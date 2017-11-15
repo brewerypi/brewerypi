@@ -1,0 +1,26 @@
+<!-- app/templates/admin/tagValues/tagValue.html -->
+
+{% extends "base.html" %}
+
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}
+    {% if add_tagValue %}
+        Add TagValue
+    {% else %}
+        Edit TagValue
+    {% endif %}
+{% endblock %}
+
+{% block page_content %}
+<div>
+{% if add_tagValue %}
+    <h1>Add TagValue</h1>
+{% else %}
+    <h1>Edit TagValue</h1>
+{% endif %}
+<div>
+<div>
+{{ wtf.quick_form(form) }}
+</div>
+{% endblock %}

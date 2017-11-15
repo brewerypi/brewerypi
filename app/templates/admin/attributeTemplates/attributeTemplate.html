@@ -1,0 +1,26 @@
+<!-- app/templates/admin/attributeTemplates/attributeTemplate.html -->
+
+{% extends "base.html" %}
+
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}
+    {% if add_attributeTemplate %}
+        Add Attribute Template
+    {% else %}
+        Edit Attribute Template
+    {% endif %}
+{% endblock %}
+
+{% block page_content %}
+<div>
+{% if add_attributeTemplate %}
+    <h1>Add Attribute Template</h1>
+{% else %}
+    <h1>Edit Attribute Template</h1>
+{% endif %}
+<div>
+<div>
+{{ wtf.quick_form(form) }}
+</div>
+{% endblock %}

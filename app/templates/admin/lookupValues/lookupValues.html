@@ -1,0 +1,32 @@
+<!-- app/templates/admin/lookupValues/lookupValues.html -->
+
+{% extends "base.html" %}
+
+{% block title %}Lookup Values{% endblock %}
+
+{% block page_content %}
+<div>
+    <h1>Lookup Values</h1>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Lookup</th>
+                <th>Name</th>
+                <th></th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for lookupValue in lookupValues %}
+            <tr>
+                <td>{{ lookupValue.Lookup.Enterprise.Abbreviation + "_" + lookupValue.Lookup.Name }}</td>
+                <td>{{ lookupValue.Name }}</td>
+                <td><a class="btn btn-default" href="{{ url_for('admin.edit_lookupValue', id=lookupValue.LookupValueId) }}">Edit</a></td>
+                <td><a class="btn btn-default" href="{{ url_for('admin.delete_lookupValue', id=lookupValue.LookupValueId) }}">Delete</a></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <a class="btn btn-default" href="{{ url_for('admin.add_lookupValue') }}" role="button">Add</a>
+</div>
+{% endblock %}

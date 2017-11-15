@@ -1,0 +1,26 @@
+<!-- app/templates/admin/elementTemplates/elementTemplate.html -->
+
+{% extends "base.html" %}
+
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}
+    {% if add_elementTemplate %}
+        Add Element Template
+    {% else %}
+        Edit Element Template
+    {% endif %}
+{% endblock %}
+
+{% block page_content %}
+<div>
+{% if add_elementTemplate %}
+    <h1>Add Element Template</h1>
+{% else %}
+    <h1>Edit Element Template</h1>
+{% endif %}
+<div>
+<div>
+{{ wtf.quick_form(form) }}
+</div>
+{% endblock %}

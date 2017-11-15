@@ -1,0 +1,26 @@
+<!-- app/templates/admin/sites/site.html -->
+
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% extends "base.html" %}
+
+{% block title %}
+    {% if add_site %}
+        Add Site
+    {% else %}
+        Edit Site
+    {% endif %}
+{% endblock %}
+
+{% block page_content %}
+<div>
+{% if add_site %}
+    <h1>Add Site</h1>
+{% else %}
+    <h1>Edit Site</h1>
+{% endif %}
+</div>
+<div>
+{{ wtf.quick_form(form) }}
+</div>
+{% endblock %}

@@ -1,0 +1,36 @@
+<!-- app/templates/admin/sites/sites.html -->
+
+{% extends "base.html" %}
+
+{% block title %}Sites{% endblock %}
+
+{% block page_content %}
+<div>
+    <h1>Sites</h1>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Enterprise</th>
+                <th>Name</th>
+                <th>Abbreviation</th>
+                <th>Description</th>
+                <th></th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for site in sites %}
+            <tr>
+                <td>{{ site.Enterprise.Abbreviation }}</td>
+                <td>{{ site.Name }}</td>
+                <td>{{ site.Abbreviation }}</td>
+                <td>{{ site.Description }}</td>
+                <td><a class="btn btn-default" href="{{ url_for('admin.edit_site', id=site.SiteId) }}">Edit</a></td>
+                <td><a class="btn btn-default" href="{{ url_for('admin.delete_site', id=site.SiteId) }}">Delete</a></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <a class="btn btn-default" href="{{ url_for('admin.add_site') }}" role="button">Add</a>
+</div>
+{% endblock %}

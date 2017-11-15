@@ -1,0 +1,26 @@
+<!-- app/templates/admin/unitsOfMeasurement/unitOfMeasurement.html -->
+
+{% extends "base.html" %}
+
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}
+    {% if add_unit %}
+        Add Unit of Measurement
+    {% else %}
+        Edit Unit of Measurement
+    {% endif %}
+{% endblock %}
+
+{% block page_content %}
+<div>
+{% if add_unitOfMeausrement %}
+    <h1>Add Unit of Measurement</h1>
+{% else %}
+    <h1>Edit Unit of Measurement</h1>
+{% endif %}
+</div>
+<div>
+{{ wtf.quick_form(form) }}
+</div>
+{% endblock %}
