@@ -92,7 +92,7 @@ class TagForm(FlaskForm):
 
 class TagValueForm(FlaskForm):
 	tag = QuerySelectField(query_factory=lambda: Tag.query.join(Area, Site, Enterprise).order_by(Enterprise.Abbreviation, Site.Abbreviation, Area.Abbreviation, Tag.Name), get_label=tagFullyAbbreviatedPath)
-	timestamp = DateTimeField("Timestamp", default=datetime.today(), validators=[Required()])
+	timestamp = DateTimeField("Timestamp", default=datetime.now, validators=[Required()])
 	value = FloatField("Value", validators=[Required()])
 	submit = SubmitField('Save')
 
