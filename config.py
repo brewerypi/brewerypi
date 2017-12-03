@@ -14,7 +14,7 @@ class Config:
 class DevelopmentConfig(Config):
 
 	DEBUG = True
-	SQLALCHEMY_DATABASE_URI = 'mysql://pi:brewery@localhost/BreweryPi'
+	SQLALCHEMY_DATABASE_URI = 'mysql://pi:brewery@localhost/BreweryPiDemo1'
 
 class ProductionConfig(Config):
 
