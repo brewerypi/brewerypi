@@ -1,0 +1,43 @@
+<!-- app/templates/admin/EventFrameTemplates/eventFrameTemplates.html -->
+
+{% extends "base.html" %}
+
+{% block title %}Event Frame Templates{% endblock %}
+
+{% block page_content %}
+<div>
+    <h1>Event Frame Templates</h1>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Description</th>
+                <th>Element Template</th>
+                <th>Parent Event Frame Template</th>
+                <th></th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for eventFrameTemplate in eventFrameTemplates %}
+            <tr>
+                <td>{{ eventFrameTemplate.Name }}</td>
+                <td>{{ eventFrameTemplate.Description }}</td>
+                <td>{{ eventFrameTemplate.ElementTemplate.Site.Enterprise.Abbreviation + "_" + eventFrameTemplate.ElementTemplate.Site.Abbreviation + "_" + 
+                    eventFrameTemplate.ElementTemplate.Name }}</td>
+                {% if eventFrameTemplate.ParentEventFrameTemplateId is none %}
+                    <td>{{ "" }}</td>
+                {% else %}
+                    <td>{{ eventFrameTemplate.ParentEventFrameTemplate.ElementTemplate.Site.Enterprise.Abbreviation + "_" + 
+                        eventFrameTemplate.ParentEventFrameTemplate.ElementTemplate.Site.Abbreviation + "_" + 
+                        eventFrameTemplate.ParentEventFrameTemplate.ElementTemplate.Name + "_" + eventFrameTemplate.ParentEventFrameTemplate.Name }}</td>
+                {% endif %}
+                <td><a class="btn btn-default" href="{{ url_for('admin.edit_eventFrameTemplate', id=eventFrameTemplate.EventFrameTemplateId) }}">Edit</a></td>
+                <td><a class="btn btn-default" href="{{ url_for('admin.delete_eventFrameTemplate', id=eventFrameTemplate.EventFrameTemplateId) }}">Delete</a></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <a class="btn btn-default" href="{{ url_for('admin.add_eventFrameTemplate') }}" role="button">Add</a>
+</div>
+{% endblock %}

@@ -5,16 +5,13 @@ from flask import abort, flash, redirect, render_template, request, url_for
 
 from . import admin
 
-from . forms import AreaForm, AttributeTemplateForm, ElementAttributeForm, \
-	ElementForm, ElementTemplateForm, EnterpriseForm, \
-	LookupForm, LookupValueForm, SiteForm, TagForm, \
-	TagValueForm, UnitOfMeasurementForm
+from . forms import AreaForm, AttributeTemplateForm, ElementAttributeForm, ElementForm, EventFrameForm, ElementTemplateForm, EnterpriseForm, \
+	EventFrameTemplateForm, LookupForm, LookupValueForm, SiteForm, TagForm, TagValueForm, UnitOfMeasurementForm
 
 from .. import db
 
-from .. models import Area, AttributeTemplate, Element, ElementAttribute, \
-	ElementTemplate, Enterprise, Lookup, LookupValue, Site, Tag, TagValue, \
-	UnitOfMeasurement
+from .. models import Area, AttributeTemplate, Element, ElementAttribute, ElementTemplate, Enterprise, EventFrame, EventFrameTemplate, Lookup, LookupValue, \
+	Site, Tag, TagValue, UnitOfMeasurement
 
 # def check_admin():
 # 	"""
@@ -467,6 +464,175 @@ def edit_enterprise(id):
 	form.abbreviation.data = enterprise.Abbreviation
 	form.description.data = enterprise.Description
 	return render_template('admin/enterprises/enterprise.html', add_enterprise=add_enterprise, form=form, enterprise=enterprise)
+
+################################################################################
+# Event Frame views.
+################################################################################
+
+@admin.route('/eventFrames', methods=['GET', 'POST'])
+# @login_required
+def list_eventFrames():
+	# check_admin()
+
+	eventFrames = EventFrame.query.join(EventFrameTemplate, ElementTemplate, Site, Enterprise)\
+		.order_by(Enterprise.Abbreviation, Site.Abbreviation, ElementTemplate.Name, EventFrameTemplate.Name, EventFrame.Name)
+
+	return render_template('admin/eventFrames/eventFrames.html', eventFrames=eventFrames)
+
+@admin.route('/eventFrames/add', methods=['GET', 'POST'])
+# @login_required
+def add_eventFrame():
+	# check_admin()
+
+	add_eventFrame = True
+
+	form = EventFrameForm()
+
+	# Add a new event frame.
+	if form.validate_on_submit():
+		eventFrame = EventFrame(EventFrameTemplate=form.eventFrameTemplate.data, Name=form.name.data, Description=form.description.data, \
+			ParentEventFrame=form.parentEventFrame.data, Order=form.order.data, StartTime=form.startTime.data, EndTime=form.endTime.data)
+		db.session.add(eventFrame)
+		db.session.commit()
+		flash("You have successfully added a new Event Frame.")
+
+		return redirect(url_for('admin.list_eventFrames'))
+
+	# Present a form to add a new event frame.
+	return render_template('admin/eventFrames/eventFrame.html', add_eventFrame=add_eventFrame, form=form)
+
+@admin.route('/eventFrames/delete/<int:id>', methods=['GET', 'POST'])
+# @login_required
+def delete_eventFrame(id):
+	# check_admin()
+
+	eventFrame = EventFrame.query.get_or_404(id)
+	db.session.delete(eventFrame)
+	db.session.commit()
+	flash('You have successfully deleted the event frame.')
+
+	return redirect(url_for('admin.list_eventFrames'))
+
+@admin.route('/eventFrames/edit/<int:id>', methods=['GET', 'POST'])
+# @login_required
+def edit_eventFrame(id):
+	# check_admin()
+
+	add_eventFrame = False
+
+	eventFrame = EventFrame.query.get_or_404(id)
+	form = EventFrameForm(obj=eventFrame)
+
+	# Edit an existing event frame.
+	if form.validate_on_submit():
+		eventFrame.EventFrameTemplate = form.eventFrameTemplate.data
+		eventFrame.Name = form.name.data
+		eventFrame.Description = form.description.data
+		eventFrame.ParentEventFrame = form.parentEventFrame.data
+		eventFrame.Order = form.order.data
+		eventFrame.StartTime = form.startTime.data
+		eventFrame.EndTime = form.endTime.data
+		db.session.commit()
+		flash('You have successfully edited the Event Frame.')
+
+		return redirect(url_for('admin.list_eventFrames'))
+
+	# Present a form to edit an existing event frame template.
+	form.eventFrameTemplate.data = eventFrame.EventFrameTemplate
+	form.name.data = eventFrame.Name
+	form.description.data = eventFrame.Description
+	form.parentEventFrame.data = eventFrame.ParentEventFrame
+	form.order.data = eventFrame.Order
+	form.startTime.data = eventFrame.StartTime
+	form.endTime.data = eventFrame.EndTime
+
+	return render_template('admin/eventFrames/eventFrame.html', add_eventFrame=add_eventFrame, form=form, eventFrame=eventFrame)
+
+################################################################################
+# Event Frame Template views.
+################################################################################
+
+@admin.route('/eventFrameTemplates', methods=['GET', 'POST'])
+# @login_required
+def list_eventFrameTemplates():
+	# check_admin()
+
+	eventFrameTemplates = EventFrameTemplate.query.join(ElementTemplate, Site, Enterprise)\
+							.order_by(Enterprise.Abbreviation, Site.Abbreviation, ElementTemplate.Name, EventFrameTemplate.Name)
+
+	return render_template('admin/eventFrameTemplates/eventFrameTemplates.html', eventFrameTemplates=eventFrameTemplates)
+
+@admin.route('/eventFrameTemplates/add', methods=['GET', 'POST'])
+# @login_required
+def add_eventFrameTemplate():
+	# check_admin()
+
+	add_eventFrameTemplate = True
+
+	form = EventFrameTemplateForm()
+
+	# Add a new event frame template.
+	if form.validate_on_submit():
+		eventFrameTemplate = EventFrameTemplate(ElementTemplate=form.elementTemplate.data, Name=form.name.data, Description=form.description.data, \
+			ParentEventFrameTemplate=form.parentEventFrameTemplate.data)
+		if eventFrameTemplate.ParentEventFrameTemplate is not None and \
+		eventFrameTemplate.ParentEventFrameTemplate.ElementTemplateId != eventFrameTemplate.ElementTemplateId:
+			flash("Unable to add new Event Frame Template due to conflicting Element Template with Parent Event Frame.")
+		else:
+			db.session.add(eventFrameTemplate)
+			db.session.commit()
+			flash("You have successfully added a new event frame template.")
+
+		return redirect(url_for('admin.list_eventFrameTemplates'))
+
+	# Present a form to add a new event frame template.
+	return render_template('admin/eventFrameTemplates/eventFrameTemplate.html', add_eventFrameTemplate=add_eventFrameTemplate, form=form)
+
+@admin.route('/eventFrameTemplates/delete/<int:id>', methods=['GET', 'POST'])
+# @login_required
+def delete_eventFrameTemplate(id):
+	# check_admin()
+
+	eventFrameTemplate = EventFrameTemplate.query.get_or_404(id)
+	db.session.delete(eventFrameTemplate)
+	db.session.commit()
+	flash('You have successfully deleted the event frame template.')
+
+	return redirect(url_for('admin.list_eventFrameTemplates'))
+
+@admin.route('/eventFrameTemplates/edit/<int:id>', methods=['GET', 'POST'])
+# @login_required
+def edit_eventFrameTemplate(id):
+	# check_admin()
+
+	add_eventFrameTemplate = False
+
+	eventFrameTemplate = EventFrameTemplate.query.get_or_404(id)
+	form = EventFrameTemplateForm(obj=eventFrameTemplate)
+
+	# Edit an existing event frame template.
+	if form.validate_on_submit():
+		eventFrameTemplate.ElementTemplate = form.elementTemplate.data
+		eventFrameTemplate.Name = form.name.data
+		eventFrameTemplate.Description = form.description.data
+		eventFrameTemplate.ParentEventFrameTemplate = form.parentEventFrameTemplate.data
+		if eventFrameTemplate.ParentEventFrameTemplate is not None and \
+		eventFrameTemplate.ParentEventFrameTemplate.ElementTemplateId != eventFrameTemplate.ElementTemplateId:
+			flash("Unable to save Event Frame Template due to conflicting Element Template with Parent Event Frame Template.")
+		else:
+			db.session.commit()
+			flash('You have successfully edited the event frame template.')
+
+		return redirect(url_for('admin.list_eventFrameTemplates'))
+
+	# Present a form to edit an existing event frame template.
+	form.elementTemplate.data = eventFrameTemplate.ElementTemplate
+	form.name.data = eventFrameTemplate.Name
+	form.description.data = eventFrameTemplate.Description
+	form.parentEventFrameTemplate.data = eventFrameTemplate.ParentEventFrameTemplate
+
+	return render_template('admin/eventFrameTemplates/eventFrameTemplate.html', add_eventFrameTemplate=add_eventFrameTemplate, form=form, \
+		eventFrameTemplate=eventFrameTemplate)
 
 ################################################################################
 # Lookup views.

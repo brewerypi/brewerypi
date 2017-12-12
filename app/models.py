@@ -68,9 +68,10 @@ class ElementTemplate(db.Model):
 	Description = db.Column(db.String(255), nullable=True)
 	Name = db.Column(db.String(45), unique=True, nullable=False)
 	SiteId = db.Column(db.Integer, db.ForeignKey('Site.SiteId'), index=True)
-	AttributeTemplates = db.relationship('AttributeTemplate', backref='ElementTemplate', lazy='dynamic')
 
+	AttributeTemplates = db.relationship('AttributeTemplate', backref='ElementTemplate', lazy='dynamic')
 	Elements = db.relationship('Element', backref='ElementTemplate', lazy='dynamic')
+	EventFrameTemplates = db.relationship('EventFrameTemplate', backref='ElementTemplate', lazy='dynamic')
 
 	UniqueConstraint('Name', 'SiteId')
 
@@ -90,6 +91,43 @@ class Enterprise(db.Model):
 
 	def __repr__(self):
 		return "<Enterprise: {}>".format(self.Name)
+
+class EventFrame(db.Model):
+	__tablename__ = "EventFrame"
+
+	EventFrameId = db.Column(db.Integer, primary_key=True)
+	Name = db.Column(db.String(45), unique=True, nullable=False)
+	Description = db.Column(db.String(255), nullable=True)
+	StartTime = db.Column(db.DateTime, nullable=False)
+	EndTime = db.Column(db.DateTime, nullable=True)
+	ParentEventFrameId = db.Column(db.Integer, db.ForeignKey("EventFrame.EventFrameId"), index=True, nullable=True)
+	EventFrameTemplateId = db.Column(db.Integer, db.ForeignKey("EventFrameTemplate.EventFrameTemplateId"), index=True)
+	Order = db.Column(db.Integer, unique=True, nullable=False)
+
+	ParentEventFrame = db.relationship("EventFrame", remote_side=[EventFrameId])
+
+	UniqueConstraint("Name", "ParentEventFrameId")
+	UniqueConstraint("ParentEventFrameId", "Order")
+
+	def __repr__(self):
+		return "<EventFrame: {}>".format(self.Name)
+
+class EventFrameTemplate(db.Model):
+	__tablename__ = "EventFrameTemplate"
+
+	EventFrameTemplateId = db.Column(db.Integer, primary_key=True)
+	Description = db.Column(db.String(255), nullable=True)
+	ElementTemplateId = db.Column(db.Integer, db.ForeignKey("ElementTemplate.ElementTemplateId"), index=True)
+	Name = db.Column(db.String(45), unique=True, nullable=False)
+	ParentEventFrameTemplateId = db.Column(db.Integer, db.ForeignKey("EventFrameTemplate.EventFrameTemplateId"), index=True, nullable=True)
+
+	ParentEventFrameTemplate = db.relationship("EventFrameTemplate", remote_side=[EventFrameTemplateId])
+	EventFrames = db.relationship("EventFrame", backref="EventFrameTemplate", lazy="dynamic")
+
+	UniqueConstraint("ElementTemplateId", "Name")
+
+	def __repr__(self):
+		return "<EventFrameTemplate: {}>".format(self.Name)
 
 class Lookup(db.Model):
 	__tablename__ = "Lookup"

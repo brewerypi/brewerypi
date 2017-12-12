@@ -1,0 +1,26 @@
+<!-- app/templates/admin/eventFrame/eventFrame.html -->
+
+{% extends "base.html" %}
+
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}
+    {% if add_eventFrame %}
+        Add Event Frame
+    {% else %}
+        Edit Event Frame
+    {% endif %}
+{% endblock %}
+
+{% block page_content %}
+<div>
+{% if add_eventFrame %}
+    <h1>Add Event Frame</h1>
+{% else %}
+    <h1>Edit Event Frame</h1>
+{% endif %}
+<div>
+<div>
+{{ wtf.quick_form(form) }}
+</div>
+{% endblock %}
