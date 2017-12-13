@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block title %}
+Lookups
+{% endblock %}
+
+{% block page_content %}
+<div>
+    <h1>Lookups</h1>
+    <table class = "table">
+        <thead>
+            <tr>
+                <th>Enterprise</th>
+                <th>Name</th>
+                <th></th>
+                <th></th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for lookup in lookups %}
+            <tr>
+                <td>{{ lookup.Enterprise.Abbreviation }}</td>
+                <td>{{ lookup.Name }}</td>
+                <td><a class = "btn btn-default" href = "{{ url_for("lookups.editLookup", lookupId = lookup.LookupId) }}">Edit</a></td>
+                <td><a class = "btn btn-default" href = "{{ url_for("lookupValues.listLookupValues", lookupId = lookup.LookupId) }}">Values</a></td>
+                <td><a class = "btn btn-default" href = "{{ url_for("lookups.deleteLookup", lookupId = lookup.LookupId) }}">Delete</a></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <a class = "btn btn-default" href = "{{ url_for("lookups.addLookup") }}" role = "button">Add</a>
+</div>
+{% endblock %}

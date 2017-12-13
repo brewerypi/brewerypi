@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}
+Data Entry - Element Attribute Values
+{% endblock %}
+
+{% block page_content %}
+<div>
+    <h1>{{ elementAttributes[0].Element.Name }}</h1>
+    <table class = "table">
+        <thead>
+            <tr>
+                <th></th>
+                <th>Attribute</th>
+                <th>Last Timestamp</th>
+                <th>Last Value</th>
+                <th></th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for elementAttribute in elementAttributes %}
+            <tr>
+                <td><a class = "btn btn-default" href = "{{ url_for("elementAttributes.addElementAttributeValue", elementId = elementAttribute.ElementId,
+                    tagId = elementAttribute.Tag.TagId, lookupId = elementAttribute.Tag.LookupId) }}">Add</a></td>
+                <td>{{ elementAttribute.AttributeTemplate.Name }}</td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td></td>
+                {% if elementAttribute.Tag.TagValues[0] %}
+                    {% set firstTagValue = elementAttribute.Tag.TagValues | sort(attribute = "Timestamp", reverse = True) | first %}
+                    <td>{{ firstTagValue.Timestamp }}</td>
+                    {% if elementAttribute.Tag.LookupId %}
+                        <td>{{ elementAttribute.Tag.Lookup.LookupValues | selectattr("Value", "equalto", firstTagValue.Value) | map(attribute = "Name") | list | first }}</td>                    
+                    {% else %}
+                        <td>{{ firstTagValue.Value }} {{ firstTagValue.Tag.UnitOfMeasurement.Abbreviation }}</td>                    
+                    {% endif %}
+                    <td><a class = "btn btn-default" href = "{{ url_for("elementAttributes.editElementAttributeValue", elementId = elementAttribute.ElementId,
+                        tagValueId = firstTagValue.TagValueId) }}">Edit</a></td>
+                    <td><a class = "btn btn-default" href = "{{ url_for("elementAttributes.deleteElementAttributeValue",
+                        elementId = elementAttribute.ElementId, tagValueId = firstTagValue.TagValueId) }}">Delete</a></td>
+                {% else %}
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                {% endif %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

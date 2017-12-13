@@ -1,14 +1,12 @@
-# app/admin/forms.py
-
 from flask_wtf import FlaskForm
 from datetime import datetime
-from wtforms import DateTimeField, FloatField, StringField, SubmitField, TextField, IntegerField
+from wtforms import DateTimeField, FloatField, IntegerField, SelectField, StringField, SubmitField, TextField
 from wtforms.ext.sqlalchemy.fields import QuerySelectField
 from wtforms.validators import Length, Required, Optional
 from app import db
 import sqlalchemy
 
-from .. models import Area, AttributeTemplate, Element, ElementTemplate, EventFrame, EventFrameTemplate, Enterprise, Lookup, Site, Tag, UnitOfMeasurement
+from .. models import Area, AttributeTemplate, Element, ElementTemplate, EventFrame, EventFrameTemplate, Enterprise, Site, Tag, UnitOfMeasurement
 
 def areaFullyAbbreviatedPath(area):
 	return area.Site.Enterprise.Abbreviation + "_" + area.Site.Abbreviation + "_" + area.Abbreviation
@@ -31,9 +29,6 @@ def eventFrameFullyAbbreviatedPath(eventFrame):
 def eventFrameTemplateFullyAbbreviatedPath(eventFrameTemplate):
 	return eventFrameTemplate.ElementTemplate.Site.Enterprise.Abbreviation + "_" + eventFrameTemplate.ElementTemplate.Site.Abbreviation + "_" + \
 			eventFrameTemplate.ElementTemplate.Name + "_" + eventFrameTemplate.Name
-
-def lookupFullyAbbreviatedPath(lookup):
-	return lookup.Enterprise.Abbreviation + "_" + lookup.Name
 
 def siteFullyAbbreviatedPath(site):
 	return site.Enterprise.Abbreviation + "_" + site.Abbreviation
@@ -101,34 +96,11 @@ class EventFrameTemplateForm(FlaskForm):
 		get_label=eventFrameTemplateFullyAbbreviatedPath, allow_blank=True)
 	submit = SubmitField('Save')
 
-class LookupForm(FlaskForm):
-	enterprise = QuerySelectField(query_factory=lambda: Enterprise.query.order_by(Enterprise.Abbreviation), get_label="Abbreviation")
-	name = StringField("Name", validators=[Required(), Length(1, 45)])
-	submit = SubmitField('Save')
-
-class LookupValueForm(FlaskForm):
-	lookup = QuerySelectField(query_factory=lambda: Lookup.query.join(Enterprise).order_by(Enterprise.Abbreviation, Lookup.Name), get_label=lookupFullyAbbreviatedPath)
-	name = StringField("Name", validators=[Required(), Length(1, 45)])
-	submit = SubmitField('Save')
-
 class SiteForm(FlaskForm):
 	enterprise = QuerySelectField(query_factory=lambda: Enterprise.query.order_by(Enterprise.Abbreviation), get_label="Abbreviation")
 	name = StringField("Name", validators=[Required(), Length(1, 45)])
 	abbreviation = StringField("Abbreviation", validators=[Required(), Length(1, 10)])
 	description = TextField("Description", validators=[Length(0, 255)])
-	submit = SubmitField('Save')
-
-class TagForm(FlaskForm):
-	area = QuerySelectField(query_factory=lambda: Area.query.join(Site, Enterprise).order_by(Enterprise.Abbreviation, Site.Abbreviation, Area.Abbreviation), get_label=areaFullyAbbreviatedPath)
-	name = StringField("Name", validators=[Required(), Length(1, 45)])
-	description = TextField("Description", validators=[Length(0, 255)])
-	unitOfMeasurement = QuerySelectField("Unit", query_factory=lambda: UnitOfMeasurement.query.order_by(UnitOfMeasurement.Abbreviation), get_label="Abbreviation")
-	submit = SubmitField('Save')
-
-class TagValueForm(FlaskForm):
-	tag = QuerySelectField(query_factory=lambda: Tag.query.join(Area, Site, Enterprise).order_by(Enterprise.Abbreviation, Site.Abbreviation, Area.Abbreviation, Tag.Name), get_label=tagFullyAbbreviatedPath)
-	timestamp = DateTimeField("Timestamp", default=datetime.now, validators=[Required()])
-	value = FloatField("Value", validators=[Required()])
 	submit = SubmitField('Save')
 
 class UnitOfMeasurementForm(FlaskForm):

@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% import "_macros.html" as macros %}
+
+{% block title %}
+Tags
+{% endblock %}
+
+{% block page_content %}
+<div>
+    <h1>Tags</h1>
+    <table class = "table">
+        <thead>
+            <tr>
+                <th>Area</th>
+                <th>Name</th>
+                <th>Description</th>
+                <th>Unit</th>
+                <th>Lookup</th>
+                <th></th>
+                <th></th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for tag in tags %}
+            <tr>
+                <td>{{ tag.Area.Site.Enterprise.Abbreviation + "_" + tag.Area.Site.Abbreviation + "_" + tag.Area.Abbreviation }}</td>
+                <td>{{ tag.Name }}</td>
+                <td>{{ tag.Description }}</td>
+                <td>{{ tag.UnitOfMeasurement.Abbreviation }}</td>
+                <td>{{ tag.Lookup.Name }}</td>
+                <td><a class = "btn btn-default" href = "{{ url_for("tags.editTag", tagId = tag.TagId) }}">Edit</a></td>
+                <td><a class = "btn btn-default" href = "{{ url_for("tagValues.listTagValues", tagId = tag.TagId, lookupId = tag.LookupId) }}">Values</a></td>
+                <td><a class = "btn btn-default" href = "{{ url_for("tags.deleteTag", tagId = tag.TagId) }}">Delete</a></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <a class = "btn btn-default" href = "{{ url_for("tags.addTag") }}" role = "button">Add</a>
+    <a class = "btn btn-default" href = "{{ url_for("tags.addTag", lookup = True) }}" role = "button">Add Lookup</a>
+</div>
+{% if pagination %}
+<div class = "text-right">
+    {{ macros.pagination_widget(pagination, ".listTags") }}
+</div>
+{% endif %}
+{% endblock %}

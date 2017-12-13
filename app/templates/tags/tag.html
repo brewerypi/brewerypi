@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}
+    {% if operation == "Add" %}
+        Add Tag
+    {% elif operation == "Edit" %}
+        Edit Tag
+    {% endif %}
+{% endblock %}
+
+{% block page_content %}
+<div>
+    {% if operation == "Add" %}
+        <h1>Add Tag</h1>
+    {% elif operation == "Edit" %}
+        <h1>Edit Tag</h1>
+    {% endif %}
+</div>
+<div>
+{{ wtf.quick_form(form) }}
+</div>
+{% endblock %}

@@ -1,0 +1,87 @@
+from flask import flash, redirect, render_template, request, url_for
+
+from sqlalchemy import func
+
+from . import lookupValues
+
+from . forms import LookupValueForm
+
+from .. import db
+
+from .. models import Enterprise, Lookup, LookupValue
+
+@lookupValues.route("/lookupValues/<int:lookupId>", methods = ["GET", "POST"])
+# @login_required
+def listLookupValues(lookupId):
+	# check_admin()
+
+	lookup = Lookup.query.get_or_404(lookupId)
+	lookupValues = LookupValue.query.join(Lookup, Enterprise).order_by(Enterprise.Abbreviation, Lookup.Name, LookupValue.Value)
+
+	return render_template("lookupValues/lookupValues.html", lookup = lookup, lookupValues = lookupValues)
+
+@lookupValues.route("/lookupValues/add/<int:lookupId>", methods = ["GET", "POST"])
+# @login_required
+def addLookupValue(lookupId):
+	# check_admin()
+
+	operation = "Add"
+	form = LookupValueForm()
+
+	# Determine the next lookup value.
+	maximumLookupValue = LookupValue.query.filter_by(LookupId = lookupId).order_by(LookupValue.Value.desc()).first()
+	if maximumLookupValue:
+		form.value.data = int(maximumLookupValue.Value) + 1
+	else:
+		form.value.data = 0
+
+	# Add a new lookupValue.
+	if form.validate_on_submit():
+		lookupValue = LookupValue(LookupId = form.lookupId.data, Name = form.name.data, Value = form.value.data)
+		db.session.add(lookupValue)
+		db.session.commit()
+		flash("You have successfully added the new lookup value \"" + lookupValue.Name + "\".")
+
+		return redirect(url_for("lookupValues.listLookupValues", lookupId = lookupId))
+
+	# Present a form to add a new lookupValue.
+	form.lookupId.data = lookupId
+	return render_template("lookupValues/lookupValue.html", form = form, operation = operation )
+
+@lookupValues.route("/lookupValues/delete/<int:lookupValueId>", methods = ["GET", "POST"])
+# @login_required
+def deleteLookupValue(lookupValueId):
+	# check_admin()
+
+	lookupValue = LookupValue.query.get_or_404(lookupValueId)
+	db.session.delete(lookupValue)
+	db.session.commit()
+	flash("You have successfully deleted the lookup value \"" + lookupValue.Name + "\".")
+
+	return redirect(url_for("lookupValues.listLookupValues", lookupId = lookupValue.LookupId))
+
+@lookupValues.route("/lookupValues/edit/<int:lookupValueId>", methods = ["GET", "POST"])
+# @login_required
+def editLookupValue(lookupValueId):
+	# check_admin()
+
+	operation = "Edit"
+	lookupValue = LookupValue.query.get_or_404(lookupValueId)
+	lookup = Lookup.query.get_or_404(lookupValue.LookupId)
+	form = LookupValueForm(obj = lookupValue)
+
+	# Edit an existing lookupValue.
+	if form.validate_on_submit():
+		lookupValue.LookupId = form.lookupId.data
+		lookupValue.Name = form.name.data
+		lookupValue.Value = form.value.data
+		db.session.commit()
+		flash("You have successfully edited the lookup value \"" + lookupValue.Name + "\".")
+
+		return redirect(url_for("lookupValues.listLookupValues", lookupId = lookupValue.LookupId))
+
+	# Present a form to edit an existing lookupValue.
+	form.lookupId.data = lookupValue.LookupId
+	form.name.data = lookupValue.Name
+	form.value.data = lookupValue.Value
+	return render_template("lookupValues/lookupValue.html", form = form, operation = operation)

@@ -1,25 +1,23 @@
-<!-- app/templates/admin/lookupValues/lookupValue.html -->
-
 {% extends "base.html" %}
 
 {% import "bootstrap/wtf.html" as wtf %}
 
 {% block title %}
-    {% if add_lookupValue %}
+    {% if operation == "Add" %}
         Add Lookup Value
-    {% else %}
+    {% elif operation == "Edit" %}
         Edit Lookup Value
     {% endif %}
 {% endblock %}
 
 {% block page_content %}
 <div>
-{% if add_lookupValue %}
-    <h1>Add Lookup Value</h1>
-{% else %}
-    <h1>Edit Lookup Value</h1>
-{% endif %}
-<div>
+    {% if operation == "Add" %}
+        <h1>Add Lookup Value</h1>
+    {% elif operation == "Edit" %}
+        <h1>Edit Lookup Value</h1>
+    {% endif %}
+</div>
 <div>
 {{ wtf.quick_form(form) }}
 </div>

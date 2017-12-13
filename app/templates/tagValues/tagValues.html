@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% import "_macros.html" as macros %}
+
+{% block title %}
+Tag Values
+{% endblock %}
+
+{% block page_content %}
+<div>
+    <h1>{{ tag.Name }} - Tag Values</h1>
+    <table class = "table">
+        <thead>
+            <tr>
+                <th>Timestamp</th>
+                <th>Value</th>
+                <th></th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for tagValue in tagValues %}
+            <tr>
+                <td>{{ tagValue.Timestamp }}</td>
+                {% if tagValue.Tag.LookupId %}
+                    <td>{{ tagValue.Tag.Lookup.LookupValues | selectattr("Value", "equalto", tagValue.Value) | map(attribute = "Name") | list | first }}</td>
+                {% else %}
+                    <td>{{ tagValue.Value | string + " " + tagValue.Tag.UnitOfMeasurement.Abbreviation }}</td>
+                {% endif %}
+                <td><a class = "btn btn-default" href = "{{ url_for("tagValues.editTagValue", tagValueId = tagValue.TagValueId) }}">Edit</a></td>
+                <td><a class = "btn btn-default" href = "{{ url_for("tagValues.deleteTagValue", tagValueId = tagValue.TagValueId) }}">Delete</a></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <a class = "btn btn-default" href = "{{ url_for("tagValues.addTagValue", tagId = tag.TagId) }}" role = "button">Add</a>
+</div>
+{% if pagination %}
+<div class = "text-right">
+    {{ macros.pagination_widget(pagination, ".listTagValues", tagId = tag.TagId) }}
+</div>
+{% endif %}
+{% endblock %}
