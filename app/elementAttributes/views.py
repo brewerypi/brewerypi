@@ -1,4 +1,5 @@
 from flask import flash, redirect, render_template, url_for
+from sqlalchemy import or_
 
 from . import elementAttributes
 
@@ -33,7 +34,8 @@ def addElementAttributeValue(elementId, tagId):
 
 	# Configure the form based on if the element attribute value is associated with a lookup.
 	if tag.LookupId:
-		form.lookupValue.choices = [(lookupValue.Value, lookupValue.Name) for lookupValue in LookupValue.query.filter_by(LookupId = tag.LookupId)]
+		form.lookupValue.choices = [(lookupValue.Value, lookupValue.Name) for lookupValue in LookupValue.query. \
+			filter(LookupValue.LookupId == tag.LookupId, LookupValue.Selectable == True)]
 		del form.value
 	else:
 		del form.lookupValue
@@ -79,7 +81,8 @@ def editElementAttributeValue(elementId, tagValueId):
 
 	# Configure the form based on if the element attribute value is associated with a lookup.
 	if tag.LookupId:
-		form.lookupValue.choices = [(lookupValue.Value, lookupValue.Name) for lookupValue in LookupValue.query.filter_by(LookupId = tag.LookupId)]
+		form.lookupValue.choices = [(lookupValue.Value, lookupValue.Name) for lookupValue in LookupValue.query. \
+			filter(LookupValue.LookupId == tag.LookupId, or_(LookupValue.Selectable == True, LookupValue.Value == tagValue.Value))]
 		del form.value
 	else:
 		del form.lookupValue

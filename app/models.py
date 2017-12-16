@@ -149,6 +149,7 @@ class LookupValue(db.Model):
 
 	LookupValueId = db.Column(db.Integer, primary_key = True)
 	Name = db.Column(db.String(45), unique = True, nullable = False)
+	Selectable = db.Column(db.Boolean, nullable = False)
 	LookupId = db.Column(db.Integer, db.ForeignKey("Lookup.LookupId"))
 	Value = db.Column(db.Integer, nullable = False)
 

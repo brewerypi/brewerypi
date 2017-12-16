@@ -37,7 +37,7 @@ def addLookupValue(lookupId):
 
 	# Add a new lookupValue.
 	if form.validate_on_submit():
-		lookupValue = LookupValue(LookupId = form.lookupId.data, Name = form.name.data, Value = form.value.data)
+		lookupValue = LookupValue(LookupId = form.lookupId.data, Name = form.name.data, Selectable = form.selectable.data, Value = form.value.data)
 		db.session.add(lookupValue)
 		db.session.commit()
 		flash("You have successfully added the new lookup value \"" + lookupValue.Name + "\".")
@@ -46,6 +46,7 @@ def addLookupValue(lookupId):
 
 	# Present a form to add a new lookupValue.
 	form.lookupId.data = lookupId
+	form.selectable.data = True
 	return render_template("lookupValues/lookupValue.html", form = form, operation = operation )
 
 @lookupValues.route("/lookupValues/delete/<int:lookupValueId>", methods = ["GET", "POST"])
@@ -74,6 +75,7 @@ def editLookupValue(lookupValueId):
 	if form.validate_on_submit():
 		lookupValue.LookupId = form.lookupId.data
 		lookupValue.Name = form.name.data
+		lookupValue.Selectable = form.selectable.data
 		lookupValue.Value = form.value.data
 		db.session.commit()
 		flash("You have successfully edited the lookup value \"" + lookupValue.Name + "\".")
@@ -83,5 +85,6 @@ def editLookupValue(lookupValueId):
 	# Present a form to edit an existing lookupValue.
 	form.lookupId.data = lookupValue.LookupId
 	form.name.data = lookupValue.Name
+	form.selectable.data = lookupValue.Selectable
 	form.value.data = lookupValue.Value
 	return render_template("lookupValues/lookupValue.html", form = form, operation = operation)

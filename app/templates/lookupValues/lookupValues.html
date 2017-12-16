@@ -12,7 +12,7 @@ Lookup Values
             <tr>
                 <th>Lookup</th>
                 <th>Name</th>
-                <th>Value</th>
+                <th>Selectable</th>
                 <th></th>
                 <th></th>
             </tr>
@@ -22,7 +22,7 @@ Lookup Values
             <tr>
                 <td>{{ lookupValue.Lookup.Enterprise.Abbreviation + "_" + lookupValue.Lookup.Name }}</td>
                 <td>{{ lookupValue.Name }}</td>
-                <td>{{ lookupValue.Value | int }}</td>
+                <td>{{ lookupValue.Selectable }}</td>
                 <td><a class = "btn btn-default" href = "{{ url_for("lookupValues.editLookupValue", lookupValueId = lookupValue.LookupValueId) }}">Edit</a></td>
                 <td><a class = "btn btn-default" href = "{{ url_for("lookupValues.deleteLookupValue", lookupValueId = lookupValue.LookupValueId) }}">Delete</a></td>
             </tr>
