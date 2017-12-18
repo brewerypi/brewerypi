@@ -16,10 +16,13 @@ def create_app(config_name):
 	boostrap.init_app(app)
 	db.init_app(app)
 
-	from .admin import admin as admin_blueprint
-	app.register_blueprint(admin_blueprint, url_prefix='/admin')
+	from . areas import areas as areasBlueprint
+	app.register_blueprint(areasBlueprint)
 
-	from .auth import auth as auth_blueprint
+	from . attributeTemplates import attributeTemplates as attributeTemplatesBlueprint
+	app.register_blueprint(attributeTemplatesBlueprint)
+
+	from . auth import auth as auth_blueprint
 	app.register_blueprint(auth_blueprint)
 
 	from . elements import elements as elementsBlueprint
@@ -27,6 +30,18 @@ def create_app(config_name):
 
 	from . elementAttributes import elementAttributes as elementAttributesBlueprint
 	app.register_blueprint(elementAttributesBlueprint)
+
+	from . elementTemplates import elementTemplates as elementTemplatesBlueprint
+	app.register_blueprint(elementTemplatesBlueprint)
+
+	from . enterprises import enterprises as enterprisesBlueprint
+	app.register_blueprint(enterprisesBlueprint)
+
+	from . eventFrames import eventFrames as eventFramesBlueprint
+	app.register_blueprint(eventFramesBlueprint)
+
+	from . eventFrameTemplates import eventFrameTemplates as eventFrameTemplatesBlueprint
+	app.register_blueprint(eventFrameTemplatesBlueprint)
 
 	from .home import home as home_blueprint
 	app.register_blueprint(home_blueprint)
@@ -42,5 +57,11 @@ def create_app(config_name):
 
 	from . tagValues import tagValues as tagValuesBlueprint
 	app.register_blueprint(tagValuesBlueprint)
+
+	from . sites import sites as sitesBlueprint
+	app.register_blueprint(sitesBlueprint)
+
+	from . unitOfMeasurements import unitOfMeasurements as unitOfMeasurementsBlueprint
+	app.register_blueprint(unitOfMeasurementsBlueprint)
 
 	return app

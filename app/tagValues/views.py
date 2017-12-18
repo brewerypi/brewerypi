@@ -1,33 +1,27 @@
 from flask import flash, redirect, render_template, request, url_for
 from sqlalchemy import or_
-
 from . import tagValues
-
 from . forms import TagValueForm
-
 from .. import db
-
 from .. models import Area, Enterprise, LookupValue, Site, Tag, TagValue
+
+modelName = "Tag Value"
 
 @tagValues.route("/tagValues/<int:tagId>", methods = ["GET", "POST"])
 # @login_required
 def listTagValues(tagId):
 	# check_admin()
-
 	tag = Tag.query.get_or_404(tagId)
-
 	page = request.args.get("page", 1, type = int)
 	pagination = TagValue.query.join(Tag).filter_by(TagId = tagId).join(Area, Site, Enterprise).order_by(Enterprise.Abbreviation, Site.Abbreviation, Area.Abbreviation, \
 		Tag.Name, TagValue.Timestamp.desc()).paginate(page, per_page = 10, error_out = False)
 	tagValues = pagination.items
-
 	return render_template("tagValues/tagValues.html", pagination = pagination, tag = tag, tagValues = tagValues)
 
 @tagValues.route("/tagValues/add/<int:tagId>", methods = ["GET", "POST"])
 # @login_required
 def addTagValue(tagId):
 	# check_admin()
-
 	operation = "Add"
 	tag = Tag.query.get_or_404(tagId)
 	form = TagValueForm()
@@ -50,30 +44,26 @@ def addTagValue(tagId):
 		db.session.add(tagValue)
 		db.session.commit()
 		flash("You have successfully added a new tag value.")
-
 		return redirect(url_for("tagValues.listTagValues", tagId = tag.TagId))
 
 	# Present a form to add a new tag value.
 	form.tagId.data = tagId
-	return render_template("tagValues/tagValue.html", form = form, operation = operation)
+	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
 
 @tagValues.route("/tagValues/delete/<int:tagValueId>", methods = ["GET", "POST"])
 # @login_required
 def deleteTagValue(tagValueId):
 	# check_admin()
-
 	tagValue = TagValue.query.get_or_404(tagValueId)
 	db.session.delete(tagValue)
 	db.session.commit()
 	flash("You have successfully deleted the tag value.")
-
 	return redirect(url_for("tagValues.listTagValues", tagId = tagValue.TagId))
 
 @tagValues.route("/tagValues/edit/<int:tagValueId>", methods = ["GET", "POST"])
 # @login_required
 def editTagValue(tagValueId):
 	# check_admin()
-
 	operation = "Edit"
 	tagValue = TagValue.query.get_or_404(tagValueId)
 	tag = Tag.query.get_or_404(tagValue.TagId)
@@ -98,9 +88,7 @@ def editTagValue(tagValueId):
 			tagValue.Value = form.value.data
 
 		db.session.commit()
-
 		flash("You have successfully edited the tag value.")
-
 		return redirect(url_for("tagValues.listTagValues", tagId = tagValue.TagId))
 
 	# Present a form to edit an existing tagValue.
@@ -112,4 +100,4 @@ def editTagValue(tagValueId):
 	else:
 		form.value.data = tagValue.Value
 
-	return render_template("tagValues/tagValue.html", form = form, operation = operation, tagValue = tagValue)
+	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)

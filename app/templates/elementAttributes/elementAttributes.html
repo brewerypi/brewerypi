@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}
+Element Attributes
+{% endblock %}
+
+{% block page_content %}
+<div>
+    <h1>Element Attributes</h1>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Element</th>
+                <th>Attribute Template</th>
+                <th>Tag</th>
+                <th></th>
+                <th></th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for elementAttribute in elementAttributes %}
+            <tr>
+                <td>{{ elementAttribute.Element.ElementTemplate.Site.Enterprise.Abbreviation + "_" + 
+                    elementAttribute.Element.ElementTemplate.Site.Abbreviation + "_" + elementAttribute.Element.ElementTemplate.Name + "_" + 
+                    elementAttribute.Element.Name }}</td>
+                <td>{{ elementAttribute.AttributeTemplate.ElementTemplate.Site.Enterprise.Abbreviation + "_" + 
+                    elementAttribute.AttributeTemplate.ElementTemplate.Site.Abbreviation + "_" + 
+                    elementAttribute.AttributeTemplate.ElementTemplate.Name + "_" + elementAttribute.AttributeTemplate.Name }}</td>
+                <td>{{ elementAttribute.Tag.Area.Site.Enterprise.Abbreviation + "_" + elementAttribute.Tag.Area.Site.Abbreviation + "_" +
+                    elementAttribute.Tag.Area.Abbreviation + "_" + elementAttribute.Tag.Name }}</td>
+                <td><a class="btn btn-default" href="{{ url_for('elementAttributes.editElementAttribute',
+                    elementAttributeId=elementAttribute.ElementAttributeId) }}">Edit</a></td>
+                <td><a class="btn btn-default" href="{{ url_for('elementAttributes.deleteElementAttribute',
+                    elementAttributeId = elementAttribute.ElementAttributeId) }}">Delete</a></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <a class="btn btn-default" href="{{ url_for('elementAttributes.addElementAttribute') }}" role="button">Add</a>
+</div>
+{% endblock %}

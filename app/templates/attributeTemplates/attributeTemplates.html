@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block title %}
+Attribute Templates
+{% endblock %}
+
+{% block page_content %}
+<div>
+    <h1>Attribute Templates</h1>
+    <table class = "table">
+        <thead>
+            <tr>
+                <th>Attribute Template</th>
+                <th>Name</th>
+                <th>Description</th>
+                <th></th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for attributeTemplate in attributeTemplates %}
+            <tr>
+                <td>{{ attributeTemplate.ElementTemplate.Site.Enterprise.Abbreviation + "_" + attributeTemplate.ElementTemplate.Site.Abbreviation + "_" +
+                    attributeTemplate.ElementTemplate.Name }}</td>
+                <td>{{ attributeTemplate.Name }}</td>
+                <td>{{ attributeTemplate.Description }}</td>
+                <td><a class = "btn btn-default" href = "{{ url_for("attributeTemplates.editAttributeTemplate",
+                    attributeTemplateId = attributeTemplate.AttributeTemplateId) }}">Edit</a></td>
+                <td><a class = "btn btn-default" href = "{{ url_for("attributeTemplates.deleteAttributeTemplate",
+                    attributeTemplateId = attributeTemplate.AttributeTemplateId) }}">Delete</a></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <a class = "btn btn-default" href = "{{ url_for("attributeTemplates.addAttributeTemplate") }}" role = "button">Add</a>
+</div>
+{% endblock %}

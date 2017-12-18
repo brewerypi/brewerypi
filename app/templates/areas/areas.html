@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block title %}
+Areas
+{% endblock %}
+
+{% block page_content %}
+<div>
+    <h1>Areas</h1>
+    <table class = "table">
+        <thead>
+            <tr>
+                <th>Site</th>
+                <th>Name</th>
+                <th>Abbreviation</th>
+                <th>Description</th>
+                <th></th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for area in areas %}
+            <tr>
+                <td>{{ area.Site.Enterprise.Abbreviation + "_" + area.Site.Abbreviation }}</td>
+                <td>{{ area.Name }}</td>
+                <td>{{ area.Abbreviation }}</td>
+                <td>{{ area.Description }}</td>
+                <td><a class = "btn btn-default" href = "{{ url_for("areas.editArea", areaId = area.AreaId) }}">Edit</a></td>
+                <td><a class = "btn btn-default" href = "{{ url_for("areas.deleteArea", areaId = area.AreaId) }}">Delete</a></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <a class = "btn btn-default" href = "{{ url_for("areas.addArea") }}" role = "button">Add</a>
+</div>
+{% endblock %}

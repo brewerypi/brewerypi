@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}
+Event Frames
+{% endblock %}
+
+{% block page_content %}
+<div>
+    <h1>Event Frames</h1>
+    <table class = "table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Description</th>
+                <th>Event Frame Template</th>
+                <th>Parent Event Frame</th>
+                <th>Order</th>
+                <th>Start Time</th>
+                <th>End Time</th>
+                <th></th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for eventFrame in eventFrames %}
+                <tr>
+                    <td>{{ eventFrame.Name }}</td>
+                    <td>{{ eventFrame.Description }}</td>
+                    <td>{{ eventFrame.EventFrameTemplate.ElementTemplate.Site.Enterprise.Abbreviation + "_" + 
+                        eventFrame.EventFrameTemplate.ElementTemplate.Site.Abbreviation + "_" + eventFrame.EventFrameTemplate.ElementTemplate.Name + "_" +
+                        eventFrame.EventFrameTemplate.Name }}</td>
+                    {% if eventFrame.ParentEventFrameId %}
+                        <td>{{ eventFrame.ParentEventFrame.EventFrameTemplate.ElementTemplate.Site.Enterprise.Abbreviation + "_" +
+                                eventFrame.ParentEventFrame.EventFrameTemplate.ElementTemplate.Site.Abbreviation + "_" +
+                                eventFrame.ParentEventFrame.EventFrameTemplate.ElementTemplate.Name + "_" +
+                                eventFrame.ParentEventFrame.EventFrameTemplate.Name + "_" + eventFrame.ParentEventFrame.Name }}</td>
+                    {% else %}
+                        <td></td>
+                    {% endif %}
+                    <td>{{ eventFrame.Order }}</td>
+                    <td>{{ eventFrame.StartTime }}</td>
+                    {% if eventFrame.EndTime %}
+                        <td>{{ eventFrame.EndTime }}</td>
+                    {% else %}
+                        <td></td>
+                    {% endif %}
+                    <td><a class = "btn btn-default" href = "{{ url_for("eventFrames.editEventFrame",
+                        eventFrameId = eventFrame.EventFrameId) }}">Edit</a></td>
+                    <td><a class = "btn btn-default" href = "{{ url_for("eventFrames.deleteEventFrame",
+                        eventFrameId = eventFrame.EventFrameId) }}">Delete</a></td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <a class = "btn btn-default" href = "{{ url_for("eventFrames.addEventFrame") }}" role = "button">Add</a>
+</div>
+{% endblock %}
