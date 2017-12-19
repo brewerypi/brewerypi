@@ -35,6 +35,12 @@ def create_app(config_name):
 	from . enterprises import enterprises as enterprisesBlueprint
 	app.register_blueprint(enterprisesBlueprint)
 
+	from . eventFrames import eventFrames as eventFramesBlueprint
+	app.register_blueprint(eventFramesBlueprint)
+
+	from . eventFrameTemplates import eventFrameTemplates as eventFrameTemplatesBlueprint
+	app.register_blueprint(eventFrameTemplatesBlueprint)
+
 	from . home import home as home_blueprint
 	app.register_blueprint(home_blueprint)
 
