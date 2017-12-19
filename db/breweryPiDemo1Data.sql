@@ -76,24 +76,6 @@ INSERT INTO `Enterprise` VALUES (1,'EP1','','Enterprise 1');
 UNLOCK TABLES;
 
 --
--- Dumping data for table `EventFrame`
---
-
-LOCK TABLES `EventFrame` WRITE;
-/*!40000 ALTER TABLE `EventFrame` DISABLE KEYS */;
-/*!40000 ALTER TABLE `EventFrame` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Dumping data for table `EventFrameTemplate`
---
-
-LOCK TABLES `EventFrameTemplate` WRITE;
-/*!40000 ALTER TABLE `EventFrameTemplate` DISABLE KEYS */;
-/*!40000 ALTER TABLE `EventFrameTemplate` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Dumping data for table `Lookup`
 --
 
