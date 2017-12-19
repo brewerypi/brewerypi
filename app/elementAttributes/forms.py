@@ -3,7 +3,6 @@ from flask_wtf import FlaskForm
 from wtforms import DateTimeField, FloatField, HiddenField, SelectField, SubmitField
 from wtforms.ext.sqlalchemy.fields import QuerySelectField
 from wtforms.validators import Required
-
 from .. models import Area, AttributeTemplate, Element, ElementTemplate, Enterprise, Site, Tag
 from .. helpers import attributeTemplateFullyAbbreviatedPath, elementFullyAbbreviatedPath, tagFullyAbbreviatedPath
 

@@ -1,14 +1,12 @@
 from flask import Flask
 from flask_bootstrap import Bootstrap
 from flask_sqlalchemy import SQLAlchemy
-
 from config import config
 
 boostrap = Bootstrap()
 db = SQLAlchemy()
 
 def create_app(config_name):
-
 	app = Flask(__name__)
 	app.config.from_object(config[config_name])
 	config[config_name].init_app(app)
@@ -43,7 +41,7 @@ def create_app(config_name):
 	from . eventFrameTemplates import eventFrameTemplates as eventFrameTemplatesBlueprint
 	app.register_blueprint(eventFrameTemplatesBlueprint)
 
-	from .home import home as home_blueprint
+	from . home import home as home_blueprint
 	app.register_blueprint(home_blueprint)
 
 	from . lookups import lookups as lookupsBlueprint

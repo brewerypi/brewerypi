@@ -7,7 +7,7 @@ Element Attributes
 {% block page_content %}
 <div>
     <h1>Element Attributes</h1>
-    <table class="table">
+    <table class = "table">
         <thead>
             <tr>
                 <th>Element</th>
@@ -29,14 +29,14 @@ Element Attributes
                     elementAttribute.AttributeTemplate.ElementTemplate.Name + "_" + elementAttribute.AttributeTemplate.Name }}</td>
                 <td>{{ elementAttribute.Tag.Area.Site.Enterprise.Abbreviation + "_" + elementAttribute.Tag.Area.Site.Abbreviation + "_" +
                     elementAttribute.Tag.Area.Abbreviation + "_" + elementAttribute.Tag.Name }}</td>
-                <td><a class="btn btn-default" href="{{ url_for('elementAttributes.editElementAttribute',
-                    elementAttributeId=elementAttribute.ElementAttributeId) }}">Edit</a></td>
-                <td><a class="btn btn-default" href="{{ url_for('elementAttributes.deleteElementAttribute',
+                <td><a class = "btn btn-default" href = "{{ url_for("elementAttributes.editElementAttribute",
+                    elementAttributeId = elementAttribute.ElementAttributeId) }}">Edit</a></td>
+                <td><a class = "btn btn-default" href = "{{ url_for("elementAttributes.deleteElementAttribute",
                     elementAttributeId = elementAttribute.ElementAttributeId) }}">Delete</a></td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
-    <a class="btn btn-default" href="{{ url_for('elementAttributes.addElementAttribute') }}" role="button">Add</a>
+    <a class = "btn btn-default" href = "{{ url_for("elementAttributes.addElementAttribute") }}" role = "button">Add</a>
 </div>
 {% endblock %}

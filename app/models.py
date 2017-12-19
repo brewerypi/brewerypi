@@ -1,5 +1,4 @@
 from sqlalchemy import UniqueConstraint
-
 from app import db
 
 class Area(db.Model):
@@ -181,7 +180,6 @@ class LookupValue(db.Model):
 	LookupId = db.Column(db.Integer, db.ForeignKey("Lookup.LookupId", name = "FK__Lookup$Have$LookupValue"), nullable = False)
 	Value = db.Column(db.Integer, nullable = False)
 
-
 	def __repr__(self):
 		return "<LookupValue: {}>".format(self.Name)
 
@@ -201,7 +199,6 @@ class Site(db.Model):
 
 	Areas = db.relationship("Area", backref = "Site", lazy = "dynamic")
 	ElementTemplates = db.relationship("ElementTemplate", backref = "Site", lazy = "dynamic")
-
 
 	def __repr__(self):
 		return "<Site: {}>".format(self.Name)

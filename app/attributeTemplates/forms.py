@@ -2,7 +2,6 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField
 from wtforms.ext.sqlalchemy.fields import QuerySelectField
 from wtforms.validators import Length, Required
-
 from .. helpers import elementTemplateFullyAbbreviatedPath
 from .. models import Element, ElementTemplate, Enterprise, Site
 

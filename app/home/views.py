@@ -1,22 +1,19 @@
-# app/home/views.py
-
 from flask import render_template
 # from flask_login import login_required
+from . import home
+from . forms import DefaultForm
 
-from .import home
-from .forms import DefaultForm
-
-@home.route('/')
+@home.route("/")
 def homepage():
-	return render_template('home/index.html')
+	return render_template("home/index.html")
 
-# @home.route('/dashboard')
+# @home.route("/dashboard")
 # @login_required
 # def dashboard():
-# 	return render_template('home/dashboard.html', title="Dashboard")
+# 	return render_template("home/dashboard.html", title = "Dashboard")
 
-@home.route('/defaults')
+@home.route("/defaults")
 def defaults():
 	form = DefaultForm()
-	return render_template('home/defaults.html', form=form)
+	return render_template("home/defaults.html", form = form)
 

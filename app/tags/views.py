@@ -8,7 +8,7 @@ from .. models import Area, Enterprise, Lookup, Site, Tag, UnitOfMeasurement
 # @login_required
 def listTags():
 	# check_admin()
-	page = request.args.get('page', 1, type = int)
+	page = request.args.get("page", 1, type = int)
 	pagination = Tag.query.outerjoin(Lookup).join(Area, Site, Enterprise).order_by(Enterprise.Abbreviation, Site.Abbreviation, Area.Abbreviation, \
 		Tag.Name).paginate(page, per_page = 10, error_out = False)
 	tags = pagination.items

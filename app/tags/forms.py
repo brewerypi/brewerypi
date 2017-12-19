@@ -2,7 +2,6 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField
 from wtforms.ext.sqlalchemy.fields import QuerySelectField
 from wtforms.validators import Length, Required
-
 from .. helpers import areaFullyAbbreviatedPath
 from .. models import Area, Enterprise, Lookup, Site, UnitOfMeasurement
 
