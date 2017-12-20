@@ -46,15 +46,11 @@ Once logged in, update the software on your Raspberry Pi by entering the followi
 
 `$ sudo apt-get update`
 
-`$ sudo apt-get upgrade`
-
-Type 'y' when prompted "Do you want to continue?".
+`$ sudo apt-get -y upgrade`
 
 # 6. Install MySQL
 
-`$ sudo apt-get install mysql-server`
-
-Type 'y' when prompted "Do you want to continue?".
+`$ sudo apt-get -y install mysql-server`
 
 # 7. Configure MySQL
 
@@ -80,37 +76,23 @@ Comment out, with is '#' character, "bind-address = 127.0.0.1. Save and exit.
 
 # 8 Install Brewery Pi
 
-`$ sudo apt-get install python3-flask`
-
-Type 'y' when prompted "Do you want to continue?".
-
-`$ sudo apt-get install python3-pip`
-
-Type 'y' when prompted "Do you want to continue?".
-
-`$ sudo apt-get install git`
-
-Type 'y' when prompted "Do you want to continue?".
-
-`$ sudo pip3 install virtualenv`
+`$ sudo apt-get -y install git`
 
 `$ git clone https://github.com/DeschutesBrewery/brewerypi`
 
 `$ cd brewerypi`
 
-`$ sudo mysql < db/brewerypi.sql`
+`$ sudo apt-get -y install python3-venv`
 
-`$ nano db/brewerypi.sql`
-
-Do a search and replace of all occurrences of "BreweryPi" with "BreweryPiDemo1". Save the file and exit. Run the following command one more time to create the demo database.
-
-`$ nano db/brewerypi.sql`
-
-`$ sudo mysql < db/brewerypi.sql`
+`$ python3 -m venv venv`
 
 `$ source venv/bin/activate`
 
-`(venv) $ pip install -r requirements`
+`(venv) $ pip install -r requirements.txt`
+
+`(venv) $ python manage.py db upgrade`
+
+`(venv) $ sudo mysql BreweryPiDemo1 < db/breweryPiDemo1Data.sql`
 
 `(venv) $ python manage.py runserver --host 0.0.0.0`
 
@@ -122,24 +104,47 @@ Point a web browser at http://\<Your Raspberry Pi IP Address>:5000
 
 `$ source venv/bin/activate`
 
-`$ pip install gunicorn`
+`(venv) $ pip install gunicorn`
 
-`$ gunicorn manage:app --bind=0.0.0.0`
+Test gunicorn:
 
-# 10. Grafana
+`(venv) $ gunicorn -b 0.0.0.0:5000 -w 2 manage:app`
 
-`$ sudo nano /etc/apt/sources.list.d/raspi.list`
+# 10. Deployment
 
-Add the following line:
+`$ echo "export FLASK_APP=manage.py" >> ~/.profile`
 
-`deb https://packagecloud.io/grafana/stable/debian/ jessie main`
+`$ sudo apt-get -y install supervisor`
 
-Save the file and exit.
+`$ sudo nano /etc/supervisor/conf.d/brewerypi.conf`
 
-`curl https://packagecloud.io/gpg.key | sudo apt-key add -`
+Add the following to the file and save:
 
-`sudo apt-get update`
+```
+[program:brewerypi]
+command=/home/pi/brewerypi/venv/bin/gunicorn -b 0.0.0.0:5000 -w 2 manage:app
+directory=/home/pi/brewerypi
+user=pi
+autostart=true
+autorestart=true
+stopasgroup=true
+killasgroup=true
+```
 
-`sudo apt-get install grafana`
+`$ sudo supervisorctl reload`
 
-Type 'y' when prompted "Do you want to continue?".
+# 11. Grafana
+
+`$ sudo apt-get -y install adduser libfontconfig`
+
+`$ curl -L https://github.com/fg2it/grafana-on-raspberry/releases/download/v4.6.2/grafana_4.6.2_armhf.deb -o /tmp/grafana_4.6.2_armhf.deb`
+
+`$ sudo dpkg -i /tmp/grafana_4.6.2_armhf.deb`
+
+`$ rm /tmp/grafana_4.6.2_armhf.deb`
+
+Run the following command to start Grafana at boot:
+
+`$ sudo systemctl enable grafana-server.service`
+
+Reboot and point a web browser at http://\<Your Raspberry Pi IP Address>:3000
