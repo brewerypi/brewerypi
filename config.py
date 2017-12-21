@@ -1,23 +1,7 @@
 import os
+from dotenv import load_dotenv
 
 class Config:
+	SECRET_KEY = os.environ.get("SECRET_KEY") or "p9Bv<3Eid9%$i01"
+	SQLALCHEMY_DATABASE_URI = os.environ.get("SECRET_KEY") or "mysql://pi:brewery@localhost/BreweryPiDemo1"
 	SQLALCHEMY_TRACK_MODIFICATIONS = False 
-	SECRET_KEY = "p9Bv<3Eid9%$i01"
-
-	@staticmethod
-	def init_app(app):
-		pass
-
-class DevelopmentConfig(Config):
-	DEBUG = True
-	SQLALCHEMY_DATABASE_URI = "mysql://pi:brewery@localhost/BreweryPiDemo1"
-
-class ProductionConfig(Config):
-	SQLALCHEMY_DATABASE_URI = "mysql://pi:brewery@localhost/BreweryPi"
-
-config = \
-{
-	"development" : DevelopmentConfig,
-	"production" : ProductionConfig,
-	"default" : DevelopmentConfig
-}
