@@ -1,10 +1,12 @@
 from flask import Flask
 from flask_bootstrap import Bootstrap
+from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from config import config
 
 boostrap = Bootstrap()
 db = SQLAlchemy()
+migrate = Migrate()
 
 def create_app(config_name):
 	app = Flask(__name__)
@@ -13,6 +15,7 @@ def create_app(config_name):
 
 	boostrap.init_app(app)
 	db.init_app(app)
+	migrate.init_app(app, db, directory = "db/migrations")
 
 	from . areas import areas as areasBlueprint
 	app.register_blueprint(areasBlueprint)

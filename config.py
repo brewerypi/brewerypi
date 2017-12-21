@@ -1,5 +1,3 @@
-import os
-
 class Config:
 	SQLALCHEMY_TRACK_MODIFICATIONS = False 
 	SECRET_KEY = "p9Bv<3Eid9%$i01"
