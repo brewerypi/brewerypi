@@ -100,8 +100,11 @@ ENV/
 # mypy
 .mypy_cache/
 
-# vscode
+# VS Code
 .vscode/
 
 # database backups
 *.mwb.bak
+
+# Imports
+/imports

@@ -1,0 +1,28 @@
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% extends "base.html" %}
+
+{% block title %}
+Import Tags
+{% endblock %}
+
+{% block page_content %}
+<div>
+{{ wtf.quick_form(form) }}
+</div>
+<br/>
+{% if successes %}
+<div class = "alert alert-success" role = "alert">
+    {% for success in successes %}
+        <p>{{ success }}</p>
+    {% endfor %}
+</div>
+{% endif %}
+{% if errors %}
+<div class = "alert alert-danger" role = "alert">
+    {% for error in errors %}
+        <p>{{ error }}</p>
+    {% endfor %}
+</div>
+{% endif %}
+{% endblock %}

@@ -25,9 +25,6 @@ def create_app(configClass = Config):
 	from . auth import auth as auth_blueprint
 	app.register_blueprint(auth_blueprint)
 
-	from . builders import builders as buildersBlueprint
-	app.register_blueprint(buildersBlueprint)
-
 	from . elements import elements as elementsBlueprint
 	app.register_blueprint(elementsBlueprint)
 
