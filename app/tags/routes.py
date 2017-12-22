@@ -105,6 +105,7 @@ def importTags():
 	form = TagImportForm()
 	errors = []
 	successes = []
+	warnings = []
 
 	if form.validate_on_submit():
 		# Save a version of the uploaded file.
@@ -150,7 +151,7 @@ def importTags():
 
 				tag = Tag.query.join(Area).filter(Tag.AreaId == area.AreaId, Tag.Name == tagName).first()
 				if tag is not None:
-					errors.append("Tag \"" + tagName + "\" already exists. Skipping row " + str(n) + ".")
+					warnings.append("Tag \"" + tagName + "\" already exists. Skipping row " + str(n) + ".")
 					continue
 					
 				lookup = Lookup.query.filter(Lookup.Name == lookupName).first()
@@ -168,4 +169,4 @@ def importTags():
 				db.session.commit()
 				successes.append("Tag \"" + tagName + "\" added.")
 
-	return render_template("tags/importTags.html", errors = errors, form = form, successes = successes)
+	return render_template("tags/importTags.html", errors = errors, form = form, successes = successes, warnings = warnings)
