@@ -107,4 +107,4 @@ ENV/
 *.mwb.bak
 
 # Imports
-/imports
+/imports/*.csv
