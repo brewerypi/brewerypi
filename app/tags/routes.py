@@ -1,7 +1,6 @@
 import csv
 import os
-from flask import current_app, flash, redirect, render_template, request, safe_join, send_file, url_for
-from werkzeug.utils import secure_filename
+from flask import current_app, flash, redirect, render_template, request, send_file, url_for
 from . import tags
 from . forms import TagForm, TagImportForm
 from .. import db
