@@ -219,11 +219,12 @@ def importElementAttributes():
 # @login_required
 def listElementAttributeValues(elementId):
 	# check_admin()
+	element = Element.query.get_or_404(elementId)
 	elementAttributes = ElementAttribute.query. \
 		join(AttributeTemplate). \
 		filter(ElementAttribute.ElementId == elementId). \
 		order_by(AttributeTemplate.Name)		
-	return render_template("elementAttributes/elementAttributeValuesDashboard.html", elementAttributes = elementAttributes)
+	return render_template("elementAttributes/elementAttributeValuesDashboard.html", elementAttributes = elementAttributes, elementName = element.Name)
 
 @elementAttributes.route("/elementAttributes/addValue/<int:elementId>/<int:tagId>", methods = ["GET", "POST"])
 # @login_required
