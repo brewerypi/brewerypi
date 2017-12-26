@@ -1,5 +1,6 @@
 from datetime import datetime
 from flask_wtf import FlaskForm
+from flask_wtf.file import FileAllowed, FileField, FileRequired
 from wtforms import DateTimeField, FloatField, HiddenField, SelectField, SubmitField
 from wtforms.ext.sqlalchemy.fields import QuerySelectField
 from wtforms.validators import Required
@@ -14,6 +15,10 @@ class ElementAttributeForm(FlaskForm):
 	tag = QuerySelectField(query_factory = lambda: Tag.query.join(Area, Site, Enterprise). \
 		order_by(Enterprise.Abbreviation, Site.Abbreviation, Area.Abbreviation, Tag.Name), get_label = tagFullyAbbreviatedPath)
 	submit = SubmitField("Save")
+
+class ElementAttributeImportForm(FlaskForm):
+	elementAttributesFile = FileField("Element Attributes Import File", validators = [FileRequired(), FileAllowed(["csv"], ".csv files only!")])
+	submit = SubmitField("Import")
 
 class ElementAttributeValueForm(FlaskForm):
 	tagId = HiddenField()
