@@ -76,6 +76,16 @@ Comment out, with is '#' character, "bind-address = 127.0.0.1. Save and exit.
 
 # 8 Install Brewery Pi
 
+`$ nano ~/.profile`
+
+Add the following to the end of the file, save and exit:
+
+```
+export FLASK_APP=breweryPi.py
+```
+
+Logout and then login.
+
 `$ sudo apt-get -y install git`
 
 `$ git clone https://github.com/DeschutesBrewery/brewerypi`
@@ -90,7 +100,7 @@ Comment out, with is '#' character, "bind-address = 127.0.0.1. Save and exit.
 
 `(venv) $ pip install -r requirements.txt`
 
-`(venv) $ python manage.py db upgrade`
+`(venv) $ flask db upgrade`
 
 `(venv) $ sudo mysql BreweryPiDemo1 < db/breweryPiDemo1Data.sql`
 
