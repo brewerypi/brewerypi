@@ -141,10 +141,11 @@ def importTags():
 				"Site" not in tagsReader.fieldnames or "Area" not in tagsReader.fieldnames or "Tag Name" not in tagsReader.fieldnames or \
 				"Tag Description" not in tagsReader.fieldnames or "Lookup" not in tagsReader.fieldnames or "Unit" not in tagsReader.fieldnames:
 				errors.append("Header malformed. Aborting upload.")
-				return render_template("tags/importTags.html", errors = errors, form = form)
+				return render_template("import.html", errors = errors, form = form, importing = "Tags")
 
 			# Iterate through each row.
 			for n, row in enumerate(tagsReader, start = 1):
+				rowNumber = n + 1
 				selected = row["Selected"].strip()
 				tagId = row["Tag Id"].strip()
 				enterpriseAbbreviation = row["Enterprise"].strip()
@@ -158,35 +159,36 @@ def importTags():
 
 				# Skip rows that are now selected.
 				if "" == selected:
+					warnings.append("Row " + str(rowNumber) + " not selected. Skipping row " + str(rowNumber) + ".")
 					continue
 
 				enterprise = Enterprise.query.filter(Enterprise.Abbreviation == enterpriseAbbreviation).first()
 				if enterprise is None:
-					errors.append("Enterprise \"" + enterpriseAbbreviation + "\" does not exist. Skipping row " + str(n) + ".")
+					errors.append("Enterprise \"" + enterpriseAbbreviation + "\" does not exist. Skipping row " + str(rowNumber) + ".")
 					continue
 
-				site = Site.query.filter(Site.Abbreviation == siteAbbreviation).first()
+				site = Site.query.filter(Site.Abbreviation == siteAbbreviation, Site.EnterpriseId == enterprise.EnterpriseId).first()
 				if site is None:
-					errors.append("Site \"" + siteAbbreviation + "\" does not exist. Skipping row " + str(n) + ".")
+					errors.append("Site \"" + siteAbbreviation + "\" does not exist. Skipping row " + str(rowNumber) + ".")
 					continue
 
-				area = Area.query.filter(Area.Abbreviation == areaAbbreviation).first()
+				area = Area.query.filter(Area.Abbreviation == areaAbbreviation, Area.SiteId == site.SiteId).first()
 				if area is None:
-					errors.append("Area \"" + areaAbbreviation + "\" does not exist. Skipping row " + str(n) + ".")
+					errors.append("Area \"" + areaAbbreviation + "\" does not exist. Skipping row " + str(rowNumber) + ".")
 					continue
 
-				lookup = Lookup.query.filter(Lookup.Name == lookupName).first()
+				lookup = Lookup.query.filter(Lookup.EnterpriseId == enterprise.EnterpriseId, Lookup.Name == lookupName).first()
 				unit = UnitOfMeasurement.query.filter(UnitOfMeasurement.Abbreviation == UnitOfMeasurementAbbreviation).first()
 				if lookup is None and unit is None:
-					errors.append("Lookup and Unit are empty. Skipping row " + str(n) + ".")
+					errors.append("Lookup and Unit can't be found. Skipping row " + str(rowNumber) + ".")
 					continue
 
 				if "" == tagId:
-					# Add.
+					# Add tag.
 					# Check for existing tag.
 					tag = Tag.query.join(Area).filter(Tag.AreaId == area.AreaId, Tag.Name == tagName).first()
 					if tag is not None:
-						warnings.append("Tag \"" + tagName + "\" already exists. Skipping row " + str(n) + ".")
+						warnings.append("Tag \"" + tagName + "\" already exists. Skipping row " + str(rowNumber) + ".")
 						continue
 					
 					if lookup:
@@ -198,7 +200,7 @@ def importTags():
 					db.session.commit()
 					successes.append("Tag \"" + tagName + "\" added.")
 				else:
-					# Edit.
+					# Edit tag.
 					tag = Tag.query.get_or_404(tagId)
 					oldTagName = tag.Name
 
@@ -206,7 +208,7 @@ def importTags():
 					if tag.AreaId != area.AreaId or tag.Name != tagName:
 						tagCheck = Tag.query.join(Area).filter(Tag.AreaId == area.AreaId, Tag.Name == tagName).first()
 						if tagCheck is not None:
-							warnings.append("Tag \"" + tagName + "\" already exists. Skipping row " + str(n) + ".")
+							warnings.append("Tag \"" + tagName + "\" already exists. Skipping row " + str(rowNumber) + ".")
 							continue
 
 					tag.Area = area
@@ -223,4 +225,4 @@ def importTags():
 					db.session.commit()
 					successes.append("Tag \"" + oldTagName + "\" edited.")
 
-	return render_template("tags/importTags.html", errors = errors, form = form, successes = successes, warnings = warnings)
+	return render_template("import.html", errors = errors, form = form, importing = "Tags", successes = successes, warnings = warnings)

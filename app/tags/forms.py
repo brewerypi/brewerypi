@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
+from flask_wtf.file import FileAllowed, FileField, FileRequired
 from wtforms import StringField, SubmitField
 from wtforms.ext.sqlalchemy.fields import QuerySelectField
-from flask_wtf.file import FileAllowed, FileField, FileRequired
 from wtforms.validators import Length, Required
 from .. helpers import areaFullyAbbreviatedPath
 from .. models import Area, Enterprise, Lookup, Site, UnitOfMeasurement
@@ -17,5 +17,5 @@ class TagForm(FlaskForm):
 	submit = SubmitField("Save")
 
 class TagImportForm(FlaskForm):
-	tagsFile = FileField("Tag Import File", validators = [FileRequired(), FileAllowed(["csv"], ".csv files only!")])
+	tagsFile = FileField("Tags Import File", validators = [FileRequired(), FileAllowed(["csv"], ".csv files only!")])
 	submit = SubmitField("Import")
