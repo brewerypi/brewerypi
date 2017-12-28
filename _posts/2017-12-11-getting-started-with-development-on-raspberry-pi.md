@@ -100,29 +100,47 @@ Logout and then login.
 
 `(venv) $ pip install -r requirements.txt`
 
-`(venv) $ flask db upgrade`
+`(venv) $ flask shell`
 
-`(venv) $ sudo mysql BreweryPiDemo1 < db/breweryPiDemo1Data.sql`
+`>>> import os`
 
-`(venv) $ python manage.py runserver --host 0.0.0.0`
+`>>> os.urandom(24)`
+
+Will return something like:
+
+`b'\xb9F\x99\n\xcb-\n\x11\x92q_\x8c\xcd\xc4\x88\xa2\x99\xe5\x92\xf6t\xece<'`
+
+Copy this entire string and past is below in .env after "SECRET_KEY="
+
+`>>> quit()`
+
+`(venv) $ nano .env`
+
+Add the following to file, save and exit:
+
+```
+SECRET_KEY=
+SQLALCHEMY_DATABASE_URI=mysql://pi:brewery@localhost/BreweryPi
+```
+```
+(venv) $ flask db upgrade
+(venv) $ sudo mysql BreweryPiDemo1 < db/breweryPiDemo1Data.sql
+(venv) $ flask run --host 0.0.0.0
+```
 
 Point a web browser at http://\<Your Raspberry Pi IP Address>:5000
 
-# 9. Install Gunicorn
-
-`$ cd brewery pi`
-
-`$ source venv/bin/activate`
-
-`(venv) $ pip install gunicorn`
+CTRL+C to quit
 
 Test gunicorn:
 
-`(venv) $ gunicorn -b 0.0.0.0:5000 -w 2 manage:app`
+`(venv) $ gunicorn -b 0.0.0.0:5000 -w 2 breweryPi:app`
+
+Point a web browser at http://\<Your Raspberry Pi IP Address>:5000
+
+CTRL+C to quit
 
 # 10. Deployment
-
-`$ echo "export FLASK_APP=manage.py" >> ~/.profile`
 
 `$ sudo apt-get -y install supervisor`
 
@@ -131,8 +149,8 @@ Test gunicorn:
 Add the following to the file and save:
 
 ```
-[program:brewerypi]
-command=/home/pi/brewerypi/venv/bin/gunicorn -b 0.0.0.0:5000 -w 2 manage:app
+[program:breweryPi]
+command=/home/pi/brewerypi/venv/bin/gunicorn -b 0.0.0.0:5000 -w 2 breweryPi:app
 directory=/home/pi/brewerypi
 user=pi
 autostart=true
@@ -145,16 +163,17 @@ killasgroup=true
 
 # 11. Grafana
 
-`$ sudo apt-get -y install adduser libfontconfig`
-
-`$ curl -L https://github.com/fg2it/grafana-on-raspberry/releases/download/v4.6.2/grafana_4.6.2_armhf.deb -o /tmp/grafana_4.6.2_armhf.deb`
-
-`$ sudo dpkg -i /tmp/grafana_4.6.2_armhf.deb`
-
-`$ rm /tmp/grafana_4.6.2_armhf.deb`
-
+```
+$ sudo apt-get -y install adduser libfontconfig
+$ curl -L https://github.com/fg2it/grafana-on-raspberry/releases/download/v4.6.2/grafana_4.6.2_armhf.deb -o /tmp/grafana_4.6.2_armhf.deb
+$ sudo dpkg -i /tmp/grafana_4.6.2_armhf.deb
+$ rm /tmp/grafana_4.6.2_armhf.deb
+```
 Run the following command to start Grafana at boot:
 
-`$ sudo systemctl enable grafana-server.service`
+```
+$ sudo /bin/systemctl daemon-reload
+$ sudo /bin/systemctl enable grafana-server
+```
 
 Reboot and point a web browser at http://\<Your Raspberry Pi IP Address>:3000
