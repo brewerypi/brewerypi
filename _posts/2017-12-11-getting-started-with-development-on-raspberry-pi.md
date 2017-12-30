@@ -90,35 +90,31 @@ export FLASK_APP=breweryPi.py
 
 Logout and then login.
 
-`$ sudo apt-get -y install git`
-
-`$ git clone https://github.com/DeschutesBrewery/brewerypi`
-
-`$ cd brewerypi`
-
-`$ sudo apt-get -y install python3-venv`
-
-`$ python3 -m venv venv`
-
-`$ source venv/bin/activate`
-
-`(venv) $ pip install -r requirements.txt`
-
-`(venv) $ flask shell`
-
-`>>> import os`
-
-`>>> os.urandom(24)`
+```
+$ sudo apt-get -y install git
+$ git clone https://github.com/DeschutesBrewery/brewerypi
+$ cd brewerypi
+$ sudo apt-get -y install python3-venv
+$ python3 -m venv venv
+$ source venv/bin/activate
+(venv) $ pip install -r requirements.txt
+(venv) $ flask shell
+>>> import os
+>>> os.urandom(24)
+```
 
 Will return something like:
 
-`b'\xb9F\x99\n\xcb-\n\x11\x92q_\x8c\xcd\xc4\x88\xa2\x99\xe5\x92\xf6t\xece<'`
+```
+b'\xb9F\x99\n\xcb-\n\x11\x92q_\x8c\xcd\xc4\x88\xa2\x99\xe5\x92\xf6t\xece<'
+```
 
-Copy this entire string and past is below in .env after "SECRET_KEY="
+Copy the entire string between the single quote marks and past is below in .env after "SECRET_KEY="
 
-`>>> quit()`
-
-`(venv) $ nano .env`
+```
+>>> quit()
+(venv) $ nano .env
+```
 
 Add the following to file, save and exit:
 
