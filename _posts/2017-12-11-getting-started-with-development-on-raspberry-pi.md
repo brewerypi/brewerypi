@@ -32,7 +32,9 @@ Once you know the IP address of your Raspberry Pi, connect to it using your SSH 
 
 # 4. Configure the Raspberry Pi
 
-`$ sudo raspi-config`
+```
+$ sudo raspi-config
+```
 
 Advanced Options->Expand Filesystem
 
@@ -44,39 +46,41 @@ Choose "<Yes>" when promoted "Would you like to reboot now?". Once the Raspberry
 
 Once logged in, update the software on your Raspberry Pi by entering the following commands: 
 
-`$ sudo apt-get update`
-
-`$ sudo apt-get -y upgrade`
+```
+$ sudo apt-get update
+$ sudo apt-get -y upgrade
+```
 
 # 6. Install MySQL
 
-`$ sudo apt-get -y install mysql-server`
+```
+$ sudo apt-get -y install mysql-server
+```
 
 # 7. Configure MySQL
 
-`$ sudo mysql`
-
-`> CREATE DATABASE BreweryPi;`
-
-`> CREATE DATABASE BreweryPiDemo1;`
-
-`> CREATE USER 'pi'@'%' IDENTIFIED BY 'brewery';`
-
-`> GRANT ALL ON BreweryPi.* TO 'pi'@'%';`
-
-`> GRANT ALL ON BreweryPiDemo1.* TO 'pi'@'%';`
-
-`> quit`
-
-`$ sudo nano /etc/mysql/mariadb.conf.d/50-server.cnf`
+```
+$ sudo mysql
+> CREATE DATABASE BreweryPi;
+> CREATE DATABASE BreweryPiDemo1;
+> CREATE USER 'pi'@'%' IDENTIFIED BY 'brewery';
+> GRANT ALL ON BreweryPi.* TO 'pi'@'%';
+> GRANT ALL ON BreweryPiDemo1.* TO 'pi'@'%';
+> quit
+$ sudo nano /etc/mysql/mariadb.conf.d/50-server.cnf
+```
 
 Comment out, with is '#' character, "bind-address = 127.0.0.1. Save and exit.
 
-`$ sudo service mysql restart`
+```
+$ sudo service mysql restart
+```
 
 # 8 Install Brewery Pi
 
-`$ nano ~/.profile`
+```
+$ nano ~/.profile`
+```
 
 Add the following to the end of the file, save and exit:
 
