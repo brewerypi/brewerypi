@@ -11,7 +11,7 @@ modelName = "Lookup Value"
 def listLookupValues(lookupId):
 	# check_admin()
 	lookup = Lookup.query.get_or_404(lookupId)
-	lookupValues = LookupValue.query.filter_by(LookupId = lookupId).join(Lookup, Enterprise).order_by(Enterprise.Abbreviation, Lookup.Name, LookupValue.Value)
+	lookupValues = LookupValue.query.filter_by(LookupId = lookupId).join(Lookup).order_by(LookupValue.Selectable.desc(), LookupValue.Name)
 	return render_template("lookupValues/lookupValues.html", lookup = lookup, lookupValues = lookupValues)
 
 @lookupValues.route("/lookupValues/add/<int:lookupId>", methods = ["GET", "POST"])
