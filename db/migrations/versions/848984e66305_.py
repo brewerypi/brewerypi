@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: fe3782d7af7e
+Revision ID: 848984e66305
 Revises: 1476a62140ae
-Create Date: 2017-12-18 21:04:03.509037
+Create Date: 2017-12-31 09:49:15.644491
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'fe3782d7af7e'
+revision = '848984e66305'
 down_revision = '1476a62140ae'
 branch_labels = None
 depends_on = None
@@ -23,24 +23,27 @@ def upgrade():
     sa.Column('Description', sa.String(length=255), nullable=True),
     sa.Column('ElementTemplateId', sa.Integer(), nullable=False),
     sa.Column('Name', sa.String(length=45), nullable=False),
+    sa.Column('Order', sa.Integer(), nullable=False),
     sa.Column('ParentEventFrameTemplateId', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['ElementTemplateId'], ['ElementTemplate.ElementTemplateId'], name='FK__ElementTemplate$Have$EventFrameTemplate'),
     sa.ForeignKeyConstraint(['ParentEventFrameTemplateId'], ['EventFrameTemplate.EventFrameTemplateId'], name='FK__EventFrameTemplate$CanHave$EventFrameTemplate'),
     sa.PrimaryKeyConstraint('EventFrameTemplateId'),
-    sa.UniqueConstraint('ElementTemplateId', 'Name', 'ParentEventFrameTemplateId', name='AK__ElementTemplateId__Name__ParentEventFrameTemplateId')
+    sa.UniqueConstraint('ElementTemplateId', 'Name', 'Order', 'ParentEventFrameTemplateId', name='AK__ElementTemplateId_Name_Order_ParentEventFrameTemplateId')
     )
     op.create_table('EventFrame',
     sa.Column('EventFrameId', sa.Integer(), nullable=False),
-    sa.Column('Name', sa.String(length=45), nullable=False),
     sa.Column('Description', sa.String(length=255), nullable=True),
-    sa.Column('StartTime', sa.DateTime(), nullable=False),
+    sa.Column('ElementId', sa.Integer(), nullable=False),
     sa.Column('EndTime', sa.DateTime(), nullable=True),
-    sa.Column('ParentEventFrameId', sa.Integer(), nullable=True),
     sa.Column('EventFrameTemplateId', sa.Integer(), nullable=False),
-    sa.Column('Order', sa.Integer(), nullable=False),
+    sa.Column('Name', sa.String(length=45), nullable=False),
+    sa.Column('ParentEventFrameId', sa.Integer(), nullable=True),
+    sa.Column('StartTime', sa.DateTime(), nullable=False),
+    sa.ForeignKeyConstraint(['ElementId'], ['Element.ElementId'], name='FK__Element$Have$EventFrame'),
     sa.ForeignKeyConstraint(['EventFrameTemplateId'], ['EventFrameTemplate.EventFrameTemplateId'], name='FK__EventFrameTemplate$Have$EventFrame'),
     sa.ForeignKeyConstraint(['ParentEventFrameId'], ['EventFrame.EventFrameId'], name='FK__EventFrame$CanHave$EventFrame'),
-    sa.PrimaryKeyConstraint('EventFrameId')
+    sa.PrimaryKeyConstraint('EventFrameId'),
+    sa.UniqueConstraint('ElementId', 'EventFrameTemplateId', 'Name', 'StartTime', name='AK__ElementId_EventFrameTemplateId_Name_StartTime')
     )
     # ### end Alembic commands ###
 

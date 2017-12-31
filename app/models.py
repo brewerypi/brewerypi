@@ -51,6 +51,7 @@ class Element(db.Model):
 	Name = db.Column(db.String(45), nullable = False)
 
 	ElementAttributes = db.relationship("ElementAttribute", backref = "Element", lazy = "dynamic")
+	EventFrames = db.relationship("EventFrame", backref = "Element", lazy = "dynamic")
 
 	def __repr__(self):
 		return "<Element: {}>".format(self.Name)
@@ -110,18 +111,18 @@ class EventFrame(db.Model):
 	__tablename__ = "EventFrame"
 	__table_args__ = \
 	(
-		# UniqueConstraint("Name", "ParentEventFrameId", name = "AK__Name_ParentEventFrameId"),
+		UniqueConstraint("ElementId", "EventFrameTemplateId", "Name", "StartTime", name = "AK__ElementId_EventFrameTemplateId_Name_StartTime"),
 	)
 
 	EventFrameId = db.Column(db.Integer, primary_key = True)
-	Name = db.Column(db.String(45), nullable = False)
 	Description = db.Column(db.String(255), nullable = True)
-	StartTime = db.Column(db.DateTime, nullable = False)
+	ElementId = db.Column(db.Integer, db.ForeignKey("Element.ElementId", name = "FK__Element$Have$EventFrame"), nullable = False)
 	EndTime = db.Column(db.DateTime, nullable = True)
-	ParentEventFrameId = db.Column(db.Integer, db.ForeignKey("EventFrame.EventFrameId", name = "FK__EventFrame$CanHave$EventFrame"), nullable = True)
 	EventFrameTemplateId = db.Column(db.Integer, db.ForeignKey("EventFrameTemplate.EventFrameTemplateId", name = "FK__EventFrameTemplate$Have$EventFrame"), \
 		nullable = False)
-	Order = db.Column(db.Integer, nullable = False)
+	Name = db.Column(db.String(45), nullable = False)
+	ParentEventFrameId = db.Column(db.Integer, db.ForeignKey("EventFrame.EventFrameId", name = "FK__EventFrame$CanHave$EventFrame"), nullable = True)
+	StartTime = db.Column(db.DateTime, nullable = False)
 
 	ParentEventFrame = db.relationship("EventFrame", remote_side = [EventFrameId])
 
@@ -132,7 +133,7 @@ class EventFrameTemplate(db.Model):
 	__tablename__ = "EventFrameTemplate"
 	__table_args__ = \
 	(
-		UniqueConstraint("ElementTemplateId", "Name", "ParentEventFrameTemplateId", name = "AK__ElementTemplateId__Name__ParentEventFrameTemplateId"),
+		UniqueConstraint("ElementTemplateId", "Name", "Order", "ParentEventFrameTemplateId", name = "AK__ElementTemplateId_Name_Order_ParentEventFrameTemplateId"),
 	)
 
 	EventFrameTemplateId = db.Column(db.Integer, primary_key = True)
@@ -140,6 +141,7 @@ class EventFrameTemplate(db.Model):
 	ElementTemplateId = db.Column(db.Integer, db.ForeignKey("ElementTemplate.ElementTemplateId", name = "FK__ElementTemplate$Have$EventFrameTemplate"), \
 		nullable = False)
 	Name = db.Column(db.String(45), nullable = False)
+	Order = db.Column(db.Integer, nullable = False)
 	ParentEventFrameTemplateId = db.Column(db.Integer, db.ForeignKey("EventFrameTemplate.EventFrameTemplateId",
 		name = "FK__EventFrameTemplate$CanHave$EventFrameTemplate"), nullable = True)
 

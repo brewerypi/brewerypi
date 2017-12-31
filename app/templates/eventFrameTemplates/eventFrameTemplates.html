@@ -13,6 +13,7 @@ Event Frame Templates
                 <th>Element Template</th>
                 <th>Parent Event Frame Template</th>
                 <th>Name</th>
+                <th>Order</th>
                 <th>Description</th>
                 <th></th>
                 <th></th>
@@ -31,6 +32,7 @@ Event Frame Templates
                     <td></td>
                 {% endif %}
                 <td>{{ eventFrameTemplate.Name }}</td>
+                <td>{{ eventFrameTemplate.Order }}</td>
                 <td>{{ eventFrameTemplate.Description }}</td>
                 <td><a class = "btn btn-default" href = "{{ url_for("eventFrameTemplates.editEventFrameTemplate",
                     eventFrameTemplateId = eventFrameTemplate.EventFrameTemplateId) }}">Edit</a></td>

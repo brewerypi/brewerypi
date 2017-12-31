@@ -24,7 +24,7 @@ def addEventFrameTemplate():
 	# Add a new event frame template.
 	if form.validate_on_submit():
 		eventFrameTemplate = EventFrameTemplate(Description = form.description.data, ElementTemplate = form.elementTemplate.data, Name = form.name.data, \
-			ParentEventFrameTemplate = form.parentEventFrameTemplate.data)
+			Order = form.order.data, ParentEventFrameTemplate = form.parentEventFrameTemplate.data)
 		db.session.add(eventFrameTemplate)
 		db.session.commit()
 		flash("You have successfully added the event frame template \"" + eventFrameTemplate.Name + "\" to \"" + eventFrameTemplate.ElementTemplate.Name + "\".")
@@ -57,6 +57,7 @@ def editEventFrameTemplate(eventFrameTemplateId):
 		eventFrameTemplate.Description = form.description.data
 		eventFrameTemplate.ElementTemplate = form.elementTemplate.data
 		eventFrameTemplate.Name = form.name.data
+		eventFrameTemplate.Order = form.order.data
 		eventFrameTemplate.ParentEventFrameTemplate = form.parentEventFrameTemplate.data
 		db.session.commit()
 		flash("You have successfully edited the event frame template \"" + eventFrameTemplate.Name + "\" for \"" +
@@ -67,5 +68,6 @@ def editEventFrameTemplate(eventFrameTemplateId):
 	form.description.data = eventFrameTemplate.Description
 	form.elementTemplate.data = eventFrameTemplate.ElementTemplate
 	form.name.data = eventFrameTemplate.Name
+	form.order.data = eventFrameTemplate.Order
 	form.parentEventFrameTemplate.data = eventFrameTemplate.ParentEventFrameTemplate
 	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
