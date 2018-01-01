@@ -1,4 +1,5 @@
 from flask import flash, redirect, render_template, request, url_for
+from sqlalchemy.orm import aliased
 from . import eventFrameTemplates
 from . forms import EventFrameTemplateForm
 from .. import db
@@ -10,8 +11,10 @@ modelName = "Event Frame Templates"
 # @login_required
 def listEventFrameTemplates():
 	# check_admin()
+	parentEventFrameTemplate = aliased(EventFrameTemplate)
 	eventFrameTemplates = EventFrameTemplate.query.join(ElementTemplate, Site, Enterprise). \
-		order_by(Enterprise.Abbreviation, Site.Abbreviation, ElementTemplate.Name, EventFrameTemplate.Name)
+		outerjoin(parentEventFrameTemplate, EventFrameTemplate.ParentEventFrameTemplateId == parentEventFrameTemplate.EventFrameTemplateId). \
+		order_by(Enterprise.Abbreviation, Site.Abbreviation, ElementTemplate.Name, parentEventFrameTemplate.Name, EventFrameTemplate.Order)
 	return render_template("eventFrameTemplates/eventFrameTemplates.html", eventFrameTemplates = eventFrameTemplates)
 
 @eventFrameTemplates.route("/eventFrameTemplates/add", methods = ["GET", "POST"])
