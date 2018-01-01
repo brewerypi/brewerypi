@@ -134,7 +134,9 @@ CTRL+C to quit
 
 Test gunicorn:
 
-`(venv) $ gunicorn -b 0.0.0.0:5000 -w 2 breweryPi:app`
+```
+(venv) $ gunicorn -b 0.0.0.0:5000 -w 2 breweryPi:app
+```
 
 Point a web browser at http://\<Your Raspberry Pi IP Address>:5000
 
@@ -142,9 +144,10 @@ CTRL+C to quit
 
 # 10. Deployment
 
-`$ sudo apt-get -y install supervisor`
-
-`$ sudo nano /etc/supervisor/conf.d/brewerypi.conf`
+```
+$ sudo apt-get -y install supervisor
+$ sudo nano /etc/supervisor/conf.d/brewerypi.conf
+```
 
 Add the following to the file and save:
 
@@ -159,7 +162,9 @@ stopasgroup=true
 killasgroup=true
 ```
 
-`$ sudo supervisorctl reload`
+```
+$ sudo supervisorctl reload
+```
 
 # 11. Grafana
 
