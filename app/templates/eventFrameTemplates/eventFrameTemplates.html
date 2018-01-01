@@ -25,9 +25,7 @@ Event Frame Templates
                 <td>{{ eventFrameTemplate.ElementTemplate.Site.Enterprise.Abbreviation + "_" + eventFrameTemplate.ElementTemplate.Site.Abbreviation + "_" +
                     eventFrameTemplate.ElementTemplate.Name }}</td>
                 {% if eventFrameTemplate.ParentEventFrameTemplateId %}
-                    <td>{{ eventFrameTemplate.ParentEventFrameTemplate.ElementTemplate.Site.Enterprise.Abbreviation + "_" + 
-                        eventFrameTemplate.ParentEventFrameTemplate.ElementTemplate.Site.Abbreviation + "_" + 
-                        eventFrameTemplate.ParentEventFrameTemplate.ElementTemplate.Name + "_" + eventFrameTemplate.ParentEventFrameTemplate.Name }}</td>
+                    <td>{{ eventFrameTemplate.ParentEventFrameTemplate.Name }}</td>
                 {% else %}
                     <td></td>
                 {% endif %}
