@@ -120,7 +120,7 @@ class EventFrame(db.Model):
 	EndTime = db.Column(db.DateTime, nullable = True)
 	EventFrameTemplateId = db.Column(db.Integer, db.ForeignKey("EventFrameTemplate.EventFrameTemplateId", name = "FK__EventFrameTemplate$Have$EventFrame"), \
 		nullable = False)
-	Name = db.Column(db.String(45), nullable = False)
+	Name = db.Column(db.String(45), nullable = True)
 	ParentEventFrameId = db.Column(db.Integer, db.ForeignKey("EventFrame.EventFrameId", name = "FK__EventFrame$CanHave$EventFrame"), nullable = True)
 	StartTime = db.Column(db.DateTime, nullable = False)
 

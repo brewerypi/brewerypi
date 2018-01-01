@@ -11,7 +11,7 @@ class EventFrameForm(FlaskForm):
 		order_by(Enterprise.Abbreviation, Site.Abbreviation, ElementTemplate.Name, EventFrameTemplate.Name), get_label = eventFrameTemplateFullyAbbreviatedPath)
 	element = QuerySelectField("Element", query_factory = lambda: Element.query.join(ElementTemplate, Site, Enterprise).\
 		order_by(Enterprise.Abbreviation, Site.Abbreviation, ElementTemplate.Name, Element.Name), get_label = elementFullyAbbreviatedPath)
-	name = StringField("Name", validators = [Required(), Length(1, 45)])
+	name = StringField("Name", validators = [Length(0, 45)])
 	parentEventFrame = QuerySelectField("Parent Event Frame", query_factory = lambda: EventFrame.query. \
 		join(EventFrameTemplate, ElementTemplate, Site, Enterprise). \
 		order_by(Enterprise.Abbreviation, Site.Abbreviation, ElementTemplate.Name, EventFrameTemplate.Name, EventFrame.Name), \
