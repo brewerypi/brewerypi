@@ -16,7 +16,6 @@ Event Frames
                 <th>Parent Event Frame</th>
                 <th>Start Time</th>
                 <th>End Time</th>
-                <th>Description</th>
                 <th></th>
                 <th></th>
             </tr>
@@ -43,7 +42,6 @@ Event Frames
                     {% else %}
                         <td></td>
                     {% endif %}
-                    <td>{{ eventFrame.Description }}</td>
                     <td><a class = "btn btn-default" href = "{{ url_for("eventFrames.editEventFrame",
                         eventFrameId = eventFrame.EventFrameId) }}">Edit</a></td>
                     <td><a class = "btn btn-default" href = "{{ url_for("eventFrames.deleteEventFrame",

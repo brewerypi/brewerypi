@@ -18,5 +18,4 @@ class EventFrameForm(FlaskForm):
 		get_label = eventFrameFullyAbbreviatedPath, allow_blank = True)
 	startTime = DateTimeField("Start Time", default = datetime.now, validators = [Required()])
 	endTime = DateTimeField("End Time", validators = [Optional()])
-	description = StringField("Description", validators = [Length(0, 255)])
 	submit = SubmitField("Save")

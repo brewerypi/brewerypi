@@ -111,11 +111,10 @@ class EventFrame(db.Model):
 	__tablename__ = "EventFrame"
 	__table_args__ = \
 	(
-		UniqueConstraint("ElementId", "EventFrameTemplateId", "Name", "StartTime", name = "AK__ElementId_EventFrameTemplateId_Name_StartTime"),
+		UniqueConstraint("ElementId", "EventFrameTemplateId", "StartTime", name = "AK__ElementId_EventFrameTemplateId_StartTime"),
 	)
 
 	EventFrameId = db.Column(db.Integer, primary_key = True)
-	Description = db.Column(db.String(255), nullable = True)
 	ElementId = db.Column(db.Integer, db.ForeignKey("Element.ElementId", name = "FK__Element$Have$EventFrame"), nullable = False)
 	EndTime = db.Column(db.DateTime, nullable = True)
 	EventFrameTemplateId = db.Column(db.Integer, db.ForeignKey("EventFrameTemplate.EventFrameTemplateId", name = "FK__EventFrameTemplate$Have$EventFrame"), \
