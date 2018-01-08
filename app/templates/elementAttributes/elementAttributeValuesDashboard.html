@@ -18,6 +18,7 @@ Data Entry - Element Attribute Values
                 <th>Last Value</th>
                 <th></th>
                 <th></th>
+                <th></th>
             </tr>
         </thead>
         <tbody>
@@ -26,14 +27,6 @@ Data Entry - Element Attribute Values
                 <td><a class = "btn btn-default" href = "{{ url_for("elementAttributes.addElementAttributeValue", elementId = elementAttribute.ElementId,
                     tagId = elementAttribute.Tag.TagId, lookupId = elementAttribute.Tag.LookupId) }}">Add</a></td>
                 <td>{{ elementAttribute.AttributeTemplate.Name }}</td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-            </tr>
-            <tr>
-                <td></td>
-                <td></td>
                 {% if elementAttribute.Tag.TagValues[0] %}
                     {% set firstTagValue = elementAttribute.Tag.TagValues | sort(attribute = "Timestamp", reverse = True) | first %}
                     <td>{{ firstTagValue.Timestamp }}</td>
@@ -44,6 +37,8 @@ Data Entry - Element Attribute Values
                     {% endif %}
                     <td><a class = "btn btn-default" href = "{{ url_for("elementAttributes.editElementAttributeValue", elementId = elementAttribute.ElementId,
                         tagValueId = firstTagValue.TagValueId) }}">Edit</a></td>
+                    <td><a class = "btn btn-default" href = "{{ url_for("tagValues.listTagValues", tagId = elementAttribute.Tag.TagId, 
+                        lookupId = elementAttribute.Tag.LookupId) }}">Values</a></td>
                     <td><a class = "btn btn-default" href = "{{ url_for("elementAttributes.deleteElementAttributeValue",
                         elementId = elementAttribute.ElementId, tagValueId = firstTagValue.TagValueId) }}">Delete</a></td>
                 {% else %}
