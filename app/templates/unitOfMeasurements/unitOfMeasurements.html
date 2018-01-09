@@ -9,6 +9,7 @@ Units of Measurment
 {% block page_content %}
 <div>
     <h1>Units of Measurment</h1>
+    <a class = "btn btn-default" href = "{{ url_for("unitOfMeasurements.addUnitOfMeasurement") }}" role = "button">Add</a>
     <table class = "table">
         <thead>
             <tr>
@@ -31,7 +32,6 @@ Units of Measurment
             {% endfor %}
         </tbody>
     </table>
-    <a class = "btn btn-default" href = "{{ url_for("unitOfMeasurements.addUnitOfMeasurement") }}" role = "button">Add</a>
 </div>
 {% if pagination %}
 <div class = "text-right">
