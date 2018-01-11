@@ -52,4 +52,4 @@ For visualization, point a web browser at:
 
 http://\<Your Raspberry Pi IP Address>:3000
 
-and use "admin" for the "User" and "Password" to log in.
+and use "admin" for **both** the "User" and "Password" to log in.
