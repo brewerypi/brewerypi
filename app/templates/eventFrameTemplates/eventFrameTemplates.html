@@ -7,6 +7,8 @@ Event Frame Templates
 {% block page_content %}
 <div>
     <h1>Event Frame Templates</h1>
+    <a class = "btn btn-default" data-toggle = "tooltip" title = "Add" href = "{{ url_for("eventFrameTemplates.addEventFrameTemplate") }}" role = "button">
+        <span class="glyphicon glyphicon-plus"></span></a>
     <table class = "table">
         <thead>
             <tr>
@@ -15,6 +17,7 @@ Event Frame Templates
                 <th>Name</th>
                 <th>Order</th>
                 <th>Description</th>
+                <th></th>
                 <th></th>
                 <th></th>
             </tr>
@@ -32,14 +35,16 @@ Event Frame Templates
                 <td>{{ eventFrameTemplate.Name }}</td>
                 <td>{{ eventFrameTemplate.Order }}</td>
                 <td>{{ eventFrameTemplate.Description }}</td>
-                <td><a class = "btn btn-default" href = "{{ url_for("eventFrameTemplates.editEventFrameTemplate",
-                    eventFrameTemplateId = eventFrameTemplate.EventFrameTemplateId) }}">Edit</a></td>
-                <td><a class = "btn btn-default" href = "{{ url_for("eventFrameTemplates.deleteEventFrameTemplate",
-                    eventFrameTemplateId = eventFrameTemplate.EventFrameTemplateId) }}">Delete</a></td>
+                <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Children"
+                    href = "{#{ url_for("tagValues.listTagValues", tagId = elementAttribute.Tag.TagId, 
+                    lookupId = elementAttribute.Tag.LookupId) }#}"><span class="glyphicon glyphicon-list"></span></a></td>
+                <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Edit" href = "{{ url_for("eventFrameTemplates.editEventFrameTemplate",
+                    eventFrameTemplateId = eventFrameTemplate.EventFrameTemplateId) }}"><span class="glyphicon glyphicon-edit"></a></td>
+                <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Delete" href = "{{ url_for("eventFrameTemplates.deleteEventFrameTemplate",
+                    eventFrameTemplateId = eventFrameTemplate.EventFrameTemplateId) }}"><span class="glyphicon glyphicon-trash"></a></td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
-    <a class = "btn btn-default" href = "{{ url_for("eventFrameTemplates.addEventFrameTemplate") }}" role = "button">Add</a>
 </div>
 {% endblock %}
