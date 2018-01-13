@@ -7,6 +7,7 @@ Element Templates
 {% block page_content %}
 <div>
     <h1>Element Templates</h1>
+    <a class = "btn btn-default" href = "{{ url_for("elementTemplates.addElementTemplate") }}" role = "button">Add</a>
     <table class = "table">
         <thead>
             <tr>
@@ -31,6 +32,5 @@ Element Templates
             {% endfor %}
         </tbody>
     </table>
-    <a class = "btn btn-default" href = "{{ url_for("elementTemplates.addElementTemplate") }}" role = "button">Add</a>
 </div>
 {% endblock %}

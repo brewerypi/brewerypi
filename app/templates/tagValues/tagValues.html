@@ -9,6 +9,7 @@ Tag Values
 {% block page_content %}
 <div>
     <h1>{{ tag.Name }} - Tag Values</h1>
+    <a class = "btn btn-default" href = "{{ url_for("tagValues.addTagValue", tagId = tag.TagId) }}" role = "button">Add</a>
     <table class = "table">
         <thead>
             <tr>
@@ -33,7 +34,6 @@ Tag Values
             {% endfor %}
         </tbody>
     </table>
-    <a class = "btn btn-default" href = "{{ url_for("tagValues.addTagValue", tagId = tag.TagId) }}" role = "button">Add</a>
 </div>
 {% if pagination %}
 <div class = "text-right">

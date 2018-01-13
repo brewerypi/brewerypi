@@ -7,6 +7,7 @@ Elements
 {% block page_content %}
 <div>
     <h1>Elements</h1>
+    <a class = "btn btn-default" href = "{{ url_for("elements.addElement") }}" role = "button">Add</a>
     <table class = "table">
         <thead>
             <tr>
@@ -30,6 +31,5 @@ Elements
             {% endfor %}
         </tbody>
     </table>
-    <a class = "btn btn-default" href = "{{ url_for("elements.addElement") }}" role = "button">Add</a>
 </div>
 {% endblock %}

@@ -9,6 +9,8 @@ Tags
 {% block page_content %}
 <div>
     <h1>Tags</h1>
+    <a class = "btn btn-default" href = "{{ url_for("tags.addTag") }}" role = "button">Add</a>
+    <a class = "btn btn-default" href = "{{ url_for("tags.addTag", lookup = True) }}" role = "button">Add Lookup</a>
     <table class = "table">
         <thead>
             <tr>
@@ -37,8 +39,6 @@ Tags
             {% endfor %}
         </tbody>
     </table>
-    <a class = "btn btn-default" href = "{{ url_for("tags.addTag") }}" role = "button">Add</a>
-    <a class = "btn btn-default" href = "{{ url_for("tags.addTag", lookup = True) }}" role = "button">Add Lookup</a>
 </div>
 {% if pagination %}
 <div class = "text-right">

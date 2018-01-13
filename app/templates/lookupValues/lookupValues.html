@@ -7,6 +7,7 @@ Lookup Values
 {% block page_content %}
 <div>
     <h1>{{ lookup.Name }} - Lookup Values</h1>
+    <a class = "btn btn-default" href = "{{ url_for("lookupValues.addLookupValue", lookupId = lookup.LookupId) }}" role = "button">Add</a>
     <table class = "table">
         <thead>
             <tr>
@@ -29,6 +30,5 @@ Lookup Values
             {% endfor %}
         </tbody>
     </table>
-    <a class = "btn btn-default" href = "{{ url_for("lookupValues.addLookupValue", lookupId = lookup.LookupId) }}" role = "button">Add</a>
 </div>
 {% endblock %}

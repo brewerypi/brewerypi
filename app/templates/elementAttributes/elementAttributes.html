@@ -7,6 +7,7 @@ Element Attributes
 {% block page_content %}
 <div>
     <h1>Element Attributes</h1>
+    <a class = "btn btn-default" href = "{{ url_for("elementAttributes.addElementAttribute") }}" role = "button">Add</a>
     <table class = "table">
         <thead>
             <tr>
@@ -37,6 +38,5 @@ Element Attributes
             {% endfor %}
         </tbody>
     </table>
-    <a class = "btn btn-default" href = "{{ url_for("elementAttributes.addElementAttribute") }}" role = "button">Add</a>
 </div>
 {% endblock %}

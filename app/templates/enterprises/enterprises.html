@@ -9,6 +9,7 @@ Enterprises
 {% block page_content %}
 <div>
     <h1>Enterprises</h1>
+    <a class = "btn btn-default" href = "{{ url_for("enterprises.addEnterprise") }}" role = "button">Add</a>
     <table class = "table">
         <thead>
             <tr>
@@ -31,6 +32,5 @@ Enterprises
             {% endfor %}
         </tbody>
     </table>
-    <a class = "btn btn-default" href = "{{ url_for("enterprises.addEnterprise") }}" role = "button">Add</a>
 </div>
 {% endblock %}
