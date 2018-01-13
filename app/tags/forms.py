@@ -1,4 +1,5 @@
 from flask_wtf import FlaskForm
+from flask_wtf.file import FileAllowed, FileField, FileRequired
 from wtforms import StringField, SubmitField
 from wtforms.ext.sqlalchemy.fields import QuerySelectField
 from wtforms.validators import Length, Required
@@ -14,3 +15,7 @@ class TagForm(FlaskForm):
 	unitOfMeasurement = QuerySelectField("Unit", query_factory = lambda: UnitOfMeasurement.query. \
 		order_by(UnitOfMeasurement.Abbreviation), get_label = "Abbreviation")
 	submit = SubmitField("Save")
+
+class TagImportForm(FlaskForm):
+	tagsFile = FileField("Tags Import File", validators = [FileRequired(), FileAllowed(["csv"], ".csv files only!")])
+	submit = SubmitField("Import")
