@@ -146,9 +146,16 @@ class EventFrameTemplate(db.Model):
 
 	ParentEventFrameTemplate = db.relationship("EventFrameTemplate", remote_side = [EventFrameTemplateId])
 	EventFrames = db.relationship("EventFrame", backref = "EventFrameTemplate", lazy = "dynamic")
+	EventFrameTemplates = db.relationship("EventFrameTemplate", remote_side = [ParentEventFrameTemplateId])
 
 	def __repr__(self):
 		return "<EventFrameTemplate: {}>".format(self.Name)
+
+	def path(self, name = ""):
+		if self.ParentEventFrameTemplateId == None:
+			return self.Name + name
+		else:
+			return self.ParentEventFrameTemplate.path(" \\ " + self.Name)
 
 class Lookup(db.Model):
 	__tablename__ = "Lookup"

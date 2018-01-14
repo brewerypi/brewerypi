@@ -6,16 +6,24 @@ Event Frame Templates
 
 {% block page_content %}
 <div>
-    <h1>Event Frame Templates</h1>
-    <a class = "btn btn-default" data-toggle = "tooltip" title = "Add" href = "{{ url_for("eventFrameTemplates.addEventFrameTemplate") }}" role = "button">
+    {% if parentEventFrameTemplate %}
+        <h1>Event Frame Templates - {{ parentEventFrameTemplate.path() }}</h1>
+        {% set parentEventFrameTemplateId = parentEventFrameTemplate.EventFrameTemplateId %}
+    {% else %}
+        <h1>Event Frame Templates</h1>
+        {% set parentEventFrameTemplateId = None %}
+    {% endif %}
+    <a class = "btn btn-default" data-toggle = "tooltip" title = "Add" href = "{{ url_for("eventFrameTemplates.addEventFrameTemplate", parentEventFrameTemplateId = parentEventFrameTemplateId) }}" role = "button">
         <span class="glyphicon glyphicon-plus"></span></a>
     <table class = "table">
         <thead>
             <tr>
                 <th>Element Template</th>
-                <th>Parent Event Frame Template</th>
+                <!-- <th>Parent Event Frame Template</th> -->
                 <th>Name</th>
-                <th>Order</th>
+                {% if parentEventFrameTemplate %}
+                    <th>Order</th>
+                {% endif %}
                 <th>Description</th>
                 <th></th>
                 <th></th>
@@ -27,17 +35,19 @@ Event Frame Templates
             <tr>
                 <td>{{ eventFrameTemplate.ElementTemplate.Site.Enterprise.Abbreviation + "_" + eventFrameTemplate.ElementTemplate.Site.Abbreviation + "_" +
                     eventFrameTemplate.ElementTemplate.Name }}</td>
-                {% if eventFrameTemplate.ParentEventFrameTemplateId %}
-                    <td>{{ eventFrameTemplate.ParentEventFrameTemplate.Name }}</td>
-                {% else %}
+                <!-- {#% if eventFrameTemplate.ParentEventFrameTemplateId %#}
+                    <td>{#{ eventFrameTemplate.ParentEventFrameTemplate.Name }#}</td>
+                {#% else %#}
                     <td></td>
-                {% endif %}
+                {#% endif %#} -->
                 <td>{{ eventFrameTemplate.Name }}</td>
-                <td>{{ eventFrameTemplate.Order }}</td>
+                {% if parentEventFrameTemplate %}
+                    <td>{{ eventFrameTemplate.Order }}</td>
+                {% endif %}
                 <td>{{ eventFrameTemplate.Description }}</td>
                 <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Children"
-                    href = "{#{ url_for("tagValues.listTagValues", tagId = elementAttribute.Tag.TagId, 
-                    lookupId = elementAttribute.Tag.LookupId) }#}"><span class="glyphicon glyphicon-list"></span></a></td>
+                    href = "{{ url_for("eventFrameTemplates.listEventFrameTemplates",
+                    parentEventFrameTemplateId = eventFrameTemplate.EventFrameTemplateId) }}"><span class="glyphicon glyphicon-list"></span></a></td>
                 <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Edit" href = "{{ url_for("eventFrameTemplates.editEventFrameTemplate",
                     eventFrameTemplateId = eventFrameTemplate.EventFrameTemplateId) }}"><span class="glyphicon glyphicon-edit"></a></td>
                 <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Delete" href = "{{ url_for("eventFrameTemplates.deleteEventFrameTemplate",
