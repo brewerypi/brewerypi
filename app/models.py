@@ -151,20 +151,12 @@ class EventFrameTemplate(db.Model):
 	def __repr__(self):
 		return "<EventFrameTemplate: {}>".format(self.Name)
 
-	def path(self, name = ""):
+	def ancestors(self, ancestors = []):
 		if self.ParentEventFrameTemplateId == None:
-			return self.Name + name
+			return ancestors
 		else:
-			return self.ParentEventFrameTemplate.path(" \\ " + self.Name)
-
-	def lineage(self, line = []):
-		line.insert(0, self)
-		if self.ParentEventFrameTemplateId == None:
-			# parents.append(self)
-			# return parents
-			return line
-		else:
-			return self.ParentEventFrameTemplate.lineage(line)
+			ancestors.insert(0, self.ParentEventFrameTemplate)
+			return self.ParentEventFrameTemplate.ancestors(ancestors)
 
 class Lookup(db.Model):
 	__tablename__ = "Lookup"

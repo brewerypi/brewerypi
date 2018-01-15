@@ -18,7 +18,7 @@ def listEventFrameTemplates(parentEventFrameTemplateId = None):
 	# 	order_by(Enterprise.Abbreviation, Site.Abbreviation, ElementTemplate.Name, parentEventFrameTemplate.Name, EventFrameTemplate.Order)
 	parentEventFrameTemplate = None
 	if parentEventFrameTemplateId:
-		parentEventFrameTemplate = EventFrameTemplate.query.get(parentEventFrameTemplateId)
+		parentEventFrameTemplate = EventFrameTemplate.query.get_or_404(parentEventFrameTemplateId)
 
 	eventFrameTemplates = EventFrameTemplate.query.join(ElementTemplate, Site, Enterprise). \
 		filter(EventFrameTemplate.ParentEventFrameTemplateId == parentEventFrameTemplateId). \
