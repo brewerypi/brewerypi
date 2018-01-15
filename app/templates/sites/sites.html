@@ -7,7 +7,7 @@ Sites
 {% block page_content %}
 <div>
     <h1>Sites</h1>
-    <a class = "btn btn-default" href = "{{ url_for("sites.addSite") }}" role = "button"><span class="glyphicon glyphicon-plus"></span></a>
+    <a class = "btn btn-default" title = "Add" href = "{{ url_for("sites.addSite") }}" role = "button"><span class="glyphicon glyphicon-plus"></span></a>
     <table class = "table">
         <thead>
             <tr>
@@ -26,9 +26,9 @@ Sites
                 <td>{{ site.Name }}</td>
                 <td>{{ site.Abbreviation }}</td>
                 <td>{{ site.Description }}</td>
-                <td><a class = "btn btn-default" href = "{{ url_for("sites.editSite", siteId = site.SiteId) }}">
+                <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("sites.editSite", siteId = site.SiteId) }}">
                     <span class="glyphicon glyphicon-edit"></span></a></td>
-                <td><a class = "btn btn-default" href = "{{ url_for("sites.deleteSite", siteId = site.SiteId) }}">
+                <td><a class = "btn btn-default" title = "Delete" href = "{{ url_for("sites.deleteSite", siteId = site.SiteId) }}">
                     <span class="glyphicon glyphicon-trash"></span></a></td>
             </tr>
             {% endfor %}

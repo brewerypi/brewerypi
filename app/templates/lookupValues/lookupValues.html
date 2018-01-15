@@ -7,7 +7,7 @@ Lookup Values
 {% block page_content %}
 <div>
     <h1>{{ lookup.Name }} - Lookup Values</h1>
-    <a class = "btn btn-default" href = "{{ url_for("lookupValues.addLookupValue", lookupId = lookup.LookupId) }}" role = "button">
+    <a class = "btn btn-default" title = "Add" href = "{{ url_for("lookupValues.addLookupValue", lookupId = lookup.LookupId) }}" role = "button">
         <span class="glyphicon glyphicon-plus"></span></a>
     <table class = "table">
         <thead>
@@ -25,10 +25,10 @@ Lookup Values
                 <td>{{ lookupValue.Lookup.Enterprise.Abbreviation + "_" + lookupValue.Lookup.Name }}</td>
                 <td>{{ lookupValue.Name }}</td>
                 <td>{{ lookupValue.Selectable }}</td>
-                <td><a class = "btn btn-default" href = "{{ url_for("lookupValues.editLookupValue", lookupValueId = lookupValue.LookupValueId) }}">
-                    <span class="glyphicon glyphicon-edit"></span></a></td>
-                <td><a class = "btn btn-default" href = "{{ url_for("lookupValues.deleteLookupValue", lookupValueId = lookupValue.LookupValueId) }}">
-                    <span class="glyphicon glyphicon-trash"></span></a></td>
+                <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("lookupValues.editLookupValue", 
+                    lookupValueId = lookupValue.LookupValueId) }}"><span class="glyphicon glyphicon-edit"></span></a></td>
+                <td><a class = "btn btn-default" title = "Delete" href = "{{ url_for("lookupValues.deleteLookupValue", 
+                    lookupValueId = lookupValue.LookupValueId) }}"><span class="glyphicon glyphicon-trash"></span></a></td>
             </tr>
             {% endfor %}
         </tbody>

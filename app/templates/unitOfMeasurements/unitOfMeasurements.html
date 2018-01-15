@@ -9,7 +9,7 @@ Units of Measurment
 {% block page_content %}
 <div>
     <h1>Units of Measurment</h1>
-    <a class = "btn btn-default" href = "{{ url_for("unitOfMeasurements.addUnitOfMeasurement") }}" role = "button">
+    <a class = "btn btn-default" title = "Add" href = "{{ url_for("unitOfMeasurements.addUnitOfMeasurement") }}" role = "button">
         <span class="glyphicon glyphicon-plus"></span></a>
     <table class = "table">
         <thead>
@@ -25,9 +25,9 @@ Units of Measurment
             <tr>
                 <td>{{ unitOfMeasurement.Name }}</td>
                 <td>{{ unitOfMeasurement.Abbreviation }}</td>
-                <td><a class = "btn btn-default" href = "{{ url_for("unitOfMeasurements.editUnitOfMeasurement",
+                <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("unitOfMeasurements.editUnitOfMeasurement",
                     unitOfMeasurementId = unitOfMeasurement.UnitOfMeasurementId) }}"><span class="glyphicon glyphicon-edit"></span></a></td>
-                <td><a class = "btn btn-default" href = "{{ url_for("unitOfMeasurements.deleteUnitOfMeasurement",
+                <td><a class = "btn btn-default" title = "Delete" href = "{{ url_for("unitOfMeasurements.deleteUnitOfMeasurement",
                     unitOfMeasurementId = unitOfMeasurement.UnitOfMeasurementId) }}"><span class="glyphicon glyphicon-trash"></span></a></td>
             </tr>
             {% endfor %}

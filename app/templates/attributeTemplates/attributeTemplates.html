@@ -7,7 +7,7 @@ Attribute Templates
 {% block page_content %}
 <div>
     <h1>Attribute Templates</h1>
-    <a class = "btn btn-default" href = "{{ url_for("attributeTemplates.addAttributeTemplate") }}" role = "button">
+    <a class = "btn btn-default" title = "Add" href = "{{ url_for("attributeTemplates.addAttributeTemplate") }}" role = "button">
         <span class="glyphicon glyphicon-plus"></span></a>
     <table class = "table">
         <thead>
@@ -26,9 +26,9 @@ Attribute Templates
                     attributeTemplate.ElementTemplate.Name }}</td>
                 <td>{{ attributeTemplate.Name }}</td>
                 <td>{{ attributeTemplate.Description }}</td>
-                <td><a class = "btn btn-default" href = "{{ url_for("attributeTemplates.editAttributeTemplate",
+                <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("attributeTemplates.editAttributeTemplate",
                     attributeTemplateId = attributeTemplate.AttributeTemplateId) }}"><span class="glyphicon glyphicon-edit"></span></a></td>
-                <td><a class = "btn btn-default" href = "{{ url_for("attributeTemplates.deleteAttributeTemplate",
+                <td><a class = "btn btn-default" title = "Delete" href = "{{ url_for("attributeTemplates.deleteAttributeTemplate",
                     attributeTemplateId = attributeTemplate.AttributeTemplateId) }}"><span class="glyphicon glyphicon-trash"></span></a></td>
             </tr>
             {% endfor %}

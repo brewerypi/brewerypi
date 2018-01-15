@@ -9,8 +9,10 @@ Tags
 {% block page_content %}
 <div>
     <h1>Tags</h1>
-    <a class = "btn btn-default" href = "{{ url_for("tags.addTag") }}" role = "button"><span class="glyphicon glyphicon-plus"></span> Tag</a>
-    <a class = "btn btn-default" href = "{{ url_for("tags.addTag", lookup = True) }}" role = "button"><span class="glyphicon glyphicon-plus"></span> Lookup</a>
+    <a class = "btn btn-default" title = "Add Tag" href = "{{ url_for("tags.addTag") }}" role = "button">
+        <span class="glyphicon glyphicon-plus"></span> Tag</a>
+    <a class = "btn btn-default" title = "Add Lookup" href = "{{ url_for("tags.addTag", lookup = True) }}" role = "button">
+        <span class="glyphicon glyphicon-plus"></span> Lookup</a>
     <table class = "table">
         <thead>
             <tr>
@@ -32,11 +34,11 @@ Tags
                 <td>{{ tag.Description }}</td>
                 <td>{{ tag.UnitOfMeasurement.Abbreviation }}</td>
                 <td>{{ tag.Lookup.Name }}</td>
-                <td><a class = "btn btn-default" href = "{{ url_for("tags.editTag", tagId = tag.TagId) }}">
+                <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("tags.editTag", tagId = tag.TagId) }}">
                     <span class="glyphicon glyphicon-edit"></span></a></td>
-                <td><a class = "btn btn-default" href = "{{ url_for("tagValues.listTagValues", tagId = tag.TagId, lookupId = tag.LookupId) }}">
-                    <span class="glyphicon glyphicon-list"></span></a></td>
-                <td><a class = "btn btn-default" href = "{{ url_for("tags.deleteTag", tagId = tag.TagId) }}">
+                <td><a class = "btn btn-default" title = "List Values" href = "{{ url_for("tagValues.listTagValues", tagId = tag.TagId, 
+                    lookupId = tag.LookupId) }}"><span class="glyphicon glyphicon-list"></span></a></td>
+                <td><a class = "btn btn-default" title = "Delete" href = "{{ url_for("tags.deleteTag", tagId = tag.TagId) }}">
                     <span class="glyphicon glyphicon-trash"></span></a></td>
             </tr>
             {% endfor %}

@@ -7,7 +7,7 @@ Element Templates
 {% block page_content %}
 <div>
     <h1>Element Templates</h1>
-    <a class = "btn btn-default" href = "{{ url_for("elementTemplates.addElementTemplate") }}" role = "button">
+    <a class = "btn btn-default" title = "Add" href = "{{ url_for("elementTemplates.addElementTemplate") }}" role = "button">
         <span class="glyphicon glyphicon-plus"></span></a>
     <table class = "table">
         <thead>
@@ -25,9 +25,9 @@ Element Templates
                 <td>{{ elementTemplate.Site.Enterprise.Abbreviation + "_" + elementTemplate.Site.Abbreviation }}</td>
                 <td>{{ elementTemplate.Name }}</td>
                 <td>{{ elementTemplate.Description }}</td>
-                <td><a class = "btn btn-default" href = "{{ url_for("elementTemplates.editElementTemplate",
+                <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("elementTemplates.editElementTemplate",
                     elementTemplateId = elementTemplate.ElementTemplateId) }}"><span class="glyphicon glyphicon-edit"></span></a></td>
-                <td><a class = "btn btn-default" href = "{{ url_for("elementTemplates.deleteElementTemplate",
+                <td><a class = "btn btn-default" title = "Delete" href = "{{ url_for("elementTemplates.deleteElementTemplate",
                     elementTemplateId = elementTemplate.ElementTemplateId) }}"><span class="glyphicon glyphicon-trash"></span></a></td>
             </tr>
             {% endfor %}
