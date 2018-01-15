@@ -16,7 +16,7 @@ def listEventFrameTemplates(parentEventFrameTemplateId = None):
 	if parentEventFrameTemplateId:
 		parentEventFrameTemplate = EventFrameTemplate.query.get_or_404(parentEventFrameTemplateId)
 
-	eventFrameTemplates = EventFrameTemplate.query.join(ElementTemplate, Site, Enterprise). \
+	eventFrameTemplates = EventFrameTemplate.query.outerjoin(ElementTemplate, Site, Enterprise). \
 		filter(EventFrameTemplate.ParentEventFrameTemplateId == parentEventFrameTemplateId). \
 		order_by(Enterprise.Abbreviation, Site.Abbreviation, ElementTemplate.Name, EventFrameTemplate.Order, EventFrameTemplate.Name)
 	return render_template("eventFrameTemplates/eventFrameTemplates.html", eventFrameTemplates = eventFrameTemplates,
@@ -31,7 +31,6 @@ def addEventFrameTemplate(parentEventFrameTemplateId = None):
 	form = EventFrameTemplateForm()
 
 	if parentEventFrameTemplateId:
-		parentEventFrameTemplate = EventFrameTemplate.query.get_or_404(parentEventFrameTemplateId)
 		del form.elementTemplate
 	else:
 		del form.order
@@ -39,7 +38,7 @@ def addEventFrameTemplate(parentEventFrameTemplateId = None):
 	# Add a new event frame template.
 	if form.validate_on_submit():
 		if parentEventFrameTemplateId:
-			eventFrameTemplate = EventFrameTemplate(Description = form.description.data, ElementTemplateId = parentEventFrameTemplate.ElementTemplateId,
+			eventFrameTemplate = EventFrameTemplate(Description = form.description.data, ElementTemplate = None,
 				Name = form.name.data, Order = form.order.data, ParentEventFrameTemplateId = parentEventFrameTemplateId)			
 		else:
 			eventFrameTemplate = EventFrameTemplate(Description = form.description.data, ElementTemplate = form.elementTemplate.data,
@@ -47,8 +46,14 @@ def addEventFrameTemplate(parentEventFrameTemplateId = None):
 
 		db.session.add(eventFrameTemplate)
 		db.session.commit()
-		flash("You have successfully added the event frame template \"" + eventFrameTemplate.Name + "\" to \"" +
-			eventFrameTemplate.ElementTemplate.Name + "\".")
+
+		if parentEventFrameTemplateId:
+			flash("You have successfully added the event frame template \"" + eventFrameTemplate.Name + "\" to \"" +
+				eventFrameTemplate.ParentEventFrameTemplate.Name + "\".")
+		else:
+			flash("You have successfully added the event frame template \"" + eventFrameTemplate.Name + "\" to \"" +
+				eventFrameTemplate.ElementTemplate.Name + "\".")
+			
 		return redirect(url_for("eventFrameTemplates.listEventFrameTemplates", parentEventFrameTemplateId = parentEventFrameTemplateId))
 
 	# Present a form to add a new event frame template.
@@ -69,10 +74,21 @@ def addEventFrameTemplate(parentEventFrameTemplateId = None):
 def deleteEventFrameTemplate(eventFrameTemplateId):
 	# check_admin()
 	eventFrameTemplate = EventFrameTemplate.query.get_or_404(eventFrameTemplateId)
-	elementTemplate = ElementTemplate.query.get_or_404(eventFrameTemplate.ElementTemplateId)
+
+	if eventFrameTemplate.ParentEventFrameTemplateId:
+		parentEventFrameTemplate = EventFrameTemplate.query.get_or_404(eventFrameTemplate.ParentEventFrameTemplateId)
+	else:
+		elementTemplate = ElementTemplate.query.get_or_404(eventFrameTemplate.ElementTemplateId)
+
 	db.session.delete(eventFrameTemplate)
 	db.session.commit()
-	flash("You have successfully deleted the event frame template \"" + eventFrameTemplate.Name + "\" from \"" + elementTemplate.Name + "\".")
+
+	if eventFrameTemplate.ParentEventFrameTemplateId:
+		flash("You have successfully deleted the event frame template \"" + eventFrameTemplate.Name + "\" from \"" +
+			parentEventFrameTemplate.Name + "\".")
+	else:
+		flash("You have successfully deleted the event frame template \"" + eventFrameTemplate.Name + "\" from \"" + elementTemplate.Name + "\".")
+
 	return redirect(url_for("eventFrameTemplates.listEventFrameTemplates", parentEventFrameTemplateId = eventFrameTemplate.ParentEventFrameTemplateId))
 
 @eventFrameTemplates.route("/eventFrameTemplates/edit/<int:eventFrameTemplateId>", methods = ["GET", "POST"])
@@ -91,7 +107,7 @@ def editEventFrameTemplate(eventFrameTemplateId):
 	# Edit an existing event frame template.
 	if form.validate_on_submit():
 		if eventFrameTemplate.ParentEventFrameTemplateId:
-			eventFrameTemplate.ElementTemplateId = form.elementTemplateId.data
+			eventFrameTemplate.ElementTemplate = None
 			eventFrameTemplate.Order = form.order.data
 			eventFrameTemplate.ParentEventFrameTemplateId = form.parentEventFrameTemplateId.data
 		else:
@@ -102,13 +118,18 @@ def editEventFrameTemplate(eventFrameTemplateId):
 		eventFrameTemplate.Description = form.description.data
 		eventFrameTemplate.Name = form.name.data
 		db.session.commit()
-		flash("You have successfully edited the event frame template \"" + eventFrameTemplate.Name + "\" for \"" +
-			eventFrameTemplate.ElementTemplate.Name + "\".")
+
+		if eventFrameTemplate.ParentEventFrameTemplateId:
+			flash("You have successfully edited the event frame template \"" + eventFrameTemplate.Name + "\" for \"" +
+				eventFrameTemplate.ParentEventFrameTemplate.Name + "\".")
+		else:
+			flash("You have successfully edited the event frame template \"" + eventFrameTemplate.Name + "\" for \"" +
+				eventFrameTemplate.ElementTemplate.Name + "\".")
+			
 		return redirect(url_for("eventFrameTemplates.listEventFrameTemplates", parentEventFrameTemplateId = eventFrameTemplate.ParentEventFrameTemplateId))
 
 	# Present a form to edit an existing event frame template.
 	if eventFrameTemplate.ParentEventFrameTemplateId:
-		form.elementTemplateId.data = eventFrameTemplate.ElementTemplateId
 		form.order.data = eventFrameTemplate.Order
 	else:
 		form.elementTemplate.data = eventFrameTemplate.ElementTemplate

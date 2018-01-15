@@ -132,13 +132,15 @@ class EventFrameTemplate(db.Model):
 	__tablename__ = "EventFrameTemplate"
 	__table_args__ = \
 	(
-		UniqueConstraint("ElementTemplateId", "Name", "Order", "ParentEventFrameTemplateId", name = "AK__ElementTemplateId_Name_Order_ParentEventFrameTemplateId"),
+		UniqueConstraint("ElementTemplateId", "Name", name = "AK__ElementTemplateId_Name"),
+		UniqueConstraint("Name", "ParentEventFrameTemplateId", name = "AK__Name_ParentEventFrameTemplateId"),
+		UniqueConstraint("Order", "ParentEventFrameTemplateId", name = "AK__Order_ParentEventFrameTemplateId"),
 	)
 
 	EventFrameTemplateId = db.Column(db.Integer, primary_key = True)
 	Description = db.Column(db.String(255), nullable = True)
 	ElementTemplateId = db.Column(db.Integer, db.ForeignKey("ElementTemplate.ElementTemplateId", name = "FK__ElementTemplate$Have$EventFrameTemplate"), \
-		nullable = False)
+		nullable = True)
 	Name = db.Column(db.String(45), nullable = False)
 	Order = db.Column(db.Integer, nullable = False)
 	ParentEventFrameTemplateId = db.Column(db.Integer, db.ForeignKey("EventFrameTemplate.EventFrameTemplateId",

@@ -25,7 +25,9 @@ Event Frame Templates
     <table class = "table">
         <thead>
             <tr>
-                <th>Element Template</th>
+                {% if parentEventFrameTemplate == None %}
+                    <th>Element Template</th>
+                {% endif %}
                 <th>Name</th>
                 {% if parentEventFrameTemplate %}
                     <th>Order</th>
@@ -39,8 +41,10 @@ Event Frame Templates
         <tbody>
             {% for eventFrameTemplate in eventFrameTemplates %}
             <tr>
-                <td>{{ eventFrameTemplate.ElementTemplate.Site.Enterprise.Abbreviation + "_" + eventFrameTemplate.ElementTemplate.Site.Abbreviation + "_" +
-                    eventFrameTemplate.ElementTemplate.Name }}</td>
+                {% if parentEventFrameTemplate == None %}
+                    <td>{{ eventFrameTemplate.ElementTemplate.Site.Enterprise.Abbreviation + "_" + eventFrameTemplate.ElementTemplate.Site.Abbreviation + "_" +
+                        eventFrameTemplate.ElementTemplate.Name }}</td>
+                {% endif %}
                 <td>{{ eventFrameTemplate.Name }}</td>
                 {% if parentEventFrameTemplate %}
                     <td>{{ eventFrameTemplate.Order }}</td>
