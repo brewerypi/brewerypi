@@ -9,7 +9,7 @@ Enterprises
 {% block page_content %}
 <div>
     <h1>Enterprises</h1>
-    <a class = "btn btn-default" href = "{{ url_for("enterprises.addEnterprise") }}" role = "button">Add</a>
+    <a class = "btn btn-default" href = "{{ url_for("enterprises.addEnterprise") }}" role = "button"><span class="glyphicon glyphicon-plus"></span></a>
     <table class = "table">
         <thead>
             <tr>
@@ -26,8 +26,10 @@ Enterprises
                 <td>{{ enterprise.Name }}</td>
                 <td>{{ enterprise.Abbreviation }}</td>
                 <td>{{ enterprise.Description }}</td>
-                <td><a class = "btn btn-default" href = "{{ url_for("enterprises.editEnterprise", enterpriseId = enterprise.EnterpriseId) }}">Edit</a></td>
-                <td><a class = "btn btn-default" href = "{{ url_for("enterprises.deleteEnterprise", enterpriseId = enterprise.EnterpriseId) }}">Delete</a></td>
+                <td><a class = "btn btn-default" href = "{{ url_for("enterprises.editEnterprise", enterpriseId = enterprise.EnterpriseId) }}">
+                    <span class="glyphicon glyphicon-edit"></span></a></td>
+                <td><a class = "btn btn-default" href = "{{ url_for("enterprises.deleteEnterprise", enterpriseId = enterprise.EnterpriseId) }}">
+                    <span class="glyphicon glyphicon-trash"></span></a></td>
             </tr>
             {% endfor %}
         </tbody>

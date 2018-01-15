@@ -7,7 +7,7 @@ Elements
 {% block page_content %}
 <div>
     <h1>Elements</h1>
-    <a class = "btn btn-default" href = "{{ url_for("elements.addElement") }}" role = "button">Add</a>
+    <a class = "btn btn-default" href = "{{ url_for("elements.addElement") }}" role = "button"><span class="glyphicon glyphicon-plus"></span></a>
     <table class = "table">
         <thead>
             <tr>
@@ -25,8 +25,10 @@ Elements
                     element.ElementTemplate.Name }}</td>
                 <td>{{ element.Name }}</td>
                 <td>{{ element.Description }}</td>
-                <td><a class = "btn btn-default" href = "{{ url_for("elements.editElement", elementId = element.ElementId) }}">Edit</a></td>
-                <td><a class = "btn btn-default" href = "{{ url_for("elements.deleteElement", elementId = element.ElementId) }}">Delete</a></td>
+                <td><a class = "btn btn-default" href = "{{ url_for("elements.editElement", elementId = element.ElementId) }}">
+                    <span class="glyphicon glyphicon-edit"></span></a></td>
+                <td><a class = "btn btn-default" href = "{{ url_for("elements.deleteElement", elementId = element.ElementId) }}">
+                    <span class="glyphicon glyphicon-trash"></span></a></td>
             </tr>
             {% endfor %}
         </tbody>

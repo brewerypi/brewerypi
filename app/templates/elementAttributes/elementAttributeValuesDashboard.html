@@ -50,7 +50,8 @@ Data Entry - Element Attribute Values
                         tagValueId = firstTagValue.TagValueId) }}"><span class="glyphicon glyphicon-edit"></span></a></td>
                     <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Delete"
                         href = "{{ url_for("elementAttributes.deleteElementAttributeValue",
-                        elementId = elementAttribute.ElementId, tagValueId = firstTagValue.TagValueId) }}"><span class="glyphicon glyphicon-trash"></a></td>
+                        elementId = elementAttribute.ElementId, tagValueId = firstTagValue.TagValueId) }}">
+                        <span class="glyphicon glyphicon-trash"></span></a></td>
                 {% else %}
                     <td></td>
                     <td></td>
