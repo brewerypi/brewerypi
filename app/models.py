@@ -157,6 +157,15 @@ class EventFrameTemplate(db.Model):
 		else:
 			return self.ParentEventFrameTemplate.path(" \\ " + self.Name)
 
+	def lineage(self, line = []):
+		line.insert(0, self)
+		if self.ParentEventFrameTemplateId == None:
+			# parents.append(self)
+			# return parents
+			return line
+		else:
+			return self.ParentEventFrameTemplate.lineage(line)
+
 class Lookup(db.Model):
 	__tablename__ = "Lookup"
 	__table_args__ = \

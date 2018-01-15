@@ -6,11 +6,29 @@ Event Frame Templates
 
 {% block page_content %}
 <div>
+    <ol class="breadcrumb">
+        {% if parentEventFrameTemplate %}
+           <li><a href="{{ url_for("eventFrameTemplates.listEventFrameTemplates") }}">Event Frame Templates</a></li>
+            {% for ancestor in parentEventFrameTemplate.lineage([]) %}
+                {% if loop.nextitem %}
+                    <li><a href="{{ url_for("eventFrameTemplates.listEventFrameTemplates",
+                        parentEventFrameTemplateId = ancestor.EventFrameTemplateId) }}">{{ ancestor.Name }}</a></li>
+                {% else %}
+                    <li class = "active">{{ ancestor.Name }}</li>
+                {% endif %}
+            {% endfor %}
+        {% else %}
+            <li class = "active">Event Frame Templates</li>
+        {% endif %}
+        <!-- <li><a href="{{ url_for("eventFrameTemplates.listEventFrameTemplates") }}">Event Frame Templates</a></li>
+        <li><a href="#">Fermentation</a></li>
+        <li class="active">Ferment</li> -->
+    </ol>
     {% if parentEventFrameTemplate %}
-        <h1>Event Frame Templates - {{ parentEventFrameTemplate.path() }}</h1>
+        <!-- <h1>Event Frame Templates - {#{ parentEventFrameTemplate.path() }#}</h1> -->
         {% set parentEventFrameTemplateId = parentEventFrameTemplate.EventFrameTemplateId %}
     {% else %}
-        <h1>Event Frame Templates</h1>
+        <!-- <h1>Event Frame Templates</h1> -->
         {% set parentEventFrameTemplateId = None %}
     {% endif %}
     <a class = "btn btn-default" data-toggle = "tooltip" title = "Add" href = "{{ url_for("eventFrameTemplates.addEventFrameTemplate", parentEventFrameTemplateId = parentEventFrameTemplateId) }}" role = "button">
