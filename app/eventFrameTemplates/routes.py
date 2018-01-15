@@ -12,10 +12,6 @@ modelName = "Event Frame Templates"
 # @login_required
 def listEventFrameTemplates(parentEventFrameTemplateId = None):
 	# check_admin()
-	# parentEventFrameTemplate = aliased(EventFrameTemplate)
-	# eventFrameTemplates = EventFrameTemplate.query.join(ElementTemplate, Site, Enterprise). \
-	# 	outerjoin(parentEventFrameTemplate, EventFrameTemplate.ParentEventFrameTemplateId == parentEventFrameTemplate.EventFrameTemplateId). \
-	# 	order_by(Enterprise.Abbreviation, Site.Abbreviation, ElementTemplate.Name, parentEventFrameTemplate.Name, EventFrameTemplate.Order)
 	parentEventFrameTemplate = None
 	if parentEventFrameTemplateId:
 		parentEventFrameTemplate = EventFrameTemplate.query.get_or_404(parentEventFrameTemplateId)
@@ -46,8 +42,8 @@ def addEventFrameTemplate(parentEventFrameTemplateId = None):
 			eventFrameTemplate = EventFrameTemplate(Description = form.description.data, ElementTemplateId = parentEventFrameTemplate.ElementTemplateId,
 				Name = form.name.data, Order = form.order.data, ParentEventFrameTemplateId = parentEventFrameTemplateId)			
 		else:
-			eventFrameTemplate = EventFrameTemplate(Description = form.description.data, ElementTemplate = form.elementTemplate.data, Name = form.name.data, \
-				Order = 1, ParentEventFrameTemplateId = None)
+			eventFrameTemplate = EventFrameTemplate(Description = form.description.data, ElementTemplate = form.elementTemplate.data,
+				Name = form.name.data, Order = 1, ParentEventFrameTemplateId = None)
 
 		db.session.add(eventFrameTemplate)
 		db.session.commit()
@@ -105,7 +101,6 @@ def editEventFrameTemplate(eventFrameTemplateId):
 
 		eventFrameTemplate.Description = form.description.data
 		eventFrameTemplate.Name = form.name.data
-		# eventFrameTemplate.ParentEventFrameTemplate = form.parentEventFrameTemplate.data
 		db.session.commit()
 		flash("You have successfully edited the event frame template \"" + eventFrameTemplate.Name + "\" for \"" +
 			eventFrameTemplate.ElementTemplate.Name + "\".")
@@ -115,16 +110,10 @@ def editEventFrameTemplate(eventFrameTemplateId):
 	if eventFrameTemplate.ParentEventFrameTemplateId:
 		form.elementTemplateId.data = eventFrameTemplate.ElementTemplateId
 		form.order.data = eventFrameTemplate.Order
-		form.parentEventFrameTemplateId.data = eventFrameTemplate.ParentEventFrameTemplateId
 	else:
 		form.elementTemplate.data = eventFrameTemplate.ElementTemplate
-		# form.order.data = 1
-		form.parentEventFrameTemplateId.data = None
-		# form.order.data = eventFrameTemplate.Order
 
 	form.description.data = eventFrameTemplate.Description
-	# form.elementTemplate.data = eventFrameTemplate.ElementTemplate
 	form.name.data = eventFrameTemplate.Name
-	# form.order.data = eventFrameTemplate.Order
-	# form.parentEventFrameTemplate.data = eventFrameTemplate.ParentEventFrameTemplate
+	form.parentEventFrameTemplateId.data = eventFrameTemplate.ParentEventFrameTemplateId
 	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
