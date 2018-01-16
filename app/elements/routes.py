@@ -2,7 +2,7 @@ from flask import flash, redirect, render_template, url_for
 from . import elements
 from . forms import ElementForm, SelectElementForm
 from .. import db
-from .. models import Element, ElementTemplate, Enterprise, Site
+from .. models import AttributeTemplate, Element, ElementAttribute, ElementTemplate, Enterprise, Site
 
 modelName = "Element"
 
@@ -12,6 +12,17 @@ def listElements():
 	# check_admin()
 	elements = Element.query.join(ElementTemplate, Site, Enterprise).order_by(Enterprise.Abbreviation, Site.Abbreviation, ElementTemplate.Name, Element.Name)
 	return render_template("elements/elements.html", elements = elements)
+
+@elements.route("/elements/<int:elementId>", methods = ["GET", "POST"])
+# @login_required
+def dashboard(elementId):
+	# check_admin()
+	element = Element.query.get_or_404(elementId)
+	elementAttributes = ElementAttribute.query. \
+		join(AttributeTemplate). \
+		filter(ElementAttribute.ElementId == elementId). \
+		order_by(AttributeTemplate.Name)
+	return render_template("elements/elementDashboard.html", elementAttributes = elementAttributes, elementName = element.Name)
 
 @elements.route("/elements/add", methods = ["GET", "POST"])
 # @login_required
@@ -72,7 +83,8 @@ def selectElement():
 	form = SelectElementForm()
 
 	if form.validate_on_submit():
-		return redirect(url_for("elementAttributes.listElementAttributeValues", elementId = form.element.data.ElementId))
+		# return redirect(url_for("elementAttributes.listElementAttributeValues", elementId = form.element.data.ElementId))
+		return redirect(url_for("elements.dashboard", elementId = form.element.data.ElementId))
 
 	# Present a form to select an element.
 	return render_template("elements/selectElement.html", form = form)
