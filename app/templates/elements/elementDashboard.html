@@ -10,8 +10,42 @@
 <div>
     <h1>{{ elementName }}</h1>
     <table class = "table">
-        
+    <h2>Event Frames</h2>
     </table>
+    <table class = "table">
+        <thead>
+            <tr>
+                <th></th>
+                <th>Event Frame</th>
+                <th>Start Time</th>
+                <th>End Time</th>
+                <th></th>
+                <th></th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for eventFrameTemplates in eventFrameTemplatess %}
+            <tr>
+                <td><a class = "btn btn-default" title = "List Values"
+                    href = "{#{ url_for("tagValues.listTagValues", tagId = elementAttribute.Tag.TagId, 
+                    lookupId = elementAttribute.Tag.LookupId) }#}"><span class="glyphicon glyphicon-list"></span></a></td>
+                <td>{{ eventFrameTemplate.Name }}</td>
+                <td>{#{ eventFrame.StartTime }#}</td>
+                <td>{#{ eventFrame.EndTime }#}</td>
+                <td><a class = "btn btn-default" title = "Add" href = "{{ url_for("elements.addEventFrame") }}">
+                    <span class="glyphicon glyphicon-plus"></span></a></td>
+                <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Edit"
+                    href = "{#{ url_for("elementAttributes.editElementAttributeValue", elementId = elementAttribute.ElementId,
+                    tagValueId = firstTagValue.TagValueId) }#}"><span class="glyphicon glyphicon-edit"></span></a></td>
+                <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Delete"
+                    href = "{#{ url_for("elementAttributes.deleteElementAttributeValue",
+                    elementId = elementAttribute.ElementId, tagValueId = firstTagValue.TagValueId) }#}"><span class="glyphicon glyphicon-trash"></a></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>        
+    <h2>Attributes</h2>        
     <table class = "table">
         <thead>
             <tr>

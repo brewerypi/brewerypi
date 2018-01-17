@@ -2,7 +2,7 @@ from flask import flash, redirect, render_template, url_for
 from . import elements
 from . forms import ElementForm, SelectElementForm
 from .. import db
-from .. models import AttributeTemplate, Element, ElementAttribute, ElementTemplate, Enterprise, Site
+from .. models import AttributeTemplate, Element, ElementAttribute, ElementTemplate, Enterprise, EventFrame, EventFrameTemplate, Site
 
 modelName = "Element"
 
@@ -22,7 +22,15 @@ def dashboard(elementId):
 		join(AttributeTemplate). \
 		filter(ElementAttribute.ElementId == elementId). \
 		order_by(AttributeTemplate.Name)
-	return render_template("elements/elementDashboard.html", elementAttributes = elementAttributes, elementName = element.Name)
+	eventFrameTemplates = EventFrameTemplate.query. \
+		outerjoin(EventFrame). \
+		filter(EventFrame.ElementId == elementId). \
+		order_by(EventFrameTemplate.Name)
+	return render_template("elements/elementDashboard.html", elementAttributes = elementAttributes, elementName = element.Name, eventFrameTemplates = eventFrameTemplates)
+
+@elements.route("/elements/add", methods = ["GET", "POST"])
+def addEventFrame():
+	pass
 
 @elements.route("/elements/add", methods = ["GET", "POST"])
 # @login_required
