@@ -23,9 +23,10 @@ def dashboard(elementId):
 		filter(ElementAttribute.ElementId == elementId). \
 		order_by(AttributeTemplate.Name)
 	eventFrameTemplates = EventFrameTemplate.query. \
-		outerjoin(EventFrame). \
-		filter(EventFrame.ElementId == elementId). \
+		join(ElementTemplate, Element). \
+		filter(Element.ElementId == elementId). \
 		order_by(EventFrameTemplate.Name)
+		# filter(EventFrame.ElementId == elementId). \
 	return render_template("elements/elementDashboard.html", elementAttributes = elementAttributes, elementName = element.Name, eventFrameTemplates = eventFrameTemplates)
 
 @elements.route("/elements/add", methods = ["GET", "POST"])
