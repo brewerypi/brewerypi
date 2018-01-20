@@ -26,11 +26,10 @@ def dashboard(elementId):
 		join(ElementTemplate, Element). \
 		filter(Element.ElementId == elementId). \
 		order_by(EventFrameTemplate.Name)
-		# filter(EventFrame.ElementId == elementId). \
 	return render_template("elements/elementDashboard.html", elementAttributes = elementAttributes, elementName = element.Name, eventFrameTemplates = eventFrameTemplates)
 
-@elements.route("/elements/add", methods = ["GET", "POST"])
-def addEventFrame():
+@elements.route("/elements/addEventFrame/<int:eventFrameTemplateId>", methods = ["GET", "POST"])
+def addEventFrame(eventFrameTemplateId):
 	pass
 
 @elements.route("/elements/add", methods = ["GET", "POST"])

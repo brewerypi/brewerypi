@@ -32,14 +32,14 @@
                     lookupId = elementAttribute.Tag.LookupId) }#}"><span class="glyphicon glyphicon-list"></span></a></td>
                 <td>{{ eventFrameTemplate.Name }}</td>
                 {% if eventFrameTemplate.EventFrames[0] %}
-                    {% set firstEventFrame = eventFrameTemplate.EventFrames | sort (attribute = "Timestamp", reverse = True) | first %}
-                    <td>{{ firstEventFrame.StartTime }}</td>
-                    <td>{{ firstEventFrame.EndTime }}</td>
+                    {% set firstEventFrame = eventFrameTemplate.EventFrames | sort (attribute = "StartTimestamp", reverse = True) | first %}
+                    <td>{{ firstEventFrame.StartTimestamp }}</td>
+                    <td>{{ firstEventFrame.EndTimestamp }}</td>
                 {% else %}
                     <td></td>
                     <td></td>
                 {% endif %}
-                <td><a class = "btn btn-default" title = "Add" href = "{{ url_for("elements.addEventFrame") }}">
+                <td><a class = "btn btn-default" title = "Add" href = "{{ url_for("elements.addEventFrame", eventFrameTemplateId = eventFrameTemplate.EventFrameTemplateId) }}">
                     <span class="glyphicon glyphicon-plus"></span></a></td>
                 <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Edit"
                     href = "{#{ url_for("elementAttributes.editElementAttributeValue", elementId = elementAttribute.ElementId,

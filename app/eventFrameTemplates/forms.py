@@ -8,7 +8,6 @@ from .. models import ElementTemplate, Enterprise, EventFrame, EventFrameTemplat
 class EventFrameTemplateForm(FlaskForm):
 	elementTemplate = QuerySelectField("Element Template", query_factory = lambda: ElementTemplate.query.join(Site, Enterprise). \
 		order_by(Enterprise.Abbreviation, Site.Abbreviation, ElementTemplate.Name), get_label = elementTemplateFullyAbbreviatedPath)
-	# elementTemplateId = HiddenField()
 	parentEventFrameTemplateId = HiddenField()
 	name = StringField("Name", validators = [Required(), Length(1, 45)])
 	order = IntegerField("Order", validators = [Required()])
