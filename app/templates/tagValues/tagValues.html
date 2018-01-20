@@ -9,7 +9,8 @@ Tag Values
 {% block page_content %}
 <div>
     <h1>{{ tag.Name }} - Tag Values</h1>
-    <a class = "btn btn-default" href = "{{ url_for("tagValues.addTagValue", tagId = tag.TagId) }}" role = "button">Add</a>
+    <a class = "btn btn-default" title = "Add" href = "{{ url_for("tagValues.addTagValue", tagId = tag.TagId) }}" role = "button">
+        <span class="glyphicon glyphicon-plus"></span></a>
     <table class = "table">
         <thead>
             <tr>
@@ -28,8 +29,10 @@ Tag Values
                 {% else %}
                     <td>{{ tagValue.Value | string + " " + tagValue.Tag.UnitOfMeasurement.Abbreviation }}</td>
                 {% endif %}
-                <td><a class = "btn btn-default" href = "{{ url_for("tagValues.editTagValue", tagValueId = tagValue.TagValueId) }}">Edit</a></td>
-                <td><a class = "btn btn-default" href = "{{ url_for("tagValues.deleteTagValue", tagValueId = tagValue.TagValueId) }}">Delete</a></td>
+                <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("tagValues.editTagValue", tagValueId = tagValue.TagValueId) }}">
+                    <span class="glyphicon glyphicon-edit"></span></a></td>
+                <td><a class = "btn btn-default" title = "Delete" href = "{{ url_for("tagValues.deleteTagValue", tagValueId = tagValue.TagValueId) }}">
+                    <span class="glyphicon glyphicon-trash"></span></a></td>
             </tr>
             {% endfor %}
         </tbody>

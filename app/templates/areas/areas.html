@@ -7,7 +7,7 @@ Areas
 {% block page_content %}
 <div>
     <h1>Areas</h1>
-    <a class = "btn btn-default" href = "{{ url_for("areas.addArea") }}" role = "button">Add</a>
+    <a class = "btn btn-default" title = "Add" href = "{{ url_for("areas.addArea") }}" role = "button"><span class="glyphicon glyphicon-plus"></span></a>
     <table class = "table">
         <thead>
             <tr>
@@ -26,8 +26,10 @@ Areas
                 <td>{{ area.Name }}</td>
                 <td>{{ area.Abbreviation }}</td>
                 <td>{{ area.Description }}</td>
-                <td><a class = "btn btn-default" href = "{{ url_for("areas.editArea", areaId = area.AreaId) }}">Edit</a></td>
-                <td><a class = "btn btn-default" href = "{{ url_for("areas.deleteArea", areaId = area.AreaId) }}">Delete</a></td>
+                <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("areas.editArea", areaId = area.AreaId) }}">
+                    <span class="glyphicon glyphicon-edit"></span></a></td>
+                <td><a class = "btn btn-default" title = "Delete" href = "{{ url_for("areas.deleteArea", areaId = area.AreaId) }}">
+                    <span class="glyphicon glyphicon-trash"></span></a></td>
             </tr>
             {% endfor %}
         </tbody>
