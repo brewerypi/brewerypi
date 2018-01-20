@@ -25,6 +25,8 @@ def upgrade():
     op.create_unique_constraint('AK__Name_ParentEventFrameTemplateId', 'EventFrameTemplate', ['Name', 'ParentEventFrameTemplateId'])
     op.create_unique_constraint('AK__Order_ParentEventFrameTemplateId', 'EventFrameTemplate', ['Order', 'ParentEventFrameTemplateId'])
     op.drop_index('AK__ElementTemplateId_Name_Order_ParentEventFrameTemplateId', table_name='EventFrameTemplate')
+    op.alter_column('EventFrame', 'EndTime', existing_type=sa.DateTime(), new_column_name='EndTimestamp')
+    op.alter_column('EventFrame', 'StartTime', existing_type=sa.DateTime(), new_column_name='StartTimestamp')
     # ### end Alembic commands ###
 
 
@@ -37,4 +39,6 @@ def downgrade():
     op.alter_column('EventFrameTemplate', 'ElementTemplateId',
                existing_type=mysql.INTEGER(display_width=11),
                nullable=False)
+    op.alter_column('EventFrame', 'StartTimestamp', existing_type=sa.DateTime(), new_column_name='StartTime')
+    op.alter_column('EventFrame', 'EndTimestamp', existing_type=sa.DateTime(), new_column_name='EndTime')
     # ### end Alembic commands ###
