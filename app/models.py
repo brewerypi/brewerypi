@@ -115,7 +115,7 @@ class EventFrame(db.Model):
 	)
 
 	EventFrameId = db.Column(db.Integer, primary_key = True)
-	ElementId = db.Column(db.Integer, db.ForeignKey("Element.ElementId", name = "FK__Element$Have$EventFrame"), nullable = False)
+	ElementId = db.Column(db.Integer, db.ForeignKey("Element.ElementId", name = "FK__Element$Have$EventFrame"), nullable = True)
 	EndTimestamp = db.Column(db.DateTime, nullable = True)
 	EventFrameTemplateId = db.Column(db.Integer, db.ForeignKey("EventFrameTemplate.EventFrameTemplateId", name = "FK__EventFrameTemplate$Have$EventFrame"), \
 		nullable = False)
@@ -124,6 +124,7 @@ class EventFrame(db.Model):
 	StartTimestamp = db.Column(db.DateTime, nullable = False)
 
 	ParentEventFrame = db.relationship("EventFrame", remote_side = [EventFrameId])
+	EventFrames = db.relationship("EventFrame", remote_side = [ParentEventFrameId])
 
 	def __repr__(self):
 		return "<EventFrame: {}>".format(self.Name)
