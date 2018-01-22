@@ -3,15 +3,13 @@
 {% import "bootstrap/wtf.html" as wtf %}
 
 {% block title %}
-{{ elementName }} Dashboard
+{{ element.Name }} Dashboard
 {% endblock %}
 
 {% block page_content %}
 <div>
-    <h1>{{ elementName }}</h1>
-    <table class = "table">
+    <h1>{{ element.Name }}</h1>
     <h2>Event Frames</h2>
-    </table>
     <table class = "table">
         <thead>
             <tr>
@@ -19,6 +17,7 @@
                 <th>Event Frame</th>
                 <th>Start Time</th>
                 <th>End Time</th>
+                <th></th>
                 <th></th>
                 <th></th>
                 <th></th>
@@ -31,22 +30,36 @@
                     href = "{#{ url_for("tagValues.listTagValues", tagId = elementAttribute.Tag.TagId, 
                     lookupId = elementAttribute.Tag.LookupId) }#}"><span class="glyphicon glyphicon-list"></span></a></td>
                 <td>{{ eventFrameTemplate.Name }}</td>
-                {% if eventFrameTemplate.EventFrames[0] %}
-                    {% set firstEventFrame = eventFrameTemplate.EventFrames | sort (attribute = "StartTimestamp", reverse = True) | first %}
+                {% set firstEventFrame = None %}
+                {% set eventFrames = eventFrameTemplate.EventFrames.filter_by(ElementId = element.ElementId) %}
+                {% if eventFrames.count() > 0 %}
+                    {% set firstEventFrame = eventFrames | sort (attribute = "StartTimestamp", reverse = True) | first %}
                     <td>{{ firstEventFrame.StartTimestamp }}</td>
                     <td>{{ firstEventFrame.EndTimestamp }}</td>
+                    {% if firstEventFrame.EndTimestamp == None %}
+                        <td><a class = "btn btn-default" title = "End" href = "{{ url_for("elements.endEventFrame",
+                            eventFrameId = firstEventFrame.EventFrameId) }}"><span class="glyphicon glyphicon-stop"></span></a></td>
+                    {% else %}
+                        <td></td>
+                    {% endif %}
                 {% else %}
                     <td></td>
                     <td></td>
+                    <td></td>
                 {% endif %}
-                <td><a class = "btn btn-default" title = "Add" href = "{{ url_for("elements.addEventFrame", eventFrameTemplateId = eventFrameTemplate.EventFrameTemplateId) }}">
+                <td><a class = "btn btn-default" title = "Add" href = "{{ url_for("elements.addEventFrame",
+                    elementId = element.ElementId, eventFrameTemplateId = eventFrameTemplate.EventFrameTemplateId) }}">
                     <span class="glyphicon glyphicon-plus"></span></a></td>
                 <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Edit"
                     href = "{#{ url_for("elementAttributes.editElementAttributeValue", elementId = elementAttribute.ElementId,
                     tagValueId = firstTagValue.TagValueId) }#}"><span class="glyphicon glyphicon-edit"></span></a></td>
-                <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Delete"
-                    href = "{#{ url_for("elementAttributes.deleteElementAttributeValue",
-                    elementId = elementAttribute.ElementId, tagValueId = firstTagValue.TagValueId) }#}"><span class="glyphicon glyphicon-trash"></a></td>
+                {% if firstEventFrame %}
+                    <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Delete"
+                        href = "{{ url_for("elements.deleteEventFrame", eventFrameId = firstEventFrame.EventFrameId) }}">
+                        <span class="glyphicon glyphicon-trash"></a></td>
+                {% else %}
+                    <td></td>
+                {% endif %}
             </tr>
             {% endfor %}
         </tbody>

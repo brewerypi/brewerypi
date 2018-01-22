@@ -17,6 +17,8 @@ class EventFrameForm(FlaskForm):
 	# 	order_by(Enterprise.Abbreviation, Site.Abbreviation, ElementTemplate.Name, EventFrameTemplate.Name, EventFrame.Name), \
 	# 	get_label = eventFrameFullyAbbreviatedPath, allow_blank = True)
 	# parentEventFrameId = HiddenField()
+	elementId = HiddenField()
+	eventFrameTemplateId = HiddenField()
 	startTimestamp = DateTimeField("Start Timestamp", default = datetime.now, validators = [Required()])
 	endTimestamp = DateTimeField("End Timestamp", validators = [Optional()])
 	submit = SubmitField("Save")
