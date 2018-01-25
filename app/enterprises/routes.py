@@ -6,11 +6,18 @@ from .. models import Enterprise
 
 modelName = "Enterprise"
 
-@enterprises.route("/enterprises", methods = ["GET", "POST"])
+@enterprises.route("/enterprises/", methods = ["GET", "POST"])
+@enterprises.route("/enterprises/<string:sortColumn>", methods = ["GET", "POST"])
 # @login_required
-def listEnterprises():
+def listEnterprises(sortColumn = "Name"):
 	# check_admin()
-	enterprises = Enterprise.query.order_by(Enterprise.Name)
+	if sortColumn == "Abbreviation":
+		sortBy = Enterprise.Abbreviation
+	elif sortColumn == "Description":
+		sortBy = Enterprise.Description
+	else:
+		sortBy = Enterprise.Name
+	enterprises = Enterprise.query.order_by(sortBy)
 	return render_template("enterprises/enterprises.html", enterprises = enterprises)
 
 @enterprises.route("/enterprises/add", methods = ["GET", "POST"])

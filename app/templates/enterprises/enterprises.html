@@ -14,9 +14,9 @@ Enterprises
     <table class = "table">
         <thead>
             <tr>
-                <th>Name</th>
-                <th>Abbreviation</th>
-                <th>Description</th>
+                <th><a href = "{{ url_for("enterprises.listEnterprises") }}">Name</a></th>
+                <th><a href = "{{ url_for("enterprises.listEnterprises", sortColumn = "Abbreviation") }}">Abbreviation</a></th>
+                <th><a href = "{{ url_for("enterprises.listEnterprises", sortColumn = "Description") }}">Description</a></th>
                 <th></th>
                 <th></th>
             </tr>
