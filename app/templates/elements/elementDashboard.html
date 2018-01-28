@@ -90,8 +90,8 @@
             {% for elementAttribute in elementAttributes %}
             <tr>
                 <td><a class = "btn btn-default" data-toggle = "tooltip" title = "List Values"
-                    href = "{{ url_for("tagValues.listTagValues", tagId = elementAttribute.Tag.TagId, 
-                    lookupId = elementAttribute.Tag.LookupId) }}"><span class="glyphicon glyphicon-list"></span></a></td>
+                    href = "{{ url_for("tagValues.listTagValues", tagId = elementAttribute.Tag.TagId) }}">
+                    <span class="glyphicon glyphicon-list"></span></a></td>
                 <td>{{ elementAttribute.AttributeTemplate.Name }}</td>
                 {% if elementAttribute.Tag.TagValues[0] %}
                     {% set firstTagValue = elementAttribute.Tag.TagValues | sort(attribute = "Timestamp", reverse = True) | first %}
@@ -108,7 +108,7 @@
                 {% endif %}
                 <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Add"
                     href = "{{ url_for("elementAttributes.addElementAttributeValue", elementId = elementAttribute.ElementId,
-                    tagId = elementAttribute.Tag.TagId, lookupId = elementAttribute.Tag.LookupId) }}"><span class="glyphicon glyphicon-plus"></span></a></td>
+                    tagId = elementAttribute.Tag.TagId) }}"><span class="glyphicon glyphicon-plus"></span></a></td>
                 {% if elementAttribute.Tag.TagValues[0] %}
                     <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Edit"
                         href = "{{ url_for("elementAttributes.editElementAttributeValue", elementId = elementAttribute.ElementId,
