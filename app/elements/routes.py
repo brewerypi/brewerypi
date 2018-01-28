@@ -2,7 +2,7 @@ from datetime import datetime
 from flask import flash, redirect, render_template, url_for
 from sqlalchemy import and_, or_
 from . import elements
-from . forms import ElementForm, SelectElementForm
+from . forms import ElementForm
 from .. import db
 from .. eventFrames . forms import EventFrameForm
 from .. models import AttributeTemplate, Element, ElementAttribute, ElementTemplate, Enterprise, EventFrame, EventFrameTemplate, Site
@@ -114,14 +114,32 @@ def editElement(elementId):
 	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
 
 @elements.route("/selectElement", methods = ["GET", "POST"])
+@elements.route("/selectElement/<path:className>/<int:id>", methods = ["GET", "POST"])
 # @login_required
-def selectElement():
+def selectElement(className = None, id = None):
 	# check_admin()
-	form = SelectElementForm()
+	elements = None
+	elementTemplate = None
+	elementTemplates = None
+	sites = None
 
-	if form.validate_on_submit():
-		# return redirect(url_for("elementAttributes.listElementAttributeValues", elementId = form.element.data.ElementId))
-		return redirect(url_for("elements.dashboard", elementId = form.element.data.ElementId))
+	if className == None:
+		elementTemplate = ElementTemplate.query.join(Site, Enterprise).order_by(Enterprise.Name, Site.Name, ElementTemplate.Name).first()
+		if elementTemplate:
+			className = elementTemplate.__class__.__name__
+	elif className == "Enterprise":
+		sites = Site.query.filter_by(EnterpriseId = id)
+		if sites:
+			className = sites[0].__class__.__name__
+	elif className == "Site":
+		elementTemplates = ElementTemplate.query.filter_by(SiteId = id)
+		if elementTemplates:
+			className = elementTemplates[0].__class__.__name__
+	elif className == "ElementTemplate":
+		elements = Element.query.filter_by(ElementTemplateId = id)
+		if elements:
+			className = elements[0].__class__.__name__
 
-	# Present a form to select an element.
-	return render_template("elements/selectElement.html", form = form)
+	# Present navigation for elements.
+	return render_template("elements/selectElement.html", className = className, elements = elements, elementTemplate = elementTemplate,
+		elementTemplates = elementTemplates, sites = sites)

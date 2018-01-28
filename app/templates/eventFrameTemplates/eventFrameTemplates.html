@@ -9,9 +9,9 @@ Event Frame Templates
     <ol class="breadcrumb">
         {% if parentEventFrameTemplate %}
             {% set parentEventFrameTemplateId = parentEventFrameTemplate.EventFrameTemplateId %}
-            <li><a href="{{ url_for("eventFrameTemplates.listEventFrameTemplates") }}">Event Frame Templates</a></li>
+            <li><a href = "{{ url_for("eventFrameTemplates.listEventFrameTemplates") }}">Event Frame Templates</a></li>
             {% for ancestor in parentEventFrameTemplate.ancestors([]) %}
-                <li><a href="{{ url_for("eventFrameTemplates.listEventFrameTemplates",
+                <li><a href = "{{ url_for("eventFrameTemplates.listEventFrameTemplates",
                     parentEventFrameTemplateId = ancestor.EventFrameTemplateId) }}">{{ ancestor.Name }}</a></li>
             {% endfor %}
             <li class = "active">{{ parentEventFrameTemplate.Name }}</li>
