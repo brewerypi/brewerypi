@@ -11,10 +11,10 @@ Sites
     <table class = "table">
         <thead>
             <tr>
-                <th>Enterprise</th>
-                <th>Name</th>
-                <th>Abbreviation</th>
-                <th>Description</th>
+                <th><a href = "{{ url_for("sites.listSites") }}">Enterprise</a></th>
+                <th><a href = "{{ url_for("sites.listSites", sortColumn = "Site.Name") }}">Name</a></th>
+                <th><a href = "{{ url_for("sites.listSites", sortColumn = "Site.Abbreviation") }}">Abbreviation</a></th>
+                <th><a href = "{{ url_for("sites.listSites", sortColumn = "Site.Description") }}">Description</a></th>
                 <th></th>
                 <th></th>
             </tr>

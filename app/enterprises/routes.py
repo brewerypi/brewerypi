@@ -7,17 +7,12 @@ from .. models import Enterprise
 modelName = "Enterprise"
 
 @enterprises.route("/enterprises/", methods = ["GET", "POST"])
-@enterprises.route("/enterprises/<string:sortColumn>", methods = ["GET", "POST"])
+@enterprises.route("/enterprises/string:<sortColumn>", methods = ["GET", "POST"])
 # @login_required
-def listEnterprises(sortColumn = "Name"):
-	# check_admin()
-	if sortColumn == "Abbreviation":
-		sortBy = Enterprise.Abbreviation
-	elif sortColumn == "Description":
-		sortBy = Enterprise.Description
-	else:
-		sortBy = Enterprise.Name
-	enterprises = Enterprise.query.order_by(sortBy)
+def listEnterprises(sortColumn = ""):
+	if sortColumn != "":
+		sortColumn = sortColumn + ", "
+	enterprises = Enterprise.query.order_by(sortColumn + "Enterprise.Name")
 	return render_template("enterprises/enterprises.html", enterprises = enterprises)
 
 @enterprises.route("/enterprises/add", methods = ["GET", "POST"])

@@ -7,10 +7,13 @@ from .. models import Area, Enterprise, Site
 modelName = "Area"
 
 @areas.route("/areas", methods = ["GET", "POST"])
+@areas.route("/areas/string:<sortColumn>", methods = ["GET", "POST"])
 # @login_required
-def listAreas():
+def listAreas(sortColumn = ""):
 	# check_admin()
-	areas = Area.query.join(Site, Enterprise).order_by(Enterprise.Abbreviation, Site.Abbreviation, Area.Name)
+	if sortColumn != "":
+		sortColumn = sortColumn + ", "
+	areas = Area.query.join(Site, Enterprise).order_by(sortColumn + "Enterprise.Abbreviation, Site.Abbreviation, Area.Name")
 	return render_template("areas/areas.html", areas = areas)
 
 @areas.route("/areas/add", methods = ["GET", "POST"])

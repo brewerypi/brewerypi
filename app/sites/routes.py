@@ -7,10 +7,13 @@ from .. models import Enterprise, Site
 modelName = "Site"
 
 @sites.route("/sites", methods = ["GET", "POST"])
+@sites.route("/sites/string:<sortColumn>", methods = ["GET", "POST"])
 # @login_required
-def listSites():
+def listSites(sortColumn = ""):
 	# check_admin()
-	sites = Site.query.join(Enterprise).order_by(Enterprise.Name, Site.Name)
+	if sortColumn != "":
+		sortColumn = sortColumn + ", "
+	sites = Site.query.join(Enterprise).order_by(sortColumn + "Enterprise.Abbreviation, Site.Name")
 	return render_template("sites/sites.html", sites = sites)
 
 @sites.route("/sites/add", methods = ["GET", "POST"])

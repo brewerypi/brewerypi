@@ -11,10 +11,10 @@ Areas
     <table class = "table">
         <thead>
             <tr>
-                <th>Site</th>
-                <th>Name</th>
-                <th>Abbreviation</th>
-                <th>Description</th>
+                <th><a href = "{{ url_for("areas.listAreas") }}">Site</a></th>
+                <th><a href = "{{ url_for("areas.listAreas", sortColumn = "Area.Name") }}">Name</a></th>
+                <th><a href = "{{ url_for("areas.listAreas", sortColumn = "Area.Abbreviation") }}">Abbreviation</a></th>
+                <th><a href = "{{ url_for("areas.listAreas", sortColumn = "Area.Description") }}">Description</a></th>
                 <th></th>
                 <th></th>
             </tr>
