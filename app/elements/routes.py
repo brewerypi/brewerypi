@@ -119,14 +119,14 @@ def editElement(elementId):
 def selectElement(className = None, id = None):
 	# check_admin()
 	elements = None
-	elementTemplate = None
 	elementTemplates = None
+	site = None
 	sites = None
 
 	if className == None:
-		elementTemplate = ElementTemplate.query.join(Site, Enterprise).order_by(Enterprise.Name, Site.Name, ElementTemplate.Name).first()
-		if elementTemplate:
-			className = elementTemplate.__class__.__name__
+		site = Site.query.join(Enterprise).order_by(Enterprise.Name, Site.Name).first()
+		if site:
+			className = site.__class__.__name__
 	elif className == "Enterprise":
 		sites = Site.query.filter_by(EnterpriseId = id)
 		if sites:
@@ -141,5 +141,5 @@ def selectElement(className = None, id = None):
 			className = elements[0].__class__.__name__
 
 	# Present navigation for elements.
-	return render_template("elements/selectElement.html", className = className, elements = elements, elementTemplate = elementTemplate,
-		elementTemplates = elementTemplates, sites = sites)
+	return render_template("elements/selectElement.html", className = className, elements = elements, elementTemplates = elementTemplates, site = site,
+		sites = sites)

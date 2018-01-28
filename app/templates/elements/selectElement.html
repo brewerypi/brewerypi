@@ -9,12 +9,10 @@ Data Entry - Elements
 {% block page_content %}
 <div>
     <ol class="breadcrumb">
-        {% if elementTemplate %}
-            <li><a href = "{{ url_for("elements.selectElement", className = elementTemplate.Site.Enterprise.__class__.__name__,
-                id = elementTemplate.Site.Enterprise.EnterpriseId) }}">{{ elementTemplate.Site.Enterprise.Name }}</a></li>
-            <li><a href = "{{ url_for("elements.selectElement", className = elementTemplate.Site.__class__.__name__, id = elementTemplate.Site.SiteId) }}">
-                {{ elementTemplate.Site.Name }}</a></li>
-            <li class = "active">{{ elementTemplate.Name }}</li>
+        {% if site %}
+            <li><a href = "{{ url_for("elements.selectElement", className = site.Enterprise.__class__.__name__,
+                id = site.Enterprise.EnterpriseId) }}">{{ site.Enterprise.Name }}</a></li>
+            <li class = "active">{{ site.Name }}</li>
         {% elif elementTemplates %}
             {% set firstElementTemplate = elementTemplates | first %}
             <li><a href = "{{ url_for("elements.selectElement", className = firstElementTemplate.Site.Enterprise.__class__.__name__,
@@ -36,11 +34,12 @@ Data Entry - Elements
     </ol>
 </div>
 <div>
-    {% if elementTemplate %}
-        <h1>Elements</h1>
+    {% if site %}
+        <h1>Element Templates</h1>
         <ul class = "list-group">
-        {% for element in elementTemplate.Elements | sort(attribute = "Name") %}
-            <li class = "list-group-item"><a href = "{{ url_for("elements.dashboard", elementId = element.ElementId) }}">{{ element.Name }}</a></li>                
+        {% for elementTemplate in site.ElementTemplates | sort(attribute = "Name") %}
+            <li class = "list-group-item"><a href = "{{ url_for("elements.selectElement", className = elementTemplate.__class__.__name__,
+                id = elementTemplate.ElementTemplateId) }}">{{ elementTemplate.Name }}</a></li>                
         {% endfor %}
         </ul>
     {% elif elementTemplates %}
