@@ -16,7 +16,7 @@ def listElements():
 	elements = Element.query.join(ElementTemplate, Site, Enterprise).order_by(Enterprise.Abbreviation, Site.Abbreviation, ElementTemplate.Name, Element.Name)
 	return render_template("elements/elements.html", elements = elements)
 
-@elements.route("/elements/<int:elementId>", methods = ["GET", "POST"])
+@elements.route("/elements/dashboard/<int:elementId>", methods = ["GET", "POST"])
 # @login_required
 def dashboard(elementId):
 	# check_admin()
@@ -139,6 +139,8 @@ def selectElement(className = None, id = None):
 		elements = Element.query.filter_by(ElementTemplateId = id)
 		if elements:
 			className = elements[0].__class__.__name__
+	elif className == "Element":
+		return redirect(url_for("elements.dashboard", elementId = id))
 
 	# Present navigation for elements.
 	return render_template("elements/selectElement.html", className = className, elements = elements, elementTemplates = elementTemplates, site = site,

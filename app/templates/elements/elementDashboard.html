@@ -35,14 +35,19 @@
         <tbody>
             {% for eventFrameTemplate in eventFrameTemplates %}
             <tr>
-                <td><a class = "btn btn-default" title = "List Values"
-                    href = "{#{ url_for("tagValues.listTagValues", tagId = elementAttribute.Tag.TagId, 
-                    lookupId = elementAttribute.Tag.LookupId) }#}"><span class="glyphicon glyphicon-list"></span></a></td>
-                <td>{{ eventFrameTemplate.Name }}</td>
                 {% set firstEventFrame = None %}
                 {% set eventFrames = eventFrameTemplate.EventFrames.filter_by(ElementId = element.ElementId) %}
                 {% if eventFrames.count() > 0 %}
                     {% set firstEventFrame = eventFrames | sort (attribute = "StartTimestamp", reverse = True) | first %}
+                    <td><a class = "btn btn-default" title = "List Values"
+                        href = "{{ url_for("eventFrames.listEventFrames", elementId = firstEventFrame.Element.ElementId,
+                        eventFrameTemplateId = firstEventFrame.EventFrameTemplate.EventFrameTemplateId) }}"><span class="glyphicon glyphicon-list"></span>
+                        </a></td>
+                {% else %}
+                    <td></td>
+                {% endif %}
+                <td>{{ eventFrameTemplate.Name }}</td>
+                {% if firstEventFrame %}
                     <td>{{ firstEventFrame.StartTimestamp }}</td>
                     <td>{{ firstEventFrame.EndTimestamp }}</td>
                     {% if firstEventFrame.EndTimestamp == None %}
