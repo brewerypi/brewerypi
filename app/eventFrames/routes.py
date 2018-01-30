@@ -16,23 +16,27 @@ def listEventFrames(elementId, eventFrameTemplateId):
 		order_by(EventFrame.StartTimestamp.desc())
 	return render_template("eventFrames/eventFrames.html", element = element, eventFrames = eventFrames, eventFrameTemplate = eventFrameTemplate)
 
-@eventFrames.route("/eventFrames/add", methods = ["GET", "POST"])
+@eventFrames.route("/eventFrames/add/<int:elementId>/<int:eventFrameTemplateId>", methods = ["GET", "POST"])
 # @login_required
-def addEventFrame():
+def addEventFrame(elementId, eventFrameTemplateId):
 	# check_admin()
 	operation = "Add"
 	form = EventFrameForm()
 
 	# Add a new event frame.
 	if form.validate_on_submit():
-		eventFrame = EventFrame(EventFrameTemplate = form.eventFrameTemplate.data, Element = form.element.data, Name = form.name.data, \
-			ParentEventFrame = form.parentEventFrame.data, StartTime = form.startTime.data, EndTime = form.endTime.data, Description = form.description.data)
+		eventFrame = EventFrame(ElementId = form.elementId.data, EndTimestamp = form.endTimestamp.data, EventFrameTemplateId = form.eventFrameTemplateId.data,
+			Name = None, ParentEventFrameId = None, StartTimestamp = form.startTimestamp.data)
 		db.session.add(eventFrame)
 		db.session.commit()
 		flash("You have successfully added a new Event Frame.")
-		return redirect(url_for("eventFrames.listEventFrames"))
+		# return redirect(url_for("eventFrames.listEventFrames"))
+		return redirect(form.requestReferrer.data)
 
 	# Present a form to add a new event frame.
+	form.elementId.data = elementId
+	form.eventFrameTemplateId.data = eventFrameTemplateId
+	form.requestReferrer.data = request.referrer
 	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
 
 @eventFrames.route("/eventFrames/delete/<int:eventFrameId>", methods = ["GET", "POST"])
