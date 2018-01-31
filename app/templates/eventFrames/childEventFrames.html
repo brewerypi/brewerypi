@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block title %}
+Event Frames
+{% endblock %}
+
+{% block page_content %}
+<div>
+    <ol class="breadcrumb">
+        <li><a href = "{{ url_for("elements.selectElement", className = parentEventFrame.Element.ElementTemplate.Site.Enterprise.__class__.__name__,
+            id = parentEventFrame.Element.ElementTemplate.Site.Enterprise.EnterpriseId) }}">{{ parentEventFrame.Element.ElementTemplate.Site.Enterprise.Name }}</a></li>
+        <li><a href = "{{ url_for("elements.selectElement", className = parentEventFrame.Element.ElementTemplate.Site.__class__.__name__,
+            id = parentEventFrame.Element.ElementTemplate.Site.SiteId) }}">{{ parentEventFrame.Element.ElementTemplate.Site.Name }}</a></li>
+        <li><a href = "{{ url_for("elements.selectElement", className = parentEventFrame.Element.ElementTemplate.__class__.__name__,
+            id = parentEventFrame.Element.ElementTemplate.ElementTemplateId) }}">{{ parentEventFrame.Element.ElementTemplate.Name }}</a></li>
+        <li><a href = "{{ url_for("elements.selectElement", className = parentEventFrame.Element.__class__.__name__,
+            id = parentEventFrame.Element.ElementId) }}">{{ parentEventFrame.Element.Name }}</a></li>
+        <li class = "active">{{ parentEventFrame.EventFrameTemplate.Name }}</li>
+    </ol>
+    <h1>{{ parentEventFrame.Element.Name }}</h1>
+    <h2>{{ parentEventFrame.EventFrameTemplate.Name }} Event Frame {{ parentEventFrame.StartTimestamp }}</h2>
+    <a class = "btn btn-default" title = "Add" href = "{#{ url_for("eventFrames.addEventFrame", elementId = element.ElementId,
+        eventFrameTemplateId = eventFrameTemplate.EventFrameTemplateId) }#}" role = "button"><span class="glyphicon glyphicon-plus"></a>
+    <table class = "table">
+        <thead>
+            <tr>
+                <th></th>
+                <th>Event Frame</th>
+                <th>Start Time</th>
+                <th>End Time</th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for eventFrameTemplate in eventFrameTemplates %}
+            <tr>
+                {% set firstEventFrame = None %}
+                {% set eventFrames = eventFrameTemplate.EventFrames.filter_by(ParentEventFrameId = parentEventFrame.EventFrameId) %}
+                {% if eventFrames.count() > 0 %}
+                    {% set firstEventFrame = eventFrames | sort (attribute = "StartTimestamp", reverse = True) | first %}
+                    <td><a class = "btn btn-default" title = "List Values"
+                        href = "{#{ url_for("eventFrames.listEventFrames", elementId = firstEventFrame.Element.ElementId,
+                        eventFrameTemplateId = firstEventFrame.EventFrameTemplate.EventFrameTemplateId) }#}"><span class="glyphicon glyphicon-list"></span>
+                        </a></td>
+                {% else %}
+                    <td></td>
+                {% endif %}
+                <td>{{ eventFrameTemplate.Name }}</td>
+                {% if firstEventFrame %}
+                    <td>{{ firstEventFrame.StartTimestamp }}</td>
+                    <td>{{ firstEventFrame.EndTimestamp }}</td>
+                    {% if firstEventFrame.EndTimestamp == None %}
+                        <td><a class = "btn btn-default" title = "End" href = "{#{ url_for("elements.endEventFrame",
+                            eventFrameId = firstEventFrame.EventFrameId) }#}"><span class="glyphicon glyphicon-stop"></span></a></td>
+                    {% else %}
+                        <td></td>
+                    {% endif %}
+                {% else %}
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                {% endif %}
+                <td><a class = "btn btn-default" title = "Add" href = "{#{ url_for("elements.addEventFrame",
+                    elementId = element.ElementId, eventFrameTemplateId = eventFrameTemplate.EventFrameTemplateId) }#}">
+                    <span class="glyphicon glyphicon-plus"></span></a></td>
+                {% if firstEventFrame %}
+                    <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Edit"
+                        href = "{#{ url_for("eventFrames.editEventFrame", eventFrameId = firstEventFrame.EventFrameId) }#}">
+                        <span class="glyphicon glyphicon-edit"></span></a></td>
+                    <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Delete"
+                        href = "{#{ url_for("elements.deleteEventFrame", eventFrameId = firstEventFrame.EventFrameId) }#}">
+                        <span class="glyphicon glyphicon-trash"></a></td>
+                {% else %}
+                    <td></td>
+                    <td></td>
+                {% endif %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>                    
+</div>
+{% endblock %}

@@ -7,14 +7,26 @@ from .. models import Enterprise, Element, ElementTemplate, EventFrame, EventFra
 modelName = "Event Frame"
 
 @eventFrames.route("/eventFrames/<int:elementId>/<int:eventFrameTemplateId>", methods = ["GET", "POST"])
+@eventFrames.route("/eventFrames/<int:parentEventFrameId>", methods = ["GET", "POST"])
 # @login_required
-def listEventFrames(elementId, eventFrameTemplateId):
+def listEventFrames(elementId = None, eventFrameTemplateId = None, parentEventFrameId = None):
 	# check_admin()
 	element = Element.query.get_or_404(elementId)
 	eventFrameTemplate = EventFrameTemplate.query.get_or_404(eventFrameTemplateId)
 	eventFrames = EventFrame.query.filter(EventFrame.ElementId == elementId, EventFrame.EventFrameTemplateId == eventFrameTemplate.EventFrameTemplateId). \
 		order_by(EventFrame.StartTimestamp.desc())
 	return render_template("eventFrames/eventFrames.html", element = element, eventFrames = eventFrames, eventFrameTemplate = eventFrameTemplate)
+
+@eventFrames.route("/childEventFrames/<int:parentEventFrameId>", methods = ["GET", "POST"])
+# @login_required
+def listChildEventFrames(parentEventFrameId):
+	# check_admin()
+	parentEventFrame = EventFrame.query.get_or_404(parentEventFrameId)
+	# element = Element.query.get_or_404(parentEventFrame.ElementId)
+	eventFrameTemplates = EventFrameTemplate.query. \
+		filter_by(ParentEventFrameTemplateId = parentEventFrame.EventFrameTemplateId). \
+		order_by(EventFrameTemplate.Order)
+	return render_template("eventFrames/childEventFrames.html", eventFrameTemplates = eventFrameTemplates, parentEventFrame = parentEventFrame)
 
 @eventFrames.route("/eventFrames/add/<int:elementId>/<int:eventFrameTemplateId>", methods = ["GET", "POST"])
 # @login_required
