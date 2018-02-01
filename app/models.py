@@ -129,6 +129,19 @@ class EventFrame(db.Model):
 	def __repr__(self):
 		return "<EventFrame: {}>".format(self.Name)
 
+	def ancestors(self, ancestors = []):
+		if self.ParentEventFrameId == None:
+			return ancestors
+		else:
+			ancestors.insert(0, self.ParentEventFrame)
+			return self.ParentEventFrame.ancestors(ancestors)
+
+	def origin(self):
+		if self.ParentEventFrameId == None:
+			return self
+		else:
+			return self.ParentEventFrame.origin()
+
 class EventFrameTemplate(db.Model):
 	__tablename__ = "EventFrameTemplate"
 	__table_args__ = \

@@ -15,10 +15,9 @@ Event Frames
             id = element.ElementTemplate.ElementTemplateId) }}">{{ element.ElementTemplate.Name }}</a></li>
         <li><a href = "{{ url_for("elements.selectElement", className = element.__class__.__name__,
             id = element.ElementId) }}">{{ element.Name }}</a></li>
-        <li class = "active">{{ eventFrameTemplate.Name }}</li>
+        <li class = "active">{{ eventFrameTemplate.Name }} Event Frames</li>
     </ol>
     <h1>{{ element.Name }}</h1>
-    <h2>{{ eventFrameTemplate.Name }} Event Frames</h2>
     <a class = "btn btn-default" title = "Add" href = "{{ url_for("eventFrames.addEventFrame", elementId = element.ElementId,
         eventFrameTemplateId = eventFrameTemplate.EventFrameTemplateId) }}" role = "button"><span class="glyphicon glyphicon-plus"></a>
     <table class = "table">
