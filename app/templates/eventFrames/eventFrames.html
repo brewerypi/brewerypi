@@ -20,11 +20,14 @@ Event Frames
             {% if parentEventFrame.ParentEventFrameId %}
                 <!-- Parent with ancestors. -->
                 {% for ancestor in parentEventFrame.ancestors([]) %}
-                    {% if ancestor.ParentEventFrameId == None %}
+                    {% if ancestor.ParentEventFrameId %}
+                        <!-- Ancestor with parent. -->
+                        <li class = "active">{{ ancestor.EventFrameTemplate.Name }}</li>                
+                    {% else %}
+                        <!-- Ancestor with no parent. -->
+                        <!-- Top level event frame. -->
                         <li><a href = "{{ url_for("eventFrames.listEventFrames", elementId = element.ElementId,
                             eventFrameTemplateId = ancestor.EventFrameTemplateId) }}">{{ ancestor.EventFrameTemplate.Name }} Event Frames</a></li>
-                    {% else %}
-                        <li class = "active">{{ ancestor.EventFrameTemplate.Name }}</li>                
                     {% endif %}
                     <li><a href = "{{ url_for("eventFrames.listEventFrames", parentEventFrameId = ancestor.EventFrameId) }}">
                         {{ ancestor.timestampRange() }}</a></li>
@@ -33,6 +36,7 @@ Event Frames
                 <li class = "active">{{ parentEventFrame.timestampRange() }}</li>                
             {% else %}
                 <!-- Parent with no ancestors. -->
+                <!-- Top level event frame. -->
                 <li><a href = "{{ url_for("eventFrames.listEventFrames", elementId = element.ElementId,
                     eventFrameTemplateId = eventFrameTemplate.EventFrameTemplateId) }}">{{ eventFrameTemplate.Name }} Event Frames</a></li>
                 <li class = "active">{{ parentEventFrame.timestampRange() }}</li>                

@@ -71,11 +71,14 @@ def editEventFrame(eventFrameId):
 
 	# Edit an existing event frame.
 	if form.validate_on_submit():
-		eventFrame.ElementId = form.elementId.data
+		if eventFrame.ParentEventFrameId:
+			eventFrame.ParentEventFrameId = form.parentEventFrameId.data
+		else:
+			eventFrame.ElementId = form.elementId.data
+
 		eventFrame.EndTimestamp = form.endTimestamp.data
 		eventFrame.EventFrameTemplateId = form.eventFrameTemplateId.data
 		# eventFrame.Name = form.name.data
-		# eventFrame.ParentEventFrame = form.parentEventFrame.data
 		eventFrame.StartTimestamp = form.startTimestamp.data
 		db.session.commit()
 		flash("You have successfully edited the Event Frame.")
@@ -83,11 +86,14 @@ def editEventFrame(eventFrameId):
 		return redirect(form.requestReferrer.data)
 
 	# Present a form to edit an existing event frame.
-	form.elementId.data = eventFrame.ElementId
+	if eventFrame.ParentEventFrameId:
+		form.parentEventFrameId.data = eventFrame.ParentEventFrameId
+	else:
+		form.elementId.data = eventFrame.ElementId
+
 	form.endTimestamp.data = eventFrame.EndTimestamp
 	form.eventFrameTemplateId.data = eventFrame.EventFrameTemplateId
 	# form.name.data = eventFrame.Name
-	# form.parentEventFrame.data = eventFrame.ParentEventFrame
 	form.startTimestamp.data = eventFrame.StartTimestamp
 	form.requestReferrer.data = request.referrer
 	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
