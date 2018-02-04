@@ -15,7 +15,32 @@ Event Frames
             id = element.ElementTemplate.ElementTemplateId) }}">{{ element.ElementTemplate.Name }}</a></li>
         <li><a href = "{{ url_for("elements.selectElement", className = element.__class__.__name__,
             id = element.ElementId) }}">{{ element.Name }}</a></li>
-        <li class = "active">{{ eventFrameTemplate.Name }} Event Frames</li>
+        {% if parentEventFrame %}
+            <!-- Parent. -->
+            {% if parentEventFrame.ParentEventFrameId %}
+                <!-- Parent with ancestors. -->
+                {% for ancestor in parentEventFrame.ancestors([]) %}
+                    {% if ancestor.ParentEventFrameId == None %}
+                        <li><a href = "{{ url_for("eventFrames.listEventFrames", elementId = element.ElementId,
+                            eventFrameTemplateId = ancestor.EventFrameTemplateId) }}">{{ ancestor.EventFrameTemplate.Name }} Event Frames</a></li>
+                    {% else %}
+                        <li class = "active">{{ ancestor.EventFrameTemplate.Name }}</li>                
+                    {% endif %}
+                    <li><a href = "{{ url_for("eventFrames.listEventFrames", parentEventFrameId = ancestor.EventFrameId) }}">
+                        {{ ancestor.timestampRange() }}</a></li>
+                {% endfor %}
+                <li class = "active">{{ parentEventFrame.EventFrameTemplate.Name }}</li>                
+                <li class = "active">{{ parentEventFrame.timestampRange() }}</li>                
+            {% else %}
+                <!-- Parent with no ancestors. -->
+                <li><a href = "{{ url_for("eventFrames.listEventFrames", elementId = element.ElementId,
+                    eventFrameTemplateId = eventFrameTemplate.EventFrameTemplateId) }}">{{ eventFrameTemplate.Name }} Event Frames</a></li>
+                <li class = "active">{{ parentEventFrame.timestampRange() }}</li>                
+            {% endif %}
+        {% else %}
+            <!-- No parent. -->
+            <li class = "active">{{ eventFrameTemplate.Name }} Event Frames</li>
+        {% endif %}
     </ol>
     <h1>{{ element.Name }}</h1>
     <a class = "btn btn-default" title = "Add" href = "{{ url_for("eventFrames.addEventFrame", elementId = element.ElementId,
@@ -23,9 +48,10 @@ Event Frames
     <table class = "table">
         <thead>
             <tr>
+                <th></th>
+                <th></th>
                 <th>Start Timestatmp</th>
                 <th>End Timestamp</th>
-                <th></th>
                 <th></th>
                 <th></th>
             </tr>
@@ -33,16 +59,21 @@ Event Frames
         <tbody>
             {% for eventFrame in eventFrames %}
                 <tr>
+                    {% if eventFrame.EventFrameTemplate.EventFrameTemplates %}
+                        <td><a class = "btn btn-default" title = "Child Event Frames"
+                            href = "{{ url_for("eventFrames.listEventFrames", parentEventFrameId = eventFrame.EventFrameId) }}">
+                            <span class="glyphicon glyphicon-list"></span>
+                            </a></td>
+                    {% else %}
+                        <td></td>
+                    {% endif %}
+                    <td>{{ eventFrame.EventFrameTemplate.Name }}</td>
                     <td>{{ eventFrame.StartTimestamp }}</td>
                     {% if eventFrame.EndTimestamp %}
                         <td>{{ eventFrame.EndTimestamp }}</td>
                     {% else %}
                         <td></td>
                     {% endif %}
-                    <td><a class = "btn btn-default" title = "Child Event Frames"
-                        href = "{{ url_for("eventFrames.listChildEventFrames", parentEventFrameId = eventFrame.EventFrameId) }}">
-                        <span class="glyphicon glyphicon-list"></span>
-                        </a></td>
                     <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("eventFrames.editEventFrame",
                         eventFrameId = eventFrame.EventFrameId) }}"><span class="glyphicon glyphicon-edit"></a></td>
                     <td><a class = "btn btn-default" title = "Delete" href = "{{ url_for("eventFrames.deleteEventFrame",

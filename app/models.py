@@ -129,7 +129,7 @@ class EventFrame(db.Model):
 	def __repr__(self):
 		return "<EventFrame: {}>".format(self.Name)
 
-	def ancestors(self, ancestors = []):
+	def ancestors(self, ancestors):
 		if self.ParentEventFrameId == None:
 			return ancestors
 		else:
@@ -141,6 +141,12 @@ class EventFrame(db.Model):
 			return self
 		else:
 			return self.ParentEventFrame.origin()
+	
+	def timestampRange(self):
+		if self.EndTimestamp:
+			return self.StartTimestamp.strftime("%m/%d/%y %H:%M") + ' - ' + self.EndTimestamp.strftime("%m/%d/%y %H:%M")
+		else:
+			return self.StartTimestamp.strftime("%m/%d/%y %H:%M") + ' - '			
 
 class EventFrameTemplate(db.Model):
 	__tablename__ = "EventFrameTemplate"
@@ -167,7 +173,7 @@ class EventFrameTemplate(db.Model):
 	def __repr__(self):
 		return "<EventFrameTemplate: {}>".format(self.Name)
 
-	def ancestors(self, ancestors = []):
+	def ancestors(self, ancestors):
 		if self.ParentEventFrameTemplateId == None:
 			return ancestors
 		else:
