@@ -47,8 +47,12 @@ Event Frames
         {% endif %}
     </ol>
     <h1>{{ element.Name }}</h1>
-    <a class = "btn btn-default" title = "Add" href = "{{ url_for("eventFrames.addEventFrame", elementId = element.ElementId,
-        eventFrameTemplateId = eventFrameTemplate.EventFrameTemplateId) }}" role = "button"><span class="glyphicon glyphicon-plus"></a>
+    {% if parentEventFrame %}
+        {% set url = url_for("eventFrames.addEventFrame", parentEventFrameId = parentEventFrame.EventFrameId) %}
+    {% else %}
+        {% set url = url_for("eventFrames.addEventFrame", elementId = element.ElementId, eventFrameTemplateId = eventFrameTemplate.EventFrameTemplateId) %}
+    {% endif %}
+    <a class = "btn btn-default" title = "Add" href = "{{ url }}" role = "button"><span class="glyphicon glyphicon-plus"></a>
     <table class = "table">
         <thead>
             <tr>

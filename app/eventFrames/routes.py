@@ -2,7 +2,7 @@ from flask import flash, redirect, render_template, request, url_for
 from . import eventFrames
 from . forms import EventFrameForm
 from .. import db
-from .. models import Enterprise, Element, ElementTemplate, EventFrame, EventFrameTemplate, Site
+from .. models import Element, EventFrame, EventFrameTemplate
 
 modelName = "Event Frame"
 
@@ -26,26 +26,44 @@ def listEventFrames(elementId = None, eventFrameTemplateId = None, parentEventFr
 	return render_template("eventFrames/eventFrames.html", element = element, eventFrames = eventFrames, eventFrameTemplate = eventFrameTemplate,
 		parentEventFrame = parentEventFrame)
 
+@eventFrames.route("/eventFrames/add/<int:parentEventFrameId>", methods = ["GET", "POST"])
 @eventFrames.route("/eventFrames/add/<int:elementId>/<int:eventFrameTemplateId>", methods = ["GET", "POST"])
 # @login_required
-def addEventFrame(elementId, eventFrameTemplateId):
+def addEventFrame(elementId = None, eventFrameTemplateId = None, parentEventFrameId = None):
 	# check_admin()
 	operation = "Add"
 	form = EventFrameForm()
 
+	# Configure the form based on if the event frame has a parent.
+	if parentEventFrameId:
+		parentEventFrame = EventFrame.query.get_or_404(parentEventFrameId)
+		form.eventFrameTemplate.choices = [(eventFrameTemplate.EventFrameTemplateId, eventFrameTemplate.Name) \
+			for eventFrameTemplate in EventFrameTemplate.query. \
+			filter_by(ParentEventFrameTemplateId = parentEventFrame.EventFrameTemplate.EventFrameTemplateId)]
+	else:
+		del form.eventFrameTemplate
+
 	# Add a new event frame.
 	if form.validate_on_submit():
-		eventFrame = EventFrame(ElementId = form.elementId.data, EndTimestamp = form.endTimestamp.data, EventFrameTemplateId = form.eventFrameTemplateId.data,
-			Name = None, ParentEventFrameId = None, StartTimestamp = form.startTimestamp.data)
+		if parentEventFrameId:
+			eventFrame = EventFrame(EndTimestamp = form.endTimestamp.data, EventFrameTemplateId = form.eventFrameTemplate.data,
+				ParentEventFrameId = parentEventFrameId, StartTimestamp = form.startTimestamp.data)
+		else:
+			eventFrame = EventFrame(ElementId = form.elementId.data, EndTimestamp = form.endTimestamp.data, EventFrameTemplateId = form.eventFrameTemplateId.data,
+				StartTimestamp = form.startTimestamp.data)
+
 		db.session.add(eventFrame)
 		db.session.commit()
 		flash("You have successfully added a new Event Frame.")
-		# return redirect(url_for("eventFrames.listEventFrames"))
 		return redirect(form.requestReferrer.data)
 
 	# Present a form to add a new event frame.
-	form.elementId.data = elementId
-	form.eventFrameTemplateId.data = eventFrameTemplateId
+	if parentEventFrameId:
+		pass
+	else:
+		form.elementId.data = elementId
+		form.eventFrameTemplateId.data = eventFrameTemplateId
+
 	form.requestReferrer.data = request.referrer
 	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
 
@@ -54,11 +72,14 @@ def addEventFrame(elementId, eventFrameTemplateId):
 def deleteEventFrame(eventFrameId):
 	# check_admin()
 	eventFrame = EventFrame.query.get_or_404(eventFrameId)
+	if eventFrame.hasDescendants():
+		flash("This event frame contains one or more child event frames and cannot be deleted.")
+		return redirect(request.referrer)
+
 	elementId = eventFrame.ElementId
 	db.session.delete(eventFrame)
 	db.session.commit()
 	flash("You have successfully deleted the event frame.")
-	# return redirect(url_for("elements.dashboard", elementId = ElementTemplate))
 	return redirect(request.referrer)
 
 @eventFrames.route("/eventFrames/edit/<int:eventFrameId>", methods = ["GET", "POST"])
@@ -82,7 +103,6 @@ def editEventFrame(eventFrameId):
 		eventFrame.StartTimestamp = form.startTimestamp.data
 		db.session.commit()
 		flash("You have successfully edited the Event Frame.")
-		# return redirect(url_for("elements.dashboard", elementId = eventFrame.ElementId))
 		return redirect(form.requestReferrer.data)
 
 	# Present a form to edit an existing event frame.

@@ -136,6 +136,12 @@ class EventFrame(db.Model):
 			ancestors.insert(0, self.ParentEventFrame)
 			return self.ParentEventFrame.ancestors(ancestors)
 
+	def hasDescendants(self):
+		if self.EventFrames:
+			return True
+		else:
+			return False
+
 	def origin(self):
 		if self.ParentEventFrameId == None:
 			return self
@@ -179,6 +185,12 @@ class EventFrameTemplate(db.Model):
 		else:
 			ancestors.insert(0, self.ParentEventFrameTemplate)
 			return self.ParentEventFrameTemplate.ancestors(ancestors)
+
+	def hasDescendants(self):
+		if self.EventFrameTemplates:
+			return True
+		else:
+			return False
 
 class Lookup(db.Model):
 	__tablename__ = "Lookup"

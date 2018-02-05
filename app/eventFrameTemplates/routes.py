@@ -74,6 +74,9 @@ def addEventFrameTemplate(parentEventFrameTemplateId = None):
 def deleteEventFrameTemplate(eventFrameTemplateId):
 	# check_admin()
 	eventFrameTemplate = EventFrameTemplate.query.get_or_404(eventFrameTemplateId)
+	if eventFrameTemplate.hasDescendants():
+		flash("This event frame contains one or more child event frame templates and cannot be deleted.")
+		return redirect(request.referrer)
 
 	if eventFrameTemplate.ParentEventFrameTemplateId:
 		parentEventFrameTemplate = EventFrameTemplate.query.get_or_404(eventFrameTemplate.ParentEventFrameTemplateId)
