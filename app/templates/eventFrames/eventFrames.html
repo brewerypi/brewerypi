@@ -57,7 +57,8 @@ Event Frames
         <thead>
             <tr>
                 <th></th>
-                <th></th>
+                <th>Event Frame</th>
+                <th>Name</th>
                 <th>Start Timestatmp</th>
                 <th>End Timestamp</th>
                 <th></th>
@@ -76,6 +77,7 @@ Event Frames
                         <td></td>
                     {% endif %}
                     <td>{{ eventFrame.EventFrameTemplate.Name }}</td>
+                    <td>{{ eventFrame.Name }}</td>
                     <td>{{ eventFrame.StartTimestamp }}</td>
                     {% if eventFrame.EndTimestamp %}
                         <td>{{ eventFrame.EndTimestamp }}</td>

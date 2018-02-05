@@ -89,6 +89,7 @@ def editEventFrame(eventFrameId):
 	operation = "Edit"
 	eventFrame = EventFrame.query.get_or_404(eventFrameId)
 	form = EventFrameForm(obj = eventFrame)
+	del form.eventFrameTemplate
 
 	# Edit an existing event frame.
 	if form.validate_on_submit():
@@ -99,7 +100,7 @@ def editEventFrame(eventFrameId):
 
 		eventFrame.EndTimestamp = form.endTimestamp.data
 		eventFrame.EventFrameTemplateId = form.eventFrameTemplateId.data
-		# eventFrame.Name = form.name.data
+		eventFrame.Name = form.name.data
 		eventFrame.StartTimestamp = form.startTimestamp.data
 		db.session.commit()
 		flash("You have successfully edited the Event Frame.")
@@ -113,7 +114,7 @@ def editEventFrame(eventFrameId):
 
 	form.endTimestamp.data = eventFrame.EndTimestamp
 	form.eventFrameTemplateId.data = eventFrame.EventFrameTemplateId
-	# form.name.data = eventFrame.Name
+	form.name.data = eventFrame.Name
 	form.startTimestamp.data = eventFrame.StartTimestamp
 	form.requestReferrer.data = request.referrer
 	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
