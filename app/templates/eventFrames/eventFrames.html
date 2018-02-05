@@ -63,6 +63,7 @@ Event Frames
                 <th>End Timestamp</th>
                 <th></th>
                 <th></th>
+                <th></th>
             </tr>
         </thead>
         <tbody>
@@ -81,6 +82,12 @@ Event Frames
                     <td>{{ eventFrame.StartTimestamp }}</td>
                     {% if eventFrame.EndTimestamp %}
                         <td>{{ eventFrame.EndTimestamp }}</td>
+                    {% else %}
+                        <td></td>
+                    {% endif %}
+                    {% if eventFrame.EndTimestamp == None %}
+                        <td><a class = "btn btn-default" title = "End" href = "{{ url_for("eventFrames.endEventFrame",
+                            eventFrameId = eventFrame.EventFrameId) }}"><span class="glyphicon glyphicon-stop"></span></a></td>
                     {% else %}
                         <td></td>
                     {% endif %}

@@ -1,3 +1,4 @@
+from datetime import datetime
 from flask import flash, redirect, render_template, request, url_for
 from . import eventFrames
 from . forms import EventFrameForm
@@ -118,3 +119,20 @@ def editEventFrame(eventFrameId):
 	form.startTimestamp.data = eventFrame.StartTimestamp
 	form.requestReferrer.data = request.referrer
 	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
+
+@eventFrames.route("/eventFrames/endEventFrame/<int:eventFrameId>", methods = ["GET", "POST"])
+def endEventFrame(eventFrameId):
+	eventFrame = EventFrame.query.get_or_404(eventFrameId)
+	eventFrame.EndTimestamp = datetime.now()
+	db.session.commit()
+	flash("You have successfully ended \"" + eventFrame.EventFrameTemplate.Name + "\" for element \"" + eventFrame.origin().Element.Name + "\".")
+	return redirect(request.referrer)
+
+@eventFrames.route("/eventFrames/startEventFrame/<int:elementId>/<int:eventFrameTemplateId>", methods = ["GET", "POST"])
+def startEventFrame(elementId, eventFrameTemplateId):
+	eventFrame = EventFrame(ElementId = elementId, EndTimestamp = None, EventFrameTemplateId = eventFrameTemplateId, ParentEventFrameId = None,
+		StartTimestamp = datetime.now())
+	db.session.add(eventFrame)
+	db.session.commit()
+	flash("You have successfully added a new \"" + eventFrame.EventFrameTemplate.Name + "\" for element \"" + eventFrame.origin().Element.Name + "\".")
+	return redirect(request.referrer)

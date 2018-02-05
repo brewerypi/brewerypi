@@ -1,4 +1,3 @@
-from datetime import datetime
 from flask import flash, redirect, render_template, url_for
 from sqlalchemy import and_, or_
 from . import elements
@@ -33,15 +32,6 @@ def dashboard(elementId):
 	return render_template("elements/elementDashboard.html", elementAttributes = elementAttributes, element = element,
 		eventFrameTemplates = eventFrameTemplates)
 
-@elements.route("/elements/addEventFrame/<int:elementId>/<int:eventFrameTemplateId>", methods = ["GET", "POST"])
-def addEventFrame(elementId, eventFrameTemplateId):
-	eventFrame = EventFrame(ElementId = elementId, EndTimestamp = None, EventFrameTemplateId = eventFrameTemplateId, ParentEventFrameId = None,
-		StartTimestamp = datetime.now())
-	db.session.add(eventFrame)
-	db.session.commit()
-	flash("You have successfully added a new \"" + eventFrame.EventFrameTemplate.Name + "\" for element \"" + eventFrame.Element.Name + "\".")
-	return redirect(url_for("elements.dashboard", elementId = elementId))
-
 @elements.route("/elements/deleteEventFrame/<int:eventFrameId>", methods = ["GET", "POST"])
 def deleteEventFrame(eventFrameId):
 	eventFrame = EventFrame.query.get_or_404(eventFrameId)
@@ -52,14 +42,6 @@ def deleteEventFrame(eventFrameId):
 	db.session.commit()
 	flash("You have successfully deleted a \"" + eventFrameTemplateName + "\" from element \"" + elementName + "\".")
 	return redirect(url_for("elements.dashboard", elementId = elementId))
-
-@elements.route("/elements/endEventFrame/<int:eventFrameId>", methods = ["GET", "POST"])
-def endEventFrame(eventFrameId):
-	eventFrame = EventFrame.query.get_or_404(eventFrameId)
-	eventFrame.EndTimestamp = datetime.now()
-	db.session.commit()
-	flash("You have successfully ended \"" + eventFrame.EventFrameTemplate.Name + "\" for element \"" + eventFrame.Element.Name + "\".")
-	return redirect(url_for("elements.dashboard", elementId = eventFrame.ElementId))
 
 @elements.route("/elements/add", methods = ["GET", "POST"])
 # @login_required

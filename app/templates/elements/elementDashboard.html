@@ -51,7 +51,7 @@
                     <td>{{ firstEventFrame.StartTimestamp }}</td>
                     <td>{{ firstEventFrame.EndTimestamp }}</td>
                     {% if firstEventFrame.EndTimestamp == None %}
-                        <td><a class = "btn btn-default" title = "End" href = "{{ url_for("elements.endEventFrame",
+                        <td><a class = "btn btn-default" title = "End" href = "{{ url_for("eventFrames.endEventFrame",
                             eventFrameId = firstEventFrame.EventFrameId) }}"><span class="glyphicon glyphicon-stop"></span></a></td>
                     {% else %}
                         <td></td>
@@ -61,7 +61,7 @@
                     <td></td>
                     <td></td>
                 {% endif %}
-                <td><a class = "btn btn-default" title = "Add" href = "{{ url_for("elements.addEventFrame",
+                <td><a class = "btn btn-default" title = "Add" href = "{{ url_for("eventFrames.startEventFrame",
                     elementId = element.ElementId, eventFrameTemplateId = eventFrameTemplate.EventFrameTemplateId) }}">
                     <span class="glyphicon glyphicon-plus"></span></a></td>
                 {% if firstEventFrame %}
