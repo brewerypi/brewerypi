@@ -30,16 +30,16 @@ Event Frames
                             eventFrameTemplateId = ancestor.EventFrameTemplateId) }}">{{ ancestor.EventFrameTemplate.Name }} Event Frames</a></li>
                     {% endif %}
                     <li><a href = "{{ url_for("eventFrames.listEventFrames", parentEventFrameId = ancestor.EventFrameId) }}">
-                        {{ ancestor.timestampRange() }}</a></li>
+                        {{ ancestor.StartTimestamp.strftime("%m/%d/%y %H:%m") }}</a></li>
                 {% endfor %}
                 <li class = "active">{{ parentEventFrame.EventFrameTemplate.Name }}</li>                
-                <li class = "active">{{ parentEventFrame.timestampRange() }}</li>                
+                <li class = "active">{{ parentEventFrame.StartTimestamp.strftime("%m/%d/%y %H:%m") }}</li>
             {% else %}
                 <!-- Parent with no ancestors. -->
                 <!-- Top level event frame. -->
                 <li><a href = "{{ url_for("eventFrames.listEventFrames", elementId = element.ElementId,
                     eventFrameTemplateId = eventFrameTemplate.EventFrameTemplateId) }}">{{ eventFrameTemplate.Name }} Event Frames</a></li>
-                <li class = "active">{{ parentEventFrame.timestampRange() }}</li>                
+                <li class = "active">{{ parentEventFrame.StartTimestamp.strftime("%m/%d/%y %H:%m") }}</li>                
             {% endif %}
         {% else %}
             <!-- No parent. -->
