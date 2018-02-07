@@ -14,8 +14,12 @@ Tag Values
     <table class = "table">
         <thead>
             <tr>
-                <th>Timestamp</th>
-                <th>Value</th>
+                <th><a href = "{{ url_for("tagValues.listTagValues", tagId = tag.TagId) }}">Timestamp</a></th>
+                {% if tag.LookupId %}
+                    <th><a href = "{{ url_for("tagValues.listTagValues", tagId = tag.TagId, sortColumn = "LookupValue.Name") }}">Value</a></th>
+                {% else %}
+                    <th><a href = "{{ url_for("tagValues.listTagValues", tagId = tag.TagId, sortColumn = "TagValue.Value") }}">Value</a></th>
+                {% endif %}
                 <th></th>
                 <th></th>
             </tr>

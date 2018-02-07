@@ -14,8 +14,8 @@ Units of Measurment
     <table class = "table">
         <thead>
             <tr>
-                <th>Name</th>
-                <th>Abbreviation</th>
+                <th><a href = "{{ url_for("unitOfMeasurements.listUnitOfMeasurements") }}">Name</a></th>
+                <th><a href = "{{ url_for("unitOfMeasurements.listUnitOfMeasurements", sortColumn = "UnitOfMeasurement.Abbreviation") }}">Abbreviation</a></th>
                 <th></th>
                 <th></th>
             </tr>

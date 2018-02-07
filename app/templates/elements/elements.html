@@ -11,9 +11,9 @@ Elements
     <table class = "table">
         <thead>
             <tr>
-                <th>Element Template</th>
-                <th>Name</th>
-                <th>Description</th>
+                <th><a href = "{{ url_for("elements.listElements") }}">Element Template</a></th>
+                <th><a href = "{{ url_for("elements.listElements", sortColumn = "Element.Name") }}">Name</a></th>
+                <th><a href = "{{ url_for("elements.listElements", sortColumn = "Element.Description") }}">Description</a></th>
                 <th></th>
                 <th></th>
             </tr>

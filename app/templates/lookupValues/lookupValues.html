@@ -12,9 +12,10 @@ Lookup Values
     <table class = "table">
         <thead>
             <tr>
-                <th>Lookup</th>
-                <th>Name</th>
-                <th>Selectable</th>
+                <th><a href = "{{ url_for("lookupValues.listLookupValues", lookupId = lookup.LookupId) }}">Lookup</a></th>
+                <th><a href = "{{ url_for("lookupValues.listLookupValues", lookupId = lookup.LookupId, sortColumn = "LookupValue.Name") }}">Name</a></th>
+                <th><a href = "{{ url_for("lookupValues.listLookupValues", lookupId = lookup.LookupId, sortColumn = "LookupValue.Selectable") }}">Selectable</a>
+                    </th>
                 <th></th>
                 <th></th>
             </tr>

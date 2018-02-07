@@ -1,20 +1,27 @@
 from flask import flash, redirect, render_template, request, url_for
-from sqlalchemy import or_
+from sqlalchemy import or_, text
 from . import tagValues
 from . forms import TagValueForm
 from .. import db
-from .. models import Area, Enterprise, LookupValue, Site, Tag, TagValue
+from .. models import Area, Enterprise, Lookup, LookupValue, Site, Tag, TagValue
 
 modelName = "Tag Value"
 
 @tagValues.route("/tagValues/<int:tagId>", methods = ["GET", "POST"])
+@tagValues.route("/tagValues/<int:tagId>/<string:sortColumn>", methods = ["GET", "POST"])
 # @login_required
-def listTagValues(tagId):
+def listTagValues(tagId, sortColumn = ""):
 	# check_admin()
+	if sortColumn != "":
+		sortColumn = sortColumn + ", "
 	tag = Tag.query.get_or_404(tagId)
 	page = request.args.get("page", 1, type = int)
-	pagination = TagValue.query.join(Tag).filter_by(TagId = tagId).join(Area, Site, Enterprise).order_by(Enterprise.Abbreviation, Site.Abbreviation, Area.Abbreviation, \
-		Tag.Name, TagValue.Timestamp.desc()).paginate(page, per_page = 10, error_out = False)
+	if tag.LookupId:
+		pagination = TagValue.query.join(Tag, Lookup, LookupValue).order_by(text(sortColumn + 
+			"TagValue.Timestamp")).filter(Tag.TagId == tagId, TagValue.Value == LookupValue.Value).paginate(page, per_page = 10, error_out = False)
+	else:
+		pagination = TagValue.query.join(Tag).filter_by(TagId = tagId).order_by(text(sortColumn + "TagValue.Timestamp")).paginate(page, per_page = 10, 
+			error_out = False)
 	tagValues = pagination.items
 	return render_template("tagValues/tagValues.html", pagination = pagination, tag = tag, tagValues = tagValues)
 

@@ -1,7 +1,7 @@
 import csv
 import os
 from flask import current_app, flash, redirect, render_template, send_file, url_for
-from sqlalchemy import or_
+from sqlalchemy import or_, text
 from . import elementAttributes
 from . forms import ElementAttributeForm, ElementAttributeImportForm, ElementAttributeValueForm
 from .. import db
@@ -9,12 +9,15 @@ from .. models import Area, AttributeTemplate, Element, ElementAttribute, Elemen
 from .. tagValues . forms import TagValueForm
 
 @elementAttributes.route("/elementAttributes", methods = ["GET", "POST"])
+@elementAttributes.route("/elementAttributes/<string:sortColumn>", methods = ["GET", "POST"])
 # @login_required
-def listElementAttributes():
+def listElementAttributes(sortColumn = ""):
 	# check_admin()
+	if sortColumn != "":
+		sortColumn = sortColumn + ", "
 	elementAttributes = ElementAttribute.query.join(Element, Tag, ElementTemplate, Site, Enterprise). \
 		join(AttributeTemplate, ElementAttribute.AttributeTemplateId == AttributeTemplate.AttributeTemplateId). \
-		order_by(Enterprise.Abbreviation, Site.Abbreviation, ElementTemplate.Name, Element.Name, AttributeTemplate.Name)
+		order_by(text(sortColumn + "Enterprise.Abbreviation, Site.Abbreviation, ElementTemplate.Name, Element.Name, AttributeTemplate.Name"))
 	return render_template("elementAttributes/elementAttributes.html", elementAttributes = elementAttributes)
 
 @elementAttributes.route("/elementAttributes/add", methods = ["GET", "POST"])

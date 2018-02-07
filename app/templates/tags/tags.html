@@ -16,11 +16,11 @@ Tags
     <table class = "table">
         <thead>
             <tr>
-                <th>Area</th>
-                <th>Name</th>
-                <th>Description</th>
-                <th>Unit</th>
-                <th>Lookup</th>
+                <th><a href = "{{ url_for("tags.listTags") }}">Area</a></th>
+                <th><a href = "{{ url_for("tags.listTags", sortColumn = "Tag.Name") }}">Name</a></th>
+                <th><a href = "{{ url_for("tags.listTags", sortColumn = "Tag.Description") }}">Description</a></th>
+                <th><a href = "{{ url_for("tags.listTags", sortColumn = "UnitOfMeasurement.Name") }}">Unit</a></th>
+                <th><a href = "{{ url_for("tags.listTags", sortColumn = "Lookup.Name") }}">Lookup</a></th>
                 <th></th>
                 <th></th>
                 <th></th>

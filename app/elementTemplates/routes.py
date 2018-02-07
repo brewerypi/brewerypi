@@ -1,4 +1,5 @@
 from flask import flash, redirect, render_template, request, url_for
+from sqlalchemy import text
 from . import elementTemplates
 from . forms import ElementTemplateForm
 from .. import db
@@ -7,10 +8,14 @@ from .. models import ElementTemplate, Enterprise, Site
 modelName = "Element Template"
 
 @elementTemplates.route("/elementTemplates", methods = ["GET", "POST"])
+@elementTemplates.route("/elementTemplates/<string:sortColumn>", methods = ["GET", "POST"])
 # @login_required
-def listElementTemplates():
+def listElementTemplates(sortColumn = ""):
 	# check_admin()
-	elementTemplates = ElementTemplate.query.join(Site, Enterprise).order_by(Enterprise.Abbreviation, Site.Abbreviation, ElementTemplate.Name)
+	if sortColumn != "":
+		sortColumn = sortColumn + ", "
+	elementTemplates = ElementTemplate.query.join(Site, Enterprise).order_by(text(sortColumn + "Enterprise.Abbreviation, Site.Abbreviation, \
+		ElementTemplate.Name"))
 	return render_template("elementTemplates/elementTemplates.html", elementTemplates = elementTemplates)
 
 @elementTemplates.route("/elementTemplates/add", methods = ["GET", "POST"])

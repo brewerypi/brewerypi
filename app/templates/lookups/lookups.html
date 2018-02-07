@@ -11,8 +11,8 @@ Lookups
     <table class = "table">
         <thead>
             <tr>
-                <th>Enterprise</th>
-                <th>Name</th>
+                <th><a href = "{{ url_for("lookups.listLookups") }}">Enterprise</a></th>
+                <th><a href = "{{ url_for("lookups.listLookups", sortColumn = "Lookup.Name") }}">Name</a></th>
                 <th></th>
                 <th></th>
                 <th></th>

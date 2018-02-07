@@ -12,9 +12,9 @@ Attribute Templates
     <table class = "table">
         <thead>
             <tr>
-                <th>Attribute Template</th>
-                <th>Name</th>
-                <th>Description</th>
+                <th><a href = "{{ url_for("attributeTemplates.listAttributeTemplates") }}">Element Template</a></th>
+                <th><a href = "{{ url_for("attributeTemplates.listAttributeTemplates", sortColumn = "attributeTemplate.Name") }}">Name</a></th>
+                <th><a href = "{{ url_for("attributeTemplates.listAttributeTemplates", sortColumn = "attributeTemplate.Description") }}">Description</a></th>
                 <th></th>
                 <th></th>
             </tr>

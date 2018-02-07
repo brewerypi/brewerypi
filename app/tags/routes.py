@@ -1,18 +1,22 @@
 import csv
 import os
 from flask import current_app, flash, redirect, render_template, request, send_file, url_for
+from sqlalchemy import text
 from . import tags
 from . forms import TagForm, TagImportForm
 from .. import db
 from .. models import Area, Enterprise, Lookup, Site, Tag, UnitOfMeasurement
 
 @tags.route("/tags", methods = ["GET", "POST"])
+@tags.route("/tags/<string:sortColumn>", methods = ["GET", "POST"])
 # @login_required
-def listTags():
+def listTags(sortColumn = ""):
 	# check_admin()
+	if sortColumn != "":
+		sortColumn = sortColumn + ", "
 	page = request.args.get("page", 1, type = int)
-	pagination = Tag.query.outerjoin(Lookup).join(Area, Site, Enterprise).order_by(Enterprise.Abbreviation, Site.Abbreviation, Area.Abbreviation, \
-		Tag.Name).paginate(page, per_page = 10, error_out = False)
+	pagination = Tag.query.outerjoin(UnitOfMeasurement, Lookup).join(Area, Site, Enterprise).order_by(text(sortColumn + "Enterprise.Abbreviation, \
+		Site.Abbreviation, Area.Abbreviation, Tag.Name")).paginate(page, per_page = 10, error_out = False)
 	tags = pagination.items
 	return render_template("tags/tags.html", pagination = pagination, tags = tags)
 
