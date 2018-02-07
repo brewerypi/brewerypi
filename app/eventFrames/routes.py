@@ -12,20 +12,27 @@ modelName = "Event Frame"
 # @login_required
 def listEventFrames(elementId = None, eventFrameTemplateId = None, parentEventFrameId = None):
 	# check_admin()
+	page = request.args.get("page", 1, type = int)
 	if parentEventFrameId:
 		parentEventFrame = EventFrame.query.get_or_404(parentEventFrameId)
 		origin = parentEventFrame.origin()
 		element = Element.query.get_or_404(origin.ElementId)
 		eventFrameTemplate = EventFrameTemplate.query.get_or_404(parentEventFrame.EventFrameTemplateId)
-		eventFrames = EventFrame.query.filter_by(ParentEventFrameId = parentEventFrameId).order_by(EventFrame.StartTimestamp.desc())
+		# eventFrames = EventFrame.query.filter_by(ParentEventFrameId = parentEventFrameId).order_by(EventFrame.StartTimestamp.desc())
+		pagination = EventFrame.query.filter_by(ParentEventFrameId = parentEventFrameId).order_by(EventFrame.StartTimestamp.desc()). \
+			paginate(page, per_page = 10, error_out = False)
+		eventFrames = pagination.items
 	else:
 		parentEventFrame = None
 		element = Element.query.get_or_404(elementId)
 		eventFrameTemplate = EventFrameTemplate.query.get_or_404(eventFrameTemplateId)
-		eventFrames = EventFrame.query.filter(EventFrame.ElementId == elementId, EventFrame.EventFrameTemplateId == eventFrameTemplate.EventFrameTemplateId). \
-			order_by(EventFrame.StartTimestamp.desc())
+		# eventFrames = EventFrame.query.filter(EventFrame.ElementId == elementId, EventFrame.EventFrameTemplateId == eventFrameTemplate.EventFrameTemplateId). \
+		# 	order_by(EventFrame.StartTimestamp.desc())
+		pagination = EventFrame.query.filter(EventFrame.ElementId == elementId, EventFrame.EventFrameTemplateId == eventFrameTemplate.EventFrameTemplateId). \
+			order_by(EventFrame.StartTimestamp.desc()).paginate(page, per_page = 10, error_out = False)
+		eventFrames = pagination.items
 	return render_template("eventFrames/eventFrames.html", element = element, eventFrames = eventFrames, eventFrameTemplate = eventFrameTemplate,
-		parentEventFrame = parentEventFrame)
+		pagination = pagination, parentEventFrame = parentEventFrame)
 
 @eventFrames.route("/eventFrames/add/<int:parentEventFrameId>", methods = ["GET", "POST"])
 @eventFrames.route("/eventFrames/add/<int:elementId>/<int:eventFrameTemplateId>", methods = ["GET", "POST"])
