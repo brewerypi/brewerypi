@@ -12,6 +12,14 @@ def elementFullyAbbreviatedPath(element):
 def elementTemplateFullyAbbreviatedPath(elementTemplate):
 	return elementTemplate.Site.Enterprise.Abbreviation + "_" + elementTemplate.Site.Abbreviation + "_" + elementTemplate.Name
 
+def eventFrameFullyAbbreviatedPath(eventFrame):
+	return eventFrame.EventFrameTemplate.ElementTemplate.Site.Enterprise.Abbreviation + "_" + eventFrame.EventFrameTemplate.ElementTemplate.Site.Abbreviation \
+		+ "_" + eventFrame.EventFrameTemplate.ElementTemplate.Name + "_" + eventFrame.EventFrameTemplate.Name + "_" + eventFrame.Name
+
+def eventFrameTemplateFullyAbbreviatedPath(eventFrameTemplate):
+	return eventFrameTemplate.ElementTemplate.Site.Enterprise.Abbreviation + "_" + eventFrameTemplate.ElementTemplate.Site.Abbreviation + "_" + \
+			eventFrameTemplate.ElementTemplate.Name + "_" + eventFrameTemplate.Name
+
 def siteFullyAbbreviatedPath(site):
 	return site.Enterprise.Abbreviation + "_" + site.Abbreviation
 

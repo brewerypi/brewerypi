@@ -8,9 +8,63 @@ Data Entry - Elements
 
 {% block page_content %}
 <div>
-    <h1>Select Element</h1>
+    <ol class="breadcrumb">
+        {% if site %}
+            <li><a href = "{{ url_for("elements.selectElement", className = site.Enterprise.__class__.__name__,
+                id = site.Enterprise.EnterpriseId) }}">{{ site.Enterprise.Name }}</a></li>
+            <li class = "active">{{ site.Name }}</li>
+        {% elif elementTemplates %}
+            {% set firstElementTemplate = elementTemplates | first %}
+            <li><a href = "{{ url_for("elements.selectElement", className = firstElementTemplate.Site.Enterprise.__class__.__name__,
+                id = firstElementTemplate.Site.Enterprise.EnterpriseId) }}">{{ firstElementTemplate.Site.Enterprise.Name }}</a></li>
+            <li class = "active">{{ firstElementTemplate.Site.Name }}</li>
+        {% elif elements %}
+            {% set firstElement = elements | first %}
+            <li><a href = "{{ url_for("elements.selectElement", className = firstElement.ElementTemplate.Site.Enterprise.__class__.__name__,
+                id = firstElement.ElementTemplate.Site.Enterprise.EnterpriseId) }}">{{ firstElement.ElementTemplate.Site.Enterprise.Name }}</a></li>
+            <li><a href = "{{ url_for("elements.selectElement", className = firstElement.ElementTemplate.Site.__class__.__name__,
+                id = firstElement.ElementTemplate.Site.SiteId) }}">{{ firstElement.ElementTemplate.Site.Name }}</a></li>
+            <li class = "active">{{ firstElement.ElementTemplate.Name }}</li>
+        {% elif sites %}
+            {% set firstSite = sites | first %}
+            <li><a href = "{{ url_for("elements.selectElement", className = firstSite.Enterprise.__class__.__name__,
+                id = firstSite.Enterprise.EnterpriseId) }}">{{ firstSite.Enterprise.Name }}</a></li>
+            <li class = "active">Sites</li>
+        {% endif %}
+    </ol>
 </div>
 <div>
-    {{ wtf.quick_form(form) }}
-</div>        
+    {% if site %}
+        <h1>Element Templates</h1>
+        <ul class = "list-group">
+        {% for elementTemplate in site.ElementTemplates | sort(attribute = "Name") %}
+            <li class = "list-group-item"><a href = "{{ url_for("elements.selectElement", className = elementTemplate.__class__.__name__,
+                id = elementTemplate.ElementTemplateId) }}">{{ elementTemplate.Name }}</a></li>                
+        {% endfor %}
+        </ul>
+    {% elif elementTemplates %}
+        <h1>Element Templates</h1>
+        <ul class = "list-group">
+        {% for elementTemplate in elementTemplates | sort(attribute = "Name") %}
+            <li class = "list-group-item"><a href = "{{ url_for("elements.selectElement", className = elementTemplate.__class__.__name__,
+                id = elementTemplate.ElementTemplateId) }}">{{ elementTemplate.Name }}</a></li>                
+        {% endfor %}
+        </ul>
+    {% elif elements %}
+        <h1>Elements</h1>
+        <ul class = "list-group">
+        {% for element in elements | sort(attribute = "Name") %}
+            <li class = "list-group-item"><a href = "{{ url_for("elements.dashboard", elementId = element.ElementId) }}">{{ element.Name }}</a></li>                
+        {% endfor %}
+        </ul>
+    {% elif sites %}
+        <h1>Sites</h1>
+        <ul class = "list-group">
+        {% for site in sites | sort(attribute = "Name") %}
+            <li class = "list-group-item"><a href = "{{ url_for("elements.selectElement", className = site.__class__.__name__, id = site.SiteId) }}">
+                {{ site.Name }}</a></li>                
+        {% endfor %}
+        </ul>
+    {% endif %}
+</div>
 {% endblock %}

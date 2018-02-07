@@ -256,7 +256,7 @@ def addElementAttributeValue(elementId, tagId):
 		db.session.add(tagValue)
 		db.session.commit()
 		flash("You have successfully added a new element attribute value.")
-		return redirect(url_for("elementAttributes.listElementAttributeValues", elementId = elementId))
+		return redirect(url_for("elements.dashboard", elementId = elementId))
 
 	# Present a form to add a new element attribute value.
 	form.tagId.data = tag.TagId
@@ -270,7 +270,7 @@ def deleteElementAttributeValue(elementId, tagValueId):
 	db.session.delete(tagValue)
 	db.session.commit()
 	flash("You have successfully deleted the element attribute value.")
-	return redirect(url_for("elementAttributes.listElementAttributeValues", elementId = elementId))
+	return redirect(url_for("elements.dashboard", elementId = elementId))
 
 @elementAttributes.route("/elementAttributes/editValue/<int:elementId>/<int:tagValueId>", methods = ["GET", "POST"])
 # @login_required
@@ -302,7 +302,7 @@ def editElementAttributeValue(elementId, tagValueId):
 
 		db.session.commit()
 		flash("You have successfully edited the element attribute value.")
-		return redirect(url_for("elementAttributes.listElementAttributeValues", elementId = elementId))
+		return redirect(url_for("elements.dashboard", elementId = elementId))
 
 	# Present a form to edit an existing element attribute value.
 	form.tagId.data = tagValue.TagId
