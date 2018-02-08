@@ -25,6 +25,7 @@ Event Frame Templates
     <table class = "table">
         <thead>
             <tr>
+                <th></th>
                 {% if parentEventFrameTemplate == None %}
                     <th>Element Template</th>
                 {% endif %}
@@ -35,12 +36,14 @@ Event Frame Templates
                 <th>Description</th>
                 <th></th>
                 <th></th>
-                <th></th>
             </tr>
         </thead>
         <tbody>
             {% for eventFrameTemplate in eventFrameTemplates %}
             <tr>
+                <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Children"
+                    href = "{{ url_for("eventFrameTemplates.listEventFrameTemplates",
+                    parentEventFrameTemplateId = eventFrameTemplate.EventFrameTemplateId) }}"><span class="glyphicon glyphicon-list"></span></a></td>
                 {% if parentEventFrameTemplate == None %}
                     <td>{{ eventFrameTemplate.ElementTemplate.Site.Enterprise.Abbreviation + "_" + eventFrameTemplate.ElementTemplate.Site.Abbreviation + "_" +
                         eventFrameTemplate.ElementTemplate.Name }}</td>
@@ -50,9 +53,6 @@ Event Frame Templates
                     <td>{{ eventFrameTemplate.Order }}</td>
                 {% endif %}
                 <td>{{ eventFrameTemplate.Description }}</td>
-                <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Children"
-                    href = "{{ url_for("eventFrameTemplates.listEventFrameTemplates",
-                    parentEventFrameTemplateId = eventFrameTemplate.EventFrameTemplateId) }}"><span class="glyphicon glyphicon-list"></span></a></td>
                 <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Edit" href = "{{ url_for("eventFrameTemplates.editEventFrameTemplate",
                     eventFrameTemplateId = eventFrameTemplate.EventFrameTemplateId) }}"><span class="glyphicon glyphicon-edit"></a></td>
                 <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Delete" href = "{{ url_for("eventFrameTemplates.deleteEventFrameTemplate",

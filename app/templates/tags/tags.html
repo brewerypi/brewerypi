@@ -16,6 +16,7 @@ Tags
     <table class = "table">
         <thead>
             <tr>
+                <th></th>
                 <th><a href = "{{ url_for("tags.listTags") }}">Area</a></th>
                 <th><a href = "{{ url_for("tags.listTags", sortColumn = "Tag.Name") }}">Name</a></th>
                 <th><a href = "{{ url_for("tags.listTags", sortColumn = "Tag.Description") }}">Description</a></th>
@@ -23,12 +24,13 @@ Tags
                 <th><a href = "{{ url_for("tags.listTags", sortColumn = "Lookup.Name") }}">Lookup</a></th>
                 <th></th>
                 <th></th>
-                <th></th>
             </tr>
         </thead>
         <tbody>
             {% for tag in tags %}
             <tr>
+                <td><a class = "btn btn-default" title = "List Values" href = "{{ url_for("tagValues.listTagValues", tagId = tag.TagId, 
+                    lookupId = tag.LookupId) }}"><span class="glyphicon glyphicon-list"></span></a></td>
                 <td>{{ tag.Area.Site.Enterprise.Abbreviation + "_" + tag.Area.Site.Abbreviation + "_" + tag.Area.Abbreviation }}</td>
                 <td>{{ tag.Name }}</td>
                 <td>{{ tag.Description }}</td>
@@ -36,8 +38,6 @@ Tags
                 <td>{{ tag.Lookup.Name }}</td>
                 <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("tags.editTag", tagId = tag.TagId) }}">
                     <span class="glyphicon glyphicon-edit"></span></a></td>
-                <td><a class = "btn btn-default" title = "List Values" href = "{{ url_for("tagValues.listTagValues", tagId = tag.TagId, 
-                    lookupId = tag.LookupId) }}"><span class="glyphicon glyphicon-list"></span></a></td>
                 <td><a class = "btn btn-default" title = "Delete" href = "{{ url_for("tags.deleteTag", tagId = tag.TagId) }}">
                     <span class="glyphicon glyphicon-trash"></span></a></td>
             </tr>

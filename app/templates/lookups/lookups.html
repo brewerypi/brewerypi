@@ -11,9 +11,9 @@ Lookups
     <table class = "table">
         <thead>
             <tr>
+                <th></th>
                 <th><a href = "{{ url_for("lookups.listLookups") }}">Enterprise</a></th>
                 <th><a href = "{{ url_for("lookups.listLookups", sortColumn = "Lookup.Name") }}">Name</a></th>
-                <th></th>
                 <th></th>
                 <th></th>
             </tr>
@@ -21,12 +21,12 @@ Lookups
         <tbody>
             {% for lookup in lookups %}
             <tr>
+                <td><a class = "btn btn-default" title = "List Values" href = "{{ url_for("lookupValues.listLookupValues", lookupId = lookup.LookupId) }}">
+                    <span class="glyphicon glyphicon-list"></span></a></td>
                 <td>{{ lookup.Enterprise.Abbreviation }}</td>
                 <td>{{ lookup.Name }}</td>
                 <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("lookups.editLookup", lookupId = lookup.LookupId) }}">
                     <span class="glyphicon glyphicon-edit"></span></a></td>
-                <td><a class = "btn btn-default" title = "List Values" href = "{{ url_for("lookupValues.listLookupValues", lookupId = lookup.LookupId) }}">
-                    <span class="glyphicon glyphicon-list"></span></a></td>
                 <td><a class = "btn btn-default" title = "Delete" href = "{{ url_for("lookups.deleteLookup", lookupId = lookup.LookupId) }}">
                     <span class="glyphicon glyphicon-trash"></span></a></td>
             </tr>
