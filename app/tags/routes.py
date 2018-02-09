@@ -105,7 +105,7 @@ def editTag(tagId):
 @tags.route("/tags/export")
 def exportTags():
 	tags = Tag.query.outerjoin(Lookup).join(Area, Site, Enterprise).order_by(Enterprise.Abbreviation, Site.Abbreviation, Area.Abbreviation, Tag.Name)
-	with open(os.path.join(current_app.config["EXPORT_FOLDER"], current_app.config["EXPORT_TAGS_FILENAME"]), "w") as tagsFile:
+	with open(os.path.join(current_app.config["EXPORT_FOLDER"], current_app.config["EXPORT_TAGS_FILENAME"]), "w", encoding = "latin-1") as tagsFile:
 		fieldnames = ["Selected", "Tag Id", "Enterprise", "Site", "Area", "Tag Name", "Tag Description", "Lookup", "Unit"]
 		tagsWriter = csv.DictWriter(tagsFile, fieldnames = fieldnames, lineterminator = "\n")
 		tagsWriter.writeheader()
@@ -137,7 +137,7 @@ def importTags():
 		tagsFile.close()
 
 		# Open the uploaded file.
-		with open(os.path.join(current_app.config["IMPORT_FOLDER"], current_app.config["IMPORT_TAGS_FILENAME"]), "r") as tagsFile:
+		with open(os.path.join(current_app.config["IMPORT_FOLDER"], current_app.config["IMPORT_TAGS_FILENAME"]), "r", encoding = "latin-1") as tagsFile:
 			tagsReader = csv.DictReader(tagsFile, delimiter = ",")
 
 			# Make sure that the header is well formed.
