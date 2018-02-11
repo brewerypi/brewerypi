@@ -16,11 +16,14 @@ def listEventFrameTemplates(parentEventFrameTemplateId = None):
 	if parentEventFrameTemplateId:
 		parentEventFrameTemplate = EventFrameTemplate.query.get_or_404(parentEventFrameTemplateId)
 
-	eventFrameTemplates = EventFrameTemplate.query.outerjoin(ElementTemplate, Site, Enterprise). \
+	page = request.args.get("page", 1, type = int)
+	pagination = EventFrameTemplate.query.outerjoin(ElementTemplate, Site, Enterprise). \
 		filter(EventFrameTemplate.ParentEventFrameTemplateId == parentEventFrameTemplateId). \
-		order_by(Enterprise.Abbreviation, Site.Abbreviation, ElementTemplate.Name, EventFrameTemplate.Order, EventFrameTemplate.Name)
+		order_by(Enterprise.Abbreviation, Site.Abbreviation, ElementTemplate.Name, EventFrameTemplate.Order, EventFrameTemplate.Name). \
+		paginate(page, per_page = 10, error_out = False)
+	eventFrameTemplates = pagination.items
 	return render_template("eventFrameTemplates/eventFrameTemplates.html", eventFrameTemplates = eventFrameTemplates,
-		parentEventFrameTemplate = parentEventFrameTemplate)
+		pagination = pagination, parentEventFrameTemplate = parentEventFrameTemplate)
 
 @eventFrameTemplates.route("/eventFrameTemplates/add", methods = ["GET", "POST"])
 @eventFrameTemplates.route("/eventFrameTemplates/add/<int:parentEventFrameTemplateId>", methods = ["GET", "POST"])

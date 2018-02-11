@@ -1,5 +1,7 @@
 {% extends "base.html" %}
 
+{% import "_macros.html" as macros %}
+
 {% block title %}
 Event Frame Templates
 {% endblock %}
@@ -62,4 +64,9 @@ Event Frame Templates
         </tbody>
     </table>
 </div>
+{% if pagination %}
+<div class = "text-right">
+    {{ macros.pagination_widget(pagination, ".listEventFrameTemplates") }}
+</div>
+{% endif %}
 {% endblock %}
