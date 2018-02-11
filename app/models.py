@@ -226,6 +226,9 @@ class LookupValue(db.Model):
 	def __repr__(self):
 		return "<LookupValue: {}>".format(self.Name)
 
+	def isReferenced(self):
+		return TagValue.query.join(Tag).filter(TagValue.Value == self.Value, Tag.LookupId == self.LookupId).count() > 0
+
 class Site(db.Model):
 	__tablename__ = "Site"
 	__table_args__ = \
