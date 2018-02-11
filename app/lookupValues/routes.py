@@ -50,9 +50,12 @@ def addLookupValue(lookupId):
 def deleteLookupValue(lookupValueId):
 	# check_admin()
 	lookupValue = LookupValue.query.get_or_404(lookupValueId)
-	db.session.delete(lookupValue)
-	db.session.commit()
-	flash("You have successfully deleted the lookup value \"" + lookupValue.Name + "\".")
+	if lookupValue.isReferenced():
+		flash("Lookup value \"" + lookupValue.Name + "\" is referenced by one or more tag values and cannot be deleted.")
+	else:
+		db.session.delete(lookupValue)
+		db.session.commit()
+		flash("You have successfully deleted the lookup value \"" + lookupValue.Name + "\".")
 	return redirect(url_for("lookupValues.listLookupValues", lookupId = lookupValue.LookupId))
 
 @lookupValues.route("/lookupValues/edit/<int:lookupValueId>", methods = ["GET", "POST"])
