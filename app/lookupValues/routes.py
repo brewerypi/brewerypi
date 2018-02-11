@@ -37,7 +37,7 @@ def addLookupValue(lookupId):
 		lookupValue = LookupValue(LookupId = form.lookupId.data, Name = form.name.data, Selectable = form.selectable.data, Value = form.value.data)
 		db.session.add(lookupValue)
 		db.session.commit()
-		flash("You have successfully added the new lookup value \"" + lookupValue.Name + "\".")
+		flash("You have successfully added the new lookup value \"" + lookupValue.Name + "\".", "alert alert-success")
 		return redirect(url_for("lookupValues.listLookupValues", lookupId = lookupId))
 
 	# Present a form to add a new lookupValue.
@@ -74,7 +74,7 @@ def editLookupValue(lookupValueId):
 		lookupValue.Selectable = form.selectable.data
 		lookupValue.Value = form.value.data
 		db.session.commit()
-		flash("You have successfully edited the lookup value \"" + lookupValue.Name + "\".")
+		flash("You have successfully edited the lookup value \"" + lookupValue.Name + "\".", "alert alert-success")
 		return redirect(url_for("lookupValues.listLookupValues", lookupId = lookupValue.LookupId))
 
 	# Present a form to edit an existing lookupValue.

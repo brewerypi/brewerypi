@@ -44,7 +44,7 @@ def deleteEventFrame(eventFrameId):
 	eventFrameTemplateName = eventFrame.EventFrameTemplate.Name
 	db.session.delete(eventFrame)
 	db.session.commit()
-	flash("You have successfully deleted a \"" + eventFrameTemplateName + "\" from element \"" + elementName + "\".")
+	flash("You have successfully deleted a \"" + eventFrameTemplateName + "\" from element \"" + elementName + "\".", "alert alert-success")
 	return redirect(url_for("elements.dashboard", elementId = elementId))
 
 @elements.route("/elements/add", methods = ["GET", "POST"])
@@ -59,7 +59,7 @@ def addElement():
 		element = Element(Description = form.description.data, ElementTemplate = form.elementTemplate.data, Name = form.name.data)
 		db.session.add(element)
 		db.session.commit()
-		flash("You have successfully added the new element \"" + element.Name + "\".")
+		flash("You have successfully added the new element \"" + element.Name + "\".", "alert alert-success")
 		return redirect(url_for("elements.listElements"))
 
 	# Present a form to add a new element.
@@ -72,7 +72,7 @@ def deleteElement(elementId):
 	element = Element.query.get_or_404(elementId)
 	db.session.delete(element)
 	db.session.commit()
-	flash("You have successfully deleted the element \"" + element.Name + "\".")
+	flash("You have successfully deleted the element \"" + element.Name + "\".", "alert alert-success")
 	return redirect(url_for("elements.listElements"))
 
 @elements.route("/elements/edit/<int:elementId>", methods = ["GET", "POST"])
@@ -90,7 +90,7 @@ def editElement(elementId):
 		element.Name = form.name.data
 
 		db.session.commit()
-		flash("You have successfully edited the element \"" + element.Name + "\".")
+		flash("You have successfully edited the element \"" + element.Name + "\".", "alert alert-success")
 		return redirect(url_for("elements.listElements"))
 
 	# Present a form to edit an existing element.

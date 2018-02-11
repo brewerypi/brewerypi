@@ -44,7 +44,7 @@ def addTag(lookup = False):
 
 		db.session.add(tag)
 		db.session.commit()
-		flash("You have successfully added the new tag \"" + tag.Name + "\".")
+		flash("You have successfully added the new tag \"" + tag.Name + "\".", "alert alert-success")
 		return redirect(url_for("tags.listTags"))
 
 	# Present a form to add a new tag.
@@ -57,7 +57,7 @@ def deleteTag(tagId):
 	tag = Tag.query.get_or_404(tagId)
 	db.session.delete(tag)
 	db.session.commit()
-	flash("You have successfully deleted the tag \"" + tag.Name + "\".")
+	flash("You have successfully deleted the tag \"" + tag.Name + "\".", "alert alert-success")
 	return redirect(url_for("tags.listTags"))
 
 @tags.route("/tags/edit/<int:tagId>", methods = ["GET", "POST"])
@@ -87,7 +87,7 @@ def editTag(tagId):
 			tag.UnitOfMeasurement = form.unitOfMeasurement.data
 
 		db.session.commit()
-		flash("You have successfully edited the tag \"" + tag.Name + "\".")
+		flash("You have successfully edited the tag \"" + tag.Name + "\".", "alert alert-success")
 		return redirect(url_for("tags.listTags"))
 
 	# Present a form to edit an existing tag.

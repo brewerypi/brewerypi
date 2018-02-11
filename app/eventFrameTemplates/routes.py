@@ -49,10 +49,10 @@ def addEventFrameTemplate(parentEventFrameTemplateId = None):
 
 		if parentEventFrameTemplateId:
 			flash("You have successfully added the event frame template \"" + eventFrameTemplate.Name + "\" to \"" +
-				eventFrameTemplate.ParentEventFrameTemplate.Name + "\".")
+				eventFrameTemplate.ParentEventFrameTemplate.Name + "\".", "alert alert-success")
 		else:
 			flash("You have successfully added the event frame template \"" + eventFrameTemplate.Name + "\" to \"" +
-				eventFrameTemplate.ElementTemplate.Name + "\".")
+				eventFrameTemplate.ElementTemplate.Name + "\".", "alert alert-success")
 			
 		return redirect(url_for("eventFrameTemplates.listEventFrameTemplates", parentEventFrameTemplateId = parentEventFrameTemplateId))
 
@@ -75,7 +75,7 @@ def deleteEventFrameTemplate(eventFrameTemplateId):
 	# check_admin()
 	eventFrameTemplate = EventFrameTemplate.query.get_or_404(eventFrameTemplateId)
 	if eventFrameTemplate.hasDescendants():
-		flash("This event frame contains one or more child event frame templates and cannot be deleted.")
+		flash("This event frame contains one or more child event frame templates and cannot be deleted.", "alert alert-danger")
 		return redirect(request.referrer)
 
 	if eventFrameTemplate.ParentEventFrameTemplateId:
@@ -88,9 +88,10 @@ def deleteEventFrameTemplate(eventFrameTemplateId):
 
 	if eventFrameTemplate.ParentEventFrameTemplateId:
 		flash("You have successfully deleted the event frame template \"" + eventFrameTemplate.Name + "\" from \"" +
-			parentEventFrameTemplate.Name + "\".")
+			parentEventFrameTemplate.Name + "\".", "alert alert-success")
 	else:
-		flash("You have successfully deleted the event frame template \"" + eventFrameTemplate.Name + "\" from \"" + elementTemplate.Name + "\".")
+		flash("You have successfully deleted the event frame template \"" + eventFrameTemplate.Name + "\" from \"" + elementTemplate.Name + "\".",
+			"alert alert-success")
 
 	return redirect(url_for("eventFrameTemplates.listEventFrameTemplates", parentEventFrameTemplateId = eventFrameTemplate.ParentEventFrameTemplateId))
 
@@ -124,10 +125,10 @@ def editEventFrameTemplate(eventFrameTemplateId):
 
 		if eventFrameTemplate.ParentEventFrameTemplateId:
 			flash("You have successfully edited the event frame template \"" + eventFrameTemplate.Name + "\" for \"" +
-				eventFrameTemplate.ParentEventFrameTemplate.Name + "\".")
+				eventFrameTemplate.ParentEventFrameTemplate.Name + "\".", "alert alert-success")
 		else:
 			flash("You have successfully edited the event frame template \"" + eventFrameTemplate.Name + "\" for \"" +
-				eventFrameTemplate.ElementTemplate.Name + "\".")
+				eventFrameTemplate.ElementTemplate.Name + "\".", "alert alert-success")
 			
 		return redirect(url_for("eventFrameTemplates.listEventFrameTemplates", parentEventFrameTemplateId = eventFrameTemplate.ParentEventFrameTemplateId))
 
