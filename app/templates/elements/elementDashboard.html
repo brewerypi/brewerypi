@@ -9,6 +9,7 @@
 {% block page_content %}
 <div>
     <ol class="breadcrumb">
+        <li><a href = "{{ url_for("elements.selectElement", className = "root", id = None) }}">..</a></li>
         <li><a href = "{{ url_for("elements.selectElement", className = element.ElementTemplate.Site.Enterprise.__class__.__name__,
             id = element.ElementTemplate.Site.Enterprise.EnterpriseId) }}">{{ element.ElementTemplate.Site.Enterprise.Name }}</a></li>
         <li><a href = "{{ url_for("elements.selectElement", className = element.ElementTemplate.Site.__class__.__name__,
