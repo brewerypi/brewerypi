@@ -19,13 +19,16 @@
     </ol>
     <h1>{{ element.Name }}</h1>
     <h2>Event Frames</h2>
+    <h4>{{ strQuery }}</h4>
     <table class = "table">
         <thead>
             <tr>
                 <th></th>
-                <th>Event Frame</th>
-                <th>Last Start Timestamp</th>
-                <th>Last End Timestamp</th>
+                <th><a href = "{{ url_for("elements.dashboard", elementId = element.ElementId) }}">Event Frame</a></th>
+                <th><a href = "{{ url_for("elements.dashboard", elementId = element.ElementId, sortColumn = "EventFrame.StartTimestamp desc") }}">
+                    Last Start Timestamp</a></th>
+                <th><a href = "{{ url_for("elements.dashboard", elementId = element.ElementId, sortColumn = "EventFrame.EndTimestamp desc") }}">
+                    Last End Timestamp</a></th>
                 <th></th>
                 <th></th>
                 <th></th>

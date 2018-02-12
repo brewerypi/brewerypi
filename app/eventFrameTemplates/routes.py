@@ -1,4 +1,5 @@
 from flask import flash, redirect, render_template, request, url_for
+from sqlalchemy import text
 from sqlalchemy.orm import aliased
 from . import eventFrameTemplates
 from . forms import EventFrameTemplateForm
@@ -9,16 +10,19 @@ modelName = "Event Frame Templates"
 
 @eventFrameTemplates.route("/eventFrameTemplates", methods = ["GET", "POST"])
 @eventFrameTemplates.route("/eventFrameTemplates/<int:parentEventFrameTemplateId>", methods = ["GET", "POST"])
+@eventFrameTemplates.route("/eventFrameTemplates/<string:sortColumn>", methods = ["GET", "POST"])
+@eventFrameTemplates.route("/eventFrameTemplates/<int:parentEventFrameTemplateId>/<string:sortColumn>", methods = ["GET", "POST"])
 # @login_required
-def listEventFrameTemplates(parentEventFrameTemplateId = None):
+def listEventFrameTemplates(parentEventFrameTemplateId = None, sortColumn = ""):
 	# check_admin()
 	parentEventFrameTemplate = None
 	if parentEventFrameTemplateId:
 		parentEventFrameTemplate = EventFrameTemplate.query.get_or_404(parentEventFrameTemplateId)
-
+	if sortColumn != "":
+		sortColumn = sortColumn + ", "
 	eventFrameTemplates = EventFrameTemplate.query.outerjoin(ElementTemplate, Site, Enterprise). \
 		filter(EventFrameTemplate.ParentEventFrameTemplateId == parentEventFrameTemplateId). \
-		order_by(Enterprise.Abbreviation, Site.Abbreviation, ElementTemplate.Name, EventFrameTemplate.Order, EventFrameTemplate.Name)
+		order_by(text(sortColumn + "Enterprise.Abbreviation, Site.Abbreviation, ElementTemplate.Name, EventFrameTemplate.Order, EventFrameTemplate.Name"))
 	return render_template("eventFrameTemplates/eventFrameTemplates.html", eventFrameTemplates = eventFrameTemplates,
 		parentEventFrameTemplate = parentEventFrameTemplate)
 
