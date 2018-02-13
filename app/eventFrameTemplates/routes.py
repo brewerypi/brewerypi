@@ -20,11 +20,14 @@ def listEventFrameTemplates(parentEventFrameTemplateId = None, sortColumn = ""):
 		parentEventFrameTemplate = EventFrameTemplate.query.get_or_404(parentEventFrameTemplateId)
 	if sortColumn != "":
 		sortColumn = sortColumn + ", "
-	eventFrameTemplates = EventFrameTemplate.query.outerjoin(ElementTemplate, Site, Enterprise). \
+	page = request.args.get("page", 1, type = int)
+	pagination = EventFrameTemplate.query.outerjoin(ElementTemplate, Site, Enterprise). \
 		filter(EventFrameTemplate.ParentEventFrameTemplateId == parentEventFrameTemplateId). \
-		order_by(text(sortColumn + "Enterprise.Abbreviation, Site.Abbreviation, ElementTemplate.Name, EventFrameTemplate.Order, EventFrameTemplate.Name"))
+		order_by(text(sortColumn + "Enterprise.Abbreviation, Site.Abbreviation, ElementTemplate.Name, EventFrameTemplate.Order, EventFrameTemplate.Name")). \
+		paginate(page, per_page = 10, error_out = False)
+	eventFrameTemplates = pagination.items
 	return render_template("eventFrameTemplates/eventFrameTemplates.html", eventFrameTemplates = eventFrameTemplates,
-		parentEventFrameTemplate = parentEventFrameTemplate)
+		pagination = pagination, parentEventFrameTemplate = parentEventFrameTemplate)
 
 @eventFrameTemplates.route("/eventFrameTemplates/add", methods = ["GET", "POST"])
 @eventFrameTemplates.route("/eventFrameTemplates/add/<int:parentEventFrameTemplateId>", methods = ["GET", "POST"])
@@ -53,10 +56,10 @@ def addEventFrameTemplate(parentEventFrameTemplateId = None):
 
 		if parentEventFrameTemplateId:
 			flash("You have successfully added the event frame template \"" + eventFrameTemplate.Name + "\" to \"" +
-				eventFrameTemplate.ParentEventFrameTemplate.Name + "\".")
+				eventFrameTemplate.ParentEventFrameTemplate.Name + "\".", "alert alert-success")
 		else:
 			flash("You have successfully added the event frame template \"" + eventFrameTemplate.Name + "\" to \"" +
-				eventFrameTemplate.ElementTemplate.Name + "\".")
+				eventFrameTemplate.ElementTemplate.Name + "\".", "alert alert-success")
 			
 		return redirect(url_for("eventFrameTemplates.listEventFrameTemplates", parentEventFrameTemplateId = parentEventFrameTemplateId))
 
@@ -79,7 +82,7 @@ def deleteEventFrameTemplate(eventFrameTemplateId):
 	# check_admin()
 	eventFrameTemplate = EventFrameTemplate.query.get_or_404(eventFrameTemplateId)
 	if eventFrameTemplate.hasDescendants():
-		flash("This event frame contains one or more child event frame templates and cannot be deleted.")
+		flash("This event frame contains one or more child event frame templates and cannot be deleted.", "alert alert-danger")
 		return redirect(request.referrer)
 
 	if eventFrameTemplate.ParentEventFrameTemplateId:
@@ -92,9 +95,10 @@ def deleteEventFrameTemplate(eventFrameTemplateId):
 
 	if eventFrameTemplate.ParentEventFrameTemplateId:
 		flash("You have successfully deleted the event frame template \"" + eventFrameTemplate.Name + "\" from \"" +
-			parentEventFrameTemplate.Name + "\".")
+			parentEventFrameTemplate.Name + "\".", "alert alert-success")
 	else:
-		flash("You have successfully deleted the event frame template \"" + eventFrameTemplate.Name + "\" from \"" + elementTemplate.Name + "\".")
+		flash("You have successfully deleted the event frame template \"" + eventFrameTemplate.Name + "\" from \"" + elementTemplate.Name + "\".",
+			"alert alert-success")
 
 	return redirect(url_for("eventFrameTemplates.listEventFrameTemplates", parentEventFrameTemplateId = eventFrameTemplate.ParentEventFrameTemplateId))
 
@@ -128,10 +132,10 @@ def editEventFrameTemplate(eventFrameTemplateId):
 
 		if eventFrameTemplate.ParentEventFrameTemplateId:
 			flash("You have successfully edited the event frame template \"" + eventFrameTemplate.Name + "\" for \"" +
-				eventFrameTemplate.ParentEventFrameTemplate.Name + "\".")
+				eventFrameTemplate.ParentEventFrameTemplate.Name + "\".", "alert alert-success")
 		else:
 			flash("You have successfully edited the event frame template \"" + eventFrameTemplate.Name + "\" for \"" +
-				eventFrameTemplate.ElementTemplate.Name + "\".")
+				eventFrameTemplate.ElementTemplate.Name + "\".", "alert alert-success")
 			
 		return redirect(url_for("eventFrameTemplates.listEventFrameTemplates", parentEventFrameTemplateId = eventFrameTemplate.ParentEventFrameTemplateId))
 

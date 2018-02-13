@@ -50,7 +50,7 @@ def addTagValue(tagId):
 
 		db.session.add(tagValue)
 		db.session.commit()
-		flash("You have successfully added a new tag value.")
+		flash("You have successfully added a new tag value.", "alert alert-success")
 		return redirect(url_for("tagValues.listTagValues", tagId = tag.TagId))
 
 	# Present a form to add a new tag value.
@@ -64,7 +64,7 @@ def deleteTagValue(tagValueId):
 	tagValue = TagValue.query.get_or_404(tagValueId)
 	db.session.delete(tagValue)
 	db.session.commit()
-	flash("You have successfully deleted the tag value.")
+	flash("You have successfully deleted the tag value.", "alert alert-success")
 	return redirect(url_for("tagValues.listTagValues", tagId = tagValue.TagId))
 
 @tagValues.route("/tagValues/edit/<int:tagValueId>", methods = ["GET", "POST"])
@@ -95,7 +95,7 @@ def editTagValue(tagValueId):
 			tagValue.Value = form.value.data
 
 		db.session.commit()
-		flash("You have successfully edited the tag value.")
+		flash("You have successfully edited the tag value.", "alert alert-success")
 		return redirect(url_for("tagValues.listTagValues", tagId = tagValue.TagId))
 
 	# Present a form to edit an existing tagValue.

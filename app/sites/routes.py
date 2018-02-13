@@ -29,7 +29,7 @@ def addSite():
 		site = Site(Abbreviation = form.abbreviation.data, Description = form.description.data, Enterprise = form.enterprise.data, Name = form.name.data)
 		db.session.add(site)
 		db.session.commit()
-		flash("You have successfully added the new site \"" + site.Name + "\".")
+		flash("You have successfully added the new site \"" + site.Name + "\".", "alert alert-success")
 		return redirect(url_for("sites.listSites"))
 
 	# Present a form to add a new site.
@@ -42,7 +42,7 @@ def deleteSite(siteId):
 	site = Site.query.get_or_404(siteId)
 	db.session.delete(site)
 	db.session.commit()
-	flash("You have successfully deleted the site \"" + site.Name + "\".")
+	flash("You have successfully deleted the site \"" + site.Name + "\".", "alert alert-success")
 	return redirect(url_for("sites.listSites"))
 
 @sites.route("/sites/edit/<int:siteId>", methods = ["GET", "POST"])
@@ -60,7 +60,7 @@ def editSite(siteId):
 		site.Enterprise = form.enterprise.data
 		site.Name = form.name.data
 		db.session.commit()
-		flash("You have successfully edited the site \"" + site.Name + "\".")
+		flash("You have successfully edited the site \"" + site.Name + "\".", "alert alert-success")
 		return redirect(url_for("sites.listSites"))
 
 	# Present a form to edit an existing site.

@@ -37,7 +37,7 @@ def addLookupValue(lookupId):
 		lookupValue = LookupValue(LookupId = form.lookupId.data, Name = form.name.data, Selectable = form.selectable.data, Value = form.value.data)
 		db.session.add(lookupValue)
 		db.session.commit()
-		flash("You have successfully added the new lookup value \"" + lookupValue.Name + "\".")
+		flash("You have successfully added the new lookup value \"" + lookupValue.Name + "\".", "alert alert-success")
 		return redirect(url_for("lookupValues.listLookupValues", lookupId = lookupId))
 
 	# Present a form to add a new lookupValue.
@@ -50,9 +50,12 @@ def addLookupValue(lookupId):
 def deleteLookupValue(lookupValueId):
 	# check_admin()
 	lookupValue = LookupValue.query.get_or_404(lookupValueId)
-	db.session.delete(lookupValue)
-	db.session.commit()
-	flash("You have successfully deleted the lookup value \"" + lookupValue.Name + "\".")
+	if lookupValue.isReferenced():
+		flash("Lookup value \"" + lookupValue.Name + "\" is referenced by one or more tag values and cannot be deleted.", "alert alert-danger")
+	else:
+		db.session.delete(lookupValue)
+		db.session.commit()
+		flash("You have successfully deleted the lookup value \"" + lookupValue.Name + "\".", "alert alert-success")
 	return redirect(url_for("lookupValues.listLookupValues", lookupId = lookupValue.LookupId))
 
 @lookupValues.route("/lookupValues/edit/<int:lookupValueId>", methods = ["GET", "POST"])
@@ -71,7 +74,7 @@ def editLookupValue(lookupValueId):
 		lookupValue.Selectable = form.selectable.data
 		lookupValue.Value = form.value.data
 		db.session.commit()
-		flash("You have successfully edited the lookup value \"" + lookupValue.Name + "\".")
+		flash("You have successfully edited the lookup value \"" + lookupValue.Name + "\".", "alert alert-success")
 		return redirect(url_for("lookupValues.listLookupValues", lookupId = lookupValue.LookupId))
 
 	# Present a form to edit an existing lookupValue.

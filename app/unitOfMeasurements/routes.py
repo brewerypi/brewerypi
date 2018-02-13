@@ -33,7 +33,7 @@ def addUnitOfMeasurement():
 		unitOfMeasurement = UnitOfMeasurement(Abbreviation = form.abbreviation.data, Name = form.name.data)
 		db.session.add(unitOfMeasurement)
 		db.session.commit()
-		flash("You have successfully added the new unit of measurement \"" + unitOfMeasurement.Abbreviation + "\".")
+		flash("You have successfully added the new unit of measurement \"" + unitOfMeasurement.Abbreviation + "\".", "alert alert-success")
 
 		return redirect(url_for("unitOfMeasurements.listUnitOfMeasurements"))
 
@@ -48,7 +48,7 @@ def deleteUnitOfMeasurement(unitOfMeasurementId):
 	unitOfMeasurement = UnitOfMeasurement.query.get_or_404(unitOfMeasurementId)
 	db.session.delete(unitOfMeasurement)
 	db.session.commit()
-	flash("You have successfully deleted the unit of measurement \"" + unitOfMeasurement.Abbreviation + "\".")
+	flash("You have successfully deleted the unit of measurement \"" + unitOfMeasurement.Abbreviation + "\".", "alert alert-success")
 
 	return redirect(url_for("unitOfMeasurements.listUnitOfMeasurements"))
 
@@ -68,7 +68,7 @@ def editUnitOfMeasurement(unitOfMeasurementId):
 
 		db.session.commit()
 
-		flash("You have successfully edited the unit of measurement \"" + unitOfMeasurement.Abbreviation + "\".")
+		flash("You have successfully edited the unit of measurement \"" + unitOfMeasurement.Abbreviation + "\".", "alert alert-success")
 
 		return redirect(url_for("unitOfMeasurements.listUnitOfMeasurements"))
 

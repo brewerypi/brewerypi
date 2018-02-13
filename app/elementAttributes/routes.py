@@ -33,7 +33,8 @@ def addElementAttribute():
 		elementAttribute = ElementAttribute(AttributeTemplate = form.attributeTemplate.data, Element = form.element.data, Tag = form.tag.data)
 		db.session.add(elementAttribute)
 		db.session.commit()
-		flash("You have successfully added the element attribute \"" + form.attributeTemplate.data.Name + "\" for \"" + form.element.data.Name + "\".")
+		flash("You have successfully added the element attribute \"" + form.attributeTemplate.data.Name + "\" for \"" + form.element.data.Name + "\".",
+			"alert alert-success")
 		return redirect(url_for("elementAttributes.listElementAttributes"))
 
 	# Present a form to add a new element attribute.
@@ -48,7 +49,7 @@ def deleteElementAttribute(elementAttributeId):
 	elementName = elementAttribute.Element.Name
 	db.session.delete(elementAttribute)
 	db.session.commit()
-	flash("You have successfully deleted the element attribute \"" + attributeTemplateName + "\" for \"" + elementName + "\".")
+	flash("You have successfully deleted the element attribute \"" + attributeTemplateName + "\" for \"" + elementName + "\".", "alert alert-success")
 	return redirect(url_for("elementAttributes.listElementAttributes"))
 
 @elementAttributes.route("/elementAttributes/edit/<int:elementAttributeId>", methods = ["GET", "POST"])
@@ -67,7 +68,7 @@ def editElementAttribute(elementAttributeId):
 		elementAttribute.Tag = form.tag.data
 		db.session.commit()
 		flash("You have successfully edited the element attribute \"" + elementAttribute.AttributeTemplate.Name + "\" for \"" + \
-			elementAttribute.Element.Name + "\".")
+			elementAttribute.Element.Name + "\".", "alert alert-success")
 		return redirect(url_for("elementAttributes.listElementAttributes"))
 
 	# Present a form to edit an existing element attribute.
@@ -257,7 +258,7 @@ def addElementAttributeValue(elementId, tagId):
 
 		db.session.add(tagValue)
 		db.session.commit()
-		flash("You have successfully added a new element attribute value.")
+		flash("You have successfully added a new element attribute value.", "alert alert-success")
 		return redirect(url_for("elements.dashboard", elementId = elementId))
 
 	# Present a form to add a new element attribute value.
@@ -271,7 +272,7 @@ def deleteElementAttributeValue(elementId, tagValueId):
 	tagValue = TagValue.query.get_or_404(tagValueId)
 	db.session.delete(tagValue)
 	db.session.commit()
-	flash("You have successfully deleted the element attribute value.")
+	flash("You have successfully deleted the element attribute value.", "alert alert-success")
 	return redirect(url_for("elements.dashboard", elementId = elementId))
 
 @elementAttributes.route("/elementAttributes/editValue/<int:elementId>/<int:tagValueId>", methods = ["GET", "POST"])
@@ -303,7 +304,7 @@ def editElementAttributeValue(elementId, tagValueId):
 			tagValue.Value = form.value.data
 
 		db.session.commit()
-		flash("You have successfully edited the element attribute value.")
+		flash("You have successfully edited the element attribute value.", "alert alert-success")
 		return redirect(url_for("elements.dashboard", elementId = elementId))
 
 	# Present a form to edit an existing element attribute value.

@@ -29,7 +29,7 @@ def addArea():
 		area = Area(Abbreviation = form.abbreviation.data, Description = form.description.data, Name = form.name.data, Site = form.site.data)
 		db.session.add(area)
 		db.session.commit()
-		flash("You have successfully added the new area \"" + area.Name + "\".")
+		flash("You have successfully added the new area \"" + area.Name + "\".", "alert alert-success")
 		return redirect(url_for("areas.listAreas"))
 
 	# Present a form to add a new area.
@@ -42,7 +42,7 @@ def deleteArea(areaId):
 	area = Area.query.get_or_404(areaId)
 	db.session.delete(area)
 	db.session.commit()
-	flash("You have successfully deleted the area \"" + area.Name + "\".")
+	flash("You have successfully deleted the area \"" + area.Name + "\".", "alert alert-success")
 	return redirect(url_for("areas.listAreas"))
 
 @areas.route("/areas/edit/<int:areaId>", methods = ["GET", "POST"])
@@ -60,7 +60,7 @@ def editArea(areaId):
 		area.Name = form.name.data
 		area.Site = form.site.data
 		db.session.commit()
-		flash("You have successfully edited the area \"" + area.Name + "\".")
+		flash("You have successfully edited the area \"" + area.Name + "\".", "alert alert-success")
 		return redirect(url_for("areas.listAreas"))
 
 	# Present a form to edit an existing area.
