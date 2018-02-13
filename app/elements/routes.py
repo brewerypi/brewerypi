@@ -20,10 +20,13 @@ def listElements(sortColumn = ""):
 	return render_template("elements/elements.html", elements = elements)
 
 @elements.route("/elements/dashboard/<int:elementId>", methods = ["GET", "POST"])
+@elements.route("/elements/dashboard/<int:elementId>/<string:sortColumn>", methods = ["GET", "POST"])
 # @login_required
-def dashboard(elementId):
+def dashboard(elementId, sortColumn = ""):
 	# check_admin()
 	element = Element.query.get_or_404(elementId)
+	if sortColumn != "":
+		sortColumn = sortColumn + ", "
 	elementAttributes = ElementAttribute.query. \
 		join(AttributeTemplate). \
 		filter(ElementAttribute.ElementId == elementId). \
@@ -32,7 +35,7 @@ def dashboard(elementId):
 		join(ElementTemplate, Element). \
 		outerjoin(EventFrame, and_(Element.ElementId == EventFrame.ElementId, EventFrameTemplate.EventFrameTemplateId == EventFrame.EventFrameTemplateId)). \
 		filter(Element.ElementId == elementId). \
-		order_by(EventFrameTemplate.Name)
+		order_by(text(sortColumn + "EventFrameTemplate.Name"))
 	return render_template("elements/elementDashboard.html", elementAttributes = elementAttributes, element = element,
 		eventFrameTemplates = eventFrameTemplates)
 

@@ -22,6 +22,7 @@ Event Frame Templates
             <li class = "active">Event Frame Templates</li>
         {% endif %}
     </ol>
+    <h1>Event Frame Templates</h1>
     <a class = "btn btn-default" data-toggle = "tooltip" title = "Add" href = "{{ url_for("eventFrameTemplates.addEventFrameTemplate",
         parentEventFrameTemplateId = parentEventFrameTemplateId) }}" role = "button"><span class="glyphicon glyphicon-plus"></span></a>
     <table class = "table">
@@ -29,13 +30,17 @@ Event Frame Templates
             <tr>
                 <th></th>
                 {% if parentEventFrameTemplate == None %}
-                    <th>Element Template</th>
+                    <th><a href = "{{ url_for("eventFrameTemplates.listEventFrameTemplates") }}">Element Template</a></th>
                 {% endif %}
-                <th>Name</th>
+                <th><a href = "{{ url_for("eventFrameTemplates.listEventFrameTemplates", parentEventFrameTemplateId = parentEventFrameTemplateId, 
+                    sortColumn = "EventFrameTemplate.Name") }}">Name</a></th>
                 {% if parentEventFrameTemplate %}
-                    <th>Order</th>
+                    <th><a href = "{{ url_for("eventFrameTemplates.listEventFrameTemplates", parentEventFrameTemplateId = parentEventFrameTemplateId, 
+                        sortColumn = "EventFrameTemplate.Order") }}">Order</a></th>
                 {% endif %}
-                <th>Description</th>
+                <th><a href = "{{ url_for("eventFrameTemplates.listEventFrameTemplates", parentEventFrameTemplateId = parentEventFrameTemplateId, 
+                    sortColumn = "EventFrameTemplate.Description") }}">Description
+                    </a></th>
                 <th></th>
                 <th></th>
             </tr>
