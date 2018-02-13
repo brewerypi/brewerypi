@@ -103,19 +103,25 @@ def editElement(elementId):
 	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
 
 @elements.route("/selectElement", methods = ["GET", "POST"])
-@elements.route("/selectElement/<path:className>/<int:id>", methods = ["GET", "POST"])
+@elements.route("/selectElement/<string:className>", methods = ["GET", "POST"])
+@elements.route("/selectElement/<string:className>/<int:id>", methods = ["GET", "POST"])
 # @login_required
 def selectElement(className = None, id = None):
 	# check_admin()
 	elements = None
 	elementTemplates = None
+	enterprises = None
 	site = None
 	sites = None
 
+	# Default case.
 	if className == None:
 		site = Site.query.join(Enterprise).order_by(Enterprise.Name, Site.Name).first()
 		if site:
 			className = site.__class__.__name__
+	# Top level case.
+	elif className == "root":
+		enterprises = Enterprise.query.all()
 	elif className == "Enterprise":
 		sites = Site.query.filter_by(EnterpriseId = id)
 		if sites:
@@ -132,5 +138,5 @@ def selectElement(className = None, id = None):
 		return redirect(url_for("elements.dashboard", elementId = id))
 
 	# Present navigation for elements.
-	return render_template("elements/selectElement.html", className = className, elements = elements, elementTemplates = elementTemplates, site = site,
-		sites = sites)
+	return render_template("elements/selectElement.html", className = className, elements = elements, elementTemplates = elementTemplates,
+		enterprises = enterprises, site = site, sites = sites)

@@ -10,22 +10,32 @@ Data Entry - Elements
 <div>
     <ol class="breadcrumb">
         {% if site %}
+            <li><a href = "{{ url_for("elements.selectElement", className = "root",
+                id = None) }}">..</a></li>
             <li><a href = "{{ url_for("elements.selectElement", className = site.Enterprise.__class__.__name__,
                 id = site.Enterprise.EnterpriseId) }}">{{ site.Enterprise.Name }}</a></li>
             <li class = "active">{{ site.Name }}</li>
         {% elif elementTemplates %}
+            <li><a href = "{{ url_for("elements.selectElement", className = "root",
+                id = None) }}">..</a></li>
             {% set firstElementTemplate = elementTemplates | first %}
             <li><a href = "{{ url_for("elements.selectElement", className = firstElementTemplate.Site.Enterprise.__class__.__name__,
                 id = firstElementTemplate.Site.Enterprise.EnterpriseId) }}">{{ firstElementTemplate.Site.Enterprise.Name }}</a></li>
             <li class = "active">{{ firstElementTemplate.Site.Name }}</li>
         {% elif elements %}
+            <li><a href = "{{ url_for("elements.selectElement", className = "root",
+                id = None) }}">..</a></li>
             {% set firstElement = elements | first %}
             <li><a href = "{{ url_for("elements.selectElement", className = firstElement.ElementTemplate.Site.Enterprise.__class__.__name__,
                 id = firstElement.ElementTemplate.Site.Enterprise.EnterpriseId) }}">{{ firstElement.ElementTemplate.Site.Enterprise.Name }}</a></li>
             <li><a href = "{{ url_for("elements.selectElement", className = firstElement.ElementTemplate.Site.__class__.__name__,
                 id = firstElement.ElementTemplate.Site.SiteId) }}">{{ firstElement.ElementTemplate.Site.Name }}</a></li>
             <li class = "active">{{ firstElement.ElementTemplate.Name }}</li>
+        {% elif enterprises %}
+            <li class = "active">..</li>
         {% elif sites %}
+            <li><a href = "{{ url_for("elements.selectElement", className = "root",
+                id = None) }}">..</a></li>
             {% set firstSite = sites | first %}
             <li><a href = "{{ url_for("elements.selectElement", className = firstSite.Enterprise.__class__.__name__,
                 id = firstSite.Enterprise.EnterpriseId) }}">{{ firstSite.Enterprise.Name }}</a></li>
@@ -55,6 +65,14 @@ Data Entry - Elements
         <ul class = "list-group">
         {% for element in elements | sort(attribute = "Name") %}
             <li class = "list-group-item"><a href = "{{ url_for("elements.dashboard", elementId = element.ElementId) }}">{{ element.Name }}</a></li>                
+        {% endfor %}
+        </ul>
+    {% elif enterprises %}
+        <h1>Enterprises</h1>
+        <ul class = "list-group">
+        {% for enterprise in enterprises | sort(attribute = "Name") %}
+            <li class = "list-group-item"><a href = "{{ url_for("elements.selectElement", className = enterprise.__class__.__name__,                
+                id = enterprise.EnterpriseId) }}">{{ enterprise.Name }}</a></li>                
         {% endfor %}
         </ul>
     {% elif sites %}

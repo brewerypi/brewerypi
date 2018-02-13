@@ -9,6 +9,7 @@ Event Frames
 {% block page_content %}
 <div>
     <ol class="breadcrumb">
+        <li><a href = "{{ url_for("elements.selectElement", className = "root", id = None) }}">..</a></li>
         <li><a href = "{{ url_for("elements.selectElement", className = element.ElementTemplate.Site.Enterprise.__class__.__name__,
             id = element.ElementTemplate.Site.Enterprise.EnterpriseId) }}">{{ element.ElementTemplate.Site.Enterprise.Name }}</a></li>
         <li><a href = "{{ url_for("elements.selectElement", className = element.ElementTemplate.Site.__class__.__name__,
@@ -29,23 +30,23 @@ Event Frames
                         <!-- Ancestor with no parent. -->
                         <!-- Top level event frame. -->
                         <li><a href = "{{ url_for("eventFrames.listEventFrames", elementId = element.ElementId,
-                            eventFrameTemplateId = ancestor.EventFrameTemplateId) }}">{{ ancestor.EventFrameTemplate.Name }} Event Frames</a></li>
+                            eventFrameTemplateId = ancestor.EventFrameTemplateId) }}">{{ ancestor.EventFrameTemplate.Name }}</a></li>
                     {% endif %}
                     <li><a href = "{{ url_for("eventFrames.listEventFrames", parentEventFrameId = ancestor.EventFrameId) }}">
-                        {{ ancestor.StartTimestamp.strftime("%m/%d/%y %H:%m") }}</a></li>
+                        {{ ancestor.friendlyName() }}</a></li>
                 {% endfor %}
                 <li class = "active">{{ parentEventFrame.EventFrameTemplate.Name }}</li>                
-                <li class = "active">{{ parentEventFrame.StartTimestamp.strftime("%m/%d/%y %H:%m") }}</li>
+                <li class = "active">{{ parentEventFrame.friendlyName() }}</li>
             {% else %}
                 <!-- Parent with no ancestors. -->
                 <!-- Top level event frame. -->
                 <li><a href = "{{ url_for("eventFrames.listEventFrames", elementId = element.ElementId,
-                    eventFrameTemplateId = eventFrameTemplate.EventFrameTemplateId) }}">{{ eventFrameTemplate.Name }} Event Frames</a></li>
-                <li class = "active">{{ parentEventFrame.StartTimestamp.strftime("%m/%d/%y %H:%m") }}</li>                
+                    eventFrameTemplateId = eventFrameTemplate.EventFrameTemplateId) }}">{{ eventFrameTemplate.Name }}</a></li>
+                <li class = "active">{{ parentEventFrame.friendlyName() }}</li>                
             {% endif %}
         {% else %}
             <!-- No parent. -->
-            <li class = "active">{{ eventFrameTemplate.Name }} Event Frames</li>
+            <li class = "active">{{ eventFrameTemplate.Name }}</li>
         {% endif %}
     </ol>
     <h1>{{ element.Name }}</h1>
@@ -61,7 +62,7 @@ Event Frames
                 <th></th>
                 <th>Event Frame</th>
                 <th>Name</th>
-                <th>Start Timestatmp</th>
+                <th>Start Timestamp</th>
                 <th>End Timestamp</th>
                 <th></th>
                 <th></th>
