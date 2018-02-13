@@ -8,12 +8,13 @@ Elements
 <div>
     <h1>Elements</h1>
     <a class = "btn btn-default" title = "Add" href = "{{ url_for("elements.addElement") }}" role = "button"><span class="glyphicon glyphicon-plus"></span></a>
-    <table class = "table">
+    <br><br>
+    <table id = "elementsTable" class = "table">
         <thead>
             <tr>
-                <th><a href = "{{ url_for("elements.listElements") }}">Element Template</a></th>
-                <th><a href = "{{ url_for("elements.listElements", sortColumn = "Element.Name") }}">Name</a></th>
-                <th><a href = "{{ url_for("elements.listElements", sortColumn = "Element.Description") }}">Description</a></th>
+                <th>Element Template</th>
+                <th>Name</th>
+                <th>Description</th>
                 <th></th>
                 <th></th>
             </tr>
@@ -34,4 +35,28 @@ Elements
         </tbody>
     </table>
 </div>
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <link rel = "stylesheet" type = "text/css" href = {{ url_for("static", filename = "css/datatables.min.css") }}/> 
+    <script type = "text/javascript" src = {{ url_for("static", filename = "js/datatables.min.js") }}></script>
+    <script>
+        $('#elementsTable').DataTable
+        ({
+            order:
+            [
+                [0, 'asc']              // Area
+            ],
+            "columns":
+            [
+                null,
+                null,
+                null,
+                { "orderable": false }, // Edit tag button.
+                { "orderable": false }  // Delete tag button.
+            ],
+            stateSave: true
+        });
+    </script>
 {% endblock %}

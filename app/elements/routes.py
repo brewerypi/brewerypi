@@ -9,33 +9,22 @@ from .. models import AttributeTemplate, Element, ElementAttribute, ElementTempl
 modelName = "Element"
 
 @elements.route("/elements", methods = ["GET", "POST"])
-@elements.route("/elements/<string:sortColumn>", methods = ["GET", "POST"])
 # @login_required
-def listElements(sortColumn = ""):
+def listElements():
 	# check_admin()
-	if sortColumn != "":
-		sortColumn = sortColumn + ", "
-	elements = Element.query.join(ElementTemplate, Site, Enterprise).order_by(text(sortColumn + "Enterprise.Abbreviation, Site.Abbreviation, \
-		ElementTemplate.Name, Element.Name"))
+	elements = Element.query.all()
 	return render_template("elements/elements.html", elements = elements)
 
 @elements.route("/elements/dashboard/<int:elementId>", methods = ["GET", "POST"])
-@elements.route("/elements/dashboard/<int:elementId>/<string:sortColumn>", methods = ["GET", "POST"])
 # @login_required
-def dashboard(elementId, sortColumn = ""):
+def dashboard(elementId):
 	# check_admin()
 	element = Element.query.get_or_404(elementId)
-	if sortColumn != "":
-		sortColumn = sortColumn + ", "
-	elementAttributes = ElementAttribute.query. \
-		join(AttributeTemplate). \
-		filter(ElementAttribute.ElementId == elementId). \
-		order_by(AttributeTemplate.Name)
+	elementAttributes = ElementAttribute.query.filter_by(ElementId = elementId)
 	eventFrameTemplates = EventFrameTemplate.query. \
 		join(ElementTemplate, Element). \
 		outerjoin(EventFrame, and_(Element.ElementId == EventFrame.ElementId, EventFrameTemplate.EventFrameTemplateId == EventFrame.EventFrameTemplateId)). \
-		filter(Element.ElementId == elementId). \
-		order_by(text(sortColumn + "EventFrameTemplate.Name"))
+		filter_by(ElementId = elementId)
 	return render_template("elements/elementDashboard.html", elementAttributes = elementAttributes, element = element,
 		eventFrameTemplates = eventFrameTemplates)
 

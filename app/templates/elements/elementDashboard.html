@@ -21,15 +21,14 @@
     <h1>{{ element.Name }}</h1>
     <h2>Event Frames</h2>
     <h4>{{ strQuery }}</h4>
-    <table class = "table">
+    <br>
+    <table id = "eventFramesTable" class = "table">
         <thead>
             <tr>
                 <th></th>
-                <th><a href = "{{ url_for("elements.dashboard", elementId = element.ElementId) }}">Event Frame</a></th>
-                <th><a href = "{{ url_for("elements.dashboard", elementId = element.ElementId, sortColumn = "EventFrame.StartTimestamp desc") }}">
-                    Last Start Timestamp</a></th>
-                <th><a href = "{{ url_for("elements.dashboard", elementId = element.ElementId, sortColumn = "EventFrame.EndTimestamp desc") }}">
-                    Last End Timestamp</a></th>
+                <th>Event Frame</th>
+                <th>Last Start Timestamp</th>
+                <th>Last End Timestamp</th>
                 <th></th>
                 <th></th>
                 <th></th>
@@ -84,7 +83,8 @@
         </tbody>
     </table>        
     <h2>Attributes</h2>        
-    <table class = "table">
+    <br>
+    <table id = "attributesTable" class = "table">
         <thead>
             <tr>
                 <th></th>
@@ -135,4 +135,49 @@
         </tbody>
     </table>
 </div>
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <link rel = "stylesheet" type = "text/css" href = {{ url_for("static", filename = "css/datatables.min.css") }}/> 
+    <script type = "text/javascript" src = {{ url_for("static", filename = "js/datatables.min.js") }}></script>
+    <script>
+        $('#eventFramesTable').DataTable
+        ({
+            order:
+            [
+                [1, 'asc']              // Event frame template name.
+            ],
+            "columns":
+            [
+                { "orderable": false }, // Event frame values button.
+                null,
+                null,
+                null,
+                { "orderable": false }, // Stop event frame button.
+                { "orderable": false }, // Add event frame button.
+                { "orderable": false }, // Edit event frame button.
+                { "orderable": false }  // Delete event frame button.
+            ],
+            stateSave: true
+        });
+        $('#attributesTable').DataTable
+        ({
+            order:
+            [
+                [1, 'asc']              // Attribute.
+            ],
+            "columns":
+            [
+                { "orderable": false }, // Attribute values button.
+                null,
+                null,
+                null,
+                { "orderable": false }, // Add attribute value button.
+                { "orderable": false }, // Edit attribute value button.
+                { "orderable": false }  // Delete attribute value button.
+            ],
+            stateSave: true
+        });
+    </script>
 {% endblock %}
