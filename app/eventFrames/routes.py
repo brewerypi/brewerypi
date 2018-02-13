@@ -18,7 +18,6 @@ def listEventFrames(elementId = None, eventFrameTemplateId = None, parentEventFr
 		origin = parentEventFrame.origin()
 		element = Element.query.get_or_404(origin.ElementId)
 		eventFrameTemplate = EventFrameTemplate.query.get_or_404(parentEventFrame.EventFrameTemplateId)
-		# eventFrames = EventFrame.query.filter_by(ParentEventFrameId = parentEventFrameId).order_by(EventFrame.StartTimestamp.desc())
 		pagination = EventFrame.query.filter_by(ParentEventFrameId = parentEventFrameId).order_by(EventFrame.StartTimestamp.desc()). \
 			paginate(page, per_page = 10, error_out = False)
 		eventFrames = pagination.items
@@ -26,8 +25,6 @@ def listEventFrames(elementId = None, eventFrameTemplateId = None, parentEventFr
 		parentEventFrame = None
 		element = Element.query.get_or_404(elementId)
 		eventFrameTemplate = EventFrameTemplate.query.get_or_404(eventFrameTemplateId)
-		# eventFrames = EventFrame.query.filter(EventFrame.ElementId == elementId, EventFrame.EventFrameTemplateId == eventFrameTemplate.EventFrameTemplateId). \
-		# 	order_by(EventFrame.StartTimestamp.desc())
 		pagination = EventFrame.query.filter(EventFrame.ElementId == elementId, EventFrame.EventFrameTemplateId == eventFrameTemplate.EventFrameTemplateId). \
 			order_by(EventFrame.StartTimestamp.desc()).paginate(page, per_page = 10, error_out = False)
 		eventFrames = pagination.items
@@ -57,8 +54,8 @@ def addEventFrame(elementId = None, eventFrameTemplateId = None, parentEventFram
 			eventFrame = EventFrame(EndTimestamp = form.endTimestamp.data, EventFrameTemplateId = form.eventFrameTemplate.data,
 				ParentEventFrameId = parentEventFrameId, StartTimestamp = form.startTimestamp.data)
 		else:
-			eventFrame = EventFrame(ElementId = form.elementId.data, EndTimestamp = form.endTimestamp.data, EventFrameTemplateId = form.eventFrameTemplateId.data,
-				StartTimestamp = form.startTimestamp.data)
+			eventFrame = EventFrame(ElementId = form.elementId.data, EndTimestamp = form.endTimestamp.data,
+				EventFrameTemplateId = form.eventFrameTemplateId.data, StartTimestamp = form.startTimestamp.data)
 
 		db.session.add(eventFrame)
 		db.session.commit()

@@ -108,7 +108,8 @@ Event Frames
     {% if parentEventFrame %}
         {{ macros.pagination_widget(pagination, ".listEventFrames", parentEventFrameId = parentEventFrame.EventFrameId) }}
     {% else %}
-        {{ macros.pagination_widget(pagination, ".listEventFrames", elementId = element.ElementId, eventFrameTemplateId = element.ElementTemplate.ElementTemplateId) }}
+        {{ macros.pagination_widget(pagination, ".listEventFrames", elementId = element.ElementId,
+            eventFrameTemplateId = element.ElementTemplate.ElementTemplateId) }}
     {% endif %}
 </div>
 {% endif %}
