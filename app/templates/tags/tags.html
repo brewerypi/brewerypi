@@ -54,24 +54,23 @@ Tags
     <script type = "text/javascript" src = {{ url_for("static", filename = "js/datatables.min.js") }}></script>
     <script>
         $('#tagsTable').DataTable
-        (
-            {
-                order:
-                [
-                    [1, 'asc'] // Area
-                ],
-                "columns":
-                [
-                    { "orderable": false }, // Tag values button.
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    { "orderable": false }, // Edit tag button.
-                    { "orderable": false }  // Delete tag button.
-                ]
-            }
-        );
+        ({
+            order:
+            [
+                [1, 'asc']              // Area
+            ],
+            "columns":
+            [
+                { "orderable": false }, // Tag values button.
+                null,
+                null,
+                null,
+                null,
+                null,
+                { "orderable": false }, // Edit tag button.
+                { "orderable": false }  // Delete tag button.
+            ],
+            stateSave: true
+        });
     </script>
 {% endblock %}
