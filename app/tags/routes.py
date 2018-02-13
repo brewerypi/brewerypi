@@ -10,7 +10,7 @@ from .. models import Area, Enterprise, Lookup, Site, Tag, UnitOfMeasurement
 # @login_required
 def listTags():
 	# check_admin()
-	tags = Tag.query.outerjoin(UnitOfMeasurement, Lookup).join(Area, Site, Enterprise)
+	tags = Tag.query.outerjoin(UnitOfMeasurement, Lookup)
 	return render_template("tags/tags.html", tags = tags)
 
 @tags.route("/tags/add", methods = ["GET", "POST"])
