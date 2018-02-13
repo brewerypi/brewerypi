@@ -88,6 +88,9 @@ class ElementTemplate(db.Model):
 	def __repr__(self):
 		return "<ElementTemplate: {}>".format(self.Name)
 
+	def id(self):
+		return self.ElementTemplateId
+
 class Enterprise(db.Model):
 	__tablename__ = "Enterprise"
 	__table_args__ = \
@@ -106,6 +109,9 @@ class Enterprise(db.Model):
 
 	def __repr__(self):
 		return "<Enterprise: {}>".format(self.Name)
+
+	def id(self):
+		return self.EnterpriseId
 
 class EventFrame(db.Model):
 	__tablename__ = "EventFrame"
@@ -192,6 +198,15 @@ class EventFrameTemplate(db.Model):
 		else:
 			return False
 
+	def id(self):
+		return self.EventFrameTemplateId
+
+	def origin(self):
+		if self.ParentEventFrameTemplateId == None:
+			return self
+		else:
+			return self.ParentEventFrameTemplate.origin()	
+
 class Lookup(db.Model):
 	__tablename__ = "Lookup"
 	__table_args__ = \
@@ -248,6 +263,9 @@ class Site(db.Model):
 
 	def __repr__(self):
 		return "<Site: {}>".format(self.Name)
+
+	def id(self):
+		return self.SiteId
 
 class Tag(db.Model):
 	__tablename__ = "Tag"

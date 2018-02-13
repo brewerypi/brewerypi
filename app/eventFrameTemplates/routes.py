@@ -8,48 +8,25 @@ from .. models import ElementTemplate, EventFrameTemplate, Site, Enterprise
 
 modelName = "Event Frame Templates"
 
-@eventFrameTemplates.route("/eventFrameTemplates", methods = ["GET", "POST"])
-@eventFrameTemplates.route("/eventFrameTemplates/<int:parentEventFrameTemplateId>", methods = ["GET", "POST"])
-@eventFrameTemplates.route("/eventFrameTemplates/<string:sortColumn>", methods = ["GET", "POST"])
-@eventFrameTemplates.route("/eventFrameTemplates/<int:parentEventFrameTemplateId>/<string:sortColumn>", methods = ["GET", "POST"])
+@eventFrameTemplates.route("/eventFrameTemplates/add/elementTemplateId/<int:elementTemplateId>", methods = ["GET", "POST"])
+@eventFrameTemplates.route("/eventFrameTemplates/add/eventFrameTemplateId/<int:parentEventFrameTemplateId>", methods = ["GET", "POST"])
 # @login_required
-def listEventFrameTemplates(parentEventFrameTemplateId = None, sortColumn = ""):
-	# check_admin()
-	parentEventFrameTemplate = None
-	if parentEventFrameTemplateId:
-		parentEventFrameTemplate = EventFrameTemplate.query.get_or_404(parentEventFrameTemplateId)
-	if sortColumn != "":
-		sortColumn = sortColumn + ", "
-	page = request.args.get("page", 1, type = int)
-	pagination = EventFrameTemplate.query.outerjoin(ElementTemplate, Site, Enterprise). \
-		filter(EventFrameTemplate.ParentEventFrameTemplateId == parentEventFrameTemplateId). \
-		order_by(text(sortColumn + "Enterprise.Abbreviation, Site.Abbreviation, ElementTemplate.Name, EventFrameTemplate.Order, EventFrameTemplate.Name")). \
-		paginate(page, per_page = 10, error_out = False)
-	eventFrameTemplates = pagination.items
-	return render_template("eventFrameTemplates/eventFrameTemplates.html", eventFrameTemplates = eventFrameTemplates,
-		pagination = pagination, parentEventFrameTemplate = parentEventFrameTemplate)
-
-@eventFrameTemplates.route("/eventFrameTemplates/add", methods = ["GET", "POST"])
-@eventFrameTemplates.route("/eventFrameTemplates/add/<int:parentEventFrameTemplateId>", methods = ["GET", "POST"])
-# @login_required
-def addEventFrameTemplate(parentEventFrameTemplateId = None):
+def addEventFrameTemplate(elementTemplateId = None, parentEventFrameTemplateId = None):
 	# check_admin()
 	operation = "Add"
 	form = EventFrameTemplateForm()
 
-	if parentEventFrameTemplateId:
-		del form.elementTemplate
-	else:
+	if elementTemplateId:
 		del form.order
 
 	# Add a new event frame template.
 	if form.validate_on_submit():
-		if parentEventFrameTemplateId:
-			eventFrameTemplate = EventFrameTemplate(Description = form.description.data, ElementTemplate = None,
-				Name = form.name.data, Order = form.order.data, ParentEventFrameTemplateId = parentEventFrameTemplateId)			
-		else:
-			eventFrameTemplate = EventFrameTemplate(Description = form.description.data, ElementTemplate = form.elementTemplate.data,
+		if elementTemplateId:
+			eventFrameTemplate = EventFrameTemplate(Description = form.description.data, ElementTemplateId = elementTemplateId,
 				Name = form.name.data, Order = 1, ParentEventFrameTemplateId = None)
+		else:
+			eventFrameTemplate = EventFrameTemplate(Description = form.description.data, ElementTemplateId = None,
+				Name = form.name.data, Order = form.order.data, ParentEventFrameTemplateId = parentEventFrameTemplateId)			
 
 		db.session.add(eventFrameTemplate)
 		db.session.commit()
@@ -61,7 +38,7 @@ def addEventFrameTemplate(parentEventFrameTemplateId = None):
 			flash("You have successfully added the event frame template \"" + eventFrameTemplate.Name + "\" to \"" +
 				eventFrameTemplate.ElementTemplate.Name + "\".", "alert alert-success")
 			
-		return redirect(url_for("eventFrameTemplates.listEventFrameTemplates", parentEventFrameTemplateId = parentEventFrameTemplateId))
+		return redirect(form.requestReferrer.data)
 
 	# Present a form to add a new event frame template.
 	if parentEventFrameTemplateId:
@@ -74,6 +51,7 @@ def addEventFrameTemplate(parentEventFrameTemplateId = None):
 			nextOrder = 1
 
 		form.order.data = nextOrder
+	form.requestReferrer.data = request.referrer
 	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
 
 @eventFrameTemplates.route("/eventFrameTemplates/delete/<int:eventFrameTemplateId>", methods = ["GET", "POST"])
@@ -100,7 +78,7 @@ def deleteEventFrameTemplate(eventFrameTemplateId):
 		flash("You have successfully deleted the event frame template \"" + eventFrameTemplate.Name + "\" from \"" + elementTemplate.Name + "\".",
 			"alert alert-success")
 
-	return redirect(url_for("eventFrameTemplates.listEventFrameTemplates", parentEventFrameTemplateId = eventFrameTemplate.ParentEventFrameTemplateId))
+	return redirect(request.referrer)
 
 @eventFrameTemplates.route("/eventFrameTemplates/edit/<int:eventFrameTemplateId>", methods = ["GET", "POST"])
 # @login_required
@@ -110,21 +88,19 @@ def editEventFrameTemplate(eventFrameTemplateId):
 	eventFrameTemplate = EventFrameTemplate.query.get_or_404(eventFrameTemplateId)
 	form = EventFrameTemplateForm(obj = eventFrameTemplate)
 
-	if eventFrameTemplate.ParentEventFrameTemplateId:
-		del form.elementTemplate
-	else:
+	if eventFrameTemplate.ElementTemplateId:
 		del form.order
 
 	# Edit an existing event frame template.
 	if form.validate_on_submit():
-		if eventFrameTemplate.ParentEventFrameTemplateId:
-			eventFrameTemplate.ElementTemplate = None
-			eventFrameTemplate.Order = form.order.data
-			eventFrameTemplate.ParentEventFrameTemplateId = form.parentEventFrameTemplateId.data
-		else:
-			eventFrameTemplate.ElementTemplate = form.elementTemplate.data
+		if eventFrameTemplate.ElementTemplateId:
+			eventFrameTemplate.ElementTemplateId = form.elementTemplateId.data
 			eventFrameTemplate.Order = 1
 			eventFrameTemplate.ParentEventFrameTemplateId = None
+		else:
+			eventFrameTemplate.ElementTemplateId = None
+			eventFrameTemplate.Order = form.order.data
+			eventFrameTemplate.ParentEventFrameTemplateId = form.parentEventFrameTemplateId.data
 
 		eventFrameTemplate.Description = form.description.data
 		eventFrameTemplate.Name = form.name.data
@@ -137,17 +113,18 @@ def editEventFrameTemplate(eventFrameTemplateId):
 			flash("You have successfully edited the event frame template \"" + eventFrameTemplate.Name + "\" for \"" +
 				eventFrameTemplate.ElementTemplate.Name + "\".", "alert alert-success")
 			
-		return redirect(url_for("eventFrameTemplates.listEventFrameTemplates", parentEventFrameTemplateId = eventFrameTemplate.ParentEventFrameTemplateId))
+		return redirect(form.requestReferrer.data)
 
 	# Present a form to edit an existing event frame template.
-	if eventFrameTemplate.ParentEventFrameTemplateId:
-		form.order.data = eventFrameTemplate.Order
+	if eventFrameTemplate.ElementTemplateId:
+		form.elementTemplateId.data = eventFrameTemplate.ElementTemplateId
 	else:
-		form.elementTemplate.data = eventFrameTemplate.ElementTemplate
+		form.order.data = eventFrameTemplate.Order
 
 	form.description.data = eventFrameTemplate.Description
 	form.name.data = eventFrameTemplate.Name
 	form.parentEventFrameTemplateId.data = eventFrameTemplate.ParentEventFrameTemplateId
+	form.requestReferrer.data = request.referrer
 	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
 
 @eventFrameTemplates.route("/selectEventFrameTemplate", methods = ["GET", "POST"])
@@ -155,43 +132,29 @@ def editEventFrameTemplate(eventFrameTemplateId):
 @eventFrameTemplates.route("/selectEventFrameTemplate/<string:className>/<int:id>", methods = ["GET", "POST"])
 # @login_required
 def selectEventFrameTemplate(className = None, id = None):
-	# check_admin()
-	# elements = None
-	elementTemplate = None
-	elementTemplates = None
-	eventFrameTemplates = None
-	# enterprises = None
-	# site = None
-	# sites = None
-
-	# Default case.
 	if className == None:
-		# site = Site.query.join(Enterprise).order_by(Enterprise.Name, Site.Name).first()
-		# if site:
-		# 	className = site.__class__.__name__
-		elementTemplate = ElementTemplate.query.join(Site, Enterprise).order_by(Enterprise.Name, Site.Name, ElementTemplate.Name).first()
-		if elementTemplate:
-			className = elementTemplate.__class__.__name__
-	# Top level case.
-	# elif className == "root":
-	# 	enterprises = Enterprise.query.all()
-	# elif className == "Enterprise":
-	# 	sites = Site.query.filter_by(EnterpriseId = id)
-	# 	if sites:
-	# 		className = sites[0].__class__.__name__
+		parent = Site.query.join(Enterprise).order_by(Enterprise.Name, Site.Name).first()
+		children = ElementTemplate.query.join(Site).filter_by(SiteId = parent.id()).order_by(ElementTemplate.Name)
+		className = "ElementTemplate"
+	elif className == "Root":
+		parent = None
+		children = Enterprise.query.order_by(Enterprise.Name)
+		className = "Enterprise"
+	elif className == "Enterprise":
+		parent = Enterprise.query.get_or_404(id)
+		children = Site.query.join(Enterprise).filter_by(EnterpriseId = id).order_by(Site.Name)
+		className = "Site"
 	elif className == "Site":
-		elementTemplates = ElementTemplate.query.filter_by(SiteId = id)
-		if elementTemplates:
-			className = elementTemplates[0].__class__.__name__
+		parent = Site.query.get_or_404(id)
+		children = ElementTemplate.query.join(Site).filter_by(SiteId = id).order_by(ElementTemplate.Name)
+		className = "ElementTemplate"
 	elif className == "ElementTemplate":
-		eventFrameTemplates = EventFrameTemplate.query.filter_by(EventFrameTemplateId = id)
-		if eventFrameTemplates:
-			className = eventFrameTemplates[0].__class__.__name__
-	# elif className == "Element":
-	# 	return redirect(url_for("elements.dashboard", elementId = id))
+		parent = ElementTemplate.query.get_or_404(id)
+		children = EventFrameTemplate.query.join(ElementTemplate).filter_by(ElementTemplateId = id).order_by(EventFrameTemplate.Name)
+		className = "EventFrameTemplate"
+	elif className == "EventFrameTemplate":
+		parent = EventFrameTemplate.query.get_or_404(id)
+		children = EventFrameTemplate.query.filter_by(ParentEventFrameTemplateId = id).order_by(EventFrameTemplate.Order)
+		className = None
 
-	# Present navigation for event frames.
-	# return render_template("elements/selectEventFrame.html", className = className, elements = elements, elementTemplates = elementTemplates,
-	# 	enterprises = enterprises, site = site, sites = sites)
-	return render_template("eventFrameTemplates/selectEventFrameTemplate.html", className = className, elementTemplate = elementTemplate,
-		elementTemplates = elementTemplates, eventFrameTemplates = eventFrameTemplates)
+	return render_template("eventFrameTemplates/selectEventFrameTemplate.html", children = children, className = className, parent = parent)
