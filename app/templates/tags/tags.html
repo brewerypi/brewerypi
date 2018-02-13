@@ -13,15 +13,16 @@ Tags
         <span class="glyphicon glyphicon-plus"></span> Tag</a>
     <a class = "btn btn-default" title = "Add Lookup" href = "{{ url_for("tags.addTag", lookup = True) }}" role = "button">
         <span class="glyphicon glyphicon-plus"></span> Lookup</a>
-    <table class = "table">
+    <br><br>
+    <table id = "tagsTable" class = "table">
         <thead>
             <tr>
                 <th></th>
-                <th><a href = "{{ url_for("tags.listTags") }}">Area</a></th>
-                <th><a href = "{{ url_for("tags.listTags", sortColumn = "Tag.Name") }}">Name</a></th>
-                <th><a href = "{{ url_for("tags.listTags", sortColumn = "Tag.Description") }}">Description</a></th>
-                <th><a href = "{{ url_for("tags.listTags", sortColumn = "UnitOfMeasurement.Name") }}">Unit</a></th>
-                <th><a href = "{{ url_for("tags.listTags", sortColumn = "Lookup.Name") }}">Lookup</a></th>
+                <th>Area</th>
+                <th>Name</th>
+                <th>Description</th>
+                <th>Unit</th>
+                <th>Lookup</th>
                 <th></th>
                 <th></th>
             </tr>
@@ -45,9 +46,32 @@ Tags
         </tbody>
     </table>
 </div>
-{% if pagination %}
-<div class = "text-right">
-    {{ macros.pagination_widget(pagination, ".listTags") }}
-</div>
-{% endif %}
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <link rel = "stylesheet" type = "text/css" href = {{ url_for("static", filename = "css/datatables.min.css") }}/> 
+    <script type = "text/javascript" src = {{ url_for("static", filename = "js/datatables.min.js") }}></script>
+    <script>
+        $('#tagsTable').DataTable
+        (
+            {
+                order:
+                [
+                    [1, 'asc'] // Area
+                ],
+                "columns":
+                [
+                    { "orderable": false }, // Tag values button.
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    { "orderable": false }, // Edit tag button.
+                    { "orderable": false }  // Delete tag button.
+                ]
+            }
+        );
+    </script>
 {% endblock %}
