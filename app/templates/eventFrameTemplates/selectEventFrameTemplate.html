@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}
+Data Entry - Elements
+{% endblock %}
+
+{% block page_content %}
+<div>
+    <ol class="breadcrumb">
+        {% if elementTemplate %}
+            <li><a href = "{#{ url_for("eventFrameTemplates.selectEventFrameTemplate", className = "root",
+                id = None) }#}">..</a></li>
+            <li><a href = "{#{ url_for("eventFrames.selectEventFrameTemplate", className = elementTemplate.Site.Enterprise.__class__.__name__,
+                id = elementTemplate.Site.Enterprise.EnterpriseId) }#}">{{ elementTemplate.Site.Enterprise.Name }}</a></li>
+            <li><a href = "{{ url_for("eventFrameTemplates.selectEventFrameTemplate", className = elementTemplate.Site.__class__.__name__,
+                id = elementTemplate.Site.Enterprise.EnterpriseId) }}">{{ elementTemplate.Site.Name }}</a></li>
+            <li class = "active">{{ elementTemplate.Name }}</li>
+        {% elif elementTemplates %}
+            <li><a href = "{{ url_for("eventFrameTemplates.selectEventFrameTemplate", className = "root",
+                id = None) }}">..</a></li>
+            {% set firstElementTemplate = elementTemplates | first %}
+            <li><a href = "{{ url_for("eventFrameTemplates.selectEventFrameTemplate", className = firstElementTemplate.Site.Enterprise.__class__.__name__,
+                id = firstElementTemplate.Site.Enterprise.EnterpriseId) }}">{{ firstElementTemplate.Site.Enterprise.Name }}</a></li>
+            <li class = "active">{{ firstElementTemplate.Site.Name }}</li>
+        {% elif eventFrameTemplates %}
+            <li><a href = "{{ url_for("eventFrameTemplates.selectEventFrameTemplate", className = "root",
+                id = None) }}">..</a></li>
+            {% set firstEventFrameTemplate = eventFrameTemplates | first %}
+            <li><a href = "{{ url_for("eventFrameTemplates.selectEventFrameTemplate", className = firstEventFrameTemplate.ElementTemplate.Site.Enterprise.__class__.__name__,
+                id = firstEventFrameTemplate.ElementTemplate.Site.Enterprise.EnterpriseId) }}">{{ firstEventFrameTemplate.ElementTemplate.Site.Enterprise.Name }}</a></li>
+            <li><a href = "{{ url_for("eventFrameTemplates.selectEventFrameTemplate", className = firstEventFrameTemplate.ElementTemplate.Site.__class__.__name__,
+                id = firstEventFrameTemplate.ElementTemplate.Site.SiteId) }}">{{ firstEventFrameTemplate.ElementTemplate.Site.Name }}</a></li>
+            <li class = "active">{{ firstEventFrameTemplate.ElementTemplate.Name }}</li>
+        <!-- {#% elif enterprises %#}
+            <li class = "active">..</li>
+        {#% elif sites %#}
+            <li><a href = "{#{ url_for("elements.selectElement", className = "root",
+                id = None) }#}">..</a></li>
+            {#% set firstSite = sites | first %#}
+            <li><a href = "{#{ url_for("elements.selectElement", className = firstSite.Enterprise.__class__.__name__,
+                id = firstSite.Enterprise.EnterpriseId) }#}">{#{ firstSite.Enterprise.Name }#}</a></li>
+            <li class = "active">Sites</li> -->
+        {% endif %}
+    </ol>
+</div>
+<div>
+    {% if elementTemplate %}
+        <h1>Event Frame Templates</h1>
+        <ul class = "list-group">
+        {% for eventFrameTemplate in elementTemplate.EventFrameTemplates | sort(attribute = "Name") %}
+            <li class = "list-group-item"><a href = "{{ url_for("eventFrameTemplates.selectEventFrameTemplate", className = eventFrameTemplate.__class__.__name__,
+                id = eventFrameTemplate.EventFrameTemplateId) }}">{{ eventFrameTemplate.Name }}</a></li>                
+        {% endfor %}
+        </ul>
+    {% elif elementTemplates %}
+        <h1>Element Templates</h1>
+        <ul class = "list-group">
+        {% for elementTemplate in elementTemplates | sort(attribute = "Name") %}
+            <li class = "list-group-item"><a href = "{{ url_for("eventFrameTemplates.selectEventFrameTemplate", className = elementTemplate.__class__.__name__,
+                id = elementTemplate.ElementTemplateId) }}">{{ elementTemplate.Name }}</a></li>                
+        {% endfor %}
+        </ul>
+    <!-- {#% elif elements %#}
+        <h1>Elements</h1>
+        <ul class = "list-group">
+        {#% for element in elements | sort(attribute = "Name") %#}
+            <li class = "list-group-item"><a href = "{#{ url_for("elements.dashboard", elementId = element.ElementId) }#}">{#{ element.Name }#}</a></li>                
+        {#% endfor %#}
+        </ul>
+    {#% elif enterprises %#}
+        <h1>Enterprises</h1>
+        <ul class = "list-group">
+        {#% for enterprise in enterprises | sort(attribute = "Name") %#}
+            <li class = "list-group-item"><a href = "{#{ url_for("elements.selectElement", className = enterprise.__class__.__name__,                
+                id = enterprise.EnterpriseId) }#}">{#{ enterprise.Name }#}</a></li>                
+        {#% endfor %#}
+        </ul>
+    {#% elif sites %#}
+        <h1>Sites</h1>
+        <ul class = "list-group">
+        {#% for site in sites | sort(attribute = "Name") %#}
+            <li class = "list-group-item"><a href = "{#{ url_for("elements.selectElement", className = site.__class__.__name__, id = site.SiteId) }#}">
+                {#{ site.Name }#}</a></li>                
+        {#% endfor %#} -->
+        </ul>
+    {% endif %}
+</div>
+{% endblock %}

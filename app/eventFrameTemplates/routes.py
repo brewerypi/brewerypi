@@ -145,3 +145,49 @@ def editEventFrameTemplate(eventFrameTemplateId):
 	form.name.data = eventFrameTemplate.Name
 	form.parentEventFrameTemplateId.data = eventFrameTemplate.ParentEventFrameTemplateId
 	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
+
+@eventFrameTemplates.route("/selectEventFrameTemplate", methods = ["GET", "POST"])
+@eventFrameTemplates.route("/selectEventFrameTemplate/<string:className>", methods = ["GET", "POST"])
+@eventFrameTemplates.route("/selectEventFrameTemplate/<string:className>/<int:id>", methods = ["GET", "POST"])
+# @login_required
+def selectEventFrameTemplate(className = None, id = None):
+	# check_admin()
+	# elements = None
+	elementTemplate = None
+	elementTemplates = None
+	eventFrameTemplates = None
+	# enterprises = None
+	# site = None
+	# sites = None
+
+	# Default case.
+	if className == None:
+		# site = Site.query.join(Enterprise).order_by(Enterprise.Name, Site.Name).first()
+		# if site:
+		# 	className = site.__class__.__name__
+		elementTemplate = ElementTemplate.query.join(Site, Enterprise).order_by(Enterprise.Name, Site.Name, ElementTemplate.Name).first()
+		if elementTemplate:
+			className = elementTemplate.__class__.__name__
+	# Top level case.
+	# elif className == "root":
+	# 	enterprises = Enterprise.query.all()
+	# elif className == "Enterprise":
+	# 	sites = Site.query.filter_by(EnterpriseId = id)
+	# 	if sites:
+	# 		className = sites[0].__class__.__name__
+	elif className == "Site":
+		elementTemplates = ElementTemplate.query.filter_by(SiteId = id)
+		if elementTemplates:
+			className = elementTemplates[0].__class__.__name__
+	elif className == "ElementTemplate":
+		eventFrameTemplates = EventFrameTemplate.query.filter_by(EventFrameTemplateId = id)
+		if eventFrameTemplates:
+			className = eventFrameTemplates[0].__class__.__name__
+	# elif className == "Element":
+	# 	return redirect(url_for("elements.dashboard", elementId = id))
+
+	# Present navigation for event frames.
+	# return render_template("elements/selectEventFrame.html", className = className, elements = elements, elementTemplates = elementTemplates,
+	# 	enterprises = enterprises, site = site, sites = sites)
+	return render_template("eventFrameTemplates/selectEventFrameTemplate.html", className = className, elementTemplate = elementTemplate,
+		elementTemplates = elementTemplates, eventFrameTemplates = eventFrameTemplates)
