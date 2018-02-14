@@ -1,7 +1,5 @@
 {% extends "base.html" %}
 
-{% import "_macros.html" as macros %}
-
 {% block title %}
 Units of Measurment
 {% endblock %}
@@ -11,11 +9,12 @@ Units of Measurment
     <h1>Units of Measurment</h1>
     <a class = "btn btn-default" title = "Add" href = "{{ url_for("unitOfMeasurements.addUnitOfMeasurement") }}" role = "button">
         <span class="glyphicon glyphicon-plus"></span></a>
-    <table class = "table">
+    <br><br>
+    <table id = "unitOfMeasurementsTable" class = "table">
         <thead>
             <tr>
-                <th><a href = "{{ url_for("unitOfMeasurements.listUnitOfMeasurements") }}">Name</a></th>
-                <th><a href = "{{ url_for("unitOfMeasurements.listUnitOfMeasurements", sortColumn = "UnitOfMeasurement.Abbreviation") }}">Abbreviation</a></th>
+                <th>Name</th>
+                <th>Abbreviation</th>
                 <th></th>
                 <th></th>
             </tr>
@@ -34,9 +33,27 @@ Units of Measurment
         </tbody>
     </table>
 </div>
-{% if pagination %}
-<div class = "text-right">
-    {{ macros.pagination_widget(pagination, ".listUnitOfMeasurements") }}
-</div>
-{% endif %}
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <link rel = "stylesheet" type = "text/css" href = {{ url_for("static", filename = "css/datatables.min.css") }}/> 
+    <script type = "text/javascript" src = {{ url_for("static", filename = "js/datatables.min.js") }}></script>
+    <script>
+        $('#unitOfMeasurementsTable').DataTable
+        ({
+            order:
+            [
+                [0, 'asc'],             // Name.
+            ],
+            "columns":
+            [
+                null,
+                null,
+                { "orderable": false }, // Edit button.
+                { "orderable": false }  // Delete button.
+            ],
+            stateSave: true
+        });
+    </script>
 {% endblock %}

@@ -1,5 +1,4 @@
 from flask import flash, redirect, render_template, request, url_for
-from sqlalchemy import text
 from . import lookupValues
 from . forms import LookupValueForm
 from .. import db
@@ -8,14 +7,11 @@ from .. models import Enterprise, Lookup, LookupValue
 modelName = "Lookup Value"
 
 @lookupValues.route("/lookupValues/<int:lookupId>", methods = ["GET", "POST"])
-@lookupValues.route("/lookupValues/<int:lookupId>/<string:sortColumn>", methods = ["GET", "POST"])
 # @login_required
-def listLookupValues(lookupId, sortColumn = ""):
+def listLookupValues(lookupId):
 	# check_admin()
-	if sortColumn != "":
-		sortColumn = sortColumn + ", "
 	lookup = Lookup.query.get_or_404(lookupId)
-	lookupValues = LookupValue.query.filter_by(LookupId = lookupId).join(Lookup).order_by(text(sortColumn + "LookupValue.Name"))
+	lookupValues = LookupValue.query.filter_by(LookupId = lookupId)
 	return render_template("lookupValues/lookupValues.html", lookup = lookup, lookupValues = lookupValues)
 
 @lookupValues.route("/lookupValues/add/<int:lookupId>", methods = ["GET", "POST"])
