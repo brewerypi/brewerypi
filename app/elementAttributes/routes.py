@@ -10,7 +10,7 @@ from .. tagValues . forms import TagValueForm
 
 @elementAttributes.route("/elementAttributes", methods = ["GET", "POST"])
 # @login_required
-def listElementAttributes(sortColumn = ""):
+def listElementAttributes():
 	# check_admin()
 	elementAttributes = ElementAttribute.query.all()
 	return render_template("elementAttributes/elementAttributes.html", elementAttributes = elementAttributes)
