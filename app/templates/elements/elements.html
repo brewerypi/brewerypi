@@ -46,15 +46,16 @@ Elements
         ({
             order:
             [
-                [0, 'asc']              // Area
+                [0, 'asc'],             // Element template path.
+                [1, 'asc']              // Name.
             ],
             "columns":
             [
                 null,
                 null,
                 null,
-                { "orderable": false }, // Edit tag button.
-                { "orderable": false }  // Delete tag button.
+                { "orderable": false }, // Edit element button.
+                { "orderable": false }  // Delete element button.
             ],
             stateSave: true
         });
