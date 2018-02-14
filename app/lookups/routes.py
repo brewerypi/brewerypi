@@ -1,5 +1,4 @@
 from flask import flash, redirect, render_template, request, url_for
-from sqlalchemy import text
 from . import lookups
 from . forms import LookupForm
 from .. import db
@@ -8,13 +7,10 @@ from .. models import Enterprise, Lookup
 modelName = "Lookup"
 
 @lookups.route("/lookups", methods = ["GET", "POST"])
-@lookups.route("/lookups/<string:sortColumn>", methods = ["GET", "POST"])
 # @login_required
-def listLookups(sortColumn = ""):
+def listLookups():
 	# check_admin()
-	if sortColumn != "":
-		sortColumn = sortColumn + ", "
-	lookups = Lookup.query.join(Enterprise).order_by(text(sortColumn + "Enterprise.Abbreviation, Lookup.Name"))
+	lookups = Lookup.query
 	return render_template("lookups/lookups.html", lookups = lookups)
 
 @lookups.route("/lookups/add", methods = ["GET", "POST"])

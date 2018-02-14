@@ -1,5 +1,4 @@
 from flask import flash, redirect, render_template, request, url_for
-from sqlalchemy import text
 from . import sites
 from . forms import SiteForm
 from .. import db
@@ -8,13 +7,10 @@ from .. models import Enterprise, Site
 modelName = "Site"
 
 @sites.route("/sites", methods = ["GET", "POST"])
-@sites.route("/sites/<string:sortColumn>", methods = ["GET", "POST"])
 # @login_required
-def listSites(sortColumn = ""):
+def listSites():
 	# check_admin()
-	if sortColumn != "":
-		sortColumn = sortColumn + ", "
-	sites = Site.query.join(Enterprise).order_by(text(sortColumn + "Enterprise.Abbreviation, Site.Name"))
+	sites = Site.query
 	return render_template("sites/sites.html", sites = sites)
 
 @sites.route("/sites/add", methods = ["GET", "POST"])

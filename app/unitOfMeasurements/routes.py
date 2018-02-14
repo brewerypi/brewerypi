@@ -1,5 +1,4 @@
 from flask import flash, redirect, render_template, request, url_for
-from sqlalchemy import text
 from . import unitOfMeasurements
 from . forms import UnitOfMeasurementForm
 from .. import db
@@ -8,17 +7,11 @@ from .. models import UnitOfMeasurement
 modelName = "Unit"
 
 @unitOfMeasurements.route("/unitOfMeasurements", methods = ["GET", "POST"])
-@unitOfMeasurements.route("/unitOfMeasurements/<string:sortColumn>", methods = ["GET", "POST"])
 # @login_required
-def listUnitOfMeasurements(sortColumn = ""):
+def listUnitOfMeasurements():
 	# check_admin()
-	if sortColumn != "":
-		sortColumn = sortColumn + ", "
-	page = request.args.get("page", 1, type = int)
-	pagination = UnitOfMeasurement.query.order_by(text(sortColumn + "UnitOfMeasurement.Name")).paginate(page, per_page = 10, error_out = False)
-	unitOfMeasurements = pagination.items
-
-	return render_template("unitOfMeasurements/unitOfMeasurements.html", pagination = pagination, unitOfMeasurements = unitOfMeasurements)
+	unitOfMeasurements = UnitOfMeasurement.query
+	return render_template("unitOfMeasurements/unitOfMeasurements.html", unitOfMeasurements = unitOfMeasurements)
 
 @unitOfMeasurements.route("/units/add", methods = ["GET", "POST"])
 # @login_required
