@@ -6,11 +6,10 @@ from .. models import Enterprise
 
 modelName = "Enterprise"
 
-@enterprises.route("/enterprises", methods = ["GET", "POST"])
+@enterprises.route("/enterprises/", methods = ["GET", "POST"])
 # @login_required
 def listEnterprises():
-	# check_admin()
-	enterprises = Enterprise.query.order_by(Enterprise.Name)
+	enterprises = Enterprise.query
 	return render_template("enterprises/enterprises.html", enterprises = enterprises)
 
 @enterprises.route("/enterprises/add", methods = ["GET", "POST"])
@@ -25,7 +24,7 @@ def addEnterprise():
 		enterprise = Enterprise(Abbreviation = form.abbreviation.data, Description = form.description.data, Name = form.name.data)
 		db.session.add(enterprise)
 		db.session.commit()
-		flash("You have successfully added the enterprise \"" + enterprise.Name + "\".")
+		flash("You have successfully added the enterprise \"" + enterprise.Name + "\".", "alert alert-success")
 		return redirect(url_for("enterprises.listEnterprises"))
 
 	# Present a form to add a new enterprise.
@@ -38,7 +37,7 @@ def deleteEnterprise(enterpriseId):
 	enterprise = Enterprise.query.get_or_404(enterpriseId)
 	db.session.delete(enterprise)
 	db.session.commit()
-	flash("You have successfully deleted the enterprise \"" + enterprise.Name + "\".")
+	flash("You have successfully deleted the enterprise \"" + enterprise.Name + "\".", "alert alert-success")
 	return redirect(url_for("enterprises.listEnterprises"))
 
 @enterprises.route("/enterprises/edit/<int:enterpriseId>", methods = ["GET", "POST"])
@@ -55,7 +54,7 @@ def editEnterprise(enterpriseId):
 		enterprise.Description = form.description.data
 		enterprise.Name = form.name.data
 		db.session.commit()
-		flash("You have successfully edited the enterprise \"" + enterprise.Name + "\".")
+		flash("You have successfully edited the enterprise \"" + enterprise.Name + "\".", "alert alert-success")
 		return redirect(url_for("enterprises.listEnterprises"))
 
 	# Present a form to edit an existing enterprise.

@@ -13,9 +13,11 @@ Tags
         <span class="glyphicon glyphicon-plus"></span> Tag</a>
     <a class = "btn btn-default" title = "Add Lookup" href = "{{ url_for("tags.addTag", lookup = True) }}" role = "button">
         <span class="glyphicon glyphicon-plus"></span> Lookup</a>
-    <table class = "table">
+    <br><br>
+    <table id = "tagsTable" class = "table">
         <thead>
             <tr>
+                <th></th>
                 <th>Area</th>
                 <th>Name</th>
                 <th>Description</th>
@@ -23,12 +25,13 @@ Tags
                 <th>Lookup</th>
                 <th></th>
                 <th></th>
-                <th></th>
             </tr>
         </thead>
         <tbody>
             {% for tag in tags %}
             <tr>
+                <td><a class = "btn btn-default" title = "List Values" href = "{{ url_for("tagValues.listTagValues", tagId = tag.TagId) }}">
+                    <span class="glyphicon glyphicon-list"></span></a></td>
                 <td>{{ tag.Area.Site.Enterprise.Abbreviation + "_" + tag.Area.Site.Abbreviation + "_" + tag.Area.Abbreviation }}</td>
                 <td>{{ tag.Name }}</td>
                 <td>{{ tag.Description }}</td>
@@ -36,8 +39,6 @@ Tags
                 <td>{{ tag.Lookup.Name }}</td>
                 <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("tags.editTag", tagId = tag.TagId) }}">
                     <span class="glyphicon glyphicon-edit"></span></a></td>
-                <td><a class = "btn btn-default" title = "List Values" href = "{{ url_for("tagValues.listTagValues", tagId = tag.TagId, 
-                    lookupId = tag.LookupId) }}"><span class="glyphicon glyphicon-list"></span></a></td>
                 <td><a class = "btn btn-default" title = "Delete" href = "{{ url_for("tags.deleteTag", tagId = tag.TagId) }}">
                     <span class="glyphicon glyphicon-trash"></span></a></td>
             </tr>
@@ -45,9 +46,32 @@ Tags
         </tbody>
     </table>
 </div>
-{% if pagination %}
-<div class = "text-right">
-    {{ macros.pagination_widget(pagination, ".listTags") }}
-</div>
-{% endif %}
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <link rel = "stylesheet" type = "text/css" href = {{ url_for("static", filename = "css/datatables.min.css") }}/> 
+    <script type = "text/javascript" src = {{ url_for("static", filename = "js/datatables.min.js") }}></script>
+    <script>
+        $('#tagsTable').DataTable
+        ({
+            order:
+            [
+                [1, 'asc'],             // Area.
+                [2, 'asc']              // Name.
+            ],
+            "columns":
+            [
+                { "orderable": false }, // Tag values button.
+                null,
+                null,
+                null,
+                null,
+                null,
+                { "orderable": false }, // Edit tag button.
+                { "orderable": false }  // Delete tag button.
+            ],
+            stateSave: true
+        });
+    </script>
 {% endblock %}

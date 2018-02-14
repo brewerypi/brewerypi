@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}
+Event Frame Templates
+{% endblock %}
+
+{% block page_content %}
+<div>
+    <ol class="breadcrumb">
+        {% if className == "Tag" %}
+            <li><a href = "{{ url_for("tags.selectTag", className = "Root") }}">..</a></li>
+            <li><a href = "{#{ url_for("eventFrameTemplates.selectEventFrameTemplate", className = parent.Site.Enterprise.__class__.__name__,
+                id = parent.Site.Enterprise.id()) }#}">{{ parent.Site.Enterprise.Name }}</a></li>
+            <li><a href = "{{ url_for("tags.selectTag", className = parent.Site.__class__.__name__,
+                id = parent.Site.id()) }}">{{ parent.Site.Name }}</a></li>
+            <li class = "active">{{ parent.Name }}</li>
+        {% elif className == "Area" %}
+            <li><a href = "{{ url_for("tags.selectTag", className = "Root") }}">..</a></li>
+            <li><a href = "{{ url_for("tags.selectTag", className = parent.Enterprise.__class__.__name__,
+                id = parent.Enterprise.id()) }}">{{ parent.Enterprise.Name }}</a></li>
+            <li class = "active">{{ parent.Name }}</li>
+        {% elif className == "Site" %}
+            <li><a href = "{{ url_for("tags.selectTag", className = "Root") }}">..</a></li>
+            <li class = "active">{{ parent.Name }}</li>
+        {% elif className == "Enterprise" %}
+            <li class = "active">..</li>
+        {% endif %}
+    </ol>
+</div>
+<div>
+    {% if className == "Tag" %}
+        <h1>Tags</h1>
+    {% elif className == "Area" %}
+        <h1>Areas</h1>
+    {% elif className == "Site" %}
+        <h1>Sites</h1>
+    {% elif className == "Enterprise" %}
+        <h1>Enterprises</h1>
+    {% endif %}
+    <br><br>
+    <table id = "tagsTable" class = "table">
+        <thead>
+            <tr>
+                <th></th>
+                <th>Name</th>
+                <th>Description</th>
+                <th></th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for child in children %}
+                <tr>
+                    {% if className == "Tag" %}
+                        <td><a class = "btn btn-default" title = "Tag Values" href = "{{ url_for("tagValues.listTagValues",
+                            tagId = child.id()) }}"><span class="glyphicon glyphicon-list"></span></a></td>
+                    {% else %}
+                        <td><a class = "btn btn-default" title = "Children" href = "{{ url_for("tags.selectTag", className = child.__class__.__name__,
+                            id = child.id()) }}"><span class="glyphicon glyphicon-list"></span></a></td>
+                    {% endif %}
+                    <td>{{ child.Name }}</td>
+                    <td>{{ child.Description }}</td>
+                    {% if className == "Tag" %}
+                        <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Edit" href = "{{ url_for("tags.editTag",
+                            tagId = child.id()) }}"><span class="glyphicon glyphicon-edit"></a></td>
+                        <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Delete" href = "{{ url_for("tags.deleteTag",
+                            tagId = child.id()) }}"><span class="glyphicon glyphicon-trash"></a></td>
+                    {% else %}
+                        <td></td>
+                        <td></td>
+                    {% endif %}
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <link rel = "stylesheet" type = "text/css" href = {{ url_for("static", filename = "css/datatables.min.css") }}/> 
+    <script type = "text/javascript" src = {{ url_for("static", filename = "js/datatables.min.js") }}></script>
+    <script>
+        $('#tagsTable').DataTable
+        ({
+            order:
+            [
+                [1, 'asc'],             // Name.
+            ],
+            "columns":
+            [
+                { "orderable": false }, // Tag values button.
+                null,
+                null,
+                { "orderable": false }, // Edit button.
+                { "orderable": false }  // Delete button.
+            ],
+            stateSave: true
+        });
+    </script>
+{% endblock %}

@@ -9,7 +9,8 @@ Element Attributes
     <h1>Element Attributes</h1>
     <a class = "btn btn-default" title = "Add" href = "{{ url_for("elementAttributes.addElementAttribute") }}" role = "button">
         <span class="glyphicon glyphicon-plus"></span></a>
-    <table class = "table">
+    <br><br>
+    <table id = "elementAttributesTable" class = "table">
         <thead>
             <tr>
                 <th>Element</th>
@@ -40,4 +41,29 @@ Element Attributes
         </tbody>
     </table>
 </div>
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <link rel = "stylesheet" type = "text/css" href = {{ url_for("static", filename = "css/datatables.min.css") }}/> 
+    <script type = "text/javascript" src = {{ url_for("static", filename = "js/datatables.min.js") }}></script>
+    <script>
+        $('#elementAttributesTable').DataTable
+        ({
+            order:
+            [
+                [0, 'asc'],             // Element path.
+                [1, 'asc']              // Attribute Template.
+            ],
+            "columns":
+            [
+                null,
+                null,
+                null,
+                { "orderable": false }, // Edit element attribute button.
+                { "orderable": false }  // Delete element attribute button.
+            ],
+            stateSave: true
+        });
+    </script>
 {% endblock %}

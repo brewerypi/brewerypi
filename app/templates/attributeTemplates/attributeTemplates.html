@@ -9,10 +9,11 @@ Attribute Templates
     <h1>Attribute Templates</h1>
     <a class = "btn btn-default" title = "Add" href = "{{ url_for("attributeTemplates.addAttributeTemplate") }}" role = "button">
         <span class="glyphicon glyphicon-plus"></span></a>
-    <table class = "table">
+    <br><br>
+    <table id = "attributeTemplatesTable" class = "table">
         <thead>
             <tr>
-                <th>Attribute Template</th>
+                <th>Element Template</th>
                 <th>Name</th>
                 <th>Description</th>
                 <th></th>
@@ -35,4 +36,29 @@ Attribute Templates
         </tbody>
     </table>
 </div>
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <link rel = "stylesheet" type = "text/css" href = {{ url_for("static", filename = "css/datatables.min.css") }}/> 
+    <script type = "text/javascript" src = {{ url_for("static", filename = "js/datatables.min.js") }}></script>
+    <script>
+        $('#attributeTemplatesTable').DataTable
+        ({
+            order:
+            [
+                [0, 'asc'],             // Element template path.
+                [1, 'asc']              // Element template name.
+            ],
+            "columns":
+            [
+                null,
+                null,
+                null,
+                { "orderable": false }, // Edit element button.
+                { "orderable": false }  // Delete element button.
+            ],
+            stateSave: true
+        });
+    </script>
 {% endblock %}

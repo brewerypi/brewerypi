@@ -20,6 +20,9 @@ class Area(db.Model):
 	def __repr__(self):
 		return "<Area: {}>".format(self.Name)
 
+	def id(self):
+		return self.AreaId
+
 class AttributeTemplate(db.Model):
 	__tablename__ = "AttributeTemplate"
 	__table_args__ = \
@@ -51,6 +54,7 @@ class Element(db.Model):
 	Name = db.Column(db.String(45), nullable = False)
 
 	ElementAttributes = db.relationship("ElementAttribute", backref = "Element", lazy = "dynamic")
+	EventFrames = db.relationship("EventFrame", backref = "Element", lazy = "dynamic")
 
 	def __repr__(self):
 		return "<Element: {}>".format(self.Name)
@@ -82,9 +86,13 @@ class ElementTemplate(db.Model):
 
 	AttributeTemplates = db.relationship("AttributeTemplate", backref = "ElementTemplate", lazy = "dynamic")
 	Elements = db.relationship("Element", backref = "ElementTemplate", lazy = "dynamic")
+	EventFrameTemplates = db.relationship("EventFrameTemplate", backref = "ElementTemplate", lazy = "dynamic")
 
 	def __repr__(self):
 		return "<ElementTemplate: {}>".format(self.Name)
+
+	def id(self):
+		return self.ElementTemplateId
 
 class Enterprise(db.Model):
 	__tablename__ = "Enterprise"
@@ -104,6 +112,103 @@ class Enterprise(db.Model):
 
 	def __repr__(self):
 		return "<Enterprise: {}>".format(self.Name)
+
+	def id(self):
+		return self.EnterpriseId
+
+class EventFrame(db.Model):
+	__tablename__ = "EventFrame"
+	__table_args__ = \
+	(
+		UniqueConstraint("ElementId", "EventFrameTemplateId", "StartTimestamp", name = "AK__ElementId_EventFrameTemplateId_StartTimestamp"),
+	)
+
+	EventFrameId = db.Column(db.Integer, primary_key = True)
+	ElementId = db.Column(db.Integer, db.ForeignKey("Element.ElementId", name = "FK__Element$Have$EventFrame"), nullable = True)
+	EndTimestamp = db.Column(db.DateTime, nullable = True)
+	EventFrameTemplateId = db.Column(db.Integer, db.ForeignKey("EventFrameTemplate.EventFrameTemplateId", name = "FK__EventFrameTemplate$Have$EventFrame"), \
+		nullable = False)
+	Name = db.Column(db.String(45), nullable = True)
+	ParentEventFrameId = db.Column(db.Integer, db.ForeignKey("EventFrame.EventFrameId", name = "FK__EventFrame$CanHave$EventFrame"), nullable = True)
+	StartTimestamp = db.Column(db.DateTime, nullable = False)
+
+	ParentEventFrame = db.relationship("EventFrame", remote_side = [EventFrameId])
+	EventFrames = db.relationship("EventFrame", remote_side = [ParentEventFrameId])
+
+	def __repr__(self):
+		return "<EventFrame: {}>".format(self.Name)
+
+	def ancestors(self, ancestors):
+		if self.ParentEventFrameId == None:
+			return ancestors
+		else:
+			ancestors.insert(0, self.ParentEventFrame)
+			return self.ParentEventFrame.ancestors(ancestors)
+
+	def friendlyName(self):
+		if self.Name:
+			return self.Name
+		else:
+			return self.StartTimestamp.strftime("%m/%d/%y %H:%M") + ' - '			
+
+	def hasDescendants(self):
+		if self.EventFrames:
+			return True
+		else:
+			return False
+
+	def origin(self):
+		if self.ParentEventFrameId == None:
+			return self
+		else:
+			return self.ParentEventFrame.origin()
+	
+class EventFrameTemplate(db.Model):
+	__tablename__ = "EventFrameTemplate"
+	__table_args__ = \
+	(
+		UniqueConstraint("ElementTemplateId", "Name", name = "AK__ElementTemplateId_Name"),
+		UniqueConstraint("Name", "ParentEventFrameTemplateId", name = "AK__Name_ParentEventFrameTemplateId"),
+		UniqueConstraint("Order", "ParentEventFrameTemplateId", name = "AK__Order_ParentEventFrameTemplateId"),
+	)
+
+	EventFrameTemplateId = db.Column(db.Integer, primary_key = True)
+	Description = db.Column(db.String(255), nullable = True)
+	ElementTemplateId = db.Column(db.Integer, db.ForeignKey("ElementTemplate.ElementTemplateId", name = "FK__ElementTemplate$Have$EventFrameTemplate"), \
+		nullable = True)
+	Name = db.Column(db.String(45), nullable = False)
+	Order = db.Column(db.Integer, nullable = False)
+	ParentEventFrameTemplateId = db.Column(db.Integer, db.ForeignKey("EventFrameTemplate.EventFrameTemplateId",
+		name = "FK__EventFrameTemplate$CanHave$EventFrameTemplate"), nullable = True)
+
+	ParentEventFrameTemplate = db.relationship("EventFrameTemplate", remote_side = [EventFrameTemplateId])
+	EventFrames = db.relationship("EventFrame", backref = "EventFrameTemplate", lazy = "dynamic")
+	EventFrameTemplates = db.relationship("EventFrameTemplate", remote_side = [ParentEventFrameTemplateId])
+
+	def __repr__(self):
+		return "<EventFrameTemplate: {}>".format(self.Name)
+
+	def ancestors(self, ancestors):
+		if self.ParentEventFrameTemplateId == None:
+			return ancestors
+		else:
+			ancestors.insert(0, self.ParentEventFrameTemplate)
+			return self.ParentEventFrameTemplate.ancestors(ancestors)
+
+	def hasDescendants(self):
+		if self.EventFrameTemplates:
+			return True
+		else:
+			return False
+
+	def id(self):
+		return self.EventFrameTemplateId
+
+	def origin(self):
+		if self.ParentEventFrameTemplateId == None:
+			return self
+		else:
+			return self.ParentEventFrameTemplate.origin()	
 
 class Lookup(db.Model):
 	__tablename__ = "Lookup"
@@ -139,6 +244,9 @@ class LookupValue(db.Model):
 	def __repr__(self):
 		return "<LookupValue: {}>".format(self.Name)
 
+	def isReferenced(self):
+		return TagValue.query.join(Tag).filter(TagValue.Value == self.Value, Tag.LookupId == self.LookupId).count() > 0
+
 class Site(db.Model):
 	__tablename__ = "Site"
 	__table_args__ = \
@@ -158,6 +266,9 @@ class Site(db.Model):
 
 	def __repr__(self):
 		return "<Site: {}>".format(self.Name)
+
+	def id(self):
+		return self.SiteId
 
 class Tag(db.Model):
 	__tablename__ = "Tag"
@@ -179,6 +290,9 @@ class Tag(db.Model):
 
 	def __repr__(self):
 		return "<Tag: {}>".format(self.Name)
+
+	def id(self):
+		return self.TagId
 
 class TagValue(db.Model):
 	__tablename__ = "TagValue"

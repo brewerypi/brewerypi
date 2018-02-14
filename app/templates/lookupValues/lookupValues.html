@@ -9,7 +9,8 @@ Lookup Values
     <h1>{{ lookup.Name }} - Lookup Values</h1>
     <a class = "btn btn-default" title = "Add" href = "{{ url_for("lookupValues.addLookupValue", lookupId = lookup.LookupId) }}" role = "button">
         <span class="glyphicon glyphicon-plus"></span></a>
-    <table class = "table">
+    <br><br>
+    <table id = "lookupValuesTable" class = "table">
         <thead>
             <tr>
                 <th>Lookup</th>
@@ -34,4 +35,29 @@ Lookup Values
         </tbody>
     </table>
 </div>
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <link rel = "stylesheet" type = "text/css" href = {{ url_for("static", filename = "css/datatables.min.css") }}/> 
+    <script type = "text/javascript" src = {{ url_for("static", filename = "js/datatables.min.js") }}></script>
+    <script>
+        $('#lookupValuesTable').DataTable
+        ({
+            order:
+            [
+                [0, 'asc'],             // Lookup.
+                [1, 'asc'],             // Name.
+            ],
+            "columns":
+            [
+                null,
+                null,
+                null,
+                { "orderable": false }, // Edit button.
+                { "orderable": false }  // Delete button.
+            ],
+            stateSave: true
+        });
+    </script>
 {% endblock %}

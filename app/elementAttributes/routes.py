@@ -12,9 +12,7 @@ from .. tagValues . forms import TagValueForm
 # @login_required
 def listElementAttributes():
 	# check_admin()
-	elementAttributes = ElementAttribute.query.join(Element, Tag, ElementTemplate, Site, Enterprise). \
-		join(AttributeTemplate, ElementAttribute.AttributeTemplateId == AttributeTemplate.AttributeTemplateId). \
-		order_by(Enterprise.Abbreviation, Site.Abbreviation, ElementTemplate.Name, Element.Name, AttributeTemplate.Name)
+	elementAttributes = ElementAttribute.query.all()
 	return render_template("elementAttributes/elementAttributes.html", elementAttributes = elementAttributes)
 
 @elementAttributes.route("/elementAttributes/add", methods = ["GET", "POST"])
@@ -30,7 +28,8 @@ def addElementAttribute():
 		elementAttribute = ElementAttribute(AttributeTemplate = form.attributeTemplate.data, Element = form.element.data, Tag = form.tag.data)
 		db.session.add(elementAttribute)
 		db.session.commit()
-		flash("You have successfully added the element attribute \"" + form.attributeTemplate.data.Name + "\" for \"" + form.element.data.Name + "\".")
+		flash("You have successfully added the element attribute \"" + form.attributeTemplate.data.Name + "\" for \"" + form.element.data.Name + "\".",
+			"alert alert-success")
 		return redirect(url_for("elementAttributes.listElementAttributes"))
 
 	# Present a form to add a new element attribute.
@@ -45,7 +44,7 @@ def deleteElementAttribute(elementAttributeId):
 	elementName = elementAttribute.Element.Name
 	db.session.delete(elementAttribute)
 	db.session.commit()
-	flash("You have successfully deleted the element attribute \"" + attributeTemplateName + "\" for \"" + elementName + "\".")
+	flash("You have successfully deleted the element attribute \"" + attributeTemplateName + "\" for \"" + elementName + "\".", "alert alert-success")
 	return redirect(url_for("elementAttributes.listElementAttributes"))
 
 @elementAttributes.route("/elementAttributes/edit/<int:elementAttributeId>", methods = ["GET", "POST"])
@@ -64,7 +63,7 @@ def editElementAttribute(elementAttributeId):
 		elementAttribute.Tag = form.tag.data
 		db.session.commit()
 		flash("You have successfully edited the element attribute \"" + elementAttribute.AttributeTemplate.Name + "\" for \"" + \
-			elementAttribute.Element.Name + "\".")
+			elementAttribute.Element.Name + "\".", "alert alert-success")
 		return redirect(url_for("elementAttributes.listElementAttributes"))
 
 	# Present a form to edit an existing element attribute.
@@ -78,7 +77,8 @@ def exportElementAttributes():
 	elementAttributes = ElementAttribute.query.join(Element, Tag, ElementTemplate, Site, Enterprise). \
 		join(AttributeTemplate, ElementAttribute.AttributeTemplateId == AttributeTemplate.AttributeTemplateId). \
 		order_by(Enterprise.Abbreviation, Site.Abbreviation, ElementTemplate.Name, Element.Name, AttributeTemplate.Name)
-	with open(os.path.join(current_app.config["EXPORT_FOLDER"], current_app.config["EXPORT_ELEMENT_ATTRIBUTES_FILENAME"]), "w") as elementsFile:
+	with open(os.path.join(current_app.config["EXPORT_FOLDER"], current_app.config["EXPORT_ELEMENT_ATTRIBUTES_FILENAME"]), "w", encoding = "latin-1") \
+		as elementsFile:
 		fieldnames = ["Selected", "Element Attribute Id", "Enterprise", "Site", "Element Template", "Element Name", "Attribute Template", "Area", "Tag Name"]
 		elementAttributesWriter = csv.DictWriter(elementsFile, fieldnames = fieldnames, lineterminator = "\n")
 		elementAttributesWriter.writeheader()
@@ -107,7 +107,8 @@ def importElementAttributes():
 		elementAttributesFile.close()
 
 		# Open the uploaded file.
-		with open(os.path.join(current_app.config["IMPORT_FOLDER"], current_app.config["IMPORT_ELEMENT_ATTRIBUTES_FILENAME"]), "r") as elementAttributesFile:
+		with open(os.path.join(current_app.config["IMPORT_FOLDER"], current_app.config["IMPORT_ELEMENT_ATTRIBUTES_FILENAME"]), "r", encoding = "latin-1") \
+			as elementAttributesFile:
 			elementAttributesReader = csv.DictReader(elementAttributesFile, delimiter = ",")
 
 			# Make sure that the header is well formed.
@@ -252,8 +253,8 @@ def addElementAttributeValue(elementId, tagId):
 
 		db.session.add(tagValue)
 		db.session.commit()
-		flash("You have successfully added a new element attribute value.")
-		return redirect(url_for("elementAttributes.listElementAttributeValues", elementId = elementId))
+		flash("You have successfully added a new element attribute value.", "alert alert-success")
+		return redirect(url_for("elements.dashboard", elementId = elementId))
 
 	# Present a form to add a new element attribute value.
 	form.tagId.data = tag.TagId
@@ -266,8 +267,8 @@ def deleteElementAttributeValue(elementId, tagValueId):
 	tagValue = TagValue.query.get_or_404(tagValueId)
 	db.session.delete(tagValue)
 	db.session.commit()
-	flash("You have successfully deleted the element attribute value.")
-	return redirect(url_for("elementAttributes.listElementAttributeValues", elementId = elementId))
+	flash("You have successfully deleted the element attribute value.", "alert alert-success")
+	return redirect(url_for("elements.dashboard", elementId = elementId))
 
 @elementAttributes.route("/elementAttributes/editValue/<int:elementId>/<int:tagValueId>", methods = ["GET", "POST"])
 # @login_required
@@ -298,8 +299,8 @@ def editElementAttributeValue(elementId, tagValueId):
 			tagValue.Value = form.value.data
 
 		db.session.commit()
-		flash("You have successfully edited the element attribute value.")
-		return redirect(url_for("elementAttributes.listElementAttributeValues", elementId = elementId))
+		flash("You have successfully edited the element attribute value.", "alert alert-success")
+		return redirect(url_for("elements.dashboard", elementId = elementId))
 
 	# Present a form to edit an existing element attribute value.
 	form.tagId.data = tagValue.TagId

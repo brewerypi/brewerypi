@@ -14,7 +14,7 @@
       "type": "grafana",
       "id": "grafana",
       "name": "Grafana",
-      "version": "4.6.2"
+      "version": "4.6.3"
     },
     {
       "type": "datasource",
@@ -95,7 +95,7 @@
               "alias": "",
               "format": "table",
               "hide": false,
-              "rawSql": "SELECT Element.Name/*,\nIFNULL((\n\tSELECT LookupValue.Name\n    FROM ElementAttribute\n\t\tINNER JOIN AttributeTemplate ON ElementAttribute.AttributeTemplateId = AttributeTemplate.AttributeTemplateId\n        INNER JOIN Tag ON ElementAttribute.TagId = Tag.TagId\n        INNER JOIN Lookup ON Tag.LookupId = Lookup.LookupId\n        INNER JOIN LookupValue ON Lookup.LookupId = LookupValue.LookupId\n        INNER JOIN TagValue ON Tag.TagId = TagValue.TagId AND LookupValue.Value = TagValue.Value\n\tWHERE ElementAttribute.ElementId = Element.ElementId AND AttributeTemplate.Name = 'Brand'\n    ORDER BY TagValue.Timestamp DESC\n    LIMIT 1\n), \"\") AS Brand,\nIFNULL((\n\tSELECT LookupValue.Name\n    FROM ElementAttribute\n\t\tINNER JOIN AttributeTemplate ON ElementAttribute.AttributeTemplateId = AttributeTemplate.AttributeTemplateId\n        INNER JOIN Tag ON ElementAttribute.TagId = Tag.TagId\n        INNER JOIN Lookup ON Tag.LookupId = Lookup.LookupId\n        INNER JOIN LookupValue ON Lookup.LookupId = LookupValue.LookupId\n        INNER JOIN TagValue ON Tag.TagId = TagValue.TagId AND LookupValue.Value = TagValue.Value\n\tWHERE ElementAttribute.ElementId = Element.ElementId AND AttributeTemplate.Name = 'Status'\n    ORDER BY TagValue.Timestamp DESC\n    LIMIT 1\n), \"\") AS Status,\nIFNULL((\n\tSELECT ROUND(TagValue.Value, 2)\n    FROM ElementAttribute\n\t\tINNER JOIN AttributeTemplate ON ElementAttribute.AttributeTemplateId = AttributeTemplate.AttributeTemplateId\n        INNER JOIN Tag ON ElementAttribute.TagId = Tag.TagId\n        INNER JOIN TagValue ON Tag.TagId = TagValue.TagId\n\tWHERE ElementAttribute.ElementId = Element.ElementId AND AttributeTemplate.Name = 'Plato'\n    ORDER BY TagValue.Timestamp DESC\n    LIMIT 1\n), \"\") AS Plato*/\nFROM Element\n  INNER JOIN ElementTemplate ON Element.ElementTemplateId = ElementTemplate.ElementTemplateId\nWHERE ElementTemplate.Name IN($elementTemplateName)\nORDER BY Element.Name",
+              "rawSql": "SELECT Element.Name/*,\nIFNULL((\n\tSELECT LookupValue.Name\n    FROM ElementAttribute\n\t\tINNER JOIN AttributeTemplate ON ElementAttribute.AttributeTemplateId = AttributeTemplate.AttributeTemplateId\n        INNER JOIN Tag ON ElementAttribute.TagId = Tag.TagId\n        INNER JOIN Lookup ON Tag.LookupId = Lookup.LookupId\n        INNER JOIN LookupValue ON Lookup.LookupId = LookupValue.LookupId\n        INNER JOIN TagValue ON Tag.TagId = TagValue.TagId AND LookupValue.Value = TagValue.Value\n\tWHERE ElementAttribute.ElementId = Element.ElementId AND AttributeTemplate.Name = 'Brand'\n    ORDER BY TagValue.Timestamp DESC\n    LIMIT 1\n), \"\") AS Brand,\nIFNULL((\n\tSELECT LookupValue.Name\n    FROM ElementAttribute\n\t\tINNER JOIN AttributeTemplate ON ElementAttribute.AttributeTemplateId = AttributeTemplate.AttributeTemplateId\n        INNER JOIN Tag ON ElementAttribute.TagId = Tag.TagId\n        INNER JOIN Lookup ON Tag.LookupId = Lookup.LookupId\n        INNER JOIN LookupValue ON Lookup.LookupId = LookupValue.LookupId\n        INNER JOIN TagValue ON Tag.TagId = TagValue.TagId AND LookupValue.Value = TagValue.Value\n\tWHERE ElementAttribute.ElementId = Element.ElementId AND AttributeTemplate.Name = 'Status'\n    ORDER BY TagValue.Timestamp DESC\n    LIMIT 1\n), \"\") AS Status,\nIFNULL((\n\tSELECT ROUND(TagValue.Value, 2)\n    FROM ElementAttribute\n\t\tINNER JOIN AttributeTemplate ON ElementAttribute.AttributeTemplateId = AttributeTemplate.AttributeTemplateId\n        INNER JOIN Tag ON ElementAttribute.TagId = Tag.TagId\n        INNER JOIN TagValue ON Tag.TagId = TagValue.TagId\n\tWHERE ElementAttribute.ElementId = Element.ElementId AND AttributeTemplate.Name = 'Plato'\n    ORDER BY TagValue.Timestamp DESC\n    LIMIT 1\n), \"\") AS Plato*/\nFROM Element\n  INNER JOIN ElementTemplate ON Element.ElementTemplateId = ElementTemplate.ElementTemplateId\nWHERE ElementTemplate.ElementTemplateId IN($elementTemplate)\nORDER BY Element.Name",
               "refId": "A"
             }
           ],
@@ -123,14 +123,54 @@
         "datasource": "${DS_BREWERYPI}",
         "hide": 0,
         "includeAll": false,
-        "label": "Element Template",
+        "label": "Enterprise:",
         "multi": false,
-        "name": "elementTemplateName",
+        "name": "enterprise",
         "options": [],
-        "query": "SELECT Name FROM ElementTemplate",
+        "query": "SELECT Enterprise.EnterpriseId AS __value, Enterprise.Name AS __text FROM Enterprise",
         "refresh": 1,
         "regex": "",
-        "sort": 0,
+        "sort": 1,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {},
+        "datasource": "${DS_BREWERYPI}",
+        "hide": 0,
+        "includeAll": false,
+        "label": "Site:",
+        "multi": false,
+        "name": "site",
+        "options": [],
+        "query": "SELECT Site.SiteId AS __value, Site.Name AS __text FROM Site WHERE Site.EnterpriseId = $enterprise",
+        "refresh": 1,
+        "regex": "",
+        "sort": 1,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {},
+        "datasource": "${DS_BREWERYPI}",
+        "hide": 0,
+        "includeAll": false,
+        "label": "Element Template:",
+        "multi": false,
+        "name": "elementTemplate",
+        "options": [],
+        "query": "SELECT ElementTemplate.ElementTemplateId AS __value, ElementTemplate.Name AS __text FROM ElementTemplate WHERE ElementTemplate.SiteId = $site",
+        "refresh": 1,
+        "regex": "",
+        "sort": 1,
         "tagValuesQuery": "",
         "tags": [],
         "tagsQuery": "",
@@ -170,5 +210,5 @@
   },
   "timezone": "",
   "title": "Element Summary",
-  "version": 2
+  "version": 4
 }

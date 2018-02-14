@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}
+Event Frame Templates
+{% endblock %}
+
+{% block page_content %}
+<div>
+    <ol class="breadcrumb">
+        {% if className == "Enterprise" %}
+            <li class = "active">..</li>
+        {% elif className == "Site" %}
+            <li><a href = "{{ url_for("eventFrameTemplates.selectEventFrameTemplate", className = "Root") }}">..</a></li>
+            <li class = "active">{{ parent.Name }}</li>
+        {% elif className == "ElementTemplate" %}
+            <li><a href = "{{ url_for("eventFrameTemplates.selectEventFrameTemplate", className = "Root") }}">..</a></li>
+            <li><a href = "{{ url_for("eventFrameTemplates.selectEventFrameTemplate", className = parent.Enterprise.__class__.__name__,
+                id = parent.Enterprise.id()) }}">{{ parent.Enterprise.Name }}</a></li>
+            <li class = "active">{{ parent.Name }}</li>
+        {% elif className == "EventFrameTemplate" %}
+            <li><a href = "{{ url_for("eventFrameTemplates.selectEventFrameTemplate", className = "Root") }}">..</a></li>
+            <li><a href = "{{ url_for("eventFrameTemplates.selectEventFrameTemplate", className = parent.Site.Enterprise.__class__.__name__,
+                id = parent.Site.Enterprise.id()) }}">{{ parent.Site.Enterprise.Name }}</a></li>
+            <li><a href = "{{ url_for("eventFrameTemplates.selectEventFrameTemplate", className = parent.Site.__class__.__name__,
+                id = parent.Site.id()) }}">{{ parent.Site.Name }}</a></li>
+            <li class = "active">{{ parent.Name }}</li>
+        {% else %}
+            <!-- These are children event frame templates. -->
+            {% set origin = parent.origin() %}
+            <li><a href = "{{ url_for("eventFrameTemplates.selectEventFrameTemplate", className = "Root") }}">..</a></li>
+            <li><a href = "{{ url_for("eventFrameTemplates.selectEventFrameTemplate", className = origin.ElementTemplate.Site.Enterprise.__class__.__name__,
+                id = origin.ElementTemplate.Site.Enterprise.id()) }}">{{ origin.ElementTemplate.Site.Enterprise.Name }}</a></li>
+            <li><a href = "{{ url_for("eventFrameTemplates.selectEventFrameTemplate", className = origin.ElementTemplate.Site.__class__.__name__,
+                id = origin.ElementTemplate.Site.id()) }}">{{ origin.ElementTemplate.Site.Name }}</a></li>
+            <li><a href = "{{ url_for("eventFrameTemplates.selectEventFrameTemplate", className = origin.ElementTemplate.__class__.__name__,
+                id = origin.ElementTemplate.id()) }}">{{ origin.ElementTemplate.Name }}</a></li>
+            {% for ancestor in parent.ancestors([]) %}
+                <li><a href = "{{ url_for("eventFrameTemplates.selectEventFrameTemplate", className = ancestor.__class__.__name__,
+                    id = ancestor.id()) }}">{{ ancestor.Name }}</a></li>
+            {% endfor %}
+            <li class = "active">{{ parent.Name }}</li>
+        {% endif %}
+    </ol>
+</div>
+<div>
+    {% if className == "Enterprise" %}
+        <h1>Enterprises</h1>
+    {% elif className == "Site" %}
+        <h1>Sites</h1>
+    {% elif className == "ElementTemplate" %}
+        <h1>Element Templates</h1>
+    {% elif className == "EventFrameTemplate" %}
+        <h1>Event Frame Templates</h1>
+        <a class = "btn btn-default" title = "Add" href = "{{ url_for("eventFrameTemplates.addEventFrameTemplate",
+            elementTemplateId = parent.id()) }}" role = "button"><span class="glyphicon glyphicon-plus"></span></a>
+    {% else %}
+        <!-- These are children event frame templates. -->
+        <h1>Event Frame Templates</h1>
+        <a class = "btn btn-default" title = "Add" href = "{{ url_for("eventFrameTemplates.addEventFrameTemplate",
+            parentEventFrameTemplateId = parent.id()) }}" role = "button"><span class="glyphicon glyphicon-plus"></span></a>
+    {% endif %}
+    <br><br>
+    <table id = "eventFrameTemplatesTable" class = "table">
+        <thead>
+            <tr>
+                <th></th>
+                <th>Name</th>
+                <th>Description</th>
+                <th></th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for child in children %}
+                <tr>
+                    <td><a class = "btn btn-default" title = "Children" href = "{{ url_for("eventFrameTemplates.selectEventFrameTemplate",
+                        className = child.__class__.__name__, id = child.id()) }}"><span class="glyphicon glyphicon-list"></span></a></td>
+                    <td>{{ child.Name }}</td>
+                    <td>{{ child.Description }}</td>
+                    {% if className == "EventFrameTemplate" or className == None %}
+                        <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Edit" href = "{{ url_for("eventFrameTemplates.editEventFrameTemplate",
+                            eventFrameTemplateId = child.id()) }}"><span class="glyphicon glyphicon-edit"></a></td>
+                        <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Delete" href = "{{ url_for("eventFrameTemplates.deleteEventFrameTemplate",
+                            eventFrameTemplateId = child.id()) }}"><span class="glyphicon glyphicon-trash"></a></td>
+                    {% else %}
+                        <td></td>
+                        <td></td>
+                    {% endif %}
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <link rel = "stylesheet" type = "text/css" href = {{ url_for("static", filename = "css/datatables.min.css") }}/> 
+    <script type = "text/javascript" src = {{ url_for("static", filename = "js/datatables.min.js") }}></script>
+    <script>
+        $('#eventFrameTemplatesTable').DataTable
+        ({
+            order:
+            [
+                [1, 'asc']              // Name.
+            ],
+            "columns":
+            [
+                { "orderable": false }, // Children button.
+                null,
+                null,
+                { "orderable": false }, // Edit button.
+                { "orderable": false }  // Delete button.
+            ],
+            stateSave: true
+        });
+    </script>
+{% endblock %}

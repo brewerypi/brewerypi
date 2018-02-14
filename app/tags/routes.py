@@ -10,11 +10,8 @@ from .. models import Area, Enterprise, Lookup, Site, Tag, UnitOfMeasurement
 # @login_required
 def listTags():
 	# check_admin()
-	page = request.args.get("page", 1, type = int)
-	pagination = Tag.query.outerjoin(Lookup).join(Area, Site, Enterprise).order_by(Enterprise.Abbreviation, Site.Abbreviation, Area.Abbreviation, \
-		Tag.Name).paginate(page, per_page = 10, error_out = False)
-	tags = pagination.items
-	return render_template("tags/tags.html", pagination = pagination, tags = tags)
+	tags = Tag.query.outerjoin(UnitOfMeasurement, Lookup)
+	return render_template("tags/tags.html", tags = tags)
 
 @tags.route("/tags/add", methods = ["GET", "POST"])
 @tags.route("/tags/add/<int:lookup>", methods = ["GET", "POST"])
@@ -40,7 +37,7 @@ def addTag(lookup = False):
 
 		db.session.add(tag)
 		db.session.commit()
-		flash("You have successfully added the new tag \"" + tag.Name + "\".")
+		flash("You have successfully added the new tag \"" + tag.Name + "\".", "alert alert-success")
 		return redirect(url_for("tags.listTags"))
 
 	# Present a form to add a new tag.
@@ -53,7 +50,7 @@ def deleteTag(tagId):
 	tag = Tag.query.get_or_404(tagId)
 	db.session.delete(tag)
 	db.session.commit()
-	flash("You have successfully deleted the tag \"" + tag.Name + "\".")
+	flash("You have successfully deleted the tag \"" + tag.Name + "\".", "alert alert-success")
 	return redirect(url_for("tags.listTags"))
 
 @tags.route("/tags/edit/<int:tagId>", methods = ["GET", "POST"])
@@ -83,7 +80,7 @@ def editTag(tagId):
 			tag.UnitOfMeasurement = form.unitOfMeasurement.data
 
 		db.session.commit()
-		flash("You have successfully edited the tag \"" + tag.Name + "\".")
+		flash("You have successfully edited the tag \"" + tag.Name + "\".", "alert alert-success")
 		return redirect(url_for("tags.listTags"))
 
 	# Present a form to edit an existing tag.
@@ -101,7 +98,7 @@ def editTag(tagId):
 @tags.route("/tags/export")
 def exportTags():
 	tags = Tag.query.outerjoin(Lookup).join(Area, Site, Enterprise).order_by(Enterprise.Abbreviation, Site.Abbreviation, Area.Abbreviation, Tag.Name)
-	with open(os.path.join(current_app.config["EXPORT_FOLDER"], current_app.config["EXPORT_TAGS_FILENAME"]), "w") as tagsFile:
+	with open(os.path.join(current_app.config["EXPORT_FOLDER"], current_app.config["EXPORT_TAGS_FILENAME"]), "w", encoding = "latin-1") as tagsFile:
 		fieldnames = ["Selected", "Tag Id", "Enterprise", "Site", "Area", "Tag Name", "Tag Description", "Lookup", "Unit"]
 		tagsWriter = csv.DictWriter(tagsFile, fieldnames = fieldnames, lineterminator = "\n")
 		tagsWriter.writeheader()
@@ -133,7 +130,7 @@ def importTags():
 		tagsFile.close()
 
 		# Open the uploaded file.
-		with open(os.path.join(current_app.config["IMPORT_FOLDER"], current_app.config["IMPORT_TAGS_FILENAME"]), "r") as tagsFile:
+		with open(os.path.join(current_app.config["IMPORT_FOLDER"], current_app.config["IMPORT_TAGS_FILENAME"]), "r", encoding = "latin-1") as tagsFile:
 			tagsReader = csv.DictReader(tagsFile, delimiter = ",")
 
 			# Make sure that the header is well formed.
@@ -226,3 +223,31 @@ def importTags():
 					successes.append("Tag \"" + oldTagName + "\" edited.")
 
 	return render_template("import.html", errors = errors, form = form, importing = "Tags", successes = successes, warnings = warnings)
+
+@tags.route("/selectTag", methods = ["GET", "POST"])
+@tags.route("/selectTag/<string:className>", methods = ["GET", "POST"])
+@tags.route("/selectTag/<string:className>/<int:id>", methods = ["GET", "POST"])
+# @login_required
+def selectTag(className = None, id = None):
+	if className == None:
+		parent = Area.query.join(Site, Enterprise).order_by(Enterprise.Name, Site.Name, Area.Name).first()
+		children = Tag.query.filter_by(AreaId = parent.id())
+		className = "Tag"
+	elif className == "Area":
+		parent = Area.query.get_or_404(id)
+		children = Tag.query.filter_by(AreaId = id)
+		className = "Tag"
+	elif className == "Site":
+		parent = Site.query.get_or_404(id)
+		children = Area.query.filter_by(SiteId = id)
+		className = "Area"
+	elif className == "Enterprise":
+		parent = Enterprise.query.get_or_404(id)
+		children = Site.query.filter_by(EnterpriseId = id)
+		className = "Site"
+	elif className == "Root":
+		parent = None
+		children = Enterprise.query.order_by(Enterprise.Name)
+		className = "Enterprise"
+
+	return render_template("tags/selectTag.html", children = children, className = className, parent = parent)
