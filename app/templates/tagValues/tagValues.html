@@ -43,11 +43,6 @@ Tag Values
         </tbody>
     </table>
 </div>
-{% if pagination %}
-<div class = "text-right">
-    {{ macros.pagination_widget(pagination, ".listTagValues", tagId = tag.TagId) }}
-</div>
-{% endif %}
 {% endblock %}
 
 {% block scripts %}
