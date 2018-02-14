@@ -223,3 +223,31 @@ def importTags():
 					successes.append("Tag \"" + oldTagName + "\" edited.")
 
 	return render_template("import.html", errors = errors, form = form, importing = "Tags", successes = successes, warnings = warnings)
+
+@tags.route("/selectTag", methods = ["GET", "POST"])
+@tags.route("/selectTag/<string:className>", methods = ["GET", "POST"])
+@tags.route("/selectTag/<string:className>/<int:id>", methods = ["GET", "POST"])
+# @login_required
+def selectTag(className = None, id = None):
+	if className == None:
+		parent = Area.query.join(Site, Enterprise).order_by(Enterprise.Name, Site.Name, Area.Name).first()
+		children = Tag.query.filter_by(AreaId = parent.id())
+		className = "Tag"
+	elif className == "Area":
+		parent = Area.query.get_or_404(id)
+		children = Tag.query.filter_by(AreaId = id)
+		className = "Tag"
+	elif className == "Site":
+		parent = Site.query.get_or_404(id)
+		children = Area.query.filter_by(SiteId = id)
+		className = "Area"
+	elif className == "Enterprise":
+		parent = Enterprise.query.get_or_404(id)
+		children = Site.query.filter_by(EnterpriseId = id)
+		className = "Site"
+	elif className == "Root":
+		parent = None
+		children = Enterprise.query.order_by(Enterprise.Name)
+		className = "Enterprise"
+
+	return render_template("tags/selectTag.html", children = children, className = className, parent = parent)

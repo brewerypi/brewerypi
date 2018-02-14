@@ -20,6 +20,9 @@ class Area(db.Model):
 	def __repr__(self):
 		return "<Area: {}>".format(self.Name)
 
+	def id(self):
+		return self.AreaId
+
 class AttributeTemplate(db.Model):
 	__tablename__ = "AttributeTemplate"
 	__table_args__ = \
@@ -287,6 +290,9 @@ class Tag(db.Model):
 
 	def __repr__(self):
 		return "<Tag: {}>".format(self.Name)
+
+	def id(self):
+		return self.TagId
 
 class TagValue(db.Model):
 	__tablename__ = "TagValue"
