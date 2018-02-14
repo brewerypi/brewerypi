@@ -61,7 +61,8 @@ Event Frame Templates
         <a class = "btn btn-default" title = "Add" href = "{{ url_for("eventFrameTemplates.addEventFrameTemplate",
             parentEventFrameTemplateId = parent.id()) }}" role = "button"><span class="glyphicon glyphicon-plus"></span></a>
     {% endif %}
-    <table class = "table">
+    <br><br>
+    <table id = "eventFrameTemplatesTable" class = "table">
         <thead>
             <tr>
                 <th></th>
@@ -78,13 +79,42 @@ Event Frame Templates
                         className = child.__class__.__name__, id = child.id()) }}"><span class="glyphicon glyphicon-list"></span></a></td>
                     <td>{{ child.Name }}</td>
                     <td>{{ child.Description }}</td>
-                    <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Edit" href = "{{ url_for("eventFrameTemplates.editEventFrameTemplate",
-                        eventFrameTemplateId = child.id()) }}"><span class="glyphicon glyphicon-edit"></a></td>
-                    <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Delete" href = "{{ url_for("eventFrameTemplates.deleteEventFrameTemplate",
-                        eventFrameTemplateId = child.id()) }}"><span class="glyphicon glyphicon-trash"></a></td>
+                    {% if className == "EventFrameTemplate" or className == None %}
+                        <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Edit" href = "{{ url_for("eventFrameTemplates.editEventFrameTemplate",
+                            eventFrameTemplateId = child.id()) }}"><span class="glyphicon glyphicon-edit"></a></td>
+                        <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Delete" href = "{{ url_for("eventFrameTemplates.deleteEventFrameTemplate",
+                            eventFrameTemplateId = child.id()) }}"><span class="glyphicon glyphicon-trash"></a></td>
+                    {% else %}
+                        <td></td>
+                        <td></td>
+                    {% endif %}
                 </tr>
             {% endfor %}
         </tbody>
     </table>
 </div>
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <link rel = "stylesheet" type = "text/css" href = {{ url_for("static", filename = "css/datatables.min.css") }}/> 
+    <script type = "text/javascript" src = {{ url_for("static", filename = "js/datatables.min.js") }}></script>
+    <script>
+        $('#eventFrameTemplatesTable').DataTable
+        ({
+            order:
+            [
+                [1, 'asc']              // Name.
+            ],
+            "columns":
+            [
+                { "orderable": false }, // Children button.
+                null,
+                null,
+                { "orderable": false }, // Edit button.
+                { "orderable": false }  // Delete button.
+            ],
+            stateSave: true
+        });
+    </script>
 {% endblock %}
