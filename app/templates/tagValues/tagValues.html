@@ -11,7 +11,8 @@ Tag Values
     <h1>{{ tag.Name }} - Tag Values</h1>
     <a class = "btn btn-default" title = "Add" href = "{{ url_for("tagValues.addTagValue", tagId = tag.TagId) }}" role = "button">
         <span class="glyphicon glyphicon-plus"></span></a>
-    <table class = "table">
+    <br><br>
+    <table id = "tagValuesTable" class = "table">
         <thead>
             <tr>
                 <th><a href = "{{ url_for("tagValues.listTagValues", tagId = tag.TagId) }}">Timestamp</a></th>
@@ -47,4 +48,27 @@ Tag Values
     {{ macros.pagination_widget(pagination, ".listTagValues", tagId = tag.TagId) }}
 </div>
 {% endif %}
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <link rel = "stylesheet" type = "text/css" href = {{ url_for("static", filename = "css/datatables.min.css") }}/> 
+    <script type = "text/javascript" src = {{ url_for("static", filename = "js/datatables.min.js") }}></script>
+    <script>
+        $('#tagValuesTable').DataTable
+        ({
+            order:
+            [
+                [0, 'desc']              // Timestamp.
+            ],
+            "columns":
+            [
+                null,
+                null,
+                { "orderable": false }, // Edit tag value button.
+                { "orderable": false }  // Delete tag value button.
+            ],
+            stateSave: true
+        });
+    </script>
 {% endblock %}
