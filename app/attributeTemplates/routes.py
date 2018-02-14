@@ -1,5 +1,4 @@
 from flask import flash, redirect, render_template, url_for
-from sqlalchemy import text
 from . import attributeTemplates
 from . forms import AttributeTemplateForm
 from .. import db
@@ -8,14 +7,10 @@ from .. models import AttributeTemplate, ElementTemplate, Enterprise, Site
 modelName = "Attribute Template"
 
 @attributeTemplates.route("/attributeTemplates", methods = ["GET", "POST"])
-@attributeTemplates.route("/attributeTemplates/<string:sortColumn>", methods = ["GET", "POST"])
 # @login_required
-def listAttributeTemplates(sortColumn = ""):
+def listAttributeTemplates():
 	# check_admin()
-	if sortColumn != "":
-		sortColumn = sortColumn + ", "
-	attributeTemplates = AttributeTemplate.query.join(ElementTemplate, Site, Enterprise). \
-		order_by(text(sortColumn + "Enterprise.Abbreviation, Site.Abbreviation, ElementTemplate.Name, AttributeTemplate.Name"))
+	attributeTemplates = AttributeTemplate.query.all()
 	return render_template("attributeTemplates/attributeTemplates.html", attributeTemplates = attributeTemplates)
 
 @attributeTemplates.route("/attributeTemplates/add", methods = ["GET", "POST"])
@@ -30,7 +25,7 @@ def addAttributeTemplate():
 		attributeTemplate = AttributeTemplate(Description = form.description.data, ElementTemplate = form.elementTemplate.data, Name = form.name.data)
 		db.session.add(attributeTemplate)
 		db.session.commit()
-		flash("You have successfully added the new attribute template \"" + attributeTemplate.Name + "\".")
+		flash("You have successfully added the new attribute template \"" + attributeTemplate.Name + "\".", "alert alert-success")
 		return redirect(url_for("attributeTemplates.listAttributeTemplates"))
 
 	# Present a form to add a new attribute template.
@@ -43,7 +38,7 @@ def deleteAttributeTemplate(attributeTemplateId):
 	attributeTemplate = AttributeTemplate.query.get_or_404(attributeTemplateId)
 	db.session.delete(attributeTemplate)
 	db.session.commit()
-	flash("You have successfully deleted the attribute template \"" + attributeTemplate.Name + "\".")
+	flash("You have successfully deleted the attribute template \"" + attributeTemplate.Name + "\".", "alert alert-success")
 	return redirect(url_for("attributeTemplates.listAttributeTemplates"))
 
 @attributeTemplates.route("/attributeTemplates/edit/<int:attributeTemplateId>", methods = ["GET", "POST"])
@@ -60,7 +55,7 @@ def editAttributeTemplate(attributeTemplateId):
 		attributeTemplate.ElementTemplate = form.elementTemplate.data
 		attributeTemplate.Name = form.name.data
 		db.session.commit()
-		flash("You have successfully edited the attribute template \"" + attributeTemplate.Name + "\".")
+		flash("You have successfully edited the attribute template \"" + attributeTemplate.Name + "\".", "alert alert-success")
 		return redirect(url_for("attributeTemplates.listAttributeTemplates"))
 
 	# Present a form to edit an existing attributeTemplate.

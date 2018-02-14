@@ -1,5 +1,4 @@
 from flask import flash, redirect, render_template, request, url_for
-from sqlalchemy import text
 from . import lookupValues
 from . forms import LookupValueForm
 from .. import db
@@ -8,14 +7,11 @@ from .. models import Enterprise, Lookup, LookupValue
 modelName = "Lookup Value"
 
 @lookupValues.route("/lookupValues/<int:lookupId>", methods = ["GET", "POST"])
-@lookupValues.route("/lookupValues/<int:lookupId>/<string:sortColumn>", methods = ["GET", "POST"])
 # @login_required
-def listLookupValues(lookupId, sortColumn = ""):
+def listLookupValues(lookupId):
 	# check_admin()
-	if sortColumn != "":
-		sortColumn = sortColumn + ", "
 	lookup = Lookup.query.get_or_404(lookupId)
-	lookupValues = LookupValue.query.filter_by(LookupId = lookupId).join(Lookup).order_by(text(sortColumn + "LookupValue.Name"))
+	lookupValues = LookupValue.query.filter_by(LookupId = lookupId)
 	return render_template("lookupValues/lookupValues.html", lookup = lookup, lookupValues = lookupValues)
 
 @lookupValues.route("/lookupValues/add/<int:lookupId>", methods = ["GET", "POST"])
@@ -37,7 +33,7 @@ def addLookupValue(lookupId):
 		lookupValue = LookupValue(LookupId = form.lookupId.data, Name = form.name.data, Selectable = form.selectable.data, Value = form.value.data)
 		db.session.add(lookupValue)
 		db.session.commit()
-		flash("You have successfully added the new lookup value \"" + lookupValue.Name + "\".")
+		flash("You have successfully added the new lookup value \"" + lookupValue.Name + "\".", "alert alert-success")
 		return redirect(url_for("lookupValues.listLookupValues", lookupId = lookupId))
 
 	# Present a form to add a new lookupValue.
@@ -50,9 +46,12 @@ def addLookupValue(lookupId):
 def deleteLookupValue(lookupValueId):
 	# check_admin()
 	lookupValue = LookupValue.query.get_or_404(lookupValueId)
-	db.session.delete(lookupValue)
-	db.session.commit()
-	flash("You have successfully deleted the lookup value \"" + lookupValue.Name + "\".")
+	if lookupValue.isReferenced():
+		flash("Lookup value \"" + lookupValue.Name + "\" is referenced by one or more tag values and cannot be deleted.", "alert alert-danger")
+	else:
+		db.session.delete(lookupValue)
+		db.session.commit()
+		flash("You have successfully deleted the lookup value \"" + lookupValue.Name + "\".", "alert alert-success")
 	return redirect(url_for("lookupValues.listLookupValues", lookupId = lookupValue.LookupId))
 
 @lookupValues.route("/lookupValues/edit/<int:lookupValueId>", methods = ["GET", "POST"])
@@ -71,7 +70,7 @@ def editLookupValue(lookupValueId):
 		lookupValue.Selectable = form.selectable.data
 		lookupValue.Value = form.value.data
 		db.session.commit()
-		flash("You have successfully edited the lookup value \"" + lookupValue.Name + "\".")
+		flash("You have successfully edited the lookup value \"" + lookupValue.Name + "\".", "alert alert-success")
 		return redirect(url_for("lookupValues.listLookupValues", lookupId = lookupValue.LookupId))
 
 	# Present a form to edit an existing lookupValue.

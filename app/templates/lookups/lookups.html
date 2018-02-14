@@ -8,12 +8,13 @@ Lookups
 <div>
     <h1>Lookups</h1>
     <a class = "btn btn-default" title = "Add" href = "{{ url_for("lookups.addLookup") }}" role = "button"><span class="glyphicon glyphicon-plus"></span></a>
-    <table class = "table">
+    <br><br>
+    <table id = "lookupsTable" class = "table">
         <thead>
             <tr>
-                <th><a href = "{{ url_for("lookups.listLookups") }}">Enterprise</a></th>
-                <th><a href = "{{ url_for("lookups.listLookups", sortColumn = "Lookup.Name") }}">Name</a></th>
                 <th></th>
+                <th>Enterprise</th>
+                <th>Name</th>
                 <th></th>
                 <th></th>
             </tr>
@@ -21,12 +22,12 @@ Lookups
         <tbody>
             {% for lookup in lookups %}
             <tr>
+                <td><a class = "btn btn-default" title = "List Values" href = "{{ url_for("lookupValues.listLookupValues", lookupId = lookup.LookupId) }}">
+                    <span class="glyphicon glyphicon-list"></span></a></td>
                 <td>{{ lookup.Enterprise.Abbreviation }}</td>
                 <td>{{ lookup.Name }}</td>
                 <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("lookups.editLookup", lookupId = lookup.LookupId) }}">
                     <span class="glyphicon glyphicon-edit"></span></a></td>
-                <td><a class = "btn btn-default" title = "List Values" href = "{{ url_for("lookupValues.listLookupValues", lookupId = lookup.LookupId) }}">
-                    <span class="glyphicon glyphicon-list"></span></a></td>
                 <td><a class = "btn btn-default" title = "Delete" href = "{{ url_for("lookups.deleteLookup", lookupId = lookup.LookupId) }}">
                     <span class="glyphicon glyphicon-trash"></span></a></td>
             </tr>
@@ -34,4 +35,29 @@ Lookups
         </tbody>
     </table>
 </div>
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <link rel = "stylesheet" type = "text/css" href = {{ url_for("static", filename = "css/datatables.min.css") }}/> 
+    <script type = "text/javascript" src = {{ url_for("static", filename = "js/datatables.min.js") }}></script>
+    <script>
+        $('#lookupsTable').DataTable
+        ({
+            order:
+            [
+                [1, 'asc'],             // Enterprise.
+                [2, 'asc'],             // Name.
+            ],
+            "columns":
+            [
+                { "orderable": false }, // List button.
+                null,
+                null,
+                { "orderable": false }, // Edit button.
+                { "orderable": false }  // Delete button.
+            ],
+            stateSave: true
+        });
+    </script>
 {% endblock %}

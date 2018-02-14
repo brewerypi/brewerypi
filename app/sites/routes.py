@@ -1,5 +1,4 @@
 from flask import flash, redirect, render_template, request, url_for
-from sqlalchemy import text
 from . import sites
 from . forms import SiteForm
 from .. import db
@@ -8,13 +7,10 @@ from .. models import Enterprise, Site
 modelName = "Site"
 
 @sites.route("/sites", methods = ["GET", "POST"])
-@sites.route("/sites/<string:sortColumn>", methods = ["GET", "POST"])
 # @login_required
-def listSites(sortColumn = ""):
+def listSites():
 	# check_admin()
-	if sortColumn != "":
-		sortColumn = sortColumn + ", "
-	sites = Site.query.join(Enterprise).order_by(text(sortColumn + "Enterprise.Abbreviation, Site.Name"))
+	sites = Site.query
 	return render_template("sites/sites.html", sites = sites)
 
 @sites.route("/sites/add", methods = ["GET", "POST"])
@@ -29,7 +25,7 @@ def addSite():
 		site = Site(Abbreviation = form.abbreviation.data, Description = form.description.data, Enterprise = form.enterprise.data, Name = form.name.data)
 		db.session.add(site)
 		db.session.commit()
-		flash("You have successfully added the new site \"" + site.Name + "\".")
+		flash("You have successfully added the new site \"" + site.Name + "\".", "alert alert-success")
 		return redirect(url_for("sites.listSites"))
 
 	# Present a form to add a new site.
@@ -42,7 +38,7 @@ def deleteSite(siteId):
 	site = Site.query.get_or_404(siteId)
 	db.session.delete(site)
 	db.session.commit()
-	flash("You have successfully deleted the site \"" + site.Name + "\".")
+	flash("You have successfully deleted the site \"" + site.Name + "\".", "alert alert-success")
 	return redirect(url_for("sites.listSites"))
 
 @sites.route("/sites/edit/<int:siteId>", methods = ["GET", "POST"])
@@ -60,7 +56,7 @@ def editSite(siteId):
 		site.Enterprise = form.enterprise.data
 		site.Name = form.name.data
 		db.session.commit()
-		flash("You have successfully edited the site \"" + site.Name + "\".")
+		flash("You have successfully edited the site \"" + site.Name + "\".", "alert alert-success")
 		return redirect(url_for("sites.listSites"))
 
 	# Present a form to edit an existing site.

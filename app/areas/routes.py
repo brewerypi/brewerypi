@@ -1,5 +1,4 @@
 from flask import flash, redirect, render_template, request, url_for
-from sqlalchemy import text
 from . import areas
 from . forms import AreaForm
 from .. import db
@@ -8,13 +7,10 @@ from .. models import Area, Enterprise, Site
 modelName = "Area"
 
 @areas.route("/areas", methods = ["GET", "POST"])
-@areas.route("/areas/<string:sortColumn>", methods = ["GET", "POST"])
 # @login_required
-def listAreas(sortColumn = ""):
+def listAreas():
 	# check_admin()
-	if sortColumn != "":
-		sortColumn = sortColumn + ", "
-	areas = Area.query.join(Site, Enterprise).order_by(text(sortColumn + "Enterprise.Abbreviation, Site.Abbreviation, Area.Name"))
+	areas = Area.query
 	return render_template("areas/areas.html", areas = areas)
 
 @areas.route("/areas/add", methods = ["GET", "POST"])
@@ -29,7 +25,7 @@ def addArea():
 		area = Area(Abbreviation = form.abbreviation.data, Description = form.description.data, Name = form.name.data, Site = form.site.data)
 		db.session.add(area)
 		db.session.commit()
-		flash("You have successfully added the new area \"" + area.Name + "\".")
+		flash("You have successfully added the new area \"" + area.Name + "\".", "alert alert-success")
 		return redirect(url_for("areas.listAreas"))
 
 	# Present a form to add a new area.
@@ -42,7 +38,7 @@ def deleteArea(areaId):
 	area = Area.query.get_or_404(areaId)
 	db.session.delete(area)
 	db.session.commit()
-	flash("You have successfully deleted the area \"" + area.Name + "\".")
+	flash("You have successfully deleted the area \"" + area.Name + "\".", "alert alert-success")
 	return redirect(url_for("areas.listAreas"))
 
 @areas.route("/areas/edit/<int:areaId>", methods = ["GET", "POST"])
@@ -60,7 +56,7 @@ def editArea(areaId):
 		area.Name = form.name.data
 		area.Site = form.site.data
 		db.session.commit()
-		flash("You have successfully edited the area \"" + area.Name + "\".")
+		flash("You have successfully edited the area \"" + area.Name + "\".", "alert alert-success")
 		return redirect(url_for("areas.listAreas"))
 
 	# Present a form to edit an existing area.

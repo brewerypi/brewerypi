@@ -20,6 +20,9 @@ class Area(db.Model):
 	def __repr__(self):
 		return "<Area: {}>".format(self.Name)
 
+	def id(self):
+		return self.AreaId
+
 class AttributeTemplate(db.Model):
 	__tablename__ = "AttributeTemplate"
 	__table_args__ = \
@@ -88,6 +91,9 @@ class ElementTemplate(db.Model):
 	def __repr__(self):
 		return "<ElementTemplate: {}>".format(self.Name)
 
+	def id(self):
+		return self.ElementTemplateId
+
 class Enterprise(db.Model):
 	__tablename__ = "Enterprise"
 	__table_args__ = \
@@ -106,6 +112,9 @@ class Enterprise(db.Model):
 
 	def __repr__(self):
 		return "<Enterprise: {}>".format(self.Name)
+
+	def id(self):
+		return self.EnterpriseId
 
 class EventFrame(db.Model):
 	__tablename__ = "EventFrame"
@@ -136,6 +145,12 @@ class EventFrame(db.Model):
 			ancestors.insert(0, self.ParentEventFrame)
 			return self.ParentEventFrame.ancestors(ancestors)
 
+	def friendlyName(self):
+		if self.Name:
+			return self.Name
+		else:
+			return self.StartTimestamp.strftime("%m/%d/%y %H:%M") + ' - '			
+
 	def hasDescendants(self):
 		if self.EventFrames:
 			return True
@@ -148,12 +163,6 @@ class EventFrame(db.Model):
 		else:
 			return self.ParentEventFrame.origin()
 	
-	def timestampRange(self):
-		if self.EndTimestamp:
-			return self.StartTimestamp.strftime("%m/%d/%y %H:%M") + ' - ' + self.EndTimestamp.strftime("%m/%d/%y %H:%M")
-		else:
-			return self.StartTimestamp.strftime("%m/%d/%y %H:%M") + ' - '			
-
 class EventFrameTemplate(db.Model):
 	__tablename__ = "EventFrameTemplate"
 	__table_args__ = \
@@ -192,6 +201,15 @@ class EventFrameTemplate(db.Model):
 		else:
 			return False
 
+	def id(self):
+		return self.EventFrameTemplateId
+
+	def origin(self):
+		if self.ParentEventFrameTemplateId == None:
+			return self
+		else:
+			return self.ParentEventFrameTemplate.origin()	
+
 class Lookup(db.Model):
 	__tablename__ = "Lookup"
 	__table_args__ = \
@@ -226,6 +244,9 @@ class LookupValue(db.Model):
 	def __repr__(self):
 		return "<LookupValue: {}>".format(self.Name)
 
+	def isReferenced(self):
+		return TagValue.query.join(Tag).filter(TagValue.Value == self.Value, Tag.LookupId == self.LookupId).count() > 0
+
 class Site(db.Model):
 	__tablename__ = "Site"
 	__table_args__ = \
@@ -245,6 +266,9 @@ class Site(db.Model):
 
 	def __repr__(self):
 		return "<Site: {}>".format(self.Name)
+
+	def id(self):
+		return self.SiteId
 
 class Tag(db.Model):
 	__tablename__ = "Tag"
@@ -266,6 +290,9 @@ class Tag(db.Model):
 
 	def __repr__(self):
 		return "<Tag: {}>".format(self.Name)
+
+	def id(self):
+		return self.TagId
 
 class TagValue(db.Model):
 	__tablename__ = "TagValue"

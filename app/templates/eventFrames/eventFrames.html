@@ -9,6 +9,7 @@ Event Frames
 {% block page_content %}
 <div>
     <ol class="breadcrumb">
+        <li><a href = "{{ url_for("elements.selectElement", className = "root", id = None) }}">..</a></li>
         <li><a href = "{{ url_for("elements.selectElement", className = element.ElementTemplate.Site.Enterprise.__class__.__name__,
             id = element.ElementTemplate.Site.Enterprise.EnterpriseId) }}">{{ element.ElementTemplate.Site.Enterprise.Name }}</a></li>
         <li><a href = "{{ url_for("elements.selectElement", className = element.ElementTemplate.Site.__class__.__name__,
@@ -29,23 +30,23 @@ Event Frames
                         <!-- Ancestor with no parent. -->
                         <!-- Top level event frame. -->
                         <li><a href = "{{ url_for("eventFrames.listEventFrames", elementId = element.ElementId,
-                            eventFrameTemplateId = ancestor.EventFrameTemplateId) }}">{{ ancestor.EventFrameTemplate.Name }} Event Frames</a></li>
+                            eventFrameTemplateId = ancestor.EventFrameTemplateId) }}">{{ ancestor.EventFrameTemplate.Name }}</a></li>
                     {% endif %}
                     <li><a href = "{{ url_for("eventFrames.listEventFrames", parentEventFrameId = ancestor.EventFrameId) }}">
-                        {{ ancestor.StartTimestamp.strftime("%m/%d/%y %H:%m") }}</a></li>
+                        {{ ancestor.friendlyName() }}</a></li>
                 {% endfor %}
                 <li class = "active">{{ parentEventFrame.EventFrameTemplate.Name }}</li>                
-                <li class = "active">{{ parentEventFrame.StartTimestamp.strftime("%m/%d/%y %H:%m") }}</li>
+                <li class = "active">{{ parentEventFrame.friendlyName() }}</li>
             {% else %}
                 <!-- Parent with no ancestors. -->
                 <!-- Top level event frame. -->
                 <li><a href = "{{ url_for("eventFrames.listEventFrames", elementId = element.ElementId,
-                    eventFrameTemplateId = eventFrameTemplate.EventFrameTemplateId) }}">{{ eventFrameTemplate.Name }} Event Frames</a></li>
-                <li class = "active">{{ parentEventFrame.StartTimestamp.strftime("%m/%d/%y %H:%m") }}</li>                
+                    eventFrameTemplateId = eventFrameTemplate.EventFrameTemplateId) }}">{{ eventFrameTemplate.Name }}</a></li>
+                <li class = "active">{{ parentEventFrame.friendlyName() }}</li>                
             {% endif %}
         {% else %}
             <!-- No parent. -->
-            <li class = "active">{{ eventFrameTemplate.Name }} Event Frames</li>
+            <li class = "active">{{ eventFrameTemplate.Name }}</li>
         {% endif %}
     </ol>
     <h1>{{ element.Name }}</h1>
@@ -55,13 +56,14 @@ Event Frames
         {% set url = url_for("eventFrames.addEventFrame", elementId = element.ElementId, eventFrameTemplateId = eventFrameTemplate.EventFrameTemplateId) %}
     {% endif %}
     <a class = "btn btn-default" title = "Add" href = "{{ url }}" role = "button"><span class="glyphicon glyphicon-plus"></a>
-    <table class = "table">
+    <br><br>
+    <table id = "eventFramesTable" class = "table">
         <thead>
             <tr>
                 <th></th>
                 <th>Event Frame</th>
                 <th>Name</th>
-                <th>Start Timestatmp</th>
+                <th>Start Timestamp</th>
                 <th>End Timestamp</th>
                 <th></th>
                 <th></th>
@@ -102,13 +104,31 @@ Event Frames
         </tbody>
     </table>
 </div>
-{% if pagination %}
-<div class = "text-right">
-    {% if parentEventFrame %}
-        {{ macros.pagination_widget(pagination, ".listEventFrames", parentEventFrameId = parentEventFrame.EventFrameId) }}
-    {% else %}
-        {{ macros.pagination_widget(pagination, ".listEventFrames", elementId = element.ElementId, eventFrameTemplateId = element.ElementTemplate.ElementTemplateId) }}
-    {% endif %}
-</div>
-{% endif %}
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <link rel = "stylesheet" type = "text/css" href = {{ url_for("static", filename = "css/datatables.min.css") }}/> 
+    <script type = "text/javascript" src = {{ url_for("static", filename = "js/datatables.min.js") }}></script>
+    <script>
+        $('#eventFramesTable').DataTable
+        ({
+            order:
+            [
+                [3, 'desc']              // Start timestamp.
+            ],
+            "columns":
+            [
+                { "orderable": false }, // Child event frames button.
+                null,
+                null,
+                null,
+                null,
+                { "orderable": false }, // Stop event frame button.
+                { "orderable": false }, // Edit event frame button.
+                { "orderable": false }  // Delete event frame button.
+            ],
+            stateSave: true
+        });
+    </script>
 {% endblock %}

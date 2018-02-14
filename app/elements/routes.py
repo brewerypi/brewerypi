@@ -1,5 +1,5 @@
 from flask import flash, redirect, render_template, url_for
-from sqlalchemy import and_, or_, text
+from sqlalchemy import and_
 from . import elements
 from . forms import ElementForm
 from .. import db
@@ -9,14 +9,10 @@ from .. models import AttributeTemplate, Element, ElementAttribute, ElementTempl
 modelName = "Element"
 
 @elements.route("/elements", methods = ["GET", "POST"])
-@elements.route("/elements/<string:sortColumn>", methods = ["GET", "POST"])
 # @login_required
-def listElements(sortColumn = ""):
+def listElements():
 	# check_admin()
-	if sortColumn != "":
-		sortColumn = sortColumn + ", "
-	elements = Element.query.join(ElementTemplate, Site, Enterprise).order_by(text(sortColumn + "Enterprise.Abbreviation, Site.Abbreviation, \
-		ElementTemplate.Name, Element.Name"))
+	elements = Element.query.all()
 	return render_template("elements/elements.html", elements = elements)
 
 @elements.route("/elements/dashboard/<int:elementId>", methods = ["GET", "POST"])
@@ -24,15 +20,11 @@ def listElements(sortColumn = ""):
 def dashboard(elementId):
 	# check_admin()
 	element = Element.query.get_or_404(elementId)
-	elementAttributes = ElementAttribute.query. \
-		join(AttributeTemplate). \
-		filter(ElementAttribute.ElementId == elementId). \
-		order_by(AttributeTemplate.Name)
+	elementAttributes = ElementAttribute.query.filter_by(ElementId = elementId)
 	eventFrameTemplates = EventFrameTemplate.query. \
 		join(ElementTemplate, Element). \
 		outerjoin(EventFrame, and_(Element.ElementId == EventFrame.ElementId, EventFrameTemplate.EventFrameTemplateId == EventFrame.EventFrameTemplateId)). \
-		filter(Element.ElementId == elementId). \
-		order_by(EventFrameTemplate.Name)
+		filter_by(ElementId = elementId)
 	return render_template("elements/elementDashboard.html", elementAttributes = elementAttributes, element = element,
 		eventFrameTemplates = eventFrameTemplates)
 
@@ -44,7 +36,7 @@ def deleteEventFrame(eventFrameId):
 	eventFrameTemplateName = eventFrame.EventFrameTemplate.Name
 	db.session.delete(eventFrame)
 	db.session.commit()
-	flash("You have successfully deleted a \"" + eventFrameTemplateName + "\" from element \"" + elementName + "\".")
+	flash("You have successfully deleted a \"" + eventFrameTemplateName + "\" from element \"" + elementName + "\".", "alert alert-success")
 	return redirect(url_for("elements.dashboard", elementId = elementId))
 
 @elements.route("/elements/add", methods = ["GET", "POST"])
@@ -59,7 +51,7 @@ def addElement():
 		element = Element(Description = form.description.data, ElementTemplate = form.elementTemplate.data, Name = form.name.data)
 		db.session.add(element)
 		db.session.commit()
-		flash("You have successfully added the new element \"" + element.Name + "\".")
+		flash("You have successfully added the new element \"" + element.Name + "\".", "alert alert-success")
 		return redirect(url_for("elements.listElements"))
 
 	# Present a form to add a new element.
@@ -72,7 +64,7 @@ def deleteElement(elementId):
 	element = Element.query.get_or_404(elementId)
 	db.session.delete(element)
 	db.session.commit()
-	flash("You have successfully deleted the element \"" + element.Name + "\".")
+	flash("You have successfully deleted the element \"" + element.Name + "\".", "alert alert-success")
 	return redirect(url_for("elements.listElements"))
 
 @elements.route("/elements/edit/<int:elementId>", methods = ["GET", "POST"])
@@ -90,7 +82,7 @@ def editElement(elementId):
 		element.Name = form.name.data
 
 		db.session.commit()
-		flash("You have successfully edited the element \"" + element.Name + "\".")
+		flash("You have successfully edited the element \"" + element.Name + "\".", "alert alert-success")
 		return redirect(url_for("elements.listElements"))
 
 	# Present a form to edit an existing element.
@@ -100,19 +92,25 @@ def editElement(elementId):
 	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
 
 @elements.route("/selectElement", methods = ["GET", "POST"])
-@elements.route("/selectElement/<path:className>/<int:id>", methods = ["GET", "POST"])
+@elements.route("/selectElement/<string:className>", methods = ["GET", "POST"])
+@elements.route("/selectElement/<string:className>/<int:id>", methods = ["GET", "POST"])
 # @login_required
 def selectElement(className = None, id = None):
 	# check_admin()
 	elements = None
 	elementTemplates = None
+	enterprises = None
 	site = None
 	sites = None
 
+	# Default case.
 	if className == None:
 		site = Site.query.join(Enterprise).order_by(Enterprise.Name, Site.Name).first()
 		if site:
 			className = site.__class__.__name__
+	# Top level case.
+	elif className == "root":
+		enterprises = Enterprise.query.all()
 	elif className == "Enterprise":
 		sites = Site.query.filter_by(EnterpriseId = id)
 		if sites:
@@ -129,5 +127,5 @@ def selectElement(className = None, id = None):
 		return redirect(url_for("elements.dashboard", elementId = id))
 
 	# Present navigation for elements.
-	return render_template("elements/selectElement.html", className = className, elements = elements, elementTemplates = elementTemplates, site = site,
-		sites = sites)
+	return render_template("elements/selectElement.html", className = className, elements = elements, elementTemplates = elementTemplates,
+		enterprises = enterprises, site = site, sites = sites)

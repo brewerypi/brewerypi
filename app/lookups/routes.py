@@ -1,5 +1,4 @@
 from flask import flash, redirect, render_template, request, url_for
-from sqlalchemy import text
 from . import lookups
 from . forms import LookupForm
 from .. import db
@@ -8,13 +7,10 @@ from .. models import Enterprise, Lookup
 modelName = "Lookup"
 
 @lookups.route("/lookups", methods = ["GET", "POST"])
-@lookups.route("/lookups/<string:sortColumn>", methods = ["GET", "POST"])
 # @login_required
-def listLookups(sortColumn = ""):
+def listLookups():
 	# check_admin()
-	if sortColumn != "":
-		sortColumn = sortColumn + ", "
-	lookups = Lookup.query.join(Enterprise).order_by(text(sortColumn + "Enterprise.Abbreviation, Lookup.Name"))
+	lookups = Lookup.query
 	return render_template("lookups/lookups.html", lookups = lookups)
 
 @lookups.route("/lookups/add", methods = ["GET", "POST"])
@@ -29,7 +25,7 @@ def addLookup():
 		lookup = Lookup(Enterprise = form.enterprise.data, Name = form.name.data)
 		db.session.add(lookup)
 		db.session.commit()
-		flash("You have successfully added the lookup \"" + lookup.Name + "\".")
+		flash("You have successfully added the lookup \"" + lookup.Name + "\".", "alert alert-success")
 		return redirect(url_for("lookups.listLookups"))
 
 	# Present a form to add a new lookup.
@@ -42,7 +38,7 @@ def deleteLookup(lookupId):
 	lookup = Lookup.query.get_or_404(lookupId)
 	db.session.delete(lookup)
 	db.session.commit()
-	flash("You have successfully deleted the lookup \"" + lookup.Name + "\".")
+	flash("You have successfully deleted the lookup \"" + lookup.Name + "\".", "alert alert-success")
 	return redirect(url_for("lookups.listLookups"))
 
 @lookups.route("/lookups/edit/<int:lookupId>", methods = ["GET", "POST"])
@@ -58,7 +54,7 @@ def editLookup(lookupId):
 		lookup.Enterprise = form.enterprise.data
 		lookup.Name = form.name.data
 		db.session.commit()
-		flash("You have successfully edited the lookup \"" + lookup.Name + "\".")
+		flash("You have successfully edited the lookup \"" + lookup.Name + "\".", "alert alert-success")
 		return redirect(url_for("lookups.listLookups"))
 
 	# Present a form to edit an existing lookup.

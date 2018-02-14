@@ -8,13 +8,14 @@ Areas
 <div>
     <h1>Areas</h1>
     <a class = "btn btn-default" title = "Add" href = "{{ url_for("areas.addArea") }}" role = "button"><span class="glyphicon glyphicon-plus"></span></a>
-    <table class = "table">
+    <br><br>
+    <table id = "areasTable" class = "table">
         <thead>
             <tr>
-                <th><a href = "{{ url_for("areas.listAreas") }}">Site</a></th>
-                <th><a href = "{{ url_for("areas.listAreas", sortColumn = "Area.Name") }}">Name</a></th>
-                <th><a href = "{{ url_for("areas.listAreas", sortColumn = "Area.Abbreviation") }}">Abbreviation</a></th>
-                <th><a href = "{{ url_for("areas.listAreas", sortColumn = "Area.Description") }}">Description</a></th>
+                <th>Site</th>
+                <th>Name</th>
+                <th>Abbreviation</th>
+                <th>Description</th>
                 <th></th>
                 <th></th>
             </tr>
@@ -35,4 +36,30 @@ Areas
         </tbody>
     </table>
 </div>
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <link rel = "stylesheet" type = "text/css" href = {{ url_for("static", filename = "css/datatables.min.css") }}/> 
+    <script type = "text/javascript" src = {{ url_for("static", filename = "js/datatables.min.js") }}></script>
+    <script>
+        $('#areasTable').DataTable
+        ({
+            order:
+            [
+                [0, 'asc'],             // Site.
+                [1, 'asc'],             // Name.
+            ],
+            "columns":
+            [
+                null,
+                null,
+                null,
+                null,
+                { "orderable": false }, // Edit button.
+                { "orderable": false }  // Delete button.
+            ],
+            stateSave: true
+        });
+    </script>
 {% endblock %}

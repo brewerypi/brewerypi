@@ -8,18 +8,37 @@ Tag Values
 
 {% block page_content %}
 <div>
-    <h1>{{ tag.Name }} - Tag Values</h1>
+    <ol class="breadcrumb">
+        {% if elementAttribute %}
+            <li><a href = "{{ url_for("elements.selectElement", className = "root", id = None) }}">..</a></li>
+            <li><a href = "{{ url_for("elements.selectElement", className = elementAttribute.Element.ElementTemplate.Site.Enterprise.__class__.__name__,
+                id = elementAttribute.Element.ElementTemplate.Site.Enterprise.EnterpriseId) }}">
+                {{ elementAttribute.Element.ElementTemplate.Site.Enterprise.Name }}</a></li>
+            <li><a href = "{{ url_for("elements.selectElement", className = elementAttribute.Element.ElementTemplate.Site.__class__.__name__,
+                id = elementAttribute.Element.ElementTemplate.Site.SiteId) }}">{{ elementAttribute.Element.ElementTemplate.Site.Name }}</a></li>
+            <li><a href = "{{ url_for("elements.selectElement", className = elementAttribute.Element.ElementTemplate.__class__.__name__,
+                id = elementAttribute.Element.ElementTemplate.ElementTemplateId) }}">{{ elementAttribute.Element.ElementTemplate.Name }}</a></li>
+            <li><a href = "{{ url_for("elements.dashboard", elementId = elementAttribute.Element.ElementId) }}">
+                {{ elementAttribute.Element.Name }}</a></li>
+            <li class = "active">{{ elementAttribute.AttributeTemplate.Name }}</li>
+        {% else %}
+            <li><a href = "{{ url_for("tags.selectTag", className = "Root") }}">..</a></li>
+            <li><a href = "{{ url_for("tags.selectTag", className = tag.Area.Site.Enterprise.__class__.__name__,
+                id = tag.Area.Site.Enterprise.EnterpriseId) }}">{{ tag.Area.Site.Enterprise.Name }}</a></li>
+            <li><a href = "{{ url_for("tags.selectTag", className = tag.Area.Site.__class__.__name__, id = tag.Area.Site.SiteId) }}">
+                {{ tag.Area.Site.Name }}</a></li>
+            <li><a href = "{{ url_for("tags.selectTag", className = tag.Area.__class__.__name__, id = tag.Area.AreaId) }}">{{ tag.Area.Name }}</a></li>
+            <li class = "active">{{ tag.Name }}</li>
+        {% endif %}
+    </ol>
     <a class = "btn btn-default" title = "Add" href = "{{ url_for("tagValues.addTagValue", tagId = tag.TagId) }}" role = "button">
         <span class="glyphicon glyphicon-plus"></span></a>
-    <table class = "table">
+    <br><br>
+    <table id = "tagValuesTable" class = "table">
         <thead>
             <tr>
-                <th><a href = "{{ url_for("tagValues.listTagValues", tagId = tag.TagId) }}">Timestamp</a></th>
-                {% if tag.LookupId %}
-                    <th><a href = "{{ url_for("tagValues.listTagValues", tagId = tag.TagId, sortColumn = "LookupValue.Name") }}">Value</a></th>
-                {% else %}
-                    <th><a href = "{{ url_for("tagValues.listTagValues", tagId = tag.TagId, sortColumn = "TagValue.Value") }}">Value</a></th>
-                {% endif %}
+                <th>Timestamp</th>
+                <th>Value</th>
                 <th></th>
                 <th></th>
             </tr>
@@ -42,9 +61,27 @@ Tag Values
         </tbody>
     </table>
 </div>
-{% if pagination %}
-<div class = "text-right">
-    {{ macros.pagination_widget(pagination, ".listTagValues", tagId = tag.TagId) }}
-</div>
-{% endif %}
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <link rel = "stylesheet" type = "text/css" href = {{ url_for("static", filename = "css/datatables.min.css") }}/> 
+    <script type = "text/javascript" src = {{ url_for("static", filename = "js/datatables.min.js") }}></script>
+    <script>
+        $('#tagValuesTable').DataTable
+        ({
+            order:
+            [
+                [0, 'desc']              // Timestamp.
+            ],
+            "columns":
+            [
+                null,
+                null,
+                { "orderable": false }, // Edit tag value button.
+                { "orderable": false }  // Delete tag value button.
+            ],
+            stateSave: true
+        });
+    </script>
 {% endblock %}

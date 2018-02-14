@@ -12,27 +12,19 @@ modelName = "Event Frame"
 # @login_required
 def listEventFrames(elementId = None, eventFrameTemplateId = None, parentEventFrameId = None):
 	# check_admin()
-	page = request.args.get("page", 1, type = int)
 	if parentEventFrameId:
 		parentEventFrame = EventFrame.query.get_or_404(parentEventFrameId)
 		origin = parentEventFrame.origin()
 		element = Element.query.get_or_404(origin.ElementId)
 		eventFrameTemplate = EventFrameTemplate.query.get_or_404(parentEventFrame.EventFrameTemplateId)
-		# eventFrames = EventFrame.query.filter_by(ParentEventFrameId = parentEventFrameId).order_by(EventFrame.StartTimestamp.desc())
-		pagination = EventFrame.query.filter_by(ParentEventFrameId = parentEventFrameId).order_by(EventFrame.StartTimestamp.desc()). \
-			paginate(page, per_page = 10, error_out = False)
-		eventFrames = pagination.items
+		eventFrames = EventFrame.query.filter_by(ParentEventFrameId = parentEventFrameId)
 	else:
 		parentEventFrame = None
 		element = Element.query.get_or_404(elementId)
 		eventFrameTemplate = EventFrameTemplate.query.get_or_404(eventFrameTemplateId)
-		# eventFrames = EventFrame.query.filter(EventFrame.ElementId == elementId, EventFrame.EventFrameTemplateId == eventFrameTemplate.EventFrameTemplateId). \
-		# 	order_by(EventFrame.StartTimestamp.desc())
-		pagination = EventFrame.query.filter(EventFrame.ElementId == elementId, EventFrame.EventFrameTemplateId == eventFrameTemplate.EventFrameTemplateId). \
-			order_by(EventFrame.StartTimestamp.desc()).paginate(page, per_page = 10, error_out = False)
-		eventFrames = pagination.items
+		eventFrames = EventFrame.query.filter(EventFrame.ElementId == elementId, EventFrame.EventFrameTemplateId == eventFrameTemplate.EventFrameTemplateId)
 	return render_template("eventFrames/eventFrames.html", element = element, eventFrames = eventFrames, eventFrameTemplate = eventFrameTemplate,
-		pagination = pagination, parentEventFrame = parentEventFrame)
+		parentEventFrame = parentEventFrame)
 
 @eventFrames.route("/eventFrames/add/<int:parentEventFrameId>", methods = ["GET", "POST"])
 @eventFrames.route("/eventFrames/add/<int:elementId>/<int:eventFrameTemplateId>", methods = ["GET", "POST"])
@@ -57,12 +49,12 @@ def addEventFrame(elementId = None, eventFrameTemplateId = None, parentEventFram
 			eventFrame = EventFrame(EndTimestamp = form.endTimestamp.data, EventFrameTemplateId = form.eventFrameTemplate.data,
 				ParentEventFrameId = parentEventFrameId, StartTimestamp = form.startTimestamp.data)
 		else:
-			eventFrame = EventFrame(ElementId = form.elementId.data, EndTimestamp = form.endTimestamp.data, EventFrameTemplateId = form.eventFrameTemplateId.data,
-				StartTimestamp = form.startTimestamp.data)
+			eventFrame = EventFrame(ElementId = form.elementId.data, EndTimestamp = form.endTimestamp.data,
+				EventFrameTemplateId = form.eventFrameTemplateId.data, StartTimestamp = form.startTimestamp.data)
 
 		db.session.add(eventFrame)
 		db.session.commit()
-		flash("You have successfully added a new Event Frame.")
+		flash("You have successfully added a new Event Frame.", "alert alert-success")
 		return redirect(form.requestReferrer.data)
 
 	# Present a form to add a new event frame.
@@ -81,13 +73,12 @@ def deleteEventFrame(eventFrameId):
 	# check_admin()
 	eventFrame = EventFrame.query.get_or_404(eventFrameId)
 	if eventFrame.hasDescendants():
-		flash("This event frame contains one or more child event frames and cannot be deleted.")
-		return redirect(request.referrer)
-
-	elementId = eventFrame.ElementId
-	db.session.delete(eventFrame)
-	db.session.commit()
-	flash("You have successfully deleted the event frame.")
+		flash("This event frame contains one or more child event frames and cannot be deleted.", "alert alert-danger")
+	else:
+		elementId = eventFrame.ElementId
+		db.session.delete(eventFrame)
+		db.session.commit()
+		flash("You have successfully deleted the event frame.", "alert alert-success")
 	return redirect(request.referrer)
 
 @eventFrames.route("/eventFrames/edit/<int:eventFrameId>", methods = ["GET", "POST"])
@@ -111,7 +102,7 @@ def editEventFrame(eventFrameId):
 		eventFrame.Name = form.name.data
 		eventFrame.StartTimestamp = form.startTimestamp.data
 		db.session.commit()
-		flash("You have successfully edited the Event Frame.")
+		flash("You have successfully edited the Event Frame.", "alert alert-success")
 		return redirect(form.requestReferrer.data)
 
 	# Present a form to edit an existing event frame.
@@ -132,7 +123,8 @@ def endEventFrame(eventFrameId):
 	eventFrame = EventFrame.query.get_or_404(eventFrameId)
 	eventFrame.EndTimestamp = datetime.now()
 	db.session.commit()
-	flash("You have successfully ended \"" + eventFrame.EventFrameTemplate.Name + "\" for element \"" + eventFrame.origin().Element.Name + "\".")
+	flash("You have successfully ended \"" + eventFrame.EventFrameTemplate.Name + "\" for element \"" + eventFrame.origin().Element.Name + "\".",
+		"alert alert-success")
 	return redirect(request.referrer)
 
 @eventFrames.route("/eventFrames/startEventFrame/<int:elementId>/<int:eventFrameTemplateId>", methods = ["GET", "POST"])
@@ -141,5 +133,6 @@ def startEventFrame(elementId, eventFrameTemplateId):
 		StartTimestamp = datetime.now())
 	db.session.add(eventFrame)
 	db.session.commit()
-	flash("You have successfully added a new \"" + eventFrame.EventFrameTemplate.Name + "\" for element \"" + eventFrame.origin().Element.Name + "\".")
+	flash("You have successfully added a new \"" + eventFrame.EventFrameTemplate.Name + "\" for element \"" + eventFrame.origin().Element.Name + "\".",
+		"alert alert-success")
 	return redirect(request.referrer)

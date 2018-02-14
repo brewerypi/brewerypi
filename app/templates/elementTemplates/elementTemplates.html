@@ -9,12 +9,13 @@ Element Templates
     <h1>Element Templates</h1>
     <a class = "btn btn-default" title = "Add" href = "{{ url_for("elementTemplates.addElementTemplate") }}" role = "button">
         <span class="glyphicon glyphicon-plus"></span></a>
-    <table class = "table">
+    <br><br>
+    <table id = "elementTemplatesTable" class = "table">
         <thead>
             <tr>
-                <th><a href = "{{ url_for("elementTemplates.listElementTemplates") }}">Site</a></th>
-                <th><a href = "{{ url_for("elementTemplates.listElementTemplates", sortColumn = "ElementTemplate.Name") }}">Name</a></th>
-                <th><a href = "{{ url_for("elementTemplates.listElementTemplates", sortColumn = "ElementTemplate.Description") }}">Description</a></th>
+                <th>Site</th>
+                <th>Name</th>
+                <th>Description</th>
                 <th></th>
                 <th></th>
             </tr>
@@ -34,4 +35,29 @@ Element Templates
         </tbody>
     </table>
 </div>
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <link rel = "stylesheet" type = "text/css" href = {{ url_for("static", filename = "css/datatables.min.css") }}/> 
+    <script type = "text/javascript" src = {{ url_for("static", filename = "js/datatables.min.js") }}></script>
+    <script>
+        $('#elementTemplatesTable').DataTable
+        ({
+            order:
+            [
+                [0, 'asc'],             // Site path.
+                [1, 'asc']              // Element template name..
+            ],
+            "columns":
+            [
+                null,
+                null,
+                null,
+                { "orderable": false }, // Edit element template button.
+                { "orderable": false }  // Delete element template button.
+            ],
+            stateSave: true
+        });
+    </script>
 {% endblock %}

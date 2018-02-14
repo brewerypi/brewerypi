@@ -1,5 +1,4 @@
 from flask import flash, redirect, render_template, request, url_for
-from sqlalchemy import text
 from . import elementTemplates
 from . forms import ElementTemplateForm
 from .. import db
@@ -8,14 +7,10 @@ from .. models import ElementTemplate, Enterprise, Site
 modelName = "Element Template"
 
 @elementTemplates.route("/elementTemplates", methods = ["GET", "POST"])
-@elementTemplates.route("/elementTemplates/<string:sortColumn>", methods = ["GET", "POST"])
 # @login_required
-def listElementTemplates(sortColumn = ""):
+def listElementTemplates():
 	# check_admin()
-	if sortColumn != "":
-		sortColumn = sortColumn + ", "
-	elementTemplates = ElementTemplate.query.join(Site, Enterprise).order_by(text(sortColumn + "Enterprise.Abbreviation, Site.Abbreviation, \
-		ElementTemplate.Name"))
+	elementTemplates = ElementTemplate.query.all()
 	return render_template("elementTemplates/elementTemplates.html", elementTemplates = elementTemplates)
 
 @elementTemplates.route("/elementTemplates/add", methods = ["GET", "POST"])
@@ -30,7 +25,7 @@ def addElementTemplate():
 		elementTemplate = ElementTemplate(Description = form.description.data, Name = form.name.data, Site = form.site.data)
 		db.session.add(elementTemplate)
 		db.session.commit()
-		flash("You have successfully added the new element template \"" + elementTemplate.Name + "\".")
+		flash("You have successfully added the new element template \"" + elementTemplate.Name + "\".", "alert alert-success")
 		return redirect(url_for("elementTemplates.listElementTemplates"))
 
 	# Present a form to add a new element template.
@@ -43,7 +38,7 @@ def deleteElementTemplate(elementTemplateId):
 	elementTemplate = ElementTemplate.query.get_or_404(elementTemplateId)
 	db.session.delete(elementTemplate)
 	db.session.commit()
-	flash("You have successfully deleted the element template \"" + elementTemplate.Name + "\".")
+	flash("You have successfully deleted the element template \"" + elementTemplate.Name + "\".", "alert alert-success")
 	return redirect(url_for("elementTemplates.listElementTemplates"))
 
 @elementTemplates.route("/elementTemplates/edit/<int:elementTemplateId>", methods = ["GET", "POST"])
@@ -60,7 +55,7 @@ def editElementTemplate(elementTemplateId):
 		elementTemplate.Name = form.name.data
 		elementTemplate.Site = form.site.data
 		db.session.commit()
-		flash("You have successfully edited the element template \"" + elementTemplate.Name + "\".")
+		flash("You have successfully edited the element template \"" + elementTemplate.Name + "\".", "alert alert-success")
 		return redirect(url_for("elementTemplates.listElementTemplates"))
 
 	# Present a form to edit an existing element template.
