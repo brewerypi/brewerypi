@@ -11,8 +11,8 @@ Event Frame Templates
     <ol class="breadcrumb">
         {% if className == "Tag" %}
             <li><a href = "{{ url_for("tags.selectTag", className = "Root") }}">..</a></li>
-            <li><a href = "{#{ url_for("eventFrameTemplates.selectEventFrameTemplate", className = parent.Site.Enterprise.__class__.__name__,
-                id = parent.Site.Enterprise.id()) }#}">{{ parent.Site.Enterprise.Name }}</a></li>
+            <li><a href = "{{ url_for("tags.selectTag", className = parent.Site.Enterprise.__class__.__name__,
+                id = parent.Site.Enterprise.id()) }}">{{ parent.Site.Enterprise.Name }}</a></li>
             <li><a href = "{{ url_for("tags.selectTag", className = parent.Site.__class__.__name__,
                 id = parent.Site.id()) }}">{{ parent.Site.Name }}</a></li>
             <li class = "active">{{ parent.Name }}</li>
