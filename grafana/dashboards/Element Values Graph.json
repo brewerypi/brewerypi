@@ -46,10 +46,22 @@
         "datasource": "${DS_BREWERYPI}",
         "enable": true,
         "hide": false,
+        "iconColor": "#3f6833",
+        "limit": 100,
+        "name": "Start of Event Frames",
+        "rawQuery": "SELECT UNIX_TIMESTAMP(EventFrame.StartTimestamp) AS time_sec, CONCAT(Element.Name, ' - ', DATE_FORMAT(EventFrame.StartTimestamp, '%m/%d/%y %H:%i')) AS text, CONCAT(Element.Name, ',', EventFrameTemplate.Name, ',', 'Start') AS tags\nFROM EventFrame\n\tINNER JOIN Element ON EventFrame.ElementId = Element.ElementId\n\tINNER JOIN EventFrameTemplate ON EventFrame.EventFrameTemplateId = EventFrameTemplate.EventFrameTemplateId\nWHERE $__timeFilter(EventFrame.StartTimestamp) AND (Element.ElementId IN ($elements))\nORDER BY EventFrame.StartTimestamp ASC",
+        "showIn": 0,
+        "tags": [],
+        "type": "tags"
+      },
+      {
+        "datasource": "${DS_BREWERYPI}",
+        "enable": true,
+        "hide": false,
         "iconColor": "rgba(255, 96, 96, 1)",
         "limit": 100,
-        "name": "Event Frames",
-        "rawQuery": "SELECT UNIX_TIMESTAMP(EventFrame.StartTimestamp) AS time_sec, CONCAT(Element.Name, ' - ', DATE_FORMAT(EventFrame.StartTimestamp, '%m/%d/%y %H:%i')) AS text, CONCAT(Element.Name, ',', EventFrameTemplate.Name) AS tags\nFROM EventFrame\n\tINNER JOIN Element ON EventFrame.ElementId = Element.ElementId\n\tINNER JOIN EventFrameTemplate ON EventFrame.EventFrameTemplateId = EventFrameTemplate.EventFrameTemplateId\nWHERE $__timeFilter(EventFrame.StartTimestamp) AND (Element.ElementId IN ($elements))\nORDER BY EventFrame.StartTimestamp ASC",
+        "name": "End of Event Frames",
+        "rawQuery": "SELECT UNIX_TIMESTAMP(EventFrame.EndTimestamp) AS time_sec, CONCAT(Element.Name, ' - ', DATE_FORMAT(EventFrame.EndTimestamp, '%m/%d/%y %H:%i')) AS text, CONCAT(Element.Name, ',', EventFrameTemplate.Name, ',', 'End') AS tags\nFROM EventFrame\n\tINNER JOIN Element ON EventFrame.ElementId = Element.ElementId\n\tINNER JOIN EventFrameTemplate ON EventFrame.EventFrameTemplateId = EventFrameTemplate.EventFrameTemplateId\nWHERE $__timeFilter(EventFrame.StartTimestamp) AND (Element.ElementId IN ($elements)) AND EventFrame.EndTimestamp IS NOT NULL\nORDER BY EventFrame.StartTimestamp ASC",
         "showIn": 0,
         "tags": [],
         "type": "tags"
@@ -261,7 +273,7 @@
     ]
   },
   "time": {
-    "from": "now-90d",
+    "from": "now-30d",
     "to": "now"
   },
   "timepicker": {
