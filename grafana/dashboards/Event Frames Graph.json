@@ -255,7 +255,7 @@
         "multi": false,
         "name": "eventFrame",
         "options": [],
-        "query": "SELECT EventFrame.EventFrameId AS __value, CONCAT(DATE_FORMAT(EventFrame.StartTimestamp, '%m/%d/%y %H:%i'), ' - ',IF(EventFrame.EndTimestamp IS NULL, '', DATE_FORMAT(EventFrame.EndTimestamp, '%m/%d/%y %H:%i'))) AS __text FROM EventFrame WHERE EventFrame.ElementId = $element AND EventFrame.EventFrameTemplateId = $eventFrameTemplate ORDER BY StartTimestamp DESC",
+        "query": "SELECT EventFrame.EventFrameId AS __value, IF(EventFrame.Name IS NOT NULL, EventFrame.Name, CONCAT(DATE_FORMAT(EventFrame.StartTimestamp, '%m/%d/%y %H:%i'), ' - ',IF(EventFrame.EndTimestamp IS NULL, '', DATE_FORMAT(EventFrame.EndTimestamp, '%m/%d/%y %H:%i')))) AS __text FROM EventFrame WHERE EventFrame.ElementId = $element AND EventFrame.EventFrameTemplateId = $eventFrameTemplate ORDER BY StartTimestamp DESC",
         "refresh": 2,
         "regex": "",
         "sort": 0,

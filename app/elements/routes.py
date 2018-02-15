@@ -24,7 +24,7 @@ def dashboard(elementId):
 	eventFrameTemplates = EventFrameTemplate.query. \
 		join(ElementTemplate, Element). \
 		outerjoin(EventFrame, and_(Element.ElementId == EventFrame.ElementId, EventFrameTemplate.EventFrameTemplateId == EventFrame.EventFrameTemplateId)). \
-		filter_by(ElementId = elementId)
+		filter(Element.ElementId == elementId)
 	return render_template("elements/elementDashboard.html", elementAttributes = elementAttributes, element = element,
 		eventFrameTemplates = eventFrameTemplates)
 
