@@ -14,7 +14,7 @@
       "type": "grafana",
       "id": "grafana",
       "name": "Grafana",
-      "version": "4.6.2"
+      "version": "4.6.3"
     },
     {
       "type": "datasource",
@@ -290,5 +290,5 @@
   },
   "timezone": "",
   "title": "Element Summary",
-  "version": 2
+  "version": 1
 }
