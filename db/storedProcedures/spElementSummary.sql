@@ -1,5 +1,5 @@
 DELIMITER $$
-CREATE DEFINER=`pi`@`localhost` PROCEDURE `spElementSummary`(IN attributeTemplateIds TEXT, IN elementIds TEXT)
+CREATE DEFINER=`pi`@`%` PROCEDURE `spElementSummary`(IN attributeTemplateIds TEXT, IN elementIds TEXT)
 BEGIN
 	SET @@group_concat_max_len = 5000;
 	SET @sql = NULL;
