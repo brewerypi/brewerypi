@@ -103,3 +103,11 @@ ENV/
 # vscode
 .vscode/
 
+# database backups
+*.mwb.bak
+
+# Exports
+/exports/*.csv
+
+# Imports
+/imports/*.csv
