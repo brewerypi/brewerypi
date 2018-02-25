@@ -12,7 +12,7 @@ Once downloaded, extract the image to somewhere on your computer's hard drive.
 
 # 2. Write the Raspbian Lite Image to your Memory Card
 
-I'm doing this on Windows 10 and use Win32DiskImager. You can find more details on the Raspberry Pi website regarding installing operating system images [here](https://www.raspberrypi.org/documentation/installation/installing-images/README.md).
+I'm doing this on Windows 10 and use Win32 Disk Imager. You can find more details on the Raspberry Pi website regarding installing operating system images [here](https://www.raspberrypi.org/documentation/installation/installing-images/README.md).
 
 Once the image is written the memory, place an empty file named "ssh" in the root of memory card. This will allow us to install and configure the Raspberry Pi without having to hookup a keyboard, mouse or monitor.
 
@@ -52,6 +52,7 @@ $ sudo mysql
 > GRANT ALL ON BreweryPi.* TO 'pi'@'%';
 > CREATE USER 'grafanaReader'@'%' IDENTIFIED BY 'brewery';
 > GRANT SELECT ON BreweryPi.* TO 'grafanaReader';
+> GRANT EXECUTE ON BreweryPi.* TO 'grafanaReader';
 > quit
 $ sudo nano /etc/mysql/mariadb.conf.d/50-server.cnf
 ```
@@ -111,6 +112,7 @@ Save and exit.
 
 ```
 (venv) $ flask db upgrade
+(venv) $ sudo mysql BreweryPi < db/storedProcedures/spElementSummary.sql
 (venv) $ flask run --host 0.0.0.0
 ```
 
@@ -173,10 +175,91 @@ Login with "admin" for both the user and password.
 
 Click on "Add data source" and set the following properties:
 
-| Property | Value     |
-| -------- | --------- |
-| Name     | BreweryPi |
-| Type     | MySQL     |
-| Database | BreweryPi |
-| User     | pi        |
-| Password | brewery   |
+| Property | Value         |
+| -------- | ------------- |
+| Name     | BreweryPi     |
+| Type     | MySQL         |
+| Database | BreweryPi     |
+| User     | grafanaReader |
+| Password | brewery       |
+
+Download the release source files from GitHub and import the dashboards.
+
+# 10 Create a Compressed Image for Distribution
+
+I referenced both of these articles for this process:
+* [Shrinking Raspberry Pi SD Card Images](http://www.aoakley.com/articles/2015-10-09-resizing-sd-images.php)
+* [How to BackUp and Shrink Your Raspberry Pi Image](http://www.instructables.com/id/How-to-BackUp-and-Shrink-Your-Raspberry-Pi-Image/)
+
+You need a Linux distribution for this task and an external disk drive. I'm using VMware Workstation Player and Debian 64-bit distribution. Shutdown the Raspberry Pi and eject the disk. Using Win32 Disk Imager, read the Raspberry Pi data from the SD card to an image file on the external drive named brewerypi-vX.Y.Z.img.
+
+Install the following tools on the VMWare Workstation Player:
+
+```
+$ su
+$ apt-get update
+$ apt-get -y install dcfldd
+$ apt-get -y install gparted
+$ apt-get -y install zip
+```
+
+Connect the external drive to the VMWare Workstation Player. Execute the following command and take note of the "Start" sector of the second partition which I'll reference as "START" below.
+
+```
+$ sudo fdisk -l brewerypi-vX.Y.Z.img
+```
+
+Execute the following, remembering to replace "START" with the value of the start sector you noted above.
+
+```
+$ losetup /dev/loop0 brewerypi-vX.Y.Z.img -o $((START*512))
+$ gparted /dev/loop0
+```
+Right click on the /dev/loop0 partition and choose "Resize/Move". Finding the minimum size is a bit of trial and error. Start by using 700 MB above the listed minimum size. Select "Apply All Operations". If the resize fails, increase the size by another 50 MB and try again until successful.
+
+Once the partition is successfully resized, expand the "shrink file system" under "Details" and note the value listed with "resize2fs -p /dev/loop0" which I'll reference as "RESIZE" below.
+
+Now execute the following:
+
+```
+$ losetup -d /dev/loop0
+$ losetup /dev/loop0 brewerypi-vX.Y.Z.img
+$ fdisk /dev/loop0
+```
+
+Within fdisk, execute the following sequence:
+
+```
+d <Enter>
+2 <Enter>
+n <Enter>
+p <Enter>
+2 <Enter>
+START <Enter>
++RESIZEK <Enter> (don't forget the 'K' or 'M' after RESIZE)
+w <Enter>
+N <Enter> (for remove signature)
+```
+
+Once fdisk exits, execute the following commands:
+
+```
+$ fdisk -l /dev/loop0
+$ losetup -d /dev/loop0
+```
+Record the "End" sector of the second partition which I'll reference as "END" below.
+
+```
+$ truncate -s $(((END+1)*512)) brewerypi-vX.Y.Z.img
+$ losetup /dev/loop0 brewerypi-vX.Y.Z.img -o $((START*512))
+$ mkdir -p /mnt/imageroot
+$ mount /dev/loop0 /mnt/imageroot
+$ dcfldd if=/dev/zero of=/mnt/imageroot/zero.txt
+$ rm /mnt/imageroot/zero.txt
+$ umount /mnt/imageroot
+$ rmdir /mnt/imageroot
+$ losetup -d /dev/loop0
+$ zip brewerypi-vX.Y.Z.zip brewerypi-vX.Y.Z.img
+```
+
+brewerypi-vX.Y.Z.zip will contain a compressed image to install on a Raspberry Pi.
