@@ -38,9 +38,11 @@ Advanced Options->Expand Filesystem
 
 Localisation Options->Change Timezone
 
-Choose "\<Yes>" when promoted "Would you like to reboot now?". Once the Raspberry Pi reboots, log back in.
+Choose "\<Yes>" when promoted "Would you like to reboot now?".
 
 # 4. Access Data Entry Forms and Visualization
+
+Once the Raspberry Pi reboots, verify that you can access the data entry forms and visualizations.
 
 For data entry, point a web browser at:
 
@@ -50,4 +52,4 @@ For visualization, point a web browser at:
 
 http://\<Your Raspberry Pi IP Address>:3000
 
-and use "admin" for the "User" and "Password" to log in.
+and use "admin" for **both** the "User" and "Password" to log in.
