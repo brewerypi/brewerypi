@@ -44,7 +44,7 @@ Element Templates
     <script>
         $('#elementTemplatesTable').DataTable
         ({
-            order:
+            "order":
             [
                 [0, 'asc'],             // Site path.
                 [1, 'asc']              // Element template name..
@@ -57,7 +57,9 @@ Element Templates
                 { "orderable": false }, // Edit element template button.
                 { "orderable": false }  // Delete element template button.
             ],
-            stateSave: true
+            "stateSave": true,
+            "stateDuration": 0,
+            "pageLength": 25
         });
     </script>
 {% endblock %}

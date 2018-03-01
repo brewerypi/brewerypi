@@ -114,7 +114,7 @@ Data Entry - Elements
     <script>
         $('#table').DataTable
         ({
-            order:
+            "order":
             [
                 [1, 'asc']              // Name.
             ],
@@ -124,7 +124,9 @@ Data Entry - Elements
                 null,
                 null
             ],
-            stateSave: true
+            "stateSave": true,
+            "stateDuration": 0,
+            "pageLength": 25
         });
     </script>
 {% endblock %}

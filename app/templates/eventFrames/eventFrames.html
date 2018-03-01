@@ -113,7 +113,7 @@ Event Frames
     <script>
         $('#eventFramesTable').DataTable
         ({
-            order:
+            "order":
             [
                 [3, 'desc']              // Start timestamp.
             ],
@@ -128,7 +128,9 @@ Event Frames
                 { "orderable": false }, // Edit event frame button.
                 { "orderable": false }  // Delete event frame button.
             ],
-            stateSave: true
+            "stateSave": true,
+            "stateDuration": 0,
+            "pageLength": 25
         });
     </script>
 {% endblock %}
