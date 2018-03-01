@@ -71,7 +71,7 @@ Tag Values
     <script>
         $('#tagValuesTable').DataTable
         ({
-            order:
+            "order":
             [
                 [0, 'desc']              // Timestamp.
             ],
@@ -82,7 +82,9 @@ Tag Values
                 { "orderable": false }, // Edit tag value button.
                 { "orderable": false }  // Delete tag value button.
             ],
-            stateSave: true
+            "stateSave": true,
+            "stateDuration": 0,
+            "pageLength": 25
         });
     </script>
 {% endblock %}

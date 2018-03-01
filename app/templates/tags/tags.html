@@ -55,7 +55,7 @@ Tags
     <script>
         $('#tagsTable').DataTable
         ({
-            order:
+            "order":
             [
                 [1, 'asc'],             // Area.
                 [2, 'asc']              // Name.
@@ -71,7 +71,9 @@ Tags
                 { "orderable": false }, // Edit tag button.
                 { "orderable": false }  // Delete tag button.
             ],
-            stateSave: true
+            "stateSave": true,
+            "stateDuration": 0,
+            "pageLength": 25
         });
     </script>
 {% endblock %}

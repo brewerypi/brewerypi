@@ -144,7 +144,7 @@
     <script>
         $('#eventFramesTable').DataTable
         ({
-            order:
+            "order":
             [
                 [1, 'asc']              // Event frame template name.
             ],
@@ -159,11 +159,13 @@
                 { "orderable": false }, // Edit event frame button.
                 { "orderable": false }  // Delete event frame button.
             ],
-            stateSave: true
+            "stateSave": true,
+            "stateDuration": 0,
+            "pageLength": 25
         });
         $('#attributesTable').DataTable
         ({
-            order:
+            "order":
             [
                 [1, 'asc']              // Attribute.
             ],
@@ -177,7 +179,9 @@
                 { "orderable": false }, // Edit attribute value button.
                 { "orderable": false }  // Delete attribute value button.
             ],
-            stateSave: true
+            "stateSave": true,
+            "stateDuration": 0,
+            "pageLength": 25
         });
     </script>
 {% endblock %}

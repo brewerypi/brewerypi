@@ -108,7 +108,7 @@ Event Frame Templates
     <script>
         $('#eventFrameTemplatesTable').DataTable
         ({
-            order:
+            "order":
             [
                 [3, 'asc'],             // Name.
                 [1, 'asc']              // Name.
@@ -122,7 +122,9 @@ Event Frame Templates
                 { "orderable": false }, // Edit button.
                 { "orderable": false }  // Delete button.
             ],
-            stateSave: true
+            "stateSave": true,
+            "stateDuration": 0,
+            "pageLength": 25
         });
     </script>
 {% endblock %}
