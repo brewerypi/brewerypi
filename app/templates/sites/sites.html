@@ -45,7 +45,7 @@ Sites
     <script>
         $('#sitesTable').DataTable
         ({
-            order:
+            "order":
             [
                 [0, 'asc'],             // Enterprise.
                 [1, 'asc'],             // Name.
@@ -59,7 +59,9 @@ Sites
                 { "orderable": false }, // Edit button.
                 { "orderable": false }  // Delete button.
             ],
-            stateSave: true
+            "stateSave": true,
+            "stateDuration": 0,
+            "pageLength": 25
         });
     </script>
 {% endblock %}

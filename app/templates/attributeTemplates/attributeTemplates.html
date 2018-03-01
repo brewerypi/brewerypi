@@ -45,7 +45,7 @@ Attribute Templates
     <script>
         $('#attributeTemplatesTable').DataTable
         ({
-            order:
+            "order":
             [
                 [0, 'asc'],             // Element template path.
                 [1, 'asc']              // Element template name.
@@ -58,7 +58,9 @@ Attribute Templates
                 { "orderable": false }, // Edit element button.
                 { "orderable": false }  // Delete element button.
             ],
-            stateSave: true
+            "stateSave": true,
+            "stateDuration": 0,
+            "pageLength": 25
         });
     </script>
 {% endblock %}

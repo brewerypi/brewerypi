@@ -42,7 +42,7 @@ Units of Measurment
     <script>
         $('#unitOfMeasurementsTable').DataTable
         ({
-            order:
+            "order":
             [
                 [0, 'asc'],             // Name.
             ],
@@ -53,7 +53,9 @@ Units of Measurment
                 { "orderable": false }, // Edit button.
                 { "orderable": false }  // Delete button.
             ],
-            stateSave: true
+            "stateSave": true,
+            "stateDuration": 0,
+            "pageLength": 25
         });
     </script>
 {% endblock %}

@@ -50,7 +50,7 @@ Element Attributes
     <script>
         $('#elementAttributesTable').DataTable
         ({
-            order:
+            "order":
             [
                 [0, 'asc'],             // Element path.
                 [1, 'asc']              // Attribute Template.
@@ -63,7 +63,9 @@ Element Attributes
                 { "orderable": false }, // Edit element attribute button.
                 { "orderable": false }  // Delete element attribute button.
             ],
-            stateSave: true
+            "stateSave": true,
+            "stateDuration": 0,
+            "pageLength": 25
         });
     </script>
 {% endblock %}

@@ -44,7 +44,7 @@ Lookups
     <script>
         $('#lookupsTable').DataTable
         ({
-            order:
+            "order":
             [
                 [1, 'asc'],             // Enterprise.
                 [2, 'asc'],             // Name.
@@ -57,7 +57,9 @@ Lookups
                 { "orderable": false }, // Edit button.
                 { "orderable": false }  // Delete button.
             ],
-            stateSave: true
+            "stateSave": true,
+            "stateDuration": 0,
+            "pageLength": 25
         });
     </script>
 {% endblock %}
