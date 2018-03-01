@@ -303,7 +303,7 @@ class TagValue(db.Model):
 
 	TagValueId = db.Column(db.Integer, primary_key = True)
 	TagId = db.Column(db.Integer, db.ForeignKey("Tag.TagId", name = "FK__Tag$Have$TagValue"), nullable = False)
-	Timestamp = db.Column(db.DateTime, nullable = False)
+	Timestamp = db.Column(db.DateTime, nullable = False, index = True)
 	Value = db.Column(db.Float, nullable = False)
 
 	def __repr__(self):
