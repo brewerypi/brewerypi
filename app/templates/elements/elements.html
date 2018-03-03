@@ -17,6 +17,7 @@ Elements
                 <th>Description</th>
                 <th></th>
                 <th></th>
+                <th></th>
             </tr>
         </thead>
         <tbody>
@@ -26,6 +27,8 @@ Elements
                     element.ElementTemplate.Name }}</td>
                 <td>{{ element.Name }}</td>
                 <td>{{ element.Description }}</td>
+                <td><a class = "btn btn-default" title = "Copy" href = "{{ url_for("elements.copyElement", elementId = element.ElementId) }}">
+                    <span class="glyphicon glyphicon-copy"></span></a></td>
                 <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("elements.editElement", elementId = element.ElementId) }}">
                     <span class="glyphicon glyphicon-edit"></span></a></td>
                 <td><a class = "btn btn-default" title = "Delete" href = "{{ url_for("elements.deleteElement", elementId = element.ElementId) }}">
@@ -54,6 +57,7 @@ Elements
                 null,
                 null,
                 null,
+                { "orderable": false }, // Copy element button.
                 { "orderable": false }, // Edit element button.
                 { "orderable": false }  // Delete element button.
             ],

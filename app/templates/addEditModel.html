@@ -3,20 +3,12 @@
 {% extends "base.html" %}
 
 {% block title %}
-    {% if operation == "Add" %}
-        Add {{ modelName }}
-    {% elif operation == "Edit" %}
-        Edit {{ modelName }}
-    {% endif %}
+    {{ operation }} {{ modelName }}
 {% endblock %}
 
 {% block page_content %}
 <div>
-    {% if operation == "Add" %}
-        <h1>Add {{ modelName }}</h1>
-    {% elif operation == "Edit" %}
-        <h1>Edit {{ modelName }}</h1>
-    {% endif %}
+    <h1>{{ operation }} {{ modelName }}</h1>
 </div>
 <div>
     {{ wtf.quick_form(form) }}

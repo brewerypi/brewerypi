@@ -4,7 +4,7 @@ from . import elements
 from . forms import ElementForm
 from .. import db
 from .. eventFrames . forms import EventFrameForm
-from .. models import AttributeTemplate, Element, ElementAttribute, ElementTemplate, Enterprise, EventFrame, EventFrameTemplate, Site
+from .. models import Area, AttributeTemplate, Element, ElementAttribute, ElementTemplate, Enterprise, EventFrame, EventFrameTemplate, Site, Tag
 
 modelName = "Element"
 
@@ -55,6 +55,61 @@ def addElement():
 		return redirect(url_for("elements.listElements"))
 
 	# Present a form to add a new element.
+	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
+
+@elements.route("/elements/copy/<int:elementId>", methods = ["GET", "POST"])
+# @login_required
+def copyElement(elementId):
+	# check_admin()
+	operation = "Copy"
+	form = ElementForm()
+
+	# Copy an element.
+	if form.validate_on_submit():
+		elementToCopy = Element.query.get_or_404(form.elementIdToCopy.data)
+
+		# Ensure the element doesn't already exist.
+		if Element.query.filter_by(ElementTemplateId = elementToCopy.ElementTemplateId, Name = form.name.data).count() != 0:
+			flash("Element " + form.name.data + " already exists. Add aborted.", "alert alert-danger")
+			return redirect(url_for("elements.listElements"))
+		element = Element(Description = form.description.data, ElementTemplate = elementToCopy.ElementTemplate, Name = form.name.data)
+		db.session.add(element)
+
+		attributeTemplateIds = []
+		tags = []
+		for elementAttribute in elementToCopy.ElementAttributes:
+			attributeTemplateIds.append(elementAttribute.AttributeTemplateId)
+			tagName = form.name.data + "_" + elementAttribute.AttributeTemplate.Name.replace(" ", "")
+
+			# Ensure the tag doesn't already exist.
+			if Tag.query.join(Area).filter(Area.SiteId == elementToCopy.ElementTemplate.SiteId, Tag.Name == tagName).count() != 0:
+				flash("Tag " + tagName + " already exists. Add aborted.", "alert alert-danger")
+				return redirect(url_for("elements.listElements"))
+
+			if elementAttribute.Tag.Lookup:
+				tag = Tag(AreaId = elementAttribute.Tag.Area.AreaId,
+					Description = elementAttribute.Tag.Description.replace(elementToCopy.Name, form.name.data), LookupId = elementAttribute.Tag.LookupId,
+					Name = tagName, UnitOfMeasurementId = None)
+			else:
+				tag = Tag(AreaId = elementAttribute.Tag.Area.AreaId,
+					Description = elementAttribute.Tag.Description.replace(elementToCopy.Name, form.name.data), LookupId = None,
+					Name = tagName, UnitOfMeasurementId = elementAttribute.Tag.UnitOfMeasurementId)
+			
+			tags.append(tag)
+			db.session.add(tag)
+
+		db.session.commit()
+		for attributeTemplateId, tag in zip(attributeTemplateIds, tags):
+			elementAttribute = ElementAttribute(AttributeTemplateId = attributeTemplateId, ElementId = element.ElementId, TagId = tag.TagId)
+			db.session.add(elementAttribute)
+
+		db.session.commit()
+		flash("You have successfully copied \"" + elementToCopy.Name + "\" to \"" + element.Name + "\".", "alert alert-success")
+		return redirect(url_for("elements.listElements"))
+
+	# Present a form to copy an element.
+	del form.elementTemplate
+	form.elementIdToCopy.data = elementId
 	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
 
 @elements.route("/elements/delete/<int:elementId>", methods = ["GET", "POST"])
