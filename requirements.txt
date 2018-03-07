@@ -13,6 +13,7 @@ Flask-Bootstrap==3.3.7.1
 Flask-Migrate==2.1.1
 Flask-SQLAlchemy==2.3.2
 Flask-WTF==0.14.2
+gunicorn==19.7.1
 idna==2.6
 imagesize==1.0.0
 itsdangerous==0.24
