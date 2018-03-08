@@ -1,4 +1,4 @@
-from sqlalchemy import PrimaryKeyConstraint, UniqueConstraint
+from sqlalchemy import Index, PrimaryKeyConstraint, UniqueConstraint
 from app import db
 
 class Area(db.Model):
