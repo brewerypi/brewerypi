@@ -6,27 +6,32 @@ This instructions will create an image for a Raspberry Pi that can be downloaded
 Download the Latest Raspbian *Lite* Image
 -----------------------------------------
 
-You can find the `latest Raspbian Lite image here <https://www.raspberrypi.org/downloads/raspbian/>`_.
+.. _latest Raspbian Lite image here: https://www.raspberrypi.org/downloads/raspbian/
 
-Once downloaded, extract the image to somewhere on a computers' (not your Raspberry Pi) hard drive.
+You can find the `latest Raspbian Lite image here`_.
+
+Once downloaded, extract the image to somewhere on a computers' (not yourRaspberry Pi) hard drive.
 
 Write the Raspbian *Lite* Image to your Memory Card
 ---------------------------------------------------
 
+.. _installing operating system images here: https://www.raspberrypi.org/documentation/installation/installing-images/README.md
+
 I'm doing this on Windows 10 and use Win32 Disk Imager. You can find more details on the Raspberry Pi website regarding `installing operating system images
-here <https://www.raspberrypi.org/documentation/installation/installing-images/README.md>`_.
-Once the image is written the memory, place an empty file named "ssh" in the root of memory card.
-This will allow us to install and configure the Raspberry Pi without having to hookup a keyboard, mouse or monitor.
-Once this is done, "eject" the memory card so you can safely remove it. You can now install the memory card into your Raspberry Pi.
+here`_. Once the image is written to the memory card, place an empty file named "ssh" in the root of memory card. This will allow us to install and configure
+the Raspberry Pi without having to hookup a keyboard, mouse or monitor (headless configuration). Once this is done, "eject" the memory card so you can safely
+remove it. You can now install the memory card into your Raspberry Pi.
 
 Connect to the Raspberry Pi using SSH
 -------------------------------------
 
-With the power to your Raspberry Pi off, plug it into your network (or laptop ethernet port) using the ethernet port.
-Next connect the power supply to the Raspberry Pi and plug it in.
+.. _finding your IP address here: https://www.raspberrypi.org/documentation/remote-access/ip-address.md
 
-Now you need to find the IP address that is assigned to your Raspberry Pi. This is dependent on your network.
-You can find more information on finding your Raspberry Pi `IP address here <https://www.raspberrypi.org/documentation/remote-access/ip-address.md>`_.
+With the power to your Raspberry Pi off, plug it into your network (or laptop ethernet port) using the ethernet port. Next connect the power supply to the
+Raspberry Pi and plug it in.
+
+Now you need to find the IP address that is assigned to your Raspberry Pi. This is dependent on your network. You can find more details on the Raspberry Pi
+website regarding `finding your IP address here`_.
 
 Once you know the IP address of your Raspberry Pi, connect to it using your SSH client. The default login is "pi" and password is "raspberry".
 
@@ -144,6 +149,7 @@ Run the following commands to start Grafana at boot::
     $ sudo /bin/systemctl enable grafana-server
 
 Reboot and point a web browser at http\://<Your Raspberry Pi IP Address>:3000
+
 Login with "admin" for both the user and password.
 
 Click on "Add data source" and set the following properties:
@@ -167,16 +173,18 @@ Download the Brewery Pi release source files from GitHub and import the Grafana 
 Create a Compressed Image
 -------------------------
 
+.. _Shrinking Raspberry Pi SD Card Images: http://www.aoakley.com/articles/2015-10-09-resizing-sd-images.php
+.. _How to BackUp and Shrink Your Raspberry Pi Image: http://www.instructables.com/id/How-to-BackUp-and-Shrink-Your-Raspberry-Pi-Image/
+
 I referenced both of these articles for this process:
 
-`Shrinking Raspberry Pi SD Card Images <http://www.aoakley.com/articles/2015-10-09-resizing-sd-images.php>`_
+`Shrinking Raspberry Pi SD Card Images`_
 
-`How to BackUp and Shrink Your Raspberry Pi Image <http://www.instructables.com/id/How-to-BackUp-and-Shrink-Your-Raspberry-Pi-Image/>`_
+`How to BackUp and Shrink Your Raspberry Pi Image`_
 
 You need a Linux distribution for this task and an external disk drive. I'm using VMware Workstation Player and Debian 64-bit distribution.
-Shutdown the Raspberry Pi and eject the disk.
-Using Win32 Disk Imager, read the Raspberry Pi data from the SD card to an image file on the external drive named brewerypi-vX.Y.Z.img.
-Install the following tools on the VMWare Workstation Player::
+Shutdown the Raspberry Pi and eject the disk. Using Win32 Disk Imager, read the Raspberry Pi data from the SD card to an image file on the external drive named
+brewerypi-vX.Y.Z.img (substitute "X", "Y" and "Z" for the release version). Install the following tools on the VMWare Workstation Player::
 
     $ su
     $ apt-get update
