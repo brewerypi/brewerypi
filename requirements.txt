@@ -39,7 +39,7 @@ Sphinx==1.7.1
 sphinx-autobuild==0.7.1
 sphinx-rtd-theme==0.2.4
 sphinxcontrib-websupport==1.0.1
-SQLAlchemy==1.2.4
+SQLAlchemy==1.1.17
 tornado==4.5.3
 urllib3==1.22
 visitor==0.1.3
