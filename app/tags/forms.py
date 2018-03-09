@@ -7,7 +7,7 @@ from .. helpers import areaFullyAbbreviatedPath
 from .. models import Area, Enterprise, Lookup, Site, UnitOfMeasurement
 
 class TagForm(FlaskForm):
-	area = QuerySelectField(query_factory = lambda: Area.query.join(Site, Enterprise).order_by(Enterprise.Abbreviation, Site.Abbreviation, Area.Abbreviation), \
+	area = QuerySelectField(query_factory = lambda: Area.query.join(Site, Enterprise).order_by(Enterprise.Abbreviation, Site.Abbreviation, Area.Abbreviation),
 		get_label = areaFullyAbbreviatedPath)
 	name = StringField("Name", validators = [Required(), Length(1, 45)])
 	description = StringField("Description", validators = [Length(0, 255)])

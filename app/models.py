@@ -32,7 +32,7 @@ class AttributeTemplate(db.Model):
 
 	AttributeTemplateId = db.Column(db.Integer, primary_key = True)
 	Description = db.Column(db.String(255), nullable = True)
-	ElementTemplateId = db.Column(db.Integer, db.ForeignKey("ElementTemplate.ElementTemplateId", name = "FK__ElementTemplate$Have$AttributeTemplate"), \
+	ElementTemplateId = db.Column(db.Integer, db.ForeignKey("ElementTemplate.ElementTemplateId", name = "FK__ElementTemplate$Have$AttributeTemplate"),
 		nullable = False)
 	Name = db.Column(db.String(45), nullable = False)
 
@@ -67,7 +67,7 @@ class ElementAttribute(db.Model):
 	)
 
 	ElementAttributeId = db.Column(db.Integer, primary_key = True)
-	AttributeTemplateId = db.Column(db.Integer, db.ForeignKey("AttributeTemplate.AttributeTemplateId", name = "FK__AttributeTemplate$Have$ElementAttribute"), \
+	AttributeTemplateId = db.Column(db.Integer, db.ForeignKey("AttributeTemplate.AttributeTemplateId", name = "FK__AttributeTemplate$Have$ElementAttribute"),
 		nullable = False)
 	ElementId = db.Column(db.Integer, db.ForeignKey("Element.ElementId", name = "FK__Element$Have$ElementAttribute"), nullable = False)
 	TagId = db.Column(db.Integer, db.ForeignKey("Tag.TagId", name = "FK__Tag$Have$ElementAttribute"), nullable = False)
@@ -126,7 +126,7 @@ class EventFrame(db.Model):
 	EventFrameId = db.Column(db.Integer, primary_key = True)
 	ElementId = db.Column(db.Integer, db.ForeignKey("Element.ElementId", name = "FK__Element$Have$EventFrame"), nullable = True)
 	EndTimestamp = db.Column(db.DateTime, nullable = True)
-	EventFrameTemplateId = db.Column(db.Integer, db.ForeignKey("EventFrameTemplate.EventFrameTemplateId", name = "FK__EventFrameTemplate$Have$EventFrame"), \
+	EventFrameTemplateId = db.Column(db.Integer, db.ForeignKey("EventFrameTemplate.EventFrameTemplateId", name = "FK__EventFrameTemplate$Have$EventFrame"),
 		nullable = False)
 	Name = db.Column(db.String(45), nullable = True)
 	ParentEventFrameId = db.Column(db.Integer, db.ForeignKey("EventFrame.EventFrameId", name = "FK__EventFrame$CanHave$EventFrame"), nullable = True)
@@ -174,7 +174,7 @@ class EventFrameTemplate(db.Model):
 
 	EventFrameTemplateId = db.Column(db.Integer, primary_key = True)
 	Description = db.Column(db.String(255), nullable = True)
-	ElementTemplateId = db.Column(db.Integer, db.ForeignKey("ElementTemplate.ElementTemplateId", name = "FK__ElementTemplate$Have$EventFrameTemplate"), \
+	ElementTemplateId = db.Column(db.Integer, db.ForeignKey("ElementTemplate.ElementTemplateId", name = "FK__ElementTemplate$Have$EventFrameTemplate"),
 		nullable = True)
 	Name = db.Column(db.String(45), nullable = False)
 	Order = db.Column(db.Integer, nullable = False)
@@ -282,7 +282,7 @@ class Tag(db.Model):
 	Description = db.Column(db.String(255), nullable = True)
 	LookupId = db.Column(db.Integer, db.ForeignKey("Lookup.LookupId", name = "FK__Lookup$CanBeUsedIn$Tag"), nullable = True)
 	Name = db.Column(db.String(45), nullable = False)
-	UnitOfMeasurementId = db.Column(db.Integer, db.ForeignKey("UnitOfMeasurement.UnitOfMeasurementId", \
+	UnitOfMeasurementId = db.Column(db.Integer, db.ForeignKey("UnitOfMeasurement.UnitOfMeasurementId",
 		name = "FK__UnitOfMeasurement$CanBeUsedIn$Tag"), nullable = True)
 
 	ElementAttributes = db.relationship("ElementAttribute", backref = "Tag", lazy = "dynamic")

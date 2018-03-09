@@ -6,6 +6,6 @@ app = create_app()
 
 @app.shell_context_processor
 def make_shell_context():
-	return dict(app = app, db = db, Area = Area, AttributeTemplate = AttributeTemplate, Element = Element, ElementAttribute = ElementAttribute, \
-		ElementTemplate = ElementTemplate, Enterprise = Enterprise, EventFrame = EventFrame, EventFrameTemplate = EventFrameTemplate, \
+	return dict(app = app, db = db, Area = Area, AttributeTemplate = AttributeTemplate, Element = Element, ElementAttribute = ElementAttribute,
+		ElementTemplate = ElementTemplate, Enterprise = Enterprise, EventFrame = EventFrame, EventFrameTemplate = EventFrameTemplate,
 		Lookup = Lookup, LookupValue = LookupValue, Site = Site, Tag = Tag, TagValue = TagValue, UnitOfMeasurement = UnitOfMeasurement)

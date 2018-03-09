@@ -105,12 +105,12 @@ def exportTags():
 		
 		for tag in tags:
 			if tag.Lookup:
-				tagsWriter.writerow({"Selected" : "", "Tag Id" : tag.TagId, "Enterprise" : tag.Area.Site.Enterprise.Abbreviation, \
-				"Site" : tag.Area.Site.Abbreviation, "Area" : tag.Area.Abbreviation, "Tag Name" : tag.Name, "Tag Description" : tag.Description, \
+				tagsWriter.writerow({"Selected" : "", "Tag Id" : tag.TagId, "Enterprise" : tag.Area.Site.Enterprise.Abbreviation,
+				"Site" : tag.Area.Site.Abbreviation, "Area" : tag.Area.Abbreviation, "Tag Name" : tag.Name, "Tag Description" : tag.Description,
 				"Lookup" : tag.Lookup.Name, "Unit" : ""})
 			else:
-				tagsWriter.writerow({"Selected" : "", "Tag Id" : tag.TagId, "Enterprise" : tag.Area.Site.Enterprise.Abbreviation, \
-					"Site" : tag.Area.Site.Abbreviation, "Area" : tag.Area.Abbreviation, "Tag Name" : tag.Name, "Tag Description" : tag.Description, \
+				tagsWriter.writerow({"Selected" : "", "Tag Id" : tag.TagId, "Enterprise" : tag.Area.Site.Enterprise.Abbreviation,
+					"Site" : tag.Area.Site.Abbreviation, "Area" : tag.Area.Abbreviation, "Tag Name" : tag.Name, "Tag Description" : tag.Description,
 					"Lookup" : "", "Unit" : tag.UnitOfMeasurement.Abbreviation})
 	
 	return send_file(os.path.join("..", current_app.config["EXPORT_FOLDER"], current_app.config["EXPORT_TAGS_FILENAME"]), as_attachment = True)

@@ -84,10 +84,10 @@ def exportElementAttributes():
 		elementAttributesWriter.writeheader()
 		
 		for elementAttribute in elementAttributes:
-			elementAttributesWriter.writerow({"Selected" : "", "Element Attribute Id" : elementAttribute.ElementAttributeId, \
-			"Enterprise" : elementAttribute.Element.ElementTemplate.Site.Enterprise.Abbreviation, \
-			"Site" : elementAttribute.Element.ElementTemplate.Site.Abbreviation, "Element Template" : elementAttribute.Element.ElementTemplate.Name, \
-			"Element Name" : elementAttribute.Element.Name, "Attribute Template" : elementAttribute.AttributeTemplate.Name, \
+			elementAttributesWriter.writerow({"Selected" : "", "Element Attribute Id" : elementAttribute.ElementAttributeId,
+			"Enterprise" : elementAttribute.Element.ElementTemplate.Site.Enterprise.Abbreviation,
+			"Site" : elementAttribute.Element.ElementTemplate.Site.Abbreviation, "Element Template" : elementAttribute.Element.ElementTemplate.Name,
+			"Element Name" : elementAttribute.Element.Name, "Attribute Template" : elementAttribute.AttributeTemplate.Name,
 			"Area" : elementAttribute.Tag.Area.Abbreviation, "Tag Name" : elementAttribute.Tag.Name})
 	
 	return send_file(os.path.join("..", current_app.config["EXPORT_FOLDER"], current_app.config["EXPORT_ELEMENT_ATTRIBUTES_FILENAME"]), as_attachment = True)
@@ -154,7 +154,7 @@ def importElementAttributes():
 						str(rowNumber) + ".")
 					continue
 
-				attributeTemplate = AttributeTemplate.query.filter(AttributeTemplate.ElementTemplateId == elementTemplate.ElementTemplateId, \
+				attributeTemplate = AttributeTemplate.query.filter(AttributeTemplate.ElementTemplateId == elementTemplate.ElementTemplateId,
 					AttributeTemplate.Name == attributeTemplateName).first()
 				if attributeTemplate is None:
 					errors.append("Attribute Template \"" + attributeTemplateName + "\" does not exist in site \"" + site.Name + "\". Skipping row " + \
@@ -182,7 +182,7 @@ def importElementAttributes():
 				if "" == elementAttributeId:
 					# Add element attribute.
 					# Check for existing element attribute.
-					elementAttribute = ElementAttribute.query.filter(ElementAttribute.AttributeTemplateId == attributeTemplate.AttributeTemplateId, \
+					elementAttribute = ElementAttribute.query.filter(ElementAttribute.AttributeTemplateId == attributeTemplate.AttributeTemplateId,
 						ElementAttribute.ElementId == element.ElementId).first()
 					if elementAttribute is not None:
 						warnings.append("Attribute Template \"" + attributeTemplateName + "\" already exists for Element \"" + elementName + \
@@ -201,7 +201,7 @@ def importElementAttributes():
 					# The attribute template and/or element have changed. Check for existing element attribute.
 					if elementAttribute.AttributeTemplateId != attributeTemplate.AttributeTemplateId or elementAttribute.ElementId != element.ElementId:
 						elementAttributeCheck = ElementAttribute.query.join(AttributeTemplate, Element). \
-							filter(ElementAttribute.AttributeTemplateId == attributeTemplate.AttributeTemplateId, \
+							filter(ElementAttribute.AttributeTemplateId == attributeTemplate.AttributeTemplateId,
 							ElementAttribute.ElementId == element.ElementId).first()
 						if elementAttributeCheck is not None:
 							warnings.append("Attribute Template  \"" + elementAttributeName + "\" already exists for Element \"" + elementName + \
