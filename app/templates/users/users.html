@@ -1,0 +1,60 @@
+{% import "bootstrap/utils.html" as utils %}
+
+{% extends "base.html" %}
+
+{% block title %}
+Users
+{% endblock %}
+
+{% block page_content %}
+<div>
+    <h1>Users</h1>
+    <a class = "btn btn-default" title = "Add" href = "{{ url_for("users.addUser") }}" role = "button">
+        <span class="glyphicon glyphicon-plus"></span></a>
+    <br><br>
+    <table id = "usersTable" class = "table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th></th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+            <tr>
+                <td>{{ user.Name }}</td>
+                <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("users.editUser", userId = user.UserId) }}">
+                    <span class="glyphicon glyphicon-edit"></span></a></td>
+                <td><a class = "btn btn-default" title = "Delete" href = "{{ url_for("users.deleteUser", 
+                    userId = user.UserId) }}"><span class="glyphicon glyphicon-trash"></span></a></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <link rel = "stylesheet" type = "text/css" href = {{ url_for("static", filename = "css/datatables.min.css") }}/> 
+    <script type = "text/javascript" src = {{ url_for("static", filename = "js/datatables.min.js") }}></script>
+    <script>
+        $('#usersTable').DataTable
+        ({
+            "order":
+            [
+                [0, 'asc'],             // Name.
+            ],
+            "columns":
+            [
+                null,
+                { "orderable": false }, // Edit button.
+                { "orderable": false }  // Delete button.
+            ],
+            "stateSave": true,
+            "stateDuration": 0,
+            "pageLength": 25
+        });
+    </script>
+{% endblock %}

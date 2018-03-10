@@ -1,5 +1,8 @@
-from sqlalchemy import UniqueConstraint
+from flask_login import UserMixin
+from sqlalchemy import Index, UniqueConstraint
+from werkzeug.security import generate_password_hash, check_password_hash
 from app import db
+from . import loginManager
 
 class Area(db.Model):
 	__tablename__ = "Area"
@@ -324,3 +327,33 @@ class UnitOfMeasurement(db.Model):
 
 	def __repr__(self):
 		return "<UnitOfMeasurement: {}>".format(self.Name)
+
+class User(UserMixin, db.Model):
+	__tablename__ = 'User'
+	__table_args__ = \
+	(
+		UniqueConstraint("Name", name = "AK__Name"),
+		Index("IX_Name", "Name"),
+	)
+
+	UserId = db.Column(db.Integer, primary_key = True)
+	Name = db.Column(db.String(45), nullable = False)
+	PasswordHash = db.Column(db.String(128))
+
+	def get_id(self):
+		return self.UserId
+
+	@property
+	def Password(self):
+		raise AttributeError("Password is not a readable attribute.")
+	
+	@Password.setter
+	def Password(self, password):
+		self.PasswordHash = generate_password_hash(password)
+
+	def verify_password(self, password):
+		return check_password_hash(self.PasswordHash, password)
+
+@loginManager.user_loader
+def loadUser(id):
+	return User.query.get(int(id))
