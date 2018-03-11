@@ -5,8 +5,8 @@ from sqlalchemy import or_
 from . import elementAttributes
 from . forms import ElementAttributeForm, ElementAttributeImportForm, ElementAttributeValueForm
 from .. import db
-from .. decorators import adminRequired
-from .. models import Area, AttributeTemplate, Element, ElementAttribute, ElementTemplate, Enterprise, LookupValue, Site, Tag, TagValue
+from .. decorators import adminRequired, permissionRequired
+from .. models import Area, AttributeTemplate, Element, ElementAttribute, ElementTemplate, Enterprise, LookupValue, Permission, Site, Tag, TagValue
 from .. tagValues . forms import TagValueForm
 
 @elementAttributes.route("/elementAttributes", methods = ["GET", "POST"])
@@ -215,7 +215,7 @@ def importElementAttributes():
 	return render_template("import.html", errors = errors, form = form, importing = "Element Attributes", successes = successes, warnings = warnings)
 
 @elementAttributes.route("/elementAttributes/addValue/<int:elementId>/<int:tagId>", methods = ["GET", "POST"])
-@adminRequired
+@permissionRequired(Permission.DATA_ENTRY)
 def addElementAttributeValue(elementId, tagId):
 	modelName = "Element Attribute Value"
 	operation = "Add"
@@ -247,7 +247,7 @@ def addElementAttributeValue(elementId, tagId):
 	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
 
 @elementAttributes.route("/elementAttributes/deleteValue/<int:elementId>/<int:tagValueId>", methods = ["GET", "POST"])
-@adminRequired
+@permissionRequired(Permission.DATA_ENTRY)
 def deleteElementAttributeValue(elementId, tagValueId):
 	tagValue = TagValue.query.get_or_404(tagValueId)
 	db.session.delete(tagValue)
@@ -256,7 +256,7 @@ def deleteElementAttributeValue(elementId, tagValueId):
 	return redirect(url_for("elements.dashboard", elementId = elementId))
 
 @elementAttributes.route("/elementAttributes/editValue/<int:elementId>/<int:tagValueId>", methods = ["GET", "POST"])
-@adminRequired
+@permissionRequired(Permission.DATA_ENTRY)
 def editElementAttributeValue(elementId, tagValueId):
 	modelName = "Element Attribute Value"
 	operation = "Edit"
