@@ -16,6 +16,7 @@ Users
         <thead>
             <tr>
                 <th>Name</th>
+                <th>Role</th>
                 <th></th>
                 <th></th>
                 <th></th>
@@ -25,6 +26,7 @@ Users
             {% for user in users %}
             <tr>
                 <td>{{ user.Name }}</td>
+                <td>{{ user.Role.Name }}</td>
                 <td><a class = "btn btn-default" title = "Change Password" href = "{{ url_for("users.changePassword", userId = user.UserId) }}">
                     <span class="glyphicon glyphicon-lock"></span></a></td>
                 <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("users.editUser", userId = user.UserId) }}">
@@ -51,6 +53,7 @@ Users
             ],
             "columns":
             [
+                null,
                 null,
                 { "orderable": false }, // Change password button.
                 { "orderable": false }, // Edit button.
