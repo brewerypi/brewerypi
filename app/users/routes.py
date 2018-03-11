@@ -1,4 +1,5 @@
 from flask import flash, redirect, render_template, request, url_for
+from flask_login import login_required
 from . import users
 from . forms import UserForm
 from .. import db
@@ -40,7 +41,7 @@ def deleteUser(userId):
 	return redirect(url_for("users.listUsers"))
 
 @users.route("/users/changePassword/<int:userId>", methods = ["GET", "POST"])
-# @login_required
+@login_required
 def changePassword(userId):
 	operation = "Edit"
 	user = User.query.get_or_404(userId)
@@ -54,9 +55,10 @@ def changePassword(userId):
 		user.Password = form.password.data
 		db.session.commit()
 		flash("You have successfully changed the password for user \"" + user.Name + "\".", "alert alert-success")
-		return redirect(url_for("users.listUsers"))
+		return redirect(form.requestReferrer.data)
 
 	# Present a form to edit an existing user.
+	form.requestReferrer.data = request.referrer
 	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
 
 @users.route("/users/edit/<int:userId>", methods = ["GET", "POST"])
@@ -66,17 +68,19 @@ def editUser(userId):
 	user = User.query.get_or_404(userId)
 	form = UserForm(obj = user)
 
-	del form.name
 	del form.password
 	del form.password2
 
 	# Edit an existing user.
 	if form.validate_on_submit():
+		user.Name = form.name.data
 		user.Role = form.role.data
 		db.session.commit()
 		flash("You have successfully edited the user \"" + user.Name + "\".", "alert alert-success")
 		return redirect(url_for("users.listUsers"))
 
 	# Present a form to edit an existing user.
+	form.userId.data = user.UserId
+	form.name.data = user.Name
 	form.role.data = user.Role
 	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
