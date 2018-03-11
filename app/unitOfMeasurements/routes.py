@@ -1,4 +1,5 @@
 from flask import flash, redirect, render_template, request, url_for
+from flask_login import login_required
 from . import unitOfMeasurements
 from . forms import UnitOfMeasurementForm
 from .. import db
@@ -8,12 +9,14 @@ from .. models import UnitOfMeasurement
 modelName = "Unit"
 
 @unitOfMeasurements.route("/unitOfMeasurements", methods = ["GET", "POST"])
+@login_required
 @adminRequired
 def listUnitOfMeasurements():
 	unitOfMeasurements = UnitOfMeasurement.query
 	return render_template("unitOfMeasurements/unitOfMeasurements.html", unitOfMeasurements = unitOfMeasurements)
 
 @unitOfMeasurements.route("/units/add", methods = ["GET", "POST"])
+@login_required
 @adminRequired
 def addUnitOfMeasurement():
 	operation = "Add"
@@ -32,6 +35,7 @@ def addUnitOfMeasurement():
 	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
 
 @unitOfMeasurements.route("/unitOfMeasurements/delete/<int:unitOfMeasurementId>", methods = ["GET", "POST"])
+@login_required
 @adminRequired
 def deleteUnitOfMeasurement(unitOfMeasurementId):
 	unitOfMeasurement = UnitOfMeasurement.query.get_or_404(unitOfMeasurementId)
@@ -42,6 +46,7 @@ def deleteUnitOfMeasurement(unitOfMeasurementId):
 	return redirect(url_for("unitOfMeasurements.listUnitOfMeasurements"))
 
 @unitOfMeasurements.route("/unitOfMeasurements/edit/<int:unitOfMeasurementId>", methods = ["GET", "POST"])
+@login_required
 @adminRequired
 def editUnitOfMeasurement(unitOfMeasurementId):
 	operation = "Edit"

@@ -1,6 +1,7 @@
 import csv
 import os
 from flask import current_app, flash, redirect, render_template, send_file, url_for
+from flask_login import login_required
 from sqlalchemy import or_
 from . import elementAttributes
 from . forms import ElementAttributeForm, ElementAttributeImportForm, ElementAttributeValueForm
@@ -10,12 +11,14 @@ from .. models import Area, AttributeTemplate, Element, ElementAttribute, Elemen
 from .. tagValues . forms import TagValueForm
 
 @elementAttributes.route("/elementAttributes", methods = ["GET", "POST"])
+@login_required
 @adminRequired
 def listElementAttributes():
 	elementAttributes = ElementAttribute.query.all()
 	return render_template("elementAttributes/elementAttributes.html", elementAttributes = elementAttributes)
 
 @elementAttributes.route("/elementAttributes/add", methods = ["GET", "POST"])
+@login_required
 @adminRequired
 def addElementAttribute():
 	modelName = "Element Attribute"
@@ -35,6 +38,7 @@ def addElementAttribute():
 	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
 
 @elementAttributes.route("/elementAttributes/delete/<int:elementAttributeId>", methods = ["GET", "POST"])
+@login_required
 @adminRequired
 def deleteElementAttribute(elementAttributeId):
 	elementAttribute = ElementAttribute.query.get_or_404(elementAttributeId)
@@ -46,6 +50,7 @@ def deleteElementAttribute(elementAttributeId):
 	return redirect(url_for("elementAttributes.listElementAttributes"))
 
 @elementAttributes.route("/elementAttributes/edit/<int:elementAttributeId>", methods = ["GET", "POST"])
+@login_required
 @adminRequired
 def editElementAttribute(elementAttributeId):
 	modelName = "Element Attribute"
@@ -70,6 +75,7 @@ def editElementAttribute(elementAttributeId):
 	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
 
 @elementAttributes.route("/elementAttributes/export")
+@login_required
 @adminRequired
 def exportElementAttributes():
 	elementAttributes = ElementAttribute.query.join(Element, Tag, ElementTemplate, Site, Enterprise). \
@@ -91,6 +97,7 @@ def exportElementAttributes():
 	return send_file(os.path.join("..", current_app.config["EXPORT_FOLDER"], current_app.config["EXPORT_ELEMENT_ATTRIBUTES_FILENAME"]), as_attachment = True)
 
 @elementAttributes.route("/elementAttributes/import", methods = ["GET", "POST"])
+@login_required
 @adminRequired
 def importElementAttributes():
 	form = ElementAttributeImportForm()
@@ -215,6 +222,7 @@ def importElementAttributes():
 	return render_template("import.html", errors = errors, form = form, importing = "Element Attributes", successes = successes, warnings = warnings)
 
 @elementAttributes.route("/elementAttributes/addValue/<int:elementId>/<int:tagId>", methods = ["GET", "POST"])
+@login_required
 @permissionRequired(Permission.DATA_ENTRY)
 def addElementAttributeValue(elementId, tagId):
 	modelName = "Element Attribute Value"
@@ -247,6 +255,7 @@ def addElementAttributeValue(elementId, tagId):
 	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
 
 @elementAttributes.route("/elementAttributes/deleteValue/<int:elementId>/<int:tagValueId>", methods = ["GET", "POST"])
+@login_required
 @permissionRequired(Permission.DATA_ENTRY)
 def deleteElementAttributeValue(elementId, tagValueId):
 	tagValue = TagValue.query.get_or_404(tagValueId)
@@ -256,6 +265,7 @@ def deleteElementAttributeValue(elementId, tagValueId):
 	return redirect(url_for("elements.dashboard", elementId = elementId))
 
 @elementAttributes.route("/elementAttributes/editValue/<int:elementId>/<int:tagValueId>", methods = ["GET", "POST"])
+@login_required
 @permissionRequired(Permission.DATA_ENTRY)
 def editElementAttributeValue(elementId, tagValueId):
 	modelName = "Element Attribute Value"

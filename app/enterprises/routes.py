@@ -1,4 +1,5 @@
 from flask import flash, redirect, render_template, request, url_for
+from flask_login import login_required
 from . import enterprises
 from . forms import EnterpriseForm
 from .. import db
@@ -8,12 +9,14 @@ from .. models import Enterprise
 modelName = "Enterprise"
 
 @enterprises.route("/enterprises", methods = ["GET", "POST"])
+@login_required
 @adminRequired
 def listEnterprises():
 	enterprises = Enterprise.query
 	return render_template("enterprises/enterprises.html", enterprises = enterprises)
 
 @enterprises.route("/enterprises/add", methods = ["GET", "POST"])
+@login_required
 @adminRequired
 def addEnterprise():
 	operation = "Add"
@@ -31,6 +34,7 @@ def addEnterprise():
 	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
 
 @enterprises.route("/enterprises/delete/<int:enterpriseId>", methods = ["GET", "POST"])
+@login_required
 @adminRequired
 def deleteEnterprise(enterpriseId):
 	enterprise = Enterprise.query.get_or_404(enterpriseId)
@@ -40,6 +44,7 @@ def deleteEnterprise(enterpriseId):
 	return redirect(url_for("enterprises.listEnterprises"))
 
 @enterprises.route("/enterprises/edit/<int:enterpriseId>", methods = ["GET", "POST"])
+@login_required
 @adminRequired
 def editEnterprise(enterpriseId):
 	operation = "Edit"

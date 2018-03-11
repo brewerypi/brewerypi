@@ -1,4 +1,5 @@
 from flask import flash, redirect, render_template, request, url_for
+from flask_login import login_required
 from . import areas
 from . forms import AreaForm
 from .. import db
@@ -8,12 +9,14 @@ from .. models import Area, Enterprise, Site
 modelName = "Area"
 
 @areas.route("/areas", methods = ["GET", "POST"])
+@login_required
 @adminRequired
 def listAreas():
 	areas = Area.query
 	return render_template("areas/areas.html", areas = areas)
 
 @areas.route("/areas/add", methods = ["GET", "POST"])
+@login_required
 @adminRequired
 def addArea():
 	operation = "Add"
@@ -31,6 +34,7 @@ def addArea():
 	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
 
 @areas.route("/areas/delete/<int:areaId>", methods = ["GET", "POST"])
+@login_required
 @adminRequired
 def deleteArea(areaId):
 	area = Area.query.get_or_404(areaId)
@@ -40,6 +44,7 @@ def deleteArea(areaId):
 	return redirect(url_for("areas.listAreas"))
 
 @areas.route("/areas/edit/<int:areaId>", methods = ["GET", "POST"])
+@login_required
 @adminRequired
 def editArea(areaId):
 	operation = "Edit"

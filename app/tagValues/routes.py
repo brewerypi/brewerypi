@@ -1,4 +1,5 @@
 from flask import flash, redirect, render_template, request, url_for
+from flask_login import login_required
 from . import tagValues
 from . forms import TagValueForm
 from .. import db
@@ -9,6 +10,7 @@ modelName = "Tag Value"
 
 @tagValues.route("/tagValues/<int:tagId>", methods = ["GET", "POST"])
 @tagValues.route("/tagValues/<int:tagId>/<int:elementAttributeId>", methods = ["GET", "POST"])
+@login_required
 @permissionRequired(Permission.DATA_ENTRY)
 def listTagValues(tagId, elementAttributeId = None, ):
 	if elementAttributeId:
@@ -24,6 +26,7 @@ def listTagValues(tagId, elementAttributeId = None, ):
 	return render_template("tagValues/tagValues.html", elementAttribute = elementAttribute, tag = tag, tagValues = tagValues)
 
 @tagValues.route("/tagValues/add/<int:tagId>", methods = ["GET", "POST"])
+@login_required
 @permissionRequired(Permission.DATA_ENTRY)
 def addTagValue(tagId):
 	operation = "Add"
@@ -55,6 +58,7 @@ def addTagValue(tagId):
 	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
 
 @tagValues.route("/tagValues/delete/<int:tagValueId>", methods = ["GET", "POST"])
+@login_required
 @permissionRequired(Permission.DATA_ENTRY)
 def deleteTagValue(tagValueId):
 	tagValue = TagValue.query.get_or_404(tagValueId)
@@ -64,6 +68,7 @@ def deleteTagValue(tagValueId):
 	return redirect(url_for("tagValues.listTagValues", tagId = tagValue.TagId))
 
 @tagValues.route("/tagValues/edit/<int:tagValueId>", methods = ["GET", "POST"])
+@login_required
 @permissionRequired(Permission.DATA_ENTRY)
 def editTagValue(tagValueId):
 	operation = "Edit"

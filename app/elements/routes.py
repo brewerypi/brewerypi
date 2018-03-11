@@ -1,4 +1,5 @@
 from flask import flash, redirect, render_template, url_for
+from flask_login import login_required
 from sqlalchemy import and_
 from . import elements
 from . forms import ElementForm
@@ -10,12 +11,14 @@ from .. models import Area, AttributeTemplate, Element, ElementAttribute, Elemen
 modelName = "Element"
 
 @elements.route("/elements", methods = ["GET", "POST"])
+@login_required
 @adminRequired
 def listElements():
 	elements = Element.query.all()
 	return render_template("elements/elements.html", elements = elements)
 
 @elements.route("/elements/dashboard/<int:elementId>", methods = ["GET", "POST"])
+@login_required
 @permissionRequired(Permission.DATA_ENTRY)
 def dashboard(elementId):
 	element = Element.query.get_or_404(elementId)
@@ -28,6 +31,7 @@ def dashboard(elementId):
 		eventFrameTemplates = eventFrameTemplates)
 
 @elements.route("/elements/add", methods = ["GET", "POST"])
+@login_required
 @adminRequired
 def addElement():
 	operation = "Add"
@@ -45,6 +49,7 @@ def addElement():
 	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
 
 @elements.route("/elements/copy/<int:elementId>", methods = ["GET", "POST"])
+@login_required
 @adminRequired
 def copyElement(elementId):
 	operation = "Copy"
@@ -99,6 +104,7 @@ def copyElement(elementId):
 	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
 
 @elements.route("/elements/delete/<int:elementId>", methods = ["GET", "POST"])
+@login_required
 @adminRequired
 def deleteElement(elementId):
 	element = Element.query.get_or_404(elementId)
@@ -108,6 +114,7 @@ def deleteElement(elementId):
 	return redirect(url_for("elements.listElements"))
 
 @elements.route("/elements/edit/<int:elementId>", methods = ["GET", "POST"])
+@login_required
 @adminRequired
 def editElement(elementId):
 	operation = "Edit"
@@ -133,6 +140,7 @@ def editElement(elementId):
 @elements.route("/selectElement", methods = ["GET", "POST"])
 @elements.route("/selectElement/<string:className>", methods = ["GET", "POST"])
 @elements.route("/selectElement/<string:className>/<int:id>", methods = ["GET", "POST"])
+@login_required
 @permissionRequired(Permission.DATA_ENTRY)
 def selectElement(className = None, id = None):
 	elements = None

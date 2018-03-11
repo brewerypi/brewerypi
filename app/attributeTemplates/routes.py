@@ -1,4 +1,5 @@
 from flask import flash, redirect, render_template, url_for
+from flask_login import login_required
 from . import attributeTemplates
 from . forms import AttributeTemplateForm
 from .. import db
@@ -8,12 +9,14 @@ from .. models import AttributeTemplate, ElementTemplate, Enterprise, Site
 modelName = "Attribute Template"
 
 @attributeTemplates.route("/attributeTemplates", methods = ["GET", "POST"])
+@login_required
 @adminRequired
 def listAttributeTemplates():
 	attributeTemplates = AttributeTemplate.query.all()
 	return render_template("attributeTemplates/attributeTemplates.html", attributeTemplates = attributeTemplates)
 
 @attributeTemplates.route("/attributeTemplates/add", methods = ["GET", "POST"])
+@login_required
 @adminRequired
 def addAttributeTemplate():
 	operation = "Add"
@@ -31,6 +34,7 @@ def addAttributeTemplate():
 	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
 
 @attributeTemplates.route("/attributeTemplates/delete/<int:attributeTemplateId>", methods = ["GET", "POST"])
+@login_required
 @adminRequired
 def deleteAttributeTemplate(attributeTemplateId):
 	attributeTemplate = AttributeTemplate.query.get_or_404(attributeTemplateId)
@@ -40,6 +44,7 @@ def deleteAttributeTemplate(attributeTemplateId):
 	return redirect(url_for("attributeTemplates.listAttributeTemplates"))
 
 @attributeTemplates.route("/attributeTemplates/edit/<int:attributeTemplateId>", methods = ["GET", "POST"])
+@login_required
 @adminRequired
 def editAttributeTemplate(attributeTemplateId):
 	operation = "Edit"

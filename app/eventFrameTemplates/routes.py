@@ -1,4 +1,5 @@
 from flask import flash, redirect, render_template, request, url_for
+from flask_login import login_required
 from sqlalchemy import text
 from sqlalchemy.orm import aliased
 from . import eventFrameTemplates
@@ -11,6 +12,7 @@ modelName = "Event Frame Templates"
 
 @eventFrameTemplates.route("/eventFrameTemplates/add/elementTemplateId/<int:elementTemplateId>", methods = ["GET", "POST"])
 @eventFrameTemplates.route("/eventFrameTemplates/add/eventFrameTemplateId/<int:parentEventFrameTemplateId>", methods = ["GET", "POST"])
+@login_required
 @adminRequired
 def addEventFrameTemplate(elementTemplateId = None, parentEventFrameTemplateId = None):
 	operation = "Add"
@@ -55,6 +57,7 @@ def addEventFrameTemplate(elementTemplateId = None, parentEventFrameTemplateId =
 	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
 
 @eventFrameTemplates.route("/eventFrameTemplates/delete/<int:eventFrameTemplateId>", methods = ["GET", "POST"])
+@login_required
 @adminRequired
 def deleteEventFrameTemplate(eventFrameTemplateId):
 	eventFrameTemplate = EventFrameTemplate.query.get_or_404(eventFrameTemplateId)
@@ -80,6 +83,7 @@ def deleteEventFrameTemplate(eventFrameTemplateId):
 	return redirect(request.referrer)
 
 @eventFrameTemplates.route("/eventFrameTemplates/edit/<int:eventFrameTemplateId>", methods = ["GET", "POST"])
+@login_required
 @adminRequired
 def editEventFrameTemplate(eventFrameTemplateId):
 	operation = "Edit"
@@ -128,6 +132,7 @@ def editEventFrameTemplate(eventFrameTemplateId):
 @eventFrameTemplates.route("/selectEventFrameTemplate", methods = ["GET", "POST"])
 @eventFrameTemplates.route("/selectEventFrameTemplate/<string:className>", methods = ["GET", "POST"])
 @eventFrameTemplates.route("/selectEventFrameTemplate/<string:className>/<int:id>", methods = ["GET", "POST"])
+@login_required
 @adminRequired
 def selectEventFrameTemplate(className = None, id = None):
 	if className == None:

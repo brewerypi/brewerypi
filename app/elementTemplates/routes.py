@@ -1,4 +1,5 @@
 from flask import flash, redirect, render_template, request, url_for
+from flask_login import login_required
 from . import elementTemplates
 from . forms import ElementTemplateForm
 from .. import db
@@ -8,12 +9,14 @@ from .. models import ElementTemplate, Enterprise, Site
 modelName = "Element Template"
 
 @elementTemplates.route("/elementTemplates", methods = ["GET", "POST"])
+@login_required
 @adminRequired
 def listElementTemplates():
 	elementTemplates = ElementTemplate.query.all()
 	return render_template("elementTemplates/elementTemplates.html", elementTemplates = elementTemplates)
 
 @elementTemplates.route("/elementTemplates/add", methods = ["GET", "POST"])
+@login_required
 @adminRequired
 def addElementTemplate():
 	operation = "Add"
@@ -31,6 +34,7 @@ def addElementTemplate():
 	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
 
 @elementTemplates.route("/elementTemplates/delete/<int:elementTemplateId>", methods = ["GET", "POST"])
+@login_required
 @adminRequired
 def deleteElementTemplate(elementTemplateId):
 	elementTemplate = ElementTemplate.query.get_or_404(elementTemplateId)
@@ -40,6 +44,7 @@ def deleteElementTemplate(elementTemplateId):
 	return redirect(url_for("elementTemplates.listElementTemplates"))
 
 @elementTemplates.route("/elementTemplates/edit/<int:elementTemplateId>", methods = ["GET", "POST"])
+@login_required
 @adminRequired
 def editElementTemplate(elementTemplateId):
 	operation = "Edit"

@@ -1,4 +1,5 @@
 from flask import flash, redirect, render_template, request, url_for
+from flask_login import login_required
 from . import sites
 from . forms import SiteForm
 from .. import db
@@ -8,12 +9,14 @@ from .. models import Enterprise, Site
 modelName = "Site"
 
 @sites.route("/sites", methods = ["GET", "POST"])
+@login_required
 @adminRequired
 def listSites():
 	sites = Site.query
 	return render_template("sites/sites.html", sites = sites)
 
 @sites.route("/sites/add", methods = ["GET", "POST"])
+@login_required
 @adminRequired
 def addSite():
 	operation = "Add"
@@ -31,6 +34,7 @@ def addSite():
 	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
 
 @sites.route("/sites/delete/<int:siteId>", methods = ["GET", "POST"])
+@login_required
 @adminRequired
 def deleteSite(siteId):
 	site = Site.query.get_or_404(siteId)
@@ -40,6 +44,7 @@ def deleteSite(siteId):
 	return redirect(url_for("sites.listSites"))
 
 @sites.route("/sites/edit/<int:siteId>", methods = ["GET", "POST"])
+@login_required
 @adminRequired
 def editSite(siteId):
 	operation = "Edit"

@@ -9,6 +9,7 @@ from .. models import User
 modelName = "User"
 
 @users.route("/users", methods = ["GET", "POST"])
+@login_required
 @adminRequired
 def listUsers():
 	users = User.query
@@ -32,6 +33,7 @@ def addUser():
 	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
 
 @users.route("/users/delete/<int:userId>", methods = ["GET", "POST"])
+@login_required
 @adminRequired
 def deleteUser(userId):
 	user = User.query.get_or_404(userId)
@@ -62,6 +64,7 @@ def changePassword(userId):
 	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
 
 @users.route("/users/edit/<int:userId>", methods = ["GET", "POST"])
+@login_required
 @adminRequired
 def editUser(userId):
 	operation = "Edit"
