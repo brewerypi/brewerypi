@@ -29,10 +29,15 @@ Users
                 <td>{{ user.Role.Name }}</td>
                 <td><a class = "btn btn-default" title = "Change Password" href = "{{ url_for("users.changePassword", userId = user.UserId) }}">
                     <span class="glyphicon glyphicon-lock"></span></a></td>
+                {% if user.Name != 'pi' %}
                 <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("users.editUser", userId = user.UserId) }}">
                     <span class="glyphicon glyphicon-edit"></span></a></td>
                 <td><a class = "btn btn-default" title = "Delete" href = "{{ url_for("users.deleteUser", 
                     userId = user.UserId) }}"><span class="glyphicon glyphicon-trash"></span></a></td>
+                {% else %}
+                <td></td>
+                <td></td>
+                {% endif %}
             </tr>
             {% endfor %}
         </tbody>

@@ -37,6 +37,10 @@ def addUser():
 @adminRequired
 def deleteUser(userId):
 	user = User.query.get_or_404(userId)
+	if user.Name == "pi":
+		flash("Deleting the default administrator account is not allowed.", "alert alert-danger")
+		return redirect(url_for("users.listUsers"))		
+
 	db.session.delete(user)
 	db.session.commit()
 	flash("You have successfully deleted the user \"" + user.Name + "\".", "alert alert-success")
@@ -67,8 +71,12 @@ def changePassword(userId):
 @login_required
 @adminRequired
 def editUser(userId):
-	operation = "Edit"
 	user = User.query.get_or_404(userId)
+	if user.Name == "pi":
+		flash("Editing the default administrator account is not allowed.", "alert alert-danger")
+		return redirect(url_for("users.listUsers"))		
+
+	operation = "Edit"
 	form = UserForm(obj = user)
 
 	del form.password
