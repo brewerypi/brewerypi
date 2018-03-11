@@ -387,6 +387,17 @@ class User(UserMixin, db.Model):
 	def Password(self, password):
 		self.PasswordHash = generate_password_hash(password)
 
+	@staticmethod
+	def insertDefaultAdministrator():
+		user = User.query.filter_by(Name = "pi").first()
+		AdministratorRole = Role.query.filter_by(Name = "Administrator").first()
+		if user is None:
+			user = User(Name = "pi", Password = "brewery", Role = AdministratorRole)
+			db.session.add(user)
+		else:
+			user.Role = AdministratorRole
+		db.session.commit()
+
 	def can(self, permissions):
 		return self.Role is not None and (self.Role.Permissions & permissions) == permissions
 
