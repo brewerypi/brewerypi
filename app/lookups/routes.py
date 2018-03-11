@@ -10,14 +10,12 @@ modelName = "Lookup"
 @lookups.route("/lookups", methods = ["GET", "POST"])
 @adminRequired
 def listLookups():
-	# check_admin()
 	lookups = Lookup.query
 	return render_template("lookups/lookups.html", lookups = lookups)
 
 @lookups.route("/lookups/add", methods = ["GET", "POST"])
 @adminRequired
 def addLookup():
-	# check_admin()
 	operation = "Add"
 	form = LookupForm()
 
@@ -35,7 +33,6 @@ def addLookup():
 @lookups.route("/lookups/delete/<int:lookupId>", methods = ["GET", "POST"])
 @adminRequired
 def deleteLookup(lookupId):
-	# check_admin()
 	lookup = Lookup.query.get_or_404(lookupId)
 	db.session.delete(lookup)
 	db.session.commit()
@@ -45,7 +42,6 @@ def deleteLookup(lookupId):
 @lookups.route("/lookups/edit/<int:lookupId>", methods = ["GET", "POST"])
 @adminRequired
 def editLookup(lookupId):
-	# check_admin()
 	operation = "Edit"
 	lookup = Lookup.query.get_or_404(lookupId)
 	form = LookupForm(obj = lookup)

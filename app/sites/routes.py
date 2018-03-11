@@ -10,14 +10,12 @@ modelName = "Site"
 @sites.route("/sites", methods = ["GET", "POST"])
 @adminRequired
 def listSites():
-	# check_admin()
 	sites = Site.query
 	return render_template("sites/sites.html", sites = sites)
 
 @sites.route("/sites/add", methods = ["GET", "POST"])
 @adminRequired
 def addSite():
-	# check_admin()
 	operation = "Add"
 	form = SiteForm()
 
@@ -35,7 +33,6 @@ def addSite():
 @sites.route("/sites/delete/<int:siteId>", methods = ["GET", "POST"])
 @adminRequired
 def deleteSite(siteId):
-	# check_admin()
 	site = Site.query.get_or_404(siteId)
 	db.session.delete(site)
 	db.session.commit()
@@ -45,7 +42,6 @@ def deleteSite(siteId):
 @sites.route("/sites/edit/<int:siteId>", methods = ["GET", "POST"])
 @adminRequired
 def editSite(siteId):
-	# check_admin()
 	operation = "Edit"
 	site = Site.query.get_or_404(siteId)
 	form = SiteForm(obj = site)

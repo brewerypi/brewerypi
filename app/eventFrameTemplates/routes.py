@@ -13,7 +13,6 @@ modelName = "Event Frame Templates"
 @eventFrameTemplates.route("/eventFrameTemplates/add/eventFrameTemplateId/<int:parentEventFrameTemplateId>", methods = ["GET", "POST"])
 @adminRequired
 def addEventFrameTemplate(elementTemplateId = None, parentEventFrameTemplateId = None):
-	# check_admin()
 	operation = "Add"
 	form = EventFrameTemplateForm()
 
@@ -58,7 +57,6 @@ def addEventFrameTemplate(elementTemplateId = None, parentEventFrameTemplateId =
 @eventFrameTemplates.route("/eventFrameTemplates/delete/<int:eventFrameTemplateId>", methods = ["GET", "POST"])
 @adminRequired
 def deleteEventFrameTemplate(eventFrameTemplateId):
-	# check_admin()
 	eventFrameTemplate = EventFrameTemplate.query.get_or_404(eventFrameTemplateId)
 	if eventFrameTemplate.hasDescendants():
 		flash("This event frame contains one or more child event frame templates and cannot be deleted.", "alert alert-danger")
@@ -84,7 +82,6 @@ def deleteEventFrameTemplate(eventFrameTemplateId):
 @eventFrameTemplates.route("/eventFrameTemplates/edit/<int:eventFrameTemplateId>", methods = ["GET", "POST"])
 @adminRequired
 def editEventFrameTemplate(eventFrameTemplateId):
-	# check_admin()
 	operation = "Edit"
 	eventFrameTemplate = EventFrameTemplate.query.get_or_404(eventFrameTemplateId)
 	form = EventFrameTemplateForm(obj = eventFrameTemplate)

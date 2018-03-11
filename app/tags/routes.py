@@ -10,7 +10,6 @@ from .. models import Area, Enterprise, Lookup, Permission, Site, Tag, UnitOfMea
 @tags.route("/tags", methods = ["GET", "POST"])
 @adminRequired
 def listTags():
-	# check_admin()
 	tags = Tag.query.outerjoin(UnitOfMeasurement, Lookup)
 	return render_template("tags/tags.html", tags = tags)
 
@@ -18,7 +17,6 @@ def listTags():
 @tags.route("/tags/add/<int:lookup>", methods = ["GET", "POST"])
 @adminRequired
 def addTag(lookup = False):
-	# check_admin()
 	operation = "Add"
 	form = TagForm()
 
@@ -47,7 +45,6 @@ def addTag(lookup = False):
 @tags.route("/tags/delete/<int:tagId>", methods = ["GET", "POST"])
 @adminRequired
 def deleteTag(tagId):
-	# check_admin()
 	tag = Tag.query.get_or_404(tagId)
 	db.session.delete(tag)
 	db.session.commit()
@@ -57,7 +54,6 @@ def deleteTag(tagId):
 @tags.route("/tags/edit/<int:tagId>", methods = ["GET", "POST"])
 @adminRequired
 def editTag(tagId):
-	# check_admin()
 	operation = "Edit"
 	tag = Tag.query.get_or_404(tagId)
 	form = TagForm(obj = tag)

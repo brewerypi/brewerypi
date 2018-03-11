@@ -16,7 +16,6 @@ def listEnterprises():
 @enterprises.route("/enterprises/add", methods = ["GET", "POST"])
 @adminRequired
 def addEnterprise():
-	# check_admin()
 	operation = "Add"
 	form = EnterpriseForm()
 
@@ -34,7 +33,6 @@ def addEnterprise():
 @enterprises.route("/enterprises/delete/<int:enterpriseId>", methods = ["GET", "POST"])
 @adminRequired
 def deleteEnterprise(enterpriseId):
-	# check_admin()
 	enterprise = Enterprise.query.get_or_404(enterpriseId)
 	db.session.delete(enterprise)
 	db.session.commit()
@@ -44,7 +42,6 @@ def deleteEnterprise(enterpriseId):
 @enterprises.route("/enterprises/edit/<int:enterpriseId>", methods = ["GET", "POST"])
 @adminRequired
 def editEnterprise(enterpriseId):
-	# check_admin()
 	operation = "Edit"
 	enterprise = Enterprise.query.get_or_404(enterpriseId)
 	form = EnterpriseForm(obj = enterprise)

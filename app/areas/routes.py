@@ -10,14 +10,12 @@ modelName = "Area"
 @areas.route("/areas", methods = ["GET", "POST"])
 @adminRequired
 def listAreas():
-	# check_admin()
 	areas = Area.query
 	return render_template("areas/areas.html", areas = areas)
 
 @areas.route("/areas/add", methods = ["GET", "POST"])
 @adminRequired
 def addArea():
-	# check_admin()
 	operation = "Add"
 	form = AreaForm()
 
@@ -35,7 +33,6 @@ def addArea():
 @areas.route("/areas/delete/<int:areaId>", methods = ["GET", "POST"])
 @adminRequired
 def deleteArea(areaId):
-	# check_admin()
 	area = Area.query.get_or_404(areaId)
 	db.session.delete(area)
 	db.session.commit()
@@ -45,7 +42,6 @@ def deleteArea(areaId):
 @areas.route("/areas/edit/<int:areaId>", methods = ["GET", "POST"])
 @adminRequired
 def editArea(areaId):
-	# check_admin()
 	operation = "Edit"
 	area = Area.query.get_or_404(areaId)
 	form = AreaForm(obj = area)

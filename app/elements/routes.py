@@ -12,14 +12,12 @@ modelName = "Element"
 @elements.route("/elements", methods = ["GET", "POST"])
 @adminRequired
 def listElements():
-	# check_admin()
 	elements = Element.query.all()
 	return render_template("elements/elements.html", elements = elements)
 
 @elements.route("/elements/dashboard/<int:elementId>", methods = ["GET", "POST"])
 @permissionRequired(Permission.DATA_ENTRY)
 def dashboard(elementId):
-	# check_admin()
 	element = Element.query.get_or_404(elementId)
 	elementAttributes = ElementAttribute.query.filter_by(ElementId = elementId)
 	eventFrameTemplates = EventFrameTemplate.query. \
@@ -32,7 +30,6 @@ def dashboard(elementId):
 @elements.route("/elements/add", methods = ["GET", "POST"])
 @adminRequired
 def addElement():
-	# check_admin()
 	operation = "Add"
 	form = ElementForm()
 
@@ -50,7 +47,6 @@ def addElement():
 @elements.route("/elements/copy/<int:elementId>", methods = ["GET", "POST"])
 @adminRequired
 def copyElement(elementId):
-	# check_admin()
 	operation = "Copy"
 	form = ElementForm()
 
@@ -105,7 +101,6 @@ def copyElement(elementId):
 @elements.route("/elements/delete/<int:elementId>", methods = ["GET", "POST"])
 @adminRequired
 def deleteElement(elementId):
-	# check_admin()
 	element = Element.query.get_or_404(elementId)
 	db.session.delete(element)
 	db.session.commit()
@@ -115,7 +110,6 @@ def deleteElement(elementId):
 @elements.route("/elements/edit/<int:elementId>", methods = ["GET", "POST"])
 @adminRequired
 def editElement(elementId):
-	# check_admin()
 	operation = "Edit"
 	element = Element.query.get_or_404(elementId)
 	form = ElementForm(obj = element)
@@ -141,7 +135,6 @@ def editElement(elementId):
 @elements.route("/selectElement/<string:className>/<int:id>", methods = ["GET", "POST"])
 @permissionRequired(Permission.DATA_ENTRY)
 def selectElement(className = None, id = None):
-	# check_admin()
 	elements = None
 	elementTemplates = None
 	enterprises = None

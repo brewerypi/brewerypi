@@ -11,7 +11,6 @@ modelName = "Tag Value"
 @tagValues.route("/tagValues/<int:tagId>/<int:elementAttributeId>", methods = ["GET", "POST"])
 @permissionRequired(Permission.DATA_ENTRY)
 def listTagValues(tagId, elementAttributeId = None, ):
-	# check_admin()
 	if elementAttributeId:
 		elementAttribute = ElementAttribute.query.get_or_404(elementAttributeId)
 	else:
@@ -27,7 +26,6 @@ def listTagValues(tagId, elementAttributeId = None, ):
 @tagValues.route("/tagValues/add/<int:tagId>", methods = ["GET", "POST"])
 @permissionRequired(Permission.DATA_ENTRY)
 def addTagValue(tagId):
-	# check_admin()
 	operation = "Add"
 	tag = Tag.query.get_or_404(tagId)
 	form = TagValueForm()
@@ -59,7 +57,6 @@ def addTagValue(tagId):
 @tagValues.route("/tagValues/delete/<int:tagValueId>", methods = ["GET", "POST"])
 @permissionRequired(Permission.DATA_ENTRY)
 def deleteTagValue(tagValueId):
-	# check_admin()
 	tagValue = TagValue.query.get_or_404(tagValueId)
 	db.session.delete(tagValue)
 	db.session.commit()
@@ -69,7 +66,6 @@ def deleteTagValue(tagValueId):
 @tagValues.route("/tagValues/edit/<int:tagValueId>", methods = ["GET", "POST"])
 @permissionRequired(Permission.DATA_ENTRY)
 def editTagValue(tagValueId):
-	# check_admin()
 	operation = "Edit"
 	tagValue = TagValue.query.get_or_404(tagValueId)
 	tag = Tag.query.get_or_404(tagValue.TagId)

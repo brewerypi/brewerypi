@@ -10,14 +10,12 @@ modelName = "Element Template"
 @elementTemplates.route("/elementTemplates", methods = ["GET", "POST"])
 @adminRequired
 def listElementTemplates():
-	# check_admin()
 	elementTemplates = ElementTemplate.query.all()
 	return render_template("elementTemplates/elementTemplates.html", elementTemplates = elementTemplates)
 
 @elementTemplates.route("/elementTemplates/add", methods = ["GET", "POST"])
 @adminRequired
 def addElementTemplate():
-	# check_admin()
 	operation = "Add"
 	form = ElementTemplateForm()
 
@@ -35,7 +33,6 @@ def addElementTemplate():
 @elementTemplates.route("/elementTemplates/delete/<int:elementTemplateId>", methods = ["GET", "POST"])
 @adminRequired
 def deleteElementTemplate(elementTemplateId):
-	# check_admin()
 	elementTemplate = ElementTemplate.query.get_or_404(elementTemplateId)
 	db.session.delete(elementTemplate)
 	db.session.commit()
@@ -45,7 +42,6 @@ def deleteElementTemplate(elementTemplateId):
 @elementTemplates.route("/elementTemplates/edit/<int:elementTemplateId>", methods = ["GET", "POST"])
 @adminRequired
 def editElementTemplate(elementTemplateId):
-	# check_admin()
 	operation = "Edit"
 	elementTemplate = ElementTemplate.query.get_or_404(elementTemplateId)
 	form = ElementTemplateForm(obj = elementTemplate)

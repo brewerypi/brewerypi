@@ -10,7 +10,6 @@ modelName = "Lookup Value"
 @lookupValues.route("/lookupValues/<int:lookupId>", methods = ["GET", "POST"])
 @adminRequired
 def listLookupValues(lookupId):
-	# check_admin()
 	lookup = Lookup.query.get_or_404(lookupId)
 	lookupValues = LookupValue.query.filter_by(LookupId = lookupId)
 	return render_template("lookupValues/lookupValues.html", lookup = lookup, lookupValues = lookupValues)
@@ -18,7 +17,6 @@ def listLookupValues(lookupId):
 @lookupValues.route("/lookupValues/add/<int:lookupId>", methods = ["GET", "POST"])
 @adminRequired
 def addLookupValue(lookupId):
-	# check_admin()
 	operation = "Add"
 	form = LookupValueForm()
 
@@ -45,7 +43,6 @@ def addLookupValue(lookupId):
 @lookupValues.route("/lookupValues/delete/<int:lookupValueId>", methods = ["GET", "POST"])
 @adminRequired
 def deleteLookupValue(lookupValueId):
-	# check_admin()
 	lookupValue = LookupValue.query.get_or_404(lookupValueId)
 	if lookupValue.isReferenced():
 		flash("Lookup value \"" + lookupValue.Name + "\" is referenced by one or more tag values and cannot be deleted.", "alert alert-danger")
@@ -58,7 +55,6 @@ def deleteLookupValue(lookupValueId):
 @lookupValues.route("/lookupValues/edit/<int:lookupValueId>", methods = ["GET", "POST"])
 @adminRequired
 def editLookupValue(lookupValueId):
-	# check_admin()
 	operation = "Edit"
 	lookupValue = LookupValue.query.get_or_404(lookupValueId)
 	lookup = Lookup.query.get_or_404(lookupValue.LookupId)

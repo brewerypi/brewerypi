@@ -16,7 +16,6 @@ def listUsers():
 @users.route("/users/add", methods = ["GET", "POST"])
 @adminRequired
 def addUser():
-	# check_admin()
 	operation = "Add"
 	form = UserForm()
 
@@ -34,7 +33,6 @@ def addUser():
 @users.route("/users/delete/<int:userId>", methods = ["GET", "POST"])
 @adminRequired
 def deleteUser(userId):
-	# check_admin()
 	user = User.query.get_or_404(userId)
 	db.session.delete(user)
 	db.session.commit()
@@ -44,7 +42,6 @@ def deleteUser(userId):
 @users.route("/users/changePassword/<int:userId>", methods = ["GET", "POST"])
 # @login_required
 def changePassword(userId):
-	# check_admin()
 	operation = "Edit"
 	user = User.query.get_or_404(userId)
 	form = UserForm(obj = user)
@@ -65,7 +62,6 @@ def changePassword(userId):
 @users.route("/users/edit/<int:userId>", methods = ["GET", "POST"])
 @adminRequired
 def editUser(userId):
-	# check_admin()
 	operation = "Edit"
 	user = User.query.get_or_404(userId)
 	form = UserForm(obj = user)

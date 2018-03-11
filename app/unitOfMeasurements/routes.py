@@ -10,15 +10,12 @@ modelName = "Unit"
 @unitOfMeasurements.route("/unitOfMeasurements", methods = ["GET", "POST"])
 @adminRequired
 def listUnitOfMeasurements():
-	# check_admin()
 	unitOfMeasurements = UnitOfMeasurement.query
 	return render_template("unitOfMeasurements/unitOfMeasurements.html", unitOfMeasurements = unitOfMeasurements)
 
 @unitOfMeasurements.route("/units/add", methods = ["GET", "POST"])
 @adminRequired
 def addUnitOfMeasurement():
-	# check_admin()
-
 	operation = "Add"
 	form = UnitOfMeasurementForm()
 
@@ -37,8 +34,6 @@ def addUnitOfMeasurement():
 @unitOfMeasurements.route("/unitOfMeasurements/delete/<int:unitOfMeasurementId>", methods = ["GET", "POST"])
 @adminRequired
 def deleteUnitOfMeasurement(unitOfMeasurementId):
-	# check_admin()
-
 	unitOfMeasurement = UnitOfMeasurement.query.get_or_404(unitOfMeasurementId)
 	db.session.delete(unitOfMeasurement)
 	db.session.commit()
@@ -49,8 +44,6 @@ def deleteUnitOfMeasurement(unitOfMeasurementId):
 @unitOfMeasurements.route("/unitOfMeasurements/edit/<int:unitOfMeasurementId>", methods = ["GET", "POST"])
 @adminRequired
 def editUnitOfMeasurement(unitOfMeasurementId):
-	# check_admin()
-
 	operation = "Edit"
 	unitOfMeasurement = UnitOfMeasurement.query.get_or_404(unitOfMeasurementId)
 	form = UnitOfMeasurementForm(obj = unitOfMeasurement)

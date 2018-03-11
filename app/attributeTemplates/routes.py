@@ -10,14 +10,12 @@ modelName = "Attribute Template"
 @attributeTemplates.route("/attributeTemplates", methods = ["GET", "POST"])
 @adminRequired
 def listAttributeTemplates():
-	# check_admin()
 	attributeTemplates = AttributeTemplate.query.all()
 	return render_template("attributeTemplates/attributeTemplates.html", attributeTemplates = attributeTemplates)
 
 @attributeTemplates.route("/attributeTemplates/add", methods = ["GET", "POST"])
 @adminRequired
 def addAttributeTemplate():
-	# check_admin()
 	operation = "Add"
 	form = AttributeTemplateForm()
 
@@ -35,7 +33,6 @@ def addAttributeTemplate():
 @attributeTemplates.route("/attributeTemplates/delete/<int:attributeTemplateId>", methods = ["GET", "POST"])
 @adminRequired
 def deleteAttributeTemplate(attributeTemplateId):
-	# check_admin()
 	attributeTemplate = AttributeTemplate.query.get_or_404(attributeTemplateId)
 	db.session.delete(attributeTemplate)
 	db.session.commit()
@@ -45,7 +42,6 @@ def deleteAttributeTemplate(attributeTemplateId):
 @attributeTemplates.route("/attributeTemplates/edit/<int:attributeTemplateId>", methods = ["GET", "POST"])
 @adminRequired
 def editAttributeTemplate(attributeTemplateId):
-	# check_admin()
 	operation = "Edit"
 	attributeTemplate = AttributeTemplate.query.get_or_404(attributeTemplateId)
 	form = AttributeTemplateForm(obj = attributeTemplate)

@@ -12,14 +12,12 @@ from .. tagValues . forms import TagValueForm
 @elementAttributes.route("/elementAttributes", methods = ["GET", "POST"])
 @adminRequired
 def listElementAttributes():
-	# check_admin()
 	elementAttributes = ElementAttribute.query.all()
 	return render_template("elementAttributes/elementAttributes.html", elementAttributes = elementAttributes)
 
 @elementAttributes.route("/elementAttributes/add", methods = ["GET", "POST"])
 @adminRequired
 def addElementAttribute():
-	# check_admin()
 	modelName = "Element Attribute"
 	operation = "Add"
 	form = ElementAttributeForm()
@@ -39,7 +37,6 @@ def addElementAttribute():
 @elementAttributes.route("/elementAttributes/delete/<int:elementAttributeId>", methods = ["GET", "POST"])
 @adminRequired
 def deleteElementAttribute(elementAttributeId):
-	# check_admin()
 	elementAttribute = ElementAttribute.query.get_or_404(elementAttributeId)
 	attributeTemplateName = elementAttribute.AttributeTemplate.Name
 	elementName = elementAttribute.Element.Name
@@ -51,7 +48,6 @@ def deleteElementAttribute(elementAttributeId):
 @elementAttributes.route("/elementAttributes/edit/<int:elementAttributeId>", methods = ["GET", "POST"])
 @adminRequired
 def editElementAttribute(elementAttributeId):
-	# check_admin()
 	modelName = "Element Attribute"
 	operation = "Add"
 	elementAttribute = ElementAttribute.query.get_or_404(elementAttributeId)
@@ -221,7 +217,6 @@ def importElementAttributes():
 @elementAttributes.route("/elementAttributes/addValue/<int:elementId>/<int:tagId>", methods = ["GET", "POST"])
 @adminRequired
 def addElementAttributeValue(elementId, tagId):
-	# check_admin()
 	modelName = "Element Attribute Value"
 	operation = "Add"
 	tag = Tag.query.get_or_404(tagId)
@@ -254,7 +249,6 @@ def addElementAttributeValue(elementId, tagId):
 @elementAttributes.route("/elementAttributes/deleteValue/<int:elementId>/<int:tagValueId>", methods = ["GET", "POST"])
 @adminRequired
 def deleteElementAttributeValue(elementId, tagValueId):
-	# check_admin()
 	tagValue = TagValue.query.get_or_404(tagValueId)
 	db.session.delete(tagValue)
 	db.session.commit()
@@ -264,7 +258,6 @@ def deleteElementAttributeValue(elementId, tagValueId):
 @elementAttributes.route("/elementAttributes/editValue/<int:elementId>/<int:tagValueId>", methods = ["GET", "POST"])
 @adminRequired
 def editElementAttributeValue(elementId, tagValueId):
-	# check_admin()
 	modelName = "Element Attribute Value"
 	operation = "Edit"
 	tagValue = TagValue.query.get_or_404(tagValueId)
