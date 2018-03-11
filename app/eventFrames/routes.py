@@ -3,13 +3,14 @@ from flask import flash, redirect, render_template, request, url_for
 from . import eventFrames
 from . forms import EventFrameForm
 from .. import db
-from .. models import Element, EventFrame, EventFrameTemplate
+from .. decorators import permissionRequired
+from .. models import Element, EventFrame, EventFrameTemplate, Permission
 
 modelName = "Event Frame"
 
 @eventFrames.route("/eventFrames/<int:parentEventFrameId>", methods = ["GET", "POST"])
 @eventFrames.route("/eventFrames/<int:elementId>/<int:eventFrameTemplateId>", methods = ["GET", "POST"])
-# @login_required
+@permissionRequired(Permission.DATA_ENTRY)
 def listEventFrames(elementId = None, eventFrameTemplateId = None, parentEventFrameId = None):
 	# check_admin()
 	if parentEventFrameId:
@@ -28,7 +29,7 @@ def listEventFrames(elementId = None, eventFrameTemplateId = None, parentEventFr
 
 @eventFrames.route("/eventFrames/add/<int:parentEventFrameId>", methods = ["GET", "POST"])
 @eventFrames.route("/eventFrames/add/<int:elementId>/<int:eventFrameTemplateId>", methods = ["GET", "POST"])
-# @login_required
+@permissionRequired(Permission.DATA_ENTRY)
 def addEventFrame(elementId = None, eventFrameTemplateId = None, parentEventFrameId = None):
 	# check_admin()
 	operation = "Add"
@@ -68,7 +69,7 @@ def addEventFrame(elementId = None, eventFrameTemplateId = None, parentEventFram
 	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
 
 @eventFrames.route("/eventFrames/delete/<int:eventFrameId>", methods = ["GET", "POST"])
-# @login_required
+@permissionRequired(Permission.DATA_ENTRY)
 def deleteEventFrame(eventFrameId):
 	# check_admin()
 	eventFrame = EventFrame.query.get_or_404(eventFrameId)
@@ -82,7 +83,7 @@ def deleteEventFrame(eventFrameId):
 	return redirect(request.referrer)
 
 @eventFrames.route("/eventFrames/edit/<int:eventFrameId>", methods = ["GET", "POST"])
-# @login_required
+@permissionRequired(Permission.DATA_ENTRY)
 def editEventFrame(eventFrameId):
 	# check_admin()
 	operation = "Edit"
@@ -119,6 +120,7 @@ def editEventFrame(eventFrameId):
 	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
 
 @eventFrames.route("/eventFrames/endEventFrame/<int:eventFrameId>", methods = ["GET", "POST"])
+@permissionRequired(Permission.DATA_ENTRY)
 def endEventFrame(eventFrameId):
 	eventFrame = EventFrame.query.get_or_404(eventFrameId)
 	eventFrame.EndTimestamp = datetime.now()
@@ -128,6 +130,7 @@ def endEventFrame(eventFrameId):
 	return redirect(request.referrer)
 
 @eventFrames.route("/eventFrames/startEventFrame/<int:elementId>/<int:eventFrameTemplateId>", methods = ["GET", "POST"])
+@permissionRequired(Permission.DATA_ENTRY)
 def startEventFrame(elementId, eventFrameTemplateId):
 	eventFrame = EventFrame(ElementId = elementId, EndTimestamp = None, EventFrameTemplateId = eventFrameTemplateId, ParentEventFrameId = None,
 		StartTimestamp = datetime.now())

@@ -4,13 +4,14 @@ from sqlalchemy.orm import aliased
 from . import eventFrameTemplates
 from . forms import EventFrameTemplateForm
 from .. import db
+from .. decorators import adminRequired
 from .. models import ElementTemplate, EventFrameTemplate, Site, Enterprise
 
 modelName = "Event Frame Templates"
 
 @eventFrameTemplates.route("/eventFrameTemplates/add/elementTemplateId/<int:elementTemplateId>", methods = ["GET", "POST"])
 @eventFrameTemplates.route("/eventFrameTemplates/add/eventFrameTemplateId/<int:parentEventFrameTemplateId>", methods = ["GET", "POST"])
-# @login_required
+@adminRequired
 def addEventFrameTemplate(elementTemplateId = None, parentEventFrameTemplateId = None):
 	# check_admin()
 	operation = "Add"
@@ -55,7 +56,7 @@ def addEventFrameTemplate(elementTemplateId = None, parentEventFrameTemplateId =
 	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
 
 @eventFrameTemplates.route("/eventFrameTemplates/delete/<int:eventFrameTemplateId>", methods = ["GET", "POST"])
-# @login_required
+@adminRequired
 def deleteEventFrameTemplate(eventFrameTemplateId):
 	# check_admin()
 	eventFrameTemplate = EventFrameTemplate.query.get_or_404(eventFrameTemplateId)
@@ -81,7 +82,7 @@ def deleteEventFrameTemplate(eventFrameTemplateId):
 	return redirect(request.referrer)
 
 @eventFrameTemplates.route("/eventFrameTemplates/edit/<int:eventFrameTemplateId>", methods = ["GET", "POST"])
-# @login_required
+@adminRequired
 def editEventFrameTemplate(eventFrameTemplateId):
 	# check_admin()
 	operation = "Edit"
@@ -130,7 +131,7 @@ def editEventFrameTemplate(eventFrameTemplateId):
 @eventFrameTemplates.route("/selectEventFrameTemplate", methods = ["GET", "POST"])
 @eventFrameTemplates.route("/selectEventFrameTemplate/<string:className>", methods = ["GET", "POST"])
 @eventFrameTemplates.route("/selectEventFrameTemplate/<string:className>/<int:id>", methods = ["GET", "POST"])
-# @login_required
+@adminRequired
 def selectEventFrameTemplate(className = None, id = None):
 	if className == None:
 		parent = Site.query.join(Enterprise).order_by(Enterprise.Name, Site.Name).first()

@@ -4,19 +4,20 @@ from . import elements
 from . forms import ElementForm
 from .. import db
 from .. eventFrames . forms import EventFrameForm
-from .. models import Area, AttributeTemplate, Element, ElementAttribute, ElementTemplate, Enterprise, EventFrame, EventFrameTemplate, Site, Tag
+from .. decorators import adminRequired, permissionRequired
+from .. models import Area, AttributeTemplate, Element, ElementAttribute, ElementTemplate, Enterprise, EventFrame, EventFrameTemplate, Permission, Site, Tag
 
 modelName = "Element"
 
 @elements.route("/elements", methods = ["GET", "POST"])
-# @login_required
+@adminRequired
 def listElements():
 	# check_admin()
 	elements = Element.query.all()
 	return render_template("elements/elements.html", elements = elements)
 
 @elements.route("/elements/dashboard/<int:elementId>", methods = ["GET", "POST"])
-# @login_required
+@permissionRequired(Permission.DATA_ENTRY)
 def dashboard(elementId):
 	# check_admin()
 	element = Element.query.get_or_404(elementId)
@@ -28,19 +29,8 @@ def dashboard(elementId):
 	return render_template("elements/elementDashboard.html", elementAttributes = elementAttributes, element = element,
 		eventFrameTemplates = eventFrameTemplates)
 
-@elements.route("/elements/deleteEventFrame/<int:eventFrameId>", methods = ["GET", "POST"])
-def deleteEventFrame(eventFrameId):
-	eventFrame = EventFrame.query.get_or_404(eventFrameId)
-	elementId = eventFrame.ElementId
-	elementName = eventFrame.Element.Name
-	eventFrameTemplateName = eventFrame.EventFrameTemplate.Name
-	db.session.delete(eventFrame)
-	db.session.commit()
-	flash("You have successfully deleted a \"" + eventFrameTemplateName + "\" from element \"" + elementName + "\".", "alert alert-success")
-	return redirect(url_for("elements.dashboard", elementId = elementId))
-
 @elements.route("/elements/add", methods = ["GET", "POST"])
-# @login_required
+@adminRequired
 def addElement():
 	# check_admin()
 	operation = "Add"
@@ -58,7 +48,7 @@ def addElement():
 	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
 
 @elements.route("/elements/copy/<int:elementId>", methods = ["GET", "POST"])
-# @login_required
+@adminRequired
 def copyElement(elementId):
 	# check_admin()
 	operation = "Copy"
@@ -113,7 +103,7 @@ def copyElement(elementId):
 	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
 
 @elements.route("/elements/delete/<int:elementId>", methods = ["GET", "POST"])
-# @login_required
+@adminRequired
 def deleteElement(elementId):
 	# check_admin()
 	element = Element.query.get_or_404(elementId)
@@ -123,7 +113,7 @@ def deleteElement(elementId):
 	return redirect(url_for("elements.listElements"))
 
 @elements.route("/elements/edit/<int:elementId>", methods = ["GET", "POST"])
-# @login_required
+@adminRequired
 def editElement(elementId):
 	# check_admin()
 	operation = "Edit"
@@ -149,7 +139,7 @@ def editElement(elementId):
 @elements.route("/selectElement", methods = ["GET", "POST"])
 @elements.route("/selectElement/<string:className>", methods = ["GET", "POST"])
 @elements.route("/selectElement/<string:className>/<int:id>", methods = ["GET", "POST"])
-# @login_required
+@permissionRequired(Permission.DATA_ENTRY)
 def selectElement(className = None, id = None):
 	# check_admin()
 	elements = None

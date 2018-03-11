@@ -2,19 +2,20 @@ from flask import flash, redirect, render_template, request, url_for
 from . import unitOfMeasurements
 from . forms import UnitOfMeasurementForm
 from .. import db
+from .. decorators import adminRequired
 from .. models import UnitOfMeasurement
 
 modelName = "Unit"
 
 @unitOfMeasurements.route("/unitOfMeasurements", methods = ["GET", "POST"])
-# @login_required
+@adminRequired
 def listUnitOfMeasurements():
 	# check_admin()
 	unitOfMeasurements = UnitOfMeasurement.query
 	return render_template("unitOfMeasurements/unitOfMeasurements.html", unitOfMeasurements = unitOfMeasurements)
 
 @unitOfMeasurements.route("/units/add", methods = ["GET", "POST"])
-# @login_required
+@adminRequired
 def addUnitOfMeasurement():
 	# check_admin()
 
@@ -34,7 +35,7 @@ def addUnitOfMeasurement():
 	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
 
 @unitOfMeasurements.route("/unitOfMeasurements/delete/<int:unitOfMeasurementId>", methods = ["GET", "POST"])
-# @login_required
+@adminRequired
 def deleteUnitOfMeasurement(unitOfMeasurementId):
 	# check_admin()
 
@@ -46,7 +47,7 @@ def deleteUnitOfMeasurement(unitOfMeasurementId):
 	return redirect(url_for("unitOfMeasurements.listUnitOfMeasurements"))
 
 @unitOfMeasurements.route("/unitOfMeasurements/edit/<int:unitOfMeasurementId>", methods = ["GET", "POST"])
-# @login_required
+@adminRequired
 def editUnitOfMeasurement(unitOfMeasurementId):
 	# check_admin()
 

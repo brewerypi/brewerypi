@@ -72,7 +72,7 @@
                         href = "{{ url_for("eventFrames.editEventFrame", eventFrameId = firstEventFrame.EventFrameId) }}">
                         <span class="glyphicon glyphicon-edit"></span></a></td>
                     <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Delete"
-                        href = "{{ url_for("elements.deleteEventFrame", eventFrameId = firstEventFrame.EventFrameId) }}">
+                        href = "{{ url_for("eventFrames.deleteEventFrame", eventFrameId = firstEventFrame.EventFrameId) }}">
                         <span class="glyphicon glyphicon-trash"></a></td>
                 {% else %}
                     <td></td>

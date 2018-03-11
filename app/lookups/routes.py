@@ -2,19 +2,20 @@ from flask import flash, redirect, render_template, request, url_for
 from . import lookups
 from . forms import LookupForm
 from .. import db
+from .. decorators import adminRequired
 from .. models import Enterprise, Lookup
 
 modelName = "Lookup"
 
 @lookups.route("/lookups", methods = ["GET", "POST"])
-# @login_required
+@adminRequired
 def listLookups():
 	# check_admin()
 	lookups = Lookup.query
 	return render_template("lookups/lookups.html", lookups = lookups)
 
 @lookups.route("/lookups/add", methods = ["GET", "POST"])
-# @login_required
+@adminRequired
 def addLookup():
 	# check_admin()
 	operation = "Add"
@@ -32,7 +33,7 @@ def addLookup():
 	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
 
 @lookups.route("/lookups/delete/<int:lookupId>", methods = ["GET", "POST"])
-# @login_required
+@adminRequired
 def deleteLookup(lookupId):
 	# check_admin()
 	lookup = Lookup.query.get_or_404(lookupId)
@@ -42,7 +43,7 @@ def deleteLookup(lookupId):
 	return redirect(url_for("lookups.listLookups"))
 
 @lookups.route("/lookups/edit/<int:lookupId>", methods = ["GET", "POST"])
-# @login_required
+@adminRequired
 def editLookup(lookupId):
 	# check_admin()
 	operation = "Edit"

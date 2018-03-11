@@ -47,8 +47,6 @@ Event Frame Templates
                 <th></th>
                 <th>Name</th>
                 <th>Description</th>
-                <th></th>
-                <th></th>
             </tr>
         </thead>
         <tbody>
@@ -63,15 +61,6 @@ Event Frame Templates
                     {% endif %}
                     <td>{{ child.Name }}</td>
                     <td>{{ child.Description }}</td>
-                    {% if className == "Tag" %}
-                        <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Edit" href = "{{ url_for("tags.editTag",
-                            tagId = child.id()) }}"><span class="glyphicon glyphicon-edit"></a></td>
-                        <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Delete" href = "{{ url_for("tags.deleteTag",
-                            tagId = child.id()) }}"><span class="glyphicon glyphicon-trash"></a></td>
-                    {% else %}
-                        <td></td>
-                        <td></td>
-                    {% endif %}
                 </tr>
             {% endfor %}
         </tbody>
@@ -94,9 +83,7 @@ Event Frame Templates
             [
                 { "orderable": false }, // Tag values button.
                 null,
-                null,
-                { "orderable": false }, // Edit button.
-                { "orderable": false }  // Delete button.
+                null
             ],
             "stateSave": true,
             "stateDuration": 0,

@@ -2,12 +2,13 @@ from flask import flash, redirect, render_template, request, url_for
 from . import lookupValues
 from . forms import LookupValueForm
 from .. import db
+from .. decorators import adminRequired
 from .. models import Enterprise, Lookup, LookupValue
 
 modelName = "Lookup Value"
 
 @lookupValues.route("/lookupValues/<int:lookupId>", methods = ["GET", "POST"])
-# @login_required
+@adminRequired
 def listLookupValues(lookupId):
 	# check_admin()
 	lookup = Lookup.query.get_or_404(lookupId)
@@ -15,7 +16,7 @@ def listLookupValues(lookupId):
 	return render_template("lookupValues/lookupValues.html", lookup = lookup, lookupValues = lookupValues)
 
 @lookupValues.route("/lookupValues/add/<int:lookupId>", methods = ["GET", "POST"])
-# @login_required
+@adminRequired
 def addLookupValue(lookupId):
 	# check_admin()
 	operation = "Add"
@@ -42,7 +43,7 @@ def addLookupValue(lookupId):
 	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
 
 @lookupValues.route("/lookupValues/delete/<int:lookupValueId>", methods = ["GET", "POST"])
-# @login_required
+@adminRequired
 def deleteLookupValue(lookupValueId):
 	# check_admin()
 	lookupValue = LookupValue.query.get_or_404(lookupValueId)
@@ -55,7 +56,7 @@ def deleteLookupValue(lookupValueId):
 	return redirect(url_for("lookupValues.listLookupValues", lookupId = lookupValue.LookupId))
 
 @lookupValues.route("/lookupValues/edit/<int:lookupValueId>", methods = ["GET", "POST"])
-# @login_required
+@adminRequired
 def editLookupValue(lookupValueId):
 	# check_admin()
 	operation = "Edit"

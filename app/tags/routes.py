@@ -4,10 +4,11 @@ from flask import current_app, flash, redirect, render_template, request, send_f
 from . import tags
 from . forms import TagForm, TagImportForm
 from .. import db
-from .. models import Area, Enterprise, Lookup, Site, Tag, UnitOfMeasurement
+from .. decorators import adminRequired, permissionRequired
+from .. models import Area, Enterprise, Lookup, Permission, Site, Tag, UnitOfMeasurement
 
 @tags.route("/tags", methods = ["GET", "POST"])
-# @login_required
+@adminRequired
 def listTags():
 	# check_admin()
 	tags = Tag.query.outerjoin(UnitOfMeasurement, Lookup)
@@ -15,7 +16,7 @@ def listTags():
 
 @tags.route("/tags/add", methods = ["GET", "POST"])
 @tags.route("/tags/add/<int:lookup>", methods = ["GET", "POST"])
-# @login_required
+@adminRequired
 def addTag(lookup = False):
 	# check_admin()
 	operation = "Add"
@@ -44,7 +45,7 @@ def addTag(lookup = False):
 	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
 
 @tags.route("/tags/delete/<int:tagId>", methods = ["GET", "POST"])
-# @login_required
+@adminRequired
 def deleteTag(tagId):
 	# check_admin()
 	tag = Tag.query.get_or_404(tagId)
@@ -54,7 +55,7 @@ def deleteTag(tagId):
 	return redirect(url_for("tags.listTags"))
 
 @tags.route("/tags/edit/<int:tagId>", methods = ["GET", "POST"])
-# @login_required
+@adminRequired
 def editTag(tagId):
 	# check_admin()
 	operation = "Edit"
@@ -96,6 +97,7 @@ def editTag(tagId):
 	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
 
 @tags.route("/tags/export")
+@adminRequired
 def exportTags():
 	tags = Tag.query.outerjoin(Lookup).join(Area, Site, Enterprise).order_by(Enterprise.Abbreviation, Site.Abbreviation, Area.Abbreviation, Tag.Name)
 	with open(os.path.join(current_app.config["EXPORT_FOLDER"], current_app.config["EXPORT_TAGS_FILENAME"]), "w", encoding = "latin-1") as tagsFile:
@@ -116,7 +118,7 @@ def exportTags():
 	return send_file(os.path.join("..", current_app.config["EXPORT_FOLDER"], current_app.config["EXPORT_TAGS_FILENAME"]), as_attachment = True)
 
 @tags.route("/tags/import", methods = ["GET", "POST"])
-# @login_required
+@adminRequired
 def importTags():
 	form = TagImportForm()
 	errors = []
@@ -227,7 +229,7 @@ def importTags():
 @tags.route("/selectTag", methods = ["GET", "POST"])
 @tags.route("/selectTag/<string:className>", methods = ["GET", "POST"])
 @tags.route("/selectTag/<string:className>/<int:id>", methods = ["GET", "POST"])
-# @login_required
+@permissionRequired(Permission.DATA_ENTRY)
 def selectTag(className = None, id = None):
 	if className == None:
 		parent = Area.query.join(Site, Enterprise).order_by(Enterprise.Name, Site.Name, Area.Name).first()
