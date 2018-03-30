@@ -8,7 +8,7 @@ from config import Config
 boostrap = Bootstrap()
 db = SQLAlchemy()
 loginManager = LoginManager()
-loginManager.session_protection = "strong"
+loginManager.session_protection = "basic"
 loginManager.login_view = "authentications.login"
 migrate = Migrate()
 
