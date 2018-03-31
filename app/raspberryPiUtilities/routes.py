@@ -11,9 +11,8 @@ from .. decorators import adminRequired
 def backupDatabase():
 	flash("Backing up database... Please wait.")
 	command = "sudo mysqldump BreweryPi > ~/brewerypi/exports/BreweryPi.sql"
-	subprocess.Popen(command, shell = True)
+	subprocess.Popen(command)
 	return send_file(os.path.join("..", current_app.config["EXPORT_FOLDER"], current_app.config["EXPORT_DATABASE_FILENAME"]), as_attachment = True)
-	return redirect(url_for("home.homepage"))
 
 @raspberryPiUtilities.route("/reboot", methods = ["GET"])
 @login_required
