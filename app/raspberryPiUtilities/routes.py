@@ -1,8 +1,19 @@
+import os
 import subprocess
-from flask import flash, redirect, url_for
+from flask import current_app, flash, Markup, redirect, send_file, url_for
 from flask_login import login_required
 from . import raspberryPiUtilities
 from .. decorators import adminRequired
+
+@raspberryPiUtilities.route("/backupDatabase", methods = ["GET"])
+@login_required
+@adminRequired
+def backupDatabase():
+	flash("Backing up database... Please wait.")
+	command = "sudo mysqldump BreweryPi > ~/brewerypi/exports/BreweryPi.sql"
+	subprocess.Popen(command, shell = True)
+	return send_file(os.path.join("..", current_app.config["EXPORT_FOLDER"], current_app.config["EXPORT_DATABASE_FILENAME"]), as_attachment = True)
+	return redirect(url_for("home.homepage"))
 
 @raspberryPiUtilities.route("/reboot", methods = ["GET"])
 @login_required
@@ -17,8 +28,8 @@ def reboot():
 @login_required
 @adminRequired
 def shutdown():
-	flash("Shutting down... Please wait. This will take approximately one minute.<br>When the LEDs on the Raspberry Pi stop blinking, it should be safe to "\
-		"unplug your Raspberry Pi.")
+	flash(Markup("Shutting down... Please wait. This will take approximately one minute.<br>When the LEDs on the Raspberry Pi stop blinking, it should be " \
+		"safe to unplug your Raspberry Pi."))
 	command = "sleep 5 && sudo shutdown -h now"
 	subprocess.Popen(command, shell = True)
 	return redirect(url_for("home.homepage"))

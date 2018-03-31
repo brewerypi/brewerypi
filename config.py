@@ -7,6 +7,7 @@ load_dotenv(os.path.join(basedir, ".env"))
 class Config:
 	BOOTSTRAP_SERVE_LOCAL = True
 	EXPORT_FOLDER = "exports"
+	EXPORT_DATABASE_FILENAME = "BreweryPi.sql"
 	EXPORT_ELEMENT_ATTRIBUTES_FILENAME = "elementsAttributes.csv"
 	EXPORT_TAGS_FILENAME = "tags.csv"
 	IMPORT_FOLDER = "imports"
