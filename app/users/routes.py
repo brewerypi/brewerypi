@@ -1,5 +1,5 @@
-from flask import flash, redirect, render_template, request, url_for
-from flask_login import login_required
+from flask import abort, flash, redirect, render_template, request, url_for
+from flask_login import current_user, fresh_login_required, login_required
 from . import users
 from . forms import UserForm
 from .. import db
@@ -47,12 +47,14 @@ def deleteUser(userId):
 	return redirect(url_for("users.listUsers"))
 
 @users.route("/users/changePassword/<int:userId>", methods = ["GET", "POST"])
-@login_required
+@fresh_login_required
 def changePassword(userId):
+	if not current_user.isAdministrator() and current_user.get_id() != userId:
+		abort(403)
+
 	operation = "Edit"
 	user = User.query.get_or_404(userId)
 	form = UserForm(obj = user)
-
 	del form.name
 	del form.role
 
@@ -78,7 +80,6 @@ def editUser(userId):
 
 	operation = "Edit"
 	form = UserForm(obj = user)
-
 	del form.password
 	del form.password2
 

@@ -48,14 +48,14 @@ def create_app(configClass = Config):
 	from . eventFrameTemplates import eventFrameTemplates as eventFrameTemplatesBlueprint
 	app.register_blueprint(eventFrameTemplatesBlueprint)
 
-	from . home import home as home_blueprint
-	app.register_blueprint(home_blueprint)
-
 	from . lookups import lookups as lookupsBlueprint
 	app.register_blueprint(lookupsBlueprint)
 
 	from . lookupValues import lookupValues as lookupValuesBlueprint
 	app.register_blueprint(lookupValuesBlueprint)
+
+	from . main import main as mainBlueprint
+	app.register_blueprint(mainBlueprint)
 
 	from . tags import tags as tagsBlueprint
 	app.register_blueprint(tagsBlueprint)
