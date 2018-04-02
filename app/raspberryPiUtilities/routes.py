@@ -10,7 +10,7 @@ from .. decorators import adminRequired
 @adminRequired
 def backupDatabase():
 	command = "sudo mysqldump --complete-insert=TRUE BreweryPi > ~/brewerypi/exports/BreweryPi.sql"
-	p = subprocess.Popen(command)
+	p = subprocess.Popen(command, shell = True)
 	p.wait()
 	return send_file(os.path.join("..", current_app.config["EXPORT_FOLDER"], current_app.config["EXPORT_DATABASE_FILENAME"]), as_attachment = True)
 
