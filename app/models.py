@@ -173,6 +173,8 @@ class EventFrameNote(db.Model):
 
 	NoteId = db.Column(db.Integer, db.ForeignKey("Note.NoteId", name = "FK__Note$CanBe$EventFrameNote"), nullable = False)
 	EventFrameId = db.Column(db.Integer, db.ForeignKey("EventFrame.EventFrameId", name = "FK__EventFrame$CanHave$EventFrameNote"), nullable = False)
+
+	Notes = db.relationship("Note", backref = "EventFrameNote")
 	
 class EventFrameTemplate(db.Model):
 	__tablename__ = "EventFrameTemplate"
@@ -315,16 +317,6 @@ class Tag(db.Model):
 	def id(self):
 		return self.TagId
 
-class TagValueNote(db.Model):
-	__tablename__ = "TagValueNote"
-	__table_args__ = \
-	(
-		PrimaryKeyConstraint("NoteId", "TagValueId"),
-	)
-
-	NoteId = db.Column(db.Integer, db.ForeignKey("Note.NoteId", name = "FK__Note$CanBe$TagValueNote"), nullable = False)
-	TagValueId = db.Column(db.Integer, db.ForeignKey("TagValue.TagValueId", name = "FK__TagValue$CanHave$TagValueNote"), nullable = False)
-	
 class TagValue(db.Model):
 	__tablename__ = "TagValue"
 	__table_args__ = \
@@ -342,6 +334,18 @@ class TagValue(db.Model):
 	def __repr__(self):
 		return "<TagValue: {}>".format(self.TagId)
 
+class TagValueNote(db.Model):
+	__tablename__ = "TagValueNote"
+	__table_args__ = \
+	(
+		PrimaryKeyConstraint("NoteId", "TagValueId"),
+	)
+
+	NoteId = db.Column(db.Integer, db.ForeignKey("Note.NoteId", name = "FK__Note$CanBe$TagValueNote"), nullable = False)
+	TagValueId = db.Column(db.Integer, db.ForeignKey("TagValue.TagValueId", name = "FK__TagValue$CanHave$TagValueNote"), nullable = False)
+
+	Notes = db.relationship("Note", backref = "TagValueNote")
+	
 class UnitOfMeasurement(db.Model):
 	__tablename__ = "UnitOfMeasurement"
 	__table_args__ = \
