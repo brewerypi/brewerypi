@@ -1,5 +1,6 @@
 import os
 import subprocess
+from datetime import datetime
 from flask import current_app, flash, Markup, redirect, send_file, url_for
 from flask_login import login_required
 from . import raspberryPiUtilities
@@ -9,10 +10,12 @@ from .. decorators import adminRequired
 @login_required
 @adminRequired
 def backupDatabase():
+	attachmentFilename = datetime.now().strftime("%Y%m%d%H%M") + "-BreweryPi.sql" 
 	command = "sudo mysqldump --complete-insert=TRUE BreweryPi > ~/brewerypi/exports/BreweryPi.sql"
 	p = subprocess.Popen(command, shell = True)
 	p.wait()
-	return send_file(os.path.join("..", current_app.config["EXPORT_FOLDER"], current_app.config["EXPORT_DATABASE_FILENAME"]), as_attachment = True)
+	return send_file(os.path.join("..", current_app.config["EXPORT_FOLDER"], current_app.config["EXPORT_DATABASE_FILENAME"]), as_attachment = True,
+		attachment_filename = attachmentFilename)
 
 @raspberryPiUtilities.route("/reboot", methods = ["GET"])
 @login_required
