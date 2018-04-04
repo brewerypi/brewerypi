@@ -9,7 +9,7 @@ from .. decorators import adminRequired
 @raspberryPiUtilities.route("/backupDatabase", methods = ["GET"])
 @login_required
 @adminRequired
-def backupDatabase():
+def backupDatabase(): 
 	attachmentFilename = datetime.now().strftime("%Y%m%d%H%M") + "-BreweryPi.sql" 
 	command = "sudo mysqldump --complete-insert=TRUE BreweryPi > ~/brewerypi/exports/BreweryPi.sql"
 	p = subprocess.Popen(command, shell = True)
