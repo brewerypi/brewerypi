@@ -11,8 +11,3 @@ class EventFrameTemplateForm(FlaskForm):
 	description = StringField("Description", validators = [Length(0, 255)])
 	requestReferrer = HiddenField()
 	submit = SubmitField("Save")
-
-	def validate_parentEventFrameTemplate(form, field):
-		if field.data != None:
-			if field.data.ElementTemplateId != form.elementTemplate.data.ElementTemplateId:
-				raise ValidationError("Parent Event Frame must be blank or of the same element template type.")

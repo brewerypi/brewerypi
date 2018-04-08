@@ -1,16 +1,18 @@
 from flask import flash, redirect, render_template, request, url_for
+from flask_login import login_required
 from . import tagValues
 from . forms import TagValueForm
 from .. import db
-from .. models import Area, ElementAttribute, Enterprise, Lookup, LookupValue, Site, Tag, TagValue
+from .. decorators import permissionRequired
+from .. models import Area, ElementAttribute, Enterprise, Lookup, LookupValue, Permission, Site, Tag, TagValue
 
 modelName = "Tag Value"
 
 @tagValues.route("/tagValues/<int:tagId>", methods = ["GET", "POST"])
 @tagValues.route("/tagValues/<int:tagId>/<int:elementAttributeId>", methods = ["GET", "POST"])
-# @login_required
+@login_required
+@permissionRequired(Permission.DATA_ENTRY)
 def listTagValues(tagId, elementAttributeId = None, ):
-	# check_admin()
 	if elementAttributeId:
 		elementAttribute = ElementAttribute.query.get_or_404(elementAttributeId)
 	else:
@@ -24,9 +26,9 @@ def listTagValues(tagId, elementAttributeId = None, ):
 	return render_template("tagValues/tagValues.html", elementAttribute = elementAttribute, tag = tag, tagValues = tagValues)
 
 @tagValues.route("/tagValues/add/<int:tagId>", methods = ["GET", "POST"])
-# @login_required
+@login_required
+@permissionRequired(Permission.DATA_ENTRY)
 def addTagValue(tagId):
-	# check_admin()
 	operation = "Add"
 	tag = Tag.query.get_or_404(tagId)
 	form = TagValueForm()
@@ -56,9 +58,9 @@ def addTagValue(tagId):
 	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
 
 @tagValues.route("/tagValues/delete/<int:tagValueId>", methods = ["GET", "POST"])
-# @login_required
+@login_required
+@permissionRequired(Permission.DATA_ENTRY)
 def deleteTagValue(tagValueId):
-	# check_admin()
 	tagValue = TagValue.query.get_or_404(tagValueId)
 	db.session.delete(tagValue)
 	db.session.commit()
@@ -66,9 +68,9 @@ def deleteTagValue(tagValueId):
 	return redirect(url_for("tagValues.listTagValues", tagId = tagValue.TagId))
 
 @tagValues.route("/tagValues/edit/<int:tagValueId>", methods = ["GET", "POST"])
-# @login_required
+@login_required
+@permissionRequired(Permission.DATA_ENTRY)
 def editTagValue(tagValueId):
-	# check_admin()
 	operation = "Edit"
 	tagValue = TagValue.query.get_or_404(tagValueId)
 	tag = Tag.query.get_or_404(tagValue.TagId)

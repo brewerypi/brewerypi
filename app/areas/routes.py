@@ -1,22 +1,24 @@
 from flask import flash, redirect, render_template, request, url_for
+from flask_login import login_required
 from . import areas
 from . forms import AreaForm
 from .. import db
+from .. decorators import adminRequired
 from .. models import Area, Enterprise, Site
 
 modelName = "Area"
 
 @areas.route("/areas", methods = ["GET", "POST"])
-# @login_required
+@login_required
+@adminRequired
 def listAreas():
-	# check_admin()
 	areas = Area.query
 	return render_template("areas/areas.html", areas = areas)
 
 @areas.route("/areas/add", methods = ["GET", "POST"])
-# @login_required
+@login_required
+@adminRequired
 def addArea():
-	# check_admin()
 	operation = "Add"
 	form = AreaForm()
 
@@ -32,9 +34,9 @@ def addArea():
 	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
 
 @areas.route("/areas/delete/<int:areaId>", methods = ["GET", "POST"])
-# @login_required
+@login_required
+@adminRequired
 def deleteArea(areaId):
-	# check_admin()
 	area = Area.query.get_or_404(areaId)
 	db.session.delete(area)
 	db.session.commit()
@@ -42,9 +44,9 @@ def deleteArea(areaId):
 	return redirect(url_for("areas.listAreas"))
 
 @areas.route("/areas/edit/<int:areaId>", methods = ["GET", "POST"])
-# @login_required
+@login_required
+@adminRequired
 def editArea(areaId):
-	# check_admin()
 	operation = "Edit"
 	area = Area.query.get_or_404(areaId)
 	form = AreaForm(obj = area)

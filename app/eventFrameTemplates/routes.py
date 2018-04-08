@@ -1,18 +1,20 @@
 from flask import flash, redirect, render_template, request, url_for
+from flask_login import login_required
 from sqlalchemy import text
 from sqlalchemy.orm import aliased
 from . import eventFrameTemplates
 from . forms import EventFrameTemplateForm
 from .. import db
+from .. decorators import adminRequired
 from .. models import ElementTemplate, EventFrameTemplate, Site, Enterprise
 
 modelName = "Event Frame Templates"
 
 @eventFrameTemplates.route("/eventFrameTemplates/add/elementTemplateId/<int:elementTemplateId>", methods = ["GET", "POST"])
 @eventFrameTemplates.route("/eventFrameTemplates/add/eventFrameTemplateId/<int:parentEventFrameTemplateId>", methods = ["GET", "POST"])
-# @login_required
+@login_required
+@adminRequired
 def addEventFrameTemplate(elementTemplateId = None, parentEventFrameTemplateId = None):
-	# check_admin()
 	operation = "Add"
 	form = EventFrameTemplateForm()
 
@@ -55,9 +57,9 @@ def addEventFrameTemplate(elementTemplateId = None, parentEventFrameTemplateId =
 	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
 
 @eventFrameTemplates.route("/eventFrameTemplates/delete/<int:eventFrameTemplateId>", methods = ["GET", "POST"])
-# @login_required
+@login_required
+@adminRequired
 def deleteEventFrameTemplate(eventFrameTemplateId):
-	# check_admin()
 	eventFrameTemplate = EventFrameTemplate.query.get_or_404(eventFrameTemplateId)
 	if eventFrameTemplate.hasDescendants():
 		flash("This event frame contains one or more child event frame templates and cannot be deleted.", "alert alert-danger")
@@ -81,9 +83,9 @@ def deleteEventFrameTemplate(eventFrameTemplateId):
 	return redirect(request.referrer)
 
 @eventFrameTemplates.route("/eventFrameTemplates/edit/<int:eventFrameTemplateId>", methods = ["GET", "POST"])
-# @login_required
+@login_required
+@adminRequired
 def editEventFrameTemplate(eventFrameTemplateId):
-	# check_admin()
 	operation = "Edit"
 	eventFrameTemplate = EventFrameTemplate.query.get_or_404(eventFrameTemplateId)
 	form = EventFrameTemplateForm(obj = eventFrameTemplate)
@@ -130,7 +132,8 @@ def editEventFrameTemplate(eventFrameTemplateId):
 @eventFrameTemplates.route("/selectEventFrameTemplate", methods = ["GET", "POST"])
 @eventFrameTemplates.route("/selectEventFrameTemplate/<string:className>", methods = ["GET", "POST"])
 @eventFrameTemplates.route("/selectEventFrameTemplate/<string:className>/<int:id>", methods = ["GET", "POST"])
-# @login_required
+@login_required
+@adminRequired
 def selectEventFrameTemplate(className = None, id = None):
 	if className == None:
 		parent = Site.query.join(Enterprise).order_by(Enterprise.Name, Site.Name).first()

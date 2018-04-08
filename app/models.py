@@ -1,5 +1,17 @@
-from sqlalchemy import UniqueConstraint
+from flask_login import AnonymousUserMixin, UserMixin
+from sqlalchemy import Index, UniqueConstraint
+from werkzeug.security import generate_password_hash, check_password_hash
 from app import db
+from . import loginManager
+
+class AnonymousUser(AnonymousUserMixin):
+	def can(self, permissions):
+		return False
+	
+	def isAdministrator(self):
+		return False
+
+loginManager.anonymous_user = AnonymousUser
 
 class Area(db.Model):
 	__tablename__ = "Area"
@@ -247,6 +259,35 @@ class LookupValue(db.Model):
 	def isReferenced(self):
 		return TagValue.query.join(Tag).filter(TagValue.Value == self.Value, Tag.LookupId == self.LookupId).count() > 0
 
+class Role(db.Model):
+	__tablename__ = "Role"
+	__table_args__ = \
+	(
+		UniqueConstraint("Name", name = "AK__Name"),
+		Index("IX_Name", "Name"),
+	)
+
+	RoleId = db.Column(db.Integer, primary_key = True)
+	Name = db.Column(db.String(45), nullable = False)
+	Permissions = db.Column(db.Integer)	
+
+	Users = db.relationship("User", backref = "Role", lazy = "dynamic")
+
+	@staticmethod
+	def insertRoles():
+		roles = {"User" : Permission.DATA_ENTRY, "Administrator" : 0xff}
+		for r in roles:
+			role = Role.query.filter_by(Name = r).first()
+			if role is None:
+				role = Role(Name = r)
+			role.Permissions = roles[r]
+			db.session.add(role)
+		db.session.commit()
+
+class Permission:
+	DATA_ENTRY = 0x01
+	ADMINISTER = 0x80
+
 class Site(db.Model):
 	__tablename__ = "Site"
 	__table_args__ = \
@@ -324,3 +365,51 @@ class UnitOfMeasurement(db.Model):
 
 	def __repr__(self):
 		return "<UnitOfMeasurement: {}>".format(self.Name)
+
+class User(UserMixin, db.Model):
+	__tablename__ = 'User'
+	__table_args__ = \
+	(
+		UniqueConstraint("Name", name = "AK__Name"),
+		Index("IX_Name", "Name"),
+	)
+
+	UserId = db.Column(db.Integer, primary_key = True)
+	Name = db.Column(db.String(45), nullable = False)
+	PasswordHash = db.Column(db.String(128))
+	RoleId = db.Column(db.Integer, db.ForeignKey("Role.RoleId", name = "FK__Role$Have$User"), nullable = False)
+
+	@property
+	def Password(self):
+		raise AttributeError("Password is not a readable attribute.")
+	
+	@Password.setter
+	def Password(self, password):
+		self.PasswordHash = generate_password_hash(password)
+
+	@staticmethod
+	def insertDefaultAdministrator():
+		user = User.query.filter_by(Name = "pi").first()
+		AdministratorRole = Role.query.filter_by(Name = "Administrator").first()
+		if user is None:
+			user = User(Name = "pi", Password = "brewery", Role = AdministratorRole)
+			db.session.add(user)
+		else:
+			user.Role = AdministratorRole
+		db.session.commit()
+
+	def can(self, permissions):
+		return self.Role is not None and (self.Role.Permissions & permissions) == permissions
+
+	def get_id(self):
+		return self.UserId
+
+	def isAdministrator(self):
+		return self.can(Permission.ADMINISTER)
+
+	def verifyPassword(self, password):
+		return check_password_hash(self.PasswordHash, password)
+
+@loginManager.user_loader
+def loadUser(id):
+	return User.query.get(int(id))

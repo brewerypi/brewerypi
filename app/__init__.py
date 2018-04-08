@@ -1,11 +1,15 @@
 from flask import Flask
 from flask_bootstrap import Bootstrap
+from flask_login import LoginManager
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from config import Config
 
 boostrap = Bootstrap()
 db = SQLAlchemy()
+loginManager = LoginManager()
+loginManager.session_protection = "basic"
+loginManager.login_view = "authentications.login"
 migrate = Migrate()
 
 def create_app(configClass = Config):
@@ -14,6 +18,7 @@ def create_app(configClass = Config):
 
 	boostrap.init_app(app)
 	db.init_app(app)
+	loginManager.init_app(app)
 	migrate.init_app(app, db, directory = "db/migrations")
 
 	from . areas import areas as areasBlueprint
@@ -22,8 +27,8 @@ def create_app(configClass = Config):
 	from . attributeTemplates import attributeTemplates as attributeTemplatesBlueprint
 	app.register_blueprint(attributeTemplatesBlueprint)
 
-	from . auth import auth as auth_blueprint
-	app.register_blueprint(auth_blueprint)
+	from . authentications import authentications as authenticationsBlueprint
+	app.register_blueprint(authenticationsBlueprint)
 
 	from . elements import elements as elementsBlueprint
 	app.register_blueprint(elementsBlueprint)
@@ -43,14 +48,14 @@ def create_app(configClass = Config):
 	from . eventFrameTemplates import eventFrameTemplates as eventFrameTemplatesBlueprint
 	app.register_blueprint(eventFrameTemplatesBlueprint)
 
-	from . home import home as home_blueprint
-	app.register_blueprint(home_blueprint)
-
 	from . lookups import lookups as lookupsBlueprint
 	app.register_blueprint(lookupsBlueprint)
 
 	from . lookupValues import lookupValues as lookupValuesBlueprint
 	app.register_blueprint(lookupValuesBlueprint)
+
+	from . main import main as mainBlueprint
+	app.register_blueprint(mainBlueprint)
 
 	from . tags import tags as tagsBlueprint
 	app.register_blueprint(tagsBlueprint)
@@ -63,5 +68,8 @@ def create_app(configClass = Config):
 
 	from . unitOfMeasurements import unitOfMeasurements as unitOfMeasurementsBlueprint
 	app.register_blueprint(unitOfMeasurementsBlueprint)
+
+	from . users import users as usersBlueprint
+	app.register_blueprint(usersBlueprint)
 
 	return app

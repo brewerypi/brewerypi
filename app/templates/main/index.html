@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block title %}
+Brewery Pi
+{% endblock %}
+
+{% block page_content %}
+<h1>Brewery Pi</h1>
+<h2>Data for the Craft Brewer</h2>
+{% if current_user.is_authenticated %}
+    <a class = "btn btn-default" title = "Log Out" href = "{{ url_for("authentications.logout") }}"><span class="glyphicon glyphicon-log-out"></span></a>
+{% else %}
+    <a class = "btn btn-default" title = "Log In" href = "{{ url_for("authentications.login") }}"><span class="glyphicon glyphicon-log-in"></span></a>
+{% endif %}
+{% endblock %}
