@@ -1,5 +1,5 @@
 from flask_login import AnonymousUserMixin, UserMixin
-from sqlalchemy import Index, UniqueConstraint
+from sqlalchemy import Index, PrimaryKeyConstraint, UniqueConstraint
 from werkzeug.security import generate_password_hash, check_password_hash
 from app import db
 from . import loginManager
@@ -146,6 +146,7 @@ class EventFrame(db.Model):
 
 	ParentEventFrame = db.relationship("EventFrame", remote_side = [EventFrameId])
 	EventFrames = db.relationship("EventFrame", remote_side = [ParentEventFrameId])
+	EventFrameNotes = db.relationship("EventFrameNote", backref = "EventFrame", lazy = "dynamic")
 
 	def __repr__(self):
 		return "<EventFrame: {}>".format(self.Name)
@@ -174,6 +175,18 @@ class EventFrame(db.Model):
 			return self
 		else:
 			return self.ParentEventFrame.origin()
+	
+class EventFrameNote(db.Model):
+	__tablename__ = "EventFrameNote"
+	__table_args__ = \
+	(
+		PrimaryKeyConstraint("NoteId", "EventFrameId"),
+	)
+
+	NoteId = db.Column(db.Integer, db.ForeignKey("Note.NoteId", name = "FK__Note$CanBe$EventFrameNote"), nullable = False)
+	EventFrameId = db.Column(db.Integer, db.ForeignKey("EventFrame.EventFrameId", name = "FK__EventFrame$CanHave$EventFrameNote"), nullable = False)
+
+	Notes = db.relationship("Note", backref = "EventFrameNote")
 	
 class EventFrameTemplate(db.Model):
 	__tablename__ = "EventFrameTemplate"
@@ -258,6 +271,16 @@ class LookupValue(db.Model):
 
 	def isReferenced(self):
 		return TagValue.query.join(Tag).filter(TagValue.Value == self.Value, Tag.LookupId == self.LookupId).count() > 0
+
+class Note(db.Model):
+	__tablename__ = "Note"
+
+	NoteId = db.Column(db.Integer, primary_key = True)
+	Note = db.Column(db.Text, nullable = False)
+	Timestamp = db.Column(db.DateTime, nullable = False, index = True)
+	
+	TagValueNotes = db.relationship("TagValueNote", backref = "Note", lazy = "dynamic")
+	EventFrameNotes = db.relationship("EventFrameNote", backref = "Note", lazy = "dynamic")
 
 class Role(db.Model):
 	__tablename__ = "Role"
@@ -347,9 +370,23 @@ class TagValue(db.Model):
 	Timestamp = db.Column(db.DateTime, nullable = False, index = True)
 	Value = db.Column(db.Float, nullable = False)
 
+	TagValueNotes = db.relationship("TagValueNote", backref = "TagValue", lazy = "dynamic")
+
 	def __repr__(self):
 		return "<TagValue: {}>".format(self.TagId)
 
+class TagValueNote(db.Model):
+	__tablename__ = "TagValueNote"
+	__table_args__ = \
+	(
+		PrimaryKeyConstraint("NoteId", "TagValueId"),
+	)
+
+	NoteId = db.Column(db.Integer, db.ForeignKey("Note.NoteId", name = "FK__Note$CanBe$TagValueNote"), nullable = False)
+	TagValueId = db.Column(db.Integer, db.ForeignKey("TagValue.TagValueId", name = "FK__TagValue$CanHave$TagValueNote"), nullable = False)
+
+	Notes = db.relationship("Note", backref = "TagValueNote")
+	
 class UnitOfMeasurement(db.Model):
 	__tablename__ = "UnitOfMeasurement"
 	__table_args__ = \

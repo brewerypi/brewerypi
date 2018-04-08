@@ -95,11 +95,38 @@ Event Frames
                     {% else %}
                         <td></td>
                     {% endif %}
+                    <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Notes"
+                        href = "{{ url_for("eventFrames.addEventFrameNote", eventFrameId = eventFrame.EventFrameId) }}">
+                        <span class="glyphicon glyphicon-comment"></a></td>
                     <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("eventFrames.editEventFrame",
                         eventFrameId = eventFrame.EventFrameId) }}"><span class="glyphicon glyphicon-edit"></a></td>
                     <td><a class = "btn btn-default" title = "Delete" href = "{{ url_for("eventFrames.deleteEventFrame",
                         eventFrameId = eventFrame.EventFrameId) }}"><span class="glyphicon glyphicon-trash"></a></td>
                 </tr>
+                {% if eventFrame.EventFrameNotes.count() > 0 %}
+                    <tr>
+                        <td class = "invisible"></td>
+                        <td class = "invisible"></td>
+                        <th colspan="4">Note</th>
+                        <th>Timestamp</th>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    {% for EventFrameNote in eventFrame.EventFrameNotes %}
+                        <tr>
+                            <td class = "invisible"></td>
+                            <td class = "invisible"></td>
+                            <td colspan="4">{{ EventFrameNote.Notes.Note }}</td>
+                            <td>{{ EventFrameNote.Notes.Timestamp }}</td>
+                            <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Edit"
+                                href = "{{ url_for("eventFrames.editEventFrameNote", noteId = EventFrameNote.Notes.NoteId) }}">
+                                <span class="glyphicon glyphicon-edit"></span></a></td>
+                            <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Delete"
+                                href = "{{ url_for("eventFrames.deleteEventFrameNote", eventFrameId = eventFrame.EventFrameId, 
+                                noteId = EventFrameNote.Notes.NoteId) }}"><span class="glyphicon glyphicon-trash"></a></td>
+                        </tr>
+                    {% endfor %}
+                {% endif %}
             {% endfor %}
         </tbody>
     </table>
