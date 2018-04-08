@@ -70,7 +70,7 @@ Tag Values
                     <td></td>
                     <td></td>
                 </tr>
-                {% for TagValueNote in tagValue.TagValueNotes %}
+                {% for TagValueNote in tagValue.TagValueNotes | sort (attribute = "Notes.Timestamp", reverse = True) %}
                     <tr>
                         <td class = "invisible"></td>
                         <td>{{ TagValueNote.Notes.Note }}</td>

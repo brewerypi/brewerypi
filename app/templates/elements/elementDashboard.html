@@ -84,29 +84,31 @@
                         <td></td>
                     {% endif %}
                 </tr>
-                {% if firstEventFrame.EventFrameNotes.count() > 0 %}
-                    <tr>
-                        <td class = "invisible"></td>
-                        <td class = "invisible"></td>
-                        <th colspan="4">Note</th>
-                        <th>Timestamp</th>
-                        <td></td>
-                        <td></td>
-                    </tr>
-                    {% for EventFrameNote in firstEventFrame.EventFrameNotes %}
+                {% if firstEventFrame %}
+                    {% if firstEventFrame.EventFrameNotes.count() > 0 %}
                         <tr>
                             <td class = "invisible"></td>
                             <td class = "invisible"></td>
-                            <td colspan="4">{{ EventFrameNote.Notes.Note }}</td>
-                            <td>{{ EventFrameNote.Notes.Timestamp }}</td>
-                            <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Edit"
-                                href = "{{ url_for("eventFrames.editEventFrameNote", noteId = EventFrameNote.Notes.NoteId) }}">
-                                <span class="glyphicon glyphicon-edit"></span></a></td>
-                            <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Delete"
-                                href = "{{ url_for("eventFrames.deleteEventFrameNote", eventFrameId = firstEventFrame.EventFrameId, 
-                                noteId = EventFrameNote.Notes.NoteId) }}"><span class="glyphicon glyphicon-trash"></a></td>
+                            <th colspan="4">Note</th>
+                            <th>Timestamp</th>
+                            <td></td>
+                            <td></td>
                         </tr>
-                    {% endfor %}
+                        {% for EventFrameNote in firstEventFrame.EventFrameNotes | sort (attribute = "Notes.Timestamp", reverse = True) %}
+                            <tr>
+                                <td class = "invisible"></td>
+                                <td class = "invisible"></td>
+                                <td colspan="4">{{ EventFrameNote.Notes.Note }}</td>
+                                <td>{{ EventFrameNote.Notes.Timestamp }}</td>
+                                <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Edit"
+                                    href = "{{ url_for("eventFrames.editEventFrameNote", noteId = EventFrameNote.Notes.NoteId) }}">
+                                    <span class="glyphicon glyphicon-edit"></span></a></td>
+                                <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Delete"
+                                    href = "{{ url_for("eventFrames.deleteEventFrameNote", eventFrameId = firstEventFrame.EventFrameId, 
+                                    noteId = EventFrameNote.Notes.NoteId) }}"><span class="glyphicon glyphicon-trash"></a></td>
+                            </tr>
+                        {% endfor %}
+                    {% endif %}
                 {% endif %}
             {% endfor %}
         </tbody>
@@ -163,29 +165,31 @@
                         <td></td>
                     {% endif %}
                 </tr>
-                {% if firstTagValue.TagValueNotes.count() > 0 %}
-                    <tr>
-                        <td class = "invisible"></td>
-                        <td class = "invisible"></td>
-                        <th colspan="3">Note</th>
-                        <th>Timestamp</th>
-                        <td></td>
-                        <td></td>
-                    </tr>
-                    {% for TagValueNote in firstTagValue.TagValueNotes %}
+                {% if firstTagValue %}
+                    {% if firstTagValue.TagValueNotes.count() > 0 %}
                         <tr>
                             <td class = "invisible"></td>
                             <td class = "invisible"></td>
-                            <td colspan="3">{{ TagValueNote.Notes.Note }}</td>
-                            <td>{{ TagValueNote.Notes.Timestamp }}</td>
-                            <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Edit"
-                                href = "{{ url_for("tagValues.editTagValueNote", noteId = TagValueNote.Notes.NoteId) }}">
-                                <span class="glyphicon glyphicon-edit"></span></a></td>
-                            <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Delete"
-                                href = "{{ url_for("tagValues.deleteTagValueNote", tagValueId = firstTagValue.TagValueId, 
-                                noteId = TagValueNote.Notes.NoteId) }}"><span class="glyphicon glyphicon-trash"></a></td>
+                            <th colspan="3">Note</th>
+                            <th>Timestamp</th>
+                            <td></td>
+                            <td></td>
                         </tr>
-                    {% endfor %}
+                        {% for TagValueNote in firstTagValue.TagValueNotes | sort (attribute = "Notes.Timestamp", reverse = True) %}
+                            <tr>
+                                <td class = "invisible"></td>
+                                <td class = "invisible"></td>
+                                <td colspan="3">{{ TagValueNote.Notes.Note }}</td>
+                                <td>{{ TagValueNote.Notes.Timestamp }}</td>
+                                <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Edit"
+                                    href = "{{ url_for("tagValues.editTagValueNote", noteId = TagValueNote.Notes.NoteId) }}">
+                                    <span class="glyphicon glyphicon-edit"></span></a></td>
+                                <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Delete"
+                                    href = "{{ url_for("tagValues.deleteTagValueNote", tagValueId = firstTagValue.TagValueId, 
+                                    noteId = TagValueNote.Notes.NoteId) }}"><span class="glyphicon glyphicon-trash"></a></td>
+                            </tr>
+                        {% endfor %}
+                    {% endif %}
                 {% endif %}
             {% endfor %}
         </tbody>
