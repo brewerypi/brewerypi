@@ -1,5 +1,6 @@
 from flask import flash, redirect, render_template, request, url_for
 from flask_login import login_required
+from sqlalchemy import or_
 from . import tagValues
 from . forms import TagValueForm, TagValueNoteForm
 from .. import db
