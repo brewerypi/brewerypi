@@ -183,8 +183,8 @@ class EventFrameNote(db.Model):
 		PrimaryKeyConstraint("NoteId", "EventFrameId"),
 	)
 
-	NoteId = db.Column(db.Integer, db.ForeignKey("Note.NoteId", name = "FK__Note$CanBe$EventFrameNote"), nullable = False)
 	EventFrameId = db.Column(db.Integer, db.ForeignKey("EventFrame.EventFrameId", name = "FK__EventFrame$CanHave$EventFrameNote"), nullable = False)
+	NoteId = db.Column(db.Integer, db.ForeignKey("Note.NoteId", name = "FK__Note$CanBe$EventFrameNote"), nullable = False)
 
 	Notes = db.relationship("Note", backref = "EventFrameNote")
 	
@@ -274,10 +274,14 @@ class LookupValue(db.Model):
 
 class Note(db.Model):
 	__tablename__ = "Note"
+	__table_args__ = \
+	(
+		Index("IX__Timestamp", "Timestamp"),
+	)
 
 	NoteId = db.Column(db.Integer, primary_key = True)
 	Note = db.Column(db.Text, nullable = False)
-	Timestamp = db.Column(db.DateTime, nullable = False, index = True)
+	Timestamp = db.Column(db.DateTime, nullable = False)
 	
 	TagValueNotes = db.relationship("TagValueNote", backref = "Note", lazy = "dynamic")
 	EventFrameNotes = db.relationship("EventFrameNote", backref = "Note", lazy = "dynamic")
@@ -287,7 +291,7 @@ class Role(db.Model):
 	__table_args__ = \
 	(
 		UniqueConstraint("Name", name = "AK__Name"),
-		Index("IX_Name", "Name"),
+		Index("IX__Name", "Name"),
 	)
 
 	RoleId = db.Column(db.Integer, primary_key = True)
@@ -363,11 +367,12 @@ class TagValue(db.Model):
 	__table_args__ = \
 	(
 		UniqueConstraint("TagId", "Timestamp", name = "AK__TagId__Timestamp"),
+		Index("IX__Timestamp", "Timestamp"),
 	)
 
 	TagValueId = db.Column(db.Integer, primary_key = True)
 	TagId = db.Column(db.Integer, db.ForeignKey("Tag.TagId", name = "FK__Tag$Have$TagValue"), nullable = False)
-	Timestamp = db.Column(db.DateTime, nullable = False, index = True)
+	Timestamp = db.Column(db.DateTime, nullable = False)
 	Value = db.Column(db.Float, nullable = False)
 
 	TagValueNotes = db.relationship("TagValueNote", backref = "TagValue", lazy = "dynamic")
@@ -408,7 +413,7 @@ class User(UserMixin, db.Model):
 	__table_args__ = \
 	(
 		UniqueConstraint("Name", name = "AK__Name"),
-		Index("IX_Name", "Name"),
+		Index("IX__Name", "Name"),
 	)
 
 	UserId = db.Column(db.Integer, primary_key = True)
