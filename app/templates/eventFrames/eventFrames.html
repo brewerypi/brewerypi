@@ -112,7 +112,7 @@ Event Frames
                         <td></td>
                         <td></td>
                     </tr>
-                    {% for EventFrameNote in eventFrame.EventFrameNotes %}
+                    {% for EventFrameNote in eventFrame.EventFrameNotes | sort (attribute = "Notes.Timestamp", reverse = True) %}
                         <tr>
                             <td class = "invisible"></td>
                             <td class = "invisible"></td>
