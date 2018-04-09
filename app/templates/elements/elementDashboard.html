@@ -163,7 +163,7 @@
                         <td></td>
                     {% endif %}
                 </tr>
-                {% if firstTagValue.TagValueNotes.count() > 0 %}
+                {#% if firstTagValue.TagValueNotes.count() > 0 %}
                     <tr>
                         <td class = "invisible"></td>
                         <td class = "invisible"></td>
@@ -186,7 +186,7 @@
                                 noteId = TagValueNote.Notes.NoteId) }}"><span class="glyphicon glyphicon-trash"></a></td>
                         </tr>
                     {% endfor %}
-                {% endif %}
+                {% endif %#}
             {% endfor %}
         </tbody>
     </table>
