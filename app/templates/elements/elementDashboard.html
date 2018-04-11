@@ -85,7 +85,7 @@
                     {% endif %}
                 </tr>
                 {% if firstEventFrame %}
-                    {% if firstEventFrame.EventFrameNotes.count() > 0 %}
+                    {% if firstEventFrame.EventFrameNotes %}
                         <tr>
                             <td class = "invisible"></td>
                             <td class = "invisible"></td>
@@ -94,18 +94,18 @@
                             <td></td>
                             <td></td>
                         </tr>
-                        {% for EventFrameNote in firstEventFrame.EventFrameNotes | sort (attribute = "Notes.Timestamp", reverse = True) %}
+                        {% for eventFrameNote in firstEventFrame.EventFrameNotes | sort (attribute = "Note.Timestamp", reverse = True) %}
                             <tr>
                                 <td class = "invisible"></td>
                                 <td class = "invisible"></td>
-                                <td colspan="4">{{ EventFrameNote.Notes.Note }}</td>
-                                <td>{{ EventFrameNote.Notes.Timestamp }}</td>
+                                <td colspan="4">{{ eventFrameNote.Note.Note }}</td>
+                                <td>{{ eventFrameNote.Note.Timestamp }}</td>
                                 <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Edit"
-                                    href = "{{ url_for("eventFrames.editEventFrameNote", noteId = EventFrameNote.Notes.NoteId) }}">
+                                    href = "{{ url_for("eventFrames.editEventFrameNote", noteId = eventFrameNote.Note.NoteId) }}">
                                     <span class="glyphicon glyphicon-edit"></span></a></td>
                                 <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Delete"
                                     href = "{{ url_for("eventFrames.deleteEventFrameNote", eventFrameId = firstEventFrame.EventFrameId, 
-                                    noteId = EventFrameNote.Notes.NoteId) }}"><span class="glyphicon glyphicon-trash"></a></td>
+                                    noteId = eventFrameNote.Note.NoteId) }}"><span class="glyphicon glyphicon-trash"></a></td>
                             </tr>
                         {% endfor %}
                     {% endif %}
