@@ -63,28 +63,28 @@ Tag Values
                         <span class="glyphicon glyphicon-trash"></span></a></td>
                 </tr>
                 {% if tagValue.TagValueNotes.count() > 0 %}
-                <tr>
-                    <td class = "invisible"></td>
-                    <th>Note</th>
-                    <th>Timestamp</th>
-                    <td></td>
-                    <td></td>
-                </tr>
-                {% for TagValueNote in tagValue.TagValueNotes | sort (attribute = "Notes.Timestamp", reverse = True) %}
                     <tr>
                         <td class = "invisible"></td>
-                        <td>{{ TagValueNote.Notes.Note }}</td>
-                        <td>{{ TagValueNote.Notes.Timestamp }}</td>
-                        <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Edit"
-                            href = "{{ url_for("tagValues.editTagValueNote", noteId = TagValueNote.Notes.NoteId) }}">
-                            <span class="glyphicon glyphicon-edit"></span></a></td>
-                        <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Delete"
-                            href = "{{ url_for("tagValues.deleteTagValueNote", tagValueId = tagValue.TagValueId, 
-                            noteId = TagValueNote.Notes.NoteId) }}"><span class="glyphicon glyphicon-trash"></a></td>
+                        <th>Note</th>
+                        <th>Timestamp</th>
+                        <td></td>
+                        <td></td>
                     </tr>
+                    {% for TagValueNote in tagValue.TagValueNotes | sort (attribute = "Note.Timestamp", reverse = True) %}
+                        <tr>
+                            <td class = "invisible"></td>
+                            <td>{{ TagValueNote.Note.Note }}</td>
+                            <td>{{ TagValueNote.Note.Timestamp }}</td>
+                            <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Edit"
+                                href = "{{ url_for("tagValues.editTagValueNote", noteId = TagValueNote.Note.NoteId) }}">
+                                <span class="glyphicon glyphicon-edit"></span></a></td>
+                            <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Delete"
+                                href = "{{ url_for("tagValues.deleteTagValueNote", tagValueId = tagValue.TagValueId, 
+                                noteId = TagValueNote.Note.NoteId) }}"><span class="glyphicon glyphicon-trash"></a></td>
+                        </tr>
+                    {% endfor %}
+                {% endif %}
             {% endfor %}
-        {% endif %}
-    {% endfor %}
         </tbody>
     </table>
 </div>

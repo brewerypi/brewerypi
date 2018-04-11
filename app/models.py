@@ -186,8 +186,6 @@ class EventFrameNote(db.Model):
 	EventFrameId = db.Column(db.Integer, db.ForeignKey("EventFrame.EventFrameId", name = "FK__EventFrame$CanHave$EventFrameNote"), nullable = False)
 	NoteId = db.Column(db.Integer, db.ForeignKey("Note.NoteId", name = "FK__Note$CanBe$EventFrameNote"), nullable = False)
 
-	Notes = db.relationship("Note", backref = "EventFrameNote")
-	
 class EventFrameTemplate(db.Model):
 	__tablename__ = "EventFrameTemplate"
 	__table_args__ = \
@@ -390,8 +388,6 @@ class TagValueNote(db.Model):
 	NoteId = db.Column(db.Integer, db.ForeignKey("Note.NoteId", name = "FK__Note$CanBe$TagValueNote"), nullable = False)
 	TagValueId = db.Column(db.Integer, db.ForeignKey("TagValue.TagValueId", name = "FK__TagValue$CanHave$TagValueNote"), nullable = False)
 
-	Notes = db.relationship("Note", backref = "TagValueNote")
-	
 class UnitOfMeasurement(db.Model):
 	__tablename__ = "UnitOfMeasurement"
 	__table_args__ = \

@@ -112,18 +112,18 @@ Event Frames
                         <td></td>
                         <td></td>
                     </tr>
-                    {% for EventFrameNote in eventFrame.EventFrameNotes | sort (attribute = "Notes.Timestamp", reverse = True) %}
+                    {% for EventFrameNote in eventFrame.EventFrameNotes | sort (attribute = "Note.Timestamp", reverse = True) %}
                         <tr>
                             <td class = "invisible"></td>
                             <td class = "invisible"></td>
-                            <td colspan="4">{{ EventFrameNote.Notes.Note }}</td>
-                            <td>{{ EventFrameNote.Notes.Timestamp }}</td>
+                            <td colspan="4">{{ EventFrameNote.Note.Note }}</td>
+                            <td>{{ EventFrameNote.Note.Timestamp }}</td>
                             <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Edit"
-                                href = "{{ url_for("eventFrames.editEventFrameNote", noteId = EventFrameNote.Notes.NoteId) }}">
+                                href = "{{ url_for("eventFrames.editEventFrameNote", noteId = EventFrameNote.Note.NoteId) }}">
                                 <span class="glyphicon glyphicon-edit"></span></a></td>
                             <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Delete"
                                 href = "{{ url_for("eventFrames.deleteEventFrameNote", eventFrameId = eventFrame.EventFrameId, 
-                                noteId = EventFrameNote.Notes.NoteId) }}"><span class="glyphicon glyphicon-trash"></a></td>
+                                noteId = EventFrameNote.Note.NoteId) }}"><span class="glyphicon glyphicon-trash"></a></td>
                         </tr>
                     {% endfor %}
                 {% endif %}
