@@ -94,18 +94,18 @@
                             <td></td>
                             <td></td>
                         </tr>
-                        {% for EventFrameNote in firstEventFrame.EventFrameNotes | sort (attribute = "Note.Timestamp", reverse = True) %}
+                        {% for eventFrameNote in firstEventFrame.EventFrameNotes | sort (attribute = "Note.Timestamp", reverse = True) %}
                             <tr>
                                 <td class = "invisible"></td>
                                 <td class = "invisible"></td>
-                                <td colspan="4">{{ EventFrameNote.Note.Note }}</td>
-                                <td>{{ EventFrameNote.Note.Timestamp }}</td>
+                                <td colspan="4">{{ eventFrameNote.Note.Note }}</td>
+                                <td>{{ eventFrameNote.Note.Timestamp }}</td>
                                 <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Edit"
-                                    href = "{{ url_for("eventFrames.editEventFrameNote", noteId = EventFrameNote.Note.NoteId) }}">
+                                    href = "{{ url_for("eventFrames.editEventFrameNote", noteId = eventFrameNote.Note.NoteId) }}">
                                     <span class="glyphicon glyphicon-edit"></span></a></td>
                                 <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Delete"
                                     href = "{{ url_for("eventFrames.deleteEventFrameNote", eventFrameId = firstEventFrame.EventFrameId, 
-                                    noteId = EventFrameNote.Note.NoteId) }}"><span class="glyphicon glyphicon-trash"></a></td>
+                                    noteId = eventFrameNote.Note.NoteId) }}"><span class="glyphicon glyphicon-trash"></a></td>
                             </tr>
                         {% endfor %}
                     {% endif %}
@@ -175,18 +175,18 @@
                             <td></td>
                             <td></td>
                         </tr>
-                        {% for TagValueNote in firstTagValue.TagValueNotes | sort (attribute = "Note.Timestamp", reverse = True) %}
+                        {% for tagValueNote in firstTagValue.TagValueNotes | sort (attribute = "Note.Timestamp", reverse = True) %}
                             <tr>
                                 <td class = "invisible"></td>
                                 <td class = "invisible"></td>
-                                <td colspan="3">{{ TagValueNote.Note.Note }}</td>
-                                <td>{{ TagValueNote.Note.Timestamp }}</td>
+                                <td colspan="3">{{ tagValueNote.Note.Note }}</td>
+                                <td>{{ tagValueNote.Note.Timestamp }}</td>
                                 <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Edit"
-                                    href = "{{ url_for("tagValues.editTagValueNote", noteId = TagValueNote.Note.NoteId) }}">
+                                    href = "{{ url_for("tagValues.editTagValueNote", noteId = tagValueNote.Note.NoteId) }}">
                                     <span class="glyphicon glyphicon-edit"></span></a></td>
                                 <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Delete"
                                     href = "{{ url_for("tagValues.deleteTagValueNote", tagValueId = firstTagValue.TagValueId, 
-                                    noteId = TagValueNote.Note.NoteId) }}"><span class="glyphicon glyphicon-trash"></a></td>
+                                    noteId = tagValueNote.Note.NoteId) }}"><span class="glyphicon glyphicon-trash"></a></td>
                             </tr>
                         {% endfor %}
                     {% endif %}

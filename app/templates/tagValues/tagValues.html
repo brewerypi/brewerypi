@@ -70,17 +70,17 @@ Tag Values
                         <td></td>
                         <td></td>
                     </tr>
-                    {% for TagValueNote in tagValue.TagValueNotes | sort (attribute = "Note.Timestamp", reverse = True) %}
+                    {% for tagValueNote in tagValue.TagValueNotes | sort (attribute = "Note.Timestamp", reverse = True) %}
                         <tr>
                             <td class = "invisible"></td>
-                            <td>{{ TagValueNote.Note.Note }}</td>
-                            <td>{{ TagValueNote.Note.Timestamp }}</td>
+                            <td>{{ tagValueNote.Note.Note }}</td>
+                            <td>{{ tagValueNote.Note.Timestamp }}</td>
                             <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Edit"
-                                href = "{{ url_for("tagValues.editTagValueNote", noteId = TagValueNote.Note.NoteId) }}">
+                                href = "{{ url_for("tagValues.editTagValueNote", noteId = tagValueNote.Note.NoteId) }}">
                                 <span class="glyphicon glyphicon-edit"></span></a></td>
                             <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Delete"
                                 href = "{{ url_for("tagValues.deleteTagValueNote", tagValueId = tagValue.TagValueId, 
-                                noteId = TagValueNote.Note.NoteId) }}"><span class="glyphicon glyphicon-trash"></a></td>
+                                noteId = tagValueNote.Note.NoteId) }}"><span class="glyphicon glyphicon-trash"></a></td>
                         </tr>
                     {% endfor %}
                 {% endif %}
