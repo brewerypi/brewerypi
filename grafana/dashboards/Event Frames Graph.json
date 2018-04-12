@@ -46,7 +46,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": null,
-  "iteration": 1523546122387,
+  "iteration": 1523552639552,
   "links": [],
   "panels": [
     {
@@ -80,8 +80,8 @@
       "links": [],
       "nullPointMode": "null",
       "percentage": false,
-      "pointradius": 5,
-      "points": false,
+      "pointradius": 1,
+      "points": true,
       "renderer": "flot",
       "seriesOverrides": [],
       "spaceLength": 10,
@@ -311,6 +311,6 @@
   },
   "timezone": "",
   "title": "Event Frames Graph",
-  "uid": "xHkP33iik",
-  "version": 4
+  "uid": "Xa8_9_iik",
+  "version": 8
 }
