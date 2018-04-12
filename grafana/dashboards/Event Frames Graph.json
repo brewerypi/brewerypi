@@ -46,7 +46,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": null,
-  "iteration": 1523546122356,
+  "iteration": 1523546122387,
   "links": [],
   "panels": [
     {
@@ -65,7 +65,7 @@
       "height": "600",
       "id": 1,
       "legend": {
-        "alignAsTable": true,
+        "alignAsTable": false,
         "avg": false,
         "current": false,
         "max": false,
@@ -248,7 +248,7 @@
         "multi": false,
         "name": "eventFrame",
         "options": [],
-        "query": "SELECT EventFrame.EventFrameId AS __value, IF(EventFrame.Name IS NOT NULL AND EventFrame.Name <> '', EventFrame.Name, CONCAT(DATE_FORMAT(EventFrame.StartTimestamp, '%m/%d/%y %H:%i'), ' - ',IF(EventFrame.EndTimestamp IS NULL, '', DATE_FORMAT(EventFrame.EndTimestamp, '%m/%d/%y %H:%i')))) AS __text FROM EventFrame WHERE EventFrame.ElementId = $element AND EventFrame.EventFrameTemplateId = $eventFrameTemplate ORDER BY StartTimestamp DESC",
+        "query": "SELECT EventFrame.EventFrameId AS __value, IF(EventFrame.Name IS NOT NULL AND EventFrame.Name <> '', EventFrame.Name, CONCAT(DATE_FORMAT(EventFrame.StartTimestamp, '%m/%d/%y %H:%i'), ' - ',IF(EventFrame.EndTimestamp IS NULL, '', DATE_FORMAT(EventFrame.EndTimestamp, '%m/%d/%y %H:%i')))) AS __text FROM EventFrame WHERE EventFrame.ElementId = $element AND EventFrame.EventFrameTemplateId = $eventFrameTemplate AND $__timeFilter(EventFrame.StartTimestamp) ORDER BY StartTimestamp DESC",
         "refresh": 2,
         "regex": "",
         "sort": 0,
@@ -312,5 +312,5 @@
   "timezone": "",
   "title": "Event Frames Graph",
   "uid": "xHkP33iik",
-  "version": 3
+  "version": 4
 }
