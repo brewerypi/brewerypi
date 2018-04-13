@@ -1,0 +1,310 @@
+{
+  "__inputs": [
+    {
+      "name": "DS_BREWERYPI",
+      "label": "BreweryPi",
+      "description": "",
+      "type": "datasource",
+      "pluginId": "mysql",
+      "pluginName": "MySQL"
+    }
+  ],
+  "__requires": [
+    {
+      "type": "grafana",
+      "id": "grafana",
+      "name": "Grafana",
+      "version": "5.0.4"
+    },
+    {
+      "type": "panel",
+      "id": "graph",
+      "name": "Graph",
+      "version": "5.0.0"
+    },
+    {
+      "type": "datasource",
+      "id": "mysql",
+      "name": "MySQL",
+      "version": "5.0.0"
+    }
+  ],
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": "-- Grafana --",
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      },
+      {
+        "datasource": "${DS_BREWERYPI}",
+        "enable": true,
+        "hide": false,
+        "iconColor": "rgba(255, 96, 96, 1)",
+        "limit": 100,
+        "name": "Days",
+        "rawQuery": "SELECT UNIX_TIMESTAMP(DATE_SUB(CURRENT_TIMESTAMP(), INTERVAL 30 DAY)) + 1 AS time_sec,\n\t'Day 0' AS text,\n\t'Day 0' AS tags\nUNION\nSELECT UNIX_TIMESTAMP(DATE_SUB(CURRENT_TIMESTAMP(), INTERVAL 29 DAY)) AS time_sec,\n\t'Day 1' AS text,\n\t'Day 1' AS tags\nUNION\nSELECT UNIX_TIMESTAMP(DATE_SUB(CURRENT_TIMESTAMP(), INTERVAL 28 DAY)) AS time_sec,\n\t'Day 2' AS text,\n\t'Day 2' AS tags\nUNION\nSELECT UNIX_TIMESTAMP(DATE_SUB(CURRENT_TIMESTAMP(), INTERVAL 27 DAY)) AS time_sec,\n\t'Day 3' AS text,\n\t'Day 3' AS tags\nUNION\nSELECT UNIX_TIMESTAMP(DATE_SUB(CURRENT_TIMESTAMP(), INTERVAL 26 DAY)) AS time_sec,\n\t'Day 4' AS text,\n\t'Day 4' AS tags\nUNION\nSELECT UNIX_TIMESTAMP(DATE_SUB(CURRENT_TIMESTAMP(), INTERVAL 25 DAY)) AS time_sec,\n\t'Day 5' AS text,\n\t'Day 5' AS tags\nUNION\nSELECT UNIX_TIMESTAMP(DATE_SUB(CURRENT_TIMESTAMP(), INTERVAL 24 DAY)) AS time_sec,\n\t'Day 6' AS text,\n\t'Day 6' AS tags\nUNION\nSELECT UNIX_TIMESTAMP(DATE_SUB(CURRENT_TIMESTAMP(), INTERVAL 23 DAY)) AS time_sec,\n\t'Day 7' AS text,\n\t'Day 7' AS tags\nUNION\nSELECT UNIX_TIMESTAMP(DATE_SUB(CURRENT_TIMESTAMP(), INTERVAL 22 DAY)) AS time_sec,\n\t'Day 8' AS text,\n\t'Day 8' AS tags\nUNION\nSELECT UNIX_TIMESTAMP(DATE_SUB(CURRENT_TIMESTAMP(), INTERVAL 21 DAY)) AS time_sec,\n\t'Day 9' AS text,\n\t'Day 9' AS tags\nUNION\nSELECT UNIX_TIMESTAMP(DATE_SUB(CURRENT_TIMESTAMP(), INTERVAL 20 DAY)) AS time_sec,\n\t'Day 10' AS text,\n\t'Day 10' AS tags\nUNION\nSELECT UNIX_TIMESTAMP(DATE_SUB(CURRENT_TIMESTAMP(), INTERVAL 19 DAY)) AS time_sec,\n\t'Day 11' AS text,\n\t'Day 11' AS tags\nUNION\nSELECT UNIX_TIMESTAMP(DATE_SUB(CURRENT_TIMESTAMP(), INTERVAL 18 DAY)) AS time_sec,\n\t'Day 12' AS text,\n\t'Day 12' AS tags\nUNION\nSELECT UNIX_TIMESTAMP(DATE_SUB(CURRENT_TIMESTAMP(), INTERVAL 17 DAY)) AS time_sec,\n\t'Day 13' AS text,\n\t'Day 13' AS tags\nUNION\nSELECT UNIX_TIMESTAMP(DATE_SUB(CURRENT_TIMESTAMP(), INTERVAL 16 DAY)) AS time_sec,\n\t'Day 14' AS text,\n\t'Day 14' AS tags\nUNION\nSELECT UNIX_TIMESTAMP(DATE_SUB(CURRENT_TIMESTAMP(), INTERVAL 15 DAY)) AS time_sec,\n\t'Day 15' AS text,\n\t'Day 15' AS tags\nUNION\nSELECT UNIX_TIMESTAMP(DATE_SUB(CURRENT_TIMESTAMP(), INTERVAL 14 DAY)) AS time_sec,\n\t'Day 16' AS text,\n\t'Day 16' AS tags\nUNION\nSELECT UNIX_TIMESTAMP(DATE_SUB(CURRENT_TIMESTAMP(), INTERVAL 13 DAY)) AS time_sec,\n\t'Day 17' AS text,\n\t'Day 17' AS tags\nUNION\nSELECT UNIX_TIMESTAMP(DATE_SUB(CURRENT_TIMESTAMP(), INTERVAL 12 DAY)) AS time_sec,\n\t'Day 18' AS text,\n\t'Day 18' AS tags\nUNION\nSELECT UNIX_TIMESTAMP(DATE_SUB(CURRENT_TIMESTAMP(), INTERVAL 11 DAY)) AS time_sec,\n\t'Day 19' AS text,\n\t'Day 19' AS tags\nUNION\nSELECT UNIX_TIMESTAMP(DATE_SUB(CURRENT_TIMESTAMP(), INTERVAL 10 DAY)) AS time_sec,\n\t'Day 20' AS text,\n\t'Day 20' AS tags\nUNION\nSELECT UNIX_TIMESTAMP(DATE_SUB(CURRENT_TIMESTAMP(), INTERVAL 9 DAY)) AS time_sec,\n\t'Day 21' AS text,\n\t'Day 21' AS tags\nUNION\nSELECT UNIX_TIMESTAMP(DATE_SUB(CURRENT_TIMESTAMP(), INTERVAL 8 DAY)) AS time_sec,\n\t'Day 22' AS text,\n\t'Day 22' AS tags\nUNION\nSELECT UNIX_TIMESTAMP(DATE_SUB(CURRENT_TIMESTAMP(), INTERVAL 7 DAY)) AS time_sec,\n\t'Day 23' AS text,\n\t'Day 23' AS tags\nUNION\nSELECT UNIX_TIMESTAMP(DATE_SUB(CURRENT_TIMESTAMP(), INTERVAL 6 DAY)) AS time_sec,\n\t'Day 24' AS text,\n\t'Day 24' AS tags\nUNION\nSELECT UNIX_TIMESTAMP(DATE_SUB(CURRENT_TIMESTAMP(), INTERVAL 5 DAY)) AS time_sec,\n\t'Day 25' AS text,\n\t'Day 25' AS tags\nUNION\nSELECT UNIX_TIMESTAMP(DATE_SUB(CURRENT_TIMESTAMP(), INTERVAL 4 DAY)) AS time_sec,\n\t'Day 26' AS text,\n\t'Day 26' AS tags\nUNION\nSELECT UNIX_TIMESTAMP(DATE_SUB(CURRENT_TIMESTAMP(), INTERVAL 3 DAY)) AS time_sec,\n\t'Day 27' AS text,\n\t'Day 27' AS tags\nUNION\nSELECT UNIX_TIMESTAMP(DATE_SUB(CURRENT_TIMESTAMP(), INTERVAL 2 DAY)) AS time_sec,\n\t'Day 28' AS text,\n\t'Day 28' AS tags\nUNION\nSELECT UNIX_TIMESTAMP(DATE_SUB(CURRENT_TIMESTAMP(), INTERVAL 1 DAY)) AS time_sec,\n\t'Day 29' AS text,\n\t'Day 29' AS tags\nUNION\nSELECT UNIX_TIMESTAMP(CURRENT_TIMESTAMP()) AS time_sec,\n\t'Day 30' AS text,\n\t'Day 30' AS tags\n",
+        "showIn": 0,
+        "tags": [],
+        "type": "tags"
+      }
+    ]
+  },
+  "editable": true,
+  "gnetId": null,
+  "graphTooltip": 0,
+  "id": null,
+  "iteration": 1523641020466,
+  "links": [],
+  "panels": [
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "${DS_BREWERYPI}",
+      "fill": 0,
+      "gridPos": {
+        "h": 15,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "height": "600",
+      "hideTimeOverride": true,
+      "id": 1,
+      "legend": {
+        "alignAsTable": false,
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "rightSide": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [],
+      "nullPointMode": "null",
+      "percentage": false,
+      "pointradius": 1,
+      "points": true,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "alias": "",
+          "format": "time_series",
+          "hide": false,
+          "rawSql": "SELECT UNIX_TIMESTAMP(DATE_SUB(CURRENT_TIMESTAMP(), INTERVAL 30 DAY)) + UNIX_TIMESTAMP(TagValue.Timestamp) - UNIX_TIMESTAMP(EventFrame.StartTimestamp) AS time_sec,\n\tTagValue.Value AS value,\n\tCONCAT(CAST(EventFrame.EventFrameId AS CHAR(10)), '_', AttributeTemplate.Name) AS metric \nFROM ElementAttribute\n\tINNER JOIN Element ON ElementAttribute.ElementId = Element.ElementId\n\tINNER JOIN EventFrame ON Element.ElementId = EventFrame.ElementId\n\tINNER JOIN AttributeTemplate ON ElementAttribute.AttributeTemplateId = AttributeTemplate.AttributeTemplateId\n\tINNER JOIN Tag ON ElementAttribute.TagId = Tag.TagId\n\tINNER JOIN TagValue ON Tag.TagId = TagValue.TagId\nWHERE (EventFrame.EventFrameId IN ($eventFrames)) AND \n\t(AttributeTemplate.AttributeTemplateId IN ($attributeTemplates)) AND\n\tIF (EventFrame.EndTimestamp IS NULL, (TagValue.Timestamp >= EventFrame.StartTimestamp), (TagValue.Timestamp >= EventFrame.StartTimestamp) AND \n\t(TagValue.Timestamp <= EventFrame.EndTimestamp))\n",
+          "refId": "A"
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": "30d",
+      "timeShift": null,
+      "title": "Event Frames Overlay",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": false,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ]
+    }
+  ],
+  "refresh": false,
+  "schemaVersion": 16,
+  "style": "dark",
+  "tags": [],
+  "templating": {
+    "list": [
+      {
+        "allValue": null,
+        "current": {},
+        "datasource": "${DS_BREWERYPI}",
+        "hide": 0,
+        "includeAll": false,
+        "label": "Enterprise:",
+        "multi": false,
+        "name": "enterprise",
+        "options": [],
+        "query": "SELECT Enterprise.EnterpriseId AS __value, Enterprise.Name AS __text FROM Enterprise",
+        "refresh": 1,
+        "regex": "",
+        "sort": 1,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {},
+        "datasource": "${DS_BREWERYPI}",
+        "hide": 0,
+        "includeAll": false,
+        "label": "Site:",
+        "multi": false,
+        "name": "site",
+        "options": [],
+        "query": "SELECT Site.SiteId AS __value, Site.Name AS __text FROM Site WHERE Site.EnterpriseId = $enterprise",
+        "refresh": 1,
+        "regex": "",
+        "sort": 1,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {},
+        "datasource": "${DS_BREWERYPI}",
+        "hide": 0,
+        "includeAll": false,
+        "label": "Element Template:",
+        "multi": false,
+        "name": "elementTemplate",
+        "options": [],
+        "query": "SELECT ElementTemplate.ElementTemplateId AS __value, ElementTemplate.Name AS __text FROM ElementTemplate WHERE ElementTemplate.SiteId = $site",
+        "refresh": 1,
+        "regex": "",
+        "sort": 1,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {},
+        "datasource": "${DS_BREWERYPI}",
+        "hide": 0,
+        "includeAll": false,
+        "label": "Event Frame Template:",
+        "multi": false,
+        "name": "eventFrameTemplate",
+        "options": [],
+        "query": "SELECT EventFrameTemplate.EventFrameTemplateId AS __value, EventFrameTemplate.Name AS __text FROM EventFrameTemplate WHERE EventFrameTemplate.ElementTemplateId = $elementTemplate",
+        "refresh": 1,
+        "regex": "",
+        "sort": 1,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {},
+        "datasource": "${DS_BREWERYPI}",
+        "hide": 0,
+        "includeAll": false,
+        "label": "Event Frames:",
+        "multi": true,
+        "name": "eventFrames",
+        "options": [],
+        "query": "SELECT EventFrame.EventFrameId AS __value, IF(EventFrame.Name IS NOT NULL AND EventFrame.Name <> '', EventFrame.Name, CONCAT(DATE_FORMAT(EventFrame.StartTimestamp, '%m/%d/%y %H:%i'), ' - ', IF(EventFrame.EndTimestamp IS NULL, '', DATE_FORMAT(EventFrame.EndTimestamp, '%m/%d/%y %H:%i')))) AS __text FROM EventFrame WHERE EventFrame.EventFrameTemplateId = $eventFrameTemplate AND $__timeFilter(EventFrame.StartTimestamp) ORDER BY StartTimestamp DESC",
+        "refresh": 2,
+        "regex": "",
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {},
+        "datasource": "${DS_BREWERYPI}",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Attributes:",
+        "multi": true,
+        "name": "attributeTemplates",
+        "options": [],
+        "query": "SELECT AttributeTemplate.AttributeTemplateId AS __value, AttributeTemplate.Name AS __text FROM AttributeTemplate WHERE AttributeTemplate.ElementTemplateId = $elementTemplate",
+        "refresh": 1,
+        "regex": "",
+        "sort": 1,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      }
+    ]
+  },
+  "time": {
+    "from": "now-90d",
+    "to": "now"
+  },
+  "timepicker": {
+    "refresh_intervals": [
+      "5s",
+      "10s",
+      "30s",
+      "1m",
+      "5m",
+      "15m",
+      "30m",
+      "1h",
+      "2h",
+      "1d"
+    ],
+    "time_options": [
+      "5m",
+      "15m",
+      "1h",
+      "6h",
+      "12h",
+      "24h",
+      "2d",
+      "7d",
+      "30d"
+    ]
+  },
+  "timezone": "",
+  "title": "Event Frames Overlay",
+  "uid": "x_wsAmZmz",
+  "version": 6
+}
