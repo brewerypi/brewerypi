@@ -54,14 +54,17 @@ def create_app(configClass = Config):
 	from . main import main as mainBlueprint
 	app.register_blueprint(mainBlueprint)
 
+	from . raspberryPiUtilities import raspberryPiUtilities as raspberryPiUtilitiesBlueprint
+	app.register_blueprint(raspberryPiUtilitiesBlueprint)
+
+	from . sites import sites as sitesBlueprint
+	app.register_blueprint(sitesBlueprint)
+
 	from . tags import tags as tagsBlueprint
 	app.register_blueprint(tagsBlueprint)
 
 	from . tagValues import tagValues as tagValuesBlueprint
 	app.register_blueprint(tagValuesBlueprint)
-
-	from . sites import sites as sitesBlueprint
-	app.register_blueprint(sitesBlueprint)
 
 	from . unitOfMeasurements import unitOfMeasurements as unitOfMeasurementsBlueprint
 	app.register_blueprint(unitOfMeasurementsBlueprint)
