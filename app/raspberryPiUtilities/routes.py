@@ -24,7 +24,7 @@ def reboot():
 	flash("Rebooting... Please wait. This will take approximately one minute.")
 	command = "sleep 5 && sudo shutdown -r now"
 	subprocess.Popen(command, shell = True)
-	return redirect(url_for("home.homepage"))
+	return redirect(url_for("main.index"))
 
 @raspberryPiUtilities.route("/shutdown", methods = ["GET"])
 @login_required
@@ -34,4 +34,4 @@ def shutdown():
 		"safe to unplug your Raspberry Pi."))
 	command = "sleep 5 && sudo shutdown -h now"
 	subprocess.Popen(command, shell = True)
-	return redirect(url_for("home.homepage"))
+	return redirect(url_for("main.index"))
