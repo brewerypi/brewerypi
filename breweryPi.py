@@ -1,4 +1,6 @@
+from flask import current_app
 from flask_migrate import Migrate, upgrade
+from sqlalchemy import create_engine
 from app import create_app, db
 from app . models import Area, AttributeTemplate, Element, ElementAttribute, ElementTemplate, Enterprise, EventFrame, EventFrameNote, EventFrameTemplate, \
 	Lookup, LookupValue, Note, Role, Site, Tag, TagValue, TagValueNote, UnitOfMeasurement, User
@@ -15,9 +17,12 @@ def make_shell_context():
 
 @app.cli.command()
 def deploy():
-	print ("Running database migrate.")
+	print ("Creating database {} if it does not exist...".format(current_app.config["MYSQL_DATABASE"]))
+	engine = create_engine(current_app.config["SQLALCHEMY_SERVER_URI"])
+	engine.execute("CREATE DATABASE IF NOT EXISTS {}".format(current_app.config["MYSQL_DATABASE"]))
+	print ("Running database upgrade...")
 	upgrade()
-	print ("Inserting default roles if needed.")
+	print ("Inserting default roles if needed...")
 	Role.insertRoles()
-	print ("Inserting default administrator if needed.")
+	print ("Inserting default administrator if needed...")
 	User.insertDefaultAdministrator()
