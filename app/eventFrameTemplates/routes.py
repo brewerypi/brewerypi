@@ -137,7 +137,10 @@ def editEventFrameTemplate(eventFrameTemplateId):
 def selectEventFrameTemplate(className = None, id = None):
 	if className == None:
 		parent = Site.query.join(Enterprise).order_by(Enterprise.Name, Site.Name).first()
-		children = ElementTemplate.query.join(Site).filter_by(SiteId = parent.id()).order_by(ElementTemplate.Name)
+		if parent:
+			children = ElementTemplate.query.join(Site).filter_by(SiteId = parent.id()).order_by(ElementTemplate.Name)
+		else:
+			children = None
 		className = "ElementTemplate"
 	elif className == "Root":
 		parent = None

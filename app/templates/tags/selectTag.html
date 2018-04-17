@@ -9,7 +9,7 @@ Event Frame Templates
 {% block page_content %}
 <div>
     <ol class="breadcrumb">
-        {% if className == "Tag" %}
+        {% if className == "Tag" and parent %}
             <li><a href = "{{ url_for("tags.selectTag", className = "Root") }}">..</a></li>
             <li><a href = "{{ url_for("tags.selectTag", className = parent.Site.Enterprise.__class__.__name__,
                 id = parent.Site.Enterprise.id()) }}">{{ parent.Site.Enterprise.Name }}</a></li>
@@ -50,19 +50,21 @@ Event Frame Templates
             </tr>
         </thead>
         <tbody>
-            {% for child in children %}
-                <tr>
-                    {% if className == "Tag" %}
-                        <td><a class = "btn btn-default" title = "Tag Values" href = "{{ url_for("tagValues.listTagValues",
-                            tagId = child.id()) }}"><span class="glyphicon glyphicon-list"></span></a></td>
-                    {% else %}
-                        <td><a class = "btn btn-default" title = "Children" href = "{{ url_for("tags.selectTag", className = child.__class__.__name__,
-                            id = child.id()) }}"><span class="glyphicon glyphicon-list"></span></a></td>
-                    {% endif %}
-                    <td>{{ child.Name }}</td>
-                    <td>{{ child.Description }}</td>
-                </tr>
-            {% endfor %}
+            {% if children %}
+                {% for child in children %}
+                    <tr>
+                        {% if className == "Tag" %}
+                            <td><a class = "btn btn-default" title = "Tag Values" href = "{{ url_for("tagValues.listTagValues",
+                                tagId = child.id()) }}"><span class="glyphicon glyphicon-list"></span></a></td>
+                        {% else %}
+                            <td><a class = "btn btn-default" title = "Children" href = "{{ url_for("tags.selectTag", className = child.__class__.__name__,
+                                id = child.id()) }}"><span class="glyphicon glyphicon-list"></span></a></td>
+                        {% endif %}
+                        <td>{{ child.Name }}</td>
+                        <td>{{ child.Description }}</td>
+                    </tr>
+                {% endfor %}
+            {% endif %}
         </tbody>
     </table>
 </div>

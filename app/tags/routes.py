@@ -237,7 +237,10 @@ def importTags():
 def selectTag(className = None, id = None):
 	if className == None:
 		parent = Area.query.join(Site, Enterprise).order_by(Enterprise.Name, Site.Name, Area.Name).first()
-		children = Tag.query.filter_by(AreaId = parent.id())
+		if parent:
+			children = Tag.query.filter_by(AreaId = parent.id())
+		else:
+			children = None
 		className = "Tag"
 	elif className == "Area":
 		parent = Area.query.get_or_404(id)
