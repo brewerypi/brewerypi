@@ -19,7 +19,8 @@ def make_shell_context():
 def deploy():
 	print ("Creating database {} if it does not exist...".format(current_app.config["MYSQL_DATABASE"]))
 	engine = create_engine(current_app.config["SQLALCHEMY_SERVER_URI"])
-	engine.execute("CREATE DATABASE IF NOT EXISTS {}".format(current_app.config["MYSQL_DATABASE"]))
+	connection = engine.connect()
+	result = connection.execute("CREATE DATABASE IF NOT EXISTS {}".format(current_app.config["MYSQL_DATABASE"]))
 	print ("Running database upgrade...")
 	upgrade()
 	print ("Inserting default roles if needed...")
