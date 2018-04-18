@@ -58,7 +58,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": null,
-  "iteration": 1524028442380,
+  "iteration": 1524029995352,
   "links": [],
   "panels": [
     {
@@ -106,7 +106,7 @@
           "alias": "",
           "format": "time_series",
           "hide": false,
-          "rawSql": "SELECT UNIX_TIMESTAMP(DATE_SUB(CURRENT_TIMESTAMP(), INTERVAL 30 DAY)) + UNIX_TIMESTAMP(TagValue.Timestamp) - UNIX_TIMESTAMP(EventFrame.StartTimestamp) AS time_sec,\n\tTagValue.Value AS value,\n\tCONCAT(CAST(EventFrame.EventFrameId AS CHAR(10)), '_', AttributeTemplate.Name) AS metric \nFROM ElementAttribute\n\tINNER JOIN Element ON ElementAttribute.ElementId = Element.ElementId\n\tINNER JOIN EventFrame ON Element.ElementId = EventFrame.ElementId\n\tINNER JOIN AttributeTemplate ON ElementAttribute.AttributeTemplateId = AttributeTemplate.AttributeTemplateId\n\tINNER JOIN Tag ON ElementAttribute.TagId = Tag.TagId\n\tINNER JOIN TagValue ON Tag.TagId = TagValue.TagId\nWHERE (EventFrame.EventFrameId IN ($eventFrames)) AND \n\t(AttributeTemplate.AttributeTemplateId IN ($attributeTemplates)) AND\n\tIF (EventFrame.EndTimestamp IS NULL, (TagValue.Timestamp >= EventFrame.StartTimestamp), (TagValue.Timestamp >= EventFrame.StartTimestamp) AND \n\t(TagValue.Timestamp <= EventFrame.EndTimestamp))\n",
+          "rawSql": "SELECT UNIX_TIMESTAMP(DATE_SUB(CURRENT_TIMESTAMP(), INTERVAL 30 DAY)) + UNIX_TIMESTAMP(TagValue.Timestamp) - UNIX_TIMESTAMP(EventFrame.StartTimestamp) AS time_sec,\n\tTagValue.Value AS value,\n\tCONCAT(IF(EventFrame.Name IS NOT NULL AND EventFrame.Name <> '', EventFrame.Name, CONCAT(DATE_FORMAT(EventFrame.StartTimestamp, '%m/%d/%y %H:%i'), ' - ',IF(EventFrame.EndTimestamp IS NULL, '', DATE_FORMAT(EventFrame.EndTimestamp, '%m/%d/%y %H:%i')))), '_', AttributeTemplate.Name) AS metric \nFROM ElementAttribute\n\tINNER JOIN Element ON ElementAttribute.ElementId = Element.ElementId\n\tINNER JOIN EventFrame ON Element.ElementId = EventFrame.ElementId\n\tINNER JOIN AttributeTemplate ON ElementAttribute.AttributeTemplateId = AttributeTemplate.AttributeTemplateId\n\tINNER JOIN Tag ON ElementAttribute.TagId = Tag.TagId\n\tINNER JOIN TagValue ON Tag.TagId = TagValue.TagId\nWHERE (EventFrame.EventFrameId IN ($eventFrames)) AND \n\t(AttributeTemplate.AttributeTemplateId IN ($attributeTemplates)) AND\n\tIF (EventFrame.EndTimestamp IS NULL, (TagValue.Timestamp >= EventFrame.StartTimestamp), (TagValue.Timestamp >= EventFrame.StartTimestamp) AND \n\t(TagValue.Timestamp <= EventFrame.EndTimestamp))\n",
           "refId": "A"
         }
       ],
@@ -307,5 +307,5 @@
   "timezone": "",
   "title": "Event Frames Overlay",
   "uid": "x_wsAmZmz",
-  "version": 8
+  "version": 10
 }
