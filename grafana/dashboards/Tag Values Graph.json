@@ -46,7 +46,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": null,
-  "iteration": 1523552656601,
+  "iteration": 1524028501749,
   "links": [],
   "panels": [
     {
@@ -55,6 +55,7 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": "${DS_BREWERYPI}",
+      "decimals": 1,
       "fill": 0,
       "gridPos": {
         "h": 15,
@@ -249,6 +250,6 @@
   },
   "timezone": "",
   "title": "Tag Values Graph",
-  "uid": "RNWgMRWmz",
-  "version": 2
+  "uid": "6JvEq3mmz",
+  "version": 3
 }

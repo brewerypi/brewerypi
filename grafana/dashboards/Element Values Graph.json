@@ -72,7 +72,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": null,
-  "iteration": 1523552610235,
+  "iteration": 1524028256048,
   "links": [],
   "panels": [
     {
@@ -81,6 +81,7 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": "${DS_BREWERYPI}",
+      "decimals": 1,
       "fill": 0,
       "gridPos": {
         "h": 15,
@@ -296,6 +297,6 @@
   },
   "timezone": "",
   "title": "Element Values Graph",
-  "uid": "3oRsAXmmz",
+  "uid": "SyoLqqmik",
   "version": 3
 }

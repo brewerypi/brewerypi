@@ -58,7 +58,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": null,
-  "iteration": 1523641020466,
+  "iteration": 1524028442380,
   "links": [],
   "panels": [
     {
@@ -67,6 +67,7 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": "${DS_BREWERYPI}",
+      "decimals": 1,
       "fill": 0,
       "gridPos": {
         "h": 15,
@@ -306,5 +307,5 @@
   "timezone": "",
   "title": "Event Frames Overlay",
   "uid": "x_wsAmZmz",
-  "version": 6
+  "version": 8
 }
