@@ -71,6 +71,9 @@ class Element(db.Model):
 	def __repr__(self):
 		return "<Element: {}>".format(self.Name)
 
+	def id(self):
+		return self.ElementId
+
 class ElementAttribute(db.Model):
 	__tablename__ = "ElementAttribute"
 	__table_args__ = \

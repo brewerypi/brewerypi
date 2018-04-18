@@ -143,35 +143,28 @@ def editElement(elementId):
 @login_required
 @permissionRequired(Permission.DATA_ENTRY)
 def selectElement(className = None, id = None):
-	elements = None
-	elementTemplates = None
-	enterprises = None
-	site = None
-	sites = None
-
-	# Default case.
 	if className == None:
-		site = Site.query.join(Enterprise).order_by(Enterprise.Name, Site.Name).first()
-		if site:
-			className = site.__class__.__name__
-	# Top level case.
-	elif className == "root":
-		enterprises = Enterprise.query.all()
+		parent = Site.query.join(Enterprise).order_by(Enterprise.Name).first()
+		if parent:
+			children = ElementTemplate.query.filter_by(SiteId = parent.id())
+		else:
+			children = None
+		className = "ElementTemplate"
+	elif className == "Root":
+		parent = None
+		children = Enterprise.query.order_by(Enterprise.Name)
+		className = "Enterprise"
 	elif className == "Enterprise":
-		sites = Site.query.filter_by(EnterpriseId = id)
-		if sites:
-			className = sites[0].__class__.__name__
+		parent = Enterprise.query.get_or_404(id)
+		children = Site.query.filter_by(EnterpriseId = id)
+		className = "Site"
 	elif className == "Site":
-		elementTemplates = ElementTemplate.query.filter_by(SiteId = id)
-		if elementTemplates:
-			className = elementTemplates[0].__class__.__name__
+		parent = Site.query.get_or_404(id)
+		children = ElementTemplate.query.filter_by(SiteId = id)
+		className = "ElementTemplate"
 	elif className == "ElementTemplate":
-		elements = Element.query.filter_by(ElementTemplateId = id)
-		if elements:
-			className = elements[0].__class__.__name__
-	elif className == "Element":
-		return redirect(url_for("elements.dashboard", elementId = id))
+		parent = ElementTemplate.query.get_or_404(id)
+		children = Element.query.filter_by(ElementTemplateId = id)
+		className = "Element"
 
-	# Present navigation for elements.
-	return render_template("elements/selectElement.html", className = className, elements = elements, elementTemplates = elementTemplates,
-		enterprises = enterprises, site = site, sites = sites)
+	return render_template("elements/selectElement.html", children = children, className = className, parent = parent)

@@ -16,8 +16,7 @@ Event Frames
             id = element.ElementTemplate.Site.SiteId) }}">{{ element.ElementTemplate.Site.Name }}</a></li>
         <li><a href = "{{ url_for("elements.selectElement", className = element.ElementTemplate.__class__.__name__,
             id = element.ElementTemplate.ElementTemplateId) }}">{{ element.ElementTemplate.Name }}</a></li>
-        <li><a href = "{{ url_for("elements.selectElement", className = element.__class__.__name__,
-            id = element.ElementId) }}">{{ element.Name }}</a></li>
+        <li><a href = "{{ url_for("elements.dashboard", elementId = element.ElementId) }}">{{ element.Name }}</a></li>
         {% if parentEventFrame %}
             <!-- Parent. -->
             {% if parentEventFrame.ParentEventFrameId %}

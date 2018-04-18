@@ -242,21 +242,21 @@ def selectTag(className = None, id = None):
 		else:
 			children = None
 		className = "Tag"
-	elif className == "Area":
-		parent = Area.query.get_or_404(id)
-		children = Tag.query.filter_by(AreaId = id)
-		className = "Tag"
-	elif className == "Site":
-		parent = Site.query.get_or_404(id)
-		children = Area.query.filter_by(SiteId = id)
-		className = "Area"
-	elif className == "Enterprise":
-		parent = Enterprise.query.get_or_404(id)
-		children = Site.query.filter_by(EnterpriseId = id)
-		className = "Site"
 	elif className == "Root":
 		parent = None
 		children = Enterprise.query.order_by(Enterprise.Name)
 		className = "Enterprise"
+	elif className == "Enterprise":
+		parent = Enterprise.query.get_or_404(id)
+		children = Site.query.filter_by(EnterpriseId = id)
+		className = "Site"
+	elif className == "Site":
+		parent = Site.query.get_or_404(id)
+		children = Area.query.filter_by(SiteId = id)
+		className = "Area"
+	elif className == "Area":
+		parent = Area.query.get_or_404(id)
+		children = Tag.query.filter_by(AreaId = id)
+		className = "Tag"
 
 	return render_template("tags/selectTag.html", children = children, className = className, parent = parent)
