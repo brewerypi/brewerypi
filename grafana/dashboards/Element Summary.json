@@ -46,7 +46,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": null,
-  "iteration": 1523544110030,
+  "iteration": 1524156481691,
   "links": [],
   "panels": [
     {
@@ -257,6 +257,7 @@
     "to": "now"
   },
   "timepicker": {
+    "hidden": true,
     "refresh_intervals": [
       "5s",
       "10s",
@@ -284,5 +285,5 @@
   "timezone": "",
   "title": "Element Summary",
   "uid": "U6ZY33miz",
-  "version": 4
+  "version": 3
 }
