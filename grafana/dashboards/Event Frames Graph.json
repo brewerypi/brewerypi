@@ -39,6 +39,18 @@
         "iconColor": "rgba(0, 211, 255, 1)",
         "name": "Annotations & Alerts",
         "type": "dashboard"
+      },
+      {
+        "datasource": "${DS_BREWERYPI}",
+        "enable": true,
+        "hide": false,
+        "iconColor": "rgba(255, 96, 96, 1)",
+        "limit": 100,
+        "name": "Notes",
+        "rawQuery": "SELECT UNIX_TIMESTAMP(EventFrame.StartTimestamp) as time_sec,\n\tGROUP_CONCAT(DATE_FORMAT(Note.Timestamp, '%m/%d/%y %H:%i'), ' - ', Note.Note ORDER BY Note.Timestamp SEPARATOR '<br>') AS text,\n\tEventFrameTemplate.Name AS tags\nFROM Note\n\tINNER JOIN EventFrameNote ON Note.NoteId = EventFrameNote.NoteId\n    INNER JOIN EventFrame ON EventFrameNote.EventFrameId = EventFrame.EventFrameId\n    INNER JOIN EventFrameTemplate ON EventFrame.EventFrameTemplateId = EventFrameTemplate.EventFrameTemplateId\nWHERE EventFrame.EventFrameId IN ($eventFrame)\n",
+        "showIn": 0,
+        "tags": [],
+        "type": "tags"
       }
     ]
   },
@@ -46,7 +58,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": null,
-  "iteration": 1524028360078,
+  "iteration": 1524241775552,
   "links": [],
   "panels": [
     {
@@ -313,5 +325,5 @@
   "timezone": "",
   "title": "Event Frames Graph",
   "uid": "xHkP33iik",
-  "version": 7
+  "version": 3
 }
