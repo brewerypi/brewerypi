@@ -46,7 +46,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": null,
-  "iteration": 1524156481691,
+  "iteration": 1524416689464,
   "links": [],
   "panels": [
     {
@@ -220,7 +220,7 @@
         "multi": true,
         "name": "attributeTemplates",
         "options": [],
-        "query": "SELECT AttributeTemplate.AttributeTemplateId AS __value, CONCAT(AttributeTemplate.Name, ' (', ElementTemplate.Name, ')') AS __text FROM AttributeTemplate INNER JOIN ElementTemplate ON AttributeTemplate.ElementTemplateId = ElementTemplate.ElementTemplateId WHERE AttributeTemplate.ElementTemplateId IN($elementTemplates) ORDER BY ElementTemplate.Name, AttributeTemplate.Name",
+        "query": "SELECT DISTINCT AttributeTemplate.Name FROM AttributeTemplate INNER JOIN ElementTemplate ON AttributeTemplate.ElementTemplateId = ElementTemplate.ElementTemplateId WHERE AttributeTemplate.ElementTemplateId IN($elementTemplates) ORDER BY AttributeTemplate.Name",
         "refresh": 1,
         "regex": "",
         "sort": 0,
@@ -285,5 +285,5 @@
   "timezone": "",
   "title": "Element Summary",
   "uid": "U6ZY33miz",
-  "version": 3
+  "version": 7
 }
