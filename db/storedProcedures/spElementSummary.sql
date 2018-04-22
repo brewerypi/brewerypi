@@ -1,4 +1,5 @@
 DELIMITER $$
+DROP PROCEDURE IF EXISTS spElementSummary;
 CREATE DEFINER=`pi`@`%` PROCEDURE `spElementSummary`(IN attributeTemplateIds TEXT, IN elementIds TEXT)
 BEGIN
 	SET @@group_concat_max_len = 5000;
