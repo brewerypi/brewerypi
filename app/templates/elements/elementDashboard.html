@@ -70,7 +70,8 @@
                         <span class="glyphicon glyphicon-plus"></span></a></td>
                     {% if firstEventFrame %}
                         <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Notes"
-                            href = "{{ url_for("eventFrames.addEventFrameNote", eventFrameId = firstEventFrame.EventFrameId) }}">
+                            href = "{{ url_for("eventFrames.listEventFrameNotes", elementId = element.ElementId, 
+                            eventFrameTemplateId = firstEventFrame.EventFrameTemplate.EventFrameTemplateId, eventFrameId = firstEventFrame.EventFrameId) }}">
                             <span class="glyphicon glyphicon-comment"></a></td>
                         <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Edit"
                             href = "{{ url_for("eventFrames.editEventFrame", eventFrameId = firstEventFrame.EventFrameId) }}">
@@ -84,32 +85,6 @@
                         <td></td>
                     {% endif %}
                 </tr>
-                {% if firstEventFrame %}
-                    {% if firstEventFrame.EventFrameNotes %}
-                        <tr>
-                            <td class = "invisible"></td>
-                            <td class = "invisible"></td>
-                            <th colspan="4">Note</th>
-                            <th>Timestamp</th>
-                            <td></td>
-                            <td></td>
-                        </tr>
-                        {% for eventFrameNote in firstEventFrame.EventFrameNotes | sort (attribute = "Note.Timestamp", reverse = True) %}
-                            <tr>
-                                <td class = "invisible"></td>
-                                <td class = "invisible"></td>
-                                <td colspan="4">{{ eventFrameNote.Note.Note }}</td>
-                                <td>{{ eventFrameNote.Note.Timestamp }}</td>
-                                <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Edit"
-                                    href = "{{ url_for("eventFrames.editEventFrameNote", noteId = eventFrameNote.Note.NoteId) }}">
-                                    <span class="glyphicon glyphicon-edit"></span></a></td>
-                                <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Delete"
-                                    href = "{{ url_for("eventFrames.deleteEventFrameNote", eventFrameId = firstEventFrame.EventFrameId, 
-                                    noteId = eventFrameNote.Note.NoteId) }}"><span class="glyphicon glyphicon-trash"></a></td>
-                            </tr>
-                        {% endfor %}
-                    {% endif %}
-                {% endif %}
             {% endfor %}
         </tbody>
     </table>        
@@ -216,6 +191,7 @@
                 null,
                 { "orderable": false }, // Stop event frame button.
                 { "orderable": false }, // Add event frame button.
+                { "orderable": false }, // List event frame notes button.
                 { "orderable": false }, // Edit event frame button.
                 { "orderable": false }  // Delete event frame button.
             ],
