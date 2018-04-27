@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% import "_macros.html" as macros %}
+
+{% block title %}
+Event Frame Notes
+{% endblock %}
+
+{% block page_content %}
+<div>
+    <ol class="breadcrumb">
+        <li><a href = "{{ url_for("elements.selectElement", className = "root", id = None) }}">..</a></li>
+        <li><a href = "{{ url_for("elements.selectElement", className = element.ElementTemplate.Site.Enterprise.__class__.__name__,
+            id = element.ElementTemplate.Site.Enterprise.EnterpriseId) }}">{{ element.ElementTemplate.Site.Enterprise.Name }}</a></li>
+        <li><a href = "{{ url_for("elements.selectElement", className = element.ElementTemplate.Site.__class__.__name__,
+            id = element.ElementTemplate.Site.SiteId) }}">{{ element.ElementTemplate.Site.Name }}</a></li>
+        <li><a href = "{{ url_for("elements.selectElement", className = element.ElementTemplate.__class__.__name__,
+            id = element.ElementTemplate.ElementTemplateId) }}">{{ element.ElementTemplate.Name }}</a></li>
+        <li><a href = "{{ url_for("elements.dashboard", elementId = element.ElementId) }}">{{ element.Name }}</a></li>
+        {% if parentEventFrame %}
+            <!-- Parent. -->
+            {% if parentEventFrame.ParentEventFrameId %}
+                <!-- Parent with ancestors. -->
+                {% for ancestor in parentEventFrame.ancestors([]) %}
+                    {% if ancestor.ParentEventFrameId %}
+                        <!-- Ancestor with parent. -->
+                        <li class = "active">{{ ancestor.EventFrameTemplate.Name }}</li>                
+                    {% else %}
+                        <!-- Ancestor with no parent. -->
+                        <!-- Top level event frame. -->
+                        <li><a href = "{{ url_for("eventFrames.listEventFrames", elementId = element.ElementId,
+                            eventFrameTemplateId = ancestor.EventFrameTemplateId) }}">{{ ancestor.EventFrameTemplate.Name }}</a></li>
+                    {% endif %}
+                    <li><a href = "{{ url_for("eventFrames.listEventFrames", parentEventFrameId = ancestor.EventFrameId) }}">
+                        {{ ancestor.friendlyName() }}</a></li>
+                {% endfor %}
+                <li class = "active">{{ parentEventFrame.EventFrameTemplate.Name }}</li>                
+                <li class = "active">{{ parentEventFrame.friendlyName() }}</li>
+            {% else %}
+                <!-- Parent with no ancestors. -->
+                <!-- Top level event frame. -->
+                <li><a href = "{{ url_for("eventFrames.listEventFrames", elementId = element.ElementId,
+                    eventFrameTemplateId = eventFrameTemplate.EventFrameTemplateId) }}">{{ eventFrameTemplate.Name }}</a></li>
+                <li class = "active">{{ parentEventFrame.friendlyName() }}</li>                
+            {% endif %}
+        {% else %}
+            <!-- No parent. -->
+            <li class = "active">{{ eventFrameTemplate.Name }}</li>
+        {% endif %}
+    </ol>
+    <h1>Event Frame Notes</h1>
+    <a class = "btn btn-default" title = "Add" href = "{{ url_for("eventFrames.addEventFrameNote", eventFrameId = eventFrame.EventFrameId) }}" role = "button">
+        <span class="glyphicon glyphicon-plus"></span></a>
+    <br><br>
+    <table id = "eventFrameNotesTable" class = "table">
+        <thead>
+            <tr>
+                <th>Note</th>
+                <th>Timestamp</th>
+                <th></th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for eventFrameNote in eventFrameNotes %}
+                <tr>
+                    <td>{{ eventFrameNote.Note.Note }}</td>
+                    <td>{{ eventFrameNote.Note.Timestamp }}</td>
+                    <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("eventFrames.editEventFrameNote", 
+                        noteId = eventFrameNote.Note.NoteId) }}"><span class="glyphicon glyphicon-edit"></span></a></td>
+                    <td><a class = "btn btn-default" title = "Delete" href = "{{ url_for("eventFrames.deleteEventFrameNote", 
+                        eventFrameId = eventFrame.EventFrameId, noteId = eventFrameNote.Note.NoteId) }}"><span class="glyphicon glyphicon-trash"></a></td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <link rel = "stylesheet" type = "text/css" href = {{ url_for("static", filename = "css/datatables.min.css") }}/> 
+    <script type = "text/javascript" src = {{ url_for("static", filename = "js/datatables.min.js") }}></script>
+    <script>
+        $('#eventFrameNotesTable').DataTable( {
+            "order": [[1, 'desc']], // Timestamp.
+            "columns": [
+                null,
+                null,
+                { "orderable": false }, // Edit event frame note button.
+                { "orderable": false }  // Delete event frame note button.
+            ],
+            "stateSave": true,
+            "stateDuration": 0,
+            "pageLength": 25
+        });
+    </script>
+{% endblock %}

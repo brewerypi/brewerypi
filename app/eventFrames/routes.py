@@ -143,8 +143,19 @@ def startEventFrame(elementId, eventFrameTemplateId):
 		"alert alert-success")
 	return redirect(request.referrer)
 
-@eventFrames.route("/eventFrames/addEventFrameNote/<int:eventFrameId>", methods = ["GET", "POST"])
-# @login_required
+@eventFrames.route("/eventFrameNotes/<int:elementId>/<int:eventFrameTemplateId>/<int:eventFrameId>", methods = ["GET", "POST"])
+@login_required
+@permissionRequired(Permission.DATA_ENTRY)
+def listEventFrameNotes(elementId, eventFrameTemplateId, eventFrameId):
+	element = Element.query.get_or_404(elementId)
+	eventFrameTemplate = EventFrameTemplate.query.get_or_404(eventFrameTemplateId)
+	eventFrame = EventFrame.query.get_or_404(eventFrameId)
+	eventFrameNotes = EventFrameNote.query.filter_by(EventFrameId = eventFrameId)
+	return render_template("eventFrames/eventFrameNotes.html", element = element, eventFrameTemplate = eventFrameTemplate, eventFrame = eventFrame, eventFrameNotes = eventFrameNotes)
+
+@eventFrames.route("/eventFrameNotes/addEventFrameNote/<int:eventFrameId>", methods = ["GET", "POST"])
+@login_required
+@permissionRequired(Permission.DATA_ENTRY)
 def addEventFrameNote(eventFrameId):
 	# check_admin()
 	operation = "Add"
@@ -167,7 +178,8 @@ def addEventFrameNote(eventFrameId):
 	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
 
 @eventFrames.route("/eventFrames/editEventFrameNote/<int:noteId>", methods = ["GET", "POST"])
-# @login_required
+@login_required
+@permissionRequired(Permission.DATA_ENTRY)
 def editEventFrameNote(noteId):
 	# check_admin()
 	operation = "Edit"
@@ -190,7 +202,8 @@ def editEventFrameNote(noteId):
 	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
 
 @eventFrames.route("/eventFrames/deleteEventFrameNote/<int:eventFrameId>/<int:noteId>", methods = ["GET", "POST"])
-# @login_required
+@login_required
+@permissionRequired(Permission.DATA_ENTRY)
 def deleteEventFrameNote(eventFrameId, noteId):
 	# check_admin()
 	eventFrameNote = EventFrameNote.query.filter_by(EventFrameId = eventFrameId, NoteId = noteId).first()

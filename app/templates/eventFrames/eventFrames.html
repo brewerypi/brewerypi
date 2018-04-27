@@ -67,6 +67,7 @@ Event Frames
                 <th></th>
                 <th></th>
                 <th></th>
+                <th></th>
             </tr>
         </thead>
         <tbody>
@@ -94,38 +95,14 @@ Event Frames
                     {% else %}
                         <td></td>
                     {% endif %}
-                    <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Notes"
-                        href = "{{ url_for("eventFrames.addEventFrameNote", eventFrameId = eventFrame.EventFrameId) }}">
-                        <span class="glyphicon glyphicon-comment"></a></td>
+                    <td><a class = "btn btn-default" title = "Notes" href = "{{ url_for("eventFrames.listEventFrameNotes", 
+                        elementId = element.ElementId, eventFrameTemplateId = eventFrame.EventFrameTemplate.EventFrameTemplateId, 
+                        eventFrameId = eventFrame.EventFrameId) }}"><span class="glyphicon glyphicon-comment"></a></td>
                     <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("eventFrames.editEventFrame",
                         eventFrameId = eventFrame.EventFrameId) }}"><span class="glyphicon glyphicon-edit"></a></td>
                     <td><a class = "btn btn-default" title = "Delete" href = "{{ url_for("eventFrames.deleteEventFrame",
                         eventFrameId = eventFrame.EventFrameId) }}"><span class="glyphicon glyphicon-trash"></a></td>
                 </tr>
-                {% if eventFrame.EventFrameNotes.count() > 0 %}
-                    <tr>
-                        <td class = "invisible"></td>
-                        <td class = "invisible"></td>
-                        <th colspan="4">Note</th>
-                        <th>Timestamp</th>
-                        <td></td>
-                        <td></td>
-                    </tr>
-                    {% for eventFrameNote in eventFrame.EventFrameNotes | sort (attribute = "Note.Timestamp", reverse = True) %}
-                        <tr>
-                            <td class = "invisible"></td>
-                            <td class = "invisible"></td>
-                            <td colspan="4">{{ eventFrameNote.Note.Note }}</td>
-                            <td>{{ eventFrameNote.Note.Timestamp }}</td>
-                            <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Edit"
-                                href = "{{ url_for("eventFrames.editEventFrameNote", noteId = eventFrameNote.Note.NoteId) }}">
-                                <span class="glyphicon glyphicon-edit"></span></a></td>
-                            <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Delete"
-                                href = "{{ url_for("eventFrames.deleteEventFrameNote", eventFrameId = eventFrame.EventFrameId, 
-                                noteId = eventFrameNote.Note.NoteId) }}"><span class="glyphicon glyphicon-trash"></a></td>
-                        </tr>
-                    {% endfor %}
-                {% endif %}
             {% endfor %}
         </tbody>
     </table>
@@ -137,20 +114,16 @@ Event Frames
     <link rel = "stylesheet" type = "text/css" href = {{ url_for("static", filename = "css/datatables.min.css") }}/> 
     <script type = "text/javascript" src = {{ url_for("static", filename = "js/datatables.min.js") }}></script>
     <script>
-        $('#eventFramesTable').DataTable
-        ({
-            "order":
-            [
-                [3, 'desc']              // Start timestamp.
-            ],
-            "columns":
-            [
+        $('#eventFramesTable').DataTable( {
+            "order": [[3, 'desc']], // Start timestamp.
+            "columns": [
                 { "orderable": false }, // Child event frames button.
                 null,
                 null,
                 null,
                 null,
                 { "orderable": false }, // Stop event frame button.
+                { "orderable": false }, // Add event frame note button.
                 { "orderable": false }, // Edit event frame button.
                 { "orderable": false }  // Delete event frame button.
             ],
@@ -158,5 +131,24 @@ Event Frames
             "stateDuration": 0,
             "pageLength": 25
         });
+        
+        // $('#eventFramesTable').DataTable().rows().every(function() {
+        //     var tr = $(this.node());
+        //     var eventFrameName = $('Name').html(); //removed (class = "Name") from <td> above
+        //     alert(eventFrameName);
+        //     this.child(formatChildTable(tr.data)).show();
+        // });
+
+        // function formatChildTable(data) {
+        //     return "<table>" +
+        //         "{% for eventFrame in eventFrames %}" +
+        //             "<tr>" +
+        //                 "<td>" +
+        //                     "{{ eventFrame.Name }}" +
+        //                 "</td>" +
+        //             "</tr>" +
+        //         "{% endfor %}" +
+        //     "</table>";
+        // }
     </script>
 {% endblock %}
