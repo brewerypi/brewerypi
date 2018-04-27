@@ -138,34 +138,9 @@
                     {% else %}
                         <td></td>
                         <td></td>
+                        <td></td>
                     {% endif %}
                 </tr>
-                {% if firstTagValue %}
-                    {% if firstTagValue.TagValueNotes.count() > 0 %}
-                        <tr>
-                            <td class = "invisible"></td>
-                            <td class = "invisible"></td>
-                            <th colspan="3">Note</th>
-                            <th>Timestamp</th>
-                            <td></td>
-                            <td></td>
-                        </tr>
-                        {% for tagValueNote in firstTagValue.TagValueNotes | sort (attribute = "Note.Timestamp", reverse = True) %}
-                            <tr>
-                                <td class = "invisible"></td>
-                                <td class = "invisible"></td>
-                                <td colspan="3">{{ tagValueNote.Note.Note }}</td>
-                                <td>{{ tagValueNote.Note.Timestamp }}</td>
-                                <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Edit"
-                                    href = "{{ url_for("tagValues.editTagValueNote", noteId = tagValueNote.Note.NoteId) }}">
-                                    <span class="glyphicon glyphicon-edit"></span></a></td>
-                                <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Delete"
-                                    href = "{{ url_for("tagValues.deleteTagValueNote", tagValueId = firstTagValue.TagValueId, 
-                                    noteId = tagValueNote.Note.NoteId) }}"><span class="glyphicon glyphicon-trash"></a></td>
-                            </tr>
-                        {% endfor %}
-                    {% endif %}
-                {% endif %}
             {% endfor %}
         </tbody>
     </table>
@@ -212,6 +187,7 @@
                 null,
                 null,
                 { "orderable": false }, // Add attribute value button.
+                { "orderable": false }, // List attribute value notes button.
                 { "orderable": false }, // Edit attribute value button.
                 { "orderable": false }  // Delete attribute value button.
             ],
