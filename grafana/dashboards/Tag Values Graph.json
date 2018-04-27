@@ -47,7 +47,7 @@
         "iconColor": "rgba(255, 96, 96, 1)",
         "limit": 100,
         "name": "Notes",
-        "rawQuery": "SELECT UNIX_TIMESTAMP(TagValue.Timestamp) AS time_sec,\n\tGROUP_CONCAT(DATE_FORMAT(Note.Timestamp, '%m/%d/%y %H:%i'), ' - ', Note.Note ORDER BY Note.Timestamp SEPARATOR '<br>') AS text,\n    Tag.Name AS tags\nFROM Note\n\tINNER JOIN TagValueNote ON Note.NoteId = TagValueNote.NoteId\n    INNER JOIN TagValue ON TagValueNote.TagValueId = TagValue.TagValueId\n    INNER JOIN Tag ON TagValue.TagId = Tag.TagId\nWHERE TagValue.TagId IN ($tags) AND\n\t$__timeFilter(TagValue.Timestamp)\n",
+        "rawQuery": "SELECT UNIX_TIMESTAMP(TagValue.Timestamp) AS time_sec,\n\tGROUP_CONCAT(DATE_FORMAT(Note.Timestamp, '%m/%d/%y %H:%i'), ' - ', Note.Note ORDER BY Note.Timestamp SEPARATOR '<br>') AS text,\n    Tag.Name AS tags\nFROM Note\n\tINNER JOIN TagValueNote ON Note.NoteId = TagValueNote.NoteId\n    INNER JOIN TagValue ON TagValueNote.TagValueId = TagValue.TagValueId\n    INNER JOIN Tag ON TagValue.TagId = Tag.TagId\nWHERE TagValue.TagId IN ($tags) AND\n\t$__timeFilter(TagValue.Timestamp)\nGROUP BY TagValue.TagValueId",
         "showIn": 0,
         "tags": [],
         "type": "tags"
@@ -58,7 +58,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": null,
-  "iteration": 1524241743770,
+  "iteration": 1524812660979,
   "links": [],
   "panels": [
     {
