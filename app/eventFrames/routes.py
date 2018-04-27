@@ -143,16 +143,6 @@ def startEventFrame(elementId, eventFrameTemplateId):
 		"alert alert-success")
 	return redirect(request.referrer)
 
-@eventFrames.route("/eventFrameNotes/<int:elementId>/<int:eventFrameTemplateId>/<int:eventFrameId>", methods = ["GET", "POST"])
-@login_required
-@permissionRequired(Permission.DATA_ENTRY)
-def listEventFrameNotes(elementId, eventFrameTemplateId, eventFrameId):
-	element = Element.query.get_or_404(elementId)
-	eventFrameTemplate = EventFrameTemplate.query.get_or_404(eventFrameTemplateId)
-	eventFrame = EventFrame.query.get_or_404(eventFrameId)
-	eventFrameNotes = EventFrameNote.query.filter_by(EventFrameId = eventFrameId)
-	return render_template("eventFrames/eventFrameNotes.html", element = element, eventFrameTemplate = eventFrameTemplate, eventFrame = eventFrame, eventFrameNotes = eventFrameNotes)
-
 @eventFrames.route("/eventFrameNotes/add/<int:eventFrameId>", methods = ["GET", "POST"])
 @login_required
 @permissionRequired(Permission.DATA_ENTRY)

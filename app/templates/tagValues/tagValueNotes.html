@@ -37,7 +37,7 @@ Tag Value Notes
     <a class = "btn btn-default" title = "Add" href = "{{ url_for("tagValues.addTagValueNote", tagValueId = tagValue.TagValueId) }}" role = "button">
         <span class="glyphicon glyphicon-plus"></span></a>
     <br><br>
-    <table id = "tagValuesTable" class = "table">
+    <table id = "tagValueNotesTable" class = "table">
         <thead>
             <tr>
                 <th>Timestamp</th>
@@ -67,7 +67,7 @@ Tag Value Notes
     <link rel = "stylesheet" type = "text/css" href = {{ url_for("static", filename = "css/datatables.min.css") }}/> 
     <script type = "text/javascript" src = {{ url_for("static", filename = "js/datatables.min.js") }}></script>
     <script>
-        $('#tagValuesTable').DataTable
+        $('#tagValueNotesTable').DataTable
         ({
             "order":
             [

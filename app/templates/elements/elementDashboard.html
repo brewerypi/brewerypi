@@ -20,7 +20,6 @@
     </ol>
     <h1>{{ element.Name }}</h1>
     <h2>Event Frames</h2>
-    <h4>{{ strQuery }}</h4>
     <br>
     <table id = "eventFramesTable" class = "table">
         <thead>
@@ -29,7 +28,6 @@
                 <th>Event Frame</th>
                 <th>Last Start Timestamp</th>
                 <th>Last End Timestamp</th>
-                <th></th>
                 <th></th>
                 <th></th>
                 <th></th>
@@ -69,10 +67,6 @@
                         elementId = element.ElementId, eventFrameTemplateId = eventFrameTemplate.EventFrameTemplateId) }}">
                         <span class="glyphicon glyphicon-plus"></span></a></td>
                     {% if firstEventFrame %}
-                        <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Notes"
-                            href = "{{ url_for("eventFrames.listEventFrameNotes", elementId = element.ElementId, 
-                            eventFrameTemplateId = firstEventFrame.EventFrameTemplate.EventFrameTemplateId, eventFrameId = firstEventFrame.EventFrameId) }}">
-                            <span class="glyphicon glyphicon-comment"></a></td>
                         <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Edit"
                             href = "{{ url_for("eventFrames.editEventFrame", eventFrameId = firstEventFrame.EventFrameId) }}">
                             <span class="glyphicon glyphicon-edit"></span></a></td>
@@ -82,13 +76,12 @@
                     {% else %}
                         <td></td>
                         <td></td>
-                        <td></td>
                     {% endif %}
                 </tr>
             {% endfor %}
         </tbody>
-    </table>        
-    <h2>Attributes</h2>        
+    </table>
+    <h2>Attributes</h2>
     <br>
     <table id = "attributesTable" class = "table">
         <thead>
@@ -166,7 +159,6 @@
                 null,
                 { "orderable": false }, // Stop event frame button.
                 { "orderable": false }, // Add event frame button.
-                { "orderable": false }, // List event frame notes button.
                 { "orderable": false }, // Edit event frame button.
                 { "orderable": false }  // Delete event frame button.
             ],
