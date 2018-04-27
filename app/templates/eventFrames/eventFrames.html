@@ -114,16 +114,21 @@ Event Frames
     <link rel = "stylesheet" type = "text/css" href = {{ url_for("static", filename = "css/datatables.min.css") }}/> 
     <script type = "text/javascript" src = {{ url_for("static", filename = "js/datatables.min.js") }}></script>
     <script>
-        $('#eventFramesTable').DataTable( {
-            "order": [[3, 'desc']], // Start timestamp.
-            "columns": [
+        $('#eventFramesTable').DataTable
+        ({
+            "order":
+            [
+                [3, 'desc']             // Event frame start timestamp.
+            ],
+            "columns":
+            [
                 { "orderable": false }, // Child event frames button.
                 null,
                 null,
                 null,
                 null,
                 { "orderable": false }, // Stop event frame button.
-                { "orderable": false }, // Add event frame note button.
+                { "orderable": false }, // List event frame notes button.
                 { "orderable": false }, // Edit event frame button.
                 { "orderable": false }  // Delete event frame button.
             ],
