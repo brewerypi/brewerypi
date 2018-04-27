@@ -3,7 +3,7 @@
 {% import "_macros.html" as macros %}
 
 {% block title %}
-Tag Values
+Tag Value Notes
 {% endblock %}
 
 {% block page_content %}
@@ -23,43 +23,38 @@ Tag Values
             <li class = "active">{{ elementAttribute.AttributeTemplate.Name }}</li>
         {% else %}
             <li><a href = "{{ url_for("tags.selectTag", className = "Root") }}">..</a></li>
-            <li><a href = "{{ url_for("tags.selectTag", className = tag.Area.Site.Enterprise.__class__.__name__,
-                id = tag.Area.Site.Enterprise.EnterpriseId) }}">{{ tag.Area.Site.Enterprise.Name }}</a></li>
-            <li><a href = "{{ url_for("tags.selectTag", className = tag.Area.Site.__class__.__name__, id = tag.Area.Site.SiteId) }}">
-                {{ tag.Area.Site.Name }}</a></li>
-            <li><a href = "{{ url_for("tags.selectTag", className = tag.Area.__class__.__name__, id = tag.Area.AreaId) }}">{{ tag.Area.Name }}</a></li>
-            <li class = "active">{{ tag.Name }}</li>
+            <li><a href = "{{ url_for("tags.selectTag", className = tagValue.Tag.Area.Site.Enterprise.__class__.__name__,
+                id = tagValue.Tag.Area.Site.Enterprise.EnterpriseId) }}">{{ tagValue.Tag.Area.Site.Enterprise.Name }}</a></li>
+            <li><a href = "{{ url_for("tags.selectTag", className = tagValue.Tag.Area.Site.__class__.__name__, id = tagValue.Tag.Area.Site.SiteId) }}">
+                {{ tagValue.Tag.Area.Site.Name }}</a></li>
+            <li><a href = "{{ url_for("tags.selectTag", className = tagValue.Tag.Area.__class__.__name__, id = tagValue.Tag.Area.AreaId) }}">
+                {{ tagValue.Tag.Area.Name }}</a></li>
+            <li><a href = "{{ url_for("tagValues.listTagValues", tagId = tagValue.Tag.TagId) }}">{{ tagValue.Tag.Name }}</a></li>
+            <li class = "active">{{ tagValue.Timestamp }}</li>
         {% endif %}
     </ol>
-    <h1>Tag Values</h1>
-    <a class = "btn btn-default" title = "Add" href = "{{ url_for("tagValues.addTagValue", tagId = tag.TagId) }}" role = "button">
+    <h1>Tag Value Notes</h1>
+    <a class = "btn btn-default" title = "Add" href = "{{ url_for("tagValues.addTagValueNote", tagValueId = tagValue.TagValueId) }}" role = "button">
         <span class="glyphicon glyphicon-plus"></span></a>
     <br><br>
     <table id = "tagValuesTable" class = "table">
         <thead>
             <tr>
+                <th>Note</th>
                 <th>Timestamp</th>
-                <th>Value</th>
-                <th></th>
                 <th></th>
                 <th></th>
             </tr>
         </thead>
         <tbody>
-            {% for tagValue in tagValues %}
+            {% for tagValueNote in tagValueNotes %}
                 <tr>
-                    <td>{{ tagValue.Timestamp }}</td>
-                    {% if tagValue.Tag.LookupId %}
-                        <td>{{ tagValue.Tag.Lookup.LookupValues | selectattr("Value", "equalto", tagValue.Value) | map(attribute = "Name") | list | first }}</td>
-                    {% else %}
-                        <td>{{ tagValue.Value | string + " " + tagValue.Tag.UnitOfMeasurement.Abbreviation }}</td>
-                    {% endif %}
-                    <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("tagValues.editTagValue", tagValueId = tagValue.TagValueId) }}">
-                        <span class="glyphicon glyphicon-edit"></span></a></td>
-                    <td><a class = "btn btn-default" title = "Note" href = "{{ url_for("tagValues.listTagValueNotes", tagValueId = tagValue.TagValueId) }}">
-                        <span class="glyphicon glyphicon-comment"></span></a></td>
-                    <td><a class = "btn btn-default" title = "Delete" href = "{{ url_for("tagValues.deleteTagValue", tagValueId = tagValue.TagValueId) }}">
-                        <span class="glyphicon glyphicon-trash"></span></a></td>
+                    <td>{{ tagValueNote.Note.Note }}</td>
+                    <td>{{ tagValueNote.Note.Timestamp }}</td>
+                    <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("tagValues.editTagValueNote",
+                        noteId = tagValueNote.NoteId) }}"><span class="glyphicon glyphicon-edit"></span></a></td>
+                    <td><a class = "btn btn-default" title = "Delete" href = "{{ url_for("tagValues.deleteTagValueNote",
+                        noteId = tagValueNote.NoteId, tagValueId = tagValueNote.TagValueId) }}"><span class="glyphicon glyphicon-trash"></span></a></td>
                 </tr>
             {% endfor %}
         </tbody>
@@ -76,14 +71,13 @@ Tag Values
         ({
             "order":
             [
-                [0, 'desc']              // Timestamp.
+                [1, 'desc']              // Timestamp.
             ],
             "columns":
             [
                 null,
                 null,
                 { "orderable": false }, // Edit tag value button.
-                { "orderable": false }, // Add note button.
                 { "orderable": false }  // Delete tag value button.
             ],
             "stateSave": true,

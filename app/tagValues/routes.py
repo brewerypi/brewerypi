@@ -110,8 +110,17 @@ def editTagValue(tagValueId):
 
 	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
 
-@tagValues.route("/tagValues/addTagValueNote/<int:tagValueId>", methods = ["GET", "POST"])
-# @login_required
+@tagValues.route("/tagValueNotes/<int:tagValueId>", methods = ["GET", "POST"])
+@login_required
+@permissionRequired(Permission.DATA_ENTRY)
+def listTagValueNotes(tagValueId):
+	tagValue = TagValue.query.get_or_404(tagValueId)
+	tagValueNotes = TagValueNote.query.filter_by(TagValueId = tagValueId)
+	return render_template("tagValues/tagValueNotes.html", tagValue = tagValue, tagValueNotes = tagValueNotes)
+
+@tagValues.route("/tagValueNotes/add/<int:tagValueId>", methods = ["GET", "POST"])
+@login_required
+@permissionRequired(Permission.DATA_ENTRY)
 def addTagValueNote(tagValueId):
 	# check_admin()
 	operation = "Add"
@@ -133,8 +142,9 @@ def addTagValueNote(tagValueId):
 	form.requestReferrer.data = request.referrer
 	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
 
-@tagValues.route("/tagValues/editTagValueNote/<int:noteId>", methods = ["GET", "POST"])
-# @login_required
+@tagValues.route("/tagValueNotes/edit/<int:noteId>", methods = ["GET", "POST"])
+@login_required
+@permissionRequired(Permission.DATA_ENTRY)
 def editTagValueNote(noteId):
 	# check_admin()
 	operation = "Edit"
@@ -156,9 +166,10 @@ def editTagValueNote(noteId):
 	form.requestReferrer.data = request.referrer
 	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
 
-@tagValues.route("/tagValues/deleteTagValueNote/<int:tagValueId>/<int:noteId>", methods = ["GET", "POST"])
-# @login_required
-def deleteTagValueNote(tagValueId, noteId):
+@tagValues.route("/tagValueNotes/delete/<int:noteId>/<int:tagValueId>", methods = ["GET", "POST"])
+@login_required
+@permissionRequired(Permission.DATA_ENTRY)
+def deleteTagValueNote(noteId, tagValueId):
 	# check_admin()
 	tagValueNote = TagValueNote.query.filter_by(TagValueId = tagValueId, NoteId = noteId).first()
 	note = Note.query.get_or_404(noteId)
