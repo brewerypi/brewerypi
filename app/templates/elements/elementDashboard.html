@@ -90,6 +90,7 @@
                 <th>Attribute</th>
                 <th>Last Timestamp</th>
                 <th>Last Value</th>
+                <th>Unit / Lookup Name</th>
                 <th></th>
                 <th></th>
                 <th></th>
@@ -107,11 +108,14 @@
                         <td>{{ firstTagValue.Timestamp }}</td>
                         {% if elementAttribute.Tag.LookupId %}
                             <td>{{ elementAttribute.Tag.Lookup.LookupValues | selectattr("Value", "equalto", firstTagValue.Value) | map(attribute = "Name") |
-                                list | first }}</td>                    
+                                list | first }}</td>
+                            <td>{{ elementAttribute.Tag.Lookup.Name }}</td>
                         {% else %}
-                            <td>{{ firstTagValue.Value }} {{ firstTagValue.Tag.UnitOfMeasurement.Abbreviation }}</td>                    
+                            <td>{{ firstTagValue.Value }}</td>
+                            <td>{{ firstTagValue.Tag.UnitOfMeasurement.Abbreviation }}</td>
                         {% endif %}
                     {% else %}
+                        <td></td>
                         <td></td>
                         <td></td>
                     {% endif %}
@@ -175,6 +179,7 @@
             "columns":
             [
                 { "orderable": false }, // Attribute values button.
+                null,
                 null,
                 null,
                 null,
