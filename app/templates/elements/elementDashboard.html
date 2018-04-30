@@ -120,8 +120,8 @@
                         tagId = elementAttribute.Tag.TagId) }}"><span class="glyphicon glyphicon-plus"></span></a></td>
                     {% if elementAttribute.Tag.TagValues[0] %}
                         <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Notes"
-                            href = "{{ url_for("tagValues.listTagValueNotes", tagValueId = firstTagValue.TagValueId) }}">
-                            <span class="glyphicon glyphicon-comment"></a></td>
+                            href = "{{ url_for("tagValues.listTagValueNotes", tagValueId = firstTagValue.TagValueId,
+                            elementAttributeId = elementAttribute.ElementAttributeId) }}"><span class="glyphicon glyphicon-comment"></a></td>
                         <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Edit"
                             href = "{{ url_for("elementAttributes.editElementAttributeValue", elementId = elementAttribute.ElementId,
                             tagValueId = firstTagValue.TagValueId) }}"><span class="glyphicon glyphicon-edit"></span></a></td>
