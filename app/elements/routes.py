@@ -171,8 +171,11 @@ def selectElement(className = None, id = None):
 
 @elements.route("/test", methods=["GET", "POST"])
 def test():
-	data = request.get_json()
-	print (data)
+	data = request.get_json(force = True)
+	# print (data)
+	for item in data:
+		if item["value"]:
+			print ("key: " + item["name"], " value: " + item["value"])
 	# for key, value in data:
 	# 	print (key, " : ", value)
 	return jsonify({"text" : "kats"})

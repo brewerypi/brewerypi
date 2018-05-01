@@ -118,7 +118,7 @@
                         <td></td>
                         <td></td>
                     {% endif %}
-                    <td><input name = {{ elementAttribute.ElementAttributeId }} value = ""></td>
+                    <td><input name = "{{ elementAttribute.ElementAttributeId }}" value = ""></td>
                     <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Add"
                         href = "{{ url_for("elementAttributes.addElementAttributeValue", elementId = elementAttribute.ElementId,
                         tagId = elementAttribute.Tag.TagId) }}"><span class="glyphicon glyphicon-plus"></span></a></td>
@@ -199,27 +199,14 @@
                 $("#test").text("x");
                 var data = JSON.stringify(attributes.$("input").serializeArray());
                 alert(data);
-                // var json = JSON.stringify(attributes.rows("*").data().toArray());
-                // var json = JSON.stringify(attributes.rows().data().toArray());
-                // var json = attributes.$("input").data().val();
-                // alert(json);
-                // alert(data.substr(0, 120))
-                // $("#test").text("y");
                 $.ajax({
+                    type: "POST",
                     url: "/test",
-                    dataType: "json",
-                    type: "post",
-                    contentType: "application/json",
-                    data: data
-                // });
-                // $.post("/test", {
-                //     data: data
-                }).done(function(response) {
-                    $("#test").text(response["text"])
-                // }).fail(function() {
-                //     $("#test").text("fail")
+                    data: data//,
+                    // dataType: "json"
+                // }).success(function(response) {
+                //     $("#test").text(response["text"])
                 });
-
             });
         });
     </script>
