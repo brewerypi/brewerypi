@@ -81,8 +81,9 @@
             {% endfor %}
         </tbody>
     </table>
-    <h2>Attributes</h2>
+    <h2 id = "test">Attributes</h2>
     <br>
+    <button type = "submit">Submit Form</button>
     <table id = "attributesTable" class = "table">
         <thead>
             <tr>
@@ -90,6 +91,8 @@
                 <th>Attribute</th>
                 <th>Last Timestamp</th>
                 <th>Last Value</th>
+                <th></th>
+                <th></th>
                 <th></th>
                 <th></th>
                 <th></th>
@@ -115,6 +118,7 @@
                         <td></td>
                         <td></td>
                     {% endif %}
+                    <td><input name = {{ elementAttribute.ElementAttributeId }} value = ""></td>
                     <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Add"
                         href = "{{ url_for("elementAttributes.addElementAttributeValue", elementId = elementAttribute.ElementId,
                         tagId = elementAttribute.Tag.TagId) }}"><span class="glyphicon glyphicon-plus"></span></a></td>
@@ -145,47 +149,78 @@
     <link rel = "stylesheet" type = "text/css" href = {{ url_for("static", filename = "css/datatables.min.css") }}/> 
     <script type = "text/javascript" src = {{ url_for("static", filename = "js/datatables.min.js") }}></script>
     <script>
-        $('#eventFramesTable').DataTable
-        ({
-            "order":
-            [
-                [1, 'asc']              // Event frame template name.
-            ],
-            "columns":
-            [
-                { "orderable": false }, // Event frame values button.
-                null,
-                null,
-                null,
-                { "orderable": false }, // Stop event frame button.
-                { "orderable": false }, // Add event frame button.
-                { "orderable": false }, // Edit event frame button.
-                { "orderable": false }  // Delete event frame button.
-            ],
-            "stateSave": true,
-            "stateDuration": 0,
-            "pageLength": 25
-        });
-        $('#attributesTable').DataTable
-        ({
-            "order":
-            [
-                [1, 'asc']              // Attribute.
-            ],
-            "columns":
-            [
-                { "orderable": false }, // Attribute values button.
-                null,
-                null,
-                null,
-                { "orderable": false }, // Add attribute value button.
-                { "orderable": false }, // List attribute value notes button.
-                { "orderable": false }, // Edit attribute value button.
-                { "orderable": false }  // Delete attribute value button.
-            ],
-            "stateSave": true,
-            "stateDuration": 0,
-            "pageLength": 25
+        $(document).ready(function() {
+            $('#eventFramesTable').DataTable
+            ({
+                "order":
+                [
+                    [1, 'asc']              // Event frame template name.
+                ],
+                "columns":
+                [
+                    { "orderable": false }, // Event frame values button.
+                    null,
+                    null,
+                    null,
+                    { "orderable": false }, // Stop event frame button.
+                    { "orderable": false }, // Add event frame button.
+                    { "orderable": false }, // Edit event frame button.
+                    { "orderable": false }  // Delete event frame button.
+                ],
+                "stateSave": true,
+                "stateDuration": 0,
+                "pageLength": 25
+            });
+
+            var attributes = $('#attributesTable').DataTable
+            ({
+                "order":
+                [
+                    [1, 'asc']              // Attribute.
+                ],
+                "columns":
+                [
+                    { "orderable": false }, // Attribute values button.
+                    null,
+                    null,
+                    null,
+                    null,
+                    { "orderable": false }, // Add attribute value button.
+                    { "orderable": false }, // List attribute value notes button.
+                    { "orderable": false }, // Edit attribute value button.
+                    { "orderable": false }  // Delete attribute value button.
+                ],
+                "stateSave": true,
+                "stateDuration": 0,
+                "pageLength": 25
+            });
+
+            $("button").click(function() {
+                $("#test").text("x");
+                var data = JSON.stringify(attributes.$("input").serializeArray());
+                alert(data);
+                // var json = JSON.stringify(attributes.rows("*").data().toArray());
+                // var json = JSON.stringify(attributes.rows().data().toArray());
+                // var json = attributes.$("input").data().val();
+                // alert(json);
+                // alert(data.substr(0, 120))
+                // $("#test").text("y");
+                $.ajax({
+                    url: "/test",
+                    dataType: "json",
+                    type: "post",
+                    contentType: "application/json",
+                    data: data
+                // });
+                // $.post("/test", {
+                //     data: data
+                }).done(function(response) {
+                    $("#test").text(response["text"])
+                // }).fail(function() {
+                //     $("#test").text("fail")
+                });
+
+            });
         });
     </script>
 {% endblock %}

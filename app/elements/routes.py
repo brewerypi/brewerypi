@@ -1,4 +1,4 @@
-from flask import flash, redirect, render_template, url_for
+from flask import flash, jsonify, redirect, render_template, request, url_for
 from flask_login import login_required
 from sqlalchemy import and_
 from . import elements
@@ -168,3 +168,11 @@ def selectElement(className = None, id = None):
 		className = "Element"
 
 	return render_template("elements/selectElement.html", children = children, className = className, parent = parent)
+
+@elements.route("/test", methods=["GET", "POST"])
+def test():
+	data = request.get_json()
+	print (data)
+	# for key, value in data:
+	# 	print (key, " : ", value)
+	return jsonify({"text" : "kats"})
