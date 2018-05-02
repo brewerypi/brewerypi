@@ -1,16 +1,19 @@
 from flask import flash, redirect, render_template, request, url_for
+from flask_login import login_required
+from sqlalchemy import or_
 from . import tagValues
-from . forms import TagValueForm
+from . forms import TagValueForm, TagValueNoteForm
 from .. import db
-from .. models import Area, ElementAttribute, Enterprise, Lookup, LookupValue, Site, Tag, TagValue
+from .. decorators import permissionRequired
+from .. models import Area, ElementAttribute, Enterprise, Lookup, LookupValue, Note, Permission, Site, Tag, TagValue, TagValueNote
 
 modelName = "Tag Value"
 
 @tagValues.route("/tagValues/<int:tagId>", methods = ["GET", "POST"])
 @tagValues.route("/tagValues/<int:tagId>/<int:elementAttributeId>", methods = ["GET", "POST"])
-# @login_required
-def listTagValues(tagId, elementAttributeId = None, ):
-	# check_admin()
+@login_required
+@permissionRequired(Permission.DATA_ENTRY)
+def listTagValues(tagId, elementAttributeId = None):
 	if elementAttributeId:
 		elementAttribute = ElementAttribute.query.get_or_404(elementAttributeId)
 	else:
@@ -24,9 +27,9 @@ def listTagValues(tagId, elementAttributeId = None, ):
 	return render_template("tagValues/tagValues.html", elementAttribute = elementAttribute, tag = tag, tagValues = tagValues)
 
 @tagValues.route("/tagValues/add/<int:tagId>", methods = ["GET", "POST"])
-# @login_required
+@login_required
+@permissionRequired(Permission.DATA_ENTRY)
 def addTagValue(tagId):
-	# check_admin()
 	operation = "Add"
 	tag = Tag.query.get_or_404(tagId)
 	form = TagValueForm()
@@ -56,9 +59,9 @@ def addTagValue(tagId):
 	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
 
 @tagValues.route("/tagValues/delete/<int:tagValueId>", methods = ["GET", "POST"])
-# @login_required
+@login_required
+@permissionRequired(Permission.DATA_ENTRY)
 def deleteTagValue(tagValueId):
-	# check_admin()
 	tagValue = TagValue.query.get_or_404(tagValueId)
 	db.session.delete(tagValue)
 	db.session.commit()
@@ -66,9 +69,9 @@ def deleteTagValue(tagValueId):
 	return redirect(url_for("tagValues.listTagValues", tagId = tagValue.TagId))
 
 @tagValues.route("/tagValues/edit/<int:tagValueId>", methods = ["GET", "POST"])
-# @login_required
+@login_required
+@permissionRequired(Permission.DATA_ENTRY)
 def editTagValue(tagValueId):
-	# check_admin()
 	operation = "Edit"
 	tagValue = TagValue.query.get_or_404(tagValueId)
 	tag = Tag.query.get_or_404(tagValue.TagId)
@@ -106,3 +109,78 @@ def editTagValue(tagValueId):
 		form.value.data = tagValue.Value
 
 	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
+
+@tagValues.route("/tagValueNotes/<int:tagValueId>", methods = ["GET", "POST"])
+@tagValues.route("/tagValueNotes/<int:tagValueId>/<int:elementAttributeId>", methods = ["GET", "POST"])
+@login_required
+@permissionRequired(Permission.DATA_ENTRY)
+def listTagValueNotes(tagValueId, elementAttributeId = None):
+	if elementAttributeId:
+		elementAttribute = ElementAttribute.query.get_or_404(elementAttributeId)
+	else:
+		elementAttribute = None
+
+	tagValue = TagValue.query.get_or_404(tagValueId)
+	tagValueNotes = TagValueNote.query.filter_by(TagValueId = tagValueId)
+	return render_template("tagValues/tagValueNotes.html", elementAttribute = elementAttribute, tagValue = tagValue, tagValueNotes = tagValueNotes)
+
+@tagValues.route("/tagValueNotes/add/<int:tagValueId>", methods = ["GET", "POST"])
+@login_required
+@permissionRequired(Permission.DATA_ENTRY)
+def addTagValueNote(tagValueId):
+	# check_admin()
+	operation = "Add"
+	modelName = "Tag Value Note"
+	form = TagValueNoteForm()
+
+	# Add a new tag value note.
+	if form.validate_on_submit():
+		note = Note(Note = form.note.data, Timestamp = form.timestamp.data)
+		db.session.add(note)
+		db.session.commit()
+		tagValueNote = TagValueNote(NoteId = note.NoteId, TagValueId = tagValueId)
+		db.session.add(tagValueNote)
+		db.session.commit()
+		flash("You have successfully added a new Tag Value Note.", "alert alert-success")
+		return redirect(form.requestReferrer.data)
+
+	# Present a form to add a new tag value note.
+	form.requestReferrer.data = request.referrer
+	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
+
+@tagValues.route("/tagValueNotes/edit/<int:noteId>", methods = ["GET", "POST"])
+@login_required
+@permissionRequired(Permission.DATA_ENTRY)
+def editTagValueNote(noteId):
+	# check_admin()
+	operation = "Edit"
+	modelName = "Tag Value Note"
+	note = Note.query.get_or_404(noteId)
+	form = TagValueNoteForm()
+
+	# Edit an existing tag value note.
+	if form.validate_on_submit():
+		note.Note = form.note.data
+		note.Timestamp = form.timestamp.data
+		db.session.commit()
+		flash("You have successfully edited the Tag Value Note.", "alert alert-success")
+		return redirect(form.requestReferrer.data)
+
+	# Present a form to edit an existing tag value.
+	form.note.data = note.Note
+	form.timestamp.data = note.Timestamp
+	form.requestReferrer.data = request.referrer
+	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
+
+@tagValues.route("/tagValueNotes/delete/<int:noteId>/<int:tagValueId>", methods = ["GET", "POST"])
+@login_required
+@permissionRequired(Permission.DATA_ENTRY)
+def deleteTagValueNote(noteId, tagValueId):
+	# check_admin()
+	tagValueNote = TagValueNote.query.filter_by(TagValueId = tagValueId, NoteId = noteId).first()
+	note = Note.query.get_or_404(noteId)
+	db.session.delete(tagValueNote)
+	db.session.delete(note)
+	db.session.commit()
+	flash("You have successfully deleted the tag value note.", "alert alert-success")
+	return redirect(request.referrer)

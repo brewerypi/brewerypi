@@ -1,22 +1,24 @@
 from flask import flash, redirect, render_template, request, url_for
+from flask_login import login_required
 from . import elementTemplates
 from . forms import ElementTemplateForm
 from .. import db
+from .. decorators import adminRequired
 from .. models import ElementTemplate, Enterprise, Site
 
 modelName = "Element Template"
 
 @elementTemplates.route("/elementTemplates", methods = ["GET", "POST"])
-# @login_required
+@login_required
+@adminRequired
 def listElementTemplates():
-	# check_admin()
 	elementTemplates = ElementTemplate.query.all()
 	return render_template("elementTemplates/elementTemplates.html", elementTemplates = elementTemplates)
 
 @elementTemplates.route("/elementTemplates/add", methods = ["GET", "POST"])
-# @login_required
+@login_required
+@adminRequired
 def addElementTemplate():
-	# check_admin()
 	operation = "Add"
 	form = ElementTemplateForm()
 
@@ -32,9 +34,9 @@ def addElementTemplate():
 	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
 
 @elementTemplates.route("/elementTemplates/delete/<int:elementTemplateId>", methods = ["GET", "POST"])
-# @login_required
+@login_required
+@adminRequired
 def deleteElementTemplate(elementTemplateId):
-	# check_admin()
 	elementTemplate = ElementTemplate.query.get_or_404(elementTemplateId)
 	db.session.delete(elementTemplate)
 	db.session.commit()
@@ -42,9 +44,9 @@ def deleteElementTemplate(elementTemplateId):
 	return redirect(url_for("elementTemplates.listElementTemplates"))
 
 @elementTemplates.route("/elementTemplates/edit/<int:elementTemplateId>", methods = ["GET", "POST"])
-# @login_required
+@login_required
+@adminRequired
 def editElementTemplate(elementTemplateId):
-	# check_admin()
 	operation = "Edit"
 	elementTemplate = ElementTemplate.query.get_or_404(elementTemplateId)
 	form = ElementTemplateForm(obj = elementTemplate)

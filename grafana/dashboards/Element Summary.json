@@ -14,19 +14,19 @@
       "type": "grafana",
       "id": "grafana",
       "name": "Grafana",
-      "version": "4.6.3"
+      "version": "5.0.4"
     },
     {
       "type": "datasource",
       "id": "mysql",
       "name": "MySQL",
-      "version": "1.0.0"
+      "version": "5.0.0"
     },
     {
       "type": "panel",
       "id": "table",
       "name": "Table",
-      "version": ""
+      "version": "5.0.0"
     }
   ],
   "annotations": {
@@ -45,74 +45,67 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "hideControls": false,
   "id": null,
+  "iteration": 1524416689464,
   "links": [],
-  "rows": [
+  "panels": [
     {
-      "collapse": false,
-      "height": "250px",
-      "panels": [
+      "columns": [],
+      "datasource": "${DS_BREWERYPI}",
+      "fontSize": "100%",
+      "gridPos": {
+        "h": 15,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "height": "600",
+      "id": 1,
+      "links": [],
+      "pageSize": null,
+      "scroll": true,
+      "showHeader": true,
+      "sort": {
+        "col": null,
+        "desc": false
+      },
+      "styles": [
         {
-          "columns": [],
-          "datasource": "${DS_BREWERYPI}",
-          "fontSize": "100%",
-          "height": "600",
-          "id": 1,
-          "links": [],
-          "pageSize": null,
-          "scroll": true,
-          "showHeader": true,
-          "sort": {
-            "col": null,
-            "desc": false
-          },
-          "span": 12,
-          "styles": [
-            {
-              "alias": "Time",
-              "dateFormat": "YYYY-MM-DD HH:mm:ss",
-              "pattern": "Time",
-              "type": "date"
-            },
-            {
-              "alias": "",
-              "colorMode": null,
-              "colors": [
-                "rgba(245, 54, 54, 0.9)",
-                "rgba(237, 129, 40, 0.89)",
-                "rgba(50, 172, 45, 0.97)"
-              ],
-              "decimals": 2,
-              "pattern": "/.*/",
-              "thresholds": [],
-              "type": "number",
-              "unit": "short"
-            }
+          "alias": "Time",
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "pattern": "Time",
+          "type": "date"
+        },
+        {
+          "alias": "",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
           ],
-          "targets": [
-            {
-              "alias": "",
-              "format": "table",
-              "hide": false,
-              "rawSql": "call BreweryPi.spElementSummary($attributeTemplatesString, $elementsString);",
-              "refId": "A"
-            }
-          ],
-          "title": "Element Summary",
-          "transform": "table",
-          "type": "table"
+          "decimals": 2,
+          "pattern": "/.*/",
+          "thresholds": [],
+          "type": "number",
+          "unit": "short"
         }
       ],
-      "repeat": null,
-      "repeatIteration": null,
-      "repeatRowId": null,
-      "showTitle": false,
-      "title": "Dashboard Row",
-      "titleSize": "h6"
+      "targets": [
+        {
+          "alias": "",
+          "format": "table",
+          "hide": false,
+          "rawSql": "call BreweryPi.spElementSummary('$attributeTemplatesString', '$elementsString');",
+          "refId": "A"
+        }
+      ],
+      "title": "Element Summary",
+      "transform": "table",
+      "type": "table"
     }
   ],
-  "schemaVersion": 14,
+  "schemaVersion": 16,
   "style": "dark",
   "tags": [],
   "templating": {
@@ -227,7 +220,7 @@
         "multi": true,
         "name": "attributeTemplates",
         "options": [],
-        "query": "SELECT AttributeTemplate.AttributeTemplateId AS __value, CONCAT(AttributeTemplate.Name, ' (', ElementTemplate.Name, ')') AS __text FROM AttributeTemplate INNER JOIN ElementTemplate ON AttributeTemplate.ElementTemplateId = ElementTemplate.ElementTemplateId WHERE AttributeTemplate.ElementTemplateId IN($elementTemplates) ORDER BY ElementTemplate.Name, AttributeTemplate.Name",
+        "query": "SELECT DISTINCT AttributeTemplate.Name FROM AttributeTemplate INNER JOIN ElementTemplate ON AttributeTemplate.ElementTemplateId = ElementTemplate.ElementTemplateId WHERE AttributeTemplate.ElementTemplateId IN($elementTemplates) ORDER BY AttributeTemplate.Name",
         "refresh": 1,
         "regex": "",
         "sort": 0,
@@ -264,6 +257,7 @@
     "to": "now"
   },
   "timepicker": {
+    "hidden": true,
     "refresh_intervals": [
       "5s",
       "10s",
@@ -290,5 +284,6 @@
   },
   "timezone": "",
   "title": "Element Summary",
-  "version": 1
+  "uid": "U6ZY33miz",
+  "version": 7
 }

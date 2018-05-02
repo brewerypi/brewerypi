@@ -1,17 +1,19 @@
 from datetime import datetime
 from flask import flash, redirect, render_template, request, url_for
+from flask_login import login_required
 from . import eventFrames
-from . forms import EventFrameForm
+from . forms import EventFrameForm, EventFrameNoteForm
 from .. import db
-from .. models import Element, EventFrame, EventFrameTemplate
+from .. decorators import permissionRequired
+from .. models import Element, EventFrame, EventFrameNote, EventFrameTemplate, Note, Permission
 
 modelName = "Event Frame"
 
 @eventFrames.route("/eventFrames/<int:parentEventFrameId>", methods = ["GET", "POST"])
 @eventFrames.route("/eventFrames/<int:elementId>/<int:eventFrameTemplateId>", methods = ["GET", "POST"])
-# @login_required
+@login_required
+@permissionRequired(Permission.DATA_ENTRY)
 def listEventFrames(elementId = None, eventFrameTemplateId = None, parentEventFrameId = None):
-	# check_admin()
 	if parentEventFrameId:
 		parentEventFrame = EventFrame.query.get_or_404(parentEventFrameId)
 		origin = parentEventFrame.origin()
@@ -28,9 +30,9 @@ def listEventFrames(elementId = None, eventFrameTemplateId = None, parentEventFr
 
 @eventFrames.route("/eventFrames/add/<int:parentEventFrameId>", methods = ["GET", "POST"])
 @eventFrames.route("/eventFrames/add/<int:elementId>/<int:eventFrameTemplateId>", methods = ["GET", "POST"])
-# @login_required
+@login_required
+@permissionRequired(Permission.DATA_ENTRY)
 def addEventFrame(elementId = None, eventFrameTemplateId = None, parentEventFrameId = None):
-	# check_admin()
 	operation = "Add"
 	form = EventFrameForm()
 
@@ -68,9 +70,9 @@ def addEventFrame(elementId = None, eventFrameTemplateId = None, parentEventFram
 	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
 
 @eventFrames.route("/eventFrames/delete/<int:eventFrameId>", methods = ["GET", "POST"])
-# @login_required
+@login_required
+@permissionRequired(Permission.DATA_ENTRY)
 def deleteEventFrame(eventFrameId):
-	# check_admin()
 	eventFrame = EventFrame.query.get_or_404(eventFrameId)
 	if eventFrame.hasDescendants():
 		flash("This event frame contains one or more child event frames and cannot be deleted.", "alert alert-danger")
@@ -82,9 +84,9 @@ def deleteEventFrame(eventFrameId):
 	return redirect(request.referrer)
 
 @eventFrames.route("/eventFrames/edit/<int:eventFrameId>", methods = ["GET", "POST"])
-# @login_required
+@login_required
+@permissionRequired(Permission.DATA_ENTRY)
 def editEventFrame(eventFrameId):
-	# check_admin()
 	operation = "Edit"
 	eventFrame = EventFrame.query.get_or_404(eventFrameId)
 	form = EventFrameForm(obj = eventFrame)
@@ -119,6 +121,8 @@ def editEventFrame(eventFrameId):
 	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
 
 @eventFrames.route("/eventFrames/endEventFrame/<int:eventFrameId>", methods = ["GET", "POST"])
+@login_required
+@permissionRequired(Permission.DATA_ENTRY)
 def endEventFrame(eventFrameId):
 	eventFrame = EventFrame.query.get_or_404(eventFrameId)
 	eventFrame.EndTimestamp = datetime.now()
@@ -128,6 +132,8 @@ def endEventFrame(eventFrameId):
 	return redirect(request.referrer)
 
 @eventFrames.route("/eventFrames/startEventFrame/<int:elementId>/<int:eventFrameTemplateId>", methods = ["GET", "POST"])
+@login_required
+@permissionRequired(Permission.DATA_ENTRY)
 def startEventFrame(elementId, eventFrameTemplateId):
 	eventFrame = EventFrame(ElementId = elementId, EndTimestamp = None, EventFrameTemplateId = eventFrameTemplateId, ParentEventFrameId = None,
 		StartTimestamp = datetime.now())
@@ -135,4 +141,65 @@ def startEventFrame(elementId, eventFrameTemplateId):
 	db.session.commit()
 	flash("You have successfully added a new \"" + eventFrame.EventFrameTemplate.Name + "\" for element \"" + eventFrame.origin().Element.Name + "\".",
 		"alert alert-success")
+	return redirect(request.referrer)
+
+@eventFrames.route("/eventFrameNotes/add/<int:eventFrameId>", methods = ["GET", "POST"])
+@login_required
+@permissionRequired(Permission.DATA_ENTRY)
+def addEventFrameNote(eventFrameId):
+	# check_admin()
+	operation = "Add"
+	modelName = "Event Frame Note"
+	form = EventFrameNoteForm()
+
+	# Add a new event frame note.
+	if form.validate_on_submit():
+		note = Note(Note = form.note.data, Timestamp = form.timestamp.data)
+		db.session.add(note)
+		db.session.commit()
+		eventFrameNote = EventFrameNote(NoteId = note.NoteId, EventFrameId = eventFrameId)
+		db.session.add(eventFrameNote)
+		db.session.commit()
+		flash("You have successfully added a new Event Frame Note.", "alert alert-success")
+		return redirect(form.requestReferrer.data)
+
+	# Present a form to add a new event frame note.
+	form.requestReferrer.data = request.referrer
+	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
+
+@eventFrames.route("/eventFrameNotes/edit/<int:noteId>", methods = ["GET", "POST"])
+@login_required
+@permissionRequired(Permission.DATA_ENTRY)
+def editEventFrameNote(noteId):
+	# check_admin()
+	operation = "Edit"
+	modelName = "Event Frame Note"
+	note = Note.query.get_or_404(noteId)
+	form = EventFrameNoteForm()
+
+	# Edit an existing event frame note.
+	if form.validate_on_submit():
+		note.Note = form.note.data
+		note.Timestamp = form.timestamp.data
+		db.session.commit()
+		flash("You have successfully edited the Event Frame Note.", "alert alert-success")
+		return redirect(form.requestReferrer.data)
+
+	# Present a form to edit an existing event frame.
+	form.note.data = note.Note
+	form.timestamp.data = note.Timestamp
+	form.requestReferrer.data = request.referrer
+	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
+
+@eventFrames.route("/eventFrameNotes/delete/<int:eventFrameId>/<int:noteId>", methods = ["GET", "POST"])
+@login_required
+@permissionRequired(Permission.DATA_ENTRY)
+def deleteEventFrameNote(eventFrameId, noteId):
+	# check_admin()
+	eventFrameNote = EventFrameNote.query.filter_by(EventFrameId = eventFrameId, NoteId = noteId).first()
+	note = Note.query.get_or_404(noteId)
+	db.session.delete(eventFrameNote)
+	db.session.delete(note)
+	db.session.commit()
+	flash("You have successfully deleted the event frame note.", "alert alert-success")
 	return redirect(request.referrer)

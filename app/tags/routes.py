@@ -1,23 +1,25 @@
 import csv
 import os
 from flask import current_app, flash, redirect, render_template, request, send_file, url_for
+from flask_login import login_required
 from . import tags
 from . forms import TagForm, TagImportForm
 from .. import db
-from .. models import Area, Enterprise, Lookup, Site, Tag, UnitOfMeasurement
+from .. decorators import adminRequired, permissionRequired
+from .. models import Area, Enterprise, Lookup, Permission, Site, Tag, UnitOfMeasurement
 
 @tags.route("/tags", methods = ["GET", "POST"])
-# @login_required
+@login_required
+@adminRequired
 def listTags():
-	# check_admin()
 	tags = Tag.query.outerjoin(UnitOfMeasurement, Lookup)
 	return render_template("tags/tags.html", tags = tags)
 
 @tags.route("/tags/add", methods = ["GET", "POST"])
 @tags.route("/tags/add/<int:lookup>", methods = ["GET", "POST"])
-# @login_required
+@login_required
+@adminRequired
 def addTag(lookup = False):
-	# check_admin()
 	operation = "Add"
 	form = TagForm()
 
@@ -44,9 +46,9 @@ def addTag(lookup = False):
 	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
 
 @tags.route("/tags/delete/<int:tagId>", methods = ["GET", "POST"])
-# @login_required
+@login_required
+@adminRequired
 def deleteTag(tagId):
-	# check_admin()
 	tag = Tag.query.get_or_404(tagId)
 	db.session.delete(tag)
 	db.session.commit()
@@ -54,9 +56,9 @@ def deleteTag(tagId):
 	return redirect(url_for("tags.listTags"))
 
 @tags.route("/tags/edit/<int:tagId>", methods = ["GET", "POST"])
-# @login_required
+@login_required
+@adminRequired
 def editTag(tagId):
-	# check_admin()
 	operation = "Edit"
 	tag = Tag.query.get_or_404(tagId)
 	form = TagForm(obj = tag)
@@ -96,6 +98,8 @@ def editTag(tagId):
 	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
 
 @tags.route("/tags/export")
+@login_required
+@adminRequired
 def exportTags():
 	tags = Tag.query.outerjoin(Lookup).join(Area, Site, Enterprise).order_by(Enterprise.Abbreviation, Site.Abbreviation, Area.Abbreviation, Tag.Name)
 	with open(os.path.join(current_app.config["EXPORT_FOLDER"], current_app.config["EXPORT_TAGS_FILENAME"]), "w", encoding = "latin-1") as tagsFile:
@@ -116,7 +120,8 @@ def exportTags():
 	return send_file(os.path.join("..", current_app.config["EXPORT_FOLDER"], current_app.config["EXPORT_TAGS_FILENAME"]), as_attachment = True)
 
 @tags.route("/tags/import", methods = ["GET", "POST"])
-# @login_required
+@login_required
+@adminRequired
 def importTags():
 	form = TagImportForm()
 	errors = []
@@ -227,27 +232,31 @@ def importTags():
 @tags.route("/selectTag", methods = ["GET", "POST"])
 @tags.route("/selectTag/<string:className>", methods = ["GET", "POST"])
 @tags.route("/selectTag/<string:className>/<int:id>", methods = ["GET", "POST"])
-# @login_required
+@login_required
+@permissionRequired(Permission.DATA_ENTRY)
 def selectTag(className = None, id = None):
 	if className == None:
 		parent = Area.query.join(Site, Enterprise).order_by(Enterprise.Name, Site.Name, Area.Name).first()
-		children = Tag.query.filter_by(AreaId = parent.id())
+		if parent:
+			children = Tag.query.filter_by(AreaId = parent.id())
+		else:
+			children = None
 		className = "Tag"
-	elif className == "Area":
-		parent = Area.query.get_or_404(id)
-		children = Tag.query.filter_by(AreaId = id)
-		className = "Tag"
-	elif className == "Site":
-		parent = Site.query.get_or_404(id)
-		children = Area.query.filter_by(SiteId = id)
-		className = "Area"
-	elif className == "Enterprise":
-		parent = Enterprise.query.get_or_404(id)
-		children = Site.query.filter_by(EnterpriseId = id)
-		className = "Site"
 	elif className == "Root":
 		parent = None
 		children = Enterprise.query.order_by(Enterprise.Name)
 		className = "Enterprise"
+	elif className == "Enterprise":
+		parent = Enterprise.query.get_or_404(id)
+		children = Site.query.filter_by(EnterpriseId = id)
+		className = "Site"
+	elif className == "Site":
+		parent = Site.query.get_or_404(id)
+		children = Area.query.filter_by(SiteId = id)
+		className = "Area"
+	elif className == "Area":
+		parent = Area.query.get_or_404(id)
+		children = Tag.query.filter_by(AreaId = id)
+		className = "Tag"
 
 	return render_template("tags/selectTag.html", children = children, className = className, parent = parent)

@@ -15,10 +15,12 @@ Event Frame Templates
             <li><a href = "{{ url_for("eventFrameTemplates.selectEventFrameTemplate", className = "Root") }}">..</a></li>
             <li class = "active">{{ parent.Name }}</li>
         {% elif className == "ElementTemplate" %}
-            <li><a href = "{{ url_for("eventFrameTemplates.selectEventFrameTemplate", className = "Root") }}">..</a></li>
-            <li><a href = "{{ url_for("eventFrameTemplates.selectEventFrameTemplate", className = parent.Enterprise.__class__.__name__,
-                id = parent.Enterprise.id()) }}">{{ parent.Enterprise.Name }}</a></li>
-            <li class = "active">{{ parent.Name }}</li>
+            {% if parent %}
+                <li><a href = "{{ url_for("eventFrameTemplates.selectEventFrameTemplate", className = "Root") }}">..</a></li>
+                <li><a href = "{{ url_for("eventFrameTemplates.selectEventFrameTemplate", className = parent.Enterprise.__class__.__name__,
+                    id = parent.Enterprise.id()) }}">{{ parent.Enterprise.Name }}</a></li>
+                <li class = "active">{{ parent.Name }}</li>
+            {% endif %}
         {% elif className == "EventFrameTemplate" %}
             <li><a href = "{{ url_for("eventFrameTemplates.selectEventFrameTemplate", className = "Root") }}">..</a></li>
             <li><a href = "{{ url_for("eventFrameTemplates.selectEventFrameTemplate", className = parent.Site.Enterprise.__class__.__name__,
@@ -74,28 +76,30 @@ Event Frame Templates
             </tr>
         </thead>
         <tbody>
-            {% for child in children %}
-                <tr>
-                    <td><a class = "btn btn-default" title = "Children" href = "{{ url_for("eventFrameTemplates.selectEventFrameTemplate",
-                        className = child.__class__.__name__, id = child.id()) }}"><span class="glyphicon glyphicon-list"></span></a></td>
-                    <td>{{ child.Name }}</td>
-                    <td>{{ child.Description }}</td>
-                    {% if className == None %}
-                        <td>{{ child.Order }}</td>
-                    {% else %}
-                        <td></td>
-                    {% endif %}
-                    {% if className == "EventFrameTemplate" or className == None %}
-                        <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Edit" href = "{{ url_for("eventFrameTemplates.editEventFrameTemplate",
-                            eventFrameTemplateId = child.id()) }}"><span class="glyphicon glyphicon-edit"></a></td>
-                        <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Delete" href = "{{ url_for("eventFrameTemplates.deleteEventFrameTemplate",
-                            eventFrameTemplateId = child.id()) }}"><span class="glyphicon glyphicon-trash"></a></td>
-                    {% else %}
-                        <td></td>
-                        <td></td>
-                    {% endif %}
-                </tr>
-            {% endfor %}
+            {% if children %}
+                {% for child in children %}
+                    <tr>
+                        <td><a class = "btn btn-default" title = "Children" href = "{{ url_for("eventFrameTemplates.selectEventFrameTemplate",
+                            className = child.__class__.__name__, id = child.id()) }}"><span class="glyphicon glyphicon-list"></span></a></td>
+                        <td>{{ child.Name }}</td>
+                        <td>{{ child.Description }}</td>
+                        {% if className == None %}
+                            <td>{{ child.Order }}</td>
+                        {% else %}
+                            <td></td>
+                        {% endif %}
+                        {% if className == "EventFrameTemplate" or className == None %}
+                            <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Edit" href = "{{ url_for("eventFrameTemplates.editEventFrameTemplate",
+                                eventFrameTemplateId = child.id()) }}"><span class="glyphicon glyphicon-edit"></a></td>
+                            <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Delete" href = "{{ url_for("eventFrameTemplates.deleteEventFrameTemplate",
+                                eventFrameTemplateId = child.id()) }}"><span class="glyphicon glyphicon-trash"></a></td>
+                        {% else %}
+                            <td></td>
+                            <td></td>
+                        {% endif %}
+                    </tr>
+                {% endfor %}
+            {% endif %}
         </tbody>
     </table>
 </div>
