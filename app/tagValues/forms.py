@@ -2,7 +2,6 @@ from flask_wtf import FlaskForm
 from datetime import datetime
 from wtforms import DateTimeField, FloatField, HiddenField, SelectField, StringField, SubmitField
 from wtforms.validators import Required
-from .. models import Area, Enterprise, Lookup, Site, UnitOfMeasurement
 
 class TagValueForm(FlaskForm):
 	tagId = HiddenField()

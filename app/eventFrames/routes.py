@@ -143,8 +143,9 @@ def startEventFrame(elementId, eventFrameTemplateId):
 		"alert alert-success")
 	return redirect(request.referrer)
 
-@eventFrames.route("/eventFrames/addEventFrameNote/<int:eventFrameId>", methods = ["GET", "POST"])
-# @login_required
+@eventFrames.route("/eventFrameNotes/add/<int:eventFrameId>", methods = ["GET", "POST"])
+@login_required
+@permissionRequired(Permission.DATA_ENTRY)
 def addEventFrameNote(eventFrameId):
 	# check_admin()
 	operation = "Add"
@@ -166,8 +167,9 @@ def addEventFrameNote(eventFrameId):
 	form.requestReferrer.data = request.referrer
 	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
 
-@eventFrames.route("/eventFrames/editEventFrameNote/<int:noteId>", methods = ["GET", "POST"])
-# @login_required
+@eventFrames.route("/eventFrameNotes/edit/<int:noteId>", methods = ["GET", "POST"])
+@login_required
+@permissionRequired(Permission.DATA_ENTRY)
 def editEventFrameNote(noteId):
 	# check_admin()
 	operation = "Edit"
@@ -189,8 +191,9 @@ def editEventFrameNote(noteId):
 	form.requestReferrer.data = request.referrer
 	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
 
-@eventFrames.route("/eventFrames/deleteEventFrameNote/<int:eventFrameId>/<int:noteId>", methods = ["GET", "POST"])
-# @login_required
+@eventFrames.route("/eventFrameNotes/delete/<int:eventFrameId>/<int:noteId>", methods = ["GET", "POST"])
+@login_required
+@permissionRequired(Permission.DATA_ENTRY)
 def deleteEventFrameNote(eventFrameId, noteId):
 	# check_admin()
 	eventFrameNote = EventFrameNote.query.filter_by(EventFrameId = eventFrameId, NoteId = noteId).first()

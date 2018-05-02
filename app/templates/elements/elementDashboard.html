@@ -9,7 +9,7 @@
 {% block page_content %}
 <div>
     <ol class="breadcrumb">
-        <li><a href = "{{ url_for("elements.selectElement", className = "root", id = None) }}">..</a></li>
+        <li><a href = "{{ url_for("elements.selectElement", className = "Root", id = None) }}">..</a></li>
         <li><a href = "{{ url_for("elements.selectElement", className = element.ElementTemplate.Site.Enterprise.__class__.__name__,
             id = element.ElementTemplate.Site.Enterprise.EnterpriseId) }}">{{ element.ElementTemplate.Site.Enterprise.Name }}</a></li>
         <li><a href = "{{ url_for("elements.selectElement", className = element.ElementTemplate.Site.__class__.__name__,
@@ -20,7 +20,6 @@
     </ol>
     <h1>{{ element.Name }}</h1>
     <h2>Event Frames</h2>
-    <h4>{{ strQuery }}</h4>
     <br>
     <table id = "eventFramesTable" class = "table">
         <thead>
@@ -29,7 +28,6 @@
                 <th>Event Frame</th>
                 <th>Last Start Timestamp</th>
                 <th>Last End Timestamp</th>
-                <th></th>
                 <th></th>
                 <th></th>
                 <th></th>
@@ -69,9 +67,6 @@
                         elementId = element.ElementId, eventFrameTemplateId = eventFrameTemplate.EventFrameTemplateId) }}">
                         <span class="glyphicon glyphicon-plus"></span></a></td>
                     {% if firstEventFrame %}
-                        <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Notes"
-                            href = "{{ url_for("eventFrames.addEventFrameNote", eventFrameId = firstEventFrame.EventFrameId) }}">
-                            <span class="glyphicon glyphicon-comment"></a></td>
                         <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Edit"
                             href = "{{ url_for("eventFrames.editEventFrame", eventFrameId = firstEventFrame.EventFrameId) }}">
                             <span class="glyphicon glyphicon-edit"></span></a></td>
@@ -81,37 +76,12 @@
                     {% else %}
                         <td></td>
                         <td></td>
-                        <td></td>
                     {% endif %}
                 </tr>
-                {% if firstEventFrame.EventFrameNotes.count() > 0 %}
-                    <tr>
-                        <td class = "invisible"></td>
-                        <td class = "invisible"></td>
-                        <th colspan="4">Note</th>
-                        <th>Timestamp</th>
-                        <td></td>
-                        <td></td>
-                    </tr>
-                    {% for EventFrameNote in firstEventFrame.EventFrameNotes %}
-                        <tr>
-                            <td class = "invisible"></td>
-                            <td class = "invisible"></td>
-                            <td colspan="4">{{ EventFrameNote.Notes.Note }}</td>
-                            <td>{{ EventFrameNote.Notes.Timestamp }}</td>
-                            <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Edit"
-                                href = "{{ url_for("eventFrames.editEventFrameNote", noteId = EventFrameNote.Notes.NoteId) }}">
-                                <span class="glyphicon glyphicon-edit"></span></a></td>
-                            <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Delete"
-                                href = "{{ url_for("eventFrames.deleteEventFrameNote", eventFrameId = firstEventFrame.EventFrameId, 
-                                noteId = EventFrameNote.Notes.NoteId) }}"><span class="glyphicon glyphicon-trash"></a></td>
-                        </tr>
-                    {% endfor %}
-                {% endif %}
             {% endfor %}
         </tbody>
-    </table>        
-    <h2>Attributes</h2>        
+    </table>
+    <h2>Attributes</h2>
     <br>
     <table id = "attributesTable" class = "table">
         <thead>
@@ -120,6 +90,7 @@
                 <th>Attribute</th>
                 <th>Last Timestamp</th>
                 <th>Last Value</th>
+                <th>Unit / Lookup Name</th>
                 <th></th>
                 <th></th>
                 <th></th>
@@ -137,11 +108,14 @@
                         <td>{{ firstTagValue.Timestamp }}</td>
                         {% if elementAttribute.Tag.LookupId %}
                             <td>{{ elementAttribute.Tag.Lookup.LookupValues | selectattr("Value", "equalto", firstTagValue.Value) | map(attribute = "Name") |
-                                list | first }}</td>                    
+                                list | first }}</td>
+                            <td>{{ elementAttribute.Tag.Lookup.Name }}</td>
                         {% else %}
-                            <td>{{ firstTagValue.Value }} {{ firstTagValue.Tag.UnitOfMeasurement.Abbreviation }}</td>                    
+                            <td>{{ firstTagValue.Value }}</td>
+                            <td>{{ firstTagValue.Tag.UnitOfMeasurement.Abbreviation }}</td>
                         {% endif %}
                     {% else %}
+                        <td></td>
                         <td></td>
                         <td></td>
                     {% endif %}
@@ -150,8 +124,8 @@
                         tagId = elementAttribute.Tag.TagId) }}"><span class="glyphicon glyphicon-plus"></span></a></td>
                     {% if elementAttribute.Tag.TagValues[0] %}
                         <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Notes"
-                            href = "{{ url_for("tagValues.addTagValueNote", tagValueId = firstTagValue.TagValueId) }}">
-                            <span class="glyphicon glyphicon-comment"></a></td>
+                            href = "{{ url_for("tagValues.listTagValueNotes", tagValueId = firstTagValue.TagValueId,
+                            elementAttributeId = elementAttribute.ElementAttributeId) }}"><span class="glyphicon glyphicon-comment"></a></td>
                         <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Edit"
                             href = "{{ url_for("elementAttributes.editElementAttributeValue", elementId = elementAttribute.ElementId,
                             tagValueId = firstTagValue.TagValueId) }}"><span class="glyphicon glyphicon-edit"></span></a></td>
@@ -161,32 +135,9 @@
                     {% else %}
                         <td></td>
                         <td></td>
+                        <td></td>
                     {% endif %}
                 </tr>
-                {% if firstTagValue.TagValueNotes.count() > 0 %}
-                    <tr>
-                        <td class = "invisible"></td>
-                        <td class = "invisible"></td>
-                        <th colspan="3">Note</th>
-                        <th>Timestamp</th>
-                        <td></td>
-                        <td></td>
-                    </tr>
-                    {% for TagValueNote in firstTagValue.TagValueNotes %}
-                        <tr>
-                            <td class = "invisible"></td>
-                            <td class = "invisible"></td>
-                            <td colspan="3">{{ TagValueNote.Notes.Note }}</td>
-                            <td>{{ TagValueNote.Notes.Timestamp }}</td>
-                            <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Edit"
-                                href = "{{ url_for("tagValues.editTagValueNote", noteId = TagValueNote.Notes.NoteId) }}">
-                                <span class="glyphicon glyphicon-edit"></span></a></td>
-                            <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Delete"
-                                href = "{{ url_for("tagValues.deleteTagValueNote", tagValueId = firstTagValue.TagValueId, 
-                                noteId = TagValueNote.Notes.NoteId) }}"><span class="glyphicon glyphicon-trash"></a></td>
-                        </tr>
-                    {% endfor %}
-                {% endif %}
             {% endfor %}
         </tbody>
     </table>
@@ -231,7 +182,9 @@
                 null,
                 null,
                 null,
+                null,
                 { "orderable": false }, // Add attribute value button.
+                { "orderable": false }, // List attribute value notes button.
                 { "orderable": false }, // Edit attribute value button.
                 { "orderable": false }  // Delete attribute value button.
             ],

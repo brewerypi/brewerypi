@@ -3,7 +3,7 @@ from wtforms import HiddenField, StringField, SubmitField
 from wtforms.ext.sqlalchemy.fields import QuerySelectField
 from wtforms.validators import Length, Optional, Required
 from .. helpers import elementTemplateFullyAbbreviatedPath
-from .. models import Element, ElementTemplate, Enterprise, Site
+from .. models import ElementTemplate, Enterprise, Site
 
 class ElementForm(FlaskForm):
 	elementTemplate = QuerySelectField("Element Template", query_factory = lambda: ElementTemplate.query.join(Site, Enterprise). \

@@ -2,7 +2,6 @@ from flask_wtf import FlaskForm
 from datetime import datetime
 from wtforms import DateTimeField, HiddenField, SelectField, StringField, SubmitField
 from wtforms.validators import Required, Optional
-from .. models import ElementTemplate, Enterprise, EventFrame, EventFrameTemplate, Site
 
 class EventFrameForm(FlaskForm):
 	elementId = HiddenField()

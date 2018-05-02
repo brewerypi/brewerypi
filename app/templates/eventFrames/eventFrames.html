@@ -9,15 +9,14 @@ Event Frames
 {% block page_content %}
 <div>
     <ol class="breadcrumb">
-        <li><a href = "{{ url_for("elements.selectElement", className = "root", id = None) }}">..</a></li>
+        <li><a href = "{{ url_for("elements.selectElement", className = "Root", id = None) }}">..</a></li>
         <li><a href = "{{ url_for("elements.selectElement", className = element.ElementTemplate.Site.Enterprise.__class__.__name__,
             id = element.ElementTemplate.Site.Enterprise.EnterpriseId) }}">{{ element.ElementTemplate.Site.Enterprise.Name }}</a></li>
         <li><a href = "{{ url_for("elements.selectElement", className = element.ElementTemplate.Site.__class__.__name__,
             id = element.ElementTemplate.Site.SiteId) }}">{{ element.ElementTemplate.Site.Name }}</a></li>
         <li><a href = "{{ url_for("elements.selectElement", className = element.ElementTemplate.__class__.__name__,
             id = element.ElementTemplate.ElementTemplateId) }}">{{ element.ElementTemplate.Name }}</a></li>
-        <li><a href = "{{ url_for("elements.selectElement", className = element.__class__.__name__,
-            id = element.ElementId) }}">{{ element.Name }}</a></li>
+        <li><a href = "{{ url_for("elements.dashboard", elementId = element.ElementId) }}">{{ element.Name }}</a></li>
         {% if parentEventFrame %}
             <!-- Parent. -->
             {% if parentEventFrame.ParentEventFrameId %}
@@ -52,8 +51,10 @@ Event Frames
     <h1>{{ element.Name }}</h1>
     {% if parentEventFrame %}
         {% set url = url_for("eventFrames.addEventFrame", parentEventFrameId = parentEventFrame.EventFrameId) %}
+        <h2>{{ parentEventFrame.EventFrameTemplate.Name }} {{ parentEventFrame.friendlyName() }} Child Event Frames</h2>
     {% else %}
         {% set url = url_for("eventFrames.addEventFrame", elementId = element.ElementId, eventFrameTemplateId = eventFrameTemplate.EventFrameTemplateId) %}
+        <h2>Event Frames</h2>
     {% endif %}
     <a class = "btn btn-default" title = "Add" href = "{{ url }}" role = "button"><span class="glyphicon glyphicon-plus"></a>
     <br><br>
@@ -73,14 +74,9 @@ Event Frames
         <tbody>
             {% for eventFrame in eventFrames %}
                 <tr>
-                    {% if eventFrame.EventFrameTemplate.EventFrameTemplates %}
-                        <td><a class = "btn btn-default" title = "Child Event Frames"
-                            href = "{{ url_for("eventFrames.listEventFrames", parentEventFrameId = eventFrame.EventFrameId) }}">
-                            <span class="glyphicon glyphicon-list"></span>
-                            </a></td>
-                    {% else %}
-                        <td></td>
-                    {% endif %}
+                    <td><a class = "btn btn-default" title = "Child Event Frames"
+                        href = "{{ url_for("eventFrames.listEventFrames", parentEventFrameId = eventFrame.EventFrameId) }}">
+                        <span class="glyphicon glyphicon-list"></span></a></td>
                     <td>{{ eventFrame.EventFrameTemplate.Name }}</td>
                     <td>{{ eventFrame.Name }}</td>
                     <td>{{ eventFrame.StartTimestamp }}</td>
@@ -95,41 +91,42 @@ Event Frames
                     {% else %}
                         <td></td>
                     {% endif %}
-                    <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Notes"
-                        href = "{{ url_for("eventFrames.addEventFrameNote", eventFrameId = eventFrame.EventFrameId) }}">
-                        <span class="glyphicon glyphicon-comment"></a></td>
                     <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("eventFrames.editEventFrame",
                         eventFrameId = eventFrame.EventFrameId) }}"><span class="glyphicon glyphicon-edit"></a></td>
                     <td><a class = "btn btn-default" title = "Delete" href = "{{ url_for("eventFrames.deleteEventFrame",
                         eventFrameId = eventFrame.EventFrameId) }}"><span class="glyphicon glyphicon-trash"></a></td>
                 </tr>
-                {% if eventFrame.EventFrameNotes.count() > 0 %}
-                    <tr>
-                        <td class = "invisible"></td>
-                        <td class = "invisible"></td>
-                        <th colspan="4">Note</th>
-                        <th>Timestamp</th>
-                        <td></td>
-                        <td></td>
-                    </tr>
-                    {% for EventFrameNote in eventFrame.EventFrameNotes %}
-                        <tr>
-                            <td class = "invisible"></td>
-                            <td class = "invisible"></td>
-                            <td colspan="4">{{ EventFrameNote.Notes.Note }}</td>
-                            <td>{{ EventFrameNote.Notes.Timestamp }}</td>
-                            <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Edit"
-                                href = "{{ url_for("eventFrames.editEventFrameNote", noteId = EventFrameNote.Notes.NoteId) }}">
-                                <span class="glyphicon glyphicon-edit"></span></a></td>
-                            <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Delete"
-                                href = "{{ url_for("eventFrames.deleteEventFrameNote", eventFrameId = eventFrame.EventFrameId, 
-                                noteId = EventFrameNote.Notes.NoteId) }}"><span class="glyphicon glyphicon-trash"></a></td>
-                        </tr>
-                    {% endfor %}
-                {% endif %}
             {% endfor %}
         </tbody>
     </table>
+    {% if parentEventFrame.EventFrameNotes %}
+    <h2>{{ parentEventFrame.EventFrameTemplate.Name }} {{ parentEventFrame.friendlyName() }} Notes</h2>
+    <a class = "btn btn-default" title = "Add" href = "{{ url_for("eventFrames.addEventFrameNote",
+        eventFrameId = parentEventFrame.EventFrameId) }}" role = "button"><span class="glyphicon glyphicon-plus"></span></a>
+    <br><br>
+    <table id = "eventFrameNotesTable" class = "table">
+        <thead>
+            <tr>
+                <th>Timestamp</th>
+                <th>Note</th>
+                <th></th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for eventFrameNote in parentEventFrame.EventFrameNotes %}
+                <tr>
+                    <td>{{ eventFrameNote.Note.Timestamp }}</td>
+                    <td>{{ eventFrameNote.Note.Note }}</td>
+                    <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("eventFrames.editEventFrameNote",
+                        noteId = eventFrameNote.NoteId) }}"><span class="glyphicon glyphicon-edit"></span></a></td>
+                    <td><a class = "btn btn-default" title = "Delete" href = "{{ url_for("eventFrames.deleteEventFrameNote",
+                        noteId = eventFrameNote.NoteId, eventFrameId = eventFrameNote.EventFrameId) }}"><span class="glyphicon glyphicon-trash"></span></a></td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
 </div>
 {% endblock %}
 
@@ -142,7 +139,7 @@ Event Frames
         ({
             "order":
             [
-                [3, 'desc']              // Start timestamp.
+                [3, 'desc']             // Event frame start timestamp.
             ],
             "columns":
             [
@@ -159,5 +156,42 @@ Event Frames
             "stateDuration": 0,
             "pageLength": 25
         });
+
+        $('#eventFrameNotesTable').DataTable
+        ({
+            "order":
+            [
+                [0, 'desc']              // Timestamp.
+            ],
+            "columns":
+            [
+                null,
+                null,
+                { "orderable": false }, // Edit tag value button.
+                { "orderable": false }  // Delete tag value button.
+            ],
+            "stateSave": true,
+            "stateDuration": 0,
+            "pageLength": 25
+        });
+        
+        // $('#eventFramesTable').DataTable().rows().every(function() {
+        //     var tr = $(this.node());
+        //     var eventFrameName = $('Name').html(); //removed (class = "Name") from <td> above
+        //     alert(eventFrameName);
+        //     this.child(formatChildTable(tr.data)).show();
+        // });
+
+        // function formatChildTable(data) {
+        //     return "<table>" +
+        //         "{% for eventFrame in eventFrames %}" +
+        //             "<tr>" +
+        //                 "<td>" +
+        //                     "{{ eventFrame.Name }}" +
+        //                 "</td>" +
+        //             "</tr>" +
+        //         "{% endfor %}" +
+        //     "</table>";
+        // }
     </script>
 {% endblock %}

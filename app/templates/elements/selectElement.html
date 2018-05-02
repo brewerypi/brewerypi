@@ -9,45 +9,35 @@ Data Entry - Elements
 {% block page_content %}
 <div>
     <ol class="breadcrumb">
-        {% if site %}
-            <li><a href = "{{ url_for("elements.selectElement", className = "root", id = None) }}">..</a></li>
-            <li><a href = "{{ url_for("elements.selectElement", className = site.Enterprise.__class__.__name__,
-                id = site.Enterprise.EnterpriseId) }}">{{ site.Enterprise.Name }}</a></li>
-            <li class = "active">{{ site.Name }}</li>
-        {% elif elementTemplates %}
-            <li><a href = "{{ url_for("elements.selectElement", className = "root", id = None) }}">..</a></li>
-            {% set firstElementTemplate = elementTemplates | first %}
-            <li><a href = "{{ url_for("elements.selectElement", className = firstElementTemplate.Site.Enterprise.__class__.__name__,
-                id = firstElementTemplate.Site.Enterprise.EnterpriseId) }}">{{ firstElementTemplate.Site.Enterprise.Name }}</a></li>
-            <li class = "active">{{ firstElementTemplate.Site.Name }}</li>
-        {% elif elements %}
-            <li><a href = "{{ url_for("elements.selectElement", className = "root", id = None) }}">..</a></li>
-            {% set firstElement = elements | first %}
-            <li><a href = "{{ url_for("elements.selectElement", className = firstElement.ElementTemplate.Site.Enterprise.__class__.__name__,
-                id = firstElement.ElementTemplate.Site.Enterprise.EnterpriseId) }}">{{ firstElement.ElementTemplate.Site.Enterprise.Name }}</a></li>
-            <li><a href = "{{ url_for("elements.selectElement", className = firstElement.ElementTemplate.Site.__class__.__name__,
-                id = firstElement.ElementTemplate.Site.SiteId) }}">{{ firstElement.ElementTemplate.Site.Name }}</a></li>
-            <li class = "active">{{ firstElement.ElementTemplate.Name }}</li>
-        {% elif enterprises %}
+        {% if className == "Element" %}
+            <li><a href = "{{ url_for("elements.selectElement", className = "Root") }}">..</a></li>
+            <li><a href = "{{ url_for("elements.selectElement", className = parent.Site.Enterprise.__class__.__name__,
+                id = parent.Site.Enterprise.id()) }}">{{ parent.Site.Enterprise.Name }}</a></li>
+            <li><a href = "{{ url_for("elements.selectElement", className = parent.Site.__class__.__name__,
+                id = parent.Site.id()) }}">{{ parent.Site.Name }}</a></li>
+            <li class = "active">{{ parent.Name }}</li>
+        {% elif className == "ElementTemplate" and parent %}
+            <li><a href = "{{ url_for("elements.selectElement", className = "Root") }}">..</a></li>
+            <li><a href = "{{ url_for("elements.selectElement", className = parent.Enterprise.__class__.__name__,
+                id = parent.Enterprise.id()) }}">{{ parent.Enterprise.Name }}</a></li>
+            <li class = "active">{{ parent.Name }}</li>
+        {% elif className == "Site" %}
+            <li><a href = "{{ url_for("elements.selectElement", className = "Root") }}">..</a></li>
+            <li class = "active">{{ parent.Name }}</li>
+        {% elif className == "Enterprise" %}
             <li class = "active">..</li>
-        {% elif sites %}
-            <li><a href = "{{ url_for("elements.selectElement", className = "root", id = None) }}">..</a></li>
-            {% set firstSite = sites | first %}
-            <li class = "active">{{ firstSite.Enterprise.Name }}</li>
         {% endif %}
     </ol>
 </div>
 <div>
-    {% if site %}
-        <h1>Element Templates</h1>
-    {% elif elementTemplates %}
-        <h1>Element Templates</h1>
-    {% elif elements %}
+    {% if className == "Element" %}
         <h1>Elements</h1>
-    {% elif enterprises %}
-        <h1>Enterprises</h1>
-    {% elif sites %}
+    {% elif className == "ElementTemplate" %}
+        <h1>Element Templates</h1>
+    {% elif className == "Site" %}
         <h1>Sites</h1>
+    {% elif className == "Enterprise" %}
+        <h1>Enterprises</h1>
     {% endif %}
     <table id = "table" class = "table">
         <thead>
@@ -58,47 +48,18 @@ Data Entry - Elements
             </tr>
         </thead>
         <tbody>
-            {% if site %}
-                {% for elementTemplate in site.ElementTemplates | sort(attribute = "Name") %}
+            {% if children %}
+                {% for child in children %}
                     <tr>
-                        <td><a class = "btn btn-default" href = "{{ url_for("elements.selectElement", className = elementTemplate.__class__.__name__,
-                            id = elementTemplate.ElementTemplateId) }}"><span class="glyphicon glyphicon-list"></span></a></td>
-                        <td>{{ elementTemplate.Name }}</td>
-                        <td>{{ elementTemplate.Description }}</td>
-                    </tr>
-                {% endfor %}
-            {% elif elementTemplates %}
-                {% for elementTemplate in elementTemplates | sort(attribute = "Name") %}
-                    <tr>
-                        <td><a class = "btn btn-default" href = "{{ url_for("elements.selectElement", className = elementTemplate.__class__.__name__,
-                            id = elementTemplate.ElementTemplateId) }}"><span class="glyphicon glyphicon-list"></span></a></td>
-                        <td>{{ elementTemplate.Name }}</td>
-                        <td>{{ elementTemplate.Description }}</td>
-                    </tr>
-                {% endfor %}
-            {% elif elements %}
-                {% for element in elements | sort(attribute = "Name") %}
-                    <tr>
-                        <td><a class = "btn btn-default" href = "{{ url_for("elements.dashboard", elementId = element.ElementId) }}"><span class="glyphicon glyphicon-list"></span></a></td>
-                        <td>{{ element.Name }}</td>
-                        <td>{{ element.Description }}</td>
-                    </tr>
-                {% endfor %}
-            {% elif enterprises %}
-                {% for enterprise in enterprises | sort(attribute = "Name") %}
-                    <tr>
-                        <td><a class = "btn btn-default" href = "{{ url_for("elements.selectElement", className = enterprise.__class__.__name__,                
-                            id = enterprise.EnterpriseId) }}"><span class="glyphicon glyphicon-list"></span></a></td>
-                        <td>{{ enterprise.Name }}</td>
-                        <td>{{ enterprise.Description }}</td>
-                    </tr>
-                {% endfor %}
-            {% elif sites %}
-                {% for site in sites | sort(attribute = "Name") %}
-                    <tr>
-                        <td><a class = "btn btn-default" href = "{{ url_for("elements.selectElement", className = site.__class__.__name__, id = site.SiteId) }}"><span class="glyphicon glyphicon-list"></span></a></td>
-                        <td>{{ site.Name }}</td>
-                        <td>{{ site.Description }}</td>
+                        {% if className == "Element" %}
+                            <td><a class = "btn btn-default" title = "Select" href = "{{ url_for("elements.dashboard",
+                                elementId = child.id()) }}"><span class="glyphicon glyphicon-list"></span></a></td>
+                        {% else %}
+                            <td><a class = "btn btn-default" title = "Select" href = "{{ url_for("elements.selectElement", className = child.__class__.__name__,
+                                id = child.id()) }}"><span class="glyphicon glyphicon-list"></span></a></td>
+                        {% endif %}
+                        <td>{{ child.Name }}</td>
+                        <td>{{ child.Description }}</td>
                     </tr>
                 {% endfor %}
             {% endif %}

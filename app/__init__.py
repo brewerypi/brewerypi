@@ -1,7 +1,6 @@
 from flask import Flask
 from flask_bootstrap import Bootstrap
 from flask_login import LoginManager
-from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from config import Config
 
@@ -10,7 +9,6 @@ db = SQLAlchemy()
 loginManager = LoginManager()
 loginManager.session_protection = "basic"
 loginManager.login_view = "authentications.login"
-migrate = Migrate()
 
 def create_app(configClass = Config):
 	app = Flask(__name__)
@@ -19,7 +17,6 @@ def create_app(configClass = Config):
 	boostrap.init_app(app)
 	db.init_app(app)
 	loginManager.init_app(app)
-	migrate.init_app(app, db, directory = "db/migrations")
 
 	from . areas import areas as areasBlueprint
 	app.register_blueprint(areasBlueprint)
