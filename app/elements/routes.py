@@ -1,3 +1,4 @@
+from datetime import datetime
 from flask import flash, jsonify, redirect, render_template, request, url_for
 from flask_login import login_required
 from sqlalchemy import and_
@@ -6,7 +7,8 @@ from . forms import ElementForm
 from .. import db
 from .. eventFrames . forms import EventFrameForm
 from .. decorators import adminRequired, permissionRequired
-from .. models import Area, AttributeTemplate, Element, ElementAttribute, ElementTemplate, Enterprise, EventFrame, EventFrameTemplate, Permission, Site, Tag
+from .. models import Area, AttributeTemplate, Element, ElementAttribute, ElementTemplate, Enterprise, EventFrame, EventFrameTemplate, Permission, Site, Tag, \
+	TagValue
 
 modelName = "Element"
 
@@ -175,7 +177,13 @@ def test():
 	# print (data)
 	for item in data:
 		if item["value"]:
-			print ("key: " + item["name"], " value: " + item["value"])
+			elementAttribute = ElementAttribute.query.get_or_404(item["name"])
+			tagValue = TagValue(TagId = elementAttribute.TagId, Timestamp = datetime.now(), Value = item["value"])
+			db.session.add(tagValue)
+			# print ("key: " + item["name"], " value: " + item["value"])
+
+	db.session.commit()
+	flash("Success!", "alert alert-success")
 	# for key, value in data:
 	# 	print (key, " : ", value)
-	return jsonify({"text" : "kats"})
+	return jsonify(True)

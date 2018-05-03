@@ -198,14 +198,15 @@
             $("button").click(function() {
                 $("#test").text("x");
                 var data = JSON.stringify(attributes.$("input").serializeArray());
-                alert(data);
+                // alert(data);
                 $.ajax({
                     type: "POST",
                     url: "/test",
                     data: data//,
                     // dataType: "json"
-                // }).success(function(response) {
-                //     $("#test").text(response["text"])
+                }).success(function(response) {
+                    // $("#test").text(response["text"])
+                    location.reload();
                 });
             });
         });
