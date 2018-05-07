@@ -72,7 +72,7 @@
                             <span class="glyphicon glyphicon-edit"></span></a></td>
                         <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Delete"
                             href = "{{ url_for("eventFrames.deleteEventFrame", eventFrameId = firstEventFrame.EventFrameId) }}">
-                            <span class="glyphicon glyphicon-trash"></a></td>
+                            <span class="glyphicon glyphicon-trash"></span></a></td>
                     {% else %}
                         <td></td>
                         <td></td>
@@ -91,6 +91,9 @@
                 <th>Attribute</th>
                 <th>Last Timestamp</th>
                 <th>Last Value</th>
+                <th>New Value</th>
+                <th></th>
+                <th>New Timestamp</th>
                 <th></th>
                 <th></th>
                 <th></th>
@@ -118,20 +121,41 @@
                         <td></td>
                         <td></td>
                     {% endif %}
-                    <td><input name = "{{ elementAttribute.ElementAttributeId }}" value = ""></td>
+                    {% if elementAttribute.Tag.LookupId %}
+                        <td>
+                            <select class = "form-control">
+                                <option value = "-1"></option>
+                                {% for lookupValue in elementAttribute.Tag.Lookup.LookupValues %}
+                                        <option value = "{{ lookupValue.Value }}">{{ lookupValue.Name}}</option>
+                                {% endfor %}
+                            </select>
+                        </td>
+                    {% else %}
+                        <td>
+                            <div class = "form-group has-error">
+                                <input class = "form-control" id = "value{{ elementAttribute.ElementAttributeId }}"
+                                    name = "value{{ elementAttribute.ElementAttributeId }}" value = "">
+                                <p class = "help-block"></p>
+                            </div>
+                        </td>
+                    {% endif %}
+                    <td><span class="glyphicon glyphicon-ok" style = "color:green"></span></td>
+                    <td><input class = "timestamp" id = "timestamp{{ elementAttribute.ElementAttributeId }}" name = "timestamp{{ elementAttribute.ElementAttributeId }}" value = ""></td>
+                    <td><span class="glyphicon glyphicon-remove" style = "color:red"></span></td>
                     <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Add"
                         href = "{{ url_for("elementAttributes.addElementAttributeValue", elementId = elementAttribute.ElementId,
                         tagId = elementAttribute.Tag.TagId) }}"><span class="glyphicon glyphicon-plus"></span></a></td>
                     {% if elementAttribute.Tag.TagValues[0] %}
                         <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Notes"
                             href = "{{ url_for("tagValues.listTagValueNotes", tagValueId = firstTagValue.TagValueId) }}">
-                            <span class="glyphicon glyphicon-comment"></a></td>
+                            <span class="glyphicon glyphicon-comment"></span></a></td>
                         <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Edit"
                             href = "{{ url_for("elementAttributes.editElementAttributeValue", elementId = elementAttribute.ElementId,
                             tagValueId = firstTagValue.TagValueId) }}"><span class="glyphicon glyphicon-edit"></span></a></td>
                         <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Delete"
                             href = "{{ url_for("elementAttributes.deleteElementAttributeValue",
-                            elementId = elementAttribute.ElementId, tagValueId = firstTagValue.TagValueId) }}"><span class="glyphicon glyphicon-trash"></a></td>
+                            elementId = elementAttribute.ElementId, tagValueId = firstTagValue.TagValueId) }}"><span class="glyphicon glyphicon-trash"></span>
+                            </a></td>
                     {% else %}
                         <td></td>
                         <td></td>
@@ -184,7 +208,10 @@
                     null,
                     null,
                     null,
-                    null,
+                    { "orderable": false }, // New value.
+                    { "orderable": false }, // New value icon.
+                    { "orderable": false }, // New timestamp.
+                    { "orderable": false }, // New timestamp icon.
                     { "orderable": false }, // Add attribute value button.
                     { "orderable": false }, // List attribute value notes button.
                     { "orderable": false }, // Edit attribute value button.
@@ -195,19 +222,46 @@
                 "pageLength": 25
             });
 
+            $(".value").blur(function()
+            {
+                var timestamp = new Date().toJSON().split(".")[0].replace("T", " ")
+                var id = $(this).attr("id").split("value")[1]
+
+                if ($.isNumeric($(this).val()) || $(this).val() == "")
+                {
+                    // $("#jQueryMessages").attr({"class" : "alert alert-success"})
+                    // $("#jQueryMessages").html("<button type = \"button\" class = \"close\" data-dismiss = \"alert\">&times;</button>kats")
+                    $("#timestamp" + id).val(timestamp)
+                }
+                else
+                {
+                    $("#timestamp" + id).val("")
+                    // alert("kats!")
+                    $(this).focus()
+                    $(this).select()
+                    // $("#jQueryMessages").attr({"class" : "alert alert-warning"})
+                    // $("#jQueryMessages").html("<button type = \"button\" class = \"close\" data-dismiss = \"alert\">&times;</button>dogs")
+                }
+            })
+
             $("button").click(function() {
-                $("#test").text("x");
-                var data = JSON.stringify(attributes.$("input").serializeArray());
+                // $("#test").text("x");
+                // var data = attributes.$("input").serializeArray();
                 // alert(data);
-                $.ajax({
-                    type: "POST",
-                    url: "/test",
-                    data: data//,
-                    // dataType: "json"
-                }).success(function(response) {
-                    // $("#test").text(response["text"])
-                    location.reload();
-                });
+                // var data = JSON.stringify(attributes.$("input").serializeArray());
+                // alert(data);
+                var arr = $("select.form-control").map(function() {return this.value}).get()
+                alert(arr)
+
+                // $.ajax({
+                //     type: "POST",
+                //     url: "/test",
+                //     data: data//,
+                //     // dataType: "json"
+                // }).done(function(response) {
+                //     // $("#test").text(response["text"])
+                //     location.reload();
+                // });
             });
         });
     </script>
