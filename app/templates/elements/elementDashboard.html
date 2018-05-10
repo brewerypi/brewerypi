@@ -83,7 +83,6 @@
     </table>
     <h2 id = "test">Attributes</h2>
     <br>
-    <button type = "submit">Submit Form</button>
     <table id = "attributesTable" class = "table">
         <thead>
             <tr>
@@ -92,7 +91,6 @@
                 <th>Last Timestamp</th>
                 <th>Last Value</th>
                 <th>New Value</th>
-                <th></th>
                 <th>New Timestamp</th>
                 <th></th>
                 <th></th>
@@ -139,9 +137,10 @@
                             </div>
                         </td>
                     {% endif %}
-                    <td><span class="glyphicon glyphicon-ok" style = "color:green"></span></td>
+                    <!-- <td><span class="glyphicon glyphicon-ok" style = "color:green"></span></td> -->
                     <td><input class = "timestamp" id = "timestamp{{ elementAttribute.ElementAttributeId }}" name = "timestamp{{ elementAttribute.ElementAttributeId }}" value = ""></td>
-                    <td><span class="glyphicon glyphicon-remove" style = "color:red"></span></td>
+                    <!-- <td><span class="glyphicon glyphicon-remove" style = "color:red"></span></td> -->
+                    <td><a class = "btn btn-default" title = "Save All"><span class="glyphicon glyphicon-floppy-disk"></span></a></td>
                     <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Add"
                         href = "{{ url_for("elementAttributes.addElementAttributeValue", elementId = elementAttribute.ElementId,
                         tagId = elementAttribute.Tag.TagId) }}"><span class="glyphicon glyphicon-plus"></span></a></td>
@@ -209,9 +208,8 @@
                     null,
                     null,
                     { "orderable": false }, // New value.
-                    { "orderable": false }, // New value icon.
                     { "orderable": false }, // New timestamp.
-                    { "orderable": false }, // New timestamp icon.
+                    { "orderable": false }, // Save all button.
                     { "orderable": false }, // Add attribute value button.
                     { "orderable": false }, // List attribute value notes button.
                     { "orderable": false }, // Edit attribute value button.
