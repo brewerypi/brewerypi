@@ -91,8 +91,8 @@
                 <th>Last Timestamp</th>
                 <th>Last Value</th>
                 <th>New Value</th>
-                <th>New Timestamp</th>
                 <th></th>
+                <th>New Timestamp</th>
                 <th></th>
                 <th></th>
                 <th></th>
@@ -121,7 +121,7 @@
                     {% endif %}
                     {% if elementAttribute.Tag.LookupId %}
                         <td>
-                            <select class = "form-control">
+                            <select class = "form-control" id = "selectValue{{ elementAttribute.ElementAttributeId }}">
                                 <option value = "-1"></option>
                                 {% for lookupValue in elementAttribute.Tag.Lookup.LookupValues %}
                                         <option value = "{{ lookupValue.Value }}">{{ lookupValue.Name}}</option>
@@ -130,17 +130,18 @@
                         </td>
                     {% else %}
                         <td>
-                            <div class = "form-group has-error">
-                                <input class = "form-control" id = "value{{ elementAttribute.ElementAttributeId }}"
+                            <!-- <div class = "form-group has-error"> -->
+                            <div class = "form-group" id = "inputValueDiv{{ elementAttribute.ElementAttributeId }}">
+                                <input class = "form-control" id = "inputValue{{ elementAttribute.ElementAttributeId }}"
                                     name = "value{{ elementAttribute.ElementAttributeId }}" value = "">
-                                <p class = "help-block"></p>
+                                <p class = "help-block" id = "inputValueHelpBlock{{ elementAttribute.ElementAttributeId }}"></p>
                             </div>
                         </td>
                     {% endif %}
                     <!-- <td><span class="glyphicon glyphicon-ok" style = "color:green"></span></td> -->
+                    <td><button class = "btn btn-default" title = "Save All"><span class="glyphicon glyphicon-floppy-disk"></span></button></td>
                     <td><input class = "timestamp" id = "timestamp{{ elementAttribute.ElementAttributeId }}" name = "timestamp{{ elementAttribute.ElementAttributeId }}" value = ""></td>
                     <!-- <td><span class="glyphicon glyphicon-remove" style = "color:red"></span></td> -->
-                    <td><a class = "btn btn-default" title = "Save All"><span class="glyphicon glyphicon-floppy-disk"></span></a></td>
                     <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Add"
                         href = "{{ url_for("elementAttributes.addElementAttributeValue", elementId = elementAttribute.ElementId,
                         tagId = elementAttribute.Tag.TagId) }}"><span class="glyphicon glyphicon-plus"></span></a></td>
@@ -171,6 +172,7 @@
     {{ super() }}
     <link rel = "stylesheet" type = "text/css" href = {{ url_for("static", filename = "css/datatables.min.css") }}/> 
     <script type = "text/javascript" src = {{ url_for("static", filename = "js/datatables.min.js") }}></script>
+    <script type = "text/javascript" src = {{ url_for("static", filename = "js/moment.min.js") }}></script>
     <script>
         $(document).ready(function() {
             $('#eventFramesTable').DataTable
@@ -193,7 +195,7 @@
                 "stateSave": true,
                 "stateDuration": 0,
                 "pageLength": 25
-            });
+            })
 
             var attributes = $('#attributesTable').DataTable
             ({
@@ -218,38 +220,95 @@
                 "stateSave": true,
                 "stateDuration": 0,
                 "pageLength": 25
-            });
+            })
 
-            $(".value").blur(function()
-            {
-                var timestamp = new Date().toJSON().split(".")[0].replace("T", " ")
-                var id = $(this).attr("id").split("value")[1]
-
-                if ($.isNumeric($(this).val()) || $(this).val() == "")
+            $("[id^=selectValue]").change(function() {
+                var value = $.trim($(this).val())
+                var id = $(this).attr("id").split("selectValue")[1]
+                if (value == "-1")
                 {
-                    // $("#jQueryMessages").attr({"class" : "alert alert-success"})
-                    // $("#jQueryMessages").html("<button type = \"button\" class = \"close\" data-dismiss = \"alert\">&times;</button>kats")
-                    $("#timestamp" + id).val(timestamp)
+                    $("#timestamp" + id).val("")
                 }
                 else
                 {
+                    // var timestamp = new Date().toJSON().split(".")[0].replace("T", " ")
+                    var timestamp = new moment().local().format("YYYY-MM-DD HH:mm:ss")
+                    $("#timestamp" + id).val(timestamp)
+                }
+            })
+
+            $("[id^=inputValue]").blur(function() {
+                var value = $.trim($(this).val())
+                var id = $(this).attr("id").split("inputValue")[1]
+                if (value == "")
+                {
                     $("#timestamp" + id).val("")
-                    // alert("kats!")
-                    $(this).focus()
-                    $(this).select()
-                    // $("#jQueryMessages").attr({"class" : "alert alert-warning"})
-                    // $("#jQueryMessages").html("<button type = \"button\" class = \"close\" data-dismiss = \"alert\">&times;</button>dogs")
+                }
+                else
+                {
+                    // var timestamp = new Date().toJSON().split(".")[0].replace("T", " ")
+                    var timestamp = new moment().local().format("YYYY-MM-DD HH:mm:ss")
+                    $("#timestamp" + id).val(timestamp)
                 }
             })
 
             $("button").click(function() {
+                var errors = false
+                var rows = []
+
+                // Loop through the input values.
+                attributes.$("[id^=inputValue]").each(function() {
+                    var value = $.trim($(this).val())
+                    var id = $(this).attr("id").split("inputValue")[1]
+                    var row = {}
+                    if (!($.isNumeric(value)) && value != "")
+                    {
+                        errors = true
+                        $("#inputValueDiv" + id).addClass("has-error")
+                        var helpBlock = $("#inputValueHelpBlock" + id).html("Not a valid float value")
+                    }
+                    else
+                    {
+                        $("#inputValueDiv" + id).removeClass("has-error")
+                        var helpBlock = $("#inputValueHelpBlock" + id).html("")
+                        if (value != "")
+                        {
+                            row[id] = value
+                            rows.push(row)
+                        }
+                    }
+                })
+                console.log(JSON.stringify(rows))
+                console.log(JSON.stringify(attributes.$("[id^=inputValue]").serializeArray()))
+
+                // Loop through the timesteamp values.
+                attributes.$("[id^=timestamp]").each(function() {
+                    var value = $.trim($(this).val())
+                    var id = $(this).attr("id").split("timestamp")[1]
+                    if (!(moment(value, "YYYY-M-D H:m:s", true).isValid()) && value != "")
+                    {
+                        errors = true
+                        alert("bad")
+                        // $("#inputValueDiv" + id).addClass("has-error")
+                        // var helpBlock = $("#inputValueHelpBlock" + id).html("Not a valid float value")
+                    }
+                })
+
+                if (errors == true)
+                {
+                    // alert("errors")
+                }
+                else
+                {
+                    // alert("no errors")                    
+                }
                 // $("#test").text("x");
                 // var data = attributes.$("input").serializeArray();
                 // alert(data);
                 // var data = JSON.stringify(attributes.$("input").serializeArray());
                 // alert(data);
-                var arr = $("select.form-control").map(function() {return this.value}).get()
-                alert(arr)
+                // var arr = $("select.form-control").map(function() {return this.value}).get()
+                // alert(arr)
 
                 // $.ajax({
                 //     type: "POST",
