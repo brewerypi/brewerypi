@@ -174,16 +174,16 @@ def selectElement(className = None, id = None):
 @elements.route("/test", methods=["GET", "POST"])
 def test():
 	data = request.get_json(force = True)
-	# print (data)
-	for item in data:
-		if item["value"]:
-			elementAttribute = ElementAttribute.query.get_or_404(item["name"])
-			tagValue = TagValue(TagId = elementAttribute.TagId, Timestamp = datetime.now(), Value = item["value"])
-			db.session.add(tagValue)
-			# print ("key: " + item["name"], " value: " + item["value"])
+	print (data)
+	# for item in data:
+	# 	if item["value"]:
+	# 		elementAttribute = ElementAttribute.query.get_or_404(item["name"])
+	# 		tagValue = TagValue(TagId = elementAttribute.TagId, Timestamp = datetime.now(), Value = item["value"])
+	# 		db.session.add(tagValue)
+	# 		# print ("key: " + item["name"], " value: " + item["value"])
 
-	db.session.commit()
-	flash("Success!", "alert alert-success")
+	# db.session.commit()
+	# flash("Success!", "alert alert-success")
 	# for key, value in data:
 	# 	print (key, " : ", value)
 	return jsonify(True)

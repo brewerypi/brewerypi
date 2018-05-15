@@ -121,27 +121,31 @@
                     {% endif %}
                     {% if elementAttribute.Tag.LookupId %}
                         <td>
-                            <select class = "form-control" id = "selectValue{{ elementAttribute.ElementAttributeId }}">
-                                <option value = "-1"></option>
-                                {% for lookupValue in elementAttribute.Tag.Lookup.LookupValues %}
+                            <div class = "form-group" id = "divValue{{ elementAttribute.ElementAttributeId }}">
+                                <select class = "form-control" id = "selectValue{{ elementAttribute.ElementAttributeId }}">
+                                    <option value = "-1"></option>
+                                    {% for lookupValue in elementAttribute.Tag.Lookup.LookupValues %}
                                         <option value = "{{ lookupValue.Value }}">{{ lookupValue.Name}}</option>
-                                {% endfor %}
-                            </select>
+                                    {% endfor %}
+                                </select>
+                                <p class = "help-block" id = "pValue{{ elementAttribute.ElementAttributeId }}"></p>
+                            </div>
                         </td>
                     {% else %}
                         <td>
-                            <!-- <div class = "form-group has-error"> -->
-                            <div class = "form-group" id = "inputValueDiv{{ elementAttribute.ElementAttributeId }}">
-                                <input class = "form-control" id = "inputValue{{ elementAttribute.ElementAttributeId }}"
-                                    name = "value{{ elementAttribute.ElementAttributeId }}" value = "">
-                                <p class = "help-block" id = "inputValueHelpBlock{{ elementAttribute.ElementAttributeId }}"></p>
+                            <div class = "form-group" id = "divValue{{ elementAttribute.ElementAttributeId }}">
+                                <input class = "form-control" id = "inputValue{{ elementAttribute.ElementAttributeId }}" value = "">
+                                <p class = "help-block" id = "pValue{{ elementAttribute.ElementAttributeId }}"></p>
                             </div>
                         </td>
                     {% endif %}
-                    <!-- <td><span class="glyphicon glyphicon-ok" style = "color:green"></span></td> -->
                     <td><button class = "btn btn-default" title = "Save All"><span class="glyphicon glyphicon-floppy-disk"></span></button></td>
-                    <td><input class = "timestamp" id = "timestamp{{ elementAttribute.ElementAttributeId }}" name = "timestamp{{ elementAttribute.ElementAttributeId }}" value = ""></td>
-                    <!-- <td><span class="glyphicon glyphicon-remove" style = "color:red"></span></td> -->
+                    <td>
+                        <div class = "form-group" id = "divTimestamp{{ elementAttribute.ElementAttributeId }}">
+                            <input class = "form-control" id = "inputTimestamp{{ elementAttribute.ElementAttributeId }}" value = "">
+                            <p class = "help-block" id = "pTimestamp{{ elementAttribute.ElementAttributeId }}"></p>
+                        </div>
+                    </td>
                     <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Add"
                         href = "{{ url_for("elementAttributes.addElementAttributeValue", elementId = elementAttribute.ElementId,
                         tagId = elementAttribute.Tag.TagId) }}"><span class="glyphicon glyphicon-plus"></span></a></td>
@@ -227,13 +231,12 @@
                 var id = $(this).attr("id").split("selectValue")[1]
                 if (value == "-1")
                 {
-                    $("#timestamp" + id).val("")
+                    $("#inputTimestamp" + id).val("")
                 }
                 else
                 {
-                    // var timestamp = new Date().toJSON().split(".")[0].replace("T", " ")
                     var timestamp = new moment().local().format("YYYY-MM-DD HH:mm:ss")
-                    $("#timestamp" + id).val(timestamp)
+                    $("#inputTimestamp" + id).val(timestamp)
                 }
             })
 
@@ -242,65 +245,136 @@
                 var id = $(this).attr("id").split("inputValue")[1]
                 if (value == "")
                 {
-                    $("#timestamp" + id).val("")
+                    $("#inputTimestamp" + id).val("")
                 }
                 else
                 {
-                    // var timestamp = new Date().toJSON().split(".")[0].replace("T", " ")
                     var timestamp = new moment().local().format("YYYY-MM-DD HH:mm:ss")
-                    $("#timestamp" + id).val(timestamp)
+                    $("#inputTimestamp" + id).val(timestamp)
                 }
             })
 
             $("button").click(function() {
-                var errors = false
+                var error = false
                 var rows = []
 
                 // Loop through the input values.
                 attributes.$("[id^=inputValue]").each(function() {
-                    var value = $.trim($(this).val())
                     var id = $(this).attr("id").split("inputValue")[1]
-                    var row = {}
-                    if (!($.isNumeric(value)) && value != "")
+                    var value = $.trim($(this).val())
+                    var valueIsBlank = value == ""
+                    var valueIsValid = $.isNumeric(value)
+                    var timestamp = $.trim($("#inputTimestamp" + id).val())
+                    var timestampIsBlank = timestamp == ""
+                    var timestampIsValid = moment(timestamp, "YYYY-M-D H:m:s", true).isValid()
+                    
+                    if (valueIsBlank && timestampIsBlank)
                     {
-                        errors = true
-                        $("#inputValueDiv" + id).addClass("has-error")
-                        var helpBlock = $("#inputValueHelpBlock" + id).html("Not a valid float value")
+                        $("#divValue" + id).removeClass("has-error")
+                        var helpBlock = $("#pValue" + id).html("")
+                        $("#divTimestamp" + id).removeClass("has-error")
+                        var helpBlock = $("#pTimestamp" + id).html("")
+                    }
+                    else if ((valueIsBlank && timestampIsValid) || (!valueIsValid && timestampIsValid))
+                    {
+                        error = true
+                        $("#divValue" + id).addClass("has-error")
+                        var helpBlock = $("#pValue" + id).html("Not a valid float value")
+                        $("#divTimestamp" + id).removeClass("has-error")
+                        var helpBlock = $("#pTimestamp" + id).html("")
+                    }
+                    else if ((valueIsBlank && !timestampIsValid) || (!valueIsValid && (timestampIsBlank || !timestampIsValid)))
+                    {
+                        error = true
+                        $("#divValue" + id).addClass("has-error")
+                        var helpBlock = $("#pValue" + id).html("Not a valid float value")
+                        $("#divTimestamp" + id).addClass("has-error")
+                        var helpBlock = $("#pTimestamp" + id).html("This field is required.")
+                    }
+                    else if (valueIsValid && (timestampIsBlank || !timestampIsValid))
+                    {
+                        error = true
+                        $("#divValue" + id).removeClass("has-error")
+                        var helpBlock = $("#pValue" + id).html("")
+                        $("#divTimestamp" + id).addClass("has-error")
+                        var helpBlock = $("#pTimestamp" + id).html("This field is required.")
                     }
                     else
                     {
-                        $("#inputValueDiv" + id).removeClass("has-error")
-                        var helpBlock = $("#inputValueHelpBlock" + id).html("")
-                        if (value != "")
-                        {
-                            row[id] = value
-                            rows.push(row)
-                        }
+                        $("#divValue" + id).removeClass("has-error")
+                        var helpBlock = $("#pValue" + id).html("")
+                        $("#divTimestamp" + id).removeClass("has-error")
+                        var helpBlock = $("#pTimestamp" + id).html("")
+                        var row = {}
+                        row["id"] = id
+                        row["value"] = value
+                        row["timestamp"] = timestamp
+                        rows.push(row)
                     }
                 })
-                console.log(JSON.stringify(rows))
-                console.log(JSON.stringify(attributes.$("[id^=inputValue]").serializeArray()))
 
-                // Loop through the timesteamp values.
-                attributes.$("[id^=timestamp]").each(function() {
+                // Loop through the select values.
+                attributes.$("[id^=selectValue]").each(function() {
+                    var id = $(this).attr("id").split("selectValue")[1]
                     var value = $.trim($(this).val())
-                    var id = $(this).attr("id").split("timestamp")[1]
-                    if (!(moment(value, "YYYY-M-D H:m:s", true).isValid()) && value != "")
+                    var valueIsBlank = value == "-1"
+                    var valueIsValid = $.isNumeric(value)
+                    var timestamp = $.trim($("#inputTimestamp" + id).val())
+                    var timestampIsBlank = timestamp == ""
+                    var timestampIsValid = moment(timestamp, "YYYY-M-D H:m:s", true).isValid()
+                    
+                    if (valueIsBlank && timestampIsBlank)
                     {
-                        errors = true
-                        alert("bad")
-                        // $("#inputValueDiv" + id).addClass("has-error")
-                        // var helpBlock = $("#inputValueHelpBlock" + id).html("Not a valid float value")
+                        $("#divValue" + id).removeClass("has-error")
+                        var helpBlock = $("#pValue" + id).html("")
+                        $("#divTimestamp" + id).removeClass("has-error")
+                        var helpBlock = $("#pTimestamp" + id).html("")
+                    }
+                    else if ((valueIsBlank && timestampIsValid) || (!valueIsValid && timestampIsValid))
+                    {
+                        error = true
+                        $("#divValue" + id).addClass("has-error")
+                        var helpBlock = $("#pValue" + id).html("Not a valid float value")
+                        $("#divTimestamp" + id).removeClass("has-error")
+                        var helpBlock = $("#pTimestamp" + id).html("")
+                    }
+                    else if ((valueIsBlank && !timestampIsValid) || (!valueIsValid && (timestampIsBlank || !timestampIsValid)))
+                    {
+                        error = true
+                        $("#divValue" + id).addClass("has-error")
+                        var helpBlock = $("#pValue" + id).html("Not a valid float value")
+                        $("#divTimestamp" + id).addClass("has-error")
+                        var helpBlock = $("#pTimestamp" + id).html("This field is required.")
+                    }
+                    else if (valueIsValid && (timestampIsBlank || !timestampIsValid))
+                    {
+                        error = true
+                        $("#divValue" + id).removeClass("has-error")
+                        var helpBlock = $("#pValue" + id).html("")
+                        $("#divTimestamp" + id).addClass("has-error")
+                        var helpBlock = $("#pTimestamp" + id).html("This field is required.")
+                    }
+                    else
+                    {
+                        $("#divValue" + id).removeClass("has-error")
+                        var helpBlock = $("#pValue" + id).html("")
+                        $("#divTimestamp" + id).removeClass("has-error")
+                        var helpBlock = $("#pTimestamp" + id).html("")
+                        var row = {}
+                        row["id"] = id
+                        row["value"] = value
+                        row["timestamp"] = timestamp
+                        rows.push(row)
                     }
                 })
 
-                if (errors == true)
+                if (error != true)
                 {
-                    // alert("errors")
-                }
-                else
-                {
-                    // alert("no errors")                    
+                    $.ajax({
+                        type : "POST",
+                        url : "/test",
+                        data : JSON.stringify(rows)
+                    })
                 }
                 // $("#test").text("x");
                 // var data = attributes.$("input").serializeArray();
