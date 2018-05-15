@@ -81,7 +81,7 @@
             {% endfor %}
         </tbody>
     </table>
-    <h2>Attributes</h2>
+    <h2>Element Attributes</h2>
     <br>
     <table id = "attributesTable" class = "table">
         <thead>
@@ -102,7 +102,7 @@
                     <td><a class = "btn btn-default" data-toggle = "tooltip" title = "List Values"
                         href = "{{ url_for("tagValues.listTagValues", tagId = elementAttribute.Tag.TagId,
                         elementAttributeId = elementAttribute.ElementAttributeId) }}"><span class="glyphicon glyphicon-list"></span></a></td>
-                    <td>{{ elementAttribute.AttributeTemplate.Name }}</td>
+                    <td>{{ elementAttribute.ElementAttributeTemplate.Name }}</td>
                     {% if elementAttribute.Tag.TagValues[0] %}
                         {% set firstTagValue = elementAttribute.Tag.TagValues | sort(attribute = "Timestamp", reverse = True) | first %}
                         <td>{{ firstTagValue.Timestamp }}</td>

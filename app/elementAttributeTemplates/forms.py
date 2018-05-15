@@ -5,7 +5,7 @@ from wtforms.validators import Length, Required
 from .. helpers import elementTemplateFullyAbbreviatedPath
 from .. models import ElementTemplate, Enterprise, Site
 
-class AttributeTemplateForm(FlaskForm):
+class ElementAttributeTemplateForm(FlaskForm):
 	elementTemplate = QuerySelectField("Element Template", query_factory = lambda: ElementTemplate.query.join(Site, Enterprise). \
 		order_by(Enterprise.Abbreviation, Site.Abbreviation, ElementTemplate.Name), get_label = elementTemplateFullyAbbreviatedPath)
 	name = StringField("Name", validators = [Required(), Length(1, 45)])

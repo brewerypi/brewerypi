@@ -20,7 +20,7 @@ Tag Value Notes
                 id = elementAttribute.Element.ElementTemplate.ElementTemplateId) }}">{{ elementAttribute.Element.ElementTemplate.Name }}</a></li>
             <li><a href = "{{ url_for("elements.dashboard", elementId = elementAttribute.Element.ElementId) }}">
                 {{ elementAttribute.Element.Name }}</a></li>
-            <li class = "active">{{ elementAttribute.AttributeTemplate.Name }}</li>
+            <li class = "active">{{ elementAttribute.ElementAttributeTemplate.Name }}</li>
         {% else %}
             <li><a href = "{{ url_for("tags.selectTag", className = "Root") }}">..</a></li>
             <li><a href = "{{ url_for("tags.selectTag", className = tagValue.Tag.Area.Site.Enterprise.__class__.__name__,

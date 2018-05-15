@@ -14,7 +14,7 @@ Element Attributes
         <thead>
             <tr>
                 <th>Element</th>
-                <th>Attribute Template</th>
+                <th>Element Attribute Template</th>
                 <th>Tag</th>
                 <th></th>
                 <th></th>
@@ -27,9 +27,9 @@ Element Attributes
                 <td>{{ elementAttribute.Element.ElementTemplate.Site.Enterprise.Abbreviation + "_" + 
                     elementAttribute.Element.ElementTemplate.Site.Abbreviation + "_" + elementAttribute.Element.ElementTemplate.Name + "_" + 
                     elementAttribute.Element.Name }}</td>
-                <td>{{ elementAttribute.AttributeTemplate.ElementTemplate.Site.Enterprise.Abbreviation + "_" + 
-                    elementAttribute.AttributeTemplate.ElementTemplate.Site.Abbreviation + "_" + 
-                    elementAttribute.AttributeTemplate.ElementTemplate.Name + "_" + elementAttribute.AttributeTemplate.Name }}</td>
+                <td>{{ elementAttribute.ElementAttributeTemplate.ElementTemplate.Site.Enterprise.Abbreviation + "_" + 
+                    elementAttribute.ElementAttributeTemplate.ElementTemplate.Site.Abbreviation + "_" + 
+                    elementAttribute.ElementAttributeTemplate.ElementTemplate.Name + "_" + elementAttribute.ElementAttributeTemplate.Name }}</td>
                 <td>{{ elementAttribute.Tag.Area.Site.Enterprise.Abbreviation + "_" + elementAttribute.Tag.Area.Site.Abbreviation + "_" +
                     elementAttribute.Tag.Area.Abbreviation + "_" + elementAttribute.Tag.Name }}</td>
                 <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("elementAttributes.editElementAttribute",
@@ -53,7 +53,7 @@ Element Attributes
             "order":
             [
                 [0, 'asc'],             // Element path.
-                [1, 'asc']              // Attribute Template.
+                [1, 'asc']              // Element Attribute Template.
             ],
             "columns":
             [

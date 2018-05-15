@@ -35,24 +35,6 @@ class Area(db.Model):
 	def id(self):
 		return self.AreaId
 
-class AttributeTemplate(db.Model):
-	__tablename__ = "AttributeTemplate"
-	__table_args__ = \
-	(
-		UniqueConstraint("ElementTemplateId", "Name", name = "AK__ElementTemplateId__Name"),
-	)
-
-	AttributeTemplateId = db.Column(db.Integer, primary_key = True)
-	Description = db.Column(db.String(255), nullable = True)
-	ElementTemplateId = db.Column(db.Integer, db.ForeignKey("ElementTemplate.ElementTemplateId", name = "FK__ElementTemplate$Have$AttributeTemplate"), \
-		nullable = False)
-	Name = db.Column(db.String(45), nullable = False)
-
-	ElementAttributes = db.relationship("ElementAttribute", backref = "AttributeTemplate", lazy = "dynamic")
-
-	def __repr__(self):
-		return "<AttributeTemplate: {}>".format(self.Name)
-
 class Element(db.Model):
 	__tablename__ = "Element"
 	__table_args__ = \
@@ -78,14 +60,32 @@ class ElementAttribute(db.Model):
 	__tablename__ = "ElementAttribute"
 	__table_args__ = \
 	(
-		UniqueConstraint("AttributeTemplateId", "ElementId", name = "AK__AttributeTemplateId__ElementId"),
+		UniqueConstraint("ElementAttributeTemplateId", "ElementId", name = "AK__ElementAttributeTemplateId__ElementId"),
 	)
 
 	ElementAttributeId = db.Column(db.Integer, primary_key = True)
-	AttributeTemplateId = db.Column(db.Integer, db.ForeignKey("AttributeTemplate.AttributeTemplateId", name = "FK__AttributeTemplate$Have$ElementAttribute"), \
-		nullable = False)
+	ElementAttributeTemplateId = db.Column(db.Integer, db.ForeignKey("ElementAttributeTemplate.ElementAttributeTemplateId", 
+		name = "FK__ElementAttributeTemplate$Have$ElementAttribute"), nullable = False)
 	ElementId = db.Column(db.Integer, db.ForeignKey("Element.ElementId", name = "FK__Element$Have$ElementAttribute"), nullable = False)
 	TagId = db.Column(db.Integer, db.ForeignKey("Tag.TagId", name = "FK__Tag$Have$ElementAttribute"), nullable = False)
+
+class ElementAttributeTemplate(db.Model):
+	__tablename__ = "ElementAttributeTemplate"
+	__table_args__ = \
+	(
+		UniqueConstraint("ElementTemplateId", "Name", name = "AK__ElementTemplateId__Name"),
+	)
+
+	ElementAttributeTemplateId = db.Column(db.Integer, primary_key = True)
+	Description = db.Column(db.String(255), nullable = True)
+	ElementTemplateId = db.Column(db.Integer, db.ForeignKey("ElementTemplate.ElementTemplateId", name = "FK__ElementTemplate$Have$ElementAttributeTemplate"), \
+		nullable = False)
+	Name = db.Column(db.String(45), nullable = False)
+
+	ElementAttributes = db.relationship("ElementAttribute", backref = "ElementAttributeTemplate", lazy = "dynamic")
+
+	def __repr__(self):
+		return "<ElementAttributeTemplate: {}>".format(self.Name)
 
 class ElementTemplate(db.Model):
 	__tablename__ = "ElementTemplate"
@@ -99,7 +99,7 @@ class ElementTemplate(db.Model):
 	Name = db.Column(db.String(45), nullable = False)
 	SiteId = db.Column(db.Integer, db.ForeignKey("Site.SiteId", name = "FK__Site$Have$ElementTemplate"), nullable = False)
 
-	AttributeTemplates = db.relationship("AttributeTemplate", backref = "ElementTemplate", lazy = "dynamic")
+	ElementAttributeTemplates = db.relationship("ElementAttributeTemplate", backref = "ElementTemplate", lazy = "dynamic")
 	Elements = db.relationship("Element", backref = "ElementTemplate", lazy = "dynamic")
 	EventFrameTemplates = db.relationship("EventFrameTemplate", backref = "ElementTemplate", lazy = "dynamic")
 

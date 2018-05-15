@@ -1,9 +1,9 @@
 def areaFullyAbbreviatedPath(area):
 	return area.Site.Enterprise.Abbreviation + "_" + area.Site.Abbreviation + "_" + area.Abbreviation
 
-def attributeTemplateFullyAbbreviatedPath(attributeTemplate):
-	return attributeTemplate.ElementTemplate.Site.Enterprise.Abbreviation + "_" + attributeTemplate.ElementTemplate.Site.Abbreviation + "_" + \
-		attributeTemplate.ElementTemplate.Name + "_" + attributeTemplate.Name
+def elementAttributeTemplateFullyAbbreviatedPath(elementAttributeTemplate):
+	return elementAttributeTemplate.ElementTemplate.Site.Enterprise.Abbreviation + "_" + elementAttributeTemplate.ElementTemplate.Site.Abbreviation + "_" + \
+		elementAttributeTemplate.ElementTemplate.Name + "_" + elementAttributeTemplate.Name
 
 def elementFullyAbbreviatedPath(element):
 	return element.ElementTemplate.Site.Enterprise.Abbreviation + "_" + element.ElementTemplate.Site.Abbreviation + "_" + \

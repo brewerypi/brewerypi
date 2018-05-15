@@ -7,7 +7,7 @@ from . import elementAttributes
 from . forms import ElementAttributeForm, ElementAttributeImportForm, ElementAttributeValueForm
 from .. import db
 from .. decorators import adminRequired, permissionRequired
-from .. models import Area, AttributeTemplate, Element, ElementAttribute, ElementTemplate, Enterprise, LookupValue, Permission, Site, Tag, TagValue
+from .. models import Area, ElementAttributeTemplate, Element, ElementAttribute, ElementTemplate, Enterprise, LookupValue, Permission, Site, Tag, TagValue
 from .. tagValues . forms import TagValueForm
 
 @elementAttributes.route("/elementAttributes", methods = ["GET", "POST"])
@@ -27,10 +27,10 @@ def addElementAttribute():
 
 	# Add a new element attribute.
 	if form.validate_on_submit():
-		elementAttribute = ElementAttribute(AttributeTemplate = form.attributeTemplate.data, Element = form.element.data, Tag = form.tag.data)
+		elementAttribute = ElementAttribute(ElementAttributeTemplate = form.elementAttributeTemplate.data, Element = form.element.data, Tag = form.tag.data)
 		db.session.add(elementAttribute)
 		db.session.commit()
-		flash("You have successfully added the element attribute \"" + form.attributeTemplate.data.Name + "\" for \"" + form.element.data.Name + "\".",
+		flash("You have successfully added the element attribute \"" + form.elementAttributeTemplate.data.Name + "\" for \"" + form.element.data.Name + "\".",
 			"alert alert-success")
 		return redirect(url_for("elementAttributes.listElementAttributes"))
 
@@ -42,11 +42,11 @@ def addElementAttribute():
 @adminRequired
 def deleteElementAttribute(elementAttributeId):
 	elementAttribute = ElementAttribute.query.get_or_404(elementAttributeId)
-	attributeTemplateName = elementAttribute.AttributeTemplate.Name
+	elementAttributeTemplateName = elementAttribute.ElementAttributeTemplate.Name
 	elementName = elementAttribute.Element.Name
 	db.session.delete(elementAttribute)
 	db.session.commit()
-	flash("You have successfully deleted the element attribute \"" + attributeTemplateName + "\" for \"" + elementName + "\".", "alert alert-success")
+	flash("You have successfully deleted the element attribute \"" + elementAttributeTemplateName + "\" for \"" + elementName + "\".", "alert alert-success")
 	return redirect(url_for("elementAttributes.listElementAttributes"))
 
 @elementAttributes.route("/elementAttributes/edit/<int:elementAttributeId>", methods = ["GET", "POST"])
@@ -60,16 +60,16 @@ def editElementAttribute(elementAttributeId):
 
 	# Edit an existing element attribute.
 	if form.validate_on_submit():	
-		elementAttribute.AttributeTemplate = form.attributeTemplate.data
+		elementAttribute.ElementAttributeTemplate = form.elementAttributeTemplate.data
 		elementAttribute.Element = form.element.data
 		elementAttribute.Tag = form.tag.data
 		db.session.commit()
-		flash("You have successfully edited the element attribute \"" + elementAttribute.AttributeTemplate.Name + "\" for \"" + \
+		flash("You have successfully edited the element attribute \"" + elementAttribute.ElementAttributeTemplate.Name + "\" for \"" + \
 			elementAttribute.Element.Name + "\".", "alert alert-success")
 		return redirect(url_for("elementAttributes.listElementAttributes"))
 
 	# Present a form to edit an existing element attribute.
-	form.attributeTemplate.data = elementAttribute.AttributeTemplate
+	form.elementAttributeTemplate.data = elementAttribute.ElementAttributeTemplate
 	form.element.data = elementAttribute.Element
 	form.tag.data = elementAttribute.Tag
 	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
@@ -79,11 +79,11 @@ def editElementAttribute(elementAttributeId):
 @adminRequired
 def exportElementAttributes():
 	elementAttributes = ElementAttribute.query.join(Element, Tag, ElementTemplate, Site, Enterprise). \
-		join(AttributeTemplate, ElementAttribute.AttributeTemplateId == AttributeTemplate.AttributeTemplateId). \
-		order_by(Enterprise.Abbreviation, Site.Abbreviation, ElementTemplate.Name, Element.Name, AttributeTemplate.Name)
+		join(ElementAttributeTemplate, ElementAttribute.ElementAttributeTemplateId == ElementAttributeTemplate.ElementAttributeTemplateId). \
+		order_by(Enterprise.Abbreviation, Site.Abbreviation, ElementTemplate.Name, Element.Name, ElementAttributeTemplate.Name)
 	with open(os.path.join(current_app.config["EXPORT_FOLDER"], current_app.config["EXPORT_ELEMENT_ATTRIBUTES_FILENAME"]), "w", encoding = "latin-1") \
 		as elementsFile:
-		fieldnames = ["Selected", "Element Attribute Id", "Enterprise", "Site", "Element Template", "Element Name", "Attribute Template", "Area", "Tag Name"]
+		fieldnames = ["Selected", "Element Attribute Id", "Enterprise", "Site", "Element Template", "Element Name", "Element Attribute Template", "Area", "Tag Name"]
 		elementAttributesWriter = csv.DictWriter(elementsFile, fieldnames = fieldnames, lineterminator = "\n")
 		elementAttributesWriter.writeheader()
 		
@@ -91,7 +91,7 @@ def exportElementAttributes():
 			elementAttributesWriter.writerow({"Selected" : "", "Element Attribute Id" : elementAttribute.ElementAttributeId, \
 			"Enterprise" : elementAttribute.Element.ElementTemplate.Site.Enterprise.Abbreviation, \
 			"Site" : elementAttribute.Element.ElementTemplate.Site.Abbreviation, "Element Template" : elementAttribute.Element.ElementTemplate.Name, \
-			"Element Name" : elementAttribute.Element.Name, "Attribute Template" : elementAttribute.AttributeTemplate.Name, \
+			"Element Name" : elementAttribute.Element.Name, "Element Attribute Template" : elementAttribute.ElementAttributeTemplate.Name, \
 			"Area" : elementAttribute.Tag.Area.Abbreviation, "Tag Name" : elementAttribute.Tag.Name})
 	
 	return send_file(os.path.join("..", current_app.config["EXPORT_FOLDER"], current_app.config["EXPORT_ELEMENT_ATTRIBUTES_FILENAME"]), as_attachment = True)
@@ -134,7 +134,7 @@ def importElementAttributes():
 				siteAbbreviation = row["Site"].strip()
 				elementTemplateName = row["Element Template"].strip()
 				elementName = row["Element Name"].strip()
-				attributeTemplateName = row["Attribute Template"].strip()
+				elementAttributeTemplateName = row["Element Attribute Template"].strip()
 				areaAbbreviation = row["Area"].strip()
 				tagName = row["Tag Name"].strip()
 
@@ -159,11 +159,9 @@ def importElementAttributes():
 						str(rowNumber) + ".")
 					continue
 
-				attributeTemplate = AttributeTemplate.query.filter(AttributeTemplate.ElementTemplateId == elementTemplate.ElementTemplateId, \
-					AttributeTemplate.Name == attributeTemplateName).first()
-				if attributeTemplate is None:
-					errors.append("Attribute Template \"" + attributeTemplateName + "\" does not exist in site \"" + site.Name + "\". Skipping row " + \
-						str(rowNumber) + ".")
+				elementAttributeTemplate = ElementAttributeTemplate.query.filter(ElementAttributeTemplate.ElementTemplateId == elementTemplate.ElementTemplateId, ElementAttributeTemplate.Name == elementAttributeTemplateName).first()
+				if elementAttributeTemplate is None:
+					errors.append("Element Attribute Template \"" + elementAttributeTemplateName + "\" does not exist in site \"" + site.Name + "\". Skipping row " + str(rowNumber) + ".")
 					continue
 
 				area = Area.query.filter(Area.Abbreviation == areaAbbreviation, Area.SiteId == site.SiteId).first()
@@ -187,37 +185,35 @@ def importElementAttributes():
 				if "" == elementAttributeId:
 					# Add element attribute.
 					# Check for existing element attribute.
-					elementAttribute = ElementAttribute.query.filter(ElementAttribute.AttributeTemplateId == attributeTemplate.AttributeTemplateId, \
-						ElementAttribute.ElementId == element.ElementId).first()
+					elementAttribute = ElementAttribute.query.filter(ElementAttribute.ElementAttributeTemplateId == elementAttributeTemplate.ElementAttributeTemplateId, ElementAttribute.ElementId == element.ElementId).first()
 					if elementAttribute is not None:
-						warnings.append("Attribute Template \"" + attributeTemplateName + "\" already exists for Element \"" + elementName + \
+						warnings.append("Element Attribute Template \"" + elementAttributeTemplateName + "\" already exists for Element \"" + elementName + \
 							"\". Skipping row " + str(rowNumber) + ".")
 						continue
 
 					# Add element attribute.
-					elementAttribute = ElementAttribute(AttributeTemplate = attributeTemplate, Element = element, Tag = tag)
+					elementAttribute = ElementAttribute(ElementAttributeTemplate = elementAttributeTemplate, Element = element, Tag = tag)
 					db.session.add(elementAttribute)
 					db.session.commit()
-					successes.append("Attribute Template \"" + attributeTemplateName + "\" added to Element \"" + elementName + "\".")
+					successes.append("Element Attribute Template \"" + elementAttributeTemplateName + "\" added to Element \"" + elementName + "\".")
 				else:
 					# Edit element attribute.
 					elementAttribute = ElementAttribute.query.get_or_404(elementAttributeId)
 
-					# The attribute template and/or element have changed. Check for existing element attribute.
-					if elementAttribute.AttributeTemplateId != attributeTemplate.AttributeTemplateId or elementAttribute.ElementId != element.ElementId:
-						elementAttributeCheck = ElementAttribute.query.join(AttributeTemplate, Element). \
-							filter(ElementAttribute.AttributeTemplateId == attributeTemplate.AttributeTemplateId, \
+					# The element attribute template and/or element have changed. Check for existing element attribute.
+					if elementAttribute.ElementAttributeTemplateId != elementAttributeTemplate.ElementAttributeTemplateId or elementAttribute.ElementId != element.ElementId:
+						elementAttributeCheck = ElementAttribute.query.join(ElementAttributeTemplate, Element).filter(ElementAttribute.ElementAttributeTemplateId == elementAttributeTemplate.ElementAttributeTemplateId, \
 							ElementAttribute.ElementId == element.ElementId).first()
 						if elementAttributeCheck is not None:
-							warnings.append("Attribute Template  \"" + elementAttributeName + "\" already exists for Element \"" + elementName + \
+							warnings.append("Element Attribute Template  \"" + elementAttributeName + "\" already exists for Element \"" + elementName + \
 								"\". Skipping row " + str(rowNumber) + ".")
 							continue
 							
-					elementAttribute.AttributeTemplate = attributeTemplate
+					elementAttribute.ElementAttributeTemplate = elementAttributeTemplate
 					elementAttribute.Element = element
 					elementAttribute.Tag = tag
 					db.session.commit()
-					successes.append("Attribute Template \"" + attributeTemplateName + "\" updated for Element \"" + elementName + "\".")
+					successes.append("Element Attribute Template \"" + elementAttributeTemplateName + "\" updated for Element \"" + elementName + "\".")
 
 	return render_template("import.html", errors = errors, form = form, importing = "Element Attributes", successes = successes, warnings = warnings)
 

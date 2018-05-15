@@ -6,7 +6,7 @@ from . forms import ElementForm
 from .. import db
 from .. eventFrames . forms import EventFrameForm
 from .. decorators import adminRequired, permissionRequired
-from .. models import Area, AttributeTemplate, Element, ElementAttribute, ElementTemplate, Enterprise, EventFrame, EventFrameTemplate, Permission, Site, Tag
+from .. models import Area, ElementAttributeTemplate, Element, ElementAttribute, ElementTemplate, Enterprise, EventFrame, EventFrameTemplate, Permission, Site, Tag
 
 modelName = "Element"
 
@@ -66,11 +66,11 @@ def copyElement(elementId):
 		element = Element(Description = form.description.data, ElementTemplate = elementToCopy.ElementTemplate, Name = form.name.data)
 		db.session.add(element)
 
-		attributeTemplateIds = []
+		elementAttributeTemplateIds = []
 		tags = []
 		for elementAttribute in elementToCopy.ElementAttributes:
-			attributeTemplateIds.append(elementAttribute.AttributeTemplateId)
-			tagName = form.name.data + "_" + elementAttribute.AttributeTemplate.Name.replace(" ", "")
+			elementAttributeTemplateIds.append(elementAttribute.ElementAttributeTemplateId)
+			tagName = form.name.data + "_" + elementAttribute.ElementAttributeTemplate.Name.replace(" ", "")
 
 			# Ensure the tag doesn't already exist.
 			if Tag.query.join(Area).filter(Area.SiteId == elementToCopy.ElementTemplate.SiteId, Tag.Name == tagName).count() != 0:
@@ -90,8 +90,8 @@ def copyElement(elementId):
 			db.session.add(tag)
 
 		db.session.commit()
-		for attributeTemplateId, tag in zip(attributeTemplateIds, tags):
-			elementAttribute = ElementAttribute(AttributeTemplateId = attributeTemplateId, ElementId = element.ElementId, TagId = tag.TagId)
+		for elementAttributeTemplateId, tag in zip(elementAttributeTemplateIds, tags):
+			elementAttribute = ElementAttribute(ElementAttributeTemplateId = elementAttributeTemplateId, ElementId = element.ElementId, TagId = tag.TagId)
 			db.session.add(elementAttribute)
 
 		db.session.commit()

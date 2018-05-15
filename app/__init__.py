@@ -21,8 +21,8 @@ def create_app(configClass = Config):
 	from . areas import areas as areasBlueprint
 	app.register_blueprint(areasBlueprint)
 
-	from . attributeTemplates import attributeTemplates as attributeTemplatesBlueprint
-	app.register_blueprint(attributeTemplatesBlueprint)
+	from . elementAttributeTemplates import elementAttributeTemplates as elementAttributeTemplatesBlueprint
+	app.register_blueprint(elementAttributeTemplatesBlueprint)
 
 	from . authentications import authentications as authenticationsBlueprint
 	app.register_blueprint(authenticationsBlueprint)
