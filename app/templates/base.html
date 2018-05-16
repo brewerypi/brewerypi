@@ -91,10 +91,6 @@
 
 {% block content %}
 <div class = "container">
-    <div class = "" id = "jQueryMessages">
-        <!-- <button type = "button" class = "close" data-dismiss = "alert">&times;</button>
-        kats -->
-    </div>
     {% for category, message in get_flashed_messages(with_categories = true) %}
         {% if category == "message" %}
             {% set alertClass = "alert alert-warning" %}

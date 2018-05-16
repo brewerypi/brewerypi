@@ -81,7 +81,9 @@
             {% endfor %}
         </tbody>
     </table>
-    <h2 id = "test">Attributes</h2>
+    <h2 id = "attributesHeader">Attributes
+        <button class = "btn btn-default" id = "buttonAttributesSaveAll" title = "Save All"><span class="glyphicon glyphicon-floppy-disk"></span></button>
+    </h2>
     <br>
     <table id = "attributesTable" class = "table">
         <thead>
@@ -91,9 +93,9 @@
                 <th>Last Timestamp</th>
                 <th>Last Value</th>
                 <th>New Value</th>
-                <th></th>
+                <!-- <th></th> -->
                 <th>New Timestamp</th>
-                <th></th>
+                <!-- <th></th> -->
                 <th></th>
                 <th></th>
                 <th></th>
@@ -118,8 +120,8 @@
                             {% endif %}
                         </td>
                     {% else %}
-                        <td></td>
-                        <td></td>
+                        <td id = "tdLastTimestamp{{ elementAttribute.ElementAttributeId }}"></td>
+                        <td id = "tdLastValue{{ elementAttribute.ElementAttributeId }}"></td>
                     {% endif %}
                     {% if elementAttribute.Tag.LookupId %}
                         <td>
@@ -141,24 +143,24 @@
                             </div>
                         </td>
                     {% endif %}
-                    <td><button class = "btn btn-default" title = "Save All"><span class="glyphicon glyphicon-floppy-disk"></span></button></td>
+                    <!-- <td><button class = "btn btn-default" title = "Save All"><span class="glyphicon glyphicon-floppy-disk"></span></button></td> -->
                     <td>
                         <div class = "form-group" id = "divNewTimestamp{{ elementAttribute.ElementAttributeId }}">
                             <input class = "form-control" id = "inputNewTimestamp{{ elementAttribute.ElementAttributeId }}" value = "">
                             <p class = "help-block" id = "pNewTimestamp{{ elementAttribute.ElementAttributeId }}"></p>
                         </div>
                     </td>
-                    <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Add"
-                        href = "{{ url_for("elementAttributes.addElementAttributeValue", elementId = elementAttribute.ElementId,
-                        tagId = elementAttribute.Tag.TagId) }}"><span class="glyphicon glyphicon-plus"></span></a></td>
+                    <!-- <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Add"
+                        href = "{#{ url_for("elementAttributes.addElementAttributeValue", elementId = elementAttribute.ElementId,
+                        tagId = elementAttribute.Tag.TagId) }#}"><span class="glyphicon glyphicon-plus"></span></a></td> -->
                     {% if elementAttribute.Tag.TagValues[0] %}
-                        <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Notes"
+                        <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Last Value Notes"
                             href = "{{ url_for("tagValues.listTagValueNotes", tagValueId = firstTagValue.TagValueId) }}">
                             <span class="glyphicon glyphicon-comment"></span></a></td>
-                        <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Edit"
+                        <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Edit Last Value"
                             href = "{{ url_for("elementAttributes.editElementAttributeValue", elementId = elementAttribute.ElementId,
                             tagValueId = firstTagValue.TagValueId) }}"><span class="glyphicon glyphicon-edit"></span></a></td>
-                        <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Delete"
+                        <td><a class = "btn btn-default" title = "Delete Last Value"
                             href = "{{ url_for("elementAttributes.deleteElementAttributeValue",
                             elementId = elementAttribute.ElementId, tagValueId = firstTagValue.TagValueId) }}"><span class="glyphicon glyphicon-trash"></span>
                             </a></td>
@@ -217,8 +219,8 @@
                     null,
                     { "orderable": false }, // New value.
                     { "orderable": false }, // New timestamp.
-                    { "orderable": false }, // Save all button.
-                    { "orderable": false }, // Add attribute value button.
+                    // { "orderable": false }, // Save all button.
+                    // { "orderable": false }, // Add attribute value button.
                     { "orderable": false }, // List attribute value notes button.
                     { "orderable": false }, // Edit attribute value button.
                     { "orderable": false }  // Delete attribute value button.
@@ -256,7 +258,7 @@
                 }
             })
 
-            $("button").click(function() {
+            $("#buttonAttributesSaveAll").click(function() {
                 var error = false
                 var rows = []
 
@@ -391,8 +393,22 @@
                                 $("#selectNewValue" + $(this).attr("id")).val("-1")
                             }
                             $("#inputNewTimestamp" + $(this).attr("id")).val("")
-                            // console.log($(this).attr("value"))
                         })
+                        $(".alert").remove()
+                        if (response.length > 0)
+                        {
+                            $("#attributesHeader").after("<div class = \"alert alert-success\"><button type = \"button\" class = \"close\" " +
+                                "data-dismiss = \"alert\">&times;</button>You have successfully added one or more new element attribute values.</div>")
+                        }
+                        else
+                        {
+                            $("#attributesHeader").after("<div class = \"alert alert-warning\"><button type = \"button\" class = \"close\" " +
+                                "data-dismiss = \"alert\">&times;</button>Nothing added to save.</div>")                            
+                        }
+                    }).fail(function() {
+                        $(".alert").remove()
+                        $("#attributesHeader").after("<div class = \"alert alert-danger\"><button type = \"button\" class = \"close\" " +
+                            "data-dismiss = \"alert\">&times;</button>The attempt to save one or more new element attribute values failed.</div>")                        
                     })
                     // $.each(rows, function() {
                     //     $("#tdLastTimestamp" + $(this).attr("id")).text($(this).attr("timestamp"))
