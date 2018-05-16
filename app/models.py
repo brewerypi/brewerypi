@@ -179,6 +179,37 @@ class EventFrame(db.Model):
 		else:
 			return self.ParentEventFrame.origin()
 	
+class EventFrameAttribute(db.Model):
+	__tablename__ = "EventFrameAttribute"
+	__table_args__ = \
+	(
+		UniqueConstraint("EventFrameAttributeTemplateId", "EventFrameId", name = "AK__EventFrameAttributeTemplateId__EventFrameId"),
+	)
+
+	EventFrameAttributeId = db.Column(db.Integer, primary_key = True)
+	EventFrameAttributeTemplateId = db.Column(db.Integer, db.ForeignKey("EventFrameAttributeTemplate.EventFrameAttributeTemplateId", 
+		name = "FK__EventFrameAttributeTemplate$Have$EventFrameAttribute"), nullable = False)
+	EventFrameId = db.Column(db.Integer, db.ForeignKey("EventFrame.EventFrameId", name = "FK__EventFrame$Have$EventFrameAttribute"), nullable = False)
+	TagId = db.Column(db.Integer, db.ForeignKey("Tag.TagId", name = "FK__Tag$Have$EventFrameAttribute"), nullable = False)
+
+class EventFrameAttributeTemplate(db.Model):
+	__tablename__ = "EventFrameAttributeTemplate"
+	__table_args__ = \
+	(
+		UniqueConstraint("EventFrameTemplateId", "Name", name = "AK__EventFrameTemplateId__Name"),
+	)
+
+	EventFrameAttributeTemplateId = db.Column(db.Integer, primary_key = True)
+	Description = db.Column(db.String(255), nullable = True)
+	EventFrameTemplateId = db.Column(db.Integer, db.ForeignKey("EventFrameTemplate.EventFrameTemplateId", \
+		name = "FK__EventFrameTemplate$Have$EventFrameAttributeTemplate"), nullable = False)
+	Name = db.Column(db.String(45), nullable = False)
+
+	EventFrameAttributes = db.relationship("EventFrameAttribute", backref = "EventFrameAttributeTemplate", lazy = "dynamic")
+
+	def __repr__(self):
+		return "<EventFrameAttributeTemplate: {}>".format(self.Name)
+
 class EventFrameNote(db.Model):
 	__tablename__ = "EventFrameNote"
 	__table_args__ = \
@@ -355,6 +386,7 @@ class Tag(db.Model):
 		name = "FK__UnitOfMeasurement$CanBeUsedIn$Tag"), nullable = True)
 
 	ElementAttributes = db.relationship("ElementAttribute", backref = "Tag", lazy = "dynamic")
+	EventFrameAttributes = db.relationship("EventFrameAttribute", backref = "Tag", lazy = "dynamic")
 	TagValues = db.relationship("TagValue", backref = "Tag", lazy = "dynamic")
 
 	def __repr__(self):
