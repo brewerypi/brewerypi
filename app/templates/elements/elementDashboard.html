@@ -108,42 +108,44 @@
                     <td>{{ elementAttribute.AttributeTemplate.Name }}</td>
                     {% if elementAttribute.Tag.TagValues[0] %}
                         {% set firstTagValue = elementAttribute.Tag.TagValues | sort(attribute = "Timestamp", reverse = True) | first %}
-                        <td>{{ firstTagValue.Timestamp }}</td>
-                        {% if elementAttribute.Tag.LookupId %}
-                            <td>{{ elementAttribute.Tag.Lookup.LookupValues | selectattr("Value", "equalto", firstTagValue.Value) | map(attribute = "Name") |
-                                list | first }}</td>                    
-                        {% else %}
-                            <td>{{ firstTagValue.Value }} {{ firstTagValue.Tag.UnitOfMeasurement.Abbreviation }}</td>                    
-                        {% endif %}
+                        <td id = "tdLastTimestamp{{ elementAttribute.ElementAttributeId }}">{{ firstTagValue.Timestamp }}</td>
+                        <td id = "tdLastValue{{ elementAttribute.ElementAttributeId }}">
+                            {% if elementAttribute.Tag.LookupId %}
+                                {{ elementAttribute.Tag.Lookup.LookupValues | selectattr("Value", "equalto", firstTagValue.Value) | map(attribute = "Name") |
+                                    list | first }}          
+                            {% else %}
+                                {{ firstTagValue.Value }} {{ firstTagValue.Tag.UnitOfMeasurement.Abbreviation }}                    
+                            {% endif %}
+                        </td>
                     {% else %}
                         <td></td>
                         <td></td>
                     {% endif %}
                     {% if elementAttribute.Tag.LookupId %}
                         <td>
-                            <div class = "form-group" id = "divValue{{ elementAttribute.ElementAttributeId }}">
-                                <select class = "form-control" id = "selectValue{{ elementAttribute.ElementAttributeId }}">
+                            <div class = "form-group" id = "divNewValue{{ elementAttribute.ElementAttributeId }}">
+                                <select class = "form-control" id = "selectNewValue{{ elementAttribute.ElementAttributeId }}">
                                     <option value = "-1"></option>
                                     {% for lookupValue in elementAttribute.Tag.Lookup.LookupValues %}
                                         <option value = "{{ lookupValue.Value }}">{{ lookupValue.Name}}</option>
                                     {% endfor %}
                                 </select>
-                                <p class = "help-block" id = "pValue{{ elementAttribute.ElementAttributeId }}"></p>
+                                <p class = "help-block" id = "pNewValue{{ elementAttribute.ElementAttributeId }}"></p>
                             </div>
                         </td>
                     {% else %}
                         <td>
-                            <div class = "form-group" id = "divValue{{ elementAttribute.ElementAttributeId }}">
-                                <input class = "form-control" id = "inputValue{{ elementAttribute.ElementAttributeId }}" value = "">
-                                <p class = "help-block" id = "pValue{{ elementAttribute.ElementAttributeId }}"></p>
+                            <div class = "form-group" id = "divNewValue{{ elementAttribute.ElementAttributeId }}">
+                                <input class = "form-control" id = "inputNewValue{{ elementAttribute.ElementAttributeId }}" value = "">
+                                <p class = "help-block" id = "pNewValue{{ elementAttribute.ElementAttributeId }}"></p>
                             </div>
                         </td>
                     {% endif %}
                     <td><button class = "btn btn-default" title = "Save All"><span class="glyphicon glyphicon-floppy-disk"></span></button></td>
                     <td>
-                        <div class = "form-group" id = "divTimestamp{{ elementAttribute.ElementAttributeId }}">
-                            <input class = "form-control" id = "inputTimestamp{{ elementAttribute.ElementAttributeId }}" value = "">
-                            <p class = "help-block" id = "pTimestamp{{ elementAttribute.ElementAttributeId }}"></p>
+                        <div class = "form-group" id = "divNewTimestamp{{ elementAttribute.ElementAttributeId }}">
+                            <input class = "form-control" id = "inputNewTimestamp{{ elementAttribute.ElementAttributeId }}" value = "">
+                            <p class = "help-block" id = "pNewTimestamp{{ elementAttribute.ElementAttributeId }}"></p>
                         </div>
                     </td>
                     <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Add"
@@ -226,31 +228,31 @@
                 "pageLength": 25
             })
 
-            $("[id^=selectValue]").change(function() {
+            $("[id^=selectNewValue]").change(function() {
                 var value = $.trim($(this).val())
-                var id = $(this).attr("id").split("selectValue")[1]
+                var id = $(this).attr("id").split("selectNewValue")[1]
                 if (value == "-1")
                 {
-                    $("#inputTimestamp" + id).val("")
+                    $("#inputNewTimestamp" + id).val("")
                 }
                 else
                 {
                     var timestamp = new moment().local().format("YYYY-MM-DD HH:mm:ss")
-                    $("#inputTimestamp" + id).val(timestamp)
+                    $("#inputNewTimestamp" + id).val(timestamp)
                 }
             })
 
-            $("[id^=inputValue]").blur(function() {
+            $("[id^=inputNewValue]").blur(function() {
                 var value = $.trim($(this).val())
-                var id = $(this).attr("id").split("inputValue")[1]
+                var id = $(this).attr("id").split("inputNewValue")[1]
                 if (value == "")
                 {
-                    $("#inputTimestamp" + id).val("")
+                    $("#inputNewTimestamp" + id).val("")
                 }
                 else
                 {
                     var timestamp = new moment().local().format("YYYY-MM-DD HH:mm:ss")
-                    $("#inputTimestamp" + id).val(timestamp)
+                    $("#inputNewTimestamp" + id).val(timestamp)
                 }
             })
 
@@ -259,54 +261,55 @@
                 var rows = []
 
                 // Loop through the input values.
-                attributes.$("[id^=inputValue]").each(function() {
-                    var id = $(this).attr("id").split("inputValue")[1]
+                attributes.$("[id^=inputNewValue]").each(function() {
+                    var id = $(this).attr("id").split("inputNewValue")[1]
                     var value = $.trim($(this).val())
                     var valueIsBlank = value == ""
                     var valueIsValid = $.isNumeric(value)
-                    var timestamp = $.trim($("#inputTimestamp" + id).val())
+                    var timestamp = $.trim($("#inputNewTimestamp" + id).val())
                     var timestampIsBlank = timestamp == ""
                     var timestampIsValid = moment(timestamp, "YYYY-M-D H:m:s", true).isValid()
                     
                     if (valueIsBlank && timestampIsBlank)
                     {
-                        $("#divValue" + id).removeClass("has-error")
-                        var helpBlock = $("#pValue" + id).html("")
-                        $("#divTimestamp" + id).removeClass("has-error")
-                        var helpBlock = $("#pTimestamp" + id).html("")
+                        $("#divNewValue" + id).removeClass("has-error")
+                        var helpBlock = $("#pNewValue" + id).html("")
+                        $("#divNewTimestamp" + id).removeClass("has-error")
+                        var helpBlock = $("#pNewTimestamp" + id).html("")
                     }
                     else if ((valueIsBlank && timestampIsValid) || (!valueIsValid && timestampIsValid))
                     {
                         error = true
-                        $("#divValue" + id).addClass("has-error")
-                        var helpBlock = $("#pValue" + id).html("Not a valid float value")
-                        $("#divTimestamp" + id).removeClass("has-error")
-                        var helpBlock = $("#pTimestamp" + id).html("")
+                        $("#divNewValue" + id).addClass("has-error")
+                        var helpBlock = $("#pNewValue" + id).html("Not a valid float value")
+                        $("#divNewTimestamp" + id).removeClass("has-error")
+                        var helpBlock = $("#pNewTimestamp" + id).html("")
                     }
                     else if ((valueIsBlank && !timestampIsValid) || (!valueIsValid && (timestampIsBlank || !timestampIsValid)))
                     {
                         error = true
-                        $("#divValue" + id).addClass("has-error")
-                        var helpBlock = $("#pValue" + id).html("Not a valid float value")
-                        $("#divTimestamp" + id).addClass("has-error")
-                        var helpBlock = $("#pTimestamp" + id).html("This field is required.")
+                        $("#divNewValue" + id).addClass("has-error")
+                        var helpBlock = $("#pNewValue" + id).html("Not a valid float value")
+                        $("#divNewTimestamp" + id).addClass("has-error")
+                        var helpBlock = $("#pNewTimestamp" + id).html("This field is required.")
                     }
                     else if (valueIsValid && (timestampIsBlank || !timestampIsValid))
                     {
                         error = true
-                        $("#divValue" + id).removeClass("has-error")
-                        var helpBlock = $("#pValue" + id).html("")
-                        $("#divTimestamp" + id).addClass("has-error")
-                        var helpBlock = $("#pTimestamp" + id).html("This field is required.")
+                        $("#divNewValue" + id).removeClass("has-error")
+                        var helpBlock = $("#pNewValue" + id).html("")
+                        $("#divNewTimestamp" + id).addClass("has-error")
+                        var helpBlock = $("#pNewTimestamp" + id).html("This field is required.")
                     }
                     else
                     {
-                        $("#divValue" + id).removeClass("has-error")
-                        var helpBlock = $("#pValue" + id).html("")
-                        $("#divTimestamp" + id).removeClass("has-error")
-                        var helpBlock = $("#pTimestamp" + id).html("")
+                        $("#divNewValue" + id).removeClass("has-error")
+                        var helpBlock = $("#pNewValue" + id).html("")
+                        $("#divNewTimestamp" + id).removeClass("has-error")
+                        var helpBlock = $("#pNewTimestamp" + id).html("")
                         var row = {}
                         row["id"] = id
+                        row["type"] = "input"
                         row["value"] = value
                         row["timestamp"] = timestamp
                         rows.push(row)
@@ -314,54 +317,55 @@
                 })
 
                 // Loop through the select values.
-                attributes.$("[id^=selectValue]").each(function() {
-                    var id = $(this).attr("id").split("selectValue")[1]
+                attributes.$("[id^=selectNewValue]").each(function() {
+                    var id = $(this).attr("id").split("selectNewValue")[1]
                     var value = $.trim($(this).val())
                     var valueIsBlank = value == "-1"
                     var valueIsValid = $.isNumeric(value)
-                    var timestamp = $.trim($("#inputTimestamp" + id).val())
+                    var timestamp = $.trim($("#inputNewTimestamp" + id).val())
                     var timestampIsBlank = timestamp == ""
                     var timestampIsValid = moment(timestamp, "YYYY-M-D H:m:s", true).isValid()
                     
                     if (valueIsBlank && timestampIsBlank)
                     {
-                        $("#divValue" + id).removeClass("has-error")
-                        var helpBlock = $("#pValue" + id).html("")
-                        $("#divTimestamp" + id).removeClass("has-error")
-                        var helpBlock = $("#pTimestamp" + id).html("")
+                        $("#divNewValue" + id).removeClass("has-error")
+                        var helpBlock = $("#pNewValue" + id).html("")
+                        $("#divNewTimestamp" + id).removeClass("has-error")
+                        var helpBlock = $("#pNewTimestamp" + id).html("")
                     }
                     else if ((valueIsBlank && timestampIsValid) || (!valueIsValid && timestampIsValid))
                     {
                         error = true
-                        $("#divValue" + id).addClass("has-error")
-                        var helpBlock = $("#pValue" + id).html("Not a valid float value")
-                        $("#divTimestamp" + id).removeClass("has-error")
-                        var helpBlock = $("#pTimestamp" + id).html("")
+                        $("#divNewValue" + id).addClass("has-error")
+                        var helpBlock = $("#pNewValue" + id).html("Not a valid float value")
+                        $("#divNewTimestamp" + id).removeClass("has-error")
+                        var helpBlock = $("#pNewTimestamp" + id).html("")
                     }
                     else if ((valueIsBlank && !timestampIsValid) || (!valueIsValid && (timestampIsBlank || !timestampIsValid)))
                     {
                         error = true
-                        $("#divValue" + id).addClass("has-error")
-                        var helpBlock = $("#pValue" + id).html("Not a valid float value")
-                        $("#divTimestamp" + id).addClass("has-error")
-                        var helpBlock = $("#pTimestamp" + id).html("This field is required.")
+                        $("#divNewValue" + id).addClass("has-error")
+                        var helpBlock = $("#pNewValue" + id).html("Not a valid float value")
+                        $("#divNewTimestamp" + id).addClass("has-error")
+                        var helpBlock = $("#pNewTimestamp" + id).html("This field is required.")
                     }
                     else if (valueIsValid && (timestampIsBlank || !timestampIsValid))
                     {
                         error = true
-                        $("#divValue" + id).removeClass("has-error")
-                        var helpBlock = $("#pValue" + id).html("")
-                        $("#divTimestamp" + id).addClass("has-error")
-                        var helpBlock = $("#pTimestamp" + id).html("This field is required.")
+                        $("#divNewValue" + id).removeClass("has-error")
+                        var helpBlock = $("#pNewValue" + id).html("")
+                        $("#divNewTimestamp" + id).addClass("has-error")
+                        var helpBlock = $("#pNewTimestamp" + id).html("This field is required.")
                     }
                     else
                     {
-                        $("#divValue" + id).removeClass("has-error")
-                        var helpBlock = $("#pValue" + id).html("")
-                        $("#divTimestamp" + id).removeClass("has-error")
-                        var helpBlock = $("#pTimestamp" + id).html("")
+                        $("#divNewValue" + id).removeClass("has-error")
+                        var helpBlock = $("#pNewValue" + id).html("")
+                        $("#divNewTimestamp" + id).removeClass("has-error")
+                        var helpBlock = $("#pNewTimestamp" + id).html("")
                         var row = {}
                         row["id"] = id
+                        row["type"] = "select"
                         row["value"] = value
                         row["timestamp"] = timestamp
                         rows.push(row)
@@ -374,7 +378,26 @@
                         type : "POST",
                         url : "/test",
                         data : JSON.stringify(rows)
+                    }).done(function(response) {
+                        $.each(response, function() {
+                            $("#tdLastTimestamp" + $(this).attr("id")).text($(this).attr("timestamp"))
+                            $("#tdLastValue" + $(this).attr("id")).text($(this).attr("value"))
+                            if ($(this).attr("type") == "input")
+                            {
+                                $("#inputNewValue" + $(this).attr("id")).val("")
+                            }
+                            else
+                            {
+                                $("#selectNewValue" + $(this).attr("id")).val("-1")
+                            }
+                            $("#inputNewTimestamp" + $(this).attr("id")).val("")
+                            // console.log($(this).attr("value"))
+                        })
                     })
+                    // $.each(rows, function() {
+                    //     $("#tdLastTimestamp" + $(this).attr("id")).text($(this).attr("timestamp"))
+                    //     $("#tdLastValue" + $(this).attr("id")).text($(this).attr("value"))
+                    // })
                 }
                 // $("#test").text("x");
                 // var data = attributes.$("input").serializeArray();

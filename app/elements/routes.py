@@ -7,8 +7,8 @@ from . forms import ElementForm
 from .. import db
 from .. eventFrames . forms import EventFrameForm
 from .. decorators import adminRequired, permissionRequired
-from .. models import Area, AttributeTemplate, Element, ElementAttribute, ElementTemplate, Enterprise, EventFrame, EventFrameTemplate, Permission, Site, Tag, \
-	TagValue
+from .. models import Area, AttributeTemplate, Element, ElementAttribute, ElementTemplate, Enterprise, EventFrame, EventFrameTemplate, LookupValue, \
+	Permission, Site, Tag, TagValue
 
 modelName = "Element"
 
@@ -174,16 +174,19 @@ def selectElement(className = None, id = None):
 @elements.route("/test", methods=["GET", "POST"])
 def test():
 	data = request.get_json(force = True)
-	print (data)
-	# for item in data:
-	# 	if item["value"]:
-	# 		elementAttribute = ElementAttribute.query.get_or_404(item["name"])
-	# 		tagValue = TagValue(TagId = elementAttribute.TagId, Timestamp = datetime.now(), Value = item["value"])
-	# 		db.session.add(tagValue)
-	# 		# print ("key: " + item["name"], " value: " + item["value"])
+	# print (data)
+	for item in data:
+		elementAttribute = ElementAttribute.query.get_or_404(item["id"])
+		tagValue = TagValue(TagId = elementAttribute.TagId, Timestamp = item["timestamp"], Value = item["value"])
+		db.session.add(tagValue)
+		if elementAttribute.Tag.LookupId != None:
+			lookupValue = LookupValue.query.filter_by(LookupId = elementAttribute.Tag.LookupId, Value = item["value"]).first()
+			item["value"] = lookupValue.Name
+		# print ("id: " + item["id"], " value: " + item["value"] + " timestamp: " + item["timestamp"])
 
-	# db.session.commit()
+	db.session.commit()
 	# flash("Success!", "alert alert-success")
 	# for key, value in data:
 	# 	print (key, " : ", value)
-	return jsonify(True)
+	# print (jsonify(data))
+	return jsonify(data)
