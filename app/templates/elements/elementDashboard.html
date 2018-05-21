@@ -92,10 +92,9 @@
                 <th>Attribute</th>
                 <th>Last Timestamp</th>
                 <th>Last Value</th>
+                <th>Unit</th>
                 <th>New Value</th>
-                <!-- <th></th> -->
                 <th>New Timestamp</th>
-                <!-- <th></th> -->
                 <th></th>
                 <th></th>
                 <th></th>
@@ -111,17 +110,17 @@
                     {% if elementAttribute.Tag.TagValues[0] %}
                         {% set firstTagValue = elementAttribute.Tag.TagValues | sort(attribute = "Timestamp", reverse = True) | first %}
                         <td id = "tdLastTimestamp{{ elementAttribute.ElementAttributeId }}">{{ firstTagValue.Timestamp }}</td>
-                        <td id = "tdLastValue{{ elementAttribute.ElementAttributeId }}">
-                            {% if elementAttribute.Tag.LookupId %}
-                                {{ elementAttribute.Tag.Lookup.LookupValues | selectattr("Value", "equalto", firstTagValue.Value) | map(attribute = "Name") |
-                                    list | first }}          
-                            {% else %}
-                                {{ firstTagValue.Value }} {{ firstTagValue.Tag.UnitOfMeasurement.Abbreviation }}                    
-                            {% endif %}
-                        </td>
+                        {% if elementAttribute.Tag.LookupId %}
+                            <td id = "tdLastValue{{ elementAttribute.ElementAttributeId }}">{{ elementAttribute.Tag.Lookup.LookupValues | selectattr("Value", "equalto", firstTagValue.Value) | map(attribute = "Name") | list | first }}          
+                            <td>{{ elementAttribute.Tag.Lookup.Name }}</td>
+                        {% else %}
+                            <td id = "tdLastValue{{ elementAttribute.ElementAttributeId }}">{{ firstTagValue.Value }}</td>                    
+                            <td>{{ firstTagValue.Tag.UnitOfMeasurement.Abbreviation }}</td>
+                        {% endif %}
                     {% else %}
                         <td id = "tdLastTimestamp{{ elementAttribute.ElementAttributeId }}"></td>
                         <td id = "tdLastValue{{ elementAttribute.ElementAttributeId }}"></td>
+                        <td></td>
                     {% endif %}
                     {% if elementAttribute.Tag.LookupId %}
                         <td>
@@ -143,21 +142,17 @@
                             </div>
                         </td>
                     {% endif %}
-                    <!-- <td><button class = "btn btn-default" title = "Save All"><span class="glyphicon glyphicon-floppy-disk"></span></button></td> -->
                     <td>
                         <div class = "form-group" id = "divNewTimestamp{{ elementAttribute.ElementAttributeId }}">
                             <input class = "form-control" id = "inputNewTimestamp{{ elementAttribute.ElementAttributeId }}" value = "">
                             <p class = "help-block" id = "pNewTimestamp{{ elementAttribute.ElementAttributeId }}"></p>
                         </div>
                     </td>
-                    <!-- <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Add"
-                        href = "{#{ url_for("elementAttributes.addElementAttributeValue", elementId = elementAttribute.ElementId,
-                        tagId = elementAttribute.Tag.TagId) }#}"><span class="glyphicon glyphicon-plus"></span></a></td> -->
                     {% if elementAttribute.Tag.TagValues[0] %}
-                        <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Last Value Notes"
-                            href = "{{ url_for("tagValues.listTagValueNotes", tagValueId = firstTagValue.TagValueId) }}">
-                            <span class="glyphicon glyphicon-comment"></span></a></td>
-                        <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Edit Last Value"
+                        <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Notes"
+                            href = "{{ url_for("tagValues.listTagValueNotes", tagValueId = firstTagValue.TagValueId,
+                            elementAttributeId = elementAttribute.ElementAttributeId) }}"><span class="glyphicon glyphicon-comment"></span></a></td>
+                        <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Edit"
                             href = "{{ url_for("elementAttributes.editElementAttributeValue", elementId = elementAttribute.ElementId,
                             tagValueId = firstTagValue.TagValueId) }}"><span class="glyphicon glyphicon-edit"></span></a></td>
                         <td><a class = "btn btn-default" title = "Delete Last Value"
@@ -217,10 +212,9 @@
                     null,
                     null,
                     null,
+                    { "orderable": false }, // Unit.
                     { "orderable": false }, // New value.
                     { "orderable": false }, // New timestamp.
-                    // { "orderable": false }, // Save all button.
-                    // { "orderable": false }, // Add attribute value button.
                     { "orderable": false }, // List attribute value notes button.
                     { "orderable": false }, // Edit attribute value button.
                     { "orderable": false }  // Delete attribute value button.
@@ -410,28 +404,7 @@
                         $("#attributesHeader").after("<div class = \"alert alert-danger\"><button type = \"button\" class = \"close\" " +
                             "data-dismiss = \"alert\">&times;</button>The attempt to save one or more new element attribute values failed.</div>")                        
                     })
-                    // $.each(rows, function() {
-                    //     $("#tdLastTimestamp" + $(this).attr("id")).text($(this).attr("timestamp"))
-                    //     $("#tdLastValue" + $(this).attr("id")).text($(this).attr("value"))
-                    // })
                 }
-                // $("#test").text("x");
-                // var data = attributes.$("input").serializeArray();
-                // alert(data);
-                // var data = JSON.stringify(attributes.$("input").serializeArray());
-                // alert(data);
-                // var arr = $("select.form-control").map(function() {return this.value}).get()
-                // alert(arr)
-
-                // $.ajax({
-                //     type: "POST",
-                //     url: "/test",
-                //     data: data//,
-                //     // dataType: "json"
-                // }).done(function(response) {
-                //     // $("#test").text(response["text"])
-                //     location.reload();
-                // });
             });
         });
     </script>

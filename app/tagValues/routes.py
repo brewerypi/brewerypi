@@ -13,7 +13,7 @@ modelName = "Tag Value"
 @tagValues.route("/tagValues/<int:tagId>/<int:elementAttributeId>", methods = ["GET", "POST"])
 @login_required
 @permissionRequired(Permission.DATA_ENTRY)
-def listTagValues(tagId, elementAttributeId = None, ):
+def listTagValues(tagId, elementAttributeId = None):
 	if elementAttributeId:
 		elementAttribute = ElementAttribute.query.get_or_404(elementAttributeId)
 	else:
@@ -111,12 +111,18 @@ def editTagValue(tagValueId):
 	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
 
 @tagValues.route("/tagValueNotes/<int:tagValueId>", methods = ["GET", "POST"])
+@tagValues.route("/tagValueNotes/<int:tagValueId>/<int:elementAttributeId>", methods = ["GET", "POST"])
 @login_required
 @permissionRequired(Permission.DATA_ENTRY)
-def listTagValueNotes(tagValueId):
+def listTagValueNotes(tagValueId, elementAttributeId = None):
+	if elementAttributeId:
+		elementAttribute = ElementAttribute.query.get_or_404(elementAttributeId)
+	else:
+		elementAttribute = None
+
 	tagValue = TagValue.query.get_or_404(tagValueId)
 	tagValueNotes = TagValueNote.query.filter_by(TagValueId = tagValueId)
-	return render_template("tagValues/tagValueNotes.html", tagValue = tagValue, tagValueNotes = tagValueNotes)
+	return render_template("tagValues/tagValueNotes.html", elementAttribute = elementAttribute, tagValue = tagValue, tagValueNotes = tagValueNotes)
 
 @tagValues.route("/tagValueNotes/add/<int:tagValueId>", methods = ["GET", "POST"])
 @login_required
