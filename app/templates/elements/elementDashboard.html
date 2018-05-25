@@ -81,9 +81,7 @@
             {% endfor %}
         </tbody>
     </table>
-    <h2 id = "attributesHeader">Attributes
-        <button class = "btn btn-default" id = "buttonAttributesSaveAll" title = "Save All"><span class="glyphicon glyphicon-floppy-disk"></span></button>
-    </h2>
+    <h2 id = "attributesHeader">Attributes</h2>
     <br>
     <table id = "attributesTable" class = "table">
         <thead>
@@ -95,6 +93,7 @@
                 <th>Unit</th>
                 <th>New Value</th>
                 <th>New Timestamp</th>
+                <th><button class = "btn btn-default" id = "buttonAttributesSaveAll" title = "Save All"><span class="glyphicon glyphicon-floppy-disk"></span></button></th>
                 <th></th>
                 <th></th>
                 <th></th>
@@ -150,6 +149,7 @@
                             <p class = "help-block" id = "pNewTimestamp{{ elementAttribute.ElementAttributeId }}"></p>
                         </div>
                     </td>
+                    <td></td>
                     {% if elementAttribute.Tag.TagValues[0] %}
                         <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Notes"
                             href = "{{ url_for("tagValues.listTagValueNotes", tagValueId = firstTagValue.TagValueId,
@@ -204,6 +204,10 @@
 
             var attributes = $('#attributesTable').DataTable
             ({
+                fixedHeader: {
+                    header: true,
+                    footer: false
+                },
                 "order":
                 [
                     [1, 'asc']              // Attribute.
@@ -217,6 +221,7 @@
                     { "orderable": false }, // Unit.
                     { "orderable": false }, // New value.
                     { "orderable": false }, // New timestamp.
+                    { "orderable": false }, // Save all button.
                     { "orderable": false }, // List attribute value notes button.
                     { "orderable": false }, // Edit attribute value button.
                     { "orderable": false }  // Delete attribute value button.
