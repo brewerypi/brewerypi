@@ -1,5 +1,5 @@
 from datetime import datetime
-from flask import flash, jsonify, redirect, render_template, request, url_for
+from flask import flash, redirect, render_template, url_for
 from flask_login import login_required
 from sqlalchemy import and_
 from . import elements
@@ -170,23 +170,3 @@ def selectElement(className = None, id = None):
 		className = "Element"
 
 	return render_template("elements/selectElement.html", children = children, className = className, parent = parent)
-
-@elements.route("/test", methods=["GET", "POST"])
-def test():
-	data = request.get_json(force = True)
-	# print (data)
-	for item in data:
-		elementAttribute = ElementAttribute.query.get_or_404(item["id"])
-		tagValue = TagValue(TagId = elementAttribute.TagId, Timestamp = item["timestamp"], Value = item["value"])
-		db.session.add(tagValue)
-		if elementAttribute.Tag.LookupId != None:
-			lookupValue = LookupValue.query.filter_by(LookupId = elementAttribute.Tag.LookupId, Value = item["value"]).first()
-			item["value"] = lookupValue.Name
-		# print ("id: " + item["id"], " value: " + item["value"] + " timestamp: " + item["timestamp"])
-
-	db.session.commit()
-	# flash("Success!", "alert alert-success")
-	# for key, value in data:
-	# 	print (key, " : ", value)
-	# print (jsonify(data))
-	return jsonify(data)

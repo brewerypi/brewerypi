@@ -1,6 +1,6 @@
 import csv
 import os
-from flask import current_app, flash, redirect, render_template, send_file, url_for
+from flask import current_app, flash, jsonify, redirect, render_template, request, send_file, url_for
 from flask_login import login_required
 from sqlalchemy import or_
 from . import elementAttributes
@@ -220,6 +220,26 @@ def importElementAttributes():
 					successes.append("Attribute Template \"" + attributeTemplateName + "\" updated for Element \"" + elementName + "\".")
 
 	return render_template("import.html", errors = errors, form = form, importing = "Element Attributes", successes = successes, warnings = warnings)
+
+
+@elementAttributes.route("/elementAttributes/addMultipleValues", methods=["GET", "POST"])
+@login_required
+@permissionRequired(Permission.DATA_ENTRY)
+def addMultipleelementAttributeValues():
+	# Get the data, loop through it and add new value.
+	data = request.get_json(force = True)
+	for item in data:
+		elementAttribute = ElementAttribute.query.get_or_404(item["id"])
+		tagValue = TagValue(TagId = elementAttribute.TagId, Timestamp = item["timestamp"], Value = item["value"])
+		db.session.add(tagValue)
+		# If the value is a lookup, write that string in place of the numberic value so that we can use it when updated last value.
+		if elementAttribute.Tag.LookupId != None:
+			lookupValue = LookupValue.query.filter_by(LookupId = elementAttribute.Tag.LookupId, Value = item["value"]).first()
+			item["value"] = lookupValue.Name
+
+	db.session.commit()
+	# Return the data so that we can update last values and timestamps for added attributes.
+	return jsonify(data)
 
 @elementAttributes.route("/elementAttributes/addValue/<int:elementId>/<int:tagId>", methods = ["GET", "POST"])
 @login_required

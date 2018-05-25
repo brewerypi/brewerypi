@@ -181,8 +181,7 @@
     <script type = "text/javascript" src = {{ url_for("static", filename = "js/moment.min.js") }}></script>
     <script>
         $(document).ready(function() {
-            $('#eventFramesTable').DataTable
-            ({
+            $('#eventFramesTable').DataTable({
                 "order":
                 [
                     [1, 'asc']              // Event frame template name.
@@ -203,8 +202,7 @@
                 "pageLength": 25
             })
 
-            var attributes = $('#attributesTable').DataTable
-            ({
+            var attributesTable = $('#attributesTable').DataTable({
                 fixedHeader: {
                     header: true,
                     footer: false
@@ -232,20 +230,7 @@
                 "pageLength": 25
             })
 
-            $("[id^=selectNewValue]").change(function() {
-                var value = $.trim($(this).val())
-                var id = $(this).attr("id").split("selectNewValue")[1]
-                if (value == "-1")
-                {
-                    $("#inputNewTimestamp" + id).val("")
-                }
-                else
-                {
-                    var timestamp = new moment().local().format("YYYY-MM-DD HH:mm:ss")
-                    $("#inputNewTimestamp" + id).val(timestamp)
-                }
-            })
-
+            // Update the timestamp for input new values appropriately.
             $("[id^=inputNewValue]").blur(function() {
                 var value = $.trim($(this).val())
                 var id = $(this).attr("id").split("inputNewValue")[1]
@@ -260,12 +245,28 @@
                 }
             })
 
+            // Update the timestamp for select new values appropriately.
+            $("[id^=selectNewValue]").change(function() {
+                var value = $.trim($(this).val())
+                var id = $(this).attr("id").split("selectNewValue")[1]
+                if (value == "-1")
+                {
+                    $("#inputNewTimestamp" + id).val("")
+                }
+                else
+                {
+                    var timestamp = new moment().local().format("YYYY-MM-DD HH:mm:ss")
+                    $("#inputNewTimestamp" + id).val(timestamp)
+                }
+            })
+
+
             $("#buttonAttributesSaveAll").click(function() {
                 var error = false
                 var rows = []
 
-                // Loop through the input values.
-                attributes.$("[id^=inputNewValue]").each(function() {
+                // Loop through the input values and check for validation errors.
+                attributesTable.$("[id^=inputNewValue]").each(function() {
                     var id = $(this).attr("id").split("inputNewValue")[1]
                     var value = $.trim($(this).val())
                     var valueIsBlank = value == ""
@@ -320,8 +321,8 @@
                     }
                 })
 
-                // Loop through the select values.
-                attributes.$("[id^=selectNewValue]").each(function() {
+                // Loop through the select values and check for validation errors.
+                attributesTable.$("[id^=selectNewValue]").each(function() {
                     var id = $(this).attr("id").split("selectNewValue")[1]
                     var value = $.trim($(this).val())
                     var valueIsBlank = value == "-1"
@@ -380,9 +381,10 @@
                 {
                     $.ajax({
                         type : "POST",
-                        url : "/test",
+                        url : "/elementAttributes/addMultipleValues",
                         data : JSON.stringify(rows)
                     }).done(function(response) {
+                        // Updated the last value and timestamp for new attributes that were saved.
                         $.each(response, function() {
                             $("#tdLastTimestamp" + $(this).attr("id")).text($(this).attr("timestamp"))
                             $("#tdLastValue" + $(this).attr("id")).text($(this).attr("value"))
@@ -396,6 +398,7 @@
                             }
                             $("#inputNewTimestamp" + $(this).attr("id")).val("")
                         })
+
                         $(".alert").remove()
                         if (response.length > 0)
                         {
