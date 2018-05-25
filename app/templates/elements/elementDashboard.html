@@ -128,7 +128,9 @@
                                 <select class = "form-control" id = "selectNewValue{{ elementAttribute.ElementAttributeId }}">
                                     <option value = "-1"></option>
                                     {% for lookupValue in elementAttribute.Tag.Lookup.LookupValues %}
-                                        <option value = "{{ lookupValue.Value }}">{{ lookupValue.Name}}</option>
+                                        {% if lookupValue.Selectable %}
+                                            <option value = "{{ lookupValue.Value }}">{{ lookupValue.Name}}</option>
+                                        {% endif %}
                                     {% endfor %}
                                 </select>
                                 <p class = "help-block" id = "pNewValue{{ elementAttribute.ElementAttributeId }}"></p>
