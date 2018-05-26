@@ -18,8 +18,6 @@
             id = element.ElementTemplate.ElementTemplateId) }}">{{ element.ElementTemplate.Name }}</a></li>
         <li class = "active">{{ element.Name }}</li>
     </ol>
-    <div class = "position-fixed"><button type = "button" class = "close"
-        data-dismiss = "alert">&times;</button>You have successfully added one or more new element attribute values.</div>
     <div class = "page-header">
         <h1>{{ element.Name }} <small>Event Frames</small></h1>
     </div>
@@ -407,17 +405,17 @@
                         $(".alert").remove()
                         if (response.length > 0)
                         {
-                            $("#attributesHeader").after("<div class = \"alert alert-success\"><button type = \"button\" class = \"close\" " +
+                            $("#divFlashedMessages").append("<div class = \"alert alert-success\"><button type = \"button\" class = \"close\" " +
                                 "data-dismiss = \"alert\">&times;</button>You have successfully added one or more new element attribute values.</div>")
                         }
                         else
                         {
-                            $("#attributesHeader").after("<div class = \"alert alert-warning\"><button type = \"button\" class = \"close\" " +
+                            $("#divFlashedMessages").append("<div class = \"alert alert-warning\"><button type = \"button\" class = \"close\" " +
                                 "data-dismiss = \"alert\">&times;</button>Nothing added to save.</div>")                            
                         }
                     }).fail(function() {
                         $(".alert").remove()
-                        $("#attributesHeader").after("<div class = \"alert alert-danger\"><button type = \"button\" class = \"close\" " +
+                        $("#divFlashedMessages").append("<div class = \"alert alert-danger\"><button type = \"button\" class = \"close\" " +
                             "data-dismiss = \"alert\">&times;</button>The attempt to save one or more new element attribute values failed.</div>")                        
                     })
                 }
