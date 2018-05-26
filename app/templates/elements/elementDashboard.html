@@ -18,8 +18,11 @@
             id = element.ElementTemplate.ElementTemplateId) }}">{{ element.ElementTemplate.Name }}</a></li>
         <li class = "active">{{ element.Name }}</li>
     </ol>
-    <h1>{{ element.Name }}</h1>
-    <h2>Event Frames</h2>
+    <div class = "position-fixed"><button type = "button" class = "close"
+        data-dismiss = "alert">&times;</button>You have successfully added one or more new element attribute values.</div>
+    <div class = "page-header">
+        <h1>{{ element.Name }} <small>Event Frames</small></h1>
+    </div>
     <br>
     <table id = "eventFramesTable" class = "table">
         <thead>
@@ -81,7 +84,9 @@
             {% endfor %}
         </tbody>
     </table>
-    <h2 id = "attributesHeader">Attributes</h2>
+    <div class = "page-header">
+            <h1>{{ element.Name }} <small>Attributes</small></h1>
+    </div>
     <br>
     <table id = "attributesTable" class = "table">
         <thead>
