@@ -228,18 +228,21 @@ def importElementAttributes():
 def addMultipleelementAttributeValues():
 	# Get the data, loop through it and add new value.
 	data = request.get_json(force = True)
+	count = 0
 	for item in data:
 		elementAttribute = ElementAttribute.query.get_or_404(item["id"])
 		tagValue = TagValue(TagId = elementAttribute.TagId, Timestamp = item["timestamp"], Value = item["value"])
 		db.session.add(tagValue)
-		# If the value is a lookup, write that string in place of the numberic value so that we can use it when updated last value.
-		if elementAttribute.Tag.LookupId != None:
-			lookupValue = LookupValue.query.filter_by(LookupId = elementAttribute.Tag.LookupId, Value = item["value"]).first()
-			item["value"] = lookupValue.Name
+		count = count + 1
 
-	db.session.commit()
-	# Return the data so that we can update last values and timestamps for added attributes.
-	return jsonify(data)
+	if count > 0:
+		db.session.commit()
+		message = "You have successfully added one or more new element attribute values."
+		flash(message, "alert alert-success")
+	else:
+		message = "Nothing added to save."
+		flash(message, "alert alert-warning")
+	return jsonify({"response": message})
 
 @elementAttributes.route("/elementAttributes/addValue/<int:elementId>/<int:tagId>", methods = ["GET", "POST"])
 @login_required

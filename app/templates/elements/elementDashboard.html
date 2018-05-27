@@ -387,39 +387,14 @@
                         url : "/elementAttributes/addMultipleValues",
                         data : JSON.stringify(rows)
                     }).done(function(response) {
-                        // Updated the last value and timestamp for new attributes that were saved.
-                        $.each(response, function() {
-                            $("#tdLastTimestamp" + $(this).attr("id")).text($(this).attr("timestamp"))
-                            $("#tdLastValue" + $(this).attr("id")).text($(this).attr("value"))
-                            if ($(this).attr("type") == "input")
-                            {
-                                $("#inputNewValue" + $(this).attr("id")).val("")
-                            }
-                            else
-                            {
-                                $("#selectNewValue" + $(this).attr("id")).val("-1")
-                            }
-                            $("#inputNewTimestamp" + $(this).attr("id")).val("")
-                        })
-
-                        $(".alert").remove()
-                        if (response.length > 0)
-                        {
-                            $("#divFlashedMessages").append("<div class = \"alert alert-success\"><button type = \"button\" class = \"close\" " +
-                                "data-dismiss = \"alert\">&times;</button>You have successfully added one or more new element attribute values.</div>")
-                        }
-                        else
-                        {
-                            $("#divFlashedMessages").append("<div class = \"alert alert-warning\"><button type = \"button\" class = \"close\" " +
-                                "data-dismiss = \"alert\">&times;</button>Nothing added to save.</div>")                            
-                        }
+                        location.reload(true)
                     }).fail(function() {
                         $(".alert").remove()
                         $("#divFlashedMessages").append("<div class = \"alert alert-danger\"><button type = \"button\" class = \"close\" " +
                             "data-dismiss = \"alert\">&times;</button>The attempt to save one or more new element attribute values failed.</div>")                        
                     })
                 }
-            });
-        });
+            })
+        })
     </script>
 {% endblock %}
