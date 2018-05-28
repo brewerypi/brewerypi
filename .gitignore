@@ -108,6 +108,10 @@ ENV/
 
 # Exports
 /exports/*.csv
+/exports/*.sql
 
 # Imports
 /imports/*.csv
+
+# Certificates
+/certs
