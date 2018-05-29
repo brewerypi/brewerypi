@@ -8,6 +8,7 @@ class TagValueForm(FlaskForm):
 	timestamp = DateTimeField("Timestamp", default = datetime.now, validators = [Required()])
 	value = FloatField("Value")
 	lookupValue = SelectField("Lookup", coerce = float)
+	requestReferrer = HiddenField()
 	submit = SubmitField("Save")
 
 class TagValueNoteForm(FlaskForm):
