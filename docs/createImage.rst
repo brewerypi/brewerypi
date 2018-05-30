@@ -46,6 +46,10 @@ Change the hostname of the Raspberry Pi from "raspberrypi" to "brewerypi" in /et
 
     $ sudo nano /etc/hostname
 
+Change the hostname of the Raspberry Pi from "raspberrypi" to "brewerypi" in /etc/hosts, save and exit.::
+
+    $ sudo nano /etc/hosts
+
 Next update the software on your Raspberry Pi::
 
     $ sudo apt-get update
@@ -65,9 +69,9 @@ Configure MySQL (MariaDB)
     > CREATE DATABASE BreweryPi;
     > CREATE USER 'pi'@'%' IDENTIFIED BY 'brewery';
     > GRANT ALL ON BreweryPi.* TO 'pi'@'%';
-    > CREATE USER 'grafanaReader'@'%' IDENTIFIED BY 'brewery';
-    > GRANT SELECT ON BreweryPi.* TO 'grafanaReader';
-    > GRANT EXECUTE ON BreweryPi.* TO 'grafanaReader';
+    > CREATE USER 'piReader'@'%' IDENTIFIED BY 'brewery';
+    > GRANT SELECT ON BreweryPi.* TO 'piReader';
+    > GRANT EXECUTE ON BreweryPi.* TO 'piReader';
     > quit
     $ sudo nano /etc/mysql/mariadb.conf.d/50-server.cnf
 
@@ -95,8 +99,38 @@ Logout and then log back in.
     $ sudo apt-get -y install python3-venv
     $ python3 -m venv venv
     $ source venv/bin/activate
+    (venv) $ pip install --upgrade pip
     (venv) $ pip install -r requirements.txt
-    (venv) $ flask db upgrade
+    (venv) $ pip list --outdated
+
+Review outdated package, update packages and requirements.txt as needed.
+
+    (venv) $ python3 -c "import uuid; print(uuid.uuid4().hex)"
+
+Will return something like::
+
+    ac9fe4f3153b4288b79718b2ea0b5a97
+
+Copy the entire string and paste it below in .env after "SECRET_KEY=".
+::
+
+    (venv) $ nano .env
+
+Add the following to the file::
+
+    IS_RASPBERRY_PI=1
+    MYSQL_USERNAME=pi
+    MYSQL_PASSWORD=brewery
+    MYSQL_HOST=localhost
+    MYSQL_DATABASE=BreweryPi
+    SECRET_KEY=ac9fe4f3153b4288b79718b2ea0b5a97
+    SQLALCHEMY_DATABASE_URI=mysql://${MYSQL_USERNAME}:${MYSQL_PASSWORD}@${MYSQL_HOST}/${MYSQL_DATABASE}
+    SQLALCHEMY_SERVER_URI=mysql://${MYSQL_USERNAME}:${MYSQL_PASSWORD}@${MYSQL_HOST}
+
+Save and exit.
+::
+
+    (venv) $ flask deploy
     (venv) $ sudo mysql BreweryPi < db/storedProcedures/spElementSummary.sql
     (venv) $ flask run --host 0.0.0.0
 
@@ -106,14 +140,14 @@ CTRL+C to quit
 
 Test gunicorn::
 
-    (venv) $ gunicorn -b 0.0.0.0:5000 -w 2 breweryPi:app
+    (venv) $ gunicorn -b 0.0.0.0:8000 -w 2 breweryPi:app
 
-Point a web browser at http\://<Your Raspberry Pi IP Address>:5000 and verify that you can access the app.
+Point a web browser at http\://<Your Raspberry Pi IP Address>:8000 and verify that you can access the app.
 
 CTRL+C to quit
 
-Deployment with Supervisor
---------------------------
+Setting Up Gunicorn and Supervisor
+----------------------------------
 ::
 
     $ sudo apt-get -y install supervisor
@@ -122,7 +156,7 @@ Deployment with Supervisor
 Add the following to the file and save::
 
     [program:breweryPi]
-    command=/home/pi/brewerypi/venv/bin/gunicorn -b 0.0.0.0:5000 -w 2 breweryPi:app
+    command=/home/pi/brewerypi/venv/bin/gunicorn -b 0.0.0.0:8000 -w 2 breweryPi:app
     directory=/home/pi/brewerypi
     user=pi
     autostart=true
@@ -134,21 +168,98 @@ Reload Supervisor with the following command::
 
     $ sudo supervisorctl reload
 
+Setting Up Nginx
+----------------
+::
+
+    $ cd ~/brewerypi/
+    $ mkdir certs
+    $ openssl req -new -newkey rsa:4096 -days 365 -nodes -x509 -keyout certs/key.pem -out certs/cert.pem
+    Country Name (2 letter code) [AU]:US
+    State or Province Name (full name) [Some-State]:Oregon
+    Locality Name (eg, city) []:Bend
+    Organization Name (eg, company) [Internet Widgits Pty Ltd]:Brewery Pi
+    Organizational Unit Name (eg, section) []:
+    Common Name (e.g. server FQDN or YOUR name) []:localhost
+    Email Address []:
+    $ sudo apt-get -y install nginx
+    $ sudo rm /etc/nginx/sites-enabled/default
+    $ sudo nano /etc/nginx/sites-enabled/brewerypi
+
+Paste the following in the file::
+
+    server {
+        # listen on port 80 (http)
+        listen 80;
+        server_name _;
+        location / {
+            # redirect any requests to the same URL but on https
+            return 301 https://$host$request_uri;
+        }
+    }
+
+    server {
+        # listen on port 443 (https)
+        listen 443 ssl;
+        server_name _;
+
+        # location of the self-signed SSL certificate
+        ssl_certificate /home/pi/brewerypi/certs/cert.pem;
+        ssl_certificate_key /home/pi/brewerypi/certs/key.pem;
+
+        # write access and error logs to /var/log
+        access_log /var/log/brewerypi_access.log;
+        error_log /var/log/brewerypi_error.log;
+
+        location / {
+            # forward application requests to the gunicorn server
+            proxy_pass http://127.0.0.1:8000;
+            proxy_redirect off;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        }
+
+        location /app/static {
+            # handle static files directly, without forwarding to the application
+            alias /home/pi/brewerypi/app/static;
+            expires 30d;
+        }
+
+        location /grafana/ {
+            proxy_pass http://localhost:3000/;
+        }
+    }
+
+Save and exit.
+::
+
+    $ sudo service nginx reload
+
+Point a web browser at http\://<Your Raspberry Pi IP Address> and verify that you can access the app.
+
 Grafana
 -------
 ::
 
     $ sudo apt-get -y install adduser libfontconfig
-    $ curl -L https://github.com/fg2it/grafana-on-raspberry/releases/download/vX.Y.Z/grafana_4.6.3_armhf.deb -o /tmp/grafana_4.6.3_armhf.deb
+    $ curl -L https://github.com/fg2it/grafana-on-raspberry/releases/download/vX.Y.Z/grafana_X.Y.Z_armhf.deb -o /tmp/grafana_X.Y.Z_armhf.deb
     $ sudo dpkg -i /tmp/grafana_X.Y.Z_armhf.deb
     $ rm /tmp/grafana_X.Y.Z_armhf.deb
+    $ sudo nano /etc/grafana/grafana.ini
+
+Add the following line::
+
+    root_url = %(protocol)s://%(domain)s:/grafana
+
+Save and exit.
 
 Run the following commands to start Grafana at boot::
 
     $ sudo /bin/systemctl daemon-reload
     $ sudo /bin/systemctl enable grafana-server
 
-Reboot and point a web browser at http\://<Your Raspberry Pi IP Address>:3000
+Reboot and point a web browser at http\://<Your Raspberry Pi IP Address>/grafana
 
 Login with "admin" for both the user and password.
 
@@ -163,12 +274,12 @@ Click on "Add data source" and set the following properties:
 +----------+---------------+
 | Database | BreweryPi     |
 +----------+---------------+
-| User     | grafanaReader |
+| User     | piReader      |
 +----------+---------------+
 | Password | brewery       |
 +----------+---------------+
 
-Download the Brewery Pi release source files from GitHub and import the Grafana dashboards.
+Download the Brewery Pi release source files from GitHub and import the Grafana dashboards into a new folder named "Brewery Pi".
 
 Create a Compressed Image
 -------------------------
@@ -196,7 +307,7 @@ Connect the external drive to the VMWare Workstation Player.
 Execute the following command and take note of the "Start" sector of the second partition which will be referenced as "START" below.
 ::
 
-    $ sudo fdisk -l brewerypi-vX.Y.Z.img
+    $ fdisk -l brewerypi-vX.Y.Z.img
 
 Execute the following, remembering to replace "START" with the value of the start sector you noted above.
 ::
@@ -223,8 +334,8 @@ Within fdisk, execute the following sequence::
     2 <Enter>
     START <Enter>
     +RESIZEK <Enter> (don't forget the 'K' or 'M' after RESIZE)
-    w <Enter>
     N <Enter> (for remove signature)
+    w <Enter>
 
 Once fdisk exits, execute the following commands::
 
