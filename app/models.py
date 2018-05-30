@@ -1,5 +1,5 @@
 from flask_login import AnonymousUserMixin, UserMixin
-from sqlalchemy import Index, PrimaryKeyConstraint, UniqueConstraint
+from sqlalchemy import and_, Index, PrimaryKeyConstraint, UniqueConstraint
 from werkzeug.security import generate_password_hash, check_password_hash
 from app import db
 from . import loginManager
@@ -287,6 +287,10 @@ class Note(db.Model):
 	TagValueNotes = db.relationship("TagValueNote", backref = "Note", lazy = "dynamic")
 	EventFrameNotes = db.relationship("EventFrameNote", backref = "Note", lazy = "dynamic")
 
+class Permission:
+	DATA_ENTRY = 0x01
+	ADMINISTER = 0x80
+
 class Role(db.Model):
 	__tablename__ = "Role"
 	__table_args__ = \
@@ -301,20 +305,29 @@ class Role(db.Model):
 
 	Users = db.relationship("User", backref = "Role", lazy = "dynamic")
 
+	# @staticmethod
+	# def insertRoles():
+	# 	roles = {"User" : Permission.DATA_ENTRY, "Administrator" : 0xff}
+	# 	for r in roles:
+	# 		role = Role.query.filter_by(Name = r).first()
+	# 		if role is None:
+	# 			role = Role(Name = r)
+	# 		role.Permissions = roles[r]
+	# 		db.session.add(role)
+	# 	db.session.commit()
 	@staticmethod
-	def insertRoles():
-		roles = {"User" : Permission.DATA_ENTRY, "Administrator" : 0xff}
-		for r in roles:
-			role = Role.query.filter_by(Name = r).first()
+	def insertDefaultRoles():
+		defaultRoles = {"User" : Permission.DATA_ENTRY, "Administrator" : 0xff}
+		for defaultRole in defaultRoles:
+			role = Role.query.filter_by(Name = defaultRole).first()
 			if role is None:
-				role = Role(Name = r)
-			role.Permissions = roles[r]
+				role = Role(Name = defaultRole)
+			role.Permissions = defaultRoles[defaultRole]
 			db.session.add(role)
 		db.session.commit()
 
-class Permission:
-	DATA_ENTRY = 0x01
-	ADMINISTER = 0x80
+	def __repr__(self):
+		return "<Role: {}>".format(self.Name)
 
 class Site(db.Model):
 	__tablename__ = "Site"
@@ -404,6 +417,56 @@ class UnitOfMeasurement(db.Model):
 
 	Tags = db.relationship("Tag", backref = "UnitOfMeasurement", lazy = "dynamic")
 
+	@staticmethod
+	def insertDefaultUnits():
+		defaultUnits = {"°C" : "degree Celsius",
+			"°F" : "degree Fahrenheit",
+			"°F/min" : "degree Fahrenheit per minute",
+			"ASBC" : "American Society of Brewing Chemists",
+			"bbl" : "barrel",
+			"cells/ml" : "cells per milliliter",
+			"cells/ml/°P" : "cells per ml per degree plato",
+			"EBC" : "european brewery convention",
+			"g" : "grams",
+			"g/bbl" : "grams per barrel",
+			"g/L" : "grams per liter",
+			"gal" : "gallon",
+			"gpm" : "gallons per minute",
+			"h" : "hour",
+			"IBU" : "international bittering unit",
+			"in" : "inches",
+			"kg" : "kilogram",
+			"L" : "Liters",
+			"lb" : "pound",
+			"lb/bbl" : "pounds / barrel",
+			"mg" : "milligram",
+			"min" : "minute",
+			"mL" : "milliliter",
+			"mm" : "millimeter",
+			"pH" : "potential of hydrogen",
+			"ppb" : "parts per billion",
+			"ppm" : "parts per million",
+			"psi" : "pounds per square inch",
+			"RE" : "real extract",
+			"s" : "second",
+			"SG" : "specific gravity",
+			"SRM" : "Standard Reference Method",
+			"t/h" : "tons per hour",
+			"TA" : "Total Acidity",
+			"vol" : "volumes",
+			"x10^12 cells" : "x10^12 cells",
+			"x10^6 cells" : "x10^6 cells"}			
+			
+		for defaultUnit in defaultUnits:
+			unit = UnitOfMeasurement.query.filter(and_(UnitOfMeasurement.Abbreviation == defaultUnit,
+				UnitOfMeasurement.Name == defaultUnits[defaultUnit])).first()
+			if unit is None:
+				print("Adding unit \"{}\".".format(defaultUnit))
+				unit = UnitOfMeasurement(Abbreviation = defaultUnit)
+				unit.Name = defaultUnits[defaultUnit]
+				db.session.add(unit)
+		db.session.commit()
+
 	def __repr__(self):
 		return "<UnitOfMeasurement: {}>".format(self.Name)
 
@@ -438,6 +501,9 @@ class User(UserMixin, db.Model):
 		else:
 			user.Role = AdministratorRole
 		db.session.commit()
+
+	def __repr__(self):
+		return "<User: {}>".format(self.Name)
 
 	def can(self, permissions):
 		return self.Role is not None and (self.Role.Permissions & permissions) == permissions
