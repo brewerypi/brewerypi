@@ -73,7 +73,8 @@ def upgrade():
     elementAttributes = metadata2.tables["ElementAttribute"]
     updateStatement = elementAttributes.update().values(ElementAttributeTemplateId = elementAttributes.c.AttributeTemplateId)
     op.get_bind().execute(updateStatement)
-
+    op.get_bind().execute("ALTER TABLE ElementAttribute MODIFY ElementAttributeTemplateId INT(11) AFTER ElementAttributeId")
+    
     op.create_unique_constraint('AK__ElementAttributeTemplateId__ElementId', 'ElementAttribute', ['ElementAttributeTemplateId', 'ElementId'])
     op.drop_index('AK__AttributeTemplateId__ElementId', table_name='ElementAttribute')
     #op.drop_constraint('FK__AttributeTemplate$Have$ElementAttribute', 'ElementAttribute', type_='foreignkey') Here
@@ -94,6 +95,7 @@ def downgrade():
     elementAttributes = metadata.tables["ElementAttribute"]
     updateStatement = elementAttributes.update().values(AttributeTemplateId = elementAttributes.c.ElementAttributeTemplateId)
     op.get_bind().execute(updateStatement)
+    op.get_bind().execute("ALTER TABLE ElementAttribute MODIFY AttributeTemplateId INT(11) AFTER ElementAttributeId")
 
     op.create_index('AK__AttributeTemplateId__ElementId', 'ElementAttribute', ['AttributeTemplateId', 'ElementId'], unique=True)
     op.drop_constraint('AK__ElementAttributeTemplateId__ElementId', 'ElementAttribute', type_='unique')
