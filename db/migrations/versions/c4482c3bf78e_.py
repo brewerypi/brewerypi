@@ -29,7 +29,7 @@ def upgrade():
     sa.UniqueConstraint('ElementTemplateId', 'Name', name='AK__ElementTemplateId__Name')
     )
 
-    # Insert AttributeTemplate records to ElementAttributeTemplate.
+    # Insert AttributeTemplate records into ElementAttributeTemplate table.
     metadata = sa.MetaData()
     metadata.reflect(bind = op.get_bind())
     attributeTemplates = metadata.tables["AttributeTemplate"]
@@ -67,7 +67,7 @@ def upgrade():
     op.drop_table('AttributeTemplate')
     op.add_column('ElementAttribute', sa.Column('ElementAttributeTemplateId', sa.Integer(), nullable=False))
 
-    # Update ElementAttributeTemplateId to AttributeTemplateId.
+    # Update ElementAttributeTemplateId to AttributeTemplateId in ElementAttribute table.
     metadata2 = sa.MetaData()
     metadata2.reflect(bind = op.get_bind())
     elementAttributes = metadata2.tables["ElementAttribute"]
@@ -88,7 +88,7 @@ def downgrade():
     op.drop_constraint('FK__ElementAttributeTemplate$Have$ElementAttribute', 'ElementAttribute', type_='foreignkey')
     #op.create_foreign_key('FK__AttributeTemplate$Have$ElementAttribute', 'ElementAttribute', 'AttributeTemplate', ['AttributeTemplateId'], ['AttributeTemplateId']) Here
 
-    # Update AttributeTemplateId to ElementAttributeTemplateId.
+    # Update AttributeTemplateId to ElementAttributeTemplateId in ElementAttribute table.
     metadata = sa.MetaData()
     metadata.reflect(bind = op.get_bind())
     elementAttributes = metadata.tables["ElementAttribute"]
@@ -109,7 +109,7 @@ def downgrade():
     mysql_engine='InnoDB'
     )
 
-    # Insert ElementAttributeTemplate records to AttributeTemplate.
+    # Insert ElementAttributeTemplate records into AttributeTemplate table.
     metadata2 = sa.MetaData()
     metadata2.reflect(bind = op.get_bind())
     attributeTemplates = metadata2.tables["AttributeTemplate"]
