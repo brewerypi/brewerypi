@@ -21,9 +21,6 @@ def create_app(configClass = Config):
 	from . areas import areas as areasBlueprint
 	app.register_blueprint(areasBlueprint)
 
-	from . elementAttributeTemplates import elementAttributeTemplates as elementAttributeTemplatesBlueprint
-	app.register_blueprint(elementAttributeTemplatesBlueprint)
-
 	from . authentications import authentications as authenticationsBlueprint
 	app.register_blueprint(authenticationsBlueprint)
 
@@ -33,6 +30,9 @@ def create_app(configClass = Config):
 	from . elementAttributes import elementAttributes as elementAttributesBlueprint
 	app.register_blueprint(elementAttributesBlueprint)
 
+	from . elementAttributeTemplates import elementAttributeTemplates as elementAttributeTemplatesBlueprint
+	app.register_blueprint(elementAttributeTemplatesBlueprint)
+
 	from . elementTemplates import elementTemplates as elementTemplatesBlueprint
 	app.register_blueprint(elementTemplatesBlueprint)
 
@@ -41,6 +41,12 @@ def create_app(configClass = Config):
 
 	from . eventFrames import eventFrames as eventFramesBlueprint
 	app.register_blueprint(eventFramesBlueprint)
+
+	from . eventFrameAttributes import eventFrameAttributes as eventFrameAttributesBlueprint
+	app.register_blueprint(eventFrameAttributesBlueprint)
+
+	from . eventFrameAttributeTemplates import eventFrameAttributeTemplates as eventFrameAttributeTemplatesBlueprint
+	app.register_blueprint(eventFrameAttributeTemplatesBlueprint)
 
 	from . eventFrameTemplates import eventFrameTemplates as eventFrameTemplatesBlueprint
 	app.register_blueprint(eventFrameTemplatesBlueprint)
