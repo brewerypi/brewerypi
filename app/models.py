@@ -253,6 +253,16 @@ class EventFrameTemplate(db.Model):
 			ancestors.insert(0, self.ParentEventFrameTemplate)
 			return self.ParentEventFrameTemplate.ancestors(ancestors)
 
+	def descendants(self, descendants, level):
+		descendants.append({"eventFrameTemplate" : self, "level" : level})
+		if self.hasDescendants():
+			descendantEventFrameTemplates = EventFrameTemplate.query.filter_by(ParentEventFrameTemplateId = self.EventFrameTemplateId). \
+				order_by(EventFrameTemplate.Order)
+			for descendant in descendantEventFrameTemplates:
+				descendant.descendants(descendants, level + 1)
+		if level == 0:
+			return descendants
+
 	def hasDescendants(self):
 		if self.EventFrameTemplates:
 			return True

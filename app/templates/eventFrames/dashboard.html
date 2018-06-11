@@ -1,0 +1,222 @@
+{% extends "base.html" %}
+
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}
+Event Frame Dashboard
+{% endblock %}
+
+{% block page_content %}
+<div>
+    <!-- <ol class="breadcrumb">
+        <li><a href = "{#{ url_for("elements.selectElement", className = "Root", id = None) }}">..</a></li>
+        <li><a href = "{{ url_for("elements.selectElement", className = element.ElementTemplate.Site.Enterprise.__class__.__name__,
+            id = element.ElementTemplate.Site.Enterprise.EnterpriseId) }}">{{ element.ElementTemplate.Site.Enterprise.Name }}</a></li>
+        <li><a href = "{{ url_for("elements.selectElement", className = element.ElementTemplate.Site.__class__.__name__,
+            id = element.ElementTemplate.Site.SiteId) }}">{{ element.ElementTemplate.Site.Name }}</a></li>
+        <li><a href = "{{ url_for("elements.selectElement", className = element.ElementTemplate.__class__.__name__,
+            id = element.ElementTemplate.ElementTemplateId) }}">{{ element.ElementTemplate.Name }}</a></li>
+        <li class = "active">{{ element.Name }#}</li>
+    </ol> -->
+    <!-- <h1>Event Frames</h1>
+    <h2>Event Frames</h2>
+    <br> -->
+    <div class = "container">
+        <div class = "row">
+            <div class = "col-md-2">
+                <br>
+                <ul class = "nav nav-pills nav-stacked">
+                    {% for descendant in eventFrame.EventFrameTemplate.descendants([], 0) %}
+                        {% set prefix = "&nbsp;" * descendant["level"] %}
+                        {% if descendant["eventFrameTemplate"].EventFrameTemplateId == selectedEventFrameTemplate.EventFrameTemplateId %}
+                            {% set class = "active" %}
+                        {% else %}
+                            {% set class = "" %}
+                        {% endif %}
+                        <li class = "{{ class }}"><a href = "{{ url_for("eventFrames.dashboard", eventFrameId = eventFrame.EventFrameId,
+                                selectedEventFrameTemplateId = descendant["eventFrameTemplate"].EventFrameTemplateId) }}">{{ prefix | safe }}
+                                {{descendant["eventFrameTemplate"].Name }}</a></li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div class = "col-md-10">
+                <h1>Event Frames <small>Attributes</small></h1>
+                {% for eventFrameAttributeTemplate in selectedEventFrameTemplate.EventFrameAttributeTemplates %}
+                    {{ eventFrameAttributeTemplate.Name }}<br>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    <!-- <table id = "eventFramesTable" class = "table">
+        <thead>
+            <tr>
+                <th></th>
+                <th>Event Frame</th>
+                <th>Last Start Timestamp</th>
+                <th>Last End Timestamp</th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {#% for eventFrameTemplate in eventFrameTemplates %}
+                <tr>
+                    {% set firstEventFrame = None %}
+                    {% set eventFrames = eventFrameTemplate.EventFrames.filter_by(ElementId = element.ElementId) %}
+                    {% if eventFrames.count() > 0 %}
+                        {% set firstEventFrame = eventFrames | sort (attribute = "StartTimestamp", reverse = True) | first %}
+                        <td><a class = "btn btn-default" title = "List Values"
+                            href = "{{ url_for("eventFrames.listEventFrames", elementId = firstEventFrame.Element.ElementId,
+                            eventFrameTemplateId = firstEventFrame.EventFrameTemplate.EventFrameTemplateId) }}"><span class="glyphicon glyphicon-list"></span>
+                            </a></td>
+                    {% else %}
+                        <td></td>
+                    {% endif %}
+                    <td>{{ eventFrameTemplate.Name }}</td>
+                    {% if firstEventFrame %}
+                        <td>{{ firstEventFrame.StartTimestamp }}</td>
+                        <td>{{ firstEventFrame.EndTimestamp }}</td>
+                        {% if firstEventFrame.EndTimestamp == None %}
+                            <td><a class = "btn btn-default" title = "End" href = "{{ url_for("eventFrames.endEventFrame",
+                                eventFrameId = firstEventFrame.EventFrameId) }}"><span class="glyphicon glyphicon-stop"></span></a></td>
+                        {% else %}
+                            <td></td>
+                        {% endif %}
+                    {% else %}
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    {% endif %}
+                    <td><a class = "btn btn-default" title = "Add" href = "{{ url_for("eventFrames.startEventFrame",
+                        elementId = element.ElementId, eventFrameTemplateId = eventFrameTemplate.EventFrameTemplateId) }}">
+                        <span class="glyphicon glyphicon-plus"></span></a></td>
+                    {% if firstEventFrame %}
+                        <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Edit"
+                            href = "{{ url_for("eventFrames.editEventFrame", eventFrameId = firstEventFrame.EventFrameId) }}">
+                            <span class="glyphicon glyphicon-edit"></span></a></td>
+                        <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Delete"
+                            href = "{{ url_for("eventFrames.deleteEventFrame", eventFrameId = firstEventFrame.EventFrameId) }}">
+                            <span class="glyphicon glyphicon-trash"></a></td>
+                    {% else %}
+                        <td></td>
+                        <td></td>
+                    {% endif %}
+                </tr>
+            {% endfor %#}
+        </tbody>
+    </table> -->
+    <!-- <h2>Element Attributes</h2>
+    <br> -->
+    <!-- <table id = "attributesTable" class = "table">
+        <thead>
+            <tr>
+                <th></th>
+                <th>Attribute</th>
+                <th>Last Timestamp</th>
+                <th>Last Value</th>
+                <th>Unit / Lookup Name</th>
+                <th></th>
+                <th></th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {#% for elementAttribute in elementAttributes %}
+                <tr>
+                    <td><a class = "btn btn-default" data-toggle = "tooltip" title = "List Values"
+                        href = "{{ url_for("tagValues.listTagValues", tagId = elementAttribute.Tag.TagId,
+                        elementAttributeId = elementAttribute.ElementAttributeId) }}"><span class="glyphicon glyphicon-list"></span></a></td>
+                    <td>{{ elementAttribute.ElementAttributeTemplate.Name }}</td>
+                    {% if elementAttribute.Tag.TagValues[0] %}
+                        {% set firstTagValue = elementAttribute.Tag.TagValues | sort(attribute = "Timestamp", reverse = True) | first %}
+                        <td>{{ firstTagValue.Timestamp }}</td>
+                        {% if elementAttribute.Tag.LookupId %}
+                            <td>{{ elementAttribute.Tag.Lookup.LookupValues | selectattr("Value", "equalto", firstTagValue.Value) | map(attribute = "Name") |
+                                list | first }}</td>
+                            <td>{{ elementAttribute.Tag.Lookup.Name }}</td>
+                        {% else %}
+                            <td>{{ firstTagValue.Value }}</td>
+                            <td>{{ firstTagValue.Tag.UnitOfMeasurement.Abbreviation }}</td>
+                        {% endif %}
+                    {% else %}
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    {% endif %}
+                    <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Add"
+                        href = "{{ url_for("elementAttributes.addElementAttributeValue", elementId = elementAttribute.ElementId,
+                        tagId = elementAttribute.Tag.TagId) }}"><span class="glyphicon glyphicon-plus"></span></a></td>
+                    {% if elementAttribute.Tag.TagValues[0] %}
+                        <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Notes"
+                            href = "{{ url_for("tagValues.listTagValueNotes", tagValueId = firstTagValue.TagValueId,
+                            elementAttributeId = elementAttribute.ElementAttributeId) }}"><span class="glyphicon glyphicon-comment"></a></td>
+                        <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Edit"
+                            href = "{{ url_for("elementAttributes.editElementAttributeValue", elementId = elementAttribute.ElementId,
+                            tagValueId = firstTagValue.TagValueId) }}"><span class="glyphicon glyphicon-edit"></span></a></td>
+                        <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Delete"
+                            href = "{{ url_for("elementAttributes.deleteElementAttributeValue",
+                            elementId = elementAttribute.ElementId, tagValueId = firstTagValue.TagValueId) }}"><span class="glyphicon glyphicon-trash"></a></td>
+                    {% else %}
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    {% endif %}
+                </tr>
+            {% endfor %#}
+        </tbody>
+    </table> -->
+</div>
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <!-- <link rel = "stylesheet" type = "text/css" href = {{ url_for("static", filename = "css/datatables.min.css") }}/> 
+    <script type = "text/javascript" src = {{ url_for("static", filename = "js/datatables.min.js") }}></script>
+    <script>
+        $('#eventFramesTable').DataTable
+        ({
+            "order":
+            [
+                [1, 'asc']              // Event frame template name.
+            ],
+            "columns":
+            [
+                { "orderable": false }, // Event frame values button.
+                null,
+                null,
+                null,
+                { "orderable": false }, // Stop event frame button.
+                { "orderable": false }, // Add event frame button.
+                { "orderable": false }, // Edit event frame button.
+                { "orderable": false }  // Delete event frame button.
+            ],
+            "stateSave": true,
+            "stateDuration": 0,
+            "pageLength": 25
+        });
+        $('#attributesTable').DataTable
+        ({
+            "order":
+            [
+                [1, 'asc']              // Attribute.
+            ],
+            "columns":
+            [
+                { "orderable": false }, // Attribute values button.
+                null,
+                null,
+                null,
+                null,
+                { "orderable": false }, // Add attribute value button.
+                { "orderable": false }, // List attribute value notes button.
+                { "orderable": false }, // Edit attribute value button.
+                { "orderable": false }  // Delete attribute value button.
+            ],
+            "stateSave": true,
+            "stateDuration": 0,
+            "pageLength": 25
+        });
+    </script> -->
+{% endblock %}
