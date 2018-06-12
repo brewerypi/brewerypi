@@ -11,15 +11,21 @@ Data Entry - Event Frames
     <ol class="breadcrumb">
         {% if childrenClass == "Enterprise" %}
             <li class = "active">..</li>
+            {% set tableHeader = "Enterprise" %}
+            {% set pageHeaderSubText = "Select an Enterprise" %}
         {% elif childrenClass == "Site" %}
             <li><a href = "{{ url_for("eventFrames.select", selectedClass = "Root") }}">..</a></li>
             <li class = "active">{{ parent.Name }}</li>
+            {% set tableHeader = "Site" %}
+            {% set pageHeaderSubText = "Select a Site" %}
         <!-- "and parent" checks for systems that have not been configured with a site yet. -->
         {% elif childrenClass == "ElementTemplate" and parent %}
             <li><a href = "{{ url_for("eventFrames.select", selectedClass = "Root") }}">..</a></li>
             <li><a href = "{{ url_for("eventFrames.select", selectedClass = "Enterprise",
                 selectedId = parent.Enterprise.id()) }}">{{ parent.Enterprise.Name }}</a></li>
             <li class = "active">{{ parent.Name }}</li>
+            {% set tableHeader = "Element Template" %}
+            {% set pageHeaderSubText = "Select an Element Template" %}
         {% elif childrenClass == "Element" %}
             <li><a href = "{{ url_for("eventFrames.select", selectedClass = "Root") }}">..</a></li>
             <li><a href = "{{ url_for("eventFrames.select", selectedClass = "Enterprise",
@@ -27,13 +33,8 @@ Data Entry - Event Frames
             <li><a href = "{{ url_for("eventFrames.select", selectedClass = "Site",
                 selectedId = parent.Site.id()) }}">{{ parent.Site.Name }}</a></li>
             <li class = "active">{{ parent.Name }}</li>
-        {% elif childrenClass == "Element" %}
-            <li><a href = "{{ url_for("eventFrames.select", selectedClass = "Root") }}">..</a></li>
-            <li><a href = "{{ url_for("eventFrames.select", selectedClass = "Enterprise",
-                selectedId = parent.Site.Enterprise.id()) }}">{{ parent.Site.Enterprise.Name }}</a></li>
-            <li><a href = "{{ url_for("eventFrames.select", selectedClass = "Site",
-                selectedId = parent.Site.id()) }}">{{ parent.Site.Name }}</a></li>
-            <li class = "active">{{ parent.Name }}</li>
+            {% set tableHeader = "Element" %}
+            {% set pageHeaderSubText = "Select an Element" %}
         {% elif childrenClass == "EventFrameTemplate" %}
             <li><a href = "{{ url_for("eventFrames.select", selectedClass = "Root") }}">..</a></li>
             <li><a href = "{{ url_for("eventFrames.select", selectedClass = "Enterprise",
@@ -43,6 +44,8 @@ Data Entry - Event Frames
             <li><a href = "{{ url_for("eventFrames.select", selectedClass = "ElementTemplate",
                 selectedId = parent.ElementTemplate.id()) }}">{{ parent.ElementTemplate.Name }}</a></li>
             <li class = "active">{{ parent.Name }}</li>
+            {% set tableHeader = "Event Frame Template" %}
+            {% set pageHeaderSubText = "Select an Event Frame Template" %}
         {% elif childrenClass == "EventFrame" %}
             <li><a href = "{{ url_for("eventFrames.select", selectedClass = "Root") }}">..</a></li>
             <li><a href = "{{ url_for("eventFrames.select", selectedClass = "Enterprise",
@@ -54,43 +57,38 @@ Data Entry - Event Frames
             <li><a href = "{{ url_for("eventFrames.select", selectedClass = "Element",
                 selectedId = element.ElementId) }}">{{ element.Name }}</a></li>
             <li class = "active">{{ parent.Name }}</li>
+            {% set tableHeader = "Event Frame" %}
+            {% set pageHeaderSubText = "Select an Event Frame" %}
         {% endif %}
     </ol>
 </div>
 <div>
-    <!-- {#% if className == "Element" %}
-        <h1>Elements</h1>
-    {% elif className == "ElementTemplate" %}
-        <h1>Element Templates</h1>
-    {% elif className == "Site" %}
-        <h1>Sites</h1>
-    {% elif className == "Enterprise" %}
-        <h1>Enterprises</h1>
-    {% endif %#} -->
+    <h1>Event Frames <small>{{ pageHeaderSubText }}</small></h1>
+</div>
+<div>
     <table id = "table" class = "table">
         <thead>
             <tr>
-                <th></th>
-                <th>Name</th>
+                <th>{{ tableHeader }}</th>
             </tr>
         </thead>
         <tbody>
             {% if children %}
                 {% for child in children %}
                     <tr>
+                        {% if childrenClass == "EventFrame" %}
+                            {% set name = child.friendlyName() %}
+                        {% else %}
+                            {% set name = child.Name %}
+                        {% endif %}
                         {% if childrenClass == "EventFrameTemplate" %}
                             <td><a class = "btn btn-default" title = "Select" href = "{{ url_for("eventFrames.select", selectedClass = "EventFrame",
-                                selectedId = child.id(), elementId = parent.id()) }}"><span class="glyphicon glyphicon-list"></span></a></td>
+                                selectedId = child.id(), elementId = parent.id()) }}"><span class="glyphicon glyphicon-list"></span></a>&nbsp;{{ name }}</td>
                         {% elif childrenClass == "EventFrame" %}
-                            <td><a class = "btn btn-default" title = "Select" href = "#"><span class="glyphicon glyphicon-list"></span></a></td>
+                            <td><a class = "btn btn-default" title = "Select" href = "#"><span class="glyphicon glyphicon-list"></span></a>&nbsp;{{ name }}</td>
                         {% else %}
                             <td><a class = "btn btn-default" title = "Select" href = "{{ url_for("eventFrames.select", selectedClass = child.__class__.__name__,
-                                selectedId = child.id()) }}"><span class="glyphicon glyphicon-list"></span></a></td>
-                        {% endif %}
-                        {% if childrenClass == "EventFrame" %}
-                            <td>{{ child.friendlyName() }}</td>
-                        {% else %}
-                            <td>{{ child.Name }}</td>
+                                selectedId = child.id()) }}"><span class="glyphicon glyphicon-list"></span></a>&nbsp;{{ name }}</td>
                         {% endif %}
                     </tr>
                 {% endfor %}
