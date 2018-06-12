@@ -15,7 +15,7 @@ from .. tagValues . forms import TagValueForm
 @adminRequired
 def listEventFrameAttributes():
 	eventFrameAttributes = EventFrameAttribute.query.all()
-	return render_template("eventFrameEAttributes/eventFrameEAttributes.html", eventFrameEAttributes = eventFrameEAttributes)
+	return render_template("eventFrameEAttributes/eventFrameAttributes.html", eventFrameEAttributes = eventFrameEAttributes)
 
 @eventFrameAttributes.route("/eventFrameAttributes/add", methods = ["GET", "POST"])
 @login_required

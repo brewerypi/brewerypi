@@ -48,6 +48,7 @@ class Element(db.Model):
 	Name = db.Column(db.String(45), nullable = False)
 
 	ElementAttributes = db.relationship("ElementAttribute", backref = "Element", lazy = "dynamic")
+	EventFrameAttributes = db.relationship("EventFrameAttribute", backref = "Element", lazy = "dynamic")
 	EventFrames = db.relationship("EventFrame", backref = "Element", lazy = "dynamic")
 
 	def __repr__(self):
@@ -183,13 +184,13 @@ class EventFrameAttribute(db.Model):
 	__tablename__ = "EventFrameAttribute"
 	__table_args__ = \
 	(
-		UniqueConstraint("EventFrameAttributeTemplateId", "EventFrameId", name = "AK__EventFrameAttributeTemplateId__EventFrameId"),
+		UniqueConstraint("EventFrameAttributeTemplateId", "ElementId", name = "AK__EventFrameAttributeTemplateId__ElementId"),
 	)
 
 	EventFrameAttributeId = db.Column(db.Integer, primary_key = True)
 	EventFrameAttributeTemplateId = db.Column(db.Integer, db.ForeignKey("EventFrameAttributeTemplate.EventFrameAttributeTemplateId", 
 		name = "FK__EventFrameAttributeTemplate$Have$EventFrameAttribute"), nullable = False)
-	EventFrameId = db.Column(db.Integer, db.ForeignKey("EventFrame.EventFrameId", name = "FK__EventFrame$Have$EventFrameAttribute"), nullable = False)
+	ElementId = db.Column(db.Integer, db.ForeignKey("Element.ElementId", name = "FK__Element$Have$EventFrameAttribute"), nullable = False)
 	TagId = db.Column(db.Integer, db.ForeignKey("Tag.TagId", name = "FK__Tag$Have$EventFrameAttribute"), nullable = False)
 
 class EventFrameAttributeTemplate(db.Model):
