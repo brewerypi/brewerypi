@@ -174,6 +174,9 @@ class EventFrame(db.Model):
 		else:
 			return False
 
+	def id(self):
+		return self.EventFrameId
+
 	def origin(self):
 		if self.ParentEventFrameId == None:
 			return self
@@ -193,6 +196,12 @@ class EventFrameAttribute(db.Model):
 	ElementId = db.Column(db.Integer, db.ForeignKey("Element.ElementId", name = "FK__Element$Have$EventFrameAttribute"), nullable = False)
 	TagId = db.Column(db.Integer, db.ForeignKey("Tag.TagId", name = "FK__Tag$Have$EventFrameAttribute"), nullable = False)
 
+	def __repr__(self):
+		return "<EventFrameAttribute: {}>".format(self.Name)
+
+	def id(self):
+		return self.EventFrameAttributeId
+
 class EventFrameAttributeTemplate(db.Model):
 	__tablename__ = "EventFrameAttributeTemplate"
 	__table_args__ = \
@@ -210,6 +219,9 @@ class EventFrameAttributeTemplate(db.Model):
 
 	def __repr__(self):
 		return "<EventFrameAttributeTemplate: {}>".format(self.Name)
+
+	def id(self):
+		return self.EventFrameAttributeTemplateId
 
 class EventFrameNote(db.Model):
 	__tablename__ = "EventFrameNote"

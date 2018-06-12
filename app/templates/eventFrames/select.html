@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}
+Data Entry - Event Frames
+{% endblock %}
+
+{% block page_content %}
+<div>
+    <ol class="breadcrumb">
+        {% if childrenClass == "Enterprise" %}
+            <li class = "active">..</li>
+        {% elif childrenClass == "Site" %}
+            <li><a href = "{{ url_for("eventFrames.select", selectedClass = "Root") }}">..</a></li>
+            <li class = "active">{{ parent.Name }}</li>
+        <!-- "and parent" checks for systems that have not been configured with a site yet. -->
+        {% elif childrenClass == "ElementTemplate" and parent %}
+            <li><a href = "{{ url_for("eventFrames.select", selectedClass = "Root") }}">..</a></li>
+            <li><a href = "{{ url_for("eventFrames.select", selectedClass = "Enterprise",
+                selectedId = parent.Enterprise.id()) }}">{{ parent.Enterprise.Name }}</a></li>
+            <li class = "active">{{ parent.Name }}</li>
+        {% elif childrenClass == "Element" %}
+            <li><a href = "{{ url_for("eventFrames.select", selectedClass = "Root") }}">..</a></li>
+            <li><a href = "{{ url_for("eventFrames.select", selectedClass = "Enterprise",
+                selectedId = parent.Site.Enterprise.id()) }}">{{ parent.Site.Enterprise.Name }}</a></li>
+            <li><a href = "{{ url_for("eventFrames.select", selectedClass = "Site",
+                selectedId = parent.Site.id()) }}">{{ parent.Site.Name }}</a></li>
+            <li class = "active">{{ parent.Name }}</li>
+        {% elif childrenClass == "Element" %}
+            <li><a href = "{{ url_for("eventFrames.select", selectedClass = "Root") }}">..</a></li>
+            <li><a href = "{{ url_for("eventFrames.select", selectedClass = "Enterprise",
+                selectedId = parent.Site.Enterprise.id()) }}">{{ parent.Site.Enterprise.Name }}</a></li>
+            <li><a href = "{{ url_for("eventFrames.select", selectedClass = "Site",
+                selectedId = parent.Site.id()) }}">{{ parent.Site.Name }}</a></li>
+            <li class = "active">{{ parent.Name }}</li>
+        {% elif childrenClass == "EventFrameTemplate" %}
+            <li><a href = "{{ url_for("eventFrames.select", selectedClass = "Root") }}">..</a></li>
+            <li><a href = "{{ url_for("eventFrames.select", selectedClass = "Enterprise",
+                selectedId = parent.ElementTemplate.Site.Enterprise.id()) }}">{{ parent.ElementTemplate.Site.Enterprise.Name }}</a></li>
+            <li><a href = "{{ url_for("eventFrames.select", selectedClass = "Site",
+                selectedId = parent.ElementTemplate.Site.id()) }}">{{ parent.ElementTemplate.Site.Name }}</a></li>
+            <li><a href = "{{ url_for("eventFrames.select", selectedClass = "ElementTemplate",
+                selectedId = parent.ElementTemplate.id()) }}">{{ parent.ElementTemplate.Name }}</a></li>
+            <li class = "active">{{ parent.Name }}</li>
+        {% elif childrenClass == "EventFrame" %}
+            <li><a href = "{{ url_for("eventFrames.select", selectedClass = "Root") }}">..</a></li>
+            <li><a href = "{{ url_for("eventFrames.select", selectedClass = "Enterprise",
+                selectedId = parent.ElementTemplate.Site.Enterprise.id()) }}">{{ parent.ElementTemplate.Site.Enterprise.Name }}</a></li>
+            <li><a href = "{{ url_for("eventFrames.select", selectedClass = "Site",
+                selectedId = parent.ElementTemplate.Site.id()) }}">{{ parent.ElementTemplate.Site.Name }}</a></li>
+            <li><a href = "{{ url_for("eventFrames.select", selectedClass = "ElementTemplate",
+                selectedId = parent.ElementTemplate.id()) }}">{{ parent.ElementTemplate.Name }}</a></li>
+            <li><a href = "{{ url_for("eventFrames.select", selectedClass = "Element",
+                selectedId = element.ElementId) }}">{{ element.Name }}</a></li>
+            <li class = "active">{{ parent.Name }}</li>
+        {% endif %}
+    </ol>
+</div>
+<div>
+    <!-- {#% if className == "Element" %}
+        <h1>Elements</h1>
+    {% elif className == "ElementTemplate" %}
+        <h1>Element Templates</h1>
+    {% elif className == "Site" %}
+        <h1>Sites</h1>
+    {% elif className == "Enterprise" %}
+        <h1>Enterprises</h1>
+    {% endif %#} -->
+    <table id = "table" class = "table">
+        <thead>
+            <tr>
+                <th></th>
+                <th>Name</th>
+                <th>Description</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if children %}
+                {% for child in children %}
+                    <tr>
+                        {% if childrenClass == "EventFrameTemplate" %}
+                            <td><a class = "btn btn-default" title = "Select" href = "{{ url_for("eventFrames.select", selectedClass = "EventFrame",
+                                selectedId = child.id(), elementId = parent.id()) }}"><span class="glyphicon glyphicon-list"></span></a></td>
+                        {% elif childrenClass == "EventFrame" %}
+                            <td><a class = "btn btn-default" title = "Select" href = "#"><span class="glyphicon glyphicon-list"></span></a></td>
+                        {% else %}
+                            <td><a class = "btn btn-default" title = "Select" href = "{{ url_for("eventFrames.select", selectedClass = child.__class__.__name__,
+                                selectedId = child.id()) }}"><span class="glyphicon glyphicon-list"></span></a></td>
+                        {% endif %}
+                        {% if childrenClass == "EventFrame" %}
+                            <td>{{ child.friendlyName() }}</td>
+                        {% else %}
+                            <td>{{ child.Name }}</td>
+                        {% endif %}
+                        <td>{{ child.Description }}</td>
+                    </tr>
+                {% endfor %}
+            {% endif %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <!-- <link rel = "stylesheet" type = "text/css" href = {{ url_for("static", filename = "css/datatables.min.css") }}/> 
+    <script type = "text/javascript" src = {{ url_for("static", filename = "js/datatables.min.js") }}></script>
+    <script>
+        $('#table').DataTable
+        ({
+            "order":
+            [
+                [1, 'asc']              // Name.
+            ],
+            "columns":
+            [
+                { "orderable": false }, // Details button.
+                null,
+                null
+            ],
+            "stateSave": true,
+            "stateDuration": 0,
+            "pageLength": 25
+        }); -->
+    </script>
+{% endblock %}

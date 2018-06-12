@@ -5,7 +5,7 @@ from . import eventFrames
 from . forms import EventFrameForm, EventFrameNoteForm
 from .. import db
 from .. decorators import permissionRequired
-from .. models import Element, EventFrame, EventFrameNote, EventFrameTemplate, Note, Permission
+from .. models import Element, ElementTemplate, Enterprise, EventFrame, EventFrameAttributeTemplate, EventFrameNote, EventFrameTemplate, Note, Permission, Site
 
 modelName = "Event Frame"
 
@@ -130,6 +130,50 @@ def endEventFrame(eventFrameId):
 	flash("You have successfully ended \"" + eventFrame.EventFrameTemplate.Name + "\" for element \"" + eventFrame.origin().Element.Name + "\".",
 		"alert alert-success")
 	return redirect(request.referrer)
+
+@eventFrames.route("/eventFrames/select", methods = ["GET", "POST"]) # Default.
+@eventFrames.route("/eventFrames/select/<string:selectedClass>", methods = ["GET", "POST"]) # Root.
+@eventFrames.route("/eventFrames/select/<string:selectedClass>/<int:selectedId>", methods = ["GET", "POST"])
+@eventFrames.route("/eventFrames/select/<string:selectedClass>/<int:selectedId>/<int:elementId>", methods = ["GET", "POST"])
+@login_required
+@permissionRequired(Permission.DATA_ENTRY)
+def select(selectedClass = None, selectedId = None, elementId = None):
+	element = None
+	if selectedClass == None:
+		parent = Site.query.join(Enterprise).order_by(Enterprise.Name).first()
+		if parent:
+			children = ElementTemplate.query.filter_by(SiteId = parent.id())
+		else:
+			children = None
+		childrenClass = "ElementTemplate"
+	elif selectedClass == "Root":
+		parent = None
+		children = Enterprise.query.order_by(Enterprise.Name)
+		childrenClass = "Enterprise"
+	elif selectedClass == "Enterprise":
+		parent = Enterprise.query.get_or_404(selectedId)
+		children = Site.query.filter_by(EnterpriseId = selectedId)
+		childrenClass = "Site"
+	elif selectedClass == "Site":
+		parent = Site.query.get_or_404(selectedId)
+		children = ElementTemplate.query.filter_by(SiteId = selectedId)
+		childrenClass = "ElementTemplate"
+	elif selectedClass == "ElementTemplate":
+		parent = ElementTemplate.query.get_or_404(selectedId)
+		children = Element.query.filter_by(ElementTemplateId = selectedId)
+		childrenClass = "Element"
+	elif selectedClass == "Element":
+		parent = Element.query.get_or_404(selectedId)
+		children = EventFrameTemplate.query.filter_by(ElementTemplateId = parent.ElementTemplate.ElementTemplateId)
+		childrenClass = "EventFrameTemplate"
+	elif selectedClass == "EventFrame":
+		parent = EventFrameTemplate.query.get_or_404(selectedId)
+		children = EventFrame.query.filter(EventFrame.ElementId == elementId, EventFrame.EventFrameTemplateId == selectedId). \
+			order_by(EventFrame.StartTimestamp.desc())
+		childrenClass = "EventFrame"
+		element = Element.query.get_or_404(elementId)
+
+	return render_template("eventFrames/select.html", children = children, childrenClass = childrenClass, element = element, parent = parent)
 
 @eventFrames.route("/eventFrames/startEventFrame/<int:elementId>/<int:eventFrameTemplateId>", methods = ["GET", "POST"])
 @login_required
