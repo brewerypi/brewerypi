@@ -69,6 +69,14 @@ def addEventFrame(elementId = None, eventFrameTemplateId = None, parentEventFram
 	form.requestReferrer.data = request.referrer
 	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
 
+@eventFrames.route("/eventFrames/dashboard/<int:eventFrameId>/<int:selectedEventFrameTemplateId>", methods = ["GET", "POST"])
+@login_required
+@permissionRequired(Permission.DATA_ENTRY)
+def dashboard(eventFrameId, selectedEventFrameTemplateId):
+	eventFrame = EventFrame.query.get_or_404(eventFrameId)
+	selectedEventFrameTemplate = EventFrameTemplate.query.get_or_404(selectedEventFrameTemplateId)
+	return render_template("eventFrames/dashboard.html", eventFrame = eventFrame, selectedEventFrameTemplate = selectedEventFrameTemplate)
+
 @eventFrames.route("/eventFrames/delete/<int:eventFrameId>", methods = ["GET", "POST"])
 @login_required
 @permissionRequired(Permission.DATA_ENTRY)
