@@ -1,3 +1,4 @@
+from datetime import datetime
 from flask import flash, redirect, render_template, url_for
 from flask_login import login_required
 from sqlalchemy import and_
@@ -6,7 +7,8 @@ from . forms import ElementForm
 from .. import db
 from .. eventFrames . forms import EventFrameForm
 from .. decorators import adminRequired, permissionRequired
-from .. models import Area, ElementAttributeTemplate, Element, ElementAttribute, ElementTemplate, Enterprise, EventFrame, EventFrameTemplate, Permission, Site, Tag
+from .. models import Area, AttributeTemplate, ElementAttributeTemplate, Element, ElementAttribute, ElementTemplate, Enterprise, EventFrame, \
+	EventFrameTemplate, LookupValue, Permission, Site, Tag, TagValue
 
 modelName = "Element"
 

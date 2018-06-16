@@ -1,3 +1,4 @@
+import click
 from flask import current_app
 from flask_migrate import Migrate, upgrade
 from sqlalchemy import create_engine
@@ -16,7 +17,8 @@ def make_shell_context():
 		UnitOfMeasurement = UnitOfMeasurement, User = User)
 
 @app.cli.command()
-def deploy():
+@click.option("--units/--no-units", default = False, help = "Add default units of measurements.")
+def deploy(units):
 	print ("Creating database {} if it does not exist...".format(current_app.config["MYSQL_DATABASE"]))
 	engine = create_engine(current_app.config["SQLALCHEMY_SERVER_URI"])
 	connection = engine.connect()
@@ -24,6 +26,9 @@ def deploy():
 	print ("Running database upgrade...")
 	upgrade()
 	print ("Inserting default roles if needed...")
-	Role.insertRoles()
+	Role.insertDefaultRoles()
 	print ("Inserting default administrator if needed...")
 	User.insertDefaultAdministrator()
+	if units:
+		print ("Inserting default units of measurements if needed...")
+		UnitOfMeasurement.insertDefaultUnits()

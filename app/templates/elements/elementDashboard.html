@@ -18,8 +18,9 @@
             id = element.ElementTemplate.ElementTemplateId) }}">{{ element.ElementTemplate.Name }}</a></li>
         <li class = "active">{{ element.Name }}</li>
     </ol>
-    <h1>{{ element.Name }}</h1>
-    <h2>Event Frames</h2>
+    <div class = "page-header">
+        <h1>{{ element.Name }} <small>Event Frames</small></h1>
+    </div>
     <br>
     <table id = "eventFramesTable" class = "table">
         <thead>
@@ -67,12 +68,12 @@
                         elementId = element.ElementId, eventFrameTemplateId = eventFrameTemplate.EventFrameTemplateId) }}">
                         <span class="glyphicon glyphicon-plus"></span></a></td>
                     {% if firstEventFrame %}
-                        <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Edit"
+                        <td><a class = "btn btn-default" title = "Edit"
                             href = "{{ url_for("eventFrames.editEventFrame", eventFrameId = firstEventFrame.EventFrameId) }}">
                             <span class="glyphicon glyphicon-edit"></span></a></td>
-                        <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Delete"
+                        <td><a class = "btn btn-default" title = "Delete"
                             href = "{{ url_for("eventFrames.deleteEventFrame", eventFrameId = firstEventFrame.EventFrameId) }}">
-                            <span class="glyphicon glyphicon-trash"></a></td>
+                            <span class="glyphicon glyphicon-trash"></span></a></td>
                     {% else %}
                         <td></td>
                         <td></td>
@@ -81,7 +82,9 @@
             {% endfor %}
         </tbody>
     </table>
-    <h2>Element Attributes</h2>
+    <div class = "page-header">
+            <h1>{{ element.Name }} <small>Attributes</small></h1>
+    </div>
     <br>
     <table id = "attributesTable" class = "table">
         <thead>
@@ -90,7 +93,11 @@
                 <th>Attribute</th>
                 <th>Last Timestamp</th>
                 <th>Last Value</th>
-                <th>Unit / Lookup Name</th>
+                <th>Unit</th>
+                <th>New Value</th>
+                <th>New Timestamp</th>
+                <th><button class = "btn btn-default" id = "buttonAttributesSaveAll" title = "Save All"><span class="glyphicon glyphicon-floppy-disk"></span>
+                    </button></th>
                 <th></th>
                 <th></th>
                 <th></th>
@@ -99,39 +106,65 @@
         <tbody>
             {% for elementAttribute in elementAttributes %}
                 <tr>
-                    <td><a class = "btn btn-default" data-toggle = "tooltip" title = "List Values"
-                        href = "{{ url_for("tagValues.listTagValues", tagId = elementAttribute.Tag.TagId,
+                    <td><a class = "btn btn-default" title = "List Values" href = "{{ url_for("tagValues.listTagValues", tagId = elementAttribute.Tag.TagId,
                         elementAttributeId = elementAttribute.ElementAttributeId) }}"><span class="glyphicon glyphicon-list"></span></a></td>
                     <td>{{ elementAttribute.ElementAttributeTemplate.Name }}</td>
                     {% if elementAttribute.Tag.TagValues[0] %}
                         {% set firstTagValue = elementAttribute.Tag.TagValues | sort(attribute = "Timestamp", reverse = True) | first %}
-                        <td>{{ firstTagValue.Timestamp }}</td>
+                        <td id = "tdLastTimestamp{{ elementAttribute.ElementAttributeId }}">{{ firstTagValue.Timestamp }}</td>
                         {% if elementAttribute.Tag.LookupId %}
-                            <td>{{ elementAttribute.Tag.Lookup.LookupValues | selectattr("Value", "equalto", firstTagValue.Value) | map(attribute = "Name") |
-                                list | first }}</td>
+                            <td id = "tdLastValue{{ elementAttribute.ElementAttributeId }}">{{ elementAttribute.Tag.Lookup.LookupValues | 
+                                    selectattr("Value", "equalto", firstTagValue.Value) | map(attribute = "Name") | list | first }}          
                             <td>{{ elementAttribute.Tag.Lookup.Name }}</td>
                         {% else %}
-                            <td>{{ firstTagValue.Value }}</td>
+                            <td id = "tdLastValue{{ elementAttribute.ElementAttributeId }}">{{ firstTagValue.Value }}</td>                    
                             <td>{{ firstTagValue.Tag.UnitOfMeasurement.Abbreviation }}</td>
                         {% endif %}
                     {% else %}
-                        <td></td>
-                        <td></td>
+                        <td id = "tdLastTimestamp{{ elementAttribute.ElementAttributeId }}"></td>
+                        <td id = "tdLastValue{{ elementAttribute.ElementAttributeId }}"></td>
                         <td></td>
                     {% endif %}
-                    <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Add"
-                        href = "{{ url_for("elementAttributes.addElementAttributeValue", elementId = elementAttribute.ElementId,
-                        tagId = elementAttribute.Tag.TagId) }}"><span class="glyphicon glyphicon-plus"></span></a></td>
+                    {% if elementAttribute.Tag.LookupId %}
+                        <td>
+                            <div class = "form-group" id = "divNewValue{{ elementAttribute.ElementAttributeId }}">
+                                <select class = "form-control" id = "selectNewValue{{ elementAttribute.ElementAttributeId }}">
+                                    <option value = "-1"></option>
+                                    {% for lookupValue in elementAttribute.Tag.Lookup.LookupValues %}
+                                        {% if lookupValue.Selectable %}
+                                            <option value = "{{ lookupValue.Value }}">{{ lookupValue.Name}}</option>
+                                        {% endif %}
+                                    {% endfor %}
+                                </select>
+                                <p class = "help-block" id = "pNewValue{{ elementAttribute.ElementAttributeId }}"></p>
+                            </div>
+                        </td>
+                    {% else %}
+                        <td>
+                            <div class = "form-group" id = "divNewValue{{ elementAttribute.ElementAttributeId }}">
+                                <input class = "form-control" id = "inputNewValue{{ elementAttribute.ElementAttributeId }}" value = "">
+                                <p class = "help-block" id = "pNewValue{{ elementAttribute.ElementAttributeId }}"></p>
+                            </div>
+                        </td>
+                    {% endif %}
+                    <td>
+                        <div class = "form-group" id = "divNewTimestamp{{ elementAttribute.ElementAttributeId }}">
+                            <input class = "form-control" id = "inputNewTimestamp{{ elementAttribute.ElementAttributeId }}" value = "">
+                            <p class = "help-block" id = "pNewTimestamp{{ elementAttribute.ElementAttributeId }}"></p>
+                        </div>
+                    </td>
+                    <td></td>
                     {% if elementAttribute.Tag.TagValues[0] %}
-                        <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Notes"
+                        <td><a class = "btn btn-default" title = "Last Value Notes"
                             href = "{{ url_for("tagValues.listTagValueNotes", tagValueId = firstTagValue.TagValueId,
-                            elementAttributeId = elementAttribute.ElementAttributeId) }}"><span class="glyphicon glyphicon-comment"></a></td>
-                        <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Edit"
+                            elementAttributeId = elementAttribute.ElementAttributeId) }}"><span class="glyphicon glyphicon-comment"></span></a></td>
+                        <td><a class = "btn btn-default" title = "Edit Last Value"
                             href = "{{ url_for("elementAttributes.editElementAttributeValue", elementId = elementAttribute.ElementId,
                             tagValueId = firstTagValue.TagValueId) }}"><span class="glyphicon glyphicon-edit"></span></a></td>
-                        <td><a class = "btn btn-default" data-toggle = "tooltip" title = "Delete"
+                        <td><a class = "btn btn-default" title = "Delete Last Value"
                             href = "{{ url_for("elementAttributes.deleteElementAttributeValue",
-                            elementId = elementAttribute.ElementId, tagValueId = firstTagValue.TagValueId) }}"><span class="glyphicon glyphicon-trash"></a></td>
+                            elementId = elementAttribute.ElementId, tagValueId = firstTagValue.TagValueId) }}"><span class="glyphicon glyphicon-trash"></span>
+                            </a></td>
                     {% else %}
                         <td></td>
                         <td></td>
@@ -148,49 +181,220 @@
     {{ super() }}
     <link rel = "stylesheet" type = "text/css" href = {{ url_for("static", filename = "css/datatables.min.css") }}/> 
     <script type = "text/javascript" src = {{ url_for("static", filename = "js/datatables.min.js") }}></script>
+    <script type = "text/javascript" src = {{ url_for("static", filename = "js/moment.min.js") }}></script>
     <script>
-        $('#eventFramesTable').DataTable
-        ({
-            "order":
-            [
-                [1, 'asc']              // Event frame template name.
-            ],
-            "columns":
-            [
-                { "orderable": false }, // Event frame values button.
-                null,
-                null,
-                null,
-                { "orderable": false }, // Stop event frame button.
-                { "orderable": false }, // Add event frame button.
-                { "orderable": false }, // Edit event frame button.
-                { "orderable": false }  // Delete event frame button.
-            ],
-            "stateSave": true,
-            "stateDuration": 0,
-            "pageLength": 25
-        });
-        $('#attributesTable').DataTable
-        ({
-            "order":
-            [
-                [1, 'asc']              // Attribute.
-            ],
-            "columns":
-            [
-                { "orderable": false }, // Attribute values button.
-                null,
-                null,
-                null,
-                null,
-                { "orderable": false }, // Add attribute value button.
-                { "orderable": false }, // List attribute value notes button.
-                { "orderable": false }, // Edit attribute value button.
-                { "orderable": false }  // Delete attribute value button.
-            ],
-            "stateSave": true,
-            "stateDuration": 0,
-            "pageLength": 25
-        });
+        $(document).ready(function() {
+            $('#eventFramesTable').DataTable({
+                "order":
+                [
+                    [1, 'asc']              // Event frame template name.
+                ],
+                "columns":
+                [
+                    { "orderable": false }, // Event frame values button.
+                    null,
+                    null,
+                    null,
+                    { "orderable": false }, // Stop event frame button.
+                    { "orderable": false }, // Add event frame button.
+                    { "orderable": false }, // Edit event frame button.
+                    { "orderable": false }  // Delete event frame button.
+                ],
+                "stateSave": true,
+                "stateDuration": 0,
+                "pageLength": 25
+            })
+
+            var attributesTable = $('#attributesTable').DataTable({
+                fixedHeader: {
+                    header: true,
+                    footer: false
+                },
+                "order":
+                [
+                    [1, 'asc']              // Attribute.
+                ],
+                "columns":
+                [
+                    { "orderable": false }, // Attribute values button.
+                    null,
+                    null,
+                    null,
+                    { "orderable": false }, // Unit.
+                    { "orderable": false }, // New value.
+                    { "orderable": false }, // New timestamp.
+                    { "orderable": false }, // Save all button.
+                    { "orderable": false }, // List attribute value notes button.
+                    { "orderable": false }, // Edit attribute value button.
+                    { "orderable": false }  // Delete attribute value button.
+                ],
+                "stateSave": true,
+                "stateDuration": 0,
+                "pageLength": 25
+            })
+
+            // Update the timestamp for input new values appropriately.
+            $("[id^=inputNewValue]").blur(function() {
+                var value = $.trim($(this).val())
+                var id = $(this).attr("id").split("inputNewValue")[1]
+                if (value == "")
+                {
+                    $("#inputNewTimestamp" + id).val("")
+                }
+                else
+                {
+                    var timestamp = new moment().local().format("YYYY-MM-DD HH:mm:ss")
+                    $("#inputNewTimestamp" + id).val(timestamp)
+                }
+            })
+
+            // Update the timestamp for select new values appropriately.
+            $("[id^=selectNewValue]").change(function() {
+                var value = $.trim($(this).val())
+                var id = $(this).attr("id").split("selectNewValue")[1]
+                if (value == "-1")
+                {
+                    $("#inputNewTimestamp" + id).val("")
+                }
+                else
+                {
+                    var timestamp = new moment().local().format("YYYY-MM-DD HH:mm:ss")
+                    $("#inputNewTimestamp" + id).val(timestamp)
+                }
+            })
+
+
+            $("#buttonAttributesSaveAll").click(function() {
+                var error = false
+                var rows = []
+
+                // Loop through the input values and check for validation errors.
+                attributesTable.$("[id^=inputNewValue]").each(function() {
+                    var id = $(this).attr("id").split("inputNewValue")[1]
+                    var value = $.trim($(this).val())
+                    var valueIsBlank = value == ""
+                    var valueIsValid = $.isNumeric(value)
+                    var timestamp = $.trim($("#inputNewTimestamp" + id).val())
+                    var timestampIsBlank = timestamp == ""
+                    var timestampIsValid = moment(timestamp, "YYYY-M-D H:m:s", true).isValid()
+                    
+                    if (valueIsBlank && timestampIsBlank)
+                    {
+                        $("#divNewValue" + id).removeClass("has-error")
+                        var helpBlock = $("#pNewValue" + id).html("")
+                        $("#divNewTimestamp" + id).removeClass("has-error")
+                        var helpBlock = $("#pNewTimestamp" + id).html("")
+                    }
+                    else if ((valueIsBlank && timestampIsValid) || (!valueIsValid && timestampIsValid))
+                    {
+                        error = true
+                        $("#divNewValue" + id).addClass("has-error")
+                        var helpBlock = $("#pNewValue" + id).html("Not a valid float value")
+                        $("#divNewTimestamp" + id).removeClass("has-error")
+                        var helpBlock = $("#pNewTimestamp" + id).html("")
+                    }
+                    else if ((valueIsBlank && !timestampIsValid) || (!valueIsValid && (timestampIsBlank || !timestampIsValid)))
+                    {
+                        error = true
+                        $("#divNewValue" + id).addClass("has-error")
+                        var helpBlock = $("#pNewValue" + id).html("Not a valid float value")
+                        $("#divNewTimestamp" + id).addClass("has-error")
+                        var helpBlock = $("#pNewTimestamp" + id).html("This field is required.")
+                    }
+                    else if (valueIsValid && (timestampIsBlank || !timestampIsValid))
+                    {
+                        error = true
+                        $("#divNewValue" + id).removeClass("has-error")
+                        var helpBlock = $("#pNewValue" + id).html("")
+                        $("#divNewTimestamp" + id).addClass("has-error")
+                        var helpBlock = $("#pNewTimestamp" + id).html("This field is required.")
+                    }
+                    else
+                    {
+                        $("#divNewValue" + id).removeClass("has-error")
+                        var helpBlock = $("#pNewValue" + id).html("")
+                        $("#divNewTimestamp" + id).removeClass("has-error")
+                        var helpBlock = $("#pNewTimestamp" + id).html("")
+                        var row = {}
+                        row["id"] = id
+                        row["type"] = "input"
+                        row["value"] = value
+                        row["timestamp"] = timestamp
+                        rows.push(row)
+                    }
+                })
+
+                // Loop through the select values and check for validation errors.
+                attributesTable.$("[id^=selectNewValue]").each(function() {
+                    var id = $(this).attr("id").split("selectNewValue")[1]
+                    var value = $.trim($(this).val())
+                    var valueIsBlank = value == "-1"
+                    var valueIsValid = $.isNumeric(value)
+                    var timestamp = $.trim($("#inputNewTimestamp" + id).val())
+                    var timestampIsBlank = timestamp == ""
+                    var timestampIsValid = moment(timestamp, "YYYY-M-D H:m:s", true).isValid()
+                    
+                    if (valueIsBlank && timestampIsBlank)
+                    {
+                        $("#divNewValue" + id).removeClass("has-error")
+                        var helpBlock = $("#pNewValue" + id).html("")
+                        $("#divNewTimestamp" + id).removeClass("has-error")
+                        var helpBlock = $("#pNewTimestamp" + id).html("")
+                    }
+                    else if ((valueIsBlank && timestampIsValid) || (!valueIsValid && timestampIsValid))
+                    {
+                        error = true
+                        $("#divNewValue" + id).addClass("has-error")
+                        var helpBlock = $("#pNewValue" + id).html("Not a valid float value")
+                        $("#divNewTimestamp" + id).removeClass("has-error")
+                        var helpBlock = $("#pNewTimestamp" + id).html("")
+                    }
+                    else if ((valueIsBlank && !timestampIsValid) || (!valueIsValid && (timestampIsBlank || !timestampIsValid)))
+                    {
+                        error = true
+                        $("#divNewValue" + id).addClass("has-error")
+                        var helpBlock = $("#pNewValue" + id).html("Not a valid float value")
+                        $("#divNewTimestamp" + id).addClass("has-error")
+                        var helpBlock = $("#pNewTimestamp" + id).html("This field is required.")
+                    }
+                    else if (valueIsValid && (timestampIsBlank || !timestampIsValid))
+                    {
+                        error = true
+                        $("#divNewValue" + id).removeClass("has-error")
+                        var helpBlock = $("#pNewValue" + id).html("")
+                        $("#divNewTimestamp" + id).addClass("has-error")
+                        var helpBlock = $("#pNewTimestamp" + id).html("This field is required.")
+                    }
+                    else
+                    {
+                        $("#divNewValue" + id).removeClass("has-error")
+                        var helpBlock = $("#pNewValue" + id).html("")
+                        $("#divNewTimestamp" + id).removeClass("has-error")
+                        var helpBlock = $("#pNewTimestamp" + id).html("")
+                        var row = {}
+                        row["id"] = id
+                        row["type"] = "select"
+                        row["value"] = value
+                        row["timestamp"] = timestamp
+                        rows.push(row)
+                    }
+                })
+
+                if (error != true)
+                {
+                    $.ajax({
+                        type : "POST",
+                        url : "/elementAttributes/addMultipleValues",
+                        data : JSON.stringify(rows)
+                    }).done(function(response) {
+                        location.reload(true)
+                    }).fail(function() {
+                        $(".alert").remove()
+                        $("#divFlashedMessages").append("<div class = \"alert alert-danger\"><button type = \"button\" class = \"close\" " +
+                            "data-dismiss = \"alert\">&times;</button>The attempt to save one or more new element attribute values failed.</div>")                        
+                    })
+                }
+            })
+        })
     </script>
 {% endblock %}

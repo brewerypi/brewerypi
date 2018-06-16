@@ -20,6 +20,7 @@ def listUsers():
 def addUser():
 	operation = "Add"
 	form = UserForm()
+	del form.currentPassword
 
 	# Add a new user.
 	if form.validate_on_submit():
@@ -55,17 +56,21 @@ def changePassword(userId):
 	operation = "Edit"
 	user = User.query.get_or_404(userId)
 	form = UserForm(obj = user)
+	if current_user.isAdministrator() and current_user.get_id() != userId:
+		del form.currentPassword
 	del form.name
 	del form.role
+	form.password.label.text = "New Password"
+	form.password2.label.text = "Confirm New Password"
 
-	# Edit an existing user.
+	# Change an existing user password.
 	if form.validate_on_submit():
 		user.Password = form.password.data
 		db.session.commit()
 		flash("You have successfully changed the password for user \"" + user.Name + "\".", "alert alert-success")
 		return redirect(form.requestReferrer.data)
 
-	# Present a form to edit an existing user.
+	# Present a form to change an user password.
 	form.requestReferrer.data = request.referrer
 	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
 
@@ -80,6 +85,7 @@ def editUser(userId):
 
 	operation = "Edit"
 	form = UserForm(obj = user)
+	del form.currentPassword
 	del form.password
 	del form.password2
 

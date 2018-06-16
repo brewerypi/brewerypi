@@ -11,7 +11,7 @@ from .. decorators import adminRequired
 @adminRequired
 def backupDatabase():
 	attachmentFilename = datetime.now().strftime("%Y%m%d%H%M") + "-BreweryPi.sql" 
-	command = "sudo mysqldump --complete-insert=TRUE BreweryPi > ~/brewerypi/exports/BreweryPi.sql"
+	command = "sudo mysqldump --complete-insert=TRUE {} > /home/pi/brewerypi/exports/BreweryPi.sql".format(current_app.config["MYSQL_DATABASE"])
 	p = subprocess.Popen(command, shell = True)
 	p.wait()
 	return send_file(os.path.join("..", current_app.config["EXPORT_FOLDER"], current_app.config["EXPORT_DATABASE_FILENAME"]), as_attachment = True,

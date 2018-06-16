@@ -1,6 +1,6 @@
 import csv
 import os
-from flask import current_app, flash, redirect, render_template, send_file, url_for
+from flask import current_app, flash, jsonify, redirect, render_template, request, send_file, url_for
 from flask_login import login_required
 from sqlalchemy import or_
 from . import elementAttributes
@@ -216,6 +216,29 @@ def importElementAttributes():
 					successes.append("Element Attribute Template \"" + elementAttributeTemplateName + "\" updated for Element \"" + elementName + "\".")
 
 	return render_template("import.html", errors = errors, form = form, importing = "Element Attributes", successes = successes, warnings = warnings)
+
+
+@elementAttributes.route("/elementAttributes/addMultipleValues", methods=["GET", "POST"])
+@login_required
+@permissionRequired(Permission.DATA_ENTRY)
+def addMultipleelementAttributeValues():
+	# Get the data, loop through it and add new value.
+	data = request.get_json(force = True)
+	count = 0
+	for item in data:
+		elementAttribute = ElementAttribute.query.get_or_404(item["id"])
+		tagValue = TagValue(TagId = elementAttribute.TagId, Timestamp = item["timestamp"], Value = item["value"])
+		db.session.add(tagValue)
+		count = count + 1
+
+	if count > 0:
+		db.session.commit()
+		message = "You have successfully added one or more new element attribute values."
+		flash(message, "alert alert-success")
+	else:
+		message = "Nothing added to save."
+		flash(message, "alert alert-warning")
+	return jsonify({"response": message})
 
 @elementAttributes.route("/elementAttributes/addValue/<int:elementId>/<int:tagId>", methods = ["GET", "POST"])
 @login_required
