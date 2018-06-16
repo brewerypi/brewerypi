@@ -7,7 +7,7 @@ from . forms import ElementForm
 from .. import db
 from .. eventFrames . forms import EventFrameForm
 from .. decorators import adminRequired, permissionRequired
-from .. models import Area, AttributeTemplate, ElementAttributeTemplate, Element, ElementAttribute, ElementTemplate, Enterprise, EventFrame, \
+from .. models import Area, ElementAttributeTemplate, Element, ElementAttribute, ElementTemplate, Enterprise, EventFrame, \
 	EventFrameTemplate, LookupValue, Permission, Site, Tag, TagValue
 
 modelName = "Element"
