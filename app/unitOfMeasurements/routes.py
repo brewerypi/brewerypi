@@ -39,10 +39,10 @@ def addUnitOfMeasurement():
 @login_required
 @adminRequired
 def addDefaultUnitsOfMeasurements():
-	defaultUnits = {"°C" : "degree Celsius",
-		"°F" : "degree Fahrenheit",
-		"°F/min" : "degree Fahrenheit per minute",
-		"ASBC" : "American Society of Brewing Chemists",
+	defaultUnits = {"°C" : "degree celsius",
+		"°F" : "degree fahrenheit",
+		"°F/min" : "degree fahrenheit per minute",
+		"ASBC" : "american society of brewing chemists",
 		"bbl" : "barrel",
 		"cells/ml" : "cells per milliliter",
 		"cells/ml/°P" : "cells per ml per degree plato",
@@ -70,37 +70,50 @@ def addDefaultUnitsOfMeasurements():
 		"RE" : "real extract",
 		"s" : "second",
 		"SG" : "specific gravity",
-		"SRM" : "Standard Reference Method",
+		"SRM" : "standard reference method",
 		"t/h" : "tons per hour",
-		"TA" : "Total Acidity",
+		"TA" : "total acidity",
 		"vol" : "volumes",
 		"x10^12 cells" : "x10^12 cells",
 		"x10^6 cells" : "x10^6 cells"}			
 			
-	added = []
-	flash("Inserting default units of measurements if needed...", "alert alert-warning")
+	addedUnits = []
+	skippedUnits = []
 	for defaultUnit in defaultUnits:
 		unit = UnitOfMeasurement.query.filter(and_(UnitOfMeasurement.Abbreviation == defaultUnit,
 			UnitOfMeasurement.Name == defaultUnits[defaultUnit])).first()
-		added = defaultUnit
 		if unit is None:
-			# flash("Adding unit \"{}\".".format(defaultUnit), "alert alert-success")
+			addedUnits.append(defaultUnits[defaultUnit])
 			unit = UnitOfMeasurement(Abbreviation = defaultUnit)
 			unit.Name = defaultUnits[defaultUnit]
 			db.session.add(unit)
+		else:
+			skippedUnits.append(defaultUnits[defaultUnit])
 	db.session.commit()
 	
-	addedMessage = None
-	if added:
-		for unit in added:
-			if addedMessage == None:
+	addedMessage = ""
+	alert = "alert alert-warning"
+	if addedUnits:
+		for unit in addedUnits:
+			if addedMessage == "":
 				addedMessage = "Added: {}".format(unit)
+				alert = "alert alert-success"
 			else:
 				addedMessage = "{}, {}".format(addedMessage, unit)
-		"{}.".format(addedMessage)
+		addedMessage = "{}.".format(addedMessage)
 	else:
-		addedMessage = "Added: none."
-	flash(addedMessage)
+		addedMessage = "Added none of the default units of measurements."
+	flash(addedMessage, alert)
+
+	skippedMessage = ""
+	if skippedUnits:
+		for unit in skippedUnits:
+			if skippedMessage == "":
+				skippedMessage = "Skipped: {}".format(unit)
+			else:
+				skippedMessage = "{}, {}".format(skippedMessage, unit)
+		skippedMessage = "{} as they already exist.".format(skippedMessage)
+		flash(skippedMessage, "alert alert-warning")
 
 	return redirect(url_for("unitOfMeasurements.listUnitOfMeasurements"))
 
