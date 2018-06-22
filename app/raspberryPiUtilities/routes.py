@@ -22,7 +22,7 @@ def backupDatabase():
 @adminRequired
 def info():
 	ipCommand = "ip a"
-	ipOutput = subprocess.check_output(hostnameCommand, shell = True).decode("utf-8").replace("\n", "<br>")
+	ipOutput = subprocess.check_output(ipCommand, shell = True).decode("utf-8").replace("\n", "<br>")
 	uptimeCommand = "uptime -p"
 	uptimeOutput = subprocess.check_output(uptimeCommand, shell = True).decode("utf-8")
 	return render_template("raspberryPiUtilities/info.html", ipOutput = ipOutput, uptimeOutput = uptimeOutput)
