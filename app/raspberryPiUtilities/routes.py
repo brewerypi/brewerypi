@@ -21,6 +21,8 @@ def backupDatabase():
 @login_required
 @adminRequired
 def info():
+	freeCommand = "free -h"
+	freeOutput = subprocess.check_output(freeCommand, shell = True).decode("utf-8").replace("\n", "<br>")
 	ipCommand = "ip a"
 	ipOutput = subprocess.check_output(ipCommand, shell = True).decode("utf-8").replace("\n", "<br>")
 	uptimeCommand = "uptime -p"
