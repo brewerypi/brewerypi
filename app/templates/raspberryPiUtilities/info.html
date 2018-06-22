@@ -9,8 +9,8 @@ Raspberry Pi - Info
     <h1>Raspberry Pi <small>Info</small></h1>
 </div>
 <div class = "panel panel-primary">
-    <div class = "panel-heading">IP Address(es)</div>
-    <div class = "panel-body">{{ hostnameOutput }}</div>
+    <div class = "panel-heading">Network</div>
+    <div class = "panel-body">{{ ifconfigOutput | safe }}</div>
 </div>
 <div class = "panel = panel-primary">
     <div class = "panel-heading">Uptime</div>

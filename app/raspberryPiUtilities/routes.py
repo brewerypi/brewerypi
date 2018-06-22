@@ -21,11 +21,11 @@ def backupDatabase():
 @login_required
 @adminRequired
 def info():
-	hostnameCommand = "hostname -I"
-	hostnameOutput = subprocess.check_output(hostnameCommand, shell = True).decode("utf-8")
+	ipCommand = "ip a"
+	ipOutput = subprocess.check_output(hostnameCommand, shell = True).decode("utf-8").replace("\n", "<br>")
 	uptimeCommand = "uptime -p"
 	uptimeOutput = subprocess.check_output(uptimeCommand, shell = True).decode("utf-8")
-	return render_template("raspberryPiUtilities/info.html", hostnameOutput = hostnameOutput, uptimeOutput = uptimeOutput)
+	return render_template("raspberryPiUtilities/info.html", ipOutput = ipOutput, uptimeOutput = uptimeOutput)
 
 @raspberryPiUtilities.route("/reboot", methods = ["GET"])
 @login_required
