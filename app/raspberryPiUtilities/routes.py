@@ -27,7 +27,7 @@ def info():
 	ipOutput = subprocess.check_output(ipCommand, shell = True).decode("utf-8").replace("\n", "<br>")
 	uptimeCommand = "uptime -p"
 	uptimeOutput = subprocess.check_output(uptimeCommand, shell = True).decode("utf-8")
-	return render_template("raspberryPiUtilities/info.html", ipOutput = ipOutput, uptimeOutput = uptimeOutput)
+	return render_template("raspberryPiUtilities/info.html", freeOutput = freeOutput, ipOutput = ipOutput, uptimeOutput = uptimeOutput)
 
 @raspberryPiUtilities.route("/reboot", methods = ["GET"])
 @login_required
