@@ -10,14 +10,14 @@ Raspberry Pi - Info
 </div>
 <div class = "panel panel-primary">
     <div class = "panel-heading">Memory</div>
-    <div class = "panel-body">{{ freeOutput | safe }}</div>
+    <div class = "panel-body"><pre><samp>{{ freeOutput | safe }}</samp></pre></div>
 </div>
 <div class = "panel panel-primary">
     <div class = "panel-heading">Network</div>
-    <div class = "panel-body">{{ ipOutput | safe }}</div>
+    <div class = "panel-body"><pre><samp>{{ ipOutput | safe }}</samp></pre></div>
 </div>
 <div class = "panel = panel-primary">
     <div class = "panel-heading">Uptime</div>
-    <div class = "panel-body">{{ uptimeOutput }}</div>
+    <div class = "panel-body"><pre><samp>{{ uptimeOutput }}</samp></pre></div>
 </div>
 {% endblock %}

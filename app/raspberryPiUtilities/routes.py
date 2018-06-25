@@ -22,9 +22,9 @@ def backupDatabase():
 @adminRequired
 def info():
 	freeCommand = "free -h"
-	freeOutput = subprocess.check_output(freeCommand, shell = True).decode("utf-8").replace("\n", "<br>")
+	freeOutput = subprocess.check_output(freeCommand, shell = True).decode("utf-8")
 	ipCommand = "ip a"
-	ipOutput = subprocess.check_output(ipCommand, shell = True).decode("utf-8").replace("\n", "<br>")
+	ipOutput = subprocess.check_output(ipCommand, shell = True).decode("utf-8")
 	uptimeCommand = "uptime -p"
 	uptimeOutput = subprocess.check_output(uptimeCommand, shell = True).decode("utf-8")
 	return render_template("raspberryPiUtilities/info.html", freeOutput = freeOutput, ipOutput = ipOutput, uptimeOutput = uptimeOutput)
