@@ -1,8 +1,8 @@
 {
   "__inputs": [
     {
-      "name": "DS_BREWERYPI",
-      "label": "BreweryPi",
+      "name": "DS_BREWERY_PI",
+      "label": "Brewery Pi",
       "description": "",
       "type": "datasource",
       "pluginId": "mysql",
@@ -14,7 +14,7 @@
       "type": "grafana",
       "id": "grafana",
       "name": "Grafana",
-      "version": "5.0.4"
+      "version": "5.1.3"
     },
     {
       "type": "panel",
@@ -41,7 +41,7 @@
         "type": "dashboard"
       },
       {
-        "datasource": "${DS_BREWERYPI}",
+        "datasource": "${DS_BREWERY_PI}",
         "enable": true,
         "hide": false,
         "iconColor": "rgba(255, 96, 96, 1)",
@@ -58,7 +58,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": null,
-  "iteration": 1524812660979,
+  "iteration": 1530301463460,
   "links": [],
   "panels": [
     {
@@ -66,7 +66,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "${DS_BREWERYPI}",
+      "datasource": "${DS_BREWERY_PI}",
       "decimals": 1,
       "fill": 0,
       "gridPos": {
@@ -141,7 +141,11 @@
           "min": null,
           "show": true
         }
-      ]
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
     }
   ],
   "schemaVersion": 16,
@@ -152,17 +156,17 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "${DS_BREWERYPI}",
+        "datasource": "${DS_BREWERY_PI}",
         "hide": 0,
         "includeAll": true,
         "label": "Enterprises:",
         "multi": true,
         "name": "enterprises",
         "options": [],
-        "query": "SELECT Enterprise.EnterpriseId AS __value, Enterprise.Name AS __text FROM Enterprise",
+        "query": "SELECT DISTINCT Enterprise.EnterpriseId AS __value, Enterprise.Name AS __text FROM Enterprise \tINNER JOIN Site ON Enterprise.EnterpriseId = Site.EnterpriseId     INNER JOIN Area ON Site.SiteId = Area.SiteId     INNER JOIN Tag ON Area.AreaId = Tag.AreaId",
         "refresh": 1,
         "regex": "",
-        "sort": 1,
+        "sort": 5,
         "tagValuesQuery": "",
         "tags": [],
         "tagsQuery": "",
@@ -172,17 +176,17 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "${DS_BREWERYPI}",
+        "datasource": "${DS_BREWERY_PI}",
         "hide": 0,
         "includeAll": true,
         "label": "Sites:",
         "multi": true,
         "name": "sites",
         "options": [],
-        "query": "SELECT Site.SiteId AS __value, Site.Name AS __text FROM Site WHERE Site.EnterpriseId IN ($enterprises)",
+        "query": "SELECT DISTINCT Site.SiteId AS __value, Site.Name AS __text FROM Site \tINNER JOIN Area ON Site.SiteId = Area.SiteId \tINNER JOIN Tag ON Area.AreaId = Tag.AreaId WHERE Site.EnterpriseId IN ($enterprises)",
         "refresh": 1,
         "regex": "",
-        "sort": 1,
+        "sort": 5,
         "tagValuesQuery": "",
         "tags": [],
         "tagsQuery": "",
@@ -192,17 +196,17 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "${DS_BREWERYPI}",
+        "datasource": "${DS_BREWERY_PI}",
         "hide": 0,
         "includeAll": true,
         "label": "Areas:",
         "multi": true,
         "name": "areas",
         "options": [],
-        "query": "SELECT Area.AreaId AS __value, Area.Name AS __text FROM Area WHERE Area.SiteId IN ($sites)",
+        "query": "SELECT DISTINCT Area.AreaId AS __value, Area.Name AS __text FROM Area \tINNER JOIN Tag ON Area.AreaId = Tag.AreaId WHERE Area.SiteId IN ($sites)",
         "refresh": 1,
         "regex": "",
-        "sort": 1,
+        "sort": 5,
         "tagValuesQuery": "",
         "tags": [],
         "tagsQuery": "",
@@ -212,17 +216,17 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "${DS_BREWERYPI}",
+        "datasource": "${DS_BREWERY_PI}",
         "hide": 0,
         "includeAll": true,
         "label": "Tags:",
         "multi": true,
         "name": "tags",
         "options": [],
-        "query": "SELECT Tag.TagId AS __value, Tag.Name AS __text FROM Tag INNER JOIN Area ON Tag.AreaId = Area.AreaId WHERE (Area.AreaId IN ($areas))",
+        "query": "SELECT Tag.TagId AS __value, Tag.Name AS __text FROM Tag WHERE (Tag.AreaId IN ($areas))",
         "refresh": 1,
         "regex": "",
-        "sort": 1,
+        "sort": 5,
         "tagValuesQuery": "",
         "tags": [],
         "tagsQuery": "",
@@ -261,7 +265,5 @@
     ]
   },
   "timezone": "",
-  "title": "Tag Values Graph",
-  "uid": "6JvEq3mmz",
-  "version": 7
+  "title": "Tag Values Graph"
 }
