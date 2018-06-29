@@ -51,6 +51,18 @@
         "showIn": 0,
         "tags": [],
         "type": "tags"
+      },
+      {
+        "datasource": "${DS_BREWERY_PI}",
+        "enable": false,
+        "hide": false,
+        "iconColor": "#ba43a9",
+        "limit": 100,
+        "name": "Lookups",
+        "rawQuery": "SELECT UNIX_TIMESTAMP(TagValue.Timestamp) AS time_sec, LookupValue.Name AS text, Lookup.Name AS tags\nFROM TagValue\n\tINNER JOIN Tag ON TagValue.TagId = Tag.TagId\n    INNER JOIN Lookup ON Tag.LookupId = Lookup.LookupId\n    INNER JOIN LookupValue ON Lookup.LookupId = LookupValue.LookupId AND\n\t\tTagValue.Value = LookupValue.Value\nWHERE TagValue.TagId IN ($tags) AND\n\tLookup.LookupId IN ($lookups) AND\n\t$__timeFilter(TagValue.Timestamp)",
+        "showIn": 0,
+        "tags": [],
+        "type": "tags"
       }
     ]
   },
@@ -58,7 +70,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": null,
-  "iteration": 1530301463460,
+  "iteration": 1530312384206,
   "links": [],
   "panels": [
     {
@@ -224,6 +236,26 @@
         "name": "tags",
         "options": [],
         "query": "SELECT Tag.TagId AS __value, Tag.Name AS __text FROM Tag WHERE (Tag.AreaId IN ($areas))",
+        "refresh": 1,
+        "regex": "",
+        "sort": 5,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {},
+        "datasource": "${DS_BREWERY_PI}",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Lookups:",
+        "multi": true,
+        "name": "lookups",
+        "options": [],
+        "query": "SELECT Lookup.LookupId AS __value, Lookup.Name AS __text FROM Lookup",
         "refresh": 1,
         "regex": "",
         "sort": 5,
