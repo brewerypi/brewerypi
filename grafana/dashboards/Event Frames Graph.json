@@ -27,6 +27,12 @@
       "id": "mysql",
       "name": "MySQL",
       "version": "5.0.0"
+    },
+    {
+      "type": "panel",
+      "id": "table",
+      "name": "Table",
+      "version": "5.0.0"
     }
   ],
   "annotations": {
@@ -44,10 +50,46 @@
         "datasource": "${DS_BREWERY_PI}",
         "enable": true,
         "hide": false,
-        "iconColor": "rgba(255, 96, 96, 1)",
+        "iconColor": "rgb(0, 255, 0)",
+        "limit": 100,
+        "name": "Start of Event Frame",
+        "rawQuery": "SELECT UNIX_TIMESTAMP(EventFrame.StartTimestamp) AS time_sec,\n\t'' AS text,\n\tCONCAT(Element.Name, ',', EventFrameTemplate.Name, ',', fxGetEventFrameFriendlyName(EventFrame.EventFrameId), ',', 'Start') AS tags\nFROM EventFrame\n\tINNER JOIN Element ON EventFrame.ElementId = Element.ElementId\n\tINNER JOIN EventFrameTemplate ON EventFrame.EventFrameTemplateId = EventFrameTemplate.EventFrameTemplateId\nWHERE EventFrame.EventFrameId = $eventFrame",
+        "showIn": 0,
+        "tags": [],
+        "type": "tags"
+      },
+      {
+        "datasource": "${DS_BREWERY_PI}",
+        "enable": true,
+        "hide": false,
+        "iconColor": "rgb(255, 0, 0)",
+        "limit": 100,
+        "name": "End of Event Frame",
+        "rawQuery": "SELECT UNIX_TIMESTAMP(EventFrame.EndTimestamp) AS time_sec,\n\t'' AS text,\n\tCONCAT(Element.Name, ',', EventFrameTemplate.Name, ',', fxGetEventFrameFriendlyName(EventFrame.EventFrameId), ',',  'End') AS tags\nFROM EventFrame\n\tINNER JOIN Element ON EventFrame.ElementId = Element.ElementId\n\tINNER JOIN EventFrameTemplate ON EventFrame.EventFrameTemplateId = EventFrameTemplate.EventFrameTemplateId\nWHERE EventFrame.EventFrameId = $eventFrame",
+        "showIn": 0,
+        "tags": [],
+        "type": "tags"
+      },
+      {
+        "datasource": "${DS_BREWERY_PI}",
+        "enable": false,
+        "hide": false,
+        "iconColor": "rgb(255, 255, 255)",
+        "limit": 100,
+        "name": "Lookups",
+        "rawQuery": "SELECT UNIX_TIMESTAMP(TagValue.Timestamp) AS time_sec,\n\t'' AS text,\n\tCONCAT(Element.Name, ',', AttributeTemplate.Name, ',', LookupValue.Name) AS tags\nFROM ElementAttribute\n\tINNER JOIN Element ON ElementAttribute.ElementId = Element.ElementId\n\tINNER JOIN EventFrame ON Element.ElementId = EventFrame.ElementId\n\tINNER JOIN AttributeTemplate ON ElementAttribute.AttributeTemplateId = AttributeTemplate.AttributeTemplateId\n\tINNER JOIN Tag ON ElementAttribute.TagId = Tag.TagId\n\tINNER JOIN Lookup ON Tag.LookupId = Lookup.LookupId\n\tINNER JOIN TagValue ON Tag.TagId = TagValue.TagId\n\tINNER JOIN LookupValue ON Lookup.LookupId = LookupValue.LookupId AND\n\t\tTagValue.Value = LookupValue.Value\nWHERE (EventFrame.EventFrameId = $eventFrame) AND\n\t(AttributeTemplate.AttributeTemplateId IN ($attributeTemplates)) AND\n\tLookup.LookupId IN ($lookups) AND\n\tIF (EventFrame.EndTimestamp IS NULL, (TagValue.Timestamp >= EventFrame.StartTimestamp), (TagValue.Timestamp >= EventFrame.StartTimestamp) AND\n\t(TagValue.Timestamp <= EventFrame.EndTimestamp))\n",
+        "showIn": 0,
+        "tags": [],
+        "type": "tags"
+      },
+      {
+        "datasource": "${DS_BREWERY_PI}",
+        "enable": true,
+        "hide": false,
+        "iconColor": "rgb(255, 255, 0)",
         "limit": 100,
         "name": "Notes",
-        "rawQuery": "SELECT UNIX_TIMESTAMP(EventFrame.StartTimestamp) as time_sec,\n\tGROUP_CONCAT(DATE_FORMAT(Note.Timestamp, '%m/%d/%y %H:%i'), ' - ', Note.Note ORDER BY Note.Timestamp SEPARATOR '<br>') AS text,\n\tEventFrameTemplate.Name AS tags\nFROM Note\n\tINNER JOIN EventFrameNote ON Note.NoteId = EventFrameNote.NoteId\n    INNER JOIN EventFrame ON EventFrameNote.EventFrameId = EventFrame.EventFrameId\n    INNER JOIN EventFrameTemplate ON EventFrame.EventFrameTemplateId = EventFrameTemplate.EventFrameTemplateId\nWHERE EventFrame.EventFrameId IN ($eventFrame)\n",
+        "rawQuery": "SELECT UNIX_TIMESTAMP(TagValue.Timestamp) AS time_sec,\n    GROUP_CONCAT(DATE_FORMAT(Note.Timestamp, '%m/%d/%y %H:%i'), ' - ', Note.Note ORDER BY Note.Timestamp SEPARATOR '<br>') AS text,\n    CONCAT(Element.Name, ',', AttributeTemplate.Name) AS tags\nFROM Note\n    INNER JOIN TagValueNote ON Note.NoteId = TagValueNote.NoteId\n    INNER JOIN TagValue ON TagValueNote.TagValueId = TagValue.TagValueId\n    INNER JOIN Tag ON TagValue.TagId = Tag.TagId\n    INNER JOIN ElementAttribute ON Tag.TagId = ElementAttribute.TagId\n    INNER JOIN AttributeTemplate ON ElementAttribute.AttributeTemplateId = AttributeTemplate.AttributeTemplateId\n    INNER JOIN Element ON ElementAttribute.ElementId = Element.ElementId\n    INNER JOIN EventFrame ON Element.ElementId = EventFrame.ElementId\nWHERE ElementAttribute.AttributeTemplateId IN ($attributeTemplates) AND\n    EventFrame.EventFrameId = $eventFrame AND\n    IF (EventFrame.EndTimestamp IS NULL, TagValue.Timestamp >= EventFrame.StartTimestamp, TagValue.Timestamp >= EventFrame.StartTimestamp AND TagValue.Timestamp <= EventFrame.EndTimestamp)\nGROUP BY TagValue.TagValueId",
         "showIn": 0,
         "tags": [],
         "type": "tags"
@@ -58,7 +100,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": null,
-  "iteration": 1530301424670,
+  "iteration": 1530826183457,
   "links": [],
   "panels": [
     {
@@ -70,7 +112,7 @@
       "decimals": 1,
       "fill": 0,
       "gridPos": {
-        "h": 15,
+        "h": 12,
         "w": 24,
         "x": 0,
         "y": 0
@@ -148,8 +190,64 @@
         "align": false,
         "alignLevel": null
       }
+    },
+    {
+      "columns": [],
+      "datasource": "${DS_BREWERY_PI}",
+      "fontSize": "100%",
+      "gridPos": {
+        "h": 7,
+        "w": 24,
+        "x": 0,
+        "y": 12
+      },
+      "id": 3,
+      "links": [],
+      "pageSize": null,
+      "scroll": true,
+      "showHeader": true,
+      "sort": {
+        "col": null,
+        "desc": false
+      },
+      "styles": [
+        {
+          "alias": "Timestamp",
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "link": false,
+          "pattern": "Timestamp",
+          "type": "date"
+        },
+        {
+          "alias": "",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "decimals": 2,
+          "pattern": "/.*/",
+          "thresholds": [],
+          "type": "number",
+          "unit": "short"
+        }
+      ],
+      "targets": [
+        {
+          "alias": "",
+          "format": "table",
+          "hide": false,
+          "rawSql": "SELECT fxGetEventFrameFriendlyName(EventFrameNote.EventFrameId) AS 'Event Frame',\n  Element.Name,\n  Note.Timestamp,\n  Note.Note\nFROM Note\n  INNER JOIN EventFrameNote ON Note.NoteId = EventFrameNote.NoteId\n  INNER JOIN EventFrame ON EventFrameNote.EventFrameId = EventFrame.EventFrameId\n  INNER JOIN Element ON EventFrame.ElementId = Element.ElementId\nWHERE EventFrameNote.EventFrameId = $eventFrame\nORDER BY Note.Timestamp",
+          "refId": "A"
+        }
+      ],
+      "title": "Event Frame Notes",
+      "transform": "table",
+      "type": "table"
     }
   ],
+  "refresh": false,
   "schemaVersion": 16,
   "style": "dark",
   "tags": [],
@@ -165,7 +263,7 @@
         "multi": false,
         "name": "enterprise",
         "options": [],
-        "query": "SELECT DISTINCT Enterprise.EnterpriseId AS __value, Enterprise.Name AS __text FROM Enterprise \tINNER JOIN Site ON Enterprise.EnterpriseId = Site.EnterpriseId     INNER JOIN ElementTemplate ON Site.SiteId = ElementTemplate.SiteId     INNER JOIN AttributeTemplate ON ElementTemplate.ElementTemplateId = AttributeTemplate.ElementTemplateId     INNER JOIN Element ON ElementTemplate.ElementTemplateId = Element.ElementTemplateId     INNER JOIN EventFrameTemplate ON ElementTemplate.ElementTemplateId = EventFrameTemplate.ElementTemplateId     INNER JOIN EventFrame ON Element.ElementId = EventFrame.ElementId AND \t\tEventFrameTemplate.EventFrameTemplateId = EventFrame.EventFrameTemplateId",
+        "query": "SELECT DISTINCT Enterprise.EnterpriseId AS __value, \tEnterprise.Name AS __text FROM Enterprise \tINNER JOIN Site ON Enterprise.EnterpriseId = Site.EnterpriseId \tINNER JOIN ElementTemplate ON Site.SiteId = ElementTemplate.SiteId \tINNER JOIN AttributeTemplate ON ElementTemplate.ElementTemplateId = AttributeTemplate.ElementTemplateId \tINNER JOIN EventFrameTemplate ON ElementTemplate.ElementTemplateId = EventFrameTemplate.ElementTemplateId \tINNER JOIN EventFrame ON EventFrameTemplate.EventFrameTemplateId = EventFrame.EventFrameTemplateId",
         "refresh": 1,
         "regex": "",
         "sort": 5,
@@ -185,7 +283,7 @@
         "multi": false,
         "name": "site",
         "options": [],
-        "query": "SELECT DISTINCT Site.SiteId AS __value, Site.Name AS __text FROM Site \tINNER JOIN ElementTemplate ON Site.SiteId = ElementTemplate.SiteId \tINNER JOIN AttributeTemplate ON ElementTemplate.ElementTemplateId = AttributeTemplate.ElementTemplateId \tINNER JOIN Element ON ElementTemplate.ElementTemplateId = Element.ElementTemplateId \tINNER JOIN EventFrameTemplate ON ElementTemplate.ElementTemplateId = EventFrameTemplate.ElementTemplateId \tINNER JOIN EventFrame ON Element.ElementId = EventFrame.ElementId AND \t\tEventFrameTemplate.EventFrameTemplateId = EventFrame.EventFrameTemplateId WHERE Site.EnterpriseId = $enterprise",
+        "query": "SELECT DISTINCT Site.SiteId AS __value, \tSite.Name AS __text FROM Site \tINNER JOIN ElementTemplate ON Site.SiteId = ElementTemplate.SiteId  \tINNER JOIN AttributeTemplate ON ElementTemplate.ElementTemplateId = AttributeTemplate.ElementTemplateId \tINNER JOIN EventFrameTemplate ON ElementTemplate.ElementTemplateId = EventFrameTemplate.ElementTemplateId \tINNER JOIN EventFrame ON EventFrameTemplate.EventFrameTemplateId = EventFrame.EventFrameTemplateId WHERE Site.EnterpriseId = $enterprise",
         "refresh": 1,
         "regex": "",
         "sort": 5,
@@ -205,7 +303,7 @@
         "multi": false,
         "name": "elementTemplate",
         "options": [],
-        "query": "SELECT DISTINCT ElementTemplate.ElementTemplateId AS __value, ElementTemplate.Name AS __text FROM ElementTemplate \tINNER JOIN AttributeTemplate ON ElementTemplate.ElementTemplateId = AttributeTemplate.ElementTemplateId \tINNER JOIN Element ON ElementTemplate.ElementTemplateId = Element.ElementTemplateId \tINNER JOIN EventFrameTemplate ON ElementTemplate.ElementTemplateId = EventFrameTemplate.ElementTemplateId \tINNER JOIN EventFrame ON Element.ElementId = EventFrame.ElementId AND \t\tEventFrameTemplate.EventFrameTemplateId = EventFrame.EventFrameTemplateId WHERE ElementTemplate.SiteId = $site",
+        "query": "SELECT DISTINCT ElementTemplate.ElementTemplateId AS __value, \tElementTemplate.Name AS __text FROM ElementTemplate \tINNER JOIN AttributeTemplate ON ElementTemplate.ElementTemplateId = AttributeTemplate.ElementTemplateId \tINNER JOIN EventFrameTemplate ON ElementTemplate.ElementTemplateId = EventFrameTemplate.ElementTemplateId \tINNER JOIN EventFrame ON EventFrameTemplate.EventFrameTemplateId = EventFrame.EventFrameTemplateId WHERE ElementTemplate.SiteId = $site",
         "refresh": 1,
         "regex": "",
         "sort": 5,
@@ -241,31 +339,11 @@
         "datasource": "${DS_BREWERY_PI}",
         "hide": 0,
         "includeAll": false,
-        "label": "Element",
-        "multi": false,
-        "name": "element",
-        "options": [],
-        "query": "SELECT DISTINCT Element.ElementId AS __value, Element.Name AS __text FROM Element \tINNER JOIN EventFrame ON Element.ElementId = EventFrame.ElementId WHERE Element.ElementTemplateId = $elementTemplate",
-        "refresh": 1,
-        "regex": "",
-        "sort": 5,
-        "tagValuesQuery": "",
-        "tags": [],
-        "tagsQuery": "",
-        "type": "query",
-        "useTags": false
-      },
-      {
-        "allValue": null,
-        "current": {},
-        "datasource": "${DS_BREWERY_PI}",
-        "hide": 0,
-        "includeAll": false,
         "label": "Event Frame:",
         "multi": false,
         "name": "eventFrame",
         "options": [],
-        "query": "SELECT EventFrame.EventFrameId AS __value, IF(EventFrame.Name IS NOT NULL AND EventFrame.Name <> '', EventFrame.Name, CONCAT(DATE_FORMAT(EventFrame.StartTimestamp, '%m/%d/%y %H:%i'), ' - ',IF(EventFrame.EndTimestamp IS NULL, '', DATE_FORMAT(EventFrame.EndTimestamp, '%m/%d/%y %H:%i')))) AS __text FROM EventFrame WHERE EventFrame.ElementId = $element AND EventFrame.EventFrameTemplateId = $eventFrameTemplate AND $__timeFilter(EventFrame.StartTimestamp) ORDER BY StartTimestamp DESC",
+        "query": "SELECT EventFrame.EventFrameId AS __value, \tfxGetEventFrameFriendlyName(EventFrameId) AS __text FROM EventFrame WHERE EventFrame.EventFrameTemplateId = $eventFrameTemplate AND \t$__timeFilter(EventFrame.StartTimestamp) ORDER BY StartTimestamp DESC",
         "refresh": 2,
         "regex": "",
         "sort": 0,
@@ -286,6 +364,26 @@
         "name": "attributeTemplates",
         "options": [],
         "query": "SELECT AttributeTemplate.AttributeTemplateId AS __value, AttributeTemplate.Name AS __text FROM AttributeTemplate WHERE AttributeTemplate.ElementTemplateId = $elementTemplate",
+        "refresh": 1,
+        "regex": "",
+        "sort": 5,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {},
+        "datasource": "${DS_BREWERY_PI}",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Lookups:",
+        "multi": true,
+        "name": "lookups",
+        "options": [],
+        "query": "SELECT Lookup.LookupId AS __value, Lookup.Name AS __text FROM Lookup WHERE Lookup.EnterpriseId = $enterprise",
         "refresh": 1,
         "regex": "",
         "sort": 5,

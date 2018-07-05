@@ -46,10 +46,10 @@
         "datasource": "${DS_BREWERY_PI}",
         "enable": true,
         "hide": false,
-        "iconColor": "#3f6833",
+        "iconColor": "rgb(0, 255, 0)",
         "limit": 100,
         "name": "Start of Event Frames",
-        "rawQuery": "SELECT UNIX_TIMESTAMP(EventFrame.StartTimestamp) AS time_sec, CONCAT(Element.Name, ' - ', DATE_FORMAT(EventFrame.StartTimestamp, '%m/%d/%y %H:%i')) AS text, CONCAT(Element.Name, ',', EventFrameTemplate.Name, ',', 'Start') AS tags\nFROM EventFrame\n\tINNER JOIN Element ON EventFrame.ElementId = Element.ElementId\n\tINNER JOIN EventFrameTemplate ON EventFrame.EventFrameTemplateId = EventFrameTemplate.EventFrameTemplateId\nWHERE $__timeFilter(EventFrame.StartTimestamp) AND (Element.ElementId IN ($elements))\nORDER BY EventFrame.StartTimestamp ASC",
+        "rawQuery": "SELECT UNIX_TIMESTAMP(EventFrame.StartTimestamp) AS time_sec,\n\tCONCAT(Element.Name, ' - ', DATE_FORMAT(EventFrame.StartTimestamp, '%m/%d/%y %H:%i')) AS text,\n\tCONCAT(Element.Name, ',', EventFrameTemplate.Name, ',', fxGetEventFrameFriendlyName(EventFrame.EventFrameId), ',', 'Start') AS tags\nFROM EventFrame\n\tINNER JOIN Element ON EventFrame.ElementId = Element.ElementId\n\tINNER JOIN EventFrameTemplate ON EventFrame.EventFrameTemplateId = EventFrameTemplate.EventFrameTemplateId\nWHERE $__timeFilter(EventFrame.StartTimestamp) AND (Element.ElementId IN ($elements))\nORDER BY EventFrame.StartTimestamp ASC\n",
         "showIn": 0,
         "tags": [],
         "type": "tags"
@@ -58,10 +58,10 @@
         "datasource": "${DS_BREWERY_PI}",
         "enable": true,
         "hide": false,
-        "iconColor": "rgba(255, 96, 96, 1)",
+        "iconColor": "rgb(255, 0, 0)",
         "limit": 100,
         "name": "End of Event Frames",
-        "rawQuery": "SELECT UNIX_TIMESTAMP(EventFrame.EndTimestamp) AS time_sec, CONCAT(Element.Name, ' - ', DATE_FORMAT(EventFrame.EndTimestamp, '%m/%d/%y %H:%i')) AS text, CONCAT(Element.Name, ',', EventFrameTemplate.Name, ',', 'End') AS tags\nFROM EventFrame\n\tINNER JOIN Element ON EventFrame.ElementId = Element.ElementId\n\tINNER JOIN EventFrameTemplate ON EventFrame.EventFrameTemplateId = EventFrameTemplate.EventFrameTemplateId\nWHERE $__timeFilter(EventFrame.StartTimestamp) AND (Element.ElementId IN ($elements)) AND EventFrame.EndTimestamp IS NOT NULL\nORDER BY EventFrame.StartTimestamp ASC",
+        "rawQuery": "SELECT UNIX_TIMESTAMP(EventFrame.EndTimestamp) AS time_sec,\n\tCONCAT(Element.Name, ' - ', DATE_FORMAT(EventFrame.EndTimestamp, '%m/%d/%y %H:%i')) AS text,\n\tCONCAT(Element.Name, ',', EventFrameTemplate.Name, ',', fxGetEventFrameFriendlyName(EventFrame.EventFrameId), ',', 'End') AS tags\nFROM EventFrame\n\tINNER JOIN Element ON EventFrame.ElementId = Element.ElementId\n\tINNER JOIN EventFrameTemplate ON EventFrame.EventFrameTemplateId = EventFrameTemplate.EventFrameTemplateId\nWHERE $__timeFilter(EventFrame.StartTimestamp) AND (Element.ElementId IN ($elements)) AND EventFrame.EndTimestamp IS NOT NULL\nORDER BY EventFrame.StartTimestamp ASC\n",
         "showIn": 0,
         "tags": [],
         "type": "tags"
@@ -70,10 +70,22 @@
         "datasource": "${DS_BREWERY_PI}",
         "enable": true,
         "hide": false,
-        "iconColor": "#ba43a9",
+        "iconColor": "rgb(255, 255, 0)",
         "limit": 100,
         "name": "Notes",
-        "rawQuery": "SELECT UNIX_TIMESTAMP(TagValue.Timestamp) AS time_sec,\n GROUP_CONCAT(DATE_FORMAT(Note.Timestamp, '%m/%d/%y %H:%i'), ' - ', Note.Note ORDER BY Note.Timestamp SEPARATOR '<br>') AS text,\n CONCAT(Element.Name, ',', AttributeTemplate.Name) AS tags\nFROM ElementAttribute\n INNER JOIN Element ON ElementAttribute.ElementId = Element.ElementId\n INNER JOIN AttributeTemplate ON ElementAttribute.AttributeTemplateId = AttributeTemplate.AttributeTemplateId\n INNER JOIN Tag ON ElementAttribute.TagId = Tag.TagId\n INNER JOIN TagValue ON Tag.TagId = TagValue.TagId\n INNER JOIN TagValueNote ON TagValue.TagValueId = TagValueNote.TagValueId\n INNER JOIN Note ON TagValueNote.NoteId = Note.NoteId\nWHERE (Element.ElementId IN ($elements)) AND (AttributeTemplate.AttributeTemplateId IN ($attributeTemplates)) AND $__timeFilter(TagValue.Timestamp)\nGROUP BY TagValue.TagValueId\n",
+        "rawQuery": "SELECT UNIX_TIMESTAMP(TagValue.Timestamp) AS time_sec,\n\tGROUP_CONCAT(DATE_FORMAT(Note.Timestamp, '%m/%d/%y %H:%i'), ' - ', Note.Note ORDER BY Note.Timestamp SEPARATOR '<br>') AS text,\n\tCONCAT(Element.Name, ',', AttributeTemplate.Name) AS tags\nFROM ElementAttribute\n\tINNER JOIN Element ON ElementAttribute.ElementId = Element.ElementId\n\tINNER JOIN AttributeTemplate ON ElementAttribute.AttributeTemplateId = AttributeTemplate.AttributeTemplateId\n\tINNER JOIN Tag ON ElementAttribute.TagId = Tag.TagId\n\tINNER JOIN TagValue ON Tag.TagId = TagValue.TagId\n\tINNER JOIN TagValueNote ON TagValue.TagValueId = TagValueNote.TagValueId\n\tINNER JOIN Note ON TagValueNote.NoteId = Note.NoteId\nWHERE (Element.ElementId IN ($elements)) AND (AttributeTemplate.AttributeTemplateId IN ($attributeTemplates)) AND $__timeFilter(TagValue.Timestamp)\nGROUP BY TagValue.TagValueId\n",
+        "showIn": 0,
+        "tags": [],
+        "type": "tags"
+      },
+      {
+        "datasource": "${DS_BREWERY_PI}",
+        "enable": false,
+        "hide": false,
+        "iconColor": "rgb(255, 255, 255)",
+        "limit": 100,
+        "name": "Lookups",
+        "rawQuery": "SELECT UNIX_TIMESTAMP(TagValue.Timestamp) AS time_sec,\n\t'' AS text,\n\tCONCAT(Element.Name, ',', AttributeTemplate.Name, ',', LookupValue.Name) AS tags\nFROM ElementAttribute\n\tINNER JOIN Element ON ElementAttribute.ElementId = Element.ElementId\n\tINNER JOIN AttributeTemplate ON ElementAttribute.AttributeTemplateId = AttributeTemplate.AttributeTemplateId\n\tINNER JOIN Tag ON ElementAttribute.TagId = Tag.TagId\n\tINNER JOIN Lookup ON Tag.LookupId = Lookup.LookupId\n\tINNER JOIN TagValue ON Tag.TagId = TagValue.TagId\n\tINNER JOIN LookupValue ON Lookup.LookupId = LookupValue.LookupId AND\n\t\tTagValue.Value = LookupValue.Value\nWHERE (Element.ElementId IN ($elements)) AND\n\t(AttributeTemplate.AttributeTemplateId IN ($attributeTemplates)) AND\n\tLookup.LookupId IN ($lookups) AND\n\t$__timeFilter(TagValue.Timestamp)\n",
         "showIn": 0,
         "tags": [],
         "type": "tags"
@@ -84,7 +96,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": null,
-  "iteration": 1530311854479,
+  "iteration": 1530826152646,
   "links": [],
   "panels": [
     {
@@ -96,7 +108,7 @@
       "decimals": 1,
       "fill": 0,
       "gridPos": {
-        "h": 15,
+        "h": 12,
         "w": 24,
         "x": 0,
         "y": 0
@@ -129,7 +141,7 @@
           "alias": "",
           "format": "time_series",
           "hide": false,
-          "rawSql": "SELECT UNIX_TIMESTAMP(TagValue.Timestamp) AS time_sec,\r\n\tTagValue.Value AS value,\r\n\tCONCAT(Element.Name, '_', AttributeTemplate.Name) AS metric \r\nFROM ElementAttribute\r\n\tINNER JOIN Element ON ElementAttribute.ElementId = Element.ElementId\r\n  INNER JOIN AttributeTemplate ON ElementAttribute.AttributeTemplateId = AttributeTemplate.AttributeTemplateId\r\n  INNER JOIN Tag ON ElementAttribute.TagId = Tag.TagId\r\n  INNER JOIN TagValue ON Tag.TagId = TagValue.TagId\r\nWHERE (Element.ElementId IN ($elements)) AND (AttributeTemplate.AttributeTemplateId IN ($attributeTemplates)) AND $__timeFilter(TagValue.Timestamp)",
+          "rawSql": "SELECT UNIX_TIMESTAMP(TagValue.Timestamp) AS time_sec,\n\tTagValue.Value AS value,\n\tCONCAT(Element.Name, '_', AttributeTemplate.Name) AS metric \nFROM ElementAttribute\n\tINNER JOIN Element ON ElementAttribute.ElementId = Element.ElementId\n\tINNER JOIN AttributeTemplate ON ElementAttribute.AttributeTemplateId = AttributeTemplate.AttributeTemplateId\n\tINNER JOIN Tag ON ElementAttribute.TagId = Tag.TagId\n\tINNER JOIN TagValue ON Tag.TagId = TagValue.TagId\nWHERE (Element.ElementId IN ($elements)) AND (AttributeTemplate.AttributeTemplateId IN ($attributeTemplates)) AND $__timeFilter(TagValue.Timestamp)",
           "refId": "A"
         }
       ],
@@ -190,7 +202,7 @@
         "multi": false,
         "name": "enterprise",
         "options": [],
-        "query": "SELECT DISTINCT Enterprise.EnterpriseId AS __value, Enterprise.Name AS __text FROM Enterprise \tINNER JOIN Site ON Enterprise.EnterpriseId = Site.EnterpriseId \tINNER JOIN ElementTemplate ON Site.SiteId = ElementTemplate.SiteId \tINNER JOIN AttributeTemplate ON ElementTemplate.ElementTemplateId = AttributeTemplate.ElementTemplateId \tINNER JOIN Element ON ElementTemplate.ElementTemplateId = Element.ElementTemplateId",
+        "query": "SELECT DISTINCT Enterprise.EnterpriseId AS __value, \tEnterprise.Name AS __text FROM Enterprise \tINNER JOIN Site ON Enterprise.EnterpriseId = Site.EnterpriseId \tINNER JOIN ElementTemplate ON Site.SiteId = ElementTemplate.SiteId \tINNER JOIN AttributeTemplate ON ElementTemplate.ElementTemplateId = AttributeTemplate.ElementTemplateId \tINNER JOIN Element ON ElementTemplate.ElementTemplateId = Element.ElementTemplateId",
         "refresh": 1,
         "regex": "",
         "sort": 5,
@@ -279,11 +291,31 @@
         "tagsQuery": "",
         "type": "query",
         "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {},
+        "datasource": "${DS_BREWERY_PI}",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Lookups:",
+        "multi": true,
+        "name": "lookups",
+        "options": [],
+        "query": "SELECT Lookup.LookupId AS __value, Lookup.Name AS __text FROM Lookup WHERE Lookup.EnterpriseId = $enterprise",
+        "refresh": 1,
+        "regex": "",
+        "sort": 5,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
       }
     ]
   },
   "time": {
-    "from": "now-30d",
+    "from": "now-90d",
     "to": "now"
   },
   "timepicker": {

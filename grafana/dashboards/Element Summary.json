@@ -46,7 +46,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": null,
-  "iteration": 1530301366987,
+  "iteration": 1530826137806,
   "links": [],
   "panels": [
     {
@@ -54,7 +54,7 @@
       "datasource": "${DS_BREWERY_PI}",
       "fontSize": "100%",
       "gridPos": {
-        "h": 15,
+        "h": 12,
         "w": 24,
         "x": 0,
         "y": 0
