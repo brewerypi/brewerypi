@@ -65,6 +65,18 @@
         "showIn": 0,
         "tags": [],
         "type": "tags"
+      },
+      {
+        "datasource": "${DS_BREWERY_PI}",
+        "enable": true,
+        "hide": false,
+        "iconColor": "#ba43a9",
+        "limit": 100,
+        "name": "Notes",
+        "rawQuery": "SELECT UNIX_TIMESTAMP(TagValue.Timestamp) AS time_sec,\n GROUP_CONCAT(DATE_FORMAT(Note.Timestamp, '%m/%d/%y %H:%i'), ' - ', Note.Note ORDER BY Note.Timestamp SEPARATOR '<br>') AS text,\n CONCAT(Element.Name, ',', AttributeTemplate.Name) AS tags\nFROM ElementAttribute\n INNER JOIN Element ON ElementAttribute.ElementId = Element.ElementId\n INNER JOIN AttributeTemplate ON ElementAttribute.AttributeTemplateId = AttributeTemplate.AttributeTemplateId\n INNER JOIN Tag ON ElementAttribute.TagId = Tag.TagId\n INNER JOIN TagValue ON Tag.TagId = TagValue.TagId\n INNER JOIN TagValueNote ON TagValue.TagValueId = TagValueNote.TagValueId\n INNER JOIN Note ON TagValueNote.NoteId = Note.NoteId\nWHERE (Element.ElementId IN ($elements)) AND (AttributeTemplate.AttributeTemplateId IN ($attributeTemplates)) AND $__timeFilter(TagValue.Timestamp)\nGROUP BY TagValue.TagValueId\n",
+        "showIn": 0,
+        "tags": [],
+        "type": "tags"
       }
     ]
   },
@@ -72,7 +84,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": null,
-  "iteration": 1530301383632,
+  "iteration": 1530311854479,
   "links": [],
   "panels": [
     {
