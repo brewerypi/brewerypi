@@ -17,8 +17,7 @@ def make_shell_context():
 		TagValue = TagValue, TagValueNote = TagValueNote, UnitOfMeasurement = UnitOfMeasurement, User = User)
 
 @app.cli.command()
-@click.option("--units/--no-units", default = False, help = "Add default units of measurements.")
-def deploy(units):
+def deploy():
 	print ("Creating database {} if it does not exist...".format(current_app.config["MYSQL_DATABASE"]))
 	engine = create_engine(current_app.config["SQLALCHEMY_SERVER_URI"])
 	connection = engine.connect()
@@ -28,7 +27,3 @@ def deploy(units):
 	print ("Inserting default roles if needed...")
 	Role.insertDefaultRoles()
 	print ("Inserting default administrator if needed...")
-	User.insertDefaultAdministrator()
-	if units:
-		print ("Inserting default units of measurements if needed...")
-		UnitOfMeasurement.insertDefaultUnits()
