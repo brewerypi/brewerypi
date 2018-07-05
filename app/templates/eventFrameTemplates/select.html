@@ -12,34 +12,34 @@ Event Frame Templates
         {% if className == "Enterprise" %}
             <li class = "active">..</li>
         {% elif className == "Site" %}
-            <li><a href = "{{ url_for("eventFrameTemplates.selectEventFrameTemplate", className = "Root") }}">..</a></li>
+            <li><a href = "{{ url_for("eventFrameTemplates.select", className = "Root") }}">..</a></li>
             <li class = "active">{{ parent.Name }}</li>
         {% elif className == "ElementTemplate" %}
             {% if parent %}
-                <li><a href = "{{ url_for("eventFrameTemplates.selectEventFrameTemplate", className = "Root") }}">..</a></li>
-                <li><a href = "{{ url_for("eventFrameTemplates.selectEventFrameTemplate", className = parent.Enterprise.__class__.__name__,
+                <li><a href = "{{ url_for("eventFrameTemplates.select", className = "Root") }}">..</a></li>
+                <li><a href = "{{ url_for("eventFrameTemplates.select", className = parent.Enterprise.__class__.__name__,
                     id = parent.Enterprise.id()) }}">{{ parent.Enterprise.Name }}</a></li>
                 <li class = "active">{{ parent.Name }}</li>
             {% endif %}
         {% elif className == "EventFrameTemplate" %}
-            <li><a href = "{{ url_for("eventFrameTemplates.selectEventFrameTemplate", className = "Root") }}">..</a></li>
-            <li><a href = "{{ url_for("eventFrameTemplates.selectEventFrameTemplate", className = parent.Site.Enterprise.__class__.__name__,
+            <li><a href = "{{ url_for("eventFrameTemplates.select", className = "Root") }}">..</a></li>
+            <li><a href = "{{ url_for("eventFrameTemplates.select", className = parent.Site.Enterprise.__class__.__name__,
                 id = parent.Site.Enterprise.id()) }}">{{ parent.Site.Enterprise.Name }}</a></li>
-            <li><a href = "{{ url_for("eventFrameTemplates.selectEventFrameTemplate", className = parent.Site.__class__.__name__,
+            <li><a href = "{{ url_for("eventFrameTemplates.select", className = parent.Site.__class__.__name__,
                 id = parent.Site.id()) }}">{{ parent.Site.Name }}</a></li>
             <li class = "active">{{ parent.Name }}</li>
         {% else %}
             <!-- These are children event frame templates. -->
             {% set origin = parent.origin() %}
-            <li><a href = "{{ url_for("eventFrameTemplates.selectEventFrameTemplate", className = "Root") }}">..</a></li>
-            <li><a href = "{{ url_for("eventFrameTemplates.selectEventFrameTemplate", className = origin.ElementTemplate.Site.Enterprise.__class__.__name__,
+            <li><a href = "{{ url_for("eventFrameTemplates.select", className = "Root") }}">..</a></li>
+            <li><a href = "{{ url_for("eventFrameTemplates.select", className = origin.ElementTemplate.Site.Enterprise.__class__.__name__,
                 id = origin.ElementTemplate.Site.Enterprise.id()) }}">{{ origin.ElementTemplate.Site.Enterprise.Name }}</a></li>
-            <li><a href = "{{ url_for("eventFrameTemplates.selectEventFrameTemplate", className = origin.ElementTemplate.Site.__class__.__name__,
+            <li><a href = "{{ url_for("eventFrameTemplates.select", className = origin.ElementTemplate.Site.__class__.__name__,
                 id = origin.ElementTemplate.Site.id()) }}">{{ origin.ElementTemplate.Site.Name }}</a></li>
-            <li><a href = "{{ url_for("eventFrameTemplates.selectEventFrameTemplate", className = origin.ElementTemplate.__class__.__name__,
+            <li><a href = "{{ url_for("eventFrameTemplates.select", className = origin.ElementTemplate.__class__.__name__,
                 id = origin.ElementTemplate.id()) }}">{{ origin.ElementTemplate.Name }}</a></li>
             {% for ancestor in parent.ancestors([]) %}
-                <li><a href = "{{ url_for("eventFrameTemplates.selectEventFrameTemplate", className = ancestor.__class__.__name__,
+                <li><a href = "{{ url_for("eventFrameTemplates.select", className = ancestor.__class__.__name__,
                     id = ancestor.id()) }}">{{ ancestor.Name }}</a></li>
             {% endfor %}
             <li class = "active">{{ parent.Name }}</li>
@@ -79,7 +79,7 @@ Event Frame Templates
             {% if children %}
                 {% for child in children %}
                     <tr>
-                        <td><a class = "btn btn-default" title = "Children" href = "{{ url_for("eventFrameTemplates.selectEventFrameTemplate",
+                        <td><a class = "btn btn-default" title = "Children" href = "{{ url_for("eventFrameTemplates.select",
                             className = child.__class__.__name__, id = child.id()) }}"><span class="glyphicon glyphicon-list"></span></a></td>
                         <td>{{ child.Name }}</td>
                         <td>{{ child.Description }}</td>
@@ -103,6 +103,38 @@ Event Frame Templates
         </tbody>
     </table>
 </div>
+<div>
+    {% if className == None %}
+        <h1>"{{ parent.Name }}" Event Frame Attribute Templates</h1>
+        <a class = "btn btn-default" title = "Add" href = "{{ url_for("eventFrameTemplates.addEventFrameAttributeTemplate", 
+            eventFrameTemplateId = parent.EventFrameTemplateId) }}" role = "button"><span class="glyphicon glyphicon-plus"></span></a>
+        <br><br>
+        <table id = "eventFrameAttributeTemplatesTable" class = "table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th></th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for eventFrameAttributeTemplate in eventFrameAttributeTemplates %}
+                <tr>
+                    <td>{{ eventFrameAttributeTemplate.Name }}</td>
+                    <td>{{ eventFrameAttributeTemplate.Description }}</td>
+                    <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("eventFrameTemplates.editEventFrameAttributeTemplate",
+                        eventFrameAttributeTemplateId = eventFrameAttributeTemplate.EventFrameAttributeTemplateId) }}">
+                        <span class="glyphicon glyphicon-edit"></span></a></td>
+                    <td><a class = "btn btn-default" title = "Delete" href = "{{ url_for("eventFrameTemplates.deleteEventFrameAttributeTemplate",
+                        eventFrameAttributeTemplateId = eventFrameAttributeTemplate.EventFrameAttributeTemplateId) }}">
+                        <span class="glyphicon glyphicon-trash"></span></a></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+</div>
 {% endblock %}
 
 {% block scripts %}
@@ -114,13 +146,33 @@ Event Frame Templates
         ({
             "order":
             [
-                [3, 'asc'],             // Name.
+                [3, 'asc'],             // Order.
                 [1, 'asc']              // Name.
             ],
             "columns":
             [
                 { "orderable": false }, // Children button.
                 null,
+                null,
+                null,
+                { "orderable": false }, // Edit button.
+                { "orderable": false }  // Delete button.
+            ],
+            "stateSave": true,
+            "stateDuration": 0,
+            "pageLength": 25
+        });
+    </script>
+
+    <script>
+        $('#eventFrameAttributeTemplatesTable').DataTable
+        ({
+            "order":
+            [
+                [0, 'asc']              // Name.
+            ],
+            "columns":
+            [
                 null,
                 null,
                 { "orderable": false }, // Edit button.
