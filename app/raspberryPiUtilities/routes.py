@@ -1,7 +1,7 @@
 import os
 import subprocess
 from datetime import datetime
-from flask import current_app, flash, Markup, redirect, send_file, url_for
+from flask import current_app, flash, Markup, redirect, render_template, send_file, url_for
 from flask_login import login_required
 from . import raspberryPiUtilities
 from .. decorators import adminRequired
@@ -16,6 +16,18 @@ def backupDatabase():
 	p.wait()
 	return send_file(os.path.join("..", current_app.config["EXPORT_FOLDER"], current_app.config["EXPORT_DATABASE_FILENAME"]), as_attachment = True,
 		attachment_filename = attachmentFilename)
+
+@raspberryPiUtilities.route("/info", methods = ["GET"])
+@login_required
+@adminRequired
+def info():
+	freeCommand = "free -h"
+	freeOutput = subprocess.check_output(freeCommand, shell = True).decode("utf-8")
+	ipCommand = "ip a"
+	ipOutput = subprocess.check_output(ipCommand, shell = True).decode("utf-8")
+	uptimeCommand = "uptime -p"
+	uptimeOutput = subprocess.check_output(uptimeCommand, shell = True).decode("utf-8")
+	return render_template("raspberryPiUtilities/info.html", freeOutput = freeOutput, ipOutput = ipOutput, uptimeOutput = uptimeOutput)
 
 @raspberryPiUtilities.route("/reboot", methods = ["GET"])
 @login_required
