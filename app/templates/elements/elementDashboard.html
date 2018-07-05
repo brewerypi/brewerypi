@@ -125,28 +125,24 @@
                         <td id = "tdLastValue{{ elementAttribute.ElementAttributeId }}"></td>
                         <td></td>
                     {% endif %}
-                    {% if elementAttribute.Tag.LookupId %}
-                        <td>
-                            <div class = "form-group" id = "divNewValue{{ elementAttribute.ElementAttributeId }}">
-                                <select class = "form-control" id = "selectNewValue{{ elementAttribute.ElementAttributeId }}">
-                                    <option value = "-1"></option>
-                                    {% for lookupValue in elementAttribute.Tag.Lookup.LookupValues %}
-                                        {% if lookupValue.Selectable %}
-                                            <option value = "{{ lookupValue.Value }}">{{ lookupValue.Name}}</option>
-                                        {% endif %}
-                                    {% endfor %}
-                                </select>
-                                <p class = "help-block" id = "pNewValue{{ elementAttribute.ElementAttributeId }}"></p>
-                            </div>
-                        </td>
-                    {% else %}
-                        <td>
-                            <div class = "form-group" id = "divNewValue{{ elementAttribute.ElementAttributeId }}">
-                                <input class = "form-control" id = "inputNewValue{{ elementAttribute.ElementAttributeId }}" value = "">
-                                <p class = "help-block" id = "pNewValue{{ elementAttribute.ElementAttributeId }}"></p>
-                            </div>
-                        </td>
-                    {% endif %}
+                    <td>
+                        <div class = "form-group" id = "divNewValue{{ elementAttribute.ElementAttributeId }}">
+                        {% if elementAttribute.Tag.LookupId %}
+                            <select class = "form-control" id = "selectNewValue{{ elementAttribute.ElementAttributeId }}">
+                                <option value = "-1"></option>
+                                {% for lookupValue in elementAttribute.Tag.Lookup.LookupValues %}
+                                    {% if lookupValue.Selectable %}
+                                        <option value = "{{ lookupValue.Value }}">{{ lookupValue.Name}}</option>
+                                    {% endif %}
+                                {% endfor %}
+                            </select>
+                            <p class = "help-block" id = "pNewValue{{ elementAttribute.ElementAttributeId }}"></p>
+                        {% else %}
+                            <input class = "form-control" id = "inputNewValue{{ elementAttribute.ElementAttributeId }}" value = "">
+                            <p class = "help-block" id = "pNewValue{{ elementAttribute.ElementAttributeId }}"></p>
+                        {% endif %}
+                        </div>
+                    </td>
                     <td>
                         <div class = "form-group" id = "divNewTimestamp{{ elementAttribute.ElementAttributeId }}">
                             <input class = "form-control" id = "inputNewTimestamp{{ elementAttribute.ElementAttributeId }}" value = "">
@@ -184,10 +180,10 @@
     <script type = "text/javascript" src = {{ url_for("static", filename = "js/moment.min.js") }}></script>
     <script>
         $(document).ready(function() {
-            $('#eventFramesTable').DataTable({
+            $("#eventFramesTable").DataTable({
                 "order":
                 [
-                    [1, 'asc']              // Event frame template name.
+                    [1, "asc"]              // Event frame template name.
                 ],
                 "columns":
                 [
@@ -205,33 +201,64 @@
                 "pageLength": 25
             })
 
-            var attributesTable = $('#attributesTable').DataTable({
-                fixedHeader: {
-                    header: true,
-                    footer: false
-                },
-                "order":
-                [
-                    [1, 'asc']              // Attribute.
-                ],
-                "columns":
-                [
-                    { "orderable": false }, // Attribute values button.
-                    null,
-                    null,
-                    null,
-                    { "orderable": false }, // Unit.
-                    { "orderable": false }, // New value.
-                    { "orderable": false }, // New timestamp.
-                    { "orderable": false }, // Save all button.
-                    { "orderable": false }, // List attribute value notes button.
-                    { "orderable": false }, // Edit attribute value button.
-                    { "orderable": false }  // Delete attribute value button.
-                ],
-                "stateSave": true,
-                "stateDuration": 0,
-                "pageLength": 25
-            })
+            // Update the focus and tabindex upon an order event.
+            var orderEvent = function(type) {
+                var tabIndex = 1
+                $("[id^=divNewValue]").each(function() {
+                    var id = $(this).attr("id").split("divNewValue")[1]
+
+                    if ($("#inputNewValue" + id).length)
+                    {
+                        $("#inputNewValue" + id).attr("tabindex", tabIndex)
+                        if (tabIndex == 1)
+                        {
+                            $("#inputNewValue" + id).focus()
+                        }
+                    }
+                    else
+                    {
+                        $("#selectNewValue" + id).attr("tabindex", tabIndex)
+                        if (tabIndex == 1)
+                        {
+                            $("#selectNewValue" + id).focus()
+                        }
+                    }
+                    tabIndex = tabIndex + 1
+                })
+                $("#buttonAttributesSaveAll").attr("tabindex", tabIndex)
+            }
+
+            var attributesTable = $("#attributesTable")
+                .on("order.dt", function() {
+                    orderEvent()
+                })
+                .DataTable({
+                    fixedHeader: {
+                        header: true,
+                        footer: false
+                    },
+                    "order":
+                    [
+                        [1, "asc"]              // Attribute.
+                    ],
+                    "columns":
+                    [
+                        { "orderable": false }, // Attribute values button.
+                        null,
+                        null,
+                        null,
+                        { "orderable": false }, // Unit.
+                        { "orderable": false }, // New value.
+                        { "orderable": false }, // New timestamp.
+                        { "orderable": false }, // Save all button.
+                        { "orderable": false }, // List attribute value notes button.
+                        { "orderable": false }, // Edit attribute value button.
+                        { "orderable": false }  // Delete attribute value button.
+                    ],
+                    "stateSave": true,
+                    "stateDuration": 0,
+                    "pageLength": 25
+                })
 
             // Update the timestamp for input new values appropriately.
             $("[id^=inputNewValue]").blur(function() {
@@ -263,6 +290,13 @@
                 }
             })
 
+            // Enter key call save all.
+            $(document).keypress(function(event) {
+                if (event.which == 13)
+                {
+                    $("#buttonAttributesSaveAll").click()
+                }
+            })
 
             $("#buttonAttributesSaveAll").click(function() {
                 var error = false
