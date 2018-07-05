@@ -53,4 +53,51 @@ Event Frame Dashboard
 
 {% block scripts %}
     {{ super() }}
+    <!-- <link rel = "stylesheet" type = "text/css" href = {{ url_for("static", filename = "css/datatables.min.css") }}/> 
+    <script type = "text/javascript" src = {{ url_for("static", filename = "js/datatables.min.js") }}></script>
+    <script>
+        $('#eventFramesTable').DataTable
+        ({
+            "order":
+            [
+                [1, 'asc']              // Event frame template name.
+            ],
+            "columns":
+            [
+                { "orderable": false }, // Event frame values button.
+                null,
+                null,
+                null,
+                { "orderable": false }, // Stop event frame button.
+                { "orderable": false }, // Add event frame button.
+                { "orderable": false }, // Edit event frame button.
+                { "orderable": false }  // Delete event frame button.
+            ],
+            "stateSave": true,
+            "stateDuration": 0,
+            "pageLength": 25
+        });
+        $('#attributesTable').DataTable
+        ({
+            "order":
+            [
+                [1, 'asc']              // Attribute.
+            ],
+            "columns":
+            [
+                { "orderable": false }, // Attribute values button.
+                null,
+                null,
+                null,
+                null,
+                { "orderable": false }, // Add attribute value button.
+                { "orderable": false }, // List attribute value notes button.
+                { "orderable": false }, // Edit attribute value button.
+                { "orderable": false }  // Delete attribute value button.
+            ],
+            "stateSave": true,
+            "stateDuration": 0,
+            "pageLength": 25
+        });
+    </script> -->
 {% endblock %}
