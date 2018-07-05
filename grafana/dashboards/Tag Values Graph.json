@@ -47,7 +47,7 @@
         "iconColor": "rgb(255, 255, 0)",
         "limit": 100,
         "name": "Notes",
-        "rawQuery": "SELECT UNIX_TIMESTAMP(TagValue.Timestamp) AS time_sec,\n\tGROUP_CONCAT(DATE_FORMAT(Note.Timestamp, '%m/%d/%y %H:%i'), ' - ', Note.Note ORDER BY Note.Timestamp SEPARATOR '<br>') AS text,\n    Tag.Name AS tags\nFROM Note\n\tINNER JOIN TagValueNote ON Note.NoteId = TagValueNote.NoteId\n    INNER JOIN TagValue ON TagValueNote.TagValueId = TagValue.TagValueId\n    INNER JOIN Tag ON TagValue.TagId = Tag.TagId\nWHERE TagValue.TagId IN ($tags) AND\n\t$__timeFilter(TagValue.Timestamp)\nGROUP BY TagValue.TagValueId",
+        "rawQuery": "SELECT UNIX_TIMESTAMP(TagValue.Timestamp) AS time_sec,\n\tGROUP_CONCAT(DATE_FORMAT(Note.Timestamp, '%m/%d/%y %H:%i'), ' - ', Note.Note ORDER BY Note.Timestamp SEPARATOR '<br>') AS text,\n\tTag.Name AS tags\nFROM Note\n\tINNER JOIN TagValueNote ON Note.NoteId = TagValueNote.NoteId\n\tINNER JOIN TagValue ON TagValueNote.TagValueId = TagValue.TagValueId\n\tINNER JOIN Tag ON TagValue.TagId = Tag.TagId\nWHERE TagValue.TagId IN ($tags) AND\n\t$__timeFilter(TagValue.Timestamp)\nGROUP BY TagValue.TagValueId\n",
         "showIn": 0,
         "tags": [],
         "type": "tags"
@@ -59,7 +59,7 @@
         "iconColor": "rgb(255, 255, 255)",
         "limit": 100,
         "name": "Lookups",
-        "rawQuery": "SELECT UNIX_TIMESTAMP(TagValue.Timestamp) AS time_sec, LookupValue.Name AS text, Lookup.Name AS tags\nFROM TagValue\n\tINNER JOIN Tag ON TagValue.TagId = Tag.TagId\n    INNER JOIN Lookup ON Tag.LookupId = Lookup.LookupId\n    INNER JOIN LookupValue ON Lookup.LookupId = LookupValue.LookupId AND\n\t\tTagValue.Value = LookupValue.Value\nWHERE TagValue.TagId IN ($tags) AND\n\tLookup.LookupId IN ($lookups) AND\n\t$__timeFilter(TagValue.Timestamp)",
+        "rawQuery": "SELECT UNIX_TIMESTAMP(TagValue.Timestamp) AS time_sec,\n\t'' AS text,\n\tCONCAT(Tag.Name, ',', LookupValue.Name) AS tags\nFROM TagValue\n\tINNER JOIN Tag ON TagValue.TagId = Tag.TagId\n\tINNER JOIN Lookup ON Tag.LookupId = Lookup.LookupId\n\tINNER JOIN LookupValue ON Lookup.LookupId = LookupValue.LookupId AND\n\t\tTagValue.Value = LookupValue.Value\nWHERE TagValue.TagId IN ($tags) AND\n\tLookup.LookupId IN ($lookups) AND\n\t$__timeFilter(TagValue.Timestamp)\n",
         "showIn": 0,
         "tags": [],
         "type": "tags"
@@ -70,7 +70,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": null,
-  "iteration": 1530804475568,
+  "iteration": 1530826214411,
   "links": [],
   "panels": [
     {
@@ -115,7 +115,7 @@
           "alias": "",
           "format": "time_series",
           "hide": false,
-          "rawSql": "SELECT UNIX_TIMESTAMP(TagValue.Timestamp) AS time_sec,\r\n  TagValue.Value as value,\r\n  Tag.Name as metric\r\nFROM Tag\r\n\tINNER JOIN TagValue ON Tag.TagId = TagValue.TagId\r\nWHERE Tag.TagId IN ($tags) AND $__timeFilter(TagValue.Timestamp)",
+          "rawSql": "SELECT UNIX_TIMESTAMP(TagValue.Timestamp) AS time_sec,\n\tTagValue.Value as value,\n\tTag.Name as metric\nFROM Tag\n\tINNER JOIN TagValue ON Tag.TagId = TagValue.TagId\nWHERE Tag.TagId IN ($tags) AND $__timeFilter(TagValue.Timestamp)\n",
           "refId": "A"
         }
       ],

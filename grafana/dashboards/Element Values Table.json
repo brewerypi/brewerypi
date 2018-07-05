@@ -46,7 +46,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": null,
-  "iteration": 1530804432531,
+  "iteration": 1530826169076,
   "links": [],
   "panels": [
     {
@@ -96,7 +96,7 @@
           "alias": "",
           "format": "table",
           "hide": false,
-          "rawSql": "SELECT AttributeTemplate.Name AS Attribute,\n\tDATE_FORMAT(TagValue.Timestamp, \"%c/%e/%y %r\") AS Timestamp,\n\tROUND(TagValue.Value, 2) AS Value\nFROM ElementAttribute\n\tINNER JOIN Element ON ElementAttribute.ElementId = Element.ElementId\n\tINNER JOIN AttributeTemplate ON ElementAttribute.AttributeTemplateId = AttributeTemplate.AttributeTemplateId\n\tINNER JOIN Tag ON ElementAttribute.TagId = Tag.TagId\n    INNER JOIN TagValue ON Tag.TagId = TagValue.TagId\nWHERE Element.ElementId = $element AND Tag.LookupId IS NULL AND $__timeFilter(TagValue.Timestamp)\nUNION\nSELECT AttributeTemplate.Name AS Attribute,\n\tDATE_FORMAT(TagValue.Timestamp, \"%c/%e/%y %r\") AS Timestamp,\n\tLookupValue.Name AS Value\nFROM ElementAttribute\n\tINNER JOIN Element ON ElementAttribute.ElementId = Element.ElementId\n\tINNER JOIN AttributeTemplate ON ElementAttribute.AttributeTemplateId = AttributeTemplate.AttributeTemplateId\n\tINNER JOIN Tag ON ElementAttribute.TagId = Tag.TagId\n    INNER JOIN Lookup ON Tag.LookupId = Lookup.LookupId\n    INNER JOIN LookupValue ON Lookup.LookupId = LookupValue.LookupId\n    INNER JOIN TagValue ON Tag.TagId = TagValue.TagId AND LookupValue.Value = TagValue.Value\nWHERE Element.ElementId = $element AND Tag.LookupId IS NOT NULL AND $__timeFilter(TagValue.Timestamp)",
+          "rawSql": "SELECT AttributeTemplate.Name AS Attribute,\n\tDATE_FORMAT(TagValue.Timestamp, \"%c/%e/%y %r\") AS Timestamp,\n\tROUND(TagValue.Value, 2) AS Value\nFROM ElementAttribute\n\tINNER JOIN Element ON ElementAttribute.ElementId = Element.ElementId\n\tINNER JOIN AttributeTemplate ON ElementAttribute.AttributeTemplateId = AttributeTemplate.AttributeTemplateId\n\tINNER JOIN Tag ON ElementAttribute.TagId = Tag.TagId\n\tINNER JOIN TagValue ON Tag.TagId = TagValue.TagId\nWHERE Element.ElementId = $element AND Tag.LookupId IS NULL AND $__timeFilter(TagValue.Timestamp)\nUNION\nSELECT AttributeTemplate.Name AS Attribute,\n\tDATE_FORMAT(TagValue.Timestamp, \"%c/%e/%y %r\") AS Timestamp,\n\tLookupValue.Name AS Value\nFROM ElementAttribute\n\tINNER JOIN Element ON ElementAttribute.ElementId = Element.ElementId\n\tINNER JOIN AttributeTemplate ON ElementAttribute.AttributeTemplateId = AttributeTemplate.AttributeTemplateId\n\tINNER JOIN Tag ON ElementAttribute.TagId = Tag.TagId\n\tINNER JOIN Lookup ON Tag.LookupId = Lookup.LookupId\n\tINNER JOIN LookupValue ON Lookup.LookupId = LookupValue.LookupId\n\tINNER JOIN TagValue ON Tag.TagId = TagValue.TagId AND LookupValue.Value = TagValue.Value\nWHERE Element.ElementId = $element AND Tag.LookupId IS NOT NULL AND $__timeFilter(TagValue.Timestamp)\n",
           "refId": "A"
         }
       ],
