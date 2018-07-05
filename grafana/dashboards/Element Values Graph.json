@@ -49,7 +49,7 @@
         "iconColor": "rgb(0, 255, 0)",
         "limit": 100,
         "name": "Start of Event Frames",
-        "rawQuery": "SELECT UNIX_TIMESTAMP(EventFrame.StartTimestamp) AS time_sec,\n\tCONCAT(Element.Name, ' - ', DATE_FORMAT(EventFrame.StartTimestamp, '%m/%d/%y %H:%i')) AS text,\n\tCONCAT(Element.Name, ',', EventFrameTemplate.Name, ',', 'Start') AS tags\nFROM EventFrame\n\tINNER JOIN Element ON EventFrame.ElementId = Element.ElementId\n\tINNER JOIN EventFrameTemplate ON EventFrame.EventFrameTemplateId = EventFrameTemplate.EventFrameTemplateId\nWHERE $__timeFilter(EventFrame.StartTimestamp) AND (Element.ElementId IN ($elements))\nORDER BY EventFrame.StartTimestamp ASC",
+        "rawQuery": "SELECT UNIX_TIMESTAMP(EventFrame.StartTimestamp) AS time_sec,\n\tCONCAT(Element.Name, ' - ', DATE_FORMAT(EventFrame.StartTimestamp, '%m/%d/%y %H:%i')) AS text,\n\tCONCAT(Element.Name, ',', EventFrameTemplate.Name, ',', fxGetEventFrameFriendlyName(EventFrame.EventFrameId), ',', 'Start') AS tags\nFROM EventFrame\n\tINNER JOIN Element ON EventFrame.ElementId = Element.ElementId\n\tINNER JOIN EventFrameTemplate ON EventFrame.EventFrameTemplateId = EventFrameTemplate.EventFrameTemplateId\nWHERE $__timeFilter(EventFrame.StartTimestamp) AND (Element.ElementId IN ($elements))\nORDER BY EventFrame.StartTimestamp ASC",
         "showIn": 0,
         "tags": [],
         "type": "tags"
@@ -61,7 +61,7 @@
         "iconColor": "rgb(255, 0, 0)",
         "limit": 100,
         "name": "End of Event Frames",
-        "rawQuery": "SELECT UNIX_TIMESTAMP(EventFrame.EndTimestamp) AS time_sec,\n\tCONCAT(Element.Name, ' - ', DATE_FORMAT(EventFrame.EndTimestamp, '%m/%d/%y %H:%i')) AS text,\n\tCONCAT(Element.Name, ',', EventFrameTemplate.Name, ',', 'End') AS tags\nFROM EventFrame\n\tINNER JOIN Element ON EventFrame.ElementId = Element.ElementId\n\tINNER JOIN EventFrameTemplate ON EventFrame.EventFrameTemplateId = EventFrameTemplate.EventFrameTemplateId\nWHERE $__timeFilter(EventFrame.StartTimestamp) AND (Element.ElementId IN ($elements)) AND EventFrame.EndTimestamp IS NOT NULL\nORDER BY EventFrame.StartTimestamp ASC",
+        "rawQuery": "SELECT UNIX_TIMESTAMP(EventFrame.EndTimestamp) AS time_sec,\n\tCONCAT(Element.Name, ' - ', DATE_FORMAT(EventFrame.EndTimestamp, '%m/%d/%y %H:%i')) AS text,\n\tCONCAT(Element.Name, ',', EventFrameTemplate.Name, ',', fxGetEventFrameFriendlyName(EventFrame.EventFrameId), ',', 'End') AS tags\nFROM EventFrame\n\tINNER JOIN Element ON EventFrame.ElementId = Element.ElementId\n\tINNER JOIN EventFrameTemplate ON EventFrame.EventFrameTemplateId = EventFrameTemplate.EventFrameTemplateId\nWHERE $__timeFilter(EventFrame.StartTimestamp) AND (Element.ElementId IN ($elements)) AND EventFrame.EndTimestamp IS NOT NULL\nORDER BY EventFrame.StartTimestamp ASC",
         "showIn": 0,
         "tags": [],
         "type": "tags"
@@ -96,7 +96,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": null,
-  "iteration": 1530545318417,
+  "iteration": 1530804417554,
   "links": [],
   "panels": [
     {
@@ -108,7 +108,7 @@
       "decimals": 1,
       "fill": 0,
       "gridPos": {
-        "h": 15,
+        "h": 12,
         "w": 24,
         "x": 0,
         "y": 0
@@ -315,7 +315,7 @@
     ]
   },
   "time": {
-    "from": "now-30d",
+    "from": "now-90d",
     "to": "now"
   },
   "timepicker": {

@@ -27,6 +27,12 @@
       "id": "mysql",
       "name": "MySQL",
       "version": "5.0.0"
+    },
+    {
+      "type": "panel",
+      "id": "table",
+      "name": "Table",
+      "version": "5.0.0"
     }
   ],
   "annotations": {
@@ -63,6 +69,18 @@
         "showIn": 0,
         "tags": [],
         "type": "tags"
+      },
+      {
+        "datasource": "${DS_BREWERY_PI}",
+        "enable": true,
+        "hide": false,
+        "iconColor": "rgb(255, 255, 0)",
+        "limit": 100,
+        "name": "Notes",
+        "rawQuery": "SELECT UNIX_TIMESTAMP(DATE_SUB(CURRENT_TIMESTAMP(), INTERVAL 30 DAY)) + UNIX_TIMESTAMP(TagValue.Timestamp) - UNIX_TIMESTAMP(EventFrame.StartTimestamp) AS time_sec,\n    GROUP_CONCAT(DATE_FORMAT(Note.Timestamp, '%m/%d/%y %H:%i'), ' - ', Note.Note ORDER BY Note.Timestamp SEPARATOR '<br>') AS text,\n    CONCAT(Element.Name, ',', AttributeTemplate.Name) AS tags\nFROM Note\n    INNER JOIN TagValueNote ON Note.NoteId = TagValueNote.NoteId\n    INNER JOIN TagValue ON TagValueNote.TagValueId = TagValue.TagValueId\n    INNER JOIN Tag ON TagValue.TagId = Tag.TagId\n    INNER JOIN ElementAttribute ON Tag.TagId = ElementAttribute.TagId\n    INNER JOIN AttributeTemplate ON ElementAttribute.AttributeTemplateId = AttributeTemplate.AttributeTemplateId\n    INNER JOIN Element ON ElementAttribute.ElementId = Element.ElementId\n    INNER JOIN EventFrame ON Element.ElementId = EventFrame.ElementId\nWHERE ElementAttribute.AttributeTemplateId IN ($attributeTemplates) AND\n    EventFrame.EventFrameId IN ($eventFrames) AND\n\tIF (EventFrame.EndTimestamp IS NULL, (TagValue.Timestamp >= EventFrame.StartTimestamp), (TagValue.Timestamp >= EventFrame.StartTimestamp) AND \n\t(TagValue.Timestamp <= EventFrame.EndTimestamp))\nGROUP BY TagValue.TagValueId",
+        "showIn": 0,
+        "tags": [],
+        "type": "tags"
       }
     ]
   },
@@ -70,7 +88,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": null,
-  "iteration": 1530545371608,
+  "iteration": 1530804461419,
   "links": [],
   "panels": [
     {
@@ -82,7 +100,7 @@
       "decimals": 1,
       "fill": 0,
       "gridPos": {
-        "h": 15,
+        "h": 12,
         "w": 24,
         "x": 0,
         "y": 0
@@ -118,7 +136,7 @@
           "alias": "",
           "format": "time_series",
           "hide": false,
-          "rawSql": "SELECT UNIX_TIMESTAMP(DATE_SUB(CURRENT_TIMESTAMP(), INTERVAL 30 DAY)) + UNIX_TIMESTAMP(TagValue.Timestamp) - UNIX_TIMESTAMP(EventFrame.StartTimestamp) AS time_sec,\n\tTagValue.Value AS value,\n\tCONCAT(IF(EventFrame.Name IS NOT NULL AND EventFrame.Name <> '', EventFrame.Name, CONCAT(DATE_FORMAT(EventFrame.StartTimestamp, '%m/%d/%y %H:%i'), ' - ',IF(EventFrame.EndTimestamp IS NULL, '', DATE_FORMAT(EventFrame.EndTimestamp, '%m/%d/%y %H:%i')))), '_', AttributeTemplate.Name) AS metric \nFROM ElementAttribute\n\tINNER JOIN Element ON ElementAttribute.ElementId = Element.ElementId\n\tINNER JOIN EventFrame ON Element.ElementId = EventFrame.ElementId\n\tINNER JOIN AttributeTemplate ON ElementAttribute.AttributeTemplateId = AttributeTemplate.AttributeTemplateId\n\tINNER JOIN Tag ON ElementAttribute.TagId = Tag.TagId\n\tINNER JOIN TagValue ON Tag.TagId = TagValue.TagId\nWHERE (EventFrame.EventFrameId IN ($eventFrames)) AND \n\t(AttributeTemplate.AttributeTemplateId IN ($attributeTemplates)) AND\n\tIF (EventFrame.EndTimestamp IS NULL, (TagValue.Timestamp >= EventFrame.StartTimestamp), (TagValue.Timestamp >= EventFrame.StartTimestamp) AND \n\t(TagValue.Timestamp <= EventFrame.EndTimestamp))\n",
+          "rawSql": "SELECT UNIX_TIMESTAMP(DATE_SUB(CURRENT_TIMESTAMP(), INTERVAL 30 DAY)) + UNIX_TIMESTAMP(TagValue.Timestamp) - UNIX_TIMESTAMP(EventFrame.StartTimestamp) AS time_sec,\n\tTagValue.Value AS value,\n\tCONCAT(fxGetEventFrameFriendlyName(EventFrame.EventFrameId), '_', AttributeTemplate.Name) AS metric \nFROM ElementAttribute\n\tINNER JOIN Element ON ElementAttribute.ElementId = Element.ElementId\n\tINNER JOIN EventFrame ON Element.ElementId = EventFrame.ElementId\n\tINNER JOIN AttributeTemplate ON ElementAttribute.AttributeTemplateId = AttributeTemplate.AttributeTemplateId\n\tINNER JOIN Tag ON ElementAttribute.TagId = Tag.TagId\n\tINNER JOIN TagValue ON Tag.TagId = TagValue.TagId\nWHERE (EventFrame.EventFrameId IN ($eventFrames)) AND \n\t(AttributeTemplate.AttributeTemplateId IN ($attributeTemplates)) AND\n\tIF (EventFrame.EndTimestamp IS NULL, (TagValue.Timestamp >= EventFrame.StartTimestamp), (TagValue.Timestamp >= EventFrame.StartTimestamp) AND \n\t(TagValue.Timestamp <= EventFrame.EndTimestamp))\n",
           "refId": "A"
         }
       ],
@@ -161,6 +179,60 @@
         "align": false,
         "alignLevel": null
       }
+    },
+    {
+      "columns": [],
+      "datasource": "${DS_BREWERY_PI}",
+      "fontSize": "100%",
+      "gridPos": {
+        "h": 7,
+        "w": 24,
+        "x": 0,
+        "y": 11
+      },
+      "id": 3,
+      "links": [],
+      "pageSize": null,
+      "scroll": true,
+      "showHeader": true,
+      "sort": {
+        "col": 0,
+        "desc": true
+      },
+      "styles": [
+        {
+          "alias": "Timestamp",
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "pattern": "Timestamp",
+          "type": "date"
+        },
+        {
+          "alias": "",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "decimals": 2,
+          "pattern": "/.*/",
+          "thresholds": [],
+          "type": "number",
+          "unit": "short"
+        }
+      ],
+      "targets": [
+        {
+          "alias": "",
+          "format": "table",
+          "hide": false,
+          "rawSql": "SELECT fxGetEventFrameFriendlyName(EventFrameNote.EventFrameId) AS 'Event Frame',\n  Element.Name,\n  Note.Timestamp,\n  Note.Note\nFROM Note\n  INNER JOIN EventFrameNote ON Note.NoteId = EventFrameNote.NoteId\n  INNER JOIN EventFrame ON EventFrameNote.EventFrameId = EventFrame.EventFrameId\n  INNER JOIN Element ON EventFrame.ElementId = Element.ElementId\nWHERE EventFrameNote.EventFrameId IN ($eventFrames)\nORDER BY Note.Timestamp",
+          "refId": "A"
+        }
+      ],
+      "title": "Event Frame Notes",
+      "transform": "table",
+      "type": "table"
     }
   ],
   "refresh": false,

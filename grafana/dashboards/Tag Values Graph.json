@@ -70,7 +70,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": null,
-  "iteration": 1530545387462,
+  "iteration": 1530804475568,
   "links": [],
   "panels": [
     {
@@ -82,7 +82,7 @@
       "decimals": 1,
       "fill": 0,
       "gridPos": {
-        "h": 15,
+        "h": 12,
         "w": 24,
         "x": 0,
         "y": 0
