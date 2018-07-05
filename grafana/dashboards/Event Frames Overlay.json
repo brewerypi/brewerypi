@@ -1,8 +1,8 @@
 {
   "__inputs": [
     {
-      "name": "DS_BREWERYPI",
-      "label": "BreweryPi",
+      "name": "DS_BREWERY_PI",
+      "label": "Brewery Pi",
       "description": "",
       "type": "datasource",
       "pluginId": "mysql",
@@ -14,7 +14,7 @@
       "type": "grafana",
       "id": "grafana",
       "name": "Grafana",
-      "version": "5.0.4"
+      "version": "5.1.3"
     },
     {
       "type": "panel",
@@ -41,7 +41,7 @@
         "type": "dashboard"
       },
       {
-        "datasource": "${DS_BREWERYPI}",
+        "datasource": "${DS_BREWERY_PI}",
         "enable": true,
         "hide": false,
         "iconColor": "rgba(255, 96, 96, 1)",
@@ -58,7 +58,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": null,
-  "iteration": 1524029995352,
+  "iteration": 1530301444625,
   "links": [],
   "panels": [
     {
@@ -66,7 +66,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "${DS_BREWERYPI}",
+      "datasource": "${DS_BREWERY_PI}",
       "decimals": 1,
       "fill": 0,
       "gridPos": {
@@ -144,7 +144,11 @@
           "min": null,
           "show": true
         }
-      ]
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
     }
   ],
   "refresh": false,
@@ -156,17 +160,17 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "${DS_BREWERYPI}",
+        "datasource": "${DS_BREWERY_PI}",
         "hide": 0,
         "includeAll": false,
         "label": "Enterprise:",
         "multi": false,
         "name": "enterprise",
         "options": [],
-        "query": "SELECT Enterprise.EnterpriseId AS __value, Enterprise.Name AS __text FROM Enterprise",
+        "query": "SELECT DISTINCT Enterprise.EnterpriseId AS __value, Enterprise.Name AS __text FROM Enterprise \tINNER JOIN Site ON Enterprise.EnterpriseId = Site.EnterpriseId \tINNER JOIN ElementTemplate ON Site.SiteId = ElementTemplate.SiteId \tINNER JOIN AttributeTemplate ON ElementTemplate.ElementTemplateId = AttributeTemplate.ElementTemplateId \tINNER JOIN EventFrameTemplate ON ElementTemplate.ElementTemplateId = EventFrameTemplate.ElementTemplateId \tINNER JOIN EventFrame ON EventFrameTemplate.EventFrameTemplateId = EventFrame.EventFrameTemplateId",
         "refresh": 1,
         "regex": "",
-        "sort": 1,
+        "sort": 5,
         "tagValuesQuery": "",
         "tags": [],
         "tagsQuery": "",
@@ -176,17 +180,17 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "${DS_BREWERYPI}",
+        "datasource": "${DS_BREWERY_PI}",
         "hide": 0,
         "includeAll": false,
         "label": "Site:",
         "multi": false,
         "name": "site",
         "options": [],
-        "query": "SELECT Site.SiteId AS __value, Site.Name AS __text FROM Site WHERE Site.EnterpriseId = $enterprise",
+        "query": "SELECT DISTINCT Site.SiteId AS __value, Site.Name AS __text FROM Site \tINNER JOIN ElementTemplate ON Site.SiteId = ElementTemplate.SiteId \tINNER JOIN AttributeTemplate ON ElementTemplate.ElementTemplateId = AttributeTemplate.ElementTemplateId \tINNER JOIN EventFrameTemplate ON ElementTemplate.ElementTemplateId = EventFrameTemplate.ElementTemplateId \tINNER JOIN EventFrame ON EventFrameTemplate.EventFrameTemplateId = EventFrame.EventFrameTemplateId WHERE Site.EnterpriseId = $enterprise",
         "refresh": 1,
         "regex": "",
-        "sort": 1,
+        "sort": 5,
         "tagValuesQuery": "",
         "tags": [],
         "tagsQuery": "",
@@ -196,17 +200,17 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "${DS_BREWERYPI}",
+        "datasource": "${DS_BREWERY_PI}",
         "hide": 0,
         "includeAll": false,
         "label": "Element Template:",
         "multi": false,
         "name": "elementTemplate",
         "options": [],
-        "query": "SELECT ElementTemplate.ElementTemplateId AS __value, ElementTemplate.Name AS __text FROM ElementTemplate WHERE ElementTemplate.SiteId = $site",
+        "query": "SELECT DISTINCT ElementTemplate.ElementTemplateId AS __value, ElementTemplate.Name AS __text FROM ElementTemplate \tINNER JOIN AttributeTemplate ON ElementTemplate.ElementTemplateId = AttributeTemplate.ElementTemplateId \tINNER JOIN EventFrameTemplate ON ElementTemplate.ElementTemplateId = EventFrameTemplate.ElementTemplateId \tINNER JOIN EventFrame ON EventFrameTemplate.EventFrameTemplateId = EventFrame.EventFrameTemplateId WHERE ElementTemplate.SiteId = $site",
         "refresh": 1,
         "regex": "",
-        "sort": 1,
+        "sort": 5,
         "tagValuesQuery": "",
         "tags": [],
         "tagsQuery": "",
@@ -216,17 +220,17 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "${DS_BREWERYPI}",
+        "datasource": "${DS_BREWERY_PI}",
         "hide": 0,
         "includeAll": false,
         "label": "Event Frame Template:",
         "multi": false,
         "name": "eventFrameTemplate",
         "options": [],
-        "query": "SELECT EventFrameTemplate.EventFrameTemplateId AS __value, EventFrameTemplate.Name AS __text FROM EventFrameTemplate WHERE EventFrameTemplate.ElementTemplateId = $elementTemplate",
+        "query": "SELECT DISTINCT EventFrameTemplate.EventFrameTemplateId AS __value, EventFrameTemplate.Name AS __text FROM EventFrameTemplate \tINNER JOIN EventFrame ON EventFrameTemplate.EventFrameTemplateId = EventFrame.EventFrameTemplateId WHERE EventFrameTemplate.ElementTemplateId = $elementTemplate",
         "refresh": 1,
         "regex": "",
-        "sort": 1,
+        "sort": 5,
         "tagValuesQuery": "",
         "tags": [],
         "tagsQuery": "",
@@ -236,7 +240,7 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "${DS_BREWERYPI}",
+        "datasource": "${DS_BREWERY_PI}",
         "hide": 0,
         "includeAll": false,
         "label": "Event Frames:",
@@ -256,7 +260,7 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "${DS_BREWERYPI}",
+        "datasource": "${DS_BREWERY_PI}",
         "hide": 0,
         "includeAll": true,
         "label": "Attributes:",
@@ -266,7 +270,7 @@
         "query": "SELECT AttributeTemplate.AttributeTemplateId AS __value, AttributeTemplate.Name AS __text FROM AttributeTemplate WHERE AttributeTemplate.ElementTemplateId = $elementTemplate",
         "refresh": 1,
         "regex": "",
-        "sort": 1,
+        "sort": 5,
         "tagValuesQuery": "",
         "tags": [],
         "tagsQuery": "",
@@ -305,7 +309,5 @@
     ]
   },
   "timezone": "",
-  "title": "Event Frames Overlay",
-  "uid": "x_wsAmZmz",
-  "version": 10
+  "title": "Event Frames Overlay"
 }

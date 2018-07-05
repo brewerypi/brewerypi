@@ -1,8 +1,8 @@
 {
   "__inputs": [
     {
-      "name": "DS_BREWERYPI",
-      "label": "BreweryPi",
+      "name": "DS_BREWERY_PI",
+      "label": "Brewery Pi",
       "description": "",
       "type": "datasource",
       "pluginId": "mysql",
@@ -14,7 +14,7 @@
       "type": "grafana",
       "id": "grafana",
       "name": "Grafana",
-      "version": "5.0.4"
+      "version": "5.1.3"
     },
     {
       "type": "panel",
@@ -43,7 +43,7 @@
         "type": "dashboard"
       },
       {
-        "datasource": "${DS_BREWERYPI}",
+        "datasource": "${DS_BREWERY_PI}",
         "enable": true,
         "hide": false,
         "iconColor": "#3f6833",
@@ -55,7 +55,7 @@
         "type": "tags"
       },
       {
-        "datasource": "${DS_BREWERYPI}",
+        "datasource": "${DS_BREWERY_PI}",
         "enable": true,
         "hide": false,
         "iconColor": "rgba(255, 96, 96, 1)",
@@ -72,7 +72,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": null,
-  "iteration": 1524028256048,
+  "iteration": 1530301383632,
   "links": [],
   "panels": [
     {
@@ -80,7 +80,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "${DS_BREWERYPI}",
+      "datasource": "${DS_BREWERY_PI}",
       "decimals": 1,
       "fill": 0,
       "gridPos": {
@@ -155,7 +155,11 @@
           "min": null,
           "show": true
         }
-      ]
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
     }
   ],
   "refresh": false,
@@ -167,17 +171,17 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "${DS_BREWERYPI}",
+        "datasource": "${DS_BREWERY_PI}",
         "hide": 0,
         "includeAll": false,
         "label": "Enterprise:",
         "multi": false,
         "name": "enterprise",
         "options": [],
-        "query": "SELECT Enterprise.EnterpriseId AS __value, Enterprise.Name AS __text FROM Enterprise",
+        "query": "SELECT DISTINCT Enterprise.EnterpriseId AS __value, Enterprise.Name AS __text FROM Enterprise \tINNER JOIN Site ON Enterprise.EnterpriseId = Site.EnterpriseId \tINNER JOIN ElementTemplate ON Site.SiteId = ElementTemplate.SiteId \tINNER JOIN AttributeTemplate ON ElementTemplate.ElementTemplateId = AttributeTemplate.ElementTemplateId \tINNER JOIN Element ON ElementTemplate.ElementTemplateId = Element.ElementTemplateId",
         "refresh": 1,
         "regex": "",
-        "sort": 1,
+        "sort": 5,
         "tagValuesQuery": "",
         "tags": [],
         "tagsQuery": "",
@@ -187,17 +191,17 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "${DS_BREWERYPI}",
+        "datasource": "${DS_BREWERY_PI}",
         "hide": 0,
         "includeAll": false,
         "label": "Site:",
         "multi": false,
         "name": "site",
         "options": [],
-        "query": "SELECT Site.SiteId AS __value, Site.Name AS __text FROM Site WHERE Site.EnterpriseId = $enterprise",
+        "query": "SELECT DISTINCT Site.SiteId AS __value, Site.Name AS __text FROM Site \tINNER JOIN ElementTemplate ON Site.SiteId = ElementTemplate.SiteId \tINNER JOIN AttributeTemplate ON ElementTemplate.ElementTemplateId = AttributeTemplate.ElementTemplateId \tINNER JOIN Element ON ElementTemplate.ElementTemplateId = Element.ElementTemplateId WHERE Site.EnterpriseId = $enterprise",
         "refresh": 1,
         "regex": "",
-        "sort": 1,
+        "sort": 5,
         "tagValuesQuery": "",
         "tags": [],
         "tagsQuery": "",
@@ -207,17 +211,17 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "${DS_BREWERYPI}",
+        "datasource": "${DS_BREWERY_PI}",
         "hide": 0,
         "includeAll": true,
         "label": "Element Templates:",
         "multi": true,
         "name": "elementTemplates",
         "options": [],
-        "query": "SELECT ElementTemplate.ElementTemplateId AS __value, ElementTemplate.Name AS __text FROM ElementTemplate WHERE ElementTemplate.SiteId = $site",
+        "query": "SELECT DISTINCT ElementTemplate.ElementTemplateId AS __value, ElementTemplate.Name AS __text FROM ElementTemplate \tINNER JOIN AttributeTemplate ON ElementTemplate.ElementTemplateId = AttributeTemplate.ElementTemplateId \tINNER JOIN Element ON ElementTemplate.ElementTemplateId = Element.ElementTemplateId WHERE ElementTemplate.SiteId = $site",
         "refresh": 1,
         "regex": "",
-        "sort": 1,
+        "sort": 5,
         "tagValuesQuery": "",
         "tags": [],
         "tagsQuery": "",
@@ -227,14 +231,14 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "${DS_BREWERYPI}",
+        "datasource": "${DS_BREWERY_PI}",
         "hide": 0,
         "includeAll": true,
         "label": "Elements:",
         "multi": true,
         "name": "elements",
         "options": [],
-        "query": "SELECT Element.ElementId AS __value, Element.Name AS __text FROM Element WHERE Element.ElementTemplateId IN ($elementTemplates)",
+        "query": "SELECT DISTINCT ElementId AS __value, CONCAT(Element.Name, ' (', ElementTemplate.Name, ')') AS __text FROM Element \tINNER JOIN ElementTemplate ON Element.ElementTemplateId = ElementTemplate.ElementTemplateId WHERE Element.ElementTemplateId IN ($elementTemplates) ORDER BY ElementTemplate.Name, Element.Name",
         "refresh": 1,
         "regex": "",
         "sort": 0,
@@ -247,7 +251,7 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "${DS_BREWERYPI}",
+        "datasource": "${DS_BREWERY_PI}",
         "hide": 0,
         "includeAll": true,
         "label": "Attributes:",
@@ -257,7 +261,7 @@
         "query": "SELECT AttributeTemplate.AttributeTemplateId AS __value, AttributeTemplate.Name AS __text FROM AttributeTemplate INNER JOIN ElementTemplate ON AttributeTemplate.ElementTemplateId = ElementTemplate.ElementTemplateId INNER JOIN Element ON ElementTemplate.ElementTemplateId = Element.ElementTemplateId WHERE (Element.ElementId IN ($elements))",
         "refresh": 1,
         "regex": "",
-        "sort": 0,
+        "sort": 5,
         "tagValuesQuery": "",
         "tags": [],
         "tagsQuery": "",
@@ -296,7 +300,5 @@
     ]
   },
   "timezone": "",
-  "title": "Element Values Graph",
-  "uid": "SyoLqqmik",
-  "version": 3
+  "title": "Element Values Graph"
 }
