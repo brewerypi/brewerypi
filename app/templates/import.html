@@ -7,11 +7,14 @@ Import {{ importing }}
 {% endblock %}
 
 {% block page_content %}
+<div class = "page-header">
+    <h1>Import <small>{{ importing }}</small></h1>
+</div>
 <div>
     {{ wtf.quick_form(form) }}
 </div>
 <br/>
-
+<div>
     {% if successes %}
     <div class = "alert alert-success" role = "alert">
         {% for success in successes %}
@@ -35,5 +38,15 @@ Import {{ importing }}
         {% endfor %}
     </div>
     {% endif %}
+</div>
+{% endblock %}
 
+{% block scripts %}
+    {{ super() }}
+    <script>
+    $("#submit").click(function() {
+        alert("Performing an import can take several minutes dependent on the size of the data being imported. Do not leave this page until a success or " +
+            "failure message is returned.")
+    })
+    </script>
 {% endblock %}

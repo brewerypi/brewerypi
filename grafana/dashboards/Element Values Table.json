@@ -1,8 +1,8 @@
 {
   "__inputs": [
     {
-      "name": "DS_BREWERYPI",
-      "label": "BreweryPi",
+      "name": "DS_BREWERY_PI",
+      "label": "Brewery Pi",
       "description": "",
       "type": "datasource",
       "pluginId": "mysql",
@@ -14,19 +14,19 @@
       "type": "grafana",
       "id": "grafana",
       "name": "Grafana",
-      "version": "4.6.3"
+      "version": "5.1.3"
     },
     {
       "type": "datasource",
       "id": "mysql",
       "name": "MySQL",
-      "version": "1.0.0"
+      "version": "5.0.0"
     },
     {
       "type": "panel",
       "id": "table",
       "name": "Table",
-      "version": ""
+      "version": "5.0.0"
     }
   ],
   "annotations": {
@@ -45,76 +45,69 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "hideControls": false,
   "id": null,
+  "iteration": 1530826169076,
   "links": [],
-  "refresh": false,
-  "rows": [
+  "panels": [
     {
-      "collapse": false,
-      "height": "250px",
-      "panels": [
+      "columns": [],
+      "datasource": "${DS_BREWERY_PI}",
+      "fontSize": "100%",
+      "gridPos": {
+        "h": 12,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "height": "600",
+      "id": 1,
+      "links": [],
+      "pageSize": null,
+      "scroll": true,
+      "showHeader": true,
+      "sort": {
+        "col": 1,
+        "desc": true
+      },
+      "styles": [
         {
-          "columns": [],
-          "datasource": "${DS_BREWERYPI}",
-          "fontSize": "100%",
-          "height": "600",
-          "id": 1,
-          "links": [],
-          "pageSize": null,
-          "scroll": true,
-          "showHeader": true,
-          "sort": {
-            "col": 1,
-            "desc": true
-          },
-          "span": 12,
-          "styles": [
-            {
-              "alias": "Time",
-              "dateFormat": "YYYY-MM-DD HH:mm:ss",
-              "pattern": "Time",
-              "type": "date"
-            },
-            {
-              "alias": "",
-              "colorMode": null,
-              "colors": [
-                "rgba(245, 54, 54, 0.9)",
-                "rgba(237, 129, 40, 0.89)",
-                "rgba(50, 172, 45, 0.97)"
-              ],
-              "decimals": 2,
-              "pattern": "/.*/",
-              "thresholds": [],
-              "type": "number",
-              "unit": "short"
-            }
+          "alias": "Time",
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "pattern": "Time",
+          "type": "date"
+        },
+        {
+          "alias": "",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
           ],
-          "targets": [
-            {
-              "alias": "",
-              "format": "table",
-              "hide": false,
-              "rawSql": "SELECT AttributeTemplate.Name AS Attribute,\n\tDATE_FORMAT(TagValue.Timestamp, \"%c/%e/%y %r\") AS Timestamp,\n\tROUND(TagValue.Value, 2) AS Value\nFROM ElementAttribute\n\tINNER JOIN Element ON ElementAttribute.ElementId = Element.ElementId\n\tINNER JOIN AttributeTemplate ON ElementAttribute.AttributeTemplateId = AttributeTemplate.AttributeTemplateId\n\tINNER JOIN Tag ON ElementAttribute.TagId = Tag.TagId\n    INNER JOIN TagValue ON Tag.TagId = TagValue.TagId\nWHERE Element.ElementId = $element AND Tag.LookupId IS NULL AND $__timeFilter(TagValue.Timestamp)\nUNION\nSELECT AttributeTemplate.Name AS Attribute,\n\tDATE_FORMAT(TagValue.Timestamp, \"%c/%e/%y %r\") AS Timestamp,\n\tLookupValue.Name AS Value\nFROM ElementAttribute\n\tINNER JOIN Element ON ElementAttribute.ElementId = Element.ElementId\n\tINNER JOIN AttributeTemplate ON ElementAttribute.AttributeTemplateId = AttributeTemplate.AttributeTemplateId\n\tINNER JOIN Tag ON ElementAttribute.TagId = Tag.TagId\n    INNER JOIN Lookup ON Tag.LookupId = Lookup.LookupId\n    INNER JOIN LookupValue ON Lookup.LookupId = LookupValue.LookupId\n    INNER JOIN TagValue ON Tag.TagId = TagValue.TagId AND LookupValue.Value = TagValue.Value\nWHERE Element.ElementId = $element AND Tag.LookupId IS NOT NULL AND $__timeFilter(TagValue.Timestamp)",
-              "refId": "A"
-            }
-          ],
-          "timeFrom": null,
-          "title": "Element Values",
-          "transform": "table",
-          "type": "table"
+          "decimals": 2,
+          "pattern": "/.*/",
+          "thresholds": [],
+          "type": "number",
+          "unit": "short"
         }
       ],
-      "repeat": null,
-      "repeatIteration": null,
-      "repeatRowId": null,
-      "showTitle": false,
-      "title": "Dashboard Row",
-      "titleSize": "h6"
+      "targets": [
+        {
+          "alias": "",
+          "format": "table",
+          "hide": false,
+          "rawSql": "SELECT AttributeTemplate.Name AS Attribute,\n\tDATE_FORMAT(TagValue.Timestamp, \"%c/%e/%y %r\") AS Timestamp,\n\tROUND(TagValue.Value, 2) AS Value\nFROM ElementAttribute\n\tINNER JOIN Element ON ElementAttribute.ElementId = Element.ElementId\n\tINNER JOIN AttributeTemplate ON ElementAttribute.AttributeTemplateId = AttributeTemplate.AttributeTemplateId\n\tINNER JOIN Tag ON ElementAttribute.TagId = Tag.TagId\n\tINNER JOIN TagValue ON Tag.TagId = TagValue.TagId\nWHERE Element.ElementId = $element AND Tag.LookupId IS NULL AND $__timeFilter(TagValue.Timestamp)\nUNION\nSELECT AttributeTemplate.Name AS Attribute,\n\tDATE_FORMAT(TagValue.Timestamp, \"%c/%e/%y %r\") AS Timestamp,\n\tLookupValue.Name AS Value\nFROM ElementAttribute\n\tINNER JOIN Element ON ElementAttribute.ElementId = Element.ElementId\n\tINNER JOIN AttributeTemplate ON ElementAttribute.AttributeTemplateId = AttributeTemplate.AttributeTemplateId\n\tINNER JOIN Tag ON ElementAttribute.TagId = Tag.TagId\n\tINNER JOIN Lookup ON Tag.LookupId = Lookup.LookupId\n\tINNER JOIN LookupValue ON Lookup.LookupId = LookupValue.LookupId\n\tINNER JOIN TagValue ON Tag.TagId = TagValue.TagId AND LookupValue.Value = TagValue.Value\nWHERE Element.ElementId = $element AND Tag.LookupId IS NOT NULL AND $__timeFilter(TagValue.Timestamp)\n",
+          "refId": "A"
+        }
+      ],
+      "timeFrom": null,
+      "title": "Element Values",
+      "transform": "table",
+      "type": "table"
     }
   ],
-  "schemaVersion": 14,
+  "refresh": false,
+  "schemaVersion": 16,
   "style": "dark",
   "tags": [],
   "templating": {
@@ -122,17 +115,17 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "${DS_BREWERYPI}",
+        "datasource": "${DS_BREWERY_PI}",
         "hide": 0,
         "includeAll": false,
         "label": "Enterprise:",
         "multi": false,
         "name": "enterprise",
         "options": [],
-        "query": "SELECT Enterprise.EnterpriseId AS __value, Enterprise.Name AS __text FROM Enterprise",
+        "query": "SELECT DISTINCT Enterprise.EnterpriseId AS __value, Enterprise.Name AS __text FROM Enterprise \tINNER JOIN Site ON Enterprise.EnterpriseId = Site.EnterpriseId \tINNER JOIN ElementTemplate ON Site.SiteId = ElementTemplate.SiteId \tINNER JOIN Element ON ElementTemplate.ElementTemplateId = Element.ElementTemplateId",
         "refresh": 1,
         "regex": "",
-        "sort": 1,
+        "sort": 5,
         "tagValuesQuery": "",
         "tags": [],
         "tagsQuery": "",
@@ -142,17 +135,17 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "${DS_BREWERYPI}",
+        "datasource": "${DS_BREWERY_PI}",
         "hide": 0,
         "includeAll": false,
         "label": "Site:",
         "multi": false,
         "name": "site",
         "options": [],
-        "query": "SELECT Site.SiteId AS __value, Site.Name AS __text FROM Site WHERE Site.EnterpriseId = $enterprise",
+        "query": "SELECT DISTINCT Site.SiteId AS __value, Site.Name AS __text FROM Site \tINNER JOIN ElementTemplate ON Site.SiteId = ElementTemplate.SiteId \tINNER JOIN Element ON ElementTemplate.ElementTemplateId = Element.ElementTemplateId WHERE Site.EnterpriseId = $enterprise",
         "refresh": 1,
         "regex": "",
-        "sort": 1,
+        "sort": 5,
         "tagValuesQuery": "",
         "tags": [],
         "tagsQuery": "",
@@ -162,17 +155,17 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "${DS_BREWERYPI}",
+        "datasource": "${DS_BREWERY_PI}",
         "hide": 0,
         "includeAll": false,
         "label": "Element Template:",
         "multi": false,
         "name": "elementTemplate",
         "options": [],
-        "query": "SELECT ElementTemplate.ElementTemplateId AS __value, ElementTemplate.Name AS __text FROM ElementTemplate WHERE ElementTemplate.SiteId = $site",
+        "query": "SELECT DISTINCT ElementTemplate.ElementTemplateId AS __value, ElementTemplate.Name AS __text FROM ElementTemplate \tINNER JOIN Element ON ElementTemplate.ElementTemplateId = Element.ElementTemplateId WHERE ElementTemplate.SiteId = $site",
         "refresh": 1,
         "regex": "",
-        "sort": 1,
+        "sort": 5,
         "tagValuesQuery": "",
         "tags": [],
         "tagsQuery": "",
@@ -182,7 +175,7 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "${DS_BREWERYPI}",
+        "datasource": "${DS_BREWERY_PI}",
         "hide": 0,
         "includeAll": false,
         "label": "Element:",
@@ -192,7 +185,7 @@
         "query": "SELECT Element.ElementId AS __value, Element.Name AS __text FROM Element WHERE Element.ElementTemplateId = $elementTemplate",
         "refresh": 1,
         "regex": "",
-        "sort": 1,
+        "sort": 5,
         "tagValuesQuery": "",
         "tags": [],
         "tagsQuery": "",
@@ -231,6 +224,5 @@
     ]
   },
   "timezone": "",
-  "title": "Element Values Table",
-  "version": 1
+  "title": "Element Values Table"
 }

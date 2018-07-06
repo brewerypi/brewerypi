@@ -478,6 +478,7 @@ class UnitOfMeasurement(db.Model):
 		defaultUnits = {"°C" : "degree Celsius",
 			"°F" : "degree Fahrenheit",
 			"°F/min" : "degree Fahrenheit per minute",
+			"°P" : "degree Plato",
 			"ASBC" : "American Society of Brewing Chemists",
 			"bbl" : "barrel",
 			"cells/ml" : "cells per milliliter",

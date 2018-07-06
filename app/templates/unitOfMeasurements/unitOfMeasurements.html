@@ -5,11 +5,17 @@ Units of Measurment
 {% endblock %}
 
 {% block page_content %}
-<div>
+<div class = "page-header">
     <h1>Units of Measurement</h1>
+</div>
+<div>
     <a class = "btn btn-default" title = "Add" href = "{{ url_for("unitOfMeasurements.addUnitOfMeasurement") }}" role = "button">
         <span class="glyphicon glyphicon-plus"></span></a>
+    <a class = "btn btn-default" title = "Add Default Units of Measurements" href = "{{ url_for("unitOfMeasurements.addDefaultUnitsOfMeasurements") }}"
+        role = "button"><span class="glyphicon glyphicon-plus"></span> Defaults</a>
     <br><br>
+</div>
+<div>
     <table id = "unitOfMeasurementsTable" class = "table">
         <thead>
             <tr>
@@ -56,6 +62,6 @@ Units of Measurment
             "stateSave": true,
             "stateDuration": 0,
             "pageLength": 25
-        });
+        })
     </script>
 {% endblock %}
