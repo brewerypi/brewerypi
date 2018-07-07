@@ -1,32 +1,10 @@
 from flask import flash, redirect, render_template, request, url_for
 from flask_login import login_required
-from sqlalchemy import text
-from sqlalchemy.orm import aliased
 from . import eventFrameTemplates
-from . forms import EventFrameAttributeTemplateForm, EventFrameTemplateForm
+from . forms import EventFrameTemplateForm
 from .. import db
 from .. decorators import adminRequired
 from .. models import ElementTemplate, EventFrameAttributeTemplate, EventFrameTemplate, Site, Enterprise
-
-@eventFrameTemplates.route("/eventFrameAttributeTemplates/add/eventFrameTemplateId/<int:eventFrameTemplateId>", methods = ["GET", "POST"])
-@login_required
-@adminRequired
-def addEventFrameAttributeTemplate(eventFrameTemplateId):
-	modelName = "Event Frame Attribute Template"
-	operation = "Add"
-	form = EventFrameAttributeTemplateForm()
-
-	# Add a new eventFrameAttributeTemplate
-	if form.validate_on_submit():
-		eventFrameAttributeTemplate = EventFrameAttributeTemplate(Description = form.description.data, EventFrameTemplateId = eventFrameTemplateId, 
-			Name = form.name.data)
-		db.session.add(eventFrameAttributeTemplate)
-		db.session.commit()
-		flash("You have successfully added the new event frame attribute template \"" + eventFrameAttributeTemplate.Name + "\" to the event frame template \"" + eventFrameAttributeTemplate.EventFrameTemplate.Name + "\".", "alert alert-success")
-		return redirect(url_for("eventFrameTemplates.select", className = "EventFrameTemplate", id = eventFrameTemplateId))
-
-	# Present a form to add a new event frame attribute template.
-	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
 
 @eventFrameTemplates.route("/eventFrameTemplates/add/elementTemplateId/<int:elementTemplateId>", methods = ["GET", "POST"])
 @eventFrameTemplates.route("/eventFrameTemplates/add/eventFrameTemplateId/<int:parentEventFrameTemplateId>", methods = ["GET", "POST"])
@@ -75,17 +53,6 @@ def addEventFrameTemplate(elementTemplateId = None, parentEventFrameTemplateId =
 	form.requestReferrer.data = request.referrer
 	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
 
-@eventFrameTemplates.route("/eventFrameAttributeTemplates/delete/eventFrameAttributeTemplateId/<int:eventFrameAttributeTemplateId>", methods = ["GET", "POST"])
-@login_required
-@adminRequired
-def deleteEventFrameAttributeTemplate(eventFrameAttributeTemplateId):
-	eventFrameAttributeTemplate = EventFrameAttributeTemplate.query.get_or_404(eventFrameAttributeTemplateId)
-	eventFrameTemplateId = eventFrameAttributeTemplate.EventFrameTemplate.EventFrameTemplateId
-	db.session.delete(eventFrameAttributeTemplate)
-	db.session.commit()
-	flash("You have successfully deleted the event frame attribute template \"" + eventFrameAttributeTemplate.Name + "\".", "alert alert-success")
-	return redirect(url_for("eventFrameTemplates.select", className = "EventFrameTemplate", id = eventFrameTemplateId))
-
 @eventFrameTemplates.route("/eventFrameTemplates/delete/<int:eventFrameTemplateId>", methods = ["GET", "POST"])
 @login_required
 @adminRequired
@@ -111,29 +78,6 @@ def deleteEventFrameTemplate(eventFrameTemplateId):
 			"alert alert-success")
 
 	return redirect(request.referrer)
-
-@eventFrameTemplates.route("/eventFrameAttributeTemplates/edit/eventFrameAttributeTemplateId/<int:eventFrameAttributeTemplateId>", methods = ["GET", "POST"])
-@login_required
-@adminRequired
-def editEventFrameAttributeTemplate(eventFrameAttributeTemplateId):
-	modelName = "Event Frame Attribute Template"
-	operation = "Edit"
-	eventFrameAttributeTemplate = EventFrameAttributeTemplate.query.get_or_404(eventFrameAttributeTemplateId)
-	eventFrameTemplateId = eventFrameAttributeTemplate.EventFrameTemplate.EventFrameTemplateId
-	form = EventFrameAttributeTemplateForm(obj = eventFrameAttributeTemplate)
-
-	# Edit an existing eventFrameAttributeTemplate.
-	if form.validate_on_submit():
-		eventFrameAttributeTemplate.Description = form.description.data
-		eventFrameAttributeTemplate.Name = form.name.data
-		db.session.commit()
-		flash("You have successfully edited the event frame attribute template \"" + eventFrameAttributeTemplate.Name + "\".", "alert alert-success")
-		return redirect(url_for("eventFrameTemplates.select", className = "EventFrameTemplate", id = eventFrameTemplateId))
-
-	# Present a form to edit an existing eventFrameAttributeTemplate.
-	form.description.data = eventFrameAttributeTemplate.Description
-	form.name.data = eventFrameAttributeTemplate.Name
-	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
 
 @eventFrameTemplates.route("/eventFrameTemplates/edit/<int:eventFrameTemplateId>", methods = ["GET", "POST"])
 @login_required
@@ -183,40 +127,41 @@ def editEventFrameTemplate(eventFrameTemplateId):
 	form.requestReferrer.data = request.referrer
 	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
 
-@eventFrameTemplates.route("/select", methods = ["GET", "POST"])
-@eventFrameTemplates.route("/select/<string:className>", methods = ["GET", "POST"])
-@eventFrameTemplates.route("/select/<string:className>/<int:id>", methods = ["GET", "POST"])
+@eventFrameTemplates.route("/select", methods = ["GET", "POST"]) # Default.
+@eventFrameTemplates.route("/select/<string:selectedClass>", methods = ["GET", "POST"]) # Root.
+@eventFrameTemplates.route("/select/<string:selectedClass>/<int:selectedId>", methods = ["GET", "POST"])
 @login_required
 @adminRequired
-def select(className = None, id = None):
+def select(selectedClass = None, selectedId = None):
 	eventFrameAttributeTemplates = None
-	if className == None:
+	if selectedClass == None:
 		parent = Site.query.join(Enterprise).order_by(Enterprise.Name, Site.Name).first()
 		if parent:
 			children = ElementTemplate.query.join(Site).filter_by(SiteId = parent.id()).order_by(ElementTemplate.Name)
 		else:
 			children = None
-		className = "ElementTemplate"
-	elif className == "Root":
+		childrenClass = "ElementTemplate"
+	elif selectedClass == "Root":
 		parent = None
 		children = Enterprise.query.order_by(Enterprise.Name)
-		className = "Enterprise"
-	elif className == "Enterprise":
-		parent = Enterprise.query.get_or_404(id)
-		children = Site.query.join(Enterprise).filter_by(EnterpriseId = id).order_by(Site.Name)
-		className = "Site"
-	elif className == "Site":
-		parent = Site.query.get_or_404(id)
-		children = ElementTemplate.query.join(Site).filter_by(SiteId = id).order_by(ElementTemplate.Name)
-		className = "ElementTemplate"
-	elif className == "ElementTemplate":
-		parent = ElementTemplate.query.get_or_404(id)
-		children = EventFrameTemplate.query.join(ElementTemplate).filter_by(ElementTemplateId = id).order_by(EventFrameTemplate.Name)
-		className = "EventFrameTemplate"
-	elif className == "EventFrameTemplate":
-		parent = EventFrameTemplate.query.get_or_404(id)
-		children = EventFrameTemplate.query.filter_by(ParentEventFrameTemplateId = id).order_by(EventFrameTemplate.Order)
-		className = None
-		eventFrameAttributeTemplates = EventFrameAttributeTemplate.query.filter_by(EventFrameTemplateId = id).order_by(EventFrameAttributeTemplate.Name)
+		childrenClass = "Enterprise"
+	elif selectedClass == "Enterprise":
+		parent = Enterprise.query.get_or_404(selectedId)
+		children = Site.query.join(Enterprise).filter_by(EnterpriseId = selectedId).order_by(Site.Name)
+		childrenClass = "Site"
+	elif selectedClass == "Site":
+		parent = Site.query.get_or_404(selectedId)
+		children = ElementTemplate.query.join(Site).filter_by(SiteId = selectedId).order_by(ElementTemplate.Name)
+		childrenClass = "ElementTemplate"
+	elif selectedClass == "ElementTemplate":
+		parent = ElementTemplate.query.get_or_404(selectedId)
+		children = EventFrameTemplate.query.join(ElementTemplate).filter_by(ElementTemplateId = selectedId).order_by(EventFrameTemplate.Name)
+		childrenClass = "EventFrameTemplate"
+	elif selectedClass == "EventFrameTemplate":
+		parent = EventFrameTemplate.query.get_or_404(selectedId)
+		children = EventFrameTemplate.query.filter_by(ParentEventFrameTemplateId = selectedId).order_by(EventFrameTemplate.Order)
+		childrenClass = "DescendantEventFrameTemplate"
+		eventFrameAttributeTemplates = EventFrameAttributeTemplate.query.filter_by(EventFrameTemplateId = selectedId).order_by(EventFrameAttributeTemplate.Name)
 
-	return render_template("eventFrameTemplates/select.html", children = children, className = className, eventFrameAttributeTemplates = eventFrameAttributeTemplates, parent = parent)
+	return render_template("eventFrameTemplates/select.html", children = children, childrenClass = childrenClass,
+		eventFrameAttributeTemplates = eventFrameAttributeTemplates, parent = parent)

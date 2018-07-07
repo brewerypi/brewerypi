@@ -45,6 +45,9 @@ def create_app(configClass = Config):
 	from . eventFrameAttributes import eventFrameAttributes as eventFrameAttributesBlueprint
 	app.register_blueprint(eventFrameAttributesBlueprint)
 
+	from . eventFrameAttributeTemplates import eventFrameAttributeTemplates as eventFrameAttributeTemplatesBlueprint
+	app.register_blueprint(eventFrameAttributeTemplatesBlueprint)
+
 	from . eventFrameTemplates import eventFrameTemplates as eventFrameTemplatesBlueprint
 	app.register_blueprint(eventFrameTemplatesBlueprint)
 
