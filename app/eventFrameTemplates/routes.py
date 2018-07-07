@@ -127,12 +127,12 @@ def editEventFrameTemplate(eventFrameTemplateId):
 	form.requestReferrer.data = request.referrer
 	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
 
-@eventFrameTemplates.route("/select", methods = ["GET", "POST"]) # Default.
-@eventFrameTemplates.route("/select/<string:selectedClass>", methods = ["GET", "POST"]) # Root.
-@eventFrameTemplates.route("/select/<string:selectedClass>/<int:selectedId>", methods = ["GET", "POST"])
+@eventFrameTemplates.route("/eventFrameTemplates/select", methods = ["GET", "POST"]) # Default.
+@eventFrameTemplates.route("/eventFrameTemplates/select/<string:selectedClass>", methods = ["GET", "POST"]) # Root.
+@eventFrameTemplates.route("/eventFrameTemplates/select/<string:selectedClass>/<int:selectedId>", methods = ["GET", "POST"])
 @login_required
 @adminRequired
-def select(selectedClass = None, selectedId = None):
+def selectEventFrameTemplate(selectedClass = None, selectedId = None):
 	eventFrameAttributeTemplates = None
 	if selectedClass == None:
 		parent = Site.query.join(Enterprise).order_by(Enterprise.Name, Site.Name).first()

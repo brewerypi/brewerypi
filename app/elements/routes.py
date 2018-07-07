@@ -139,12 +139,12 @@ def editElement(elementId):
 	form.name.data = element.Name
 	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
 
-@elements.route("/select", methods = ["GET", "POST"])
-@elements.route("/select/<string:selectedClass>", methods = ["GET", "POST"])
-@elements.route("/select/<string:selectedClass>/<int:selectedId>", methods = ["GET", "POST"])
+@elements.route("/elements/select", methods = ["GET", "POST"])
+@elements.route("/elements/select/<string:selectedClass>", methods = ["GET", "POST"])
+@elements.route("/elements/select/<string:selectedClass>/<int:selectedId>", methods = ["GET", "POST"])
 @login_required
 @permissionRequired(Permission.DATA_ENTRY)
-def select(selectedClass = None, selectedId = None):
+def selectElement(selectedClass = None, selectedId = None):
 	if selectedClass == None:
 		parent = Site.query.join(Enterprise).order_by(Enterprise.Name).first()
 		if parent:

@@ -10,13 +10,13 @@ Tag Value Notes
 <div>
     <ol class="breadcrumb">
         {% if elementAttribute %}
-            <li><a href = "{{ url_for("elements.select", className = "Root", id = None) }}">..</a></li>
-            <li><a href = "{{ url_for("elements.select", className = elementAttribute.Element.ElementTemplate.Site.Enterprise.__class__.__name__,
+            <li><a href = "{{ url_for("elements.selectElement", className = "Root", id = None) }}">..</a></li>
+            <li><a href = "{{ url_for("elements.selectElement", className = elementAttribute.Element.ElementTemplate.Site.Enterprise.__class__.__name__,
                 id = elementAttribute.Element.ElementTemplate.Site.Enterprise.EnterpriseId) }}">
                 {{ elementAttribute.Element.ElementTemplate.Site.Enterprise.Name }}</a></li>
-            <li><a href = "{{ url_for("elements.select", className = elementAttribute.Element.ElementTemplate.Site.__class__.__name__,
+            <li><a href = "{{ url_for("elements.selectElement", className = elementAttribute.Element.ElementTemplate.Site.__class__.__name__,
                 id = elementAttribute.Element.ElementTemplate.Site.SiteId) }}">{{ elementAttribute.Element.ElementTemplate.Site.Name }}</a></li>
-            <li><a href = "{{ url_for("elements.select", className = elementAttribute.Element.ElementTemplate.__class__.__name__,
+            <li><a href = "{{ url_for("elements.selectElement", className = elementAttribute.Element.ElementTemplate.__class__.__name__,
                 id = elementAttribute.Element.ElementTemplate.ElementTemplateId) }}">{{ elementAttribute.Element.ElementTemplate.Name }}</a></li>
             <li><a href = "{{ url_for("elements.dashboard", elementId = elementAttribute.Element.ElementId) }}">
                 {{ elementAttribute.Element.Name }}</a></li>

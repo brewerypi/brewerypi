@@ -145,7 +145,7 @@ def endEventFrame(eventFrameId):
 @eventFrames.route("/eventFrames/select/<string:selectedClass>/<int:selectedId>/<int:elementId>", methods = ["GET", "POST"])
 @login_required
 @permissionRequired(Permission.DATA_ENTRY)
-def select(selectedClass = None, selectedId = None, elementId = None):
+def selectEventFrame(selectedClass = None, selectedId = None, elementId = None):
 	element = None
 	if selectedClass == None:
 		parent = Site.query.join(Enterprise).order_by(Enterprise.Name).first()

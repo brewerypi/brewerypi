@@ -14,23 +14,23 @@ Data Entry - Elements
             {% set tableHeader = "Enterprise" %}
             {% set pageHeaderSubText = "Select an Enterprise" %}
         {% elif childrenClass == "Site" %}
-            <li><a href = "{{ url_for("elements.select", selectedClass = "Root") }}">..</a></li>
+            <li><a href = "{{ url_for("elements.selectElement", selectedClass = "Root") }}">..</a></li>
             <li class = "active">{{ parent.Name }}</li>
             {% set tableHeader = "Site" %}
             {% set pageHeaderSubText = "Select a Site" %}
         <!-- "and parent" checks for systems that have not been configured with a site yet. -->
         {% elif childrenClass == "ElementTemplate" and parent %}
-            <li><a href = "{{ url_for("elements.select", selectedClass = "Root") }}">..</a></li>
-            <li><a href = "{{ url_for("elements.select", selectedClass = parent.Enterprise.__class__.__name__,
+            <li><a href = "{{ url_for("elements.selectElement", selectedClass = "Root") }}">..</a></li>
+            <li><a href = "{{ url_for("elements.selectElement", selectedClass = parent.Enterprise.__class__.__name__,
                 selectedId = parent.Enterprise.id()) }}">{{ parent.Enterprise.Name }}</a></li>
             <li class = "active">{{ parent.Name }}</li>
             {% set tableHeader = "Element Template" %}
             {% set pageHeaderSubText = "Select an Element Template" %}
         {% elif childrenClass == "Element" %}
-            <li><a href = "{{ url_for("elements.select", selectedClass = "Root") }}">..</a></li>
-            <li><a href = "{{ url_for("elements.select", selectedClass = parent.Site.Enterprise.__class__.__name__,
+            <li><a href = "{{ url_for("elements.selectElement", selectedClass = "Root") }}">..</a></li>
+            <li><a href = "{{ url_for("elements.selectElement", selectedClass = parent.Site.Enterprise.__class__.__name__,
                 selectedId = parent.Site.Enterprise.id()) }}">{{ parent.Site.Enterprise.Name }}</a></li>
-            <li><a href = "{{ url_for("elements.select", selectedClass = parent.Site.__class__.__name__,
+            <li><a href = "{{ url_for("elements.selectElement", selectedClass = parent.Site.__class__.__name__,
                 selectedId = parent.Site.id()) }}">{{ parent.Site.Name }}</a></li>
             <li class = "active">{{ parent.Name }}</li>
             {% set tableHeader = "Element" %}
@@ -58,7 +58,7 @@ Data Entry - Elements
                             <td><a class = "btn btn-default" title = "Select" href = "{{ url_for("elements.dashboard",
                                 elementId = child.id()) }}"><span class="glyphicon glyphicon-list"></span></a></td>
                         {% else %}
-                            <td><a class = "btn btn-default" title = "Select" href = "{{ url_for("elements.select", selectedClass = child.__class__.__name__,
+                            <td><a class = "btn btn-default" title = "Select" href = "{{ url_for("elements.selectElement", selectedClass = child.__class__.__name__,
                                 selectedId = child.id()) }}"><span class="glyphicon glyphicon-list"></span></a></td>
                         {% endif %}
                         <td>{{ child.Name }}</td>
