@@ -29,7 +29,7 @@ def dashboard(elementId):
 		join(ElementTemplate, Element). \
 		outerjoin(EventFrame, and_(Element.ElementId == EventFrame.ElementId, EventFrameTemplate.EventFrameTemplateId == EventFrame.EventFrameTemplateId)). \
 		filter(Element.ElementId == elementId)
-	return render_template("elements/elementDashboard.html", elementAttributes = elementAttributes, element = element,
+	return render_template("elements/dashboard.html", elementAttributes = elementAttributes, element = element,
 		eventFrameTemplates = eventFrameTemplates)
 
 @elements.route("/elements/add", methods = ["GET", "POST"])
@@ -139,34 +139,34 @@ def editElement(elementId):
 	form.name.data = element.Name
 	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
 
-@elements.route("/selectElement", methods = ["GET", "POST"])
-@elements.route("/selectElement/<string:className>", methods = ["GET", "POST"])
-@elements.route("/selectElement/<string:className>/<int:id>", methods = ["GET", "POST"])
+@elements.route("/select", methods = ["GET", "POST"])
+@elements.route("/select/<string:selectedClass>", methods = ["GET", "POST"])
+@elements.route("/select/<string:selectedClass>/<int:selectedId>", methods = ["GET", "POST"])
 @login_required
 @permissionRequired(Permission.DATA_ENTRY)
-def selectElement(className = None, id = None):
-	if className == None:
+def select(selectedClass = None, selectedId = None):
+	if selectedClass == None:
 		parent = Site.query.join(Enterprise).order_by(Enterprise.Name).first()
 		if parent:
 			children = ElementTemplate.query.filter_by(SiteId = parent.id())
 		else:
 			children = None
-		className = "ElementTemplate"
-	elif className == "Root":
+		childrenClass = "ElementTemplate"
+	elif selectedClass == "Root":
 		parent = None
 		children = Enterprise.query.order_by(Enterprise.Name)
-		className = "Enterprise"
-	elif className == "Enterprise":
-		parent = Enterprise.query.get_or_404(id)
-		children = Site.query.filter_by(EnterpriseId = id)
-		className = "Site"
-	elif className == "Site":
-		parent = Site.query.get_or_404(id)
-		children = ElementTemplate.query.filter_by(SiteId = id)
-		className = "ElementTemplate"
-	elif className == "ElementTemplate":
-		parent = ElementTemplate.query.get_or_404(id)
-		children = Element.query.filter_by(ElementTemplateId = id)
-		className = "Element"
+		childrenClass = "Enterprise"
+	elif selectedClass == "Enterprise":
+		parent = Enterprise.query.get_or_404(selectedId)
+		children = Site.query.filter_by(EnterpriseId = selectedId)
+		childrenClass = "Site"
+	elif selectedClass == "Site":
+		parent = Site.query.get_or_404(selectedId)
+		children = ElementTemplate.query.filter_by(SiteId = selectedId)
+		childrenClass = "ElementTemplate"
+	elif selectedClass == "ElementTemplate":
+		parent = ElementTemplate.query.get_or_404(selectedId)
+		children = Element.query.filter_by(ElementTemplateId = selectedId)
+		childrenClass = "Element"
 
-	return render_template("elements/selectElement.html", children = children, className = className, parent = parent)
+	return render_template("elements/select.html", children = children, childrenClass = childrenClass, parent = parent)
