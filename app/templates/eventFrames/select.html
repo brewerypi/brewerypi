@@ -91,8 +91,8 @@ Data Entry - Event Frames
                             <td><a class = "btn btn-default" title = "Select" href = "{{ url_for("eventFrames.selectEventFrame", selectedClass = "EventFrame",
                                 selectedId = child.id(), elementId = parent.id()) }}"><span class="glyphicon glyphicon-list"></span></a></td>
                         {% else %}
-                            <td><a class = "btn btn-default" title = "Select" href = "{{ url_for("eventFrames.selectEventFrame", selectedClass = child.__class__.__name__,
-                                selectedId = child.id()) }}"><span class="glyphicon glyphicon-list"></span></a></td>
+                            <td><a class = "btn btn-default" title = "Select" href = "{{ url_for("eventFrames.selectEventFrame",
+                                selectedClass = child.__class__.__name__, selectedId = child.id()) }}"><span class="glyphicon glyphicon-list"></span></a></td>
                         {% endif %}
                         <td>{{ name }}</td>
                         <td>{{ child.StartTimestamp }}</td>

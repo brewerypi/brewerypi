@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}
+Event Frame Templates
+{% endblock %}
+
+{% block page_content %}
+<div>
+    <ol class="breadcrumb">
+        {% if childrenClass == "Enterprise" %}
+            <li class = "active">..</li>
+            {% set tableHeader = "Enterprise" %}
+            {% set pageHeaderSubText = "Select an Enterprise" %}
+        {% elif childrenClass == "Site" %}
+            <li><a href = "{{ url_for("elementTemplates.selectElementTemplate", selectedClass = "Root") }}">..</a></li>
+            <li class = "active">{{ parent.Name }}</li>
+            {% set tableHeader = "Site" %}
+            {% set pageHeaderSubText = "Select a Site" %}
+        <!-- "and parent" checks for systems that have not been configured with a site yet. -->
+        {% elif childrenClass == "ElementTemplate" and parent %}
+            <li><a href = "{{ url_for("elementTemplates.selectElementTemplate", selectedClass = "Root") }}">..</a></li>
+            <li><a href = "{{ url_for("elementTemplates.selectElementTemplate", selectedClass = parent.Enterprise.__class__.__name__,
+                selectedId = parent.Enterprise.id()) }}">{{ parent.Enterprise.Name }}</a></li>
+            <li class = "active">{{ parent.Name }}</li>
+            {% set tableHeader = "Element Template" %}
+            {% set pageHeaderSubText = "Select an Element Template" %}
+        {% elif childrenClass == "ElementAttributeTemplate" %}
+            <li><a href = "{{ url_for("elementTemplates.selectElementTemplate", selectedClass = "Root") }}">..</a></li>
+            <li><a href = "{{ url_for("elementTemplates.selectElementTemplate", selectedClass = parent.Site.Enterprise.__class__.__name__,
+                selectedId = parent.Site.Enterprise.id()) }}">{{ parent.Site.Enterprise.Name }}</a></li>
+            <li><a href = "{{ url_for("elementTemplates.selectElementTemplate", selectedClass = parent.Site.__class__.__name__,
+                selectedId = parent.Site.id()) }}">{{ parent.Site.Name }}</a></li>
+            <li class = "active">{{ parent.Name }}</li>
+            {% set tableHeader = "Name" %}
+            {% set pageHeaderSubText = "Element Attribute Templates" %}
+        {% endif %}
+    </ol>
+</div>
+<div>
+    <h1>Element Templates <small>{{ pageHeaderSubText }}</small></h1>
+</div>
+<div>
+    {% if childrenClass == "ElementAttributeTemplate" %}
+        <a class = "btn btn-default" title = "Add Element Attribute Template" href = "{{ url_for("elementAttributeTemplates.addElementAttributeTemplate",
+            elementTemplateId = parent.id()) }}" role = "button"><span class="glyphicon glyphicon-plus"></span></a>
+    {% elif childrenClass == "ElementTemplate" %}
+        <a class = "btn btn-default" title = "Add Element Template" href = "{{ url_for("elementTemplates.addElementTemplate", siteId = parent.id()) }}"
+            role = "button"><span class="glyphicon glyphicon-plus"></span></a>
+    {% endif %}
+    <br><br>
+    <table id = "elementTemplatesTable" class = "table">
+        <thead>
+            <tr>
+                <th></th>
+                <th>{{ tableHeader }}</th>
+                <th>Description</th>
+                <th></th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if children %}
+                {% for child in children %}
+                    <tr>
+                        {% if childrenClass == "ElementAttributeTemplate" %}
+                            <td></td>
+                        {% else %}
+                            <td><a class = "btn btn-default" title = "Children" href = "{{ url_for("elementTemplates.selectElementTemplate",
+                                selectedClass = child.__class__.__name__, selectedId = child.id()) }}"><span class="glyphicon glyphicon-list"></span></a></td>
+                        {% endif %}
+                        <td>{{ child.Name }}</td>
+                        <td>{{ child.Description }}</td>
+                        {% if childrenClass == "ElementAttributeTemplate" %}
+                            <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("elementAttributeTemplates.editElementAttributeTemplate",
+                                elementAttributeTemplateId = child.id()) }}"><span class="glyphicon glyphicon-edit"></a></td>
+                            <td><a class = "btn btn-default" title = "Delete" href = "{{ url_for("elementAttributeTemplates.deleteElementAttributeTemplate",
+                                elementAttributeTemplateId = child.id()) }}"><span class="glyphicon glyphicon-trash"></a></td>
+                        {% elif childrenClass == "ElementTemplate" %}
+                            <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("elementTemplates.editElementTemplate",
+                                elementTemplateId = child.id()) }}"><span class="glyphicon glyphicon-edit"></a></td>
+                            <td><a class = "btn btn-default" title = "Delete" href = "{{ url_for("elementTemplates.deleteElementTemplate",
+                                elementTemplateId = child.id()) }}"><span class="glyphicon glyphicon-trash"></a></td>
+                        {% else %}
+                            <td></td>
+                            <td></td>
+                        {% endif %}
+                    </tr>
+                {% endfor %}
+            {% endif %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <link rel = "stylesheet" type = "text/css" href = {{ url_for("static", filename = "css/datatables.min.css") }}/> 
+    <script type = "text/javascript" src = {{ url_for("static", filename = "js/datatables.min.js") }}></script>
+    <script>
+        $('#elementTemplatesTable').DataTable
+        ({
+            "order":
+            [
+                [1, 'asc']              // Name.
+            ],
+            "columns":
+            [
+                { "orderable": false }, // Select button.
+                null,
+                null,
+                { "orderable": false }, // Edit button.
+                { "orderable": false }  // Delete button.
+            ],
+            "stateSave": true,
+            "stateDuration": 0,
+            "pageLength": 25
+        });
+    </script>
+{% endblock %}

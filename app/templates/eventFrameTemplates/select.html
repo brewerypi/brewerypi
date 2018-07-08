@@ -56,7 +56,7 @@ Event Frame Templates
     </ol>
 </div>
 <div>
-    <h1>Event Frames <small>{{ pageHeaderSubText }}</small></h1>
+    <h1>Event Frame Templates <small>{{ pageHeaderSubText }}</small></h1>
 </div>
 <div>
     {% if childrenClass == "EventFrameTemplate" %}
@@ -71,7 +71,7 @@ Event Frame Templates
         <thead>
             <tr>
                 <th></th>
-                <th>Name</th>
+                <th>{{ tableHeader }}</th>
                 <th>Description</th>
                 <th>Order</th>
                 <th></th>
@@ -86,7 +86,7 @@ Event Frame Templates
                             selectedClass = child.__class__.__name__, selectedId = child.id()) }}"><span class="glyphicon glyphicon-list"></span></a></td>
                         <td>{{ child.Name }}</td>
                         <td>{{ child.Description }}</td>
-                        {% if childrenClass == None %}
+                        {% if childrenClass == "DescendantEventFrameTemplate" %}
                             <td>{{ child.Order }}</td>
                         {% else %}
                             <td></td>
@@ -168,7 +168,6 @@ Event Frame Templates
             "pageLength": 25
         });
     </script>
-
     <script>
         $('#eventFrameAttributeTemplatesTable').DataTable
         ({

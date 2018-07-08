@@ -70,6 +70,9 @@ class ElementAttribute(db.Model):
 	ElementId = db.Column(db.Integer, db.ForeignKey("Element.ElementId", name = "FK__Element$Have$ElementAttribute"), nullable = False)
 	TagId = db.Column(db.Integer, db.ForeignKey("Tag.TagId", name = "FK__Tag$Have$ElementAttribute"), nullable = False)
 
+	def id(self):
+		return self.ElementAttributeId
+
 class ElementAttributeTemplate(db.Model):
 	__tablename__ = "ElementAttributeTemplate"
 	__table_args__ = \
@@ -87,6 +90,9 @@ class ElementAttributeTemplate(db.Model):
 
 	def __repr__(self):
 		return "<ElementAttributeTemplate: {}>".format(self.Name)
+
+	def id(self):
+		return self.ElementAttributeTemplateId
 
 class ElementTemplate(db.Model):
 	__tablename__ = "ElementTemplate"
@@ -308,6 +314,9 @@ class Lookup(db.Model):
 	def __repr__(self):
 		return "<Lookup: {}>".format(self.Name)
 
+	def id(self):
+		return self.LookupId
+
 class LookupValue(db.Model):
 	__tablename__ = "LookupValue"
 	__table_args__ = \
@@ -324,6 +333,9 @@ class LookupValue(db.Model):
 
 	def __repr__(self):
 		return "<LookupValue: {}>".format(self.Name)
+
+	def id(self):
+		return self.LookupValueId
 
 	def isReferenced(self):
 		return TagValue.query.join(Tag).filter(TagValue.Value == self.Value, Tag.LookupId == self.LookupId).count() > 0
@@ -383,6 +395,9 @@ class Role(db.Model):
 
 	def __repr__(self):
 		return "<Role: {}>".format(self.Name)
+
+	def id(self):
+		return self.RoleId
 
 class Site(db.Model):
 	__tablename__ = "Site"
@@ -449,6 +464,9 @@ class TagValue(db.Model):
 
 	def __repr__(self):
 		return "<TagValue: {}>".format(self.TagId)
+
+	def id(self):
+		return self.TagValueId
 
 class TagValueNote(db.Model):
 	__tablename__ = "TagValueNote"
@@ -527,6 +545,9 @@ class UnitOfMeasurement(db.Model):
 	def __repr__(self):
 		return "<UnitOfMeasurement: {}>".format(self.Name)
 
+	def id(self):
+		return self.UnitOfMeasurementId
+
 class User(UserMixin, db.Model):
 	__tablename__ = 'User'
 	__table_args__ = \
@@ -566,6 +587,9 @@ class User(UserMixin, db.Model):
 		return self.Role is not None and (self.Role.Permissions & permissions) == permissions
 
 	def get_id(self):
+		return self.UserId
+
+	def id(self):
 		return self.UserId
 
 	def isAdministrator(self):
