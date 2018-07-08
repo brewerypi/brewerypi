@@ -5,8 +5,10 @@ Element Attributes
 {% endblock %}
 
 {% block page_content %}
+<div class = "page-header">
+    <h1>Element Attributes <small></small></h1>
+</div>
 <div>
-    <h1>Element Attributes</h1>
     <a class = "btn btn-default" title = "Add" href = "{{ url_for("elementAttributes.addElementAttribute") }}" role = "button">
         <span class="glyphicon glyphicon-plus"></span></a>
     <br><br>

@@ -3,7 +3,7 @@
 {% import "bootstrap/wtf.html" as wtf %}
 
 {% block title %}
-Data Entry - Elements
+Data Entry - Tags
 {% endblock %}
 
 {% block page_content %}
@@ -14,35 +14,35 @@ Data Entry - Elements
             {% set tableHeader = "Enterprise" %}
             {% set pageHeaderSubText = "Select an Enterprise" %}
         {% elif childrenClass == "Site" %}
-            <li><a href = "{{ url_for("elements.selectElement", selectedClass = "Root") }}">..</a></li>
+            <li><a href = "{{ url_for("tags.selectTag", selectedClass = "Root") }}">..</a></li>
             <li class = "active">{{ parent.Name }}</li>
             {% set tableHeader = "Site" %}
             {% set pageHeaderSubText = "Select a Site" %}
-        <!-- "and parent" checks for systems that have not been configured with a site yet. -->
-        {% elif childrenClass == "ElementTemplate" and parent %}
-            <li><a href = "{{ url_for("elements.selectElement", selectedClass = "Root") }}">..</a></li>
-            <li><a href = "{{ url_for("elements.selectElement", selectedClass = parent.Enterprise.__class__.__name__,
+        {% elif childrenClass == "Area" %}
+            <li><a href = "{{ url_for("tags.selectTag", selectedClass = "Root") }}">..</a></li>
+            <li><a href = "{{ url_for("tags.selectTag", selectedClass = parent.Enterprise.__class__.__name__,
                 selectedId = parent.Enterprise.id()) }}">{{ parent.Enterprise.Name }}</a></li>
             <li class = "active">{{ parent.Name }}</li>
-            {% set tableHeader = "Element Template" %}
-            {% set pageHeaderSubText = "Select an Element Template" %}
-        {% elif childrenClass == "Element" %}
-            <li><a href = "{{ url_for("elements.selectElement", selectedClass = "Root") }}">..</a></li>
-            <li><a href = "{{ url_for("elements.selectElement", selectedClass = parent.Site.Enterprise.__class__.__name__,
+            {% set tableHeader = "Area" %}
+            {% set pageHeaderSubText = "Select an Area" %}
+        <!-- "and parent" checks for systems that have not been configured with an area yet. -->
+        {% elif childrenClass == "Tag" and parent %}
+            <li><a href = "{{ url_for("tags.selectTag", selectedClass = "Root") }}">..</a></li>
+            <li><a href = "{{ url_for("tags.selectTag", selectedClass = parent.Site.Enterprise.__class__.__name__,
                 selectedId = parent.Site.Enterprise.id()) }}">{{ parent.Site.Enterprise.Name }}</a></li>
-            <li><a href = "{{ url_for("elements.selectElement", selectedClass = parent.Site.__class__.__name__,
+            <li><a href = "{{ url_for("tags.selectTag", selectedClass = parent.Site.__class__.__name__,
                 selectedId = parent.Site.id()) }}">{{ parent.Site.Name }}</a></li>
             <li class = "active">{{ parent.Name }}</li>
-            {% set tableHeader = "Element" %}
-            {% set pageHeaderSubText = "Select an Element" %}
+            {% set tableHeader = "Tag" %}
+            {% set pageHeaderSubText = "Select a Tag" %}
         {% endif %}
     </ol>
 </div>
 <div class = "page-header">
-    <h1>Elements <small>{{ pageHeaderSubText }}</small></h1>
+    <h1>Tags <small>{{ pageHeaderSubText }}</small></h1>
 </div>
 <div>
-    <table id = "table" class = "table">
+    <table id = "tagsTable" class = "table">
         <thead>
             <tr>
                 <th></th>
@@ -54,11 +54,11 @@ Data Entry - Elements
             {% if children %}
                 {% for child in children %}
                     <tr>
-                        {% if childrenClass == "Element" %}
-                            <td><a class = "btn btn-default" title = "Select" href = "{{ url_for("elements.dashboard",
-                                elementId = child.id()) }}"><span class="glyphicon glyphicon-list"></span></a></td>
+                        {% if childrenClass == "Tag" %}
+                            <td><a class = "btn btn-default" title = "Tag Values" href = "{{ url_for("tagValues.listTagValues",
+                                tagId = child.id()) }}"><span class="glyphicon glyphicon-list"></span></a></td>
                         {% else %}
-                            <td><a class = "btn btn-default" title = "Select" href = "{{ url_for("elements.selectElement", selectedClass = child.__class__.__name__,
+                            <td><a class = "btn btn-default" title = "Children" href = "{{ url_for("tags.selectTag", selectedClass = child.__class__.__name__,
                                 selectedId = child.id()) }}"><span class="glyphicon glyphicon-list"></span></a></td>
                         {% endif %}
                         <td>{{ child.Name }}</td>
@@ -76,15 +76,15 @@ Data Entry - Elements
     <link rel = "stylesheet" type = "text/css" href = {{ url_for("static", filename = "css/datatables.min.css") }}/> 
     <script type = "text/javascript" src = {{ url_for("static", filename = "js/datatables.min.js") }}></script>
     <script>
-        $('#table').DataTable
+        $('#tagsTable').DataTable
         ({
             "order":
             [
-                [1, 'asc']              // Name.
+                [1, 'asc'],             // Name.
             ],
             "columns":
             [
-                { "orderable": false }, // Details button.
+                { "orderable": false }, // Tag values button.
                 null,
                 null
             ],

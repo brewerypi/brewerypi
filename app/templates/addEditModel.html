@@ -7,8 +7,8 @@
 {% endblock %}
 
 {% block page_content %}
-<div>
-    <h1>{{ operation }} {{ modelName }}</h1>
+<div class = "page-header">
+    <h1>{{ operation }} <small>{{ modelName }}</small></h1>
 </div>
 <div>
     {{ wtf.quick_form(form) }}

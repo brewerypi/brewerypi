@@ -7,8 +7,10 @@ Tags
 {% endblock %}
 
 {% block page_content %}
+<div class = "page-header">
+    <h1>Tags <small></small></h1>
+</div>
 <div>
-    <h1>Tags</h1>
     <a class = "btn btn-default" title = "Add Tag" href = "{{ url_for("tags.addTag") }}" role = "button">
         <span class="glyphicon glyphicon-plus"></span> Tag</a>
     <a class = "btn btn-default" title = "Add Lookup" href = "{{ url_for("tags.addTag", lookup = True) }}" role = "button">

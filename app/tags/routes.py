@@ -229,34 +229,34 @@ def importTags():
 
 	return render_template("import.html", errors = errors, form = form, importing = "Tags", successes = successes, warnings = warnings)
 
-@tags.route("/selectTag", methods = ["GET", "POST"])
-@tags.route("/selectTag/<string:className>", methods = ["GET", "POST"])
-@tags.route("/selectTag/<string:className>/<int:id>", methods = ["GET", "POST"])
+@tags.route("/tags/select", methods = ["GET", "POST"]) # Default.
+@tags.route("/tags/select/<string:selectedClass>", methods = ["GET", "POST"]) # Root.
+@tags.route("/tags/select/<string:selectedClass>/<int:selectedId>", methods = ["GET", "POST"])
 @login_required
 @permissionRequired(Permission.DATA_ENTRY)
-def selectTag(className = None, id = None):
-	if className == None:
+def selectTag(selectedClass = None, selectedId = None):
+	if selectedClass == None:
 		parent = Area.query.join(Site, Enterprise).order_by(Enterprise.Name, Site.Name, Area.Name).first()
 		if parent:
 			children = Tag.query.filter_by(AreaId = parent.id())
 		else:
 			children = None
-		className = "Tag"
-	elif className == "Root":
+		childrenClass = "Tag"
+	elif selectedClass == "Root":
 		parent = None
 		children = Enterprise.query.order_by(Enterprise.Name)
-		className = "Enterprise"
-	elif className == "Enterprise":
-		parent = Enterprise.query.get_or_404(id)
-		children = Site.query.filter_by(EnterpriseId = id)
-		className = "Site"
-	elif className == "Site":
-		parent = Site.query.get_or_404(id)
-		children = Area.query.filter_by(SiteId = id)
-		className = "Area"
-	elif className == "Area":
-		parent = Area.query.get_or_404(id)
-		children = Tag.query.filter_by(AreaId = id)
-		className = "Tag"
+		childrenClass = "Enterprise"
+	elif selectedClass == "Enterprise":
+		parent = Enterprise.query.get_or_404(selectedId)
+		children = Site.query.filter_by(EnterpriseId = selectedId)
+		childrenClass = "Site"
+	elif selectedClass == "Site":
+		parent = Site.query.get_or_404(selectedId)
+		children = Area.query.filter_by(SiteId = selectedId)
+		childrenClass = "Area"
+	elif selectedClass == "Area":
+		parent = Area.query.get_or_404(selectedId)
+		children = Tag.query.filter_by(AreaId = selectedId)
+		childrenClass = "Tag"
 
-	return render_template("tags/selectTag.html", children = children, className = className, parent = parent)
+	return render_template("tags/select.html", children = children, childrenClass = childrenClass, parent = parent)

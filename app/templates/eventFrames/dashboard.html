@@ -23,6 +23,9 @@ Event Frame Dashboard
         <li class = "active">{{ eventFrame.friendlyName() }}</li>
     </ol>
 </div>
+<div class = "page-header">
+    <h1>Event Frames <small>Attributes</small></h1>
+</div>
 <div class = "container">
     <div class = "row">
         <div class = "col-md-2">
@@ -42,7 +45,6 @@ Event Frame Dashboard
             </ul>
         </div>
         <div class = "col-md-10">
-            <h1>Event Frames <small>Attributes</small></h1>
             {% for eventFrameAttributeTemplate in selectedEventFrameTemplate.EventFrameAttributeTemplates %}
                 {{ eventFrameAttributeTemplate.Name }}<br>
             {% endfor %}

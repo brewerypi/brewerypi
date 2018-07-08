@@ -7,8 +7,10 @@ Users
 {% endblock %}
 
 {% block page_content %}
+<div class = "page-header">
+    <h1>Users <small></small></h1>
+</div>
 <div>
-    <h1>Users</h1>
     <a class = "btn btn-default" title = "Add" href = "{{ url_for("users.addUser") }}" role = "button">
         <span class="glyphicon glyphicon-plus"></span></a>
     <br><br>

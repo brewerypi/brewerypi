@@ -10,28 +10,33 @@ Tag Values
 <div>
     <ol class="breadcrumb">
         {% if elementAttribute %}
-            <li><a href = "{{ url_for("elements.selectElement", className = "Root", id = None) }}">..</a></li>
-            <li><a href = "{{ url_for("elements.selectElement", className = elementAttribute.Element.ElementTemplate.Site.Enterprise.__class__.__name__,
-                id = elementAttribute.Element.ElementTemplate.Site.Enterprise.EnterpriseId) }}">
+            <li><a href = "{{ url_for("elements.selectElement", selectedClass = "Root") }}">..</a></li>
+            <li><a href = "{{ url_for("elements.selectElement", selectedClass = elementAttribute.Element.ElementTemplate.Site.Enterprise.__class__.__name__,
+                selectedId = elementAttribute.Element.ElementTemplate.Site.Enterprise.EnterpriseId) }}">
                 {{ elementAttribute.Element.ElementTemplate.Site.Enterprise.Name }}</a></li>
-            <li><a href = "{{ url_for("elements.selectElement", className = elementAttribute.Element.ElementTemplate.Site.__class__.__name__,
-                id = elementAttribute.Element.ElementTemplate.Site.SiteId) }}">{{ elementAttribute.Element.ElementTemplate.Site.Name }}</a></li>
-            <li><a href = "{{ url_for("elements.selectElement", className = elementAttribute.Element.ElementTemplate.__class__.__name__,
-                id = elementAttribute.Element.ElementTemplate.ElementTemplateId) }}">{{ elementAttribute.Element.ElementTemplate.Name }}</a></li>
+            <li><a href = "{{ url_for("elements.selectElement", selectedClass = elementAttribute.Element.ElementTemplate.Site.__class__.__name__,
+                selectedId = elementAttribute.Element.ElementTemplate.Site.SiteId) }}">{{ elementAttribute.Element.ElementTemplate.Site.Name }}</a></li>
+            <li><a href = "{{ url_for("elements.selectElement", selectedClass = elementAttribute.Element.ElementTemplate.__class__.__name__,
+                selectedId = elementAttribute.Element.ElementTemplate.ElementTemplateId) }}">{{ elementAttribute.Element.ElementTemplate.Name }}</a></li>
             <li><a href = "{{ url_for("elements.dashboard", elementId = elementAttribute.Element.ElementId) }}">
                 {{ elementAttribute.Element.Name }}</a></li>
             <li class = "active">{{ elementAttribute.ElementAttributeTemplate.Name }}</li>
         {% else %}
-            <li><a href = "{{ url_for("tags.selectTag", className = "Root") }}">..</a></li>
-            <li><a href = "{{ url_for("tags.selectTag", className = tag.Area.Site.Enterprise.__class__.__name__,
-                id = tag.Area.Site.Enterprise.EnterpriseId) }}">{{ tag.Area.Site.Enterprise.Name }}</a></li>
-            <li><a href = "{{ url_for("tags.selectTag", className = tag.Area.Site.__class__.__name__, id = tag.Area.Site.SiteId) }}">
+            <li><a href = "{{ url_for("tags.selectTag", selectedClass = "Root") }}">..</a></li>
+            <li><a href = "{{ url_for("tags.selectTag", selectedClass = tag.Area.Site.Enterprise.__class__.__name__,
+                selectedId = tag.Area.Site.Enterprise.EnterpriseId) }}">{{ tag.Area.Site.Enterprise.Name }}</a></li>
+            <li><a href = "{{ url_for("tags.selectTag", selectedClass = tag.Area.Site.__class__.__name__, selectedId = tag.Area.Site.SiteId) }}">
                 {{ tag.Area.Site.Name }}</a></li>
-            <li><a href = "{{ url_for("tags.selectTag", className = tag.Area.__class__.__name__, id = tag.Area.AreaId) }}">{{ tag.Area.Name }}</a></li>
+            <li><a href = "{{ url_for("tags.selectTag", selectedClass = tag.Area.__class__.__name__, selectedId = tag.Area.AreaId) }}">
+                {{ tag.Area.Name }}</a></li>
             <li class = "active">{{ tag.Name }}</li>
         {% endif %}
     </ol>
-    <h1>Tag Values</h1>
+</div>
+<div class = "page-header">
+    <h1>Tag Values <small></small></h1>
+</div>
+<div>
     <a class = "btn btn-default" title = "Add" href = "{{ url_for("tagValues.addTagValue", tagId = tag.TagId) }}" role = "button">
         <span class="glyphicon glyphicon-plus"></span></a>
     <br><br>

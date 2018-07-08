@@ -5,8 +5,10 @@ Element Templates
 {% endblock %}
 
 {% block page_content %}
+<div class = "page-header">
+    <h1>Element Templates <small></small></h1>
+</div>
 <div>
-    <h1>Element Templates</h1>
     <a class = "btn btn-default" title = "Add" href = "{{ url_for("elementTemplates.addElementTemplate") }}" role = "button">
         <span class="glyphicon glyphicon-plus"></span></a>
     <br><br>

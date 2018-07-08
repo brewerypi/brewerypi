@@ -139,8 +139,8 @@ def editElement(elementId):
 	form.name.data = element.Name
 	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
 
-@elements.route("/elements/select", methods = ["GET", "POST"])
-@elements.route("/elements/select/<string:selectedClass>", methods = ["GET", "POST"])
+@elements.route("/elements/select", methods = ["GET", "POST"]) # Default.
+@elements.route("/elements/select/<string:selectedClass>", methods = ["GET", "POST"]) # Root.
 @elements.route("/elements/select/<string:selectedClass>/<int:selectedId>", methods = ["GET", "POST"])
 @login_required
 @permissionRequired(Permission.DATA_ENTRY)
