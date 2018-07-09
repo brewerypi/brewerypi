@@ -29,7 +29,6 @@ Event Frame Dashboard
 <div class = "container">
     <div class = "row">
         <div class = "col-md-2">
-            <br>
             <ul class = "nav nav-pills nav-stacked">
                 {% for descendant in eventFrame.EventFrameTemplate.descendants([], 0) %}
                     {% set prefix = "&nbsp;" * descendant["level"] %}
