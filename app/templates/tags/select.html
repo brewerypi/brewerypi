@@ -20,7 +20,7 @@ Data Entry - Tags
             {% set pageHeaderSubText = "Select a Site" %}
         {% elif childrenClass == "Area" %}
             <li><a href = "{{ url_for("tags.selectTag", selectedClass = "Root") }}">..</a></li>
-            <li><a href = "{{ url_for("tags.selectTag", selectedClass = parent.Enterprise.__class__.__name__,
+            <li><a href = "{{ url_for("tags.selectTag", selectedClass = "Enterprise",
                 selectedId = parent.Enterprise.id()) }}">{{ parent.Enterprise.Name }}</a></li>
             <li class = "active">{{ parent.Name }}</li>
             {% set tableHeader = "Area" %}
@@ -28,9 +28,9 @@ Data Entry - Tags
         <!-- "and parent" checks for systems that have not been configured with an area yet. -->
         {% elif childrenClass == "Tag" and parent %}
             <li><a href = "{{ url_for("tags.selectTag", selectedClass = "Root") }}">..</a></li>
-            <li><a href = "{{ url_for("tags.selectTag", selectedClass = parent.Site.Enterprise.__class__.__name__,
+            <li><a href = "{{ url_for("tags.selectTag", selectedClass = "Enterprise",
                 selectedId = parent.Site.Enterprise.id()) }}">{{ parent.Site.Enterprise.Name }}</a></li>
-            <li><a href = "{{ url_for("tags.selectTag", selectedClass = parent.Site.__class__.__name__,
+            <li><a href = "{{ url_for("tags.selectTag", selectedClass = "Site",
                 selectedId = parent.Site.id()) }}">{{ parent.Site.Name }}</a></li>
             <li class = "active">{{ parent.Name }}</li>
             {% set tableHeader = "Tag" %}

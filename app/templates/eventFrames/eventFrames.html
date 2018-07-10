@@ -9,12 +9,12 @@ Event Frames
 {% block page_content %}
 <div>
     <ol class="breadcrumb">
-        <li><a href = "{{ url_for("elements.selectElement", className = "Root", id = None) }}">..</a></li>
-        <li><a href = "{{ url_for("elements.selectElement", className = element.ElementTemplate.Site.Enterprise.__class__.__name__,
+        <li><a href = "{{ url_for("elements.selectElement", selectedClass = "Root", id = None) }}">..</a></li>
+        <li><a href = "{{ url_for("elements.selectElement", selectedClass = "Enterprise",
             id = element.ElementTemplate.Site.Enterprise.EnterpriseId) }}">{{ element.ElementTemplate.Site.Enterprise.Name }}</a></li>
-        <li><a href = "{{ url_for("elements.selectElement", className = element.ElementTemplate.Site.__class__.__name__,
+        <li><a href = "{{ url_for("elements.selectElement", selectedClass = "Site",
             id = element.ElementTemplate.Site.SiteId) }}">{{ element.ElementTemplate.Site.Name }}</a></li>
-        <li><a href = "{{ url_for("elements.selectElement", className = element.ElementTemplate.__class__.__name__,
+        <li><a href = "{{ url_for("elements.selectElement", selectedClass = "ElementTemplate",
             id = element.ElementTemplate.ElementTemplateId) }}">{{ element.ElementTemplate.Name }}</a></li>
         <li><a href = "{{ url_for("elements.dashboard", elementId = element.ElementId) }}">{{ element.Name }}</a></li>
         {% if parentEventFrame %}

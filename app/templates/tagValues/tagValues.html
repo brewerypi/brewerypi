@@ -11,24 +11,22 @@ Tag Values
     <ol class="breadcrumb">
         {% if elementAttribute %}
             <li><a href = "{{ url_for("elements.selectElement", selectedClass = "Root") }}">..</a></li>
-            <li><a href = "{{ url_for("elements.selectElement", selectedClass = elementAttribute.Element.ElementTemplate.Site.Enterprise.__class__.__name__,
+            <li><a href = "{{ url_for("elements.selectElement", selectedClass = "Enterprise",
                 selectedId = elementAttribute.Element.ElementTemplate.Site.Enterprise.EnterpriseId) }}">
                 {{ elementAttribute.Element.ElementTemplate.Site.Enterprise.Name }}</a></li>
-            <li><a href = "{{ url_for("elements.selectElement", selectedClass = elementAttribute.Element.ElementTemplate.Site.__class__.__name__,
+            <li><a href = "{{ url_for("elements.selectElement", selectedClass = "Site",
                 selectedId = elementAttribute.Element.ElementTemplate.Site.SiteId) }}">{{ elementAttribute.Element.ElementTemplate.Site.Name }}</a></li>
-            <li><a href = "{{ url_for("elements.selectElement", selectedClass = elementAttribute.Element.ElementTemplate.__class__.__name__,
+            <li><a href = "{{ url_for("elements.selectElement", selectedClass = "ElementTemplate",
                 selectedId = elementAttribute.Element.ElementTemplate.ElementTemplateId) }}">{{ elementAttribute.Element.ElementTemplate.Name }}</a></li>
             <li><a href = "{{ url_for("elements.dashboard", elementId = elementAttribute.Element.ElementId) }}">
                 {{ elementAttribute.Element.Name }}</a></li>
             <li class = "active">{{ elementAttribute.ElementAttributeTemplate.Name }}</li>
         {% else %}
             <li><a href = "{{ url_for("tags.selectTag", selectedClass = "Root") }}">..</a></li>
-            <li><a href = "{{ url_for("tags.selectTag", selectedClass = tag.Area.Site.Enterprise.__class__.__name__,
-                selectedId = tag.Area.Site.Enterprise.EnterpriseId) }}">{{ tag.Area.Site.Enterprise.Name }}</a></li>
-            <li><a href = "{{ url_for("tags.selectTag", selectedClass = tag.Area.Site.__class__.__name__, selectedId = tag.Area.Site.SiteId) }}">
-                {{ tag.Area.Site.Name }}</a></li>
-            <li><a href = "{{ url_for("tags.selectTag", selectedClass = tag.Area.__class__.__name__, selectedId = tag.Area.AreaId) }}">
-                {{ tag.Area.Name }}</a></li>
+            <li><a href = "{{ url_for("tags.selectTag", selectedClass = "Enterprise", selectedId = tag.Area.Site.Enterprise.EnterpriseId) }}">
+                {{ tag.Area.Site.Enterprise.Name }}</a></li>
+            <li><a href = "{{ url_for("tags.selectTag", selectedClass = "Site", selectedId = tag.Area.Site.SiteId) }}">{{ tag.Area.Site.Name }}</a></li>
+            <li><a href = "{{ url_for("tags.selectTag", selectedClass = "Area", selectedId = tag.Area.AreaId) }}">{{ tag.Area.Name }}</a></li>
             <li class = "active">{{ tag.Name }}</li>
         {% endif %}
     </ol>

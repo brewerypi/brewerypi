@@ -10,11 +10,11 @@
 <div>
     <ol class="breadcrumb">
         <li><a href = "{{ url_for("elements.selectElement", selectedClass = "Root", selectedId = None) }}">..</a></li>
-        <li><a href = "{{ url_for("elements.selectElement", selectedClass = element.ElementTemplate.Site.Enterprise.__class__.__name__,
+        <li><a href = "{{ url_for("elements.selectElement", selectedClass = "Enterprise",
             selectedId = element.ElementTemplate.Site.Enterprise.EnterpriseId) }}">{{ element.ElementTemplate.Site.Enterprise.Name }}</a></li>
-        <li><a href = "{{ url_for("elements.selectElement", selectedClass = element.ElementTemplate.Site.__class__.__name__,
+        <li><a href = "{{ url_for("elements.selectElement", selectedClass = "Site",
             selectedId = element.ElementTemplate.Site.SiteId) }}">{{ element.ElementTemplate.Site.Name }}</a></li>
-        <li><a href = "{{ url_for("elements.selectElement", selectedClass = element.ElementTemplate.__class__.__name__,
+        <li><a href = "{{ url_for("elements.selectElement", selectedClass = "ElementTemplate",
             selectedId = element.ElementTemplate.ElementTemplateId) }}">{{ element.ElementTemplate.Name }}</a></li>
         <li class = "active">{{ element.Name }}</li>
     </ol>

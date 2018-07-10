@@ -10,27 +10,25 @@ Tag Value Notes
 <div>
     <ol class="breadcrumb">
         {% if elementAttribute %}
-            <li><a href = "{{ url_for("elements.selectElement", className = "Root", id = None) }}">..</a></li>
-            <li><a href = "{{ url_for("elements.selectElement", className = elementAttribute.Element.ElementTemplate.Site.Enterprise.__class__.__name__,
-                id = elementAttribute.Element.ElementTemplate.Site.Enterprise.EnterpriseId) }}">
+            <li><a href = "{{ url_for("elements.selectElement", selectedClass = "Root", id = None) }}">..</a></li>
+            <li><a href = "{{ url_for("elements.selectElement", selectedClass = "Enterprise",
+                selectedId = elementAttribute.Element.ElementTemplate.Site.Enterprise.EnterpriseId) }}">
                 {{ elementAttribute.Element.ElementTemplate.Site.Enterprise.Name }}</a></li>
-            <li><a href = "{{ url_for("elements.selectElement", className = elementAttribute.Element.ElementTemplate.Site.__class__.__name__,
-                id = elementAttribute.Element.ElementTemplate.Site.SiteId) }}">{{ elementAttribute.Element.ElementTemplate.Site.Name }}</a></li>
-            <li><a href = "{{ url_for("elements.selectElement", className = elementAttribute.Element.ElementTemplate.__class__.__name__,
-                id = elementAttribute.Element.ElementTemplate.ElementTemplateId) }}">{{ elementAttribute.Element.ElementTemplate.Name }}</a></li>
-            <li><a href = "{{ url_for("elements.dashboard", elementId = elementAttribute.Element.ElementId) }}">
-                {{ elementAttribute.Element.Name }}</a></li>
+            <li><a href = "{{ url_for("elements.selectElement", selectedClass = "Site",
+                selectedId = elementAttribute.Element.ElementTemplate.Site.SiteId) }}">{{ elementAttribute.Element.ElementTemplate.Site.Name }}</a></li>
+            <li><a href = "{{ url_for("elements.selectElement", selectedClass = "ElementTemplate",
+                selectedId = elementAttribute.Element.ElementTemplate.ElementTemplateId) }}">{{ elementAttribute.Element.ElementTemplate.Name }}</a></li>
+            <li><a href = "{{ url_for("elements.dashboard", elementId = elementAttribute.Element.ElementId) }}">{{ elementAttribute.Element.Name }}</a></li>
             <li><a href = "{{ url_for("tagValues.listTagValues", tagId = tagValue.Tag.TagId, elementAttributeId = elementAttribute.ElementAttributeId) }}">
-                {{ elementAttribute.AttributeTemplate.Name }}</a></li>
+                {{ elementAttribute.ElementAttributeTemplate.Name }}</a></li>
             <li class = "active">{{ tagValue.Timestamp }}</li>
         {% else %}
-            <li><a href = "{{ url_for("tags.selectTag", className = "Root") }}">..</a></li>
-            <li><a href = "{{ url_for("tags.selectTag", className = tagValue.Tag.Area.Site.Enterprise.__class__.__name__,
-                id = tagValue.Tag.Area.Site.Enterprise.EnterpriseId) }}">{{ tagValue.Tag.Area.Site.Enterprise.Name }}</a></li>
-            <li><a href = "{{ url_for("tags.selectTag", className = tagValue.Tag.Area.Site.__class__.__name__, id = tagValue.Tag.Area.Site.SiteId) }}">
+            <li><a href = "{{ url_for("tags.selectTag", selectedClass = "Root") }}">..</a></li>
+            <li><a href = "{{ url_for("tags.selectTag", selectedClass = "Enterprise",
+                selectedId = tagValue.Tag.Area.Site.Enterprise.EnterpriseId) }}">{{ tagValue.Tag.Area.Site.Enterprise.Name }}</a></li>
+            <li><a href = "{{ url_for("tags.selectTag", selectedClass = "Site", selectedId = tagValue.Tag.Area.Site.SiteId) }}">
                 {{ tagValue.Tag.Area.Site.Name }}</a></li>
-            <li><a href = "{{ url_for("tags.selectTag", className = tagValue.Tag.Area.__class__.__name__, id = tagValue.Tag.Area.AreaId) }}">
-                {{ tagValue.Tag.Area.Name }}</a></li>
+            <li><a href = "{{ url_for("tags.selectTag", selectedClass = "Area", selectedId = tagValue.Tag.Area.AreaId) }}">{{ tagValue.Tag.Area.Name }}</a></li>
             <li><a href = "{{ url_for("tagValues.listTagValues", tagId = tagValue.Tag.TagId) }}">{{ tagValue.Tag.Name }}</a></li>
             <li class = "active">{{ tagValue.Timestamp }}</li>
         {% endif %}

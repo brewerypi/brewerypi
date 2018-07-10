@@ -21,16 +21,16 @@ Event Frame Templates
         <!-- "and parent" checks for systems that have not been configured with a site yet. -->
         {% elif childrenClass == "ElementTemplate" and parent %}
             <li><a href = "{{ url_for("eventFrameTemplates.selectEventFrameTemplate", selectedClass = "Root") }}">..</a></li>
-            <li><a href = "{{ url_for("eventFrameTemplates.selectEventFrameTemplate", selectedClass = parent.Enterprise.__class__.__name__,
+            <li><a href = "{{ url_for("eventFrameTemplates.selectEventFrameTemplate", selectedClass = "Enterprise",
                 selectedId = parent.Enterprise.id()) }}">{{ parent.Enterprise.Name }}</a></li>
             <li class = "active">{{ parent.Name }}</li>
             {% set tableHeader = "Element Template" %}
             {% set pageHeaderSubText = "Select an Element Template" %}
         {% elif childrenClass == "EventFrameTemplate" %}
             <li><a href = "{{ url_for("eventFrameTemplates.selectEventFrameTemplate", selectedClass = "Root") }}">..</a></li>
-            <li><a href = "{{ url_for("eventFrameTemplates.selectEventFrameTemplate", selectedClass = parent.Site.Enterprise.__class__.__name__,
+            <li><a href = "{{ url_for("eventFrameTemplates.selectEventFrameTemplate", selectedClass = "Enterprise",
                 selectedId = parent.Site.Enterprise.id()) }}">{{ parent.Site.Enterprise.Name }}</a></li>
-            <li><a href = "{{ url_for("eventFrameTemplates.selectEventFrameTemplate", selectedClass = parent.Site.__class__.__name__,
+            <li><a href = "{{ url_for("eventFrameTemplates.selectEventFrameTemplate", selectedClass = "Site",
                 selectedId = parent.Site.id()) }}">{{ parent.Site.Name }}</a></li>
             <li class = "active">{{ parent.Name }}</li>
             {% set tableHeader = "Event Frame Template" %}
@@ -39,11 +39,11 @@ Event Frame Templates
             <!-- These are children event frame templates. -->
             {% set origin = parent.origin() %}
             <li><a href = "{{ url_for("eventFrameTemplates.selectEventFrameTemplate", selectedClass = "Root") }}">..</a></li>
-            <li><a href = "{{ url_for("eventFrameTemplates.selectEventFrameTemplate", selectedClass = origin.ElementTemplate.Site.Enterprise.__class__.__name__,
+            <li><a href = "{{ url_for("eventFrameTemplates.selectEventFrameTemplate", selectedClass = "Enterprise",
                 selectedId = origin.ElementTemplate.Site.Enterprise.id()) }}">{{ origin.ElementTemplate.Site.Enterprise.Name }}</a></li>
-            <li><a href = "{{ url_for("eventFrameTemplates.selectEventFrameTemplate", selectedClass = origin.ElementTemplate.Site.__class__.__name__,
+            <li><a href = "{{ url_for("eventFrameTemplates.selectEventFrameTemplate", selectedClass = "Site",
                 selectedId = origin.ElementTemplate.Site.id()) }}">{{ origin.ElementTemplate.Site.Name }}</a></li>
-            <li><a href = "{{ url_for("eventFrameTemplates.selectEventFrameTemplate", selectedClass = origin.ElementTemplate.__class__.__name__,
+            <li><a href = "{{ url_for("eventFrameTemplates.selectEventFrameTemplate", selectedClass = "ElementTemplate",
                 selectedId = origin.ElementTemplate.id()) }}">{{ origin.ElementTemplate.Name }}</a></li>
             {% for ancestor in parent.ancestors([]) %}
                 <li><a href = "{{ url_for("eventFrameTemplates.selectEventFrameTemplate", selectedClass = ancestor.__class__.__name__,

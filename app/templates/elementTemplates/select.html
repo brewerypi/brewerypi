@@ -21,16 +21,16 @@ Event Frame Templates
         <!-- "and parent" checks for systems that have not been configured with a site yet. -->
         {% elif childrenClass == "ElementTemplate" and parent %}
             <li><a href = "{{ url_for("elementTemplates.selectElementTemplate", selectedClass = "Root") }}">..</a></li>
-            <li><a href = "{{ url_for("elementTemplates.selectElementTemplate", selectedClass = parent.Enterprise.__class__.__name__,
+            <li><a href = "{{ url_for("elementTemplates.selectElementTemplate", selectedClass = "Enterprise",
                 selectedId = parent.Enterprise.id()) }}">{{ parent.Enterprise.Name }}</a></li>
             <li class = "active">{{ parent.Name }}</li>
             {% set tableHeader = "Element Template" %}
             {% set pageHeaderSubText = "Select an Element Template" %}
         {% elif childrenClass == "ElementAttributeTemplate" %}
             <li><a href = "{{ url_for("elementTemplates.selectElementTemplate", selectedClass = "Root") }}">..</a></li>
-            <li><a href = "{{ url_for("elementTemplates.selectElementTemplate", selectedClass = parent.Site.Enterprise.__class__.__name__,
+            <li><a href = "{{ url_for("elementTemplates.selectElementTemplate", selectedClass = "Enterprise",
                 selectedId = parent.Site.Enterprise.id()) }}">{{ parent.Site.Enterprise.Name }}</a></li>
-            <li><a href = "{{ url_for("elementTemplates.selectElementTemplate", selectedClass = parent.Site.__class__.__name__,
+            <li><a href = "{{ url_for("elementTemplates.selectElementTemplate", selectedClass = "Site",
                 selectedId = parent.Site.id()) }}">{{ parent.Site.Name }}</a></li>
             <li class = "active">{{ parent.Name }}</li>
             {% set tableHeader = "Name" %}
