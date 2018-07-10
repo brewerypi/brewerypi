@@ -28,14 +28,18 @@
                             <li><a href = "{{ url_for("users.listUsers") }}">Users</a></li>
                         </ul>
                     </li>
+                {% endif %}
                     <li class = "dropdown"><a href = "#" class = "dropdown-toggle" data-toggle = "dropdown">Tags <span class="caret"></span></a>
                         <ul class = "dropdown-menu">
-                            <li><a href = "{{ url_for("tags.listTags") }}">Tags</a></li>
+                            <li><a href = "{{ url_for("tags.selectTag") }}">Tags</a></li>
+                            {% if current_user.isAdministrator() %}
                                 <li><a href = "{{ url_for("tags.importTags") }}">Import</a></li>
                                 <li><a href = "{{ url_for("tags.exportTags") }}">Export</a></li>
                                 <li><a href = "{{ url_for("unitOfMeasurements.listUnitOfMeasurements") }}">Units</a></li>
+                            {% endif %}
                         </ul>
                     </li>
+                {% if current_user.isAdministrator() %}
                     <li class = "dropdown"><a href = "#" class = "dropdown-toggle" data-toggle = "dropdown">Templates <span class="caret"></span></a>
                         <ul class = "dropdown-menu">
                             <li><a href = "{{ url_for("elementTemplates.selectElementTemplate") }}">Elements</a></li>
@@ -66,7 +70,6 @@
                     <ul class = "dropdown-menu">
                         <li><a href = "{{ url_for("elements.selectElement") }}">Elements</a></li>
                         <li><a href = "{{ url_for("eventFrames.selectEventFrame") }}">Event Frames</a></li>
-                        <li><a href = "{{ url_for("tags.selectTag") }}">Tags</a></li>
                     </ul>
                 </li>
                 {% if config["IS_RASPBERRY_PI"] %}

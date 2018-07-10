@@ -42,12 +42,21 @@ Data Entry - Tags
     <h1>Tags <small>{{ pageHeaderSubText }}</small></h1>
 </div>
 <div>
+    {% if childrenClass == "Tag" and parent and current_user.isAdministrator() %}
+        <a class = "btn btn-default" title = "Add Tag" href = "{{ url_for("tags.addTag", areaId = parent.id()) }}" role = "button">
+            <span class="glyphicon glyphicon-plus"></span> Tag</a>
+        <a class = "btn btn-default" title = "Add Lookup" href = "{{ url_for("tags.addTag", areaId = parent.id(), lookup = True) }}" role = "button">
+            <span class="glyphicon glyphicon-plus"></span> Lookup Tag</a>
+    {% endif %}
+    <br><br>    
     <table id = "tagsTable" class = "table">
         <thead>
             <tr>
                 <th></th>
                 <th>{{ tableHeader }}</th>
                 <th>Description</th>
+                <th></th>
+                <th></th>
             </tr>
         </thead>
         <tbody>
@@ -63,6 +72,15 @@ Data Entry - Tags
                         {% endif %}
                         <td>{{ child.Name }}</td>
                         <td>{{ child.Description }}</td>
+                        {% if childrenClass == "Tag" and current_user.isAdministrator() %}
+                            <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("tags.editTag", tagId = child.TagId) }}">
+                                <span class="glyphicon glyphicon-edit"></span></a></td>
+                            <td><a class = "btn btn-default" title = "Delete" href = "{{ url_for("tags.deleteTag", tagId = child.TagId) }}">
+                                <span class="glyphicon glyphicon-trash"></span></a></td>
+                        {% else %}
+                            <td></td>
+                            <td></td>
+                        {% endif %}
                     </tr>
                 {% endfor %}
             {% endif %}
@@ -86,7 +104,9 @@ Data Entry - Tags
             [
                 { "orderable": false }, // Tag values button.
                 null,
-                null
+                null,
+                { "orderable": false }, // Edit button.
+                { "orderable": false }  // Delete button.
             ],
             "stateSave": true,
             "stateDuration": 0,
