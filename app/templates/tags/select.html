@@ -3,7 +3,7 @@
 {% import "bootstrap/wtf.html" as wtf %}
 
 {% block title %}
-Data Entry - Tags
+Tags
 {% endblock %}
 
 {% block page_content %}
@@ -44,7 +44,7 @@ Data Entry - Tags
 <div>
     {% if childrenClass == "Tag" and parent and current_user.isAdministrator() %}
         <a class = "btn btn-default" title = "Add Tag" href = "{{ url_for("tags.addTag", areaId = parent.id()) }}" role = "button">
-            <span class="glyphicon glyphicon-plus"></span> Tag</a>
+            <span class="glyphicon glyphicon-plus"></span>Tag</a>
         <a class = "btn btn-default" title = "Add Lookup" href = "{{ url_for("tags.addTag", areaId = parent.id(), lookup = True) }}" role = "button">
             <span class="glyphicon glyphicon-plus"></span> Lookup Tag</a>
     {% endif %}

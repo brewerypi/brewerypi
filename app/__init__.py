@@ -60,6 +60,9 @@ def create_app(configClass = Config):
 	from . main import main as mainBlueprint
 	app.register_blueprint(mainBlueprint)
 
+	from . physicalModels import physicalModels as physicalModelsBlueprint
+	app.register_blueprint(physicalModelsBlueprint)
+
 	from . raspberryPiUtilities import raspberryPiUtilities as raspberryPiUtilitiesBlueprint
 	app.register_blueprint(raspberryPiUtilitiesBlueprint)
 
