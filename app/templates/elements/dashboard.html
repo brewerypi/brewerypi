@@ -153,9 +153,14 @@
                     </td>
                     <td></td>
                     {% if elementAttribute.Tag.TagValues[0] %}
-                        <td><a class = "btn btn-default" title = "Last Value Notes"
-                            href = "{{ url_for("tagValues.listTagValueNotes", tagValueId = firstTagValue.TagValueId,
-                            elementAttributeId = elementAttribute.ElementAttributeId) }}"><span class="glyphicon glyphicon-comment"></span></a></td>
+                        {% if elementAttribute.Tag.TagValues[0].TagValueNotes[0] %}
+                            {% set noteButtonClass = "btn btn-default has-note" %}
+                        {% else %}
+                            {% set noteButtonClass = "btn btn-default" %}
+                        {% endif %}
+                        <td><a class = "{{ noteButtonClass }}" title = "Last Value Notes" href = "{{ url_for("tagValues.listTagValueNotes", 
+                                tagValueId = firstTagValue.TagValueId, elementAttributeId = elementAttribute.ElementAttributeId) }}">
+                                <span class="glyphicon glyphicon-comment"></span></a></td>
                         <td><a class = "btn btn-default" title = "Edit Last Value"
                             href = "{{ url_for("elementAttributes.editElementAttributeValue", elementId = elementAttribute.ElementId,
                             tagValueId = firstTagValue.TagValueId) }}"><span class="glyphicon glyphicon-edit"></span></a></td>
@@ -177,7 +182,8 @@
 
 {% block scripts %}
     {{ super() }}
-    <link rel = "stylesheet" type = "text/css" href = {{ url_for("static", filename = "css/datatables.min.css") }}/> 
+    <link rel = "stylesheet" type = "text/css" href = {{ url_for("static", filename = "css/datatables.min.css") }}/>
+    <link rel = "stylesheet" type = "text/css" href = {{ url_for("static", filename = "css/styles.css") }}/>
     <script type = "text/javascript" src = {{ url_for("static", filename = "js/datatables.min.js") }}></script>
     <script type = "text/javascript" src = {{ url_for("static", filename = "js/moment.min.js") }}></script>
     <script>

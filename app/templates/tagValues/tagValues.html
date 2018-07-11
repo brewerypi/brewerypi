@@ -66,12 +66,18 @@ Tag Values
                     {% endif %}
                     <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("tagValues.editTagValue", tagValueId = tagValue.TagValueId) }}">
                         <span class="glyphicon glyphicon-edit"></span></a></td>
-                    {% if elementAttribute %}
-                        <td><a class = "btn btn-default" title = "Note" href = "{{ url_for("tagValues.listTagValueNotes", tagValueId = tagValue.TagValueId,
-                            elementAttributeId = elementAttribute.ElementAttributeId) }}"><span class="glyphicon glyphicon-comment"></span></a></td>
+                    {% if tagValue.TagValueNotes[0] %}
+                        {% set noteButtonClass = "btn btn-default has-note" %}
                     {% else %}
-                        <td><a class = "btn btn-default" title = "Note" href = "{{ url_for("tagValues.listTagValueNotes", tagValueId = tagValue.TagValueId) }}">
+                        {% set noteButtonClass = "btn btn-default" %}
+                    {% endif %}
+                    {% if elementAttribute %}
+                        <td><a class = "{{ noteButtonClass }}" title = "Note" href = "{{ url_for("tagValues.listTagValueNotes", 
+                            tagValueId = tagValue.TagValueId, elementAttributeId = elementAttribute.ElementAttributeId) }}">
                             <span class="glyphicon glyphicon-comment"></span></a></td>
+                    {% else %}
+                        <td><a class = "{{ noteButtonClass }}" title = "Note" href = "{{ url_for("tagValues.listTagValueNotes", 
+                            tagValueId = tagValue.TagValueId) }}"><span class="glyphicon glyphicon-comment"></span></a></td>
                     {% endif %}
                     <td><a class = "btn btn-default" title = "Delete" href = "{{ url_for("tagValues.deleteTagValue", tagValueId = tagValue.TagValueId) }}">
                         <span class="glyphicon glyphicon-trash"></span></a></td>
@@ -85,6 +91,7 @@ Tag Values
 {% block scripts %}
     {{ super() }}
     <link rel = "stylesheet" type = "text/css" href = {{ url_for("static", filename = "css/datatables.min.css") }}/> 
+    <link rel = "stylesheet" type = "text/css" href = {{ url_for("static", filename = "css/styles.css") }}/>
     <script type = "text/javascript" src = {{ url_for("static", filename = "js/datatables.min.js") }}></script>
     <script>
         $('#tagValuesTable').DataTable
