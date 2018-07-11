@@ -1,4 +1,4 @@
-from flask import flash, redirect, render_template, request
+from flask import flash, redirect, render_template, request, url_for
 from flask_login import login_required
 from . import lookups
 from . forms import LookupForm
@@ -13,6 +13,7 @@ modelName = "Lookup"
 @adminRequired
 def addLookup(enterpriseId):
 	operation = "Add"
+	enterprise = Enterprise.query.get_or_404(enterpriseId)
 	form = LookupForm()
 
 	# Add a new lookup.
@@ -26,7 +27,9 @@ def addLookup(enterpriseId):
 	# Present a form to add a new lookup.
 	form.enterpriseId.data = enterpriseId
 	form.requestReferrer.data = request.referrer
-	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
+	breadcrumbs = [{"url" : url_for("lookups.selectLookup", selectedClass = "Root"), "text" : "..", "isActive" : False},
+		{"url" : None, "text" : enterprise.Name, "isActive" : True}]
+	return render_template("addEditModel.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
 
 @lookups.route("/lookups/delete/<int:lookupId>", methods = ["GET", "POST"])
 @login_required
@@ -58,7 +61,12 @@ def editLookup(lookupId):
 	form.enterpriseId.data = lookup.EnterpriseId
 	form.name.data = lookup.Name
 	form.requestReferrer.data = request.referrer
-	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
+	# return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
+	breadcrumbs = [{"url" : url_for("lookups.selectLookup", selectedClass = "Root"), "text" : "..", "isActive" : False},
+		{"url" : url_for("lookups.selectLookup", selectedClass = "Enterprise", selectedId = lookup.Enterprise.EnterpriseId), "text" : lookup.Enterprise.Name,
+			"isActive" : False},
+		{"url" : None, "text" : lookup.Name, "isActive" : True}]
+	return render_template("addEditModel.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
 
 @lookups.route("/lookups/select", methods = ["GET", "POST"]) # Default.
 @lookups.route("/lookups/select/<string:selectedClass>", methods = ["GET", "POST"]) # Root.
