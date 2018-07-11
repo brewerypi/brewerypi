@@ -27,8 +27,8 @@ def addLookup(enterpriseId):
 	# Present a form to add a new lookup.
 	form.enterpriseId.data = enterpriseId
 	form.requestReferrer.data = request.referrer
-	breadcrumbs = [{"url" : url_for("lookups.selectLookup", selectedClass = "Root"), "text" : "..", "isActive" : False},
-		{"url" : None, "text" : enterprise.Name, "isActive" : True}]
+	breadcrumbs = [{"url" : url_for("lookups.selectLookup", selectedClass = "Root"), "text" : ".."},
+		{"url" : url_for("lookups.selectLookup", selectedClass = "Enterprise", selectedId = enterprise.EnterpriseId), "text" : enterprise.Name}]
 	return render_template("addEditModel.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
 
 @lookups.route("/lookups/delete/<int:lookupId>", methods = ["GET", "POST"])
@@ -62,10 +62,9 @@ def editLookup(lookupId):
 	form.name.data = lookup.Name
 	form.requestReferrer.data = request.referrer
 	# return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
-	breadcrumbs = [{"url" : url_for("lookups.selectLookup", selectedClass = "Root"), "text" : "..", "isActive" : False},
-		{"url" : url_for("lookups.selectLookup", selectedClass = "Enterprise", selectedId = lookup.Enterprise.EnterpriseId), "text" : lookup.Enterprise.Name,
-			"isActive" : False},
-		{"url" : None, "text" : lookup.Name, "isActive" : True}]
+	breadcrumbs = [{"url" : url_for("lookups.selectLookup", selectedClass = "Root"), "text" : ".."},
+		{"url" : url_for("lookups.selectLookup", selectedClass = "Enterprise", selectedId = lookup.Enterprise.EnterpriseId), "text" : lookup.Enterprise.Name},
+		{"url" : None, "text" : lookup.Name}]
 	return render_template("addEditModel.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
 
 @lookups.route("/lookups/select", methods = ["GET", "POST"]) # Default.

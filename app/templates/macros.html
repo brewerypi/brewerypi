@@ -2,7 +2,7 @@
 <div>
     <ol class = "breadcrumb">
     {% for breadcrumb in breadcrumbs %}
-        {% if breadcrumb["isActive"] == true %}
+        {% if breadcrumb["url"] == None %}
             <li class = "active">{{ breadcrumb["text"] }}</li>
         {% else %}
             <li><a href = "{{ breadcrumb["url"] }}">{{ breadcrumb["text"] }}</a></li>

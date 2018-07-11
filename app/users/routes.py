@@ -31,7 +31,8 @@ def addUser():
 		return redirect(url_for("users.listUsers"))
 
 	# Present a form to add a new user.
-	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
+	breadcrumbs = [{"url" : url_for("users.listUsers"), "text" : ".."}]
+	return render_template("addEditModel.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
 
 @users.route("/users/delete/<int:userId>", methods = ["GET", "POST"])
 @login_required
@@ -101,4 +102,6 @@ def editUser(userId):
 	form.userId.data = user.UserId
 	form.name.data = user.Name
 	form.role.data = user.Role
-	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
+	breadcrumbs = [{"url" : url_for("users.listUsers"), "text" : ".."},
+		{"url" : None, "text" : user.Name}]
+	return render_template("addEditModel.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)

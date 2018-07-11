@@ -1,4 +1,4 @@
-from flask import flash, redirect, render_template, request
+from flask import flash, redirect, render_template, request, url_for
 from flask_login import login_required
 from . import lookupValues
 from . forms import LookupValueForm
@@ -13,6 +13,7 @@ modelName = "Lookup Value"
 @adminRequired
 def addLookupValue(lookupId):
 	operation = "Add"
+	lookup = Lookup.query.get_or_404(lookupId)
 	form = LookupValueForm()
 
 	# Determine the next lookup value.
@@ -34,7 +35,10 @@ def addLookupValue(lookupId):
 	form.lookupId.data = lookupId
 	form.selectable.data = True
 	form.requestReferrer.data = request.referrer
-	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
+	breadcrumbs = [{"url" : url_for("lookups.selectLookup", selectedClass = "Root"), "text" : ".."},
+		{"url" : url_for("lookups.selectLookup", selectedClass = "Enterprise", selectedId = lookup.Enterprise.EnterpriseId), "text" : lookup.Enterprise.Name},
+		{"url" : url_for("lookups.selectLookup", selectedClass = "Lookup", selectedId = lookup.LookupId), "text" : lookup.Name}]
+	return render_template("addEditModel.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
 
 @lookupValues.route("/lookupValues/delete/<int:lookupValueId>", methods = ["GET", "POST"])
 @login_required
@@ -74,4 +78,8 @@ def editLookupValue(lookupValueId):
 	form.selectable.data = lookupValue.Selectable
 	form.value.data = lookupValue.Value
 	form.requestReferrer.data = request.referrer
-	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
+	breadcrumbs = [{"url" : url_for("lookups.selectLookup", selectedClass = "Root"), "text" : ".."},
+		{"url" : url_for("lookups.selectLookup", selectedClass = "Enterprise", selectedId = lookup.Enterprise.EnterpriseId), "text" : lookup.Enterprise.Name},
+		{"url" : url_for("lookups.selectLookup", selectedClass = "Lookup", selectedId = lookup.LookupId), "text" : lookup.Name},
+		{"url" : None, "text" : lookupValue.Name}]
+	return render_template("addEditModel.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
