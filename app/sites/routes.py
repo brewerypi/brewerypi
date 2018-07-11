@@ -1,10 +1,10 @@
-from flask import flash, redirect, render_template, request
+from flask import flash, redirect, render_template, request, url_for
 from flask_login import login_required
 from . import sites
 from . forms import SiteForm
 from .. import db
 from .. decorators import adminRequired
-from .. models import Site
+from .. models import Enterprise, Site
 
 modelName = "Site"
 
@@ -13,6 +13,7 @@ modelName = "Site"
 @adminRequired
 def addSite(enterpriseId):
 	operation = "Add"
+	enterprise = Enterprise.query.get_or_404(enterpriseId)
 	form = SiteForm()
 
 	# Add a new site.
@@ -25,7 +26,9 @@ def addSite(enterpriseId):
 
 	# Present a form to add a new site.
 	form.requestReferrer.data = request.referrer
-	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
+	breadcrumbs = [{"url" : url_for("physicalModels.selectPhysicalModel", selectedClass = "Root"), "text" : ".."},
+		{"url" : url_for("physicalModels.selectPhysicalModel", selectedClass = "Enterprise", selectedId = enterprise.EnterpriseId), "text" : enterprise.Name}]
+	return render_template("addEditModel.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
 
 @sites.route("/sites/delete/<int:siteId>", methods = ["GET", "POST"])
 @login_required
@@ -61,4 +64,8 @@ def editSite(siteId):
 	form.enterpriseId.data = site.EnterpriseId
 	form.name.data = site.Name
 	form.requestReferrer.data = request.referrer
-	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
+	breadcrumbs = [{"url" : url_for("physicalModels.selectPhysicalModel", selectedClass = "Root"), "text" : ".."},
+		{"url" : url_for("physicalModels.selectPhysicalModel", selectedClass = "Enterprise", selectedId = site.Enterprise.EnterpriseId),
+			"text" : site.Enterprise.Name},
+		{"url" : None, "text" : site.Name}]
+	return render_template("addEditModel.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)

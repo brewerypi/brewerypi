@@ -1,10 +1,10 @@
-from flask import flash, redirect, render_template, request
+from flask import flash, redirect, render_template, request, url_for
 from flask_login import login_required
 from . import areas
 from . forms import AreaForm
 from .. import db
 from .. decorators import adminRequired
-from .. models import Area
+from .. models import Area, Site
 
 modelName = "Area"
 
@@ -13,6 +13,7 @@ modelName = "Area"
 @adminRequired
 def addArea(siteId):
 	operation = "Add"
+	site = Site.query.get_or_404(siteId)
 	form = AreaForm()
 
 	# Add a new area.
@@ -25,7 +26,11 @@ def addArea(siteId):
 
 	# Present a form to add a new area.
 	form.requestReferrer.data = request.referrer
-	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
+	breadcrumbs = [{"url" : url_for("physicalModels.selectPhysicalModel", selectedClass = "Root"), "text" : ".."},
+		{"url" : url_for("physicalModels.selectPhysicalModel", selectedClass = "Enterprise", selectedId = site.Enterprise.EnterpriseId),
+			"text" : site.Enterprise.Name},
+		{"url" : url_for("physicalModels.selectPhysicalModel", selectedClass = "Site", selectedId = site.SiteId), "text" : site.Name}]
+	return render_template("addEditModel.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
 
 @areas.route("/areas/delete/<int:areaId>", methods = ["GET", "POST"])
 @login_required
@@ -61,4 +66,9 @@ def editArea(areaId):
 	form.name.data = area.Name
 	form.siteId.data = area.SiteId
 	form.requestReferrer.data = request.referrer
-	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
+	breadcrumbs = [{"url" : url_for("physicalModels.selectPhysicalModel", selectedClass = "Root"), "text" : ".."},
+		{"url" : url_for("physicalModels.selectPhysicalModel", selectedClass = "Enterprise", selectedId = area.Site.Enterprise.EnterpriseId),
+			"text" : area.Site.Enterprise.Name},
+		{"url" : url_for("physicalModels.selectPhysicalModel", selectedClass = "Site", selectedId = area.Site.SiteId), "text" : area.Site.Name},
+		{"url" : None, "text" : area.Name}]
+	return render_template("addEditModel.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)

@@ -1,4 +1,4 @@
-from flask import flash, redirect, render_template, request
+from flask import flash, redirect, render_template, request, url_for
 from flask_login import login_required
 from . import enterprises
 from . forms import EnterpriseForm
@@ -25,7 +25,8 @@ def addEnterprise():
 
 	# Present a form to add a new enterprise.
 	form.requestReferrer.data = request.referrer
-	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
+	breadcrumbs = [{"url" : url_for("physicalModels.selectPhysicalModel", selectedClass = "Root"), "text" : ".."}]
+	return render_template("addEditModel.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
 
 @enterprises.route("/enterprises/delete/<int:enterpriseId>", methods = ["GET", "POST"])
 @login_required
@@ -59,4 +60,6 @@ def editEnterprise(enterpriseId):
 	form.description.data = enterprise.Description
 	form.name.data = enterprise.Name
 	form.requestReferrer.data = request.referrer
-	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
+	breadcrumbs = [{"url" : url_for("physicalModels.selectPhysicalModel", selectedClass = "Root"), "text" : ".."},
+		{"url" : None, "text" : enterprise.Name}]
+	return render_template("addEditModel.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)

@@ -1,0 +1,13 @@
+{% macro breadcrumb(breadcrumbs) %}
+<div>
+    <ol class = "breadcrumb">
+    {% for breadcrumb in breadcrumbs %}
+        {% if breadcrumb["url"] == None %}
+            <li class = "active">{{ breadcrumb["text"] }}</li>
+        {% else %}
+            <li><a href = "{{ breadcrumb["url"] }}">{{ breadcrumb["text"] }}</a></li>
+        {% endif %}
+    {% endfor %}
+    </ol>
+</div>
+{% endmacro %}}
