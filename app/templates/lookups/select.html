@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}
+Lookups
+{% endblock %}
+
+{% block page_content %}
+<div>
+    <ol class="breadcrumb">
+        {% if childrenClass == "Enterprise" %}
+            <li class = "active">..</li>
+            {% set tableHeader = "Enterprise" %}
+            {% set pageHeaderSubText = "Enterprises" %}
+        {% elif childrenClass == "Lookup" %}
+            <li><a href = "{{ url_for("lookups.selectLookup", selectedClass = "Root") }}">..</a></li>
+            <li class = "active">{{ parent.Name }}</li>
+            {% set tableHeader = "Lookup" %}
+            {% set pageHeaderSubText = "" %}
+        {% elif childrenClass == "LookupValue" %}
+            <li><a href = "{{ url_for("lookups.selectLookup", selectedClass = "Root") }}">..</a></li>
+            <li><a href = "{{ url_for("lookups.selectLookup", selectedClass = "Enterprise", selectedId = parent.Enterprise.id()) }}">
+                {{ parent.Enterprise.Name }}</a></li>
+            <li class = "active">{{ parent.Name }}</li>
+            {% set tableHeader = "Name" %}
+            {% set pageHeaderSubText = "Values" %}
+        {% endif %}
+    </ol>
+</div>
+<div class = "page-header">
+    <h1>Lookups <small>{{ pageHeaderSubText }}</small></h1>
+</div>
+<div>
+    {% if childrenClass == "Lookup" %}
+        <a class = "btn btn-default" title = "Add a Lookup" href = "{{ url_for("lookups.addLookup", enterpriseId = parent.id()) }}" role = "button">
+            <span class="glyphicon glyphicon-plus"></span></a>
+    {% elif childrenClass == "LookupValue" %}
+        <a class = "btn btn-default" title = "Add a Lookup Value" href = "{{ url_for("lookupValues.addLookupValue", lookupId = parent.id()) }}" role = "button">
+            <span class="glyphicon glyphicon-plus"></span></a>
+    {% endif %}
+    <br><br>
+    <table id = "lookupsTable" class = "table">
+        <thead>
+            <tr>
+                <th></th>
+                <th>{{ tableHeader }}</th>
+                <th>Selectable</th>
+                <th></th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if children %}
+                {% for child in children %}
+                    <tr>
+                        {% if childrenClass != "LookupValue" %}
+                            <td><a class = "btn btn-default" title = "Select" href = "{{ url_for("lookups.selectLookup",
+                            selectedClass = child.__class__.__name__, selectedId = child.id()) }}"><span class="glyphicon glyphicon-list"></span></a></td>
+                        {% else %}
+                            <td></td>
+                        {% endif %}
+                        <td>{{ child.Name }}</td>
+                        <td>{{ child.Selectable }}</td>
+                        {% if childrenClass == "Lookup" %}
+                            <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("lookups.editLookup",
+                                lookupId = child.LookupId) }}"><span class="glyphicon glyphicon-edit"></span></a></td>
+                            <td><a class = "btn btn-default" title = "Delete" href = "{{ url_for("lookups.deleteLookup",
+                                lookupId = child.LookupId) }}"><span class="glyphicon glyphicon-trash"></span></a></td>
+                        {% elif childrenClass == "LookupValue" %}
+                            <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("lookupValues.editLookupValue",
+                                lookupValueId = child.LookupValueId) }}"><span class="glyphicon glyphicon-edit"></span></a></td>
+                            <td><a class = "btn btn-default" title = "Delete" href = "{{ url_for("lookupValues.deleteLookupValue",
+                                lookupValueId = child.LookupValueId) }}"><span class="glyphicon glyphicon-trash"></span></a></td>
+                        {% else %}
+                            <td></td>
+                            <td></td>
+                        {% endif %}
+                    </tr>
+                {% endfor %}
+            {% endif %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <link rel = "stylesheet" type = "text/css" href = {{ url_for("static", filename = "css/datatables.min.css") }}/> 
+    <script type = "text/javascript" src = {{ url_for("static", filename = "js/datatables.min.js") }}></script>
+    <script>
+        $('#lookupsTable').DataTable
+        ({
+            "order":
+            [
+                [1, 'asc'],             // Name.
+            ],
+            "columns":
+            [
+                { "orderable": false }, // Select button.
+                null,
+                null,
+                { "orderable": false }, // Edit button.
+                { "orderable": false }  // Delete button.
+            ],
+            "stateSave": true,
+            "stateDuration": 0,
+            "pageLength": 25
+        })
+    </script>
+{% endblock %}

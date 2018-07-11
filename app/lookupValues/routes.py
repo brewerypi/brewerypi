@@ -8,14 +8,6 @@ from .. models import Enterprise, Lookup, LookupValue
 
 modelName = "Lookup Value"
 
-@lookupValues.route("/lookupValues/<int:lookupId>", methods = ["GET", "POST"])
-@login_required
-@adminRequired
-def listLookupValues(lookupId):
-	lookup = Lookup.query.get_or_404(lookupId)
-	lookupValues = LookupValue.query.filter_by(LookupId = lookupId)
-	return render_template("lookupValues/lookupValues.html", lookup = lookup, lookupValues = lookupValues)
-
 @lookupValues.route("/lookupValues/add/<int:lookupId>", methods = ["GET", "POST"])
 @login_required
 @adminRequired
@@ -35,12 +27,13 @@ def addLookupValue(lookupId):
 		lookupValue = LookupValue(LookupId = form.lookupId.data, Name = form.name.data, Selectable = form.selectable.data, Value = form.value.data)
 		db.session.add(lookupValue)
 		db.session.commit()
-		flash("You have successfully added the new lookup value \"" + lookupValue.Name + "\".", "alert alert-success")
-		return redirect(url_for("lookupValues.listLookupValues", lookupId = lookupId))
+		flash("You have successfully added the new lookup value \"{}\".".format(lookupValue.Name), "alert alert-success")
+		return redirect(form.requestReferrer.data)
 
 	# Present a form to add a new lookupValue.
 	form.lookupId.data = lookupId
 	form.selectable.data = True
+	form.requestReferrer.data = request.referrer
 	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
 
 @lookupValues.route("/lookupValues/delete/<int:lookupValueId>", methods = ["GET", "POST"])
@@ -49,12 +42,12 @@ def addLookupValue(lookupId):
 def deleteLookupValue(lookupValueId):
 	lookupValue = LookupValue.query.get_or_404(lookupValueId)
 	if lookupValue.isReferenced():
-		flash("Lookup value \"" + lookupValue.Name + "\" is referenced by one or more tag values and cannot be deleted.", "alert alert-danger")
+		flash("Lookup value \"{}\" is referenced by one or more tag values and cannot be deleted.".format(lookupValue.Name), "alert alert-danger")
 	else:
 		db.session.delete(lookupValue)
 		db.session.commit()
-		flash("You have successfully deleted the lookup value \"" + lookupValue.Name + "\".", "alert alert-success")
-	return redirect(url_for("lookupValues.listLookupValues", lookupId = lookupValue.LookupId))
+		flash("You have successfully deleted the lookup value \"{}\".".format(lookupValue.Name), "alert alert-success")
+	return redirect(request.referrer)
 
 @lookupValues.route("/lookupValues/edit/<int:lookupValueId>", methods = ["GET", "POST"])
 @login_required
@@ -72,12 +65,13 @@ def editLookupValue(lookupValueId):
 		lookupValue.Selectable = form.selectable.data
 		lookupValue.Value = form.value.data
 		db.session.commit()
-		flash("You have successfully edited the lookup value \"" + lookupValue.Name + "\".", "alert alert-success")
-		return redirect(url_for("lookupValues.listLookupValues", lookupId = lookupValue.LookupId))
+		flash("You have successfully edited the lookup value \"{}\".".format(lookupValue.Name), "alert alert-success")
+		return redirect(form.requestReferrer.data)
 
 	# Present a form to edit an existing lookupValue.
 	form.lookupId.data = lookupValue.LookupId
 	form.name.data = lookupValue.Name
 	form.selectable.data = lookupValue.Selectable
 	form.value.data = lookupValue.Value
+	form.requestReferrer.data = request.referrer
 	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
