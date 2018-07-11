@@ -1,10 +1,10 @@
-from flask import flash, redirect, render_template, request, url_for
+from flask import flash, redirect, render_template, request
 from flask_login import login_required
 from . import lookupValues
 from . forms import LookupValueForm
 from .. import db
 from .. decorators import adminRequired
-from .. models import Enterprise, Lookup, LookupValue
+from .. models import Lookup, LookupValue
 
 modelName = "Lookup Value"
 
