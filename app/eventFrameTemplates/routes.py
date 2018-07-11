@@ -135,7 +135,7 @@ def editEventFrameTemplate(eventFrameTemplateId):
 def selectEventFrameTemplate(selectedClass = None, selectedId = None):
 	eventFrameAttributeTemplates = None
 	if selectedClass == None:
-		parent = Site.query.join(Enterprise).order_by(Enterprise.Name, Site.Name).first()
+		parent = Site.query.join(ElementTemplate, Enterprise).order_by(Enterprise.Name, Site.Name).first()
 		if parent:
 			children = ElementTemplate.query.join(Site).filter_by(SiteId = parent.id()).order_by(ElementTemplate.Name)
 		else:

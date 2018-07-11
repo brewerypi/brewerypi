@@ -232,7 +232,7 @@ def importTags():
 @permissionRequired(Permission.DATA_ENTRY)
 def selectTag(selectedClass = None, selectedId = None):
 	if selectedClass == None:
-		parent = Area.query.join(Site, Enterprise).order_by(Enterprise.Name, Site.Name, Area.Name).first()
+		parent = Area.query.join(Tag, Site, Enterprise).order_by(Enterprise.Name, Site.Name, Area.Name).first()
 		if parent:
 			children = Tag.query.filter_by(AreaId = parent.id())
 		else:
