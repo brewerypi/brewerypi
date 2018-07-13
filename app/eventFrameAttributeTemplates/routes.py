@@ -6,11 +6,12 @@ from .. import db
 from .. decorators import adminRequired
 from .. models import EventFrameAttributeTemplate, EventFrameTemplate
 
+modelName = "Event Frame Attribute Template"
+
 @eventFrameAttributeTemplates.route("/eventFrameAttributeTemplates/add/eventFrameTemplateId/<int:eventFrameTemplateId>", methods = ["GET", "POST"])
 @login_required
 @adminRequired
 def addEventFrameAttributeTemplate(eventFrameTemplateId):
-	modelName = "Event Frame Attribute Template"
 	operation = "Add"
 	form = EventFrameAttributeTemplateForm()
 
@@ -26,7 +27,35 @@ def addEventFrameAttributeTemplate(eventFrameTemplateId):
 
 	# Present a form to add a new event frame attribute template.
 	form.requestReferrer.data = request.referrer
-	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
+	eventFrameTemplate = EventFrameTemplate.query.get_or_404(eventFrameTemplateId)
+	if eventFrameTemplate.hasParent():
+		breadcrumbs = [{"url" : url_for("eventFrameTemplates.selectEventFrameTemplate", selectedClass = "Root"), "text" : ".."},
+			{"url" : url_for("eventFrameTemplates.selectEventFrameTemplate", selectedClass = "Enterprise",
+				selectedId = eventFrameTemplate.origin().ElementTemplate.Site.Enterprise.EnterpriseId),
+				"text" : eventFrameTemplate.origin().ElementTemplate.Site.Enterprise.Name},
+			{"url" : url_for("eventFrameTemplates.selectEventFrameTemplate", selectedClass = "Site",
+				selectedId = eventFrameTemplate.origin().ElementTemplate.Site.SiteId), "text" : eventFrameTemplate.origin().ElementTemplate.Site.Name},
+			{"url" : url_for("eventFrameTemplates.selectEventFrameTemplate", selectedClass = "ElementTemplate",
+				selectedId = eventFrameTemplate.origin().ElementTemplate.ElementTemplateId), "text" : eventFrameTemplate.origin().ElementTemplate.Name}]
+		for eventFrameTemplateAcestor in eventFrameTemplate.ancestors([]):
+			breadcrumbs.append({"url" : url_for("eventFrameTemplates.selectEventFrameTemplate", selectedClass = "EventFrameTemplate",
+				selectedId = eventFrameTemplateAcestor.EventFrameTemplateId), "text" : eventFrameTemplateAcestor.Name})
+
+		breadcrumbs.append({"url" : url_for("eventFrameTemplates.selectEventFrameTemplate", selectedClass = "EventFrameTemplate",
+			selectedId = eventFrameTemplate.EventFrameTemplateId), "text" : eventFrameTemplate.Name})
+	else:
+		breadcrumbs = [{"url" : url_for("eventFrameTemplates.selectEventFrameTemplate", selectedClass = "Root"), "text" : ".."},
+			{"url" : url_for("eventFrameTemplates.selectEventFrameTemplate", selectedClass = "Enterprise",
+				selectedId = eventFrameTemplate.ElementTemplate.Site.Enterprise.EnterpriseId),
+				"text" : eventFrameTemplate.ElementTemplate.Site.Enterprise.Name},
+			{"url" : url_for("eventFrameTemplates.selectEventFrameTemplate", selectedClass = "Site",
+				selectedId = eventFrameTemplate.ElementTemplate.Site.SiteId),
+				"text" : eventFrameTemplate.ElementTemplate.Site.Name},
+			{"url" : url_for("eventFrameTemplates.selectEventFrameTemplate", selectedClass = "ElementTemplate",
+				selectedId = eventFrameTemplate.ElementTemplate.ElementTemplateId), "text" : eventFrameTemplate.ElementTemplate.Name},
+			{"url" : url_for("eventFrameTemplates.selectEventFrameTemplate", selectedClass = "EventFrameTemplate",
+				selectedId = eventFrameTemplate.EventFrameTemplateId), "text" : eventFrameTemplate.Name}]
+	return render_template("addEditModel.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
 
 @eventFrameAttributeTemplates.route("/eventFrameAttributeTemplates/delete/eventFrameAttributeTemplateId/<int:eventFrameAttributeTemplateId>",
 	methods = ["GET", "POST"])
@@ -45,7 +74,6 @@ def deleteEventFrameAttributeTemplate(eventFrameAttributeTemplateId):
 @login_required
 @adminRequired
 def editEventFrameAttributeTemplate(eventFrameAttributeTemplateId):
-	modelName = "Event Frame Attribute Template"
 	operation = "Edit"
 	eventFrameAttributeTemplate = EventFrameAttributeTemplate.query.get_or_404(eventFrameAttributeTemplateId)
 	eventFrameTemplateId = eventFrameAttributeTemplate.EventFrameTemplate.EventFrameTemplateId
@@ -63,4 +91,39 @@ def editEventFrameAttributeTemplate(eventFrameAttributeTemplateId):
 	form.description.data = eventFrameAttributeTemplate.Description
 	form.name.data = eventFrameAttributeTemplate.Name
 	form.requestReferrer.data = request.referrer
-	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
+
+	if eventFrameAttributeTemplate.EventFrameTemplate.hasParent():
+		breadcrumbs = [{"url" : url_for("eventFrameTemplates.selectEventFrameTemplate", selectedClass = "Root"), "text" : ".."},
+			{"url" : url_for("eventFrameTemplates.selectEventFrameTemplate", selectedClass = "Enterprise",
+				selectedId = eventFrameAttributeTemplate.EventFrameTemplate.origin().ElementTemplate.Site.Enterprise.EnterpriseId),
+				"text" : eventFrameAttributeTemplate.EventFrameTemplate.origin().ElementTemplate.Site.Enterprise.Name},
+			{"url" : url_for("eventFrameTemplates.selectEventFrameTemplate", selectedClass = "Site",
+				selectedId = eventFrameAttributeTemplate.EventFrameTemplate.origin().ElementTemplate.Site.SiteId),
+				"text" : eventFrameAttributeTemplate.EventFrameTemplate.origin().ElementTemplate.Site.Name},
+			{"url" : url_for("eventFrameTemplates.selectEventFrameTemplate", selectedClass = "ElementTemplate",
+				selectedId = eventFrameAttributeTemplate.EventFrameTemplate.origin().ElementTemplate.ElementTemplateId),
+				"text" : eventFrameAttributeTemplate.EventFrameTemplate.origin().ElementTemplate.Name}]
+		for eventFrameTemplateAcestor in eventFrameAttributeTemplate.EventFrameTemplate.ancestors([]):
+			breadcrumbs.append({"url" : url_for("eventFrameTemplates.selectEventFrameTemplate", selectedClass = "EventFrameTemplate",
+				selectedId = eventFrameTemplateAcestor.EventFrameTemplateId), "text" : eventFrameTemplateAcestor.Name})
+
+		breadcrumbs.extend([{"url" : url_for("eventFrameTemplates.selectEventFrameTemplate", selectedClass = "EventFrameTemplate",
+			selectedId = eventFrameAttributeTemplate.EventFrameTemplate.EventFrameTemplateId), "text" : eventFrameAttributeTemplate.EventFrameTemplate.Name},
+			{"url" : None, "text" : eventFrameAttributeTemplate.Name}])
+	else:
+		breadcrumbs = [{"url" : url_for("eventFrameTemplates.selectEventFrameTemplate", selectedClass = "Root"), "text" : ".."},
+			{"url" : url_for("eventFrameTemplates.selectEventFrameTemplate", selectedClass = "Enterprise",
+				selectedId = eventFrameAttributeTemplate.EventFrameTemplate.ElementTemplate.Site.Enterprise.EnterpriseId),
+				"text" : eventFrameAttributeTemplate.EventFrameTemplate.ElementTemplate.Site.Enterprise.Name},
+			{"url" : url_for("eventFrameTemplates.selectEventFrameTemplate", selectedClass = "Site",
+				selectedId = eventFrameAttributeTemplate.EventFrameTemplate.ElementTemplate.Site.SiteId),
+				"text" : eventFrameAttributeTemplate.EventFrameTemplate.ElementTemplate.Site.Name},
+			{"url" : url_for("eventFrameTemplates.selectEventFrameTemplate", selectedClass = "ElementTemplate",
+				selectedId = eventFrameAttributeTemplate.EventFrameTemplate.ElementTemplate.ElementTemplateId),
+				"text" : eventFrameAttributeTemplate.EventFrameTemplate.ElementTemplate.Name},
+			{"url" : url_for("eventFrameTemplates.selectEventFrameTemplate", selectedClass = "EventFrameTemplate",
+				selectedId = eventFrameAttributeTemplate.EventFrameTemplate.EventFrameTemplateId),
+				"text" : eventFrameAttributeTemplate.EventFrameTemplate.Name},
+			{"url" : None, "text" : eventFrameAttributeTemplate.Name}]
+
+	return render_template("addEditModel.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)

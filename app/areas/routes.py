@@ -13,7 +13,6 @@ modelName = "Area"
 @adminRequired
 def addArea(siteId):
 	operation = "Add"
-	site = Site.query.get_or_404(siteId)
 	form = AreaForm()
 
 	# Add a new area.
@@ -26,6 +25,7 @@ def addArea(siteId):
 
 	# Present a form to add a new area.
 	form.requestReferrer.data = request.referrer
+	site = Site.query.get_or_404(siteId)
 	breadcrumbs = [{"url" : url_for("physicalModels.selectPhysicalModel", selectedClass = "Root"), "text" : ".."},
 		{"url" : url_for("physicalModels.selectPhysicalModel", selectedClass = "Enterprise", selectedId = site.Enterprise.EnterpriseId),
 			"text" : site.Enterprise.Name},

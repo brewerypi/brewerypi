@@ -13,7 +13,6 @@ modelName = "Lookup Value"
 @adminRequired
 def addLookupValue(lookupId):
 	operation = "Add"
-	lookup = Lookup.query.get_or_404(lookupId)
 	form = LookupValueForm()
 
 	# Determine the next lookup value.
@@ -35,6 +34,7 @@ def addLookupValue(lookupId):
 	form.lookupId.data = lookupId
 	form.selectable.data = True
 	form.requestReferrer.data = request.referrer
+	lookup = Lookup.query.get_or_404(lookupId)
 	breadcrumbs = [{"url" : url_for("lookups.selectLookup", selectedClass = "Root"), "text" : ".."},
 		{"url" : url_for("lookups.selectLookup", selectedClass = "Enterprise", selectedId = lookup.Enterprise.EnterpriseId), "text" : lookup.Enterprise.Name},
 		{"url" : url_for("lookups.selectLookup", selectedClass = "Lookup", selectedId = lookup.LookupId), "text" : lookup.Name}]

@@ -13,7 +13,6 @@ modelName = "Site"
 @adminRequired
 def addSite(enterpriseId):
 	operation = "Add"
-	enterprise = Enterprise.query.get_or_404(enterpriseId)
 	form = SiteForm()
 
 	# Add a new site.
@@ -26,6 +25,7 @@ def addSite(enterpriseId):
 
 	# Present a form to add a new site.
 	form.requestReferrer.data = request.referrer
+	enterprise = Enterprise.query.get_or_404(enterpriseId)
 	breadcrumbs = [{"url" : url_for("physicalModels.selectPhysicalModel", selectedClass = "Root"), "text" : ".."},
 		{"url" : url_for("physicalModels.selectPhysicalModel", selectedClass = "Enterprise", selectedId = enterprise.EnterpriseId), "text" : enterprise.Name}]
 	return render_template("addEditModel.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)

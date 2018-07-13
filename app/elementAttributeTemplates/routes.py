@@ -27,7 +27,15 @@ def addElementAttributeTemplate(elementTemplateId):
 	# Present a form to add a new element attribute template.
 	form.elementTemplateId.data = elementTemplateId
 	form.requestReferrer.data = request.referrer
-	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
+	elementTemplate = ElementTemplate.query.get_or_404(elementTemplateId)
+	breadcrumbs = [{"url" : url_for("elementTemplates.selectElementTemplate", selectedClass = "Root"), "text" : ".."},
+		{"url" : url_for("elementTemplates.selectElementTemplate", selectedClass = "Enterprise", selectedId = elementTemplate.Site.Enterprise.EnterpriseId),
+			"text" : elementTemplate.Site.Enterprise.Name},
+		{"url" : url_for("elementTemplates.selectElementTemplate", selectedClass = "Site", selectedId = elementTemplate.Site.SiteId),
+			"text" : elementTemplate.Site.Name},
+		{"url" : url_for("elementTemplates.selectElementTemplate", selectedClass = "ElementTemplate", selectedId = elementTemplate.ElementTemplateId),
+			"text" : elementTemplate.Name}]
+	return render_template("addEditModel.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
 
 @elementAttributeTemplates.route("/elementAttributeTemplates/delete/<int:elementAttributeTemplateId>", methods = ["GET", "POST"])
 @login_required
@@ -61,4 +69,14 @@ def editElementAttributeTemplate(elementAttributeTemplateId):
 	form.elementTemplateId.data = elementAttributeTemplate.ElementTemplateId
 	form.name.data = elementAttributeTemplate.Name
 	form.requestReferrer.data = request.referrer
-	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
+	breadcrumbs = [{"url" : url_for("elementTemplates.selectElementTemplate", selectedClass = "Root"), "text" : ".."},
+		{"url" : url_for("elementTemplates.selectElementTemplate", selectedClass = "Enterprise",
+			selectedId = elementAttributeTemplate.ElementTemplate.Site.Enterprise.EnterpriseId),
+			"text" : elementAttributeTemplate.ElementTemplate.Site.Enterprise.Name},
+		{"url" : url_for("elementTemplates.selectElementTemplate", selectedClass = "Site", selectedId = elementAttributeTemplate.ElementTemplate.Site.SiteId),
+			"text" : elementAttributeTemplate.ElementTemplate.Site.Name},
+		{"url" : url_for("elementTemplates.selectElementTemplate", selectedClass = "ElementTemplate",
+			selectedId = elementAttributeTemplate.ElementTemplate.ElementTemplateId),
+			"text" : elementAttributeTemplate.ElementTemplate.Name},
+		{"url" : None, "text" : elementAttributeTemplate.Name}]
+	return render_template("addEditModel.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)

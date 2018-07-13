@@ -10,32 +10,46 @@ from .. decorators import adminRequired, permissionRequired
 from .. models import Area, ElementAttributeTemplate, Element, ElementAttribute, ElementTemplate, Enterprise, LookupValue, Permission, Site, Tag, TagValue
 from .. tagValues . forms import TagValueForm
 
-@elementAttributes.route("/elementAttributes", methods = ["GET", "POST"])
+@elementAttributes.route("/elementAttributes/<int:elementId>", methods = ["GET", "POST"])
 @login_required
 @adminRequired
-def listElementAttributes():
-	elementAttributes = ElementAttribute.query.all()
-	return render_template("elementAttributes/elementAttributes.html", elementAttributes = elementAttributes)
+def listElementAttributes(elementId):
+	element = Element.query.get_or_404(elementId)
+	return render_template("elementAttributes/elementAttributes.html", element = element)
 
-@elementAttributes.route("/elementAttributes/add", methods = ["GET", "POST"])
+@elementAttributes.route("/elementAttributes/add/<int:elementId>", methods = ["GET", "POST"])
 @login_required
 @adminRequired
-def addElementAttribute():
+def addElementAttribute(elementId):
 	modelName = "Element Attribute"
 	operation = "Add"
 	form = ElementAttributeForm()
+	element = Element.query.get_or_404(elementId)
+	form.elementAttributeTemplate.query = ElementAttributeTemplate.query.join(ElementTemplate, Site, Enterprise). \
+		filter(ElementAttributeTemplate.ElementTemplateId == element.ElementTemplateId). \
+		order_by(Enterprise.Abbreviation, Site.Abbreviation, ElementTemplate.Name, ElementAttributeTemplate.Name)
 
 	# Add a new element attribute.
 	if form.validate_on_submit():
-		elementAttribute = ElementAttribute(ElementAttributeTemplate = form.elementAttributeTemplate.data, Element = form.element.data, Tag = form.tag.data)
+		elementAttribute = ElementAttribute(ElementAttributeTemplate = form.elementAttributeTemplate.data, ElementId = form.elementId.data, Tag = form.tag.data)
 		db.session.add(elementAttribute)
 		db.session.commit()
-		flash("You have successfully added the element attribute \"" + form.elementAttributeTemplate.data.Name + "\" for \"" + form.element.data.Name + "\".",
+		flash("You have successfully added the element attribute \"{}\" for \"{}\".".format(elementAttribute.ElementAttributeTemplate.Name, element.Name),
 			"alert alert-success")
-		return redirect(url_for("elementAttributes.listElementAttributes"))
+		return redirect(form.requestReferrer.data)
 
 	# Present a form to add a new element attribute.
-	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
+	form.elementId.data = elementId
+	form.requestReferrer.data = request.referrer
+	breadcrumbs = [{"url" : url_for("elements.selectElement", selectedClass = "Root"), "text" : ".."},
+		{"url" : url_for("elements.selectElement", selectedClass = "Enterprise", selectedId = element.ElementTemplate.Site.Enterprise.EnterpriseId),
+			"text" : element.ElementTemplate.Site.Enterprise.Name},
+		{"url" : url_for("elements.selectElement", selectedClass = "Site", selectedId = element.ElementTemplate.Site.SiteId),
+			"text" : element.ElementTemplate.Site.Name},
+		{"url" : url_for("elements.selectElement", selectedClass = "ElementTemplate", selectedId = element.ElementTemplate.ElementTemplateId),
+			"text" : element.ElementTemplate.Name},
+		{"url" : url_for("elementAttributes.listElementAttributes", elementId = elementId), "text" : element.Name}]
+	return render_template("addEditModel.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
 
 @elementAttributes.route("/elementAttributes/delete/<int:elementAttributeId>", methods = ["GET", "POST"])
 @login_required
@@ -46,33 +60,47 @@ def deleteElementAttribute(elementAttributeId):
 	elementName = elementAttribute.Element.Name
 	db.session.delete(elementAttribute)
 	db.session.commit()
-	flash("You have successfully deleted the element attribute \"" + elementAttributeTemplateName + "\" for \"" + elementName + "\".", "alert alert-success")
-	return redirect(url_for("elementAttributes.listElementAttributes"))
+	flash("You have successfully deleted the element attribute \"{}\" for \"{}\".".format(elementAttributeTemplateName, elementName), "alert alert-success")
+	return redirect(request.referrer)
 
 @elementAttributes.route("/elementAttributes/edit/<int:elementAttributeId>", methods = ["GET", "POST"])
 @login_required
 @adminRequired
 def editElementAttribute(elementAttributeId):
 	modelName = "Element Attribute"
-	operation = "Add"
+	operation = "Edit"
 	elementAttribute = ElementAttribute.query.get_or_404(elementAttributeId)
 	form = ElementAttributeForm(obj = elementAttribute)
+	form.elementAttributeTemplate.query = ElementAttributeTemplate.query.join(ElementTemplate, Site, Enterprise). \
+		filter(ElementAttributeTemplate.ElementTemplateId == elementAttribute.Element.ElementTemplateId). \
+		order_by(Enterprise.Abbreviation, Site.Abbreviation, ElementTemplate.Name, ElementAttributeTemplate.Name)
 
 	# Edit an existing element attribute.
 	if form.validate_on_submit():	
 		elementAttribute.ElementAttributeTemplate = form.elementAttributeTemplate.data
-		elementAttribute.Element = form.element.data
+		elementAttribute.ElementId = form.elementId.data
 		elementAttribute.Tag = form.tag.data
 		db.session.commit()
 		flash("You have successfully edited the element attribute \"" + elementAttribute.ElementAttributeTemplate.Name + "\" for \"" + \
 			elementAttribute.Element.Name + "\".", "alert alert-success")
-		return redirect(url_for("elementAttributes.listElementAttributes"))
+		return redirect(form.requestReferrer.data)
 
 	# Present a form to edit an existing element attribute.
 	form.elementAttributeTemplate.data = elementAttribute.ElementAttributeTemplate
-	form.element.data = elementAttribute.Element
+	form.elementId.data = elementAttribute.ElementId
 	form.tag.data = elementAttribute.Tag
-	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
+	form.requestReferrer.data = request.referrer
+	breadcrumbs = [{"url" : url_for("elements.selectElement", selectedClass = "Root"), "text" : ".."},
+		{"url" : url_for("elements.selectElement", selectedClass = "Enterprise",
+			selectedId = elementAttribute.Element.ElementTemplate.Site.Enterprise.EnterpriseId),
+			"text" : elementAttribute.Element.ElementTemplate.Site.Enterprise.Name},
+		{"url" : url_for("elements.selectElement", selectedClass = "Site", selectedId = elementAttribute.Element.ElementTemplate.Site.SiteId),
+			"text" : elementAttribute.Element.ElementTemplate.Site.Name},
+		{"url" : url_for("elements.selectElement", selectedClass = "ElementTemplate", selectedId = elementAttribute.Element.ElementTemplate.ElementTemplateId),
+			"text" : elementAttribute.Element.ElementTemplate.Name},
+		{"url" : url_for("elementAttributes.listElementAttributes", elementId = elementAttribute.ElementId), "text" : elementAttribute.Element.Name},
+		{"url" : None, "text" : elementAttribute.ElementAttributeTemplate.Name}]
+	return render_template("addEditModel.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
 
 @elementAttributes.route("/elementAttributes/export")
 @login_required
@@ -240,38 +268,38 @@ def addMultipleelementAttributeValues():
 		flash(message, "alert alert-warning")
 	return jsonify({"response": message})
 
-@elementAttributes.route("/elementAttributes/addValue/<int:elementId>/<int:tagId>", methods = ["GET", "POST"])
-@login_required
-@permissionRequired(Permission.DATA_ENTRY)
-def addElementAttributeValue(elementId, tagId):
-	modelName = "Element Attribute Value"
-	operation = "Add"
-	tag = Tag.query.get_or_404(tagId)
-	form = TagValueForm()
+# @elementAttributes.route("/elementAttributes/addValue/<int:elementId>/<int:tagId>", methods = ["GET", "POST"])
+# @login_required
+# @permissionRequired(Permission.DATA_ENTRY)
+# def addElementAttributeValue(elementId, tagId):
+# 	modelName = "Element Attribute Value"
+# 	operation = "Add"
+# 	tag = Tag.query.get_or_404(tagId)
+# 	form = TagValueForm()
 
-	# Configure the form based on if the element attribute value is associated with a lookup.
-	if tag.LookupId:
-		form.lookupValue.choices = [(lookupValue.Value, lookupValue.Name) for lookupValue in LookupValue.query. \
-			filter(LookupValue.LookupId == tag.LookupId, LookupValue.Selectable == True)]
-		del form.value
-	else:
-		del form.lookupValue
+# 	# Configure the form based on if the element attribute value is associated with a lookup.
+# 	if tag.LookupId:
+# 		form.lookupValue.choices = [(lookupValue.Value, lookupValue.Name) for lookupValue in LookupValue.query. \
+# 			filter(LookupValue.LookupId == tag.LookupId, LookupValue.Selectable == True)]
+# 		del form.value
+# 	else:
+# 		del form.lookupValue
 
-	# Add a new element attribute value.
-	if form.validate_on_submit():
-		if tag.LookupId:
-			tagValue = TagValue(TagId = form.tagId.data, Timestamp = form.timestamp.data, Value = form.lookupValue.data)
-		else:
-			tagValue = TagValue(TagId = form.tagId.data, Timestamp = form.timestamp.data, Value = form.value.data)
+# 	# Add a new element attribute value.
+# 	if form.validate_on_submit():
+# 		if tag.LookupId:
+# 			tagValue = TagValue(TagId = form.tagId.data, Timestamp = form.timestamp.data, Value = form.lookupValue.data)
+# 		else:
+# 			tagValue = TagValue(TagId = form.tagId.data, Timestamp = form.timestamp.data, Value = form.value.data)
 
-		db.session.add(tagValue)
-		db.session.commit()
-		flash("You have successfully added a new element attribute value.", "alert alert-success")
-		return redirect(url_for("elements.dashboard", elementId = elementId))
+# 		db.session.add(tagValue)
+# 		db.session.commit()
+# 		flash("You have successfully added a new element attribute value.", "alert alert-success")
+# 		return redirect(url_for("elements.dashboard", elementId = elementId))
 
-	# Present a form to add a new element attribute value.
-	form.tagId.data = tag.TagId
-	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
+# 	# Present a form to add a new element attribute value.
+# 	form.tagId.data = tag.TagId
+# 	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
 
 @elementAttributes.route("/elementAttributes/deleteValue/<int:elementId>/<int:tagValueId>", methods = ["GET", "POST"])
 @login_required

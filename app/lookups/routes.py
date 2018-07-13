@@ -13,7 +13,6 @@ modelName = "Lookup"
 @adminRequired
 def addLookup(enterpriseId):
 	operation = "Add"
-	enterprise = Enterprise.query.get_or_404(enterpriseId)
 	form = LookupForm()
 
 	# Add a new lookup.
@@ -27,6 +26,7 @@ def addLookup(enterpriseId):
 	# Present a form to add a new lookup.
 	form.enterpriseId.data = enterpriseId
 	form.requestReferrer.data = request.referrer
+	enterprise = Enterprise.query.get_or_404(enterpriseId)
 	breadcrumbs = [{"url" : url_for("lookups.selectLookup", selectedClass = "Root"), "text" : ".."},
 		{"url" : url_for("lookups.selectLookup", selectedClass = "Enterprise", selectedId = enterprise.EnterpriseId), "text" : enterprise.Name}]
 	return render_template("addEditModel.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)

@@ -288,6 +288,12 @@ class EventFrameTemplate(db.Model):
 		else:
 			return False
 
+	def hasParent(self):
+		if self.ParentEventFrameTemplateId:
+			return True
+		else:
+			return False
+
 	def id(self):
 		return self.EventFrameTemplateId
 

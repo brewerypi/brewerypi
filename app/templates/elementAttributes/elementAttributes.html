@@ -5,17 +5,28 @@ Element Attributes
 {% endblock %}
 
 {% block page_content %}
+<div>
+    <ol class="breadcrumb">
+        <li><a href = "{{ url_for("elements.selectElement", selectedClass = "Root", selectedId = None) }}">..</a></li>
+        <li><a href = "{{ url_for("elements.selectElement", selectedClass = "Enterprise",
+            selectedId = element.ElementTemplate.Site.Enterprise.EnterpriseId) }}">{{ element.ElementTemplate.Site.Enterprise.Name }}</a></li>
+        <li><a href = "{{ url_for("elements.selectElement", selectedClass = "Site",
+            selectedId = element.ElementTemplate.Site.SiteId) }}">{{ element.ElementTemplate.Site.Name }}</a></li>
+        <li><a href = "{{ url_for("elements.selectElement", selectedClass = "ElementTemplate",
+            selectedId = element.ElementTemplate.ElementTemplateId) }}">{{ element.ElementTemplate.Name }}</a></li>
+        <li><a href = "{{ url_for("elements.dashboard", elementId = element.ElementId) }}">{{ element.Name }}</a></li>
+    </ol>
+</div>
 <div class = "page-header">
     <h1>Element Attributes <small></small></h1>
 </div>
 <div>
-    <a class = "btn btn-default" title = "Add" href = "{{ url_for("elementAttributes.addElementAttribute") }}" role = "button">
-        <span class="glyphicon glyphicon-plus"></span></a>
+    <a class = "btn btn-default" title = "Add" href = "{{ url_for("elementAttributes.addElementAttribute", elementId = element.ElementId) }}"
+        role = "button"><span class="glyphicon glyphicon-plus"></span></a>
     <br><br>
     <table id = "elementAttributesTable" class = "table">
         <thead>
             <tr>
-                <th>Element</th>
                 <th>Element Attribute Template</th>
                 <th>Tag</th>
                 <th></th>
@@ -24,14 +35,9 @@ Element Attributes
             </tr>
         </thead>
         <tbody>
-            {% for elementAttribute in elementAttributes %}
+            {% for elementAttribute in element.ElementAttributes %}
             <tr>
-                <td>{{ elementAttribute.Element.ElementTemplate.Site.Enterprise.Abbreviation + "_" + 
-                    elementAttribute.Element.ElementTemplate.Site.Abbreviation + "_" + elementAttribute.Element.ElementTemplate.Name + "_" + 
-                    elementAttribute.Element.Name }}</td>
-                <td>{{ elementAttribute.ElementAttributeTemplate.ElementTemplate.Site.Enterprise.Abbreviation + "_" + 
-                    elementAttribute.ElementAttributeTemplate.ElementTemplate.Site.Abbreviation + "_" + 
-                    elementAttribute.ElementAttributeTemplate.ElementTemplate.Name + "_" + elementAttribute.ElementAttributeTemplate.Name }}</td>
+                <td>{{ elementAttribute.ElementAttributeTemplate.Name }}</td>
                 <td>{{ elementAttribute.Tag.Area.Site.Enterprise.Abbreviation + "_" + elementAttribute.Tag.Area.Site.Abbreviation + "_" +
                     elementAttribute.Tag.Area.Abbreviation + "_" + elementAttribute.Tag.Name }}</td>
                 <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("elementAttributes.editElementAttribute",
@@ -54,12 +60,10 @@ Element Attributes
         ({
             "order":
             [
-                [0, 'asc'],             // Element path.
-                [1, 'asc']              // Element Attribute Template.
+                [0, 'asc']              // Element Attribute Template.
             ],
             "columns":
             [
-                null,
                 null,
                 null,
                 { "orderable": false }, // Edit element attribute button.

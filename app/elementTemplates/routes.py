@@ -26,7 +26,12 @@ def addElementTemplate(siteId):
 	# Present a form to add a new element template.
 	form.siteId.data = siteId
 	form.requestReferrer.data = request.referrer
-	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
+	site = Site.query.get_or_404(siteId)
+	breadcrumbs = [{"url" : url_for("elementTemplates.selectElementTemplate", selectedClass = "Root"), "text" : ".."},
+		{"url" : url_for("elementTemplates.selectElementTemplate", selectedClass = "Enterprise", selectedId = site.Enterprise.EnterpriseId),
+			"text" : site.Enterprise.Name},
+		{"url" : url_for("elementTemplates.selectElementTemplate", selectedClass = "Site", selectedId = site.SiteId), "text" : site.Name}]
+	return render_template("addEditModel.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
 
 @elementTemplates.route("/elementTemplates/delete/<int:elementTemplateId>", methods = ["GET", "POST"])
 @login_required
@@ -60,7 +65,13 @@ def editElementTemplate(elementTemplateId):
 	form.name.data = elementTemplate.Name
 	form.siteId.data = elementTemplate.SiteId
 	form.requestReferrer.data = request.referrer
-	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
+	breadcrumbs = [{"url" : url_for("elementTemplates.selectElementTemplate", selectedClass = "Root"), "text" : ".."},
+		{"url" : url_for("elementTemplates.selectElementTemplate", selectedClass = "Enterprise", selectedId = elementTemplate.Site.Enterprise.EnterpriseId),
+			"text" : elementTemplate.Site.Enterprise.Name},
+		{"url" : url_for("elementTemplates.selectElementTemplate", selectedClass = "Site", selectedId = elementTemplate.Site.SiteId),
+			"text" : elementTemplate.Site.Name},
+		{"url" : None, "text" : elementTemplate.Name}]
+	return render_template("addEditModel.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
 
 @elementTemplates.route("/elementTemplates/select", methods = ["GET", "POST"]) # Default.
 @elementTemplates.route("/elementTemplates/select/<string:selectedClass>", methods = ["GET", "POST"]) # Root.

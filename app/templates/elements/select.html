@@ -42,12 +42,20 @@ Data Entry - Elements
     <h1>Elements <small>{{ pageHeaderSubText }}</small></h1>
 </div>
 <div>
+    {% if childrenClass == "Element" %}
+        <a class = "btn btn-default" title = "Add" href = "{{ url_for("elements.addElement", elementTemplateId = parent.id()) }}" role = "button">
+            <span class="glyphicon glyphicon-plus"></span></a>
+    {% endif %}
+    <br><br>
     <table id = "table" class = "table">
         <thead>
             <tr>
                 <th></th>
                 <th>{{ tableHeader }}</th>
                 <th>Description</th>
+                <th></th>
+                <th></th>
+                <th></th>
             </tr>
         </thead>
         <tbody>
@@ -63,6 +71,18 @@ Data Entry - Elements
                         {% endif %}
                         <td>{{ child.Name }}</td>
                         <td>{{ child.Description }}</td>
+                        {% if childrenClass == "Element" %}
+                            <td><a class = "btn btn-default" title = "Copy" href = "{{ url_for("elements.copyElement", elementId = child.ElementId) }}">
+                                <span class="glyphicon glyphicon-copy"></span></a></td>
+                            <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("elements.editElement", elementId = child.ElementId) }}">
+                                <span class="glyphicon glyphicon-edit"></span></a></td>
+                            <td><a class = "btn btn-default" title = "Delete" href = "{{ url_for("elements.deleteElement", elementId = child.ElementId) }}">
+                                <span class="glyphicon glyphicon-trash"></span></a></td>
+                        {% else %}
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        {% endif %}
                     </tr>
                 {% endfor %}
             {% endif %}
@@ -86,7 +106,10 @@ Data Entry - Elements
             [
                 { "orderable": false }, // Details button.
                 null,
-                null
+                null,
+                { "orderable": false }, // Copy button.
+                { "orderable": false }, // Edit button.
+                { "orderable": false }  // Delete button.
             ],
             "stateSave": true,
             "stateDuration": 0,
