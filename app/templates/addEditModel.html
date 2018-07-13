@@ -18,3 +18,12 @@
     {{ wtf.quick_form(form) }}
 </div>
 {% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <script>
+        $("#submit").hide()
+        $("#submit").parent().append("<button class = \"btn btn-default\" title = \"Save\" type = \"submit\">" +
+            "<span class = \"glyphicon glyphicon-floppy-disk\" aria-hidden = \"true\"></span></button>")
+    </script>
+{% endblock %}
