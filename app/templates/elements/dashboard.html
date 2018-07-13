@@ -85,7 +85,9 @@
     </table>
 </div>
 <div>
-    <h1>{{ element.Name }} <small>Attributes</small></h1>
+    <h1>{{ element.Name }} <small>Attributes <a class = "btn btn-default" title = "Edit"
+        href = "{{ url_for("elementAttributes.listElementAttributes", elementId = element.ElementId) }}">
+        <span class="glyphicon glyphicon-edit"></span></small></h1></a>
 </div>
 <div>
     <table id = "attributesTable" class = "table">

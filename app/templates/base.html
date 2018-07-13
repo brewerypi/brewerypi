@@ -47,7 +47,6 @@
                     <li class = "dropdown"><a href = "#" class = "dropdown-toggle" data-toggle = "dropdown">Elements <span class="caret"></span></a>
                         <ul class = "dropdown-menu">
                             <li><a href = "{{ url_for("elements.selectElement") }}">Elements</a></li>
-                            <li><a href = "{{ url_for("elementAttributes.listElementAttributes") }}">Element Attributes</a></li>
                             <li><a href = "{{ url_for("elementAttributes.importElementAttributes") }}">Import</a></li>
                             <li><a href = "{{ url_for("elementAttributes.exportElementAttributes") }}">Export</a></li>
                         </ul>
@@ -64,7 +63,7 @@
                         </li>
                     {% endif %}
                 {% endif %}
-                <li class = "dropdown"><a href = "#" class = "dropdown-toggle" data-toggle = "dropdown">Data Entry <span class="caret"></span></a>
+                <li class = "dropdown"><a href = "#" class = "dropdown-toggle" data-toggle = "dropdown">Event Frames <span class="caret"></span></a>
                     <ul class = "dropdown-menu">
                         <li><a href = "{{ url_for("eventFrames.selectEventFrame") }}">Event Frames</a></li>
                     </ul>
