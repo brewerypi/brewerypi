@@ -13,7 +13,6 @@ modelName = "Element Attribute Template"
 @adminRequired
 def addElementAttributeTemplate(elementTemplateId):
 	operation = "Add"
-	elementTemplate = ElementTemplate.query.get_or_404(elementTemplateId)
 	form = ElementAttributeTemplateForm()
 
 	# Add a new elementAttributeTemplate.
@@ -28,6 +27,7 @@ def addElementAttributeTemplate(elementTemplateId):
 	# Present a form to add a new element attribute template.
 	form.elementTemplateId.data = elementTemplateId
 	form.requestReferrer.data = request.referrer
+	elementTemplate = ElementTemplate.query.get_or_404(elementTemplateId)
 	breadcrumbs = [{"url" : url_for("elementTemplates.selectElementTemplate", selectedClass = "Root"), "text" : ".."},
 		{"url" : url_for("elementTemplates.selectElementTemplate", selectedClass = "Enterprise", selectedId = elementTemplate.Site.Enterprise.EnterpriseId),
 			"text" : elementTemplate.Site.Enterprise.Name},

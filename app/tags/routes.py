@@ -14,7 +14,6 @@ from .. models import Area, Enterprise, Lookup, Permission, Site, Tag, UnitOfMea
 @adminRequired
 def addTag(areaId, lookup = False):
 	operation = "Add"
-	area = Area.query.get_or_404(areaId)
 	form = TagForm()
 
 	if lookup:
@@ -39,6 +38,7 @@ def addTag(areaId, lookup = False):
 	# Present a form to add a new tag.
 	form.areaId.data = areaId
 	form.requestReferrer.data = request.referrer
+	area = Area.query.get_or_404(areaId)
 	breadcrumbs = [{"url" : url_for("tags.selectTag", selectedClass = "Root"), "text" : ".."},
 		{"url" : url_for("tags.selectTag", selectedClass = "Enterprise", selectedId = area.Site.Enterprise.EnterpriseId), "text" : area.Site.Enterprise.Name},
 		{"url" : url_for("tags.selectTag", selectedClass = "Site", selectedId = area.Site.SiteId), "text" : area.Site.Name},

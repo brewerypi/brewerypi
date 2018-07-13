@@ -13,7 +13,6 @@ modelName = "Element Template"
 @adminRequired
 def addElementTemplate(siteId):
 	operation = "Add"
-	site = Site.query.get_or_404(siteId)
 	form = ElementTemplateForm()
 
 	# Add a new element template.
@@ -27,6 +26,7 @@ def addElementTemplate(siteId):
 	# Present a form to add a new element template.
 	form.siteId.data = siteId
 	form.requestReferrer.data = request.referrer
+	site = Site.query.get_or_404(siteId)
 	breadcrumbs = [{"url" : url_for("elementTemplates.selectElementTemplate", selectedClass = "Root"), "text" : ".."},
 		{"url" : url_for("elementTemplates.selectElementTemplate", selectedClass = "Enterprise", selectedId = site.Enterprise.EnterpriseId),
 			"text" : site.Enterprise.Name},
