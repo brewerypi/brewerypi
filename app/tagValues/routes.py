@@ -27,9 +27,10 @@ def listTagValues(tagId, elementAttributeId = None):
 	return render_template("tagValues/tagValues.html", elementAttribute = elementAttribute, tag = tag, tagValues = tagValues)
 
 @tagValues.route("/tagValues/add/<int:tagId>", methods = ["GET", "POST"])
+@tagValues.route("/tagValues/add/<int:tagId>/<int:elementAttributeId>", methods = ["GET", "POST"])
 @login_required
 @permissionRequired(Permission.DATA_ENTRY)
-def addTagValue(tagId):
+def addTagValue(tagId, elementAttributeId = None):
 	operation = "Add"
 	tag = Tag.query.get_or_404(tagId)
 	form = TagValueForm()
@@ -57,7 +58,28 @@ def addTagValue(tagId):
 	# Present a form to add a new tag value.
 	form.tagId.data = tagId
 	form.requestReferrer.data = request.referrer
-	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
+	if elementAttributeId:
+		elementAttribute = ElementAttribute.query.get_or_404(elementAttributeId)
+		breadcrumbs = [{"url" : url_for("tags.selectTag", selectedClass = "Root"), "text" : ".."},
+			{"url" : url_for("elements.selectElement", selectedClass = "Enterprise",
+				selectedId = elementAttribute.Element.ElementTemplate.Site.Enterprise.EnterpriseId),
+				"text" : elementAttribute.Element.ElementTemplate.Site.Enterprise.Name},
+			{"url" : url_for("elements.selectElement", selectedClass = "Site",
+				selectedId = elementAttribute.Element.ElementTemplate.Site.SiteId), "text" : elementAttribute.Element.ElementTemplate.Site.Name},
+			{"url" : url_for("elements.selectElement", selectedClass = "ElementTemplate",
+				selectedId = elementAttribute.Element.ElementTemplate.ElementTemplateId), "text" : elementAttribute.Element.ElementTemplate.Name},
+			{"url" : url_for("elements.dashboard", elementId = elementAttribute.Element.ElementId), "text" : elementAttribute.Element.Name},
+			{"url" : url_for("tagValues.listTagValues", tagId = tag.TagId, elementAttributeId = elementAttribute.ElementAttributeId),
+				"text" : elementAttribute.ElementAttributeTemplate.Name}]
+	else:
+		breadcrumbs = [{"url" : url_for("tags.selectTag", selectedClass = "Root"), "text" : ".."},
+			{"url" : url_for("tags.selectTag", selectedClass = "Enterprise", selectedId = tag.Area.Site.Enterprise.EnterpriseId),
+				"text" : tag.Area.Site.Enterprise.Name},
+			{"url" : url_for("tags.selectTag", selectedClass = "Site", selectedId = tag.Area.Site.SiteId), "text" : tag.Area.Site.Name},
+			{"url" : url_for("tags.selectTag", selectedClass = "Area", selectedId = tag.Area.AreaId), "text" : tag.Area.Name},
+			{"url" : url_for("tagValues.listTagValues", tagId = tag.TagId), "text" : tag.Name}]
+
+	return render_template("addEditModel.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
 
 @tagValues.route("/tagValues/delete/<int:tagValueId>", methods = ["GET", "POST"])
 @login_required
@@ -70,9 +92,10 @@ def deleteTagValue(tagValueId):
 	return redirect(request.referrer)
 
 @tagValues.route("/tagValues/edit/<int:tagValueId>", methods = ["GET", "POST"])
+@tagValues.route("/tagValues/edit/<int:tagValueId>/<int:elementAttributeId>", methods = ["GET", "POST"])
 @login_required
 @permissionRequired(Permission.DATA_ENTRY)
-def editTagValue(tagValueId):
+def editTagValue(tagValueId, elementAttributeId = None):
 	operation = "Edit"
 	tagValue = TagValue.query.get_or_404(tagValueId)
 	tag = Tag.query.get_or_404(tagValue.TagId)
@@ -110,7 +133,29 @@ def editTagValue(tagValueId):
 		form.value.data = tagValue.Value
 
 	form.requestReferrer.data = request.referrer
-	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
+	if elementAttributeId:
+		elementAttribute = ElementAttribute.query.get_or_404(elementAttributeId)
+		breadcrumbs = [{"url" : url_for("tags.selectTag", selectedClass = "Root"), "text" : ".."},
+			{"url" : url_for("elements.selectElement", selectedClass = "Enterprise",
+				selectedId = elementAttribute.Element.ElementTemplate.Site.Enterprise.EnterpriseId),
+				"text" : elementAttribute.Element.ElementTemplate.Site.Enterprise.Name},
+			{"url" : url_for("elements.selectElement", selectedClass = "Site",
+				selectedId = elementAttribute.Element.ElementTemplate.Site.SiteId), "text" : elementAttribute.Element.ElementTemplate.Site.Name},
+			{"url" : url_for("elements.selectElement", selectedClass = "ElementTemplate",
+				selectedId = elementAttribute.Element.ElementTemplate.ElementTemplateId), "text" : elementAttribute.Element.ElementTemplate.Name},
+			{"url" : url_for("elements.dashboard", elementId = elementAttribute.Element.ElementId), "text" : elementAttribute.Element.Name},
+			{"url" : None, "text" : elementAttribute.ElementAttributeTemplate.Name},
+			{"url" : None, "text" : tagValue.Timestamp}]
+	else:
+		breadcrumbs = [{"url" : url_for("tags.selectTag", selectedClass = "Root"), "text" : ".."},
+			{"url" : url_for("tags.selectTag", selectedClass = "Enterprise", selectedId = tag.Area.Site.Enterprise.EnterpriseId),
+				"text" : tag.Area.Site.Enterprise.Name},
+			{"url" : url_for("tags.selectTag", selectedClass = "Site", selectedId = tag.Area.Site.SiteId), "text" : tag.Area.Site.Name},
+			{"url" : url_for("tags.selectTag", selectedClass = "Area", selectedId = tag.Area.AreaId), "text" : tag.Area.Name},
+			{"url" : url_for("tagValues.listTagValues", tagId = tag.TagId), "text" : tag.Name},
+			{"url" : None, "text" : tagValue.Timestamp}]
+
+	return render_template("addEditModel.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
 
 @tagValues.route("/tagValueNotes/<int:tagValueId>", methods = ["GET", "POST"])
 @tagValues.route("/tagValueNotes/<int:tagValueId>/<int:elementAttributeId>", methods = ["GET", "POST"])

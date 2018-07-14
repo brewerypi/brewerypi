@@ -33,8 +33,13 @@ Tag Values
     <h1>Tag Values <small></small></h1>
 </div>
 <div>
-    <a class = "btn btn-default" title = "Add" href = "{{ url_for("tagValues.addTagValue", tagId = tag.TagId) }}" role = "button">
-        <span class="glyphicon glyphicon-plus"></span></a>
+    {% if elementAttribute %}
+        <a class = "btn btn-default" title = "Add" href = "{{ url_for("tagValues.addTagValue", tagId = tag.TagId,
+            elementAttributeId = elementAttribute.ElementAttributeId) }}" role = "button"><span class="glyphicon glyphicon-plus"></span></a>
+    {% else %}
+        <a class = "btn btn-default" title = "Add" href = "{{ url_for("tagValues.addTagValue", tagId = tag.TagId) }}" role = "button">
+            <span class="glyphicon glyphicon-plus"></span></a>
+    {% endif %}
     <br><br>
     <table id = "tagValuesTable" class = "table">
         <thead>
