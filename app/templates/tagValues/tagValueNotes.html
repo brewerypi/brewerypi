@@ -69,22 +69,25 @@ Tag Value Notes
     <link rel = "stylesheet" type = "text/css" href = {{ url_for("static", filename = "css/datatables.min.css") }}/> 
     <script type = "text/javascript" src = {{ url_for("static", filename = "js/datatables.min.js") }}></script>
     <script>
-        $('#tagValueNotesTable').DataTable
-        ({
-            "order":
-            [
-                [0, 'desc']              // Timestamp.
-            ],
-            "columns":
-            [
-                null,
-                null,
-                { "orderable": false }, // Edit tag value button.
-                { "orderable": false }  // Delete tag value button.
-            ],
-            "stateSave": true,
-            "stateDuration": 0,
-            "pageLength": 25
-        });
+        $(document).ready(function()
+        {
+            $('#tagValueNotesTable').DataTable
+            ({
+                "order":
+                [
+                    [0, 'desc']              // Timestamp.
+                ],
+                "columns":
+                [
+                    null,
+                    null,
+                    { "orderable": false }, // Edit tag value button.
+                    { "orderable": false }  // Delete tag value button.
+                ],
+                "stateSave": true,
+                "stateDuration": 0,
+                "pageLength": 25
+            })
+        })
     </script>
 {% endblock %}

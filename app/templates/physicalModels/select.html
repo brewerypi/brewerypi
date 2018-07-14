@@ -96,24 +96,27 @@ Physical Models
     <link rel = "stylesheet" type = "text/css" href = {{ url_for("static", filename = "css/datatables.min.css") }}/> 
     <script type = "text/javascript" src = {{ url_for("static", filename = "js/datatables.min.js") }}></script>
     <script>
-        $('#physicalModelsTable').DataTable
-        ({
-            "order":
-            [
-                [1, 'asc'],             // Name.
-            ],
-            "columns":
-            [
-                { "orderable": false }, // Select button.
-                null,
-                null,
-                null,
-                { "orderable": false }, // Edit button.
-                { "orderable": false }  // Delete button.
-            ],
-            "stateSave": true,
-            "stateDuration": 0,
-            "pageLength": 25
+        $(document).ready(function()
+        {
+            $('#physicalModelsTable').DataTable
+            ({
+                "order":
+                [
+                    [1, 'asc'],             // Name.
+                ],
+                "columns":
+                [
+                    { "orderable": false }, // Select button.
+                    null,
+                    null,
+                    null,
+                    { "orderable": false }, // Edit button.
+                    { "orderable": false }  // Delete button.
+                ],
+                "stateSave": true,
+                "stateDuration": 0,
+                "pageLength": 25
+            })
         })
     </script>
 {% endblock %}

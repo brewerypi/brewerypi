@@ -56,22 +56,25 @@ Element Attributes
     <link rel = "stylesheet" type = "text/css" href = {{ url_for("static", filename = "css/datatables.min.css") }}/> 
     <script type = "text/javascript" src = {{ url_for("static", filename = "js/datatables.min.js") }}></script>
     <script>
-        $('#elementAttributesTable').DataTable
-        ({
-            "order":
-            [
-                [0, 'asc']              // Element Attribute Template.
-            ],
-            "columns":
-            [
-                null,
-                null,
-                { "orderable": false }, // Edit element attribute button.
-                { "orderable": false }  // Delete element attribute button.
-            ],
-            "stateSave": true,
-            "stateDuration": 0,
-            "pageLength": 25
-        });
+        $(document).ready(function()
+        {
+            $('#elementAttributesTable').DataTable
+            ({
+                "order":
+                [
+                    [0, 'asc']              // Element Attribute Template.
+                ],
+                "columns":
+                [
+                    null,
+                    null,
+                    { "orderable": false }, // Edit element attribute button.
+                    { "orderable": false }  // Delete element attribute button.
+                ],
+                "stateSave": true,
+                "stateDuration": 0,
+                "pageLength": 25
+            })
+        })
     </script>
 {% endblock %}

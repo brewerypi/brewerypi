@@ -57,23 +57,26 @@ Users
     <link rel = "stylesheet" type = "text/css" href = {{ url_for("static", filename = "css/datatables.min.css") }}/> 
     <script type = "text/javascript" src = {{ url_for("static", filename = "js/datatables.min.js") }}></script>
     <script>
-        $('#usersTable').DataTable
-        ({
-            "order":
-            [
-                [0, 'asc'],             // Name.
-            ],
-            "columns":
-            [
-                null,
-                null,
-                { "orderable": false }, // Change password button.
-                { "orderable": false }, // Edit button.
-                { "orderable": false }  // Delete button.
-            ],
-            "stateSave": true,
-            "stateDuration": 0,
-            "pageLength": 25
-        });
+        $(document).ready(function()
+        {
+            $('#usersTable').DataTable
+            ({
+                "order":
+                [
+                    [0, 'asc'],             // Name.
+                ],
+                "columns":
+                [
+                    null,
+                    null,
+                    { "orderable": false }, // Change password button.
+                    { "orderable": false }, // Edit button.
+                    { "orderable": false }  // Delete button.
+                ],
+                "stateSave": true,
+                "stateDuration": 0,
+                "pageLength": 25
+            })
+        })
     </script>
 {% endblock %}

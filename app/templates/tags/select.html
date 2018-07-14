@@ -94,23 +94,26 @@ Tags
     <link rel = "stylesheet" type = "text/css" href = {{ url_for("static", filename = "css/datatables.min.css") }}/> 
     <script type = "text/javascript" src = {{ url_for("static", filename = "js/datatables.min.js") }}></script>
     <script>
-        $('#tagsTable').DataTable
-        ({
-            "order":
-            [
-                [1, 'asc'],             // Name.
-            ],
-            "columns":
-            [
-                { "orderable": false }, // Tag values button.
-                null,
-                null,
-                { "orderable": false }, // Edit button.
-                { "orderable": false }  // Delete button.
-            ],
-            "stateSave": true,
-            "stateDuration": 0,
-            "pageLength": 25
-        });
+        $(document).ready(function()
+        {
+            $('#tagsTable').DataTable
+            ({
+                "order":
+                [
+                    [1, 'asc'],             // Name.
+                ],
+                "columns":
+                [
+                    { "orderable": false }, // Tag values button.
+                    null,
+                    null,
+                    { "orderable": false }, // Edit button.
+                    { "orderable": false }  // Delete button.
+                ],
+                "stateSave": true,
+                "stateDuration": 0,
+                "pageLength": 25
+            })
+        })
     </script>
 {% endblock %}

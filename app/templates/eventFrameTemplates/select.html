@@ -147,44 +147,45 @@ Event Frame Templates
     <link rel = "stylesheet" type = "text/css" href = {{ url_for("static", filename = "css/datatables.min.css") }}/> 
     <script type = "text/javascript" src = {{ url_for("static", filename = "js/datatables.min.js") }}></script>
     <script>
-        $('#eventFrameTemplatesTable').DataTable
-        ({
-            "order":
-            [
-                [3, 'asc'],             // Order.
-                [1, 'asc']              // Name.
-            ],
-            "columns":
-            [
-                { "orderable": false }, // Children button.
-                null,
-                null,
-                null,
-                { "orderable": false }, // Edit button.
-                { "orderable": false }  // Delete button.
-            ],
-            "stateSave": true,
-            "stateDuration": 0,
-            "pageLength": 25
-        });
-    </script>
-    <script>
-        $('#eventFrameAttributeTemplatesTable').DataTable
-        ({
-            "order":
-            [
-                [0, 'asc']              // Name.
-            ],
-            "columns":
-            [
-                null,
-                null,
-                { "orderable": false }, // Edit button.
-                { "orderable": false }  // Delete button.
-            ],
-            "stateSave": true,
-            "stateDuration": 0,
-            "pageLength": 25
-        });
+        $(document).ready(function()
+        {
+            $('#eventFrameTemplatesTable').DataTable
+            ({
+                "order":
+                [
+                    [3, 'asc'],             // Order.
+                    [1, 'asc']              // Name.
+                ],
+                "columns":
+                [
+                    { "orderable": false }, // Children button.
+                    null,
+                    null,
+                    null,
+                    { "orderable": false }, // Edit button.
+                    { "orderable": false }  // Delete button.
+                ],
+                "stateSave": true,
+                "stateDuration": 0,
+                "pageLength": 25
+            })
+            $('#eventFrameAttributeTemplatesTable').DataTable
+            ({
+                "order":
+                [
+                    [0, 'asc']              // Name.
+                ],
+                "columns":
+                [
+                    null,
+                    null,
+                    { "orderable": false }, // Edit button.
+                    { "orderable": false }  // Delete button.
+                ],
+                "stateSave": true,
+                "stateDuration": 0,
+                "pageLength": 25
+            })
+        })
     </script>
 {% endblock %}

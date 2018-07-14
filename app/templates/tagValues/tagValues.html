@@ -97,24 +97,27 @@ Tag Values
     <link rel = "stylesheet" type = "text/css" href = {{ url_for("static", filename = "css/styles.css") }}/>
     <script type = "text/javascript" src = {{ url_for("static", filename = "js/datatables.min.js") }}></script>
     <script>
-        $('#tagValuesTable').DataTable
-        ({
-            "order":
-            [
-                [0, 'desc']              // Timestamp.
-            ],
-            "columns":
-            [
-                null,
-                null,
-                null,
-                { "orderable": false }, // Edit tag value button.
-                { "orderable": false }, // Add note button.
-                { "orderable": false }  // Delete tag value button.
-            ],
-            "stateSave": true,
-            "stateDuration": 0,
-            "pageLength": 25
-        });
+        $(document).ready(function()
+        {
+            $('#tagValuesTable').DataTable
+            ({
+                "order":
+                [
+                    [0, 'desc']              // Timestamp.
+                ],
+                "columns":
+                [
+                    null,
+                    null,
+                    null,
+                    { "orderable": false }, // Edit tag value button.
+                    { "orderable": false }, // Add note button.
+                    { "orderable": false }  // Delete tag value button.
+                ],
+                "stateSave": true,
+                "stateDuration": 0,
+                "pageLength": 25
+            })
+        })
     </script>
 {% endblock %}
