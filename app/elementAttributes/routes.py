@@ -1,14 +1,13 @@
 import csv
 import os
-from flask import current_app, flash, jsonify, redirect, render_template, request, send_file, url_for
+from flask import current_app, flash, redirect, render_template, request, send_file, url_for
 from flask_login import login_required
 from sqlalchemy import or_
 from . import elementAttributes
-from . forms import ElementAttributeForm, ElementAttributeImportForm, ElementAttributeValueForm
+from . forms import ElementAttributeForm, ElementAttributeImportForm
 from .. import db
-from .. decorators import adminRequired, permissionRequired
-from .. models import Area, ElementAttributeTemplate, Element, ElementAttribute, ElementTemplate, Enterprise, LookupValue, Permission, Site, Tag, TagValue
-from .. tagValues . forms import TagValueForm
+from .. decorators import adminRequired
+from .. models import Area, ElementAttributeTemplate, Element, ElementAttribute, ElementTemplate, Enterprise, Site, Tag
 
 @elementAttributes.route("/elementAttributes/<int:elementId>", methods = ["GET", "POST"])
 @login_required
@@ -244,112 +243,3 @@ def importElementAttributes():
 					successes.append("Element Attribute Template \"" + elementAttributeTemplateName + "\" updated for Element \"" + elementName + "\".")
 
 	return render_template("import.html", errors = errors, form = form, importing = "Element Attributes", successes = successes, warnings = warnings)
-
-
-@elementAttributes.route("/elementAttributes/addMultipleValues", methods=["GET", "POST"])
-@login_required
-@permissionRequired(Permission.DATA_ENTRY)
-def addMultipleelementAttributeValues():
-	# Get the data, loop through it and add new value.
-	data = request.get_json(force = True)
-	count = 0
-	for item in data:
-		elementAttribute = ElementAttribute.query.get_or_404(item["id"])
-		tagValue = TagValue(TagId = elementAttribute.TagId, Timestamp = item["timestamp"], Value = item["value"])
-		db.session.add(tagValue)
-		count = count + 1
-
-	if count > 0:
-		db.session.commit()
-		message = "You have successfully added one or more new element attribute values."
-		flash(message, "alert alert-success")
-	else:
-		message = "Nothing added to save."
-		flash(message, "alert alert-warning")
-	return jsonify({"response": message})
-
-# @elementAttributes.route("/elementAttributes/addValue/<int:elementId>/<int:tagId>", methods = ["GET", "POST"])
-# @login_required
-# @permissionRequired(Permission.DATA_ENTRY)
-# def addElementAttributeValue(elementId, tagId):
-# 	modelName = "Element Attribute Value"
-# 	operation = "Add"
-# 	tag = Tag.query.get_or_404(tagId)
-# 	form = TagValueForm()
-
-# 	# Configure the form based on if the element attribute value is associated with a lookup.
-# 	if tag.LookupId:
-# 		form.lookupValue.choices = [(lookupValue.Value, lookupValue.Name) for lookupValue in LookupValue.query. \
-# 			filter(LookupValue.LookupId == tag.LookupId, LookupValue.Selectable == True)]
-# 		del form.value
-# 	else:
-# 		del form.lookupValue
-
-# 	# Add a new element attribute value.
-# 	if form.validate_on_submit():
-# 		if tag.LookupId:
-# 			tagValue = TagValue(TagId = form.tagId.data, Timestamp = form.timestamp.data, Value = form.lookupValue.data)
-# 		else:
-# 			tagValue = TagValue(TagId = form.tagId.data, Timestamp = form.timestamp.data, Value = form.value.data)
-
-# 		db.session.add(tagValue)
-# 		db.session.commit()
-# 		flash("You have successfully added a new element attribute value.", "alert alert-success")
-# 		return redirect(url_for("elements.dashboard", elementId = elementId))
-
-# 	# Present a form to add a new element attribute value.
-# 	form.tagId.data = tag.TagId
-# 	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
-
-@elementAttributes.route("/elementAttributes/deleteValue/<int:elementId>/<int:tagValueId>", methods = ["GET", "POST"])
-@login_required
-@permissionRequired(Permission.DATA_ENTRY)
-def deleteElementAttributeValue(elementId, tagValueId):
-	tagValue = TagValue.query.get_or_404(tagValueId)
-	db.session.delete(tagValue)
-	db.session.commit()
-	flash("You have successfully deleted the element attribute value.", "alert alert-success")
-	return redirect(url_for("elements.dashboard", elementId = elementId))
-
-@elementAttributes.route("/elementAttributes/editValue/<int:elementId>/<int:tagValueId>", methods = ["GET", "POST"])
-@login_required
-@permissionRequired(Permission.DATA_ENTRY)
-def editElementAttributeValue(elementId, tagValueId):
-	modelName = "Element Attribute Value"
-	operation = "Edit"
-	tagValue = TagValue.query.get_or_404(tagValueId)
-	tag = Tag.query.get_or_404(tagValue.TagId)
-	form = ElementAttributeValueForm(obj = tagValue)
-
-	# Configure the form based on if the element attribute value is associated with a lookup.
-	if tag.LookupId:
-		form.lookupValue.choices = [(lookupValue.Value, lookupValue.Name) for lookupValue in LookupValue.query. \
-			filter(LookupValue.LookupId == tag.LookupId, or_(LookupValue.Selectable == True, LookupValue.Value == tagValue.Value))]
-		del form.value
-	else:
-		del form.lookupValue
-
-	# Edit an existing element attribute value.
-	if form.validate_on_submit():
-		tagValue.TagId = form.tagId.data
-		tagValue.Timestamp = form.timestamp.data
-
-		if tag.LookupId:
-			tagValue.Value = form.lookupValue.data
-		else:
-			tagValue.Value = form.value.data
-
-		db.session.commit()
-		flash("You have successfully edited the element attribute value.", "alert alert-success")
-		return redirect(url_for("elements.dashboard", elementId = elementId))
-
-	# Present a form to edit an existing element attribute value.
-	form.tagId.data = tagValue.TagId
-	form.timestamp.data = tagValue.Timestamp
-
-	if tag.LookupId:
-		form.lookupValue.data = tagValue.Value
-	else:
-		form.value.data = tagValue.Value
-
-	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)

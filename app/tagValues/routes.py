@@ -1,4 +1,4 @@
-from flask import flash, redirect, render_template, request, url_for
+from flask import flash, jsonify, redirect, render_template, request, url_for
 from flask_login import login_required
 from sqlalchemy import or_
 from . import tagValues
@@ -80,6 +80,28 @@ def addTagValue(tagId, elementAttributeId = None):
 			{"url" : url_for("tagValues.listTagValues", tagId = tag.TagId), "text" : tag.Name}]
 
 	return render_template("addEditModel.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
+
+@tagValues.route("/tagValues/addMultiple", methods=["GET", "POST"])
+@login_required
+@permissionRequired(Permission.DATA_ENTRY)
+def addMultiple():
+	# Get the data, loop through it and add new value.
+	data = request.get_json(force = True)
+	count = 0
+	for item in data:
+		elementAttribute = ElementAttribute.query.get_or_404(item["id"])
+		tagValue = TagValue(TagId = elementAttribute.TagId, Timestamp = item["timestamp"], Value = item["value"])
+		db.session.add(tagValue)
+		count = count + 1
+
+	if count > 0:
+		db.session.commit()
+		message = "You have successfully added one or more new tag values."
+		flash(message, "alert alert-success")
+	else:
+		message = "Nothing added to save."
+		flash(message, "alert alert-warning")
+	return jsonify({"response": message})
 
 @tagValues.route("/tagValues/delete/<int:tagValueId>", methods = ["GET", "POST"])
 @login_required

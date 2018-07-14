@@ -167,9 +167,8 @@
                             href = "{{ url_for("tagValues.editTagValue", tagValueId = firstTagValue.TagValueId,
                             elementAttributeId = elementAttribute.ElementAttributeId) }}"><span class="glyphicon glyphicon-edit"></span></a></td>
                         <td><a class = "btn btn-default" title = "Delete Last Value"
-                            href = "{{ url_for("elementAttributes.deleteElementAttributeValue",
-                            elementId = elementAttribute.ElementId, tagValueId = firstTagValue.TagValueId) }}"><span class="glyphicon glyphicon-trash"></span>
-                            </a></td>
+                            href = "{{ url_for("tagValues.deleteTagValue", tagValueId = firstTagValue.TagValueId) }}">
+                            <span class="glyphicon glyphicon-trash"></span></a></td>
                     {% else %}
                         <td></td>
                         <td></td>
@@ -428,7 +427,7 @@
                 {
                     $.ajax({
                         type : "POST",
-                        url : "/elementAttributes/addMultipleValues",
+                        url : "/tagValues/addMultiple",
                         data : JSON.stringify(rows)
                     }).done(function(response) {
                         location.reload(true)
