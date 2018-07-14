@@ -18,8 +18,12 @@
 {% block scripts %}
     {{ super() }}
     <script>
-        $("#submit").hide()
-        $("#submit").parent().append("<button class = \"btn btn-default\" title = \"Log In\" type = \"submit\">" +
-            "<span class = \"glyphicon glyphicon-log-in\" aria-hidden = \"true\"></span></button>")
+        $(document).ready(function()
+        {
+            $("#name").focus()
+            $("#submit").hide()
+            $("#submit").parent().append("<button class = \"btn btn-default\" title = \"Log In\" type = \"submit\">" +
+                "<span class = \"glyphicon glyphicon-log-in\" aria-hidden = \"true\"></span></button>")
+        })
     </script>
 {% endblock %}
