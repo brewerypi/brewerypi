@@ -5,7 +5,7 @@ from wtforms import DateTimeField, FloatField, HiddenField, SelectField, SubmitF
 from wtforms.ext.sqlalchemy.fields import QuerySelectField
 from wtforms.validators import Required
 from .. models import Area, Element, Enterprise, Site, Tag
-from .. helpers import elementAttributeTemplateFullyAbbreviatedPath, tagFullyAbbreviatedPath
+from .. helpers import tagFullyAbbreviatedPath
 
 class ElementAttributeForm(FlaskForm):
 	elementAttributeTemplate = QuerySelectField("Element Attribute Template", validators = [Required()],

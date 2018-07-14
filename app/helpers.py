@@ -1,14 +1,3 @@
-def elementAttributeTemplateFullyAbbreviatedPath(elementAttributeTemplate):
-	return elementAttributeTemplate.ElementTemplate.Site.Enterprise.Abbreviation + "_" + elementAttributeTemplate.ElementTemplate.Site.Abbreviation + "_" + \
-		elementAttributeTemplate.ElementTemplate.Name + "_" + elementAttributeTemplate.Name
-
-def elementFullyAbbreviatedPath(element):
-	return element.ElementTemplate.Site.Enterprise.Abbreviation + "_" + element.ElementTemplate.Site.Abbreviation + "_" + element.ElementTemplate.Name + "_" \
-		+ element.Name
-
-def elementTemplateFullyAbbreviatedPath(elementTemplate):
-	return elementTemplate.Site.Enterprise.Abbreviation + "_" + elementTemplate.Site.Abbreviation + "_" + elementTemplate.Name
-
 def eventFrameFullyAbbreviatedPath(eventFrame):
 	return eventFrame.EventFrameTemplate.ElementTemplate.Site.Enterprise.Abbreviation + "_" + \
 		eventFrame.EventFrameTemplate.ElementTemplate.Site.Abbreviation + "_" + eventFrame.EventFrameTemplate.ElementTemplate.Name + "_" + eventFrame.EventFrameTemplate.Name + "_" + eventFrame.Name
