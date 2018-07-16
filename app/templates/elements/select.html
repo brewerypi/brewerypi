@@ -34,7 +34,7 @@ Data Entry - Elements
                 selectedId = parent.Site.id()) }}">{{ parent.Site.Name }}</a></li>
             <li class = "active">{{ parent.Name }}</li>
             {% set tableHeader = "Element Attribute Template" %}
-            {% set pageHeaderSubText = "" %}
+            {% set pageHeaderSubText = "Element Attribute Templates" %}
         {% elif childrenClass == "Element" %}
             <li><a href = "{{ url_for("elements.selectElement", selectedClass = "Root") }}">..</a></li>
             <li><a href = "{{ url_for("elements.selectElement", selectedClass = "Enterprise",

@@ -148,7 +148,7 @@ def endEventFrame(eventFrameId):
 def selectEventFrame(selectedClass = None, selectedId = None, elementId = None):
 	element = None
 	if selectedClass == None:
-		parent = Site.query.join(Enterprise).order_by(Enterprise.Name).first()
+		parent = Site.query.join(Enterprise, ElementTemplate, EventFrameTemplate, EventFrame).order_by(Enterprise.Name).first()
 		if parent:
 			children = ElementTemplate.query.filter_by(SiteId = parent.id())
 		else:
