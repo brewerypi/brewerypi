@@ -28,12 +28,12 @@ def addElementAttributeTemplate(elementTemplateId):
 	form.elementTemplateId.data = elementTemplateId
 	form.requestReferrer.data = request.referrer
 	elementTemplate = ElementTemplate.query.get_or_404(elementTemplateId)
-	breadcrumbs = [{"url" : url_for("elementTemplates.selectElementTemplate", selectedClass = "Root"), "text" : ".."},
-		{"url" : url_for("elementTemplates.selectElementTemplate", selectedClass = "Enterprise", selectedId = elementTemplate.Site.Enterprise.EnterpriseId),
+	breadcrumbs = [{"url" : url_for("elements.selectElement", selectedClass = "Root"), "text" : ".."},
+		{"url" : url_for("elements.selectElement", selectedClass = "Enterprise", selectedId = elementTemplate.Site.Enterprise.EnterpriseId),
 			"text" : elementTemplate.Site.Enterprise.Name},
-		{"url" : url_for("elementTemplates.selectElementTemplate", selectedClass = "Site", selectedId = elementTemplate.Site.SiteId),
+		{"url" : url_for("elements.selectElement", selectedClass = "Site", selectedId = elementTemplate.Site.SiteId),
 			"text" : elementTemplate.Site.Name},
-		{"url" : url_for("elementTemplates.selectElementTemplate", selectedClass = "ElementTemplate", selectedId = elementTemplate.ElementTemplateId),
+		{"url" : url_for("elements.selectElement", selectedClass = "ElementTemplate", selectedId = elementTemplate.ElementTemplateId),
 			"text" : elementTemplate.Name}]
 	return render_template("addEditModel.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
 
@@ -69,13 +69,13 @@ def editElementAttributeTemplate(elementAttributeTemplateId):
 	form.elementTemplateId.data = elementAttributeTemplate.ElementTemplateId
 	form.name.data = elementAttributeTemplate.Name
 	form.requestReferrer.data = request.referrer
-	breadcrumbs = [{"url" : url_for("elementTemplates.selectElementTemplate", selectedClass = "Root"), "text" : ".."},
-		{"url" : url_for("elementTemplates.selectElementTemplate", selectedClass = "Enterprise",
+	breadcrumbs = [{"url" : url_for("elements.selectElement", selectedClass = "Root"), "text" : ".."},
+		{"url" : url_for("elements.selectElement", selectedClass = "Enterprise",
 			selectedId = elementAttributeTemplate.ElementTemplate.Site.Enterprise.EnterpriseId),
 			"text" : elementAttributeTemplate.ElementTemplate.Site.Enterprise.Name},
-		{"url" : url_for("elementTemplates.selectElementTemplate", selectedClass = "Site", selectedId = elementAttributeTemplate.ElementTemplate.Site.SiteId),
+		{"url" : url_for("elements.selectElement", selectedClass = "Site", selectedId = elementAttributeTemplate.ElementTemplate.Site.SiteId),
 			"text" : elementAttributeTemplate.ElementTemplate.Site.Name},
-		{"url" : url_for("elementTemplates.selectElementTemplate", selectedClass = "ElementTemplate",
+		{"url" : url_for("elements.selectElement", selectedClass = "ElementTemplate",
 			selectedId = elementAttributeTemplate.ElementTemplate.ElementTemplateId),
 			"text" : elementAttributeTemplate.ElementTemplate.Name},
 		{"url" : None, "text" : elementAttributeTemplate.Name}]

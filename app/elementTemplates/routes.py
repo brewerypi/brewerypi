@@ -27,10 +27,10 @@ def addElementTemplate(siteId):
 	form.siteId.data = siteId
 	form.requestReferrer.data = request.referrer
 	site = Site.query.get_or_404(siteId)
-	breadcrumbs = [{"url" : url_for("elementTemplates.selectElementTemplate", selectedClass = "Root"), "text" : ".."},
-		{"url" : url_for("elementTemplates.selectElementTemplate", selectedClass = "Enterprise", selectedId = site.Enterprise.EnterpriseId),
+	breadcrumbs = [{"url" : url_for("elements.selectElement", selectedClass = "Root"), "text" : ".."},
+		{"url" : url_for("elements.selectElement", selectedClass = "Enterprise", selectedId = site.Enterprise.EnterpriseId),
 			"text" : site.Enterprise.Name},
-		{"url" : url_for("elementTemplates.selectElementTemplate", selectedClass = "Site", selectedId = site.SiteId), "text" : site.Name}]
+		{"url" : url_for("elements.selectElement", selectedClass = "Site", selectedId = site.SiteId), "text" : site.Name}]
 	return render_template("addEditModel.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
 
 @elementTemplates.route("/elementTemplates/delete/<int:elementTemplateId>", methods = ["GET", "POST"])
@@ -65,42 +65,10 @@ def editElementTemplate(elementTemplateId):
 	form.name.data = elementTemplate.Name
 	form.siteId.data = elementTemplate.SiteId
 	form.requestReferrer.data = request.referrer
-	breadcrumbs = [{"url" : url_for("elementTemplates.selectElementTemplate", selectedClass = "Root"), "text" : ".."},
-		{"url" : url_for("elementTemplates.selectElementTemplate", selectedClass = "Enterprise", selectedId = elementTemplate.Site.Enterprise.EnterpriseId),
+	breadcrumbs = [{"url" : url_for("elements.selectElement", selectedClass = "Root"), "text" : ".."},
+		{"url" : url_for("elements.selectElement", selectedClass = "Enterprise", selectedId = elementTemplate.Site.Enterprise.EnterpriseId),
 			"text" : elementTemplate.Site.Enterprise.Name},
-		{"url" : url_for("elementTemplates.selectElementTemplate", selectedClass = "Site", selectedId = elementTemplate.Site.SiteId),
+		{"url" : url_for("elements.selectElement", selectedClass = "Site", selectedId = elementTemplate.Site.SiteId),
 			"text" : elementTemplate.Site.Name},
 		{"url" : None, "text" : elementTemplate.Name}]
 	return render_template("addEditModel.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
-
-@elementTemplates.route("/elementTemplates/select", methods = ["GET", "POST"]) # Default.
-@elementTemplates.route("/elementTemplates/select/<string:selectedClass>", methods = ["GET", "POST"]) # Root.
-@elementTemplates.route("/elementTemplates/select/<string:selectedClass>/<int:selectedId>", methods = ["GET", "POST"])
-@login_required
-@adminRequired
-def selectElementTemplate(selectedClass = None, selectedId = None):
-	if selectedClass == None:
-		parent = Site.query.join(ElementTemplate, Enterprise).order_by(Enterprise.Name, Site.Name).first()
-		if parent:
-			children = ElementTemplate.query.join(Site).filter_by(SiteId = parent.id()).order_by(ElementTemplate.Name)
-		else:
-			children = None
-		childrenClass = "ElementTemplate"
-	elif selectedClass == "Root":
-		parent = None
-		children = Enterprise.query.order_by(Enterprise.Name)
-		childrenClass = "Enterprise"
-	elif selectedClass == "Enterprise":
-		parent = Enterprise.query.get_or_404(selectedId)
-		children = Site.query.join(Enterprise).filter_by(EnterpriseId = selectedId).order_by(Site.Name)
-		childrenClass = "Site"
-	elif selectedClass == "Site":
-		parent = Site.query.get_or_404(selectedId)
-		children = ElementTemplate.query.join(Site).filter_by(SiteId = selectedId).order_by(ElementTemplate.Name)
-		childrenClass = "ElementTemplate"
-	elif selectedClass == "ElementTemplate":
-		parent = ElementTemplate.query.get_or_404(selectedId)
-		children = ElementAttributeTemplate.query.join(ElementTemplate).filter_by(ElementTemplateId = selectedId).order_by(ElementAttributeTemplate.Name)
-		childrenClass = "ElementAttributeTemplate"
-
-	return render_template("elementTemplates/select.html", children = children, childrenClass = childrenClass, parent = parent)
