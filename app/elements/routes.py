@@ -178,5 +178,9 @@ def selectElement(selectedClass = None, selectedId = None):
 		parent = ElementTemplate.query.get_or_404(selectedId)
 		children = Element.query.filter_by(ElementTemplateId = selectedId)
 		childrenClass = "Element"
+	elif selectedClass == "ElementAttributeTemplate":
+		parent = ElementTemplate.query.get_or_404(selectedId)
+		children = ElementAttributeTemplate.query.filter_by(ElementTemplateId = selectedId)
+		childrenClass = "ElementAttributeTemplate"
 
 	return render_template("elements/select.html", children = children, childrenClass = childrenClass, parent = parent)
