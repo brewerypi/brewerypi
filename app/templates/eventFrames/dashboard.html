@@ -28,7 +28,7 @@ Event Frame Dashboard
 </div>
 <div class = "container">
     <div class = "row">
-        <div class = "col-md-2">
+        <div class = "col-xs-3">
             <ul class = "nav nav-pills nav-stacked">
                 {% for descendant in eventFrame.EventFrameTemplate.descendants([], 0) %}
                     {% set prefix = "&nbsp;" * descendant["level"] %}
@@ -43,7 +43,7 @@ Event Frame Dashboard
                 {% endfor %}
             </ul>
         </div>
-        <div class = "col-md-10">
+        <div class = "col-xs-9">
             {% for eventFrameAttributeTemplate in selectedEventFrameTemplate.EventFrameAttributeTemplates %}
                 {{ eventFrameAttributeTemplate.Name }}<br>
             {% endfor %}
