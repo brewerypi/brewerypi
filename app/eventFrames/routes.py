@@ -174,6 +174,12 @@ def selectEventFrame(selectedClass = None, selectedId = None, elementId = None):
 		parent = EventFrameTemplate.query.get_or_404(selectedId)
 		children = EventFrame.query.filter_by(EventFrameTemplateId = selectedId)
 		childrenClass = "EventFrame"
+	# elif selectedClass == "EventFrame":
+	# 	parent = EventFrameTemplate.query.get_or_404(selectedId)
+	# 	children = EventFrame.query.filter(EventFrame.ElementId == elementId, EventFrame.EventFrameTemplateId == selectedId). \
+	# 		order_by(EventFrame.StartTimestamp.desc())
+	# 	childrenClass = "EventFrame"
+	# 	element = Element.query.get_or_404(elementId)
 	# elif selectedClass == "ElementTemplate":
 	# 	parent = ElementTemplate.query.get_or_404(selectedId)
 	# 	children = Element.query.filter_by(ElementTemplateId = selectedId)

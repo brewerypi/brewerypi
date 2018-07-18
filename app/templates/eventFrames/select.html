@@ -91,6 +91,9 @@ Event Frames
         <a class = "btn btn-default" title = "Add" href = "{{ url_for("eventFrameTemplates.addEventFrameTemplate",
             elementTemplateId = parent.id()) }}" role = "button"><span class="glyphicon glyphicon-plus"></span></a>
     {% elif childrenClass == "DescendantEventFrameTemplate" %}
+    {% elif childrenClass == "EventFrame" %}
+        <a class = "btn btn-default" title = "Add" href = "{#{ url_for("eventFrameTemplates.addEventFrameTemplate",
+            elementTemplateId = parent.id()) }#}" role = "button"><span class="glyphicon glyphicon-plus"></span></a>
     {% endif %}
     <br><br>
     <table id = "table" class = "table">
@@ -105,6 +108,13 @@ Event Frames
                     <th></th>
                     <th></th>
                     <th></th>
+                {% elif childrenClass == "EventFrame" %}
+                    <th>Element</th>
+                    <th>Start Timestamp</th>
+                    <th>End Timestamp</th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
                 {% endif %}
             </tr>
         </thead>
@@ -113,9 +123,10 @@ Event Frames
                 {% for child in children %}
                     <tr>
                         {% if childrenClass == "EventFrame" %}
-                            {% set name = child.friendlyName() %}
+                            <td><a class = "btn btn-default" title = "Select" href = "{{ url_for("eventFrames.dashboard", eventFrameId = child.id(),
+                                selectedEventFrameTemplateId = child.EventFrameTemplate.EventFrameTemplateId) }}"><span class="glyphicon glyphicon-list"></span></a>
+                                </td>
                         {% else %}
-                            {% set name = child.Name %}
                             <td><a class = "btn btn-default" title = "Select" href = "{{ url_for("eventFrames.selectEventFrame",
                                 selectedClass = child.__class__.__name__, selectedId = child.id()) }}"><span class="glyphicon glyphicon-list"></span></a></td>
                         {% endif %}
@@ -131,6 +142,14 @@ Event Frames
                                 eventFrameTemplateId = child.id()) }}"><span class="glyphicon glyphicon-edit"></a></td>
                             <td><a class = "btn btn-default" title = "Delete" href = "{{ url_for("eventFrameTemplates.deleteEventFrameTemplate",
                                 eventFrameTemplateId = child.id()) }}"><span class="glyphicon glyphicon-trash"></a></td>                        
+                        {% elif childrenClass == "EventFrame" %}
+                            <td>{{ child.friendlyName() }}</td>
+                            <td>{{ child.Element.Name }}</td>
+                            <td>{{ child.StartTimestamp }}</td>
+                            <td>{{ child.EndTimestamp }}</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
                         {% endif %}
                         <!-- {#% if childrenClass == "EventFrame" %}
                             <td><a class = "btn btn-default" title = "Select" href = "{{ url_for("eventFrames.dashboard", eventFrameId = child.id(),
@@ -175,6 +194,8 @@ Event Frames
                         [1, "asc"]              // Name.
                     {% elif childrenClass == "EventFrameTemplate" %}
                         [1, "asc"]              // Name.
+                    {% elif childrenClass == "EventFrame" %}
+                        [3, "desc"]             // Start timestamp.
                     {% endif %}
                 ],
                 "columns":
@@ -187,6 +208,14 @@ Event Frames
                         null,
                         null,
                         { "orderable": false }, // Associate button.
+                        { "orderable": false }, // Edit button.
+                        { "orderable": false }  // Delete button.
+                    {% elif childrenClass == "EventFrame" %}
+                        null,
+                        null,
+                        null,
+                        null,
+                        { "orderable": false }, // Stop button.
                         { "orderable": false }, // Edit button.
                         { "orderable": false }  // Delete button.
                     {% endif %}

@@ -10,21 +10,19 @@ Event Frame Dashboard
 <div>
     <ol class="breadcrumb">
         <li><a href = "{{ url_for("eventFrames.selectEventFrame", selectedClass = "Root") }}">..</a></li>
-        <li><a href = "{{ url_for("eventFrames.selectEventFrame", selectedClass = "Enterprise", selectedId = eventFrame.Element.ElementTemplate.Site.Enterprise.id()) }}">
-            {{ eventFrame.Element.ElementTemplate.Site.Enterprise.Name }}</a></li>
-        <li><a href = "{{ url_for("eventFrames.selectEventFrame", selectedClass = "Site", selectedId = eventFrame.Element.ElementTemplate.Site.id()) }}">
-            {{ eventFrame.Element.ElementTemplate.Site.Name }}</a></li>
-        <li><a href = "{{ url_for("eventFrames.selectEventFrame", selectedClass = "ElementTemplate", selectedId = eventFrame.Element.ElementTemplate.id()) }}">
-            {{ eventFrame.Element.ElementTemplate.Name }}</a></li>
-        <li><a href = "{{ url_for("eventFrames.selectEventFrame", selectedClass = "Element", selectedId = eventFrame.Element.ElementId) }}">
-            {{ eventFrame.Element.Name }}</a></li>
-        <li><a href = "{{ url_for("eventFrames.selectEventFrame", selectedClass = "EventFrame", selectedId = eventFrame.EventFrameTemplate.EventFrameTemplateId,
-            elementId = eventFrame.Element.ElementId) }}">{{ eventFrame.EventFrameTemplate.Name }}</a></li>
+        <li><a href = "{{ url_for("eventFrames.selectEventFrame", selectedClass = "Enterprise",
+            selectedId = eventFrame.EventFrameTemplate.ElementTemplate.Site.Enterprise.id()) }}">{{ eventFrame.EventFrameTemplate.ElementTemplate.Site.Enterprise.Name }}</a></li>
+        <li><a href = "{{ url_for("eventFrames.selectEventFrame", selectedClass = "Site", selectedId = eventFrame.EventFrameTemplate.ElementTemplate.Site.id()) }}">
+            {{ eventFrame.EventFrameTemplate.ElementTemplate.Site.Name }}</a></li>
+        <li><a href = "{{ url_for("eventFrames.selectEventFrame", selectedClass = "ElementTemplate", selectedId = eventFrame.EventFrameTemplate.ElementTemplate.id()) }}">
+            {{ eventFrame.EventFrameTemplate.ElementTemplate.Name }}</a></li>
+        <li><a href = "{{ url_for("eventFrames.selectEventFrame", selectedClass = "EventFrameTemplate", selectedId = eventFrame.EventFrameTemplate.EventFrameTemplateId) }}">
+            {{ eventFrame.EventFrameTemplate.Name }}</a></li>
         <li class = "active">{{ eventFrame.friendlyName() }}</li>
     </ol>
 </div>
 <div class = "page-header">
-    <h1>Event Frames <small>Attributes</small></h1>
+    <h1>Event Frame <small>{{ eventFrame.Element.Name }}</small></h1>
 </div>
 <div class = "container">
     <div class = "row">
