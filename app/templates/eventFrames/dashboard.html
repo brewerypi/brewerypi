@@ -11,45 +11,50 @@ Event Frame Dashboard
     <ol class="breadcrumb">
         <li><a href = "{{ url_for("eventFrames.selectEventFrame", selectedClass = "Root") }}">..</a></li>
         <li><a href = "{{ url_for("eventFrames.selectEventFrame", selectedClass = "Enterprise",
-            selectedId = eventFrame.EventFrameTemplate.ElementTemplate.Site.Enterprise.id()) }}">{{ eventFrame.EventFrameTemplate.ElementTemplate.Site.Enterprise.Name }}</a></li>
-        <li><a href = "{{ url_for("eventFrames.selectEventFrame", selectedClass = "Site", selectedId = eventFrame.EventFrameTemplate.ElementTemplate.Site.id()) }}">
-            {{ eventFrame.EventFrameTemplate.ElementTemplate.Site.Name }}</a></li>
-        <li><a href = "{{ url_for("eventFrames.selectEventFrame", selectedClass = "ElementTemplate", selectedId = eventFrame.EventFrameTemplate.ElementTemplate.id()) }}">
-            {{ eventFrame.EventFrameTemplate.ElementTemplate.Name }}</a></li>
-        <li><a href = "{{ url_for("eventFrames.selectEventFrame", selectedClass = "EventFrameTemplate", selectedId = eventFrame.EventFrameTemplate.EventFrameTemplateId) }}">
-            {{ eventFrame.EventFrameTemplate.Name }}</a></li>
+            selectedId = eventFrame.EventFrameTemplate.ElementTemplate.Site.Enterprise.id()) }}">
+            {{ eventFrame.EventFrameTemplate.ElementTemplate.Site.Enterprise.Name }}</a></li>
+        <li><a href = "{{ url_for("eventFrames.selectEventFrame", selectedClass = "Site",
+            selectedId = eventFrame.EventFrameTemplate.ElementTemplate.Site.id()) }}">{{ eventFrame.EventFrameTemplate.ElementTemplate.Site.Name }}</a></li>
+        <li><a href = "{{ url_for("eventFrames.selectEventFrame", selectedClass = "ElementTemplate",
+            selectedId = eventFrame.EventFrameTemplate.ElementTemplate.id()) }}">{{ eventFrame.EventFrameTemplate.ElementTemplate.Name }}</a></li>
+        <li><a href = "{{ url_for("eventFrames.selectEventFrame", selectedClass = "EventFrameTemplate",
+            selectedId = eventFrame.EventFrameTemplate.EventFrameTemplateId) }}">{{ eventFrame.EventFrameTemplate.Name }}</a></li>
         <li class = "active">{{ eventFrame.friendlyName() }}</li>
     </ol>
 </div>
 <div class = "page-header">
-    <h1>Event Frame <small>{{ eventFrame.Element.Name }}</small></h1>
+    <h1>Event Frame Notes <small>{{ eventFrame.Element.Name }}</small></h1>
 </div>
-<div class = "container">
-    <div class = "row">
-        <div class = "col-xs-3">
-            <ul class = "nav nav-pills nav-stacked">
-                {% for descendant in eventFrame.EventFrameTemplate.descendants([], 0) %}
-                    {% set prefix = "&nbsp;" * descendant["level"] %}
-                    {% if descendant["eventFrameTemplate"].EventFrameTemplateId == selectedEventFrameTemplate.EventFrameTemplateId %}
-                        {% set class = "active" %}
-                    {% else %}
-                        {% set class = "" %}
-                    {% endif %}
-                    <li class = "{{ class }}"><a href = "{{ url_for("eventFrames.dashboard", eventFrameId = eventFrame.EventFrameId,
-                            selectedEventFrameTemplateId = descendant["eventFrameTemplate"].EventFrameTemplateId) }}">{{ prefix | safe }}
-                            {{descendant["eventFrameTemplate"].Name }}</a></li>
-                {% endfor %}
-            </ul>
-        </div>
-        <div class = "col-xs-9">
-            {% for eventFrameAttributeTemplate in selectedEventFrameTemplate.EventFrameAttributeTemplates %}
-                {{ eventFrameAttributeTemplate.Name }}<br>
+<div>
+    <br><br>
+    <table id = "table" class = "table">
+        <thead>
+            <tr>
+                <th>Timestamp</th>
+                <th>Note</th>
+                <th></th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for eventFrameNote in eventFrame.EventFrameNotes %}
+                <tr>
+                    <td>{{ eventFrameNote.Note.Timestamp }}</td>
+                    <td>{{ eventFrameNote.Note.Note }}</td>
+                    <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("eventFrameNotes.editEventFrameNote",
+                        noteId = eventFrameNote.NoteId) }}"><span class="glyphicon glyphicon-edit"></span></a></td>
+                    <td><a class = "btn btn-default" title = "Delete" href = "{{ url_for("eventFrameNotes.deleteEventFrameNote",
+                        noteId = eventFrameNote.NoteId, eventFrameId = eventFrameNote.EventFrameId) }}"><span class="glyphicon glyphicon-trash"></span></a>
+                        </td>
+                </tr>
             {% endfor %}
-        </div>
-    </div>
+        </tbody>
+    </table>
 </div>
 {% endblock %}
 
 {% block scripts %}
     {{ super() }}
+    <link rel = "stylesheet" type = "text/css" href = {{ url_for("static", filename = "css/datatables.min.css") }}/> 
+    <script type = "text/javascript" src = {{ url_for("static", filename = "js/datatables.min.js") }}></script>
 {% endblock %}

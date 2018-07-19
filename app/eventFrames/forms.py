@@ -16,9 +16,3 @@ class EventFrameForm(FlaskForm):
 	parentEventFrameId = HiddenField()
 	requestReferrer = HiddenField()
 	submit = SubmitField("Save")
-
-class EventFrameNoteForm(FlaskForm):
-	note = StringField("Note", validators = [Required()])
-	timestamp = DateTimeField("Timestamp", default = datetime.now, validators = [Required()])
-	requestReferrer = HiddenField()
-	submit = SubmitField("Save")
