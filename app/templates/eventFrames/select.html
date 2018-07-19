@@ -88,12 +88,12 @@ Event Frames
 </div>
 <div>
     {% if childrenClass == "EventFrameTemplate" %}
-        <a class = "btn btn-default" title = "Add" href = "{{ url_for("eventFrameTemplates.addEventFrameTemplate",
-            elementTemplateId = parent.id()) }}" role = "button"><span class="glyphicon glyphicon-plus"></span></a>
+        <a class = "btn btn-default" title = "Add" href = "{{ url_for("eventFrameTemplates.addEventFrameTemplate", elementTemplateId = parent.id()) }}"
+            role = "button"><span class="glyphicon glyphicon-plus"></span></a>
     {% elif childrenClass == "DescendantEventFrameTemplate" %}
     {% elif childrenClass == "EventFrame" %}
-        <a class = "btn btn-default" title = "Add" href = "{#{ url_for("eventFrameTemplates.addEventFrameTemplate",
-            elementTemplateId = parent.id()) }#}" role = "button"><span class="glyphicon glyphicon-plus"></span></a>
+        <a class = "btn btn-default" title = "Add" href = "{{ url_for("eventFrames.addEventFrame", eventFrameTemplateId = parent.id()) }}" role = "button">
+            <span class="glyphicon glyphicon-plus"></span></a>
     {% endif %}
     <br><br>
     <table id = "table" class = "table">
@@ -137,18 +137,20 @@ Event Frames
                             <td>{{ child.Name }}</td>
                             <td>{{ child.Description }}</td>
                             <td><a class = "btn btn-default" title = "Edit" href = "{#{ url_for("eventFrameTemplates.editEventFrameTemplate",
-                                eventFrameTemplateId = child.id()) }#}"><span class="glyphicon glyphicon-link"></a></td>
+                                eventFrameTemplateId = child.id()) }#}"><span class="glyphicon glyphicon-link"></span></a></td>
                             <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("eventFrameTemplates.editEventFrameTemplate",
-                                eventFrameTemplateId = child.id()) }}"><span class="glyphicon glyphicon-edit"></a></td>
+                                eventFrameTemplateId = child.id()) }}"><span class="glyphicon glyphicon-edit"></span></a></td>
                             <td><a class = "btn btn-default" title = "Delete" href = "{{ url_for("eventFrameTemplates.deleteEventFrameTemplate",
-                                eventFrameTemplateId = child.id()) }}"><span class="glyphicon glyphicon-trash"></a></td>                        
+                                eventFrameTemplateId = child.id()) }}"><span class="glyphicon glyphicon-trash"></span></a></td>                        
                         {% elif childrenClass == "EventFrame" %}
                             <td>{{ child.friendlyName() }}</td>
                             <td>{{ child.Element.Name }}</td>
                             <td>{{ child.StartTimestamp }}</td>
                             <td>{{ child.EndTimestamp }}</td>
-                            <td></td>
-                            <td></td>
+                            <td><a class = "btn btn-default" title = "End" href = "{{ url_for("eventFrames.endEventFrame",
+                                eventFrameId = child.id()) }}"><span class="glyphicon glyphicon-stop"></span></a></td>
+                            <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("eventFrames.editEventFrame", eventFrameId = child.id()) }}">
+                                <span class="glyphicon glyphicon-edit"></span></a></td>
                             <td></td>
                         {% endif %}
                         <!-- {#% if childrenClass == "EventFrame" %}
