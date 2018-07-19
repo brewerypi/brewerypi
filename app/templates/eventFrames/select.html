@@ -123,9 +123,8 @@ Event Frames
                 {% for child in children %}
                     <tr>
                         {% if childrenClass == "EventFrame" %}
-                            <td><a class = "btn btn-default" title = "Select" href = "{{ url_for("eventFrames.dashboard", eventFrameId = child.id(),
-                                selectedEventFrameTemplateId = child.EventFrameTemplate.EventFrameTemplateId) }}"><span class="glyphicon glyphicon-list"></span></a>
-                                </td>
+                            <td><a class = "btn btn-default" title = "Select" href = "{{ url_for("eventFrames.dashboard", eventFrameId = child.id(),) }}">
+                                <span class="glyphicon glyphicon-list"></span></a></td>
                         {% else %}
                             <td><a class = "btn btn-default" title = "Select" href = "{{ url_for("eventFrames.selectEventFrame",
                                 selectedClass = child.__class__.__name__, selectedId = child.id()) }}"><span class="glyphicon glyphicon-list"></span></a></td>

@@ -86,13 +86,16 @@ def addEventFrame(eventFrameTemplateId = None):
 			"text" : eventFrameTemplate.Name}]	
 	return render_template("addEditModel.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
 
-@eventFrames.route("/eventFrames/dashboard/<int:eventFrameId>/<int:selectedEventFrameTemplateId>", methods = ["GET", "POST"])
+# @eventFrames.route("/eventFrames/dashboard/<int:eventFrameId>/<int:selectedEventFrameTemplateId>", methods = ["GET", "POST"])
+@eventFrames.route("/eventFrames/dashboard/<int:eventFrameId>", methods = ["GET", "POST"])
 @login_required
 @permissionRequired(Permission.DATA_ENTRY)
-def dashboard(eventFrameId, selectedEventFrameTemplateId):
+# def dashboard(eventFrameId, selectedEventFrameTemplateId):
+def dashboard(eventFrameId):
 	eventFrame = EventFrame.query.get_or_404(eventFrameId)
-	selectedEventFrameTemplate = EventFrameTemplate.query.get_or_404(selectedEventFrameTemplateId)
-	return render_template("eventFrames/dashboard.html", eventFrame = eventFrame, selectedEventFrameTemplate = selectedEventFrameTemplate)
+	# selectedEventFrameTemplate = EventFrameTemplate.query.get_or_404(selectedEventFrameTemplateId)
+	# return render_template("eventFrames/dashboard.html", eventFrame = eventFrame, selectedEventFrameTemplate = selectedEventFrameTemplate)
+	return render_template("eventFrames/dashboard.html", eventFrame = eventFrame)
 
 @eventFrames.route("/eventFrames/delete/<int:eventFrameId>", methods = ["GET", "POST"])
 @login_required
