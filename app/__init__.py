@@ -39,9 +39,6 @@ def create_app(configClass = Config):
 	from . enterprises import enterprises as enterprisesBlueprint
 	app.register_blueprint(enterprisesBlueprint)
 
-	from . eventFrames import eventFrames as eventFramesBlueprint
-	app.register_blueprint(eventFramesBlueprint)
-
 	from . eventFrameAttributes import eventFrameAttributes as eventFrameAttributesBlueprint
 	app.register_blueprint(eventFrameAttributesBlueprint)
 
@@ -50,6 +47,9 @@ def create_app(configClass = Config):
 
 	from . eventFrameNotes import eventFrameNotes as eventFrameNotesBlueprint
 	app.register_blueprint(eventFrameNotesBlueprint)
+
+	from . eventFrames import eventFrames as eventFramesBlueprint
+	app.register_blueprint(eventFramesBlueprint)
 
 	from . eventFrameTemplates import eventFrameTemplates as eventFrameTemplatesBlueprint
 	app.register_blueprint(eventFrameTemplatesBlueprint)
@@ -74,6 +74,9 @@ def create_app(configClass = Config):
 
 	from . tags import tags as tagsBlueprint
 	app.register_blueprint(tagsBlueprint)
+
+	from . tagValueNotes import tagValueNotes as tagValueNotesBlueprint
+	app.register_blueprint(tagValueNotesBlueprint)
 
 	from . tagValues import tagValues as tagValuesBlueprint
 	app.register_blueprint(tagValuesBlueprint)

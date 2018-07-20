@@ -79,7 +79,7 @@ Tag Values
                             tagValueId = tagValue.TagValueId, elementAttributeId = elementAttribute.ElementAttributeId) }}">
                             <span class="glyphicon glyphicon-comment"></span></a></td>
                     {% else %}
-                        <td><a class = "{{ noteButtonClass }}" title = "Note" href = "{{ url_for("tagValues.listTagValueNotes", 
+                        <td><a class = "{{ noteButtonClass }}" title = "Note" href = "{{ url_for("tagValueNotes.listTagValueNotes", 
                             tagValueId = tagValue.TagValueId) }}"><span class="glyphicon glyphicon-comment"></span></a></td>
                     {% endif %}
                     <td><a class = "btn btn-default" title = "Delete" href = "{{ url_for("tagValues.deleteTagValue", tagValueId = tagValue.TagValueId) }}">

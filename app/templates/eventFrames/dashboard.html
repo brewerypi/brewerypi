@@ -44,7 +44,7 @@ Event Frame Dashboard
                     <td>{{ eventFrameNote.Note.Timestamp }}</td>
                     <td>{{ eventFrameNote.Note.Note }}</td>
                     <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("eventFrameNotes.editEventFrameNote",
-                        noteId = eventFrameNote.NoteId) }}"><span class="glyphicon glyphicon-edit"></span></a></td>
+                        eventFrameId = eventFrame.EventFrameId, noteId = eventFrameNote.NoteId) }}"><span class="glyphicon glyphicon-edit"></span></a></td>
                     <td><a class = "btn btn-default" title = "Delete" href = "{{ url_for("eventFrameNotes.deleteEventFrameNote",
                         noteId = eventFrameNote.NoteId, eventFrameId = eventFrameNote.EventFrameId) }}"><span class="glyphicon glyphicon-trash"></span></a>
                         </td>

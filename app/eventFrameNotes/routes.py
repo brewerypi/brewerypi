@@ -31,10 +31,12 @@ def addEventFrameNote(eventFrameId):
 	eventFrame = EventFrame.query.get_or_404(eventFrameId)
 	breadcrumbs = [{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Root"), "text" : ".."},
 		{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Enterprise",
-			selectedId = eventFrame.EventFrameTemplate.ElementTemplate.Site.Enterprise.EnterpriseId), "text" : eventFrame.EventFrameTemplate.ElementTemplate.Site.Enterprise.Name},
+			selectedId = eventFrame.EventFrameTemplate.ElementTemplate.Site.Enterprise.EnterpriseId),
+			"text" : eventFrame.EventFrameTemplate.ElementTemplate.Site.Enterprise.Name},
 		{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Site", selectedId = eventFrame.EventFrameTemplate.ElementTemplate.Site.SiteId),
 			"text" : eventFrame.EventFrameTemplate.ElementTemplate.Site.Name},
-		{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "ElementTemplate", selectedId = eventFrame.EventFrameTemplate.ElementTemplate.ElementTemplateId),
+		{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "ElementTemplate",
+			selectedId = eventFrame.EventFrameTemplate.ElementTemplate.ElementTemplateId),
 			"text" : eventFrame.EventFrameTemplate.ElementTemplate.Name},
 		{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "EventFrameTemplate", selectedId = eventFrame.EventFrameTemplate.EventFrameTemplateId),
 			"text" : eventFrame.EventFrameTemplate.Name},
@@ -53,10 +55,10 @@ def deleteEventFrameNote(eventFrameId, noteId):
 	flash("You have successfully deleted the event frame note.", "alert alert-success")
 	return redirect(request.referrer)
 
-@eventFrameNotes.route("/eventFrameNotes/edit/<int:noteId>", methods = ["GET", "POST"])
+@eventFrameNotes.route("/eventFrameNotes/edit/<int:eventFrameId>/<int:noteId>", methods = ["GET", "POST"])
 @login_required
 @permissionRequired(Permission.DATA_ENTRY)
-def editEventFrameNote(noteId):
+def editEventFrameNote(eventFrameId, noteId):
 	operation = "Edit"
 	note = Note.query.get_or_404(noteId)
 	form = EventFrameNoteForm()
@@ -73,4 +75,18 @@ def editEventFrameNote(noteId):
 	form.note.data = note.Note
 	form.timestamp.data = note.Timestamp
 	form.requestReferrer.data = request.referrer
-	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
+	eventFrame = EventFrame.query.get_or_404(eventFrameId)
+	breadcrumbs = [{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Root"), "text" : ".."},
+		{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Enterprise",
+			selectedId = eventFrame.EventFrameTemplate.ElementTemplate.Site.Enterprise.EnterpriseId),
+			"text" : eventFrame.EventFrameTemplate.ElementTemplate.Site.Enterprise.Name},
+		{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Site", selectedId = eventFrame.EventFrameTemplate.ElementTemplate.Site.SiteId),
+			"text" : eventFrame.EventFrameTemplate.ElementTemplate.Site.Name},
+		{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "ElementTemplate",
+			selectedId = eventFrame.EventFrameTemplate.ElementTemplate.ElementTemplateId),
+			"text" : eventFrame.EventFrameTemplate.ElementTemplate.Name},
+		{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "EventFrameTemplate", selectedId = eventFrame.EventFrameTemplate.EventFrameTemplateId),
+			"text" : eventFrame.EventFrameTemplate.Name},
+		{"url" : url_for("eventFrames.dashboard", eventFrameId = eventFrame.EventFrameId), "text" : eventFrame.friendlyName()},
+		{"url" : None, "text" : note.Timestamp}]
+	return render_template("addEditModel.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)

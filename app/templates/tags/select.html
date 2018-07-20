@@ -12,19 +12,19 @@ Tags
         {% if childrenClass == "Enterprise" %}
             <li class = "active">..</li>
             {% set tableHeader = "Enterprise" %}
-            {% set pageHeaderSubText = "Select an Enterprise" %}
+            {% set pageHeaderSubText = "Enterprises" %}
         {% elif childrenClass == "Site" %}
             <li><a href = "{{ url_for("tags.selectTag", selectedClass = "Root") }}">..</a></li>
             <li class = "active">{{ parent.Name }}</li>
             {% set tableHeader = "Site" %}
-            {% set pageHeaderSubText = "Select a Site" %}
+            {% set pageHeaderSubText = "Sites" %}
         {% elif childrenClass == "Area" %}
             <li><a href = "{{ url_for("tags.selectTag", selectedClass = "Root") }}">..</a></li>
             <li><a href = "{{ url_for("tags.selectTag", selectedClass = "Enterprise",
                 selectedId = parent.Enterprise.id()) }}">{{ parent.Enterprise.Name }}</a></li>
             <li class = "active">{{ parent.Name }}</li>
             {% set tableHeader = "Area" %}
-            {% set pageHeaderSubText = "Select an Area" %}
+            {% set pageHeaderSubText = "Areas" %}
         <!-- "and parent" checks for systems that have not been configured with an area yet. -->
         {% elif childrenClass == "Tag" and parent %}
             <li><a href = "{{ url_for("tags.selectTag", selectedClass = "Root") }}">..</a></li>
@@ -34,7 +34,7 @@ Tags
                 selectedId = parent.Site.id()) }}">{{ parent.Site.Name }}</a></li>
             <li class = "active">{{ parent.Name }}</li>
             {% set tableHeader = "Tag" %}
-            {% set pageHeaderSubText = "Select a Tag" %}
+            {% set pageHeaderSubText = "" %}
         {% endif %}
     </ol>
 </div>
