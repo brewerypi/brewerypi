@@ -1,7 +1,7 @@
 from datetime import datetime
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileAllowed, FileField, FileRequired
-from wtforms import DateTimeField, FloatField, HiddenField, SelectField, SubmitField
+from wtforms import SelectField, SubmitField
 from wtforms.ext.sqlalchemy.fields import QuerySelectField
 from wtforms.validators import Required
 from .. models import Area, ElementTemplate, Enterprise, EventFrameAttributeTemplate, EventFrame, EventFrameTemplate, Site, Tag
@@ -22,10 +22,3 @@ class EventFrameAttributeForm(FlaskForm):
 class EventFrameAttributeImportForm(FlaskForm):
 	eventFrameAttributesFile = FileField("Event Frame Attributes Import File", validators = [FileRequired(), FileAllowed(["csv"], ".csv files only!")])
 	submit = SubmitField("Import")
-
-class EventFrameAttributeValueForm(FlaskForm):
-	tagId = HiddenField()
-	timestamp = DateTimeField("Timestamp", default = datetime.now, validators = [Required()])
-	value = FloatField("Value")
-	lookupValue = SelectField("Lookup", coerce = float)
-	submit = SubmitField("Save")

@@ -4,7 +4,7 @@ from flask import current_app, flash, redirect, render_template, send_file, url_
 from flask_login import login_required
 from sqlalchemy import or_
 from . import eventFrameAttributes
-from . forms import EventFrameAttributeForm, EventFrameAttributeImportForm, EventFrameAttributeValueForm
+from . forms import EventFrameAttributeForm, EventFrameAttributeImportForm
 from .. import db
 from .. decorators import adminRequired, permissionRequired
 from .. models import Area, Element, EventFrame, EventFrameAttribute, EventFrameAttributeTemplate, EventFrameTemplate, Enterprise, LookupValue, Permission, Site, Tag, TagValue

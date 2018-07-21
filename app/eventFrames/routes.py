@@ -214,20 +214,6 @@ def selectEventFrame(selectedClass = None, selectedId = None, elementId = None):
 	# 		order_by(EventFrame.StartTimestamp.desc())
 	# 	childrenClass = "EventFrame"
 	# 	element = Element.query.get_or_404(elementId)
-	# elif selectedClass == "ElementTemplate":
-	# 	parent = ElementTemplate.query.get_or_404(selectedId)
-	# 	children = Element.query.filter_by(ElementTemplateId = selectedId)
-	# 	childrenClass = "Element"
-	# elif selectedClass == "Element":
-	# 	parent = Element.query.get_or_404(selectedId)
-	# 	children = EventFrameTemplate.query.filter_by(ElementTemplateId = parent.ElementTemplate.ElementTemplateId)
-	# 	childrenClass = "EventFrameTemplate"
-	# elif selectedClass == "EventFrame":
-	# 	parent = EventFrameTemplate.query.get_or_404(selectedId)
-	# 	children = EventFrame.query.filter(EventFrame.ElementId == elementId, EventFrame.EventFrameTemplateId == selectedId). \
-	# 		order_by(EventFrame.StartTimestamp.desc())
-	# 	childrenClass = "EventFrame"
-	# 	element = Element.query.get_or_404(elementId)
 
 	return render_template("eventFrames/select.html", children = children, childrenClass = childrenClass, element = element, parent = parent)
 

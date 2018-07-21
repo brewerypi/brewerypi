@@ -29,7 +29,7 @@ Event Frame Dashboard
     <a class = "btn btn-default" title = "Add" href = "{{ url_for("eventFrameNotes.addEventFrameNote", eventFrameId = eventFrame.id()) }}" role = "button">
         <span class = "glyphicon glyphicon-plus"></span></a>
     <br><br>
-    <table id = "table" class = "table">
+    <table id = "eventFrameNotesTable" class = "table">
         <thead>
             <tr>
                 <th>Timestamp</th>
@@ -59,4 +59,26 @@ Event Frame Dashboard
     {{ super() }}
     <link rel = "stylesheet" type = "text/css" href = {{ url_for("static", filename = "css/datatables.min.css") }}/> 
     <script type = "text/javascript" src = {{ url_for("static", filename = "js/datatables.min.js") }}></script>
+    <script>
+        $(document).ready(function()
+        {
+            $("#eventFrameNotesTable").DataTable
+            ({
+                "order":
+                [
+                    [0, "desc"],             // Timestamp.
+                ],
+                "columns":
+                [
+                    null,
+                    null,
+                    { "orderable": false }, // Edit button.
+                    { "orderable": false }  // Delete button.
+                ],
+                "stateSave": true,
+                "stateDuration": 0,
+                "pageLength": 25
+            })
+        })
+    </script>
 {% endblock %}

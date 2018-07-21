@@ -8,8 +8,8 @@ from .. models import ElementTemplate, EventFrameAttributeTemplate, EventFrameTe
 
 modelName = "Event Frame Template"
 
-@eventFrameTemplates.route("/eventFrameTemplates/add/elementTemplateId/<int:elementTemplateId>", methods = ["GET", "POST"])
-@eventFrameTemplates.route("/eventFrameTemplates/add/eventFrameTemplateId/<int:parentEventFrameTemplateId>", methods = ["GET", "POST"])
+@eventFrameTemplates.route("/eventFrameTemplates/add/<int:elementTemplateId>", methods = ["GET", "POST"])
+@eventFrameTemplates.route("/eventFrameTemplates/add/<int:parentEventFrameTemplateId>", methods = ["GET", "POST"])
 @login_required
 @adminRequired
 def addEventFrameTemplate(elementTemplateId = None, parentEventFrameTemplateId = None):
@@ -64,11 +64,11 @@ def addEventFrameTemplate(elementTemplateId = None, parentEventFrameTemplateId =
 				selectedId = parentEventFrameTemplate.origin().ElementTemplate.ElementTemplateId),
 				"text" : parentEventFrameTemplate.origin().ElementTemplate.Name}]
 		for parentEventFrameTemplateAcestor in parentEventFrameTemplate.ancestors([]):
-			breadcrumbs.append({"url" : url_for("eventFrameTemplates.selectEventFrameTemplate", selectedClass = "EventFrameTemplate",
-				selectedId = parentEventFrameTemplateAcestor.EventFrameTemplateId), "text" : parentEventFrameTemplateAcestor.Name})
+			breadcrumbs.append({"url" : url_for("eventFrameTemplates.selectEventFrameTemplate",
+				eventFrameTemplateId = parentEventFrameTemplateAcestor.EventFrameTemplateId), "text" : parentEventFrameTemplateAcestor.Name})
 
-		breadcrumbs.append({"url" : url_for("eventFrameTemplates.selectEventFrameTemplate", selectedClass = "EventFrameTemplate",
-			selectedId = parentEventFrameTemplate.EventFrameTemplateId), "text" : parentEventFrameTemplate.Name})
+		breadcrumbs.append({"url" : url_for("eventFrameTemplates.selectEventFrameTemplate",
+			eventFrameTemplateId = parentEventFrameTemplate.EventFrameTemplateId), "text" : parentEventFrameTemplate.Name})
 	else:
 		elementTemplate = ElementTemplate.query.get_or_404(elementTemplateId)
 		breadcrumbs = [{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Root"), "text" : ".."},
@@ -156,8 +156,8 @@ def editEventFrameTemplate(eventFrameTemplateId):
 				selectedId = eventFrameTemplate.origin().ElementTemplate.ElementTemplateId),
 				"text" : eventFrameTemplate.origin().ElementTemplate.Name}]
 		for eventFrameTemplateAcestor in eventFrameTemplate.ancestors([]):
-			breadcrumbs.append({"url" : url_for("eventFrameTemplates.selectEventFrameTemplate", selectedClass = "EventFrameTemplate",
-				selectedId = eventFrameTemplateAcestor.EventFrameTemplateId), "text" : eventFrameTemplateAcestor.Name})
+			breadcrumbs.append({"url" : url_for("eventFrameTemplates.selectEventFrameTemplate",
+				eventFrameTemplateId = eventFrameTemplateAcestor.EventFrameTemplateId), "text" : eventFrameTemplateAcestor.Name})
 
 		breadcrumbs.append({"url" : None, "text" : eventFrameTemplate.Name})
 	else:
@@ -178,41 +178,14 @@ def editEventFrameTemplate(eventFrameTemplateId):
 	form.requestReferrer.data = request.referrer
 	return render_template("addEditModel.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
 
-@eventFrameTemplates.route("/eventFrameTemplates/select", methods = ["GET", "POST"]) # Default.
-@eventFrameTemplates.route("/eventFrameTemplates/select/<string:selectedClass>", methods = ["GET", "POST"]) # Root.
-@eventFrameTemplates.route("/eventFrameTemplates/select/<string:selectedClass>/<int:selectedId>", methods = ["GET", "POST"])
+@eventFrameTemplates.route("/eventFrameTemplates/select/<int:eventFrameTemplateId>", methods = ["GET", "POST"])
 @login_required
 @adminRequired
-def selectEventFrameTemplate(selectedClass = None, selectedId = None):
-	eventFrameAttributeTemplates = None
-	if selectedClass == None:
-		parent = Site.query.join(ElementTemplate, Enterprise).order_by(Enterprise.Name, Site.Name).first()
-		if parent:
-			children = ElementTemplate.query.join(Site).filter_by(SiteId = parent.id()).order_by(ElementTemplate.Name)
-		else:
-			children = None
-		childrenClass = "ElementTemplate"
-	elif selectedClass == "Root":
-		parent = None
-		children = Enterprise.query.order_by(Enterprise.Name)
-		childrenClass = "Enterprise"
-	elif selectedClass == "Enterprise":
-		parent = Enterprise.query.get_or_404(selectedId)
-		children = Site.query.join(Enterprise).filter_by(EnterpriseId = selectedId).order_by(Site.Name)
-		childrenClass = "Site"
-	elif selectedClass == "Site":
-		parent = Site.query.get_or_404(selectedId)
-		children = ElementTemplate.query.join(Site).filter_by(SiteId = selectedId).order_by(ElementTemplate.Name)
-		childrenClass = "ElementTemplate"
-	elif selectedClass == "ElementTemplate":
-		parent = ElementTemplate.query.get_or_404(selectedId)
-		children = EventFrameTemplate.query.join(ElementTemplate).filter_by(ElementTemplateId = selectedId).order_by(EventFrameTemplate.Name)
-		childrenClass = "EventFrameTemplate"
-	elif selectedClass == "EventFrameTemplate":
-		parent = EventFrameTemplate.query.get_or_404(selectedId)
-		children = EventFrameTemplate.query.filter_by(ParentEventFrameTemplateId = selectedId).order_by(EventFrameTemplate.Order)
-		childrenClass = "DescendantEventFrameTemplate"
-		eventFrameAttributeTemplates = EventFrameAttributeTemplate.query.filter_by(EventFrameTemplateId = selectedId).order_by(EventFrameAttributeTemplate.Name)
-
+def selectEventFrameTemplate(eventFrameTemplateId):
+	parent = EventFrameTemplate.query.get_or_404(eventFrameTemplateId)
+	children = EventFrameTemplate.query.filter_by(ParentEventFrameTemplateId = eventFrameTemplateId).order_by(EventFrameTemplate.Order)
+	childrenClass = "DescendantEventFrameTemplate"
+	eventFrameAttributeTemplates = EventFrameAttributeTemplate.query. \
+		filter_by(EventFrameTemplateId = eventFrameTemplateId).order_by(EventFrameAttributeTemplate.Name)
 	return render_template("eventFrameTemplates/select.html", children = children, childrenClass = childrenClass,
 		eventFrameAttributeTemplates = eventFrameAttributeTemplates, parent = parent)

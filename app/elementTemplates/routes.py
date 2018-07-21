@@ -20,7 +20,7 @@ def addElementTemplate(siteId):
 		elementTemplate = ElementTemplate(Description = form.description.data, Name = form.name.data, SiteId = form.siteId.data)
 		db.session.add(elementTemplate)
 		db.session.commit()
-		flash("You have successfully added the new element template \"" + elementTemplate.Name + "\".", "alert alert-success")
+		flash("You have successfully added the new element template \"{}\".".format(elementTemplate.Name), "alert alert-success")
 		return redirect(form.requestReferrer.data)
 
 	# Present a form to add a new element template.
@@ -40,7 +40,7 @@ def deleteElementTemplate(elementTemplateId):
 	elementTemplate = ElementTemplate.query.get_or_404(elementTemplateId)
 	db.session.delete(elementTemplate)
 	db.session.commit()
-	flash("You have successfully deleted the element template \"" + elementTemplate.Name + "\".", "alert alert-success")
+	flash("You have successfully deleted the element template \"{}\".".format(elementTemplate.Name), "alert alert-success")
 	return redirect(request.referrer)
 
 @elementTemplates.route("/elementTemplates/edit/<int:elementTemplateId>", methods = ["GET", "POST"])
@@ -57,7 +57,7 @@ def editElementTemplate(elementTemplateId):
 		elementTemplate.Name = form.name.data
 		elementTemplate.SiteId = form.siteId.data
 		db.session.commit()
-		flash("You have successfully edited the element template \"" + elementTemplate.Name + "\".", "alert alert-success")
+		flash("You have successfully edited the element template \"{}\".".format(elementTemplate.Name), "alert alert-success")
 		return redirect(form.requestReferrer.data)
 
 	# Present a form to edit an existing element template.
