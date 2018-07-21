@@ -172,7 +172,7 @@ class EventFrame(db.Model):
 		if self.Name:
 			return self.Name
 		else:
-			return self.StartTimestamp.strftime("%m/%d/%y %H:%M") + ' - '			
+			return self.StartTimestamp.strftime("%m/%d/%y %H:%M") + " - "			
 
 	def hasDescendants(self):
 		if self.EventFrames:
@@ -555,7 +555,7 @@ class UnitOfMeasurement(db.Model):
 		return self.UnitOfMeasurementId
 
 class User(UserMixin, db.Model):
-	__tablename__ = 'User'
+	__tablename__ = "User"
 	__table_args__ = \
 	(
 		UniqueConstraint("Name", name = "AK__Name"),
