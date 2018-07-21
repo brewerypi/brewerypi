@@ -135,8 +135,9 @@ Event Frames
                         {% elif childrenClass == "EventFrameTemplate" %}
                             <td>{{ child.Name }}</td>
                             <td>{{ child.Description }}</td>
-                            <td><a class = "btn btn-default" title = "Edit" href = "{#{ url_for("eventFrameTemplates.editEventFrameTemplate",
-                                eventFrameTemplateId = child.id()) }#}"><span class="glyphicon glyphicon-link"></span></a></td>
+                            <td><a class = "btn btn-default" title = "Associate Attributes and Event Frames with Event Frame"
+                                href = "{{ url_for("eventFrameTemplates.selectEventFrameTemplate", selectedClass = "EventFrameTemplate",
+                                selectedId = child.id()) }}"><span class="glyphicon glyphicon-link"></span></a></td>
                             <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("eventFrameTemplates.editEventFrameTemplate",
                                 eventFrameTemplateId = child.id()) }}"><span class="glyphicon glyphicon-edit"></span></a></td>
                             <td><a class = "btn btn-default" title = "Delete" href = "{{ url_for("eventFrameTemplates.deleteEventFrameTemplate",
@@ -150,7 +151,8 @@ Event Frames
                                 eventFrameId = child.id()) }}"><span class="glyphicon glyphicon-stop"></span></a></td>
                             <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("eventFrames.editEventFrame", eventFrameId = child.id()) }}">
                                 <span class="glyphicon glyphicon-edit"></span></a></td>
-                            <td></td>
+                            <td><a class = "btn btn-default" title = "Delete" href = "{{ url_for("eventFrames.deleteEventFrame", eventFrameId = child.id()) }}">
+                                <span class="glyphicon glyphicon-trash"></span></a></td>
                         {% endif %}
                         <!-- {#% if childrenClass == "EventFrame" %}
                             <td><a class = "btn btn-default" title = "Select" href = "{{ url_for("eventFrames.dashboard", eventFrameId = child.id(),

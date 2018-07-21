@@ -29,13 +29,13 @@ def addEventFrameAttributeTemplate(eventFrameTemplateId):
 	form.requestReferrer.data = request.referrer
 	eventFrameTemplate = EventFrameTemplate.query.get_or_404(eventFrameTemplateId)
 	if eventFrameTemplate.hasParent():
-		breadcrumbs = [{"url" : url_for("eventFrameTemplates.selectEventFrameTemplate", selectedClass = "Root"), "text" : ".."},
-			{"url" : url_for("eventFrameTemplates.selectEventFrameTemplate", selectedClass = "Enterprise",
+		breadcrumbs = [{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Root"), "text" : ".."},
+			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Enterprise",
 				selectedId = eventFrameTemplate.origin().ElementTemplate.Site.Enterprise.EnterpriseId),
 				"text" : eventFrameTemplate.origin().ElementTemplate.Site.Enterprise.Name},
-			{"url" : url_for("eventFrameTemplates.selectEventFrameTemplate", selectedClass = "Site",
+			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Site",
 				selectedId = eventFrameTemplate.origin().ElementTemplate.Site.SiteId), "text" : eventFrameTemplate.origin().ElementTemplate.Site.Name},
-			{"url" : url_for("eventFrameTemplates.selectEventFrameTemplate", selectedClass = "ElementTemplate",
+			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "ElementTemplate",
 				selectedId = eventFrameTemplate.origin().ElementTemplate.ElementTemplateId), "text" : eventFrameTemplate.origin().ElementTemplate.Name}]
 		for eventFrameTemplateAcestor in eventFrameTemplate.ancestors([]):
 			breadcrumbs.append({"url" : url_for("eventFrameTemplates.selectEventFrameTemplate", selectedClass = "EventFrameTemplate",
@@ -44,14 +44,14 @@ def addEventFrameAttributeTemplate(eventFrameTemplateId):
 		breadcrumbs.append({"url" : url_for("eventFrameTemplates.selectEventFrameTemplate", selectedClass = "EventFrameTemplate",
 			selectedId = eventFrameTemplate.EventFrameTemplateId), "text" : eventFrameTemplate.Name})
 	else:
-		breadcrumbs = [{"url" : url_for("eventFrameTemplates.selectEventFrameTemplate", selectedClass = "Root"), "text" : ".."},
-			{"url" : url_for("eventFrameTemplates.selectEventFrameTemplate", selectedClass = "Enterprise",
+		breadcrumbs = [{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Root"), "text" : ".."},
+			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Enterprise",
 				selectedId = eventFrameTemplate.ElementTemplate.Site.Enterprise.EnterpriseId),
 				"text" : eventFrameTemplate.ElementTemplate.Site.Enterprise.Name},
-			{"url" : url_for("eventFrameTemplates.selectEventFrameTemplate", selectedClass = "Site",
+			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Site",
 				selectedId = eventFrameTemplate.ElementTemplate.Site.SiteId),
 				"text" : eventFrameTemplate.ElementTemplate.Site.Name},
-			{"url" : url_for("eventFrameTemplates.selectEventFrameTemplate", selectedClass = "ElementTemplate",
+			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "ElementTemplate",
 				selectedId = eventFrameTemplate.ElementTemplate.ElementTemplateId), "text" : eventFrameTemplate.ElementTemplate.Name},
 			{"url" : url_for("eventFrameTemplates.selectEventFrameTemplate", selectedClass = "EventFrameTemplate",
 				selectedId = eventFrameTemplate.EventFrameTemplateId), "text" : eventFrameTemplate.Name}]
@@ -93,14 +93,14 @@ def editEventFrameAttributeTemplate(eventFrameAttributeTemplateId):
 	form.requestReferrer.data = request.referrer
 
 	if eventFrameAttributeTemplate.EventFrameTemplate.hasParent():
-		breadcrumbs = [{"url" : url_for("eventFrameTemplates.selectEventFrameTemplate", selectedClass = "Root"), "text" : ".."},
-			{"url" : url_for("eventFrameTemplates.selectEventFrameTemplate", selectedClass = "Enterprise",
+		breadcrumbs = [{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Root"), "text" : ".."},
+			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Enterprise",
 				selectedId = eventFrameAttributeTemplate.EventFrameTemplate.origin().ElementTemplate.Site.Enterprise.EnterpriseId),
 				"text" : eventFrameAttributeTemplate.EventFrameTemplate.origin().ElementTemplate.Site.Enterprise.Name},
-			{"url" : url_for("eventFrameTemplates.selectEventFrameTemplate", selectedClass = "Site",
+			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Site",
 				selectedId = eventFrameAttributeTemplate.EventFrameTemplate.origin().ElementTemplate.Site.SiteId),
 				"text" : eventFrameAttributeTemplate.EventFrameTemplate.origin().ElementTemplate.Site.Name},
-			{"url" : url_for("eventFrameTemplates.selectEventFrameTemplate", selectedClass = "ElementTemplate",
+			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "ElementTemplate",
 				selectedId = eventFrameAttributeTemplate.EventFrameTemplate.origin().ElementTemplate.ElementTemplateId),
 				"text" : eventFrameAttributeTemplate.EventFrameTemplate.origin().ElementTemplate.Name}]
 		for eventFrameTemplateAcestor in eventFrameAttributeTemplate.EventFrameTemplate.ancestors([]):
@@ -111,14 +111,14 @@ def editEventFrameAttributeTemplate(eventFrameAttributeTemplateId):
 			selectedId = eventFrameAttributeTemplate.EventFrameTemplate.EventFrameTemplateId), "text" : eventFrameAttributeTemplate.EventFrameTemplate.Name},
 			{"url" : None, "text" : eventFrameAttributeTemplate.Name}])
 	else:
-		breadcrumbs = [{"url" : url_for("eventFrameTemplates.selectEventFrameTemplate", selectedClass = "Root"), "text" : ".."},
-			{"url" : url_for("eventFrameTemplates.selectEventFrameTemplate", selectedClass = "Enterprise",
+		breadcrumbs = [{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Root"), "text" : ".."},
+			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Enterprise",
 				selectedId = eventFrameAttributeTemplate.EventFrameTemplate.ElementTemplate.Site.Enterprise.EnterpriseId),
 				"text" : eventFrameAttributeTemplate.EventFrameTemplate.ElementTemplate.Site.Enterprise.Name},
-			{"url" : url_for("eventFrameTemplates.selectEventFrameTemplate", selectedClass = "Site",
+			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Site",
 				selectedId = eventFrameAttributeTemplate.EventFrameTemplate.ElementTemplate.Site.SiteId),
 				"text" : eventFrameAttributeTemplate.EventFrameTemplate.ElementTemplate.Site.Name},
-			{"url" : url_for("eventFrameTemplates.selectEventFrameTemplate", selectedClass = "ElementTemplate",
+			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "ElementTemplate",
 				selectedId = eventFrameAttributeTemplate.EventFrameTemplate.ElementTemplate.ElementTemplateId),
 				"text" : eventFrameAttributeTemplate.EventFrameTemplate.ElementTemplate.Name},
 			{"url" : url_for("eventFrameTemplates.selectEventFrameTemplate", selectedClass = "EventFrameTemplate",
