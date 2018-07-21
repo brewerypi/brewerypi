@@ -75,7 +75,7 @@ Tag Values
                         {% set noteButtonClass = "btn btn-default" %}
                     {% endif %}
                     {% if elementAttribute %}
-                        <td><a class = "{{ noteButtonClass }}" title = "Note" href = "{{ url_for("tagValues.listTagValueNotes", 
+                        <td><a class = "{{ noteButtonClass }}" title = "Note" href = "{{ url_for("tagValueNotes.listTagValueNotes", 
                             tagValueId = tagValue.TagValueId, elementAttributeId = elementAttribute.ElementAttributeId) }}">
                             <span class = "glyphicon glyphicon-comment"></span></a></td>
                     {% else %}

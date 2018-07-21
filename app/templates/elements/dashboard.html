@@ -160,7 +160,7 @@
                         {% else %}
                             {% set noteButtonClass = "btn btn-default" %}
                         {% endif %}
-                        <td><a class = "{{ noteButtonClass }}" title = "Last Value Notes" href = "{{ url_for("tagValues.listTagValueNotes", 
+                        <td><a class = "{{ noteButtonClass }}" title = "Last Value Notes" href = "{{ url_for("tagValueNotes.listTagValueNotes", 
                                 tagValueId = firstTagValue.TagValueId, elementAttributeId = elementAttribute.ElementAttributeId) }}">
                                 <span class = "glyphicon glyphicon-comment"></span></a></td>
                         <td><a class = "btn btn-default" title = "Edit Last Value"
