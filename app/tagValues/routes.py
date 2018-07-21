@@ -81,7 +81,7 @@ def addTagValue(tagId, elementAttributeId = None):
 
 	return render_template("addEditModel.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
 
-@tagValues.route("/tagValues/addMultiple", methods=["GET", "POST"])
+@tagValues.route("/tagValues/addMultiple", methods = ["GET", "POST"])
 @login_required
 @permissionRequired(Permission.DATA_ENTRY)
 def addMultiple():

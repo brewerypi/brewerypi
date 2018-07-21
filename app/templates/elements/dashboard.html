@@ -8,7 +8,7 @@
 
 {% block page_content %}
 <div>
-    <ol class="breadcrumb">
+    <ol class = "breadcrumb">
         <li><a href = "{{ url_for("elements.selectElement", selectedClass = "Root", selectedId = None) }}">..</a></li>
         <li><a href = "{{ url_for("elements.selectElement", selectedClass = "Enterprise",
             selectedId = element.ElementTemplate.Site.Enterprise.EnterpriseId) }}">{{ element.ElementTemplate.Site.Enterprise.Name }}</a></li>
@@ -56,7 +56,7 @@
                         <td>{{ firstEventFrame.EndTimestamp }}</td>
                         {% if firstEventFrame.EndTimestamp == None %}
                             <td><a class = "btn btn-default" title = "End" href = "{{ url_for("eventFrames.endEventFrame",
-                                eventFrameId = firstEventFrame.EventFrameId) }}"><span class="glyphicon glyphicon-stop"></span></a></td>
+                                eventFrameId = firstEventFrame.EventFrameId) }}"><span class = "glyphicon glyphicon-stop"></span></a></td>
                         {% else %}
                             <td></td>
                         {% endif %}
@@ -67,14 +67,14 @@
                     {% endif %}
                     <td><a class = "btn btn-default" title = "Add" href = "{{ url_for("eventFrames.startEventFrame",
                         elementId = element.ElementId, eventFrameTemplateId = eventFrameTemplate.EventFrameTemplateId) }}">
-                        <span class="glyphicon glyphicon-plus"></span></a></td>
+                        <span class = "glyphicon glyphicon-plus"></span></a></td>
                     {% if firstEventFrame %}
                         <td><a class = "btn btn-default" title = "Edit"
                             href = "{{ url_for("eventFrames.editEventFrame", eventFrameId = firstEventFrame.EventFrameId) }}">
-                            <span class="glyphicon glyphicon-edit"></span></a></td>
+                            <span class = "glyphicon glyphicon-edit"></span></a></td>
                         <td><a class = "btn btn-default" title = "Delete"
                             href = "{{ url_for("eventFrames.deleteEventFrame", eventFrameId = firstEventFrame.EventFrameId) }}">
-                            <span class="glyphicon glyphicon-trash"></span></a></td>
+                            <span class = "glyphicon glyphicon-trash"></span></a></td>
                     {% else %}
                         <td></td>
                         <td></td>
@@ -87,7 +87,7 @@
 <div>
     <h1>{{ element.Name }} <small>Attributes <a class = "btn btn-default" title = "Link Attributes to Tags"
         href = "{{ url_for("elementAttributes.listElementAttributes", elementId = element.ElementId) }}">
-        <span class="glyphicon glyphicon-link"></span></a></small></h1>
+        <span class = "glyphicon glyphicon-link"></span></a></small></h1>
 </div>
 <div>
     <table id = "attributesTable" class = "table">
@@ -100,7 +100,7 @@
                 <th>Unit</th>
                 <th>New Value</th>
                 <th>New Timestamp</th>
-                <th><button class = "btn btn-default" id = "buttonAttributesSaveAll" title = "Save All"><span class="glyphicon glyphicon-floppy-disk"></span>
+                <th><button class = "btn btn-default" id = "buttonAttributesSaveAll" title = "Save All"><span class = "glyphicon glyphicon-floppy-disk"></span>
                     </button></th>
                 <th></th>
                 <th></th>
@@ -111,7 +111,7 @@
             {% for elementAttribute in elementAttributes %}
                 <tr>
                     <td><a class = "btn btn-default" title = "List Values" href = "{{ url_for("tagValues.listTagValues", tagId = elementAttribute.Tag.TagId,
-                        elementAttributeId = elementAttribute.ElementAttributeId) }}"><span class="glyphicon glyphicon-list"></span></a></td>
+                        elementAttributeId = elementAttribute.ElementAttributeId) }}"><span class = "glyphicon glyphicon-list"></span></a></td>
                     <td>{{ elementAttribute.ElementAttributeTemplate.Name }}</td>
                     {% if elementAttribute.Tag.TagValues[0] %}
                         {% set firstTagValue = elementAttribute.Tag.TagValues | sort(attribute = "Timestamp", reverse = True) | first %}
@@ -162,13 +162,13 @@
                         {% endif %}
                         <td><a class = "{{ noteButtonClass }}" title = "Last Value Notes" href = "{{ url_for("tagValues.listTagValueNotes", 
                                 tagValueId = firstTagValue.TagValueId, elementAttributeId = elementAttribute.ElementAttributeId) }}">
-                                <span class="glyphicon glyphicon-comment"></span></a></td>
+                                <span class = "glyphicon glyphicon-comment"></span></a></td>
                         <td><a class = "btn btn-default" title = "Edit Last Value"
                             href = "{{ url_for("tagValues.editTagValue", tagValueId = firstTagValue.TagValueId,
-                            elementAttributeId = elementAttribute.ElementAttributeId) }}"><span class="glyphicon glyphicon-edit"></span></a></td>
+                            elementAttributeId = elementAttribute.ElementAttributeId) }}"><span class = "glyphicon glyphicon-edit"></span></a></td>
                         <td><a class = "btn btn-default" title = "Delete Last Value"
                             href = "{{ url_for("tagValues.deleteTagValue", tagValueId = firstTagValue.TagValueId) }}">
-                            <span class="glyphicon glyphicon-trash"></span></a></td>
+                            <span class = "glyphicon glyphicon-trash"></span></a></td>
                     {% else %}
                         <td></td>
                         <td></td>

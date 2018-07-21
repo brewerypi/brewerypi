@@ -8,7 +8,7 @@ Tags
 
 {% block page_content %}
 <div>
-    <ol class="breadcrumb">
+    <ol class = "breadcrumb">
         {% if childrenClass == "Enterprise" %}
             <li class = "active">..</li>
             {% set tableHeader = "Enterprise" %}
@@ -44,9 +44,9 @@ Tags
 <div>
     {% if childrenClass == "Tag" and parent and current_user.isAdministrator() %}
         <a class = "btn btn-default" title = "Add Tag" href = "{{ url_for("tags.addTag", areaId = parent.id()) }}" role = "button">
-            <span class="glyphicon glyphicon-plus"></span>Tag</a>
+            <span class = "glyphicon glyphicon-plus"></span>Tag</a>
         <a class = "btn btn-default" title = "Add Lookup" href = "{{ url_for("tags.addTag", areaId = parent.id(), lookup = True) }}" role = "button">
-            <span class="glyphicon glyphicon-plus"></span> Lookup Tag</a>
+            <span class = "glyphicon glyphicon-plus"></span> Lookup Tag</a>
     {% endif %}
     <br><br>    
     <table id = "tagsTable" class = "table">
@@ -65,18 +65,18 @@ Tags
                     <tr>
                         {% if childrenClass == "Tag" %}
                             <td><a class = "btn btn-default" title = "Tag Values" href = "{{ url_for("tagValues.listTagValues",
-                                tagId = child.id()) }}"><span class="glyphicon glyphicon-list"></span></a></td>
+                                tagId = child.id()) }}"><span class = "glyphicon glyphicon-list"></span></a></td>
                         {% else %}
                             <td><a class = "btn btn-default" title = "Children" href = "{{ url_for("tags.selectTag", selectedClass = child.__class__.__name__,
-                                selectedId = child.id()) }}"><span class="glyphicon glyphicon-list"></span></a></td>
+                                selectedId = child.id()) }}"><span class = "glyphicon glyphicon-list"></span></a></td>
                         {% endif %}
                         <td>{{ child.Name }}</td>
                         <td>{{ child.Description }}</td>
                         {% if childrenClass == "Tag" and current_user.isAdministrator() %}
                             <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("tags.editTag", tagId = child.TagId) }}">
-                                <span class="glyphicon glyphicon-edit"></span></a></td>
+                                <span class = "glyphicon glyphicon-edit"></span></a></td>
                             <td><a class = "btn btn-default" title = "Delete" href = "{{ url_for("tags.deleteTag", tagId = child.TagId) }}">
-                                <span class="glyphicon glyphicon-trash"></span></a></td>
+                                <span class = "glyphicon glyphicon-trash"></span></a></td>
                         {% else %}
                             <td></td>
                             <td></td>

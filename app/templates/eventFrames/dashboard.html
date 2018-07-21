@@ -8,7 +8,7 @@ Event Frame Dashboard
 
 {% block page_content %}
 <div>
-    <ol class="breadcrumb">
+    <ol class = "breadcrumb">
         <li><a href = "{{ url_for("eventFrames.selectEventFrame", selectedClass = "Root") }}">..</a></li>
         <li><a href = "{{ url_for("eventFrames.selectEventFrame", selectedClass = "Enterprise",
             selectedId = eventFrame.EventFrameTemplate.ElementTemplate.Site.Enterprise.id()) }}">
@@ -27,7 +27,7 @@ Event Frame Dashboard
 </div>
 <div>
     <a class = "btn btn-default" title = "Add" href = "{{ url_for("eventFrameNotes.addEventFrameNote", eventFrameId = eventFrame.id()) }}" role = "button">
-        <span class="glyphicon glyphicon-plus"></span></a>
+        <span class = "glyphicon glyphicon-plus"></span></a>
     <br><br>
     <table id = "table" class = "table">
         <thead>
@@ -44,9 +44,9 @@ Event Frame Dashboard
                     <td>{{ eventFrameNote.Note.Timestamp }}</td>
                     <td>{{ eventFrameNote.Note.Note }}</td>
                     <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("eventFrameNotes.editEventFrameNote",
-                        eventFrameId = eventFrame.EventFrameId, noteId = eventFrameNote.NoteId) }}"><span class="glyphicon glyphicon-edit"></span></a></td>
+                        eventFrameId = eventFrame.EventFrameId, noteId = eventFrameNote.NoteId) }}"><span class = "glyphicon glyphicon-edit"></span></a></td>
                     <td><a class = "btn btn-default" title = "Delete" href = "{{ url_for("eventFrameNotes.deleteEventFrameNote",
-                        noteId = eventFrameNote.NoteId, eventFrameId = eventFrameNote.EventFrameId) }}"><span class="glyphicon glyphicon-trash"></span></a>
+                        noteId = eventFrameNote.NoteId, eventFrameId = eventFrameNote.EventFrameId) }}"><span class = "glyphicon glyphicon-trash"></span></a>
                         </td>
                 </tr>
             {% endfor %}

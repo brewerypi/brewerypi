@@ -8,7 +8,7 @@ Data Entry - Elements
 
 {% block page_content %}
 <div>
-    <ol class="breadcrumb">
+    <ol class = "breadcrumb">
         {% if childrenClass == "Enterprise" %}
             <li class = "active">..</li>
             {% set tableHeader = "Enterprise" %}
@@ -53,13 +53,13 @@ Data Entry - Elements
 <div>
     {% if childrenClass == "Element" %}
         <a class = "btn btn-default" title = "Add" href = "{{ url_for("elements.addElement", elementTemplateId = parent.id()) }}" role = "button">
-            <span class="glyphicon glyphicon-plus"></span></a>
+            <span class = "glyphicon glyphicon-plus"></span></a>
     {% elif childrenClass == "ElementAttributeTemplate" %}
         <a class = "btn btn-default" title = "Add Element Attribute Template" href = "{{ url_for("elementAttributeTemplates.addElementAttributeTemplate",
-            elementTemplateId = parent.id()) }}" role = "button"><span class="glyphicon glyphicon-plus"></span></a>
+            elementTemplateId = parent.id()) }}" role = "button"><span class = "glyphicon glyphicon-plus"></span></a>
     {% elif childrenClass == "ElementTemplate" %}
         <a class = "btn btn-default" title = "Add Element Template" href = "{{ url_for("elementTemplates.addElementTemplate", siteId = parent.id()) }}"
-            role = "button"><span class="glyphicon glyphicon-plus"></span></a>
+            role = "button"><span class = "glyphicon glyphicon-plus"></span></a>
     {% endif %}
     <br><br>
     <table id = "table" class = "table">
@@ -79,35 +79,35 @@ Data Entry - Elements
                     <tr>
                         {% if childrenClass == "Element" %}
                             <td><a class = "btn btn-default" title = "Select" href = "{{ url_for("elements.dashboard",
-                                elementId = child.id()) }}"><span class="glyphicon glyphicon-list"></span></a></td>
+                                elementId = child.id()) }}"><span class = "glyphicon glyphicon-list"></span></a></td>
                         {% elif childrenClass == "ElementAttributeTemplate" %}
                             <td></td>
                         {% else %}
                             <td><a class = "btn btn-default" title = "Select" href = "{{ url_for("elements.selectElement",
-                                selectedClass = child.__class__.__name__, selectedId = child.id()) }}"><span class="glyphicon glyphicon-list"></span></a></td>
+                                selectedClass = child.__class__.__name__, selectedId = child.id()) }}"><span class = "glyphicon glyphicon-list"></span></a></td>
                         {% endif %}
                         <td>{{ child.Name }}</td>
                         <td>{{ child.Description }}</td>
                         {% if childrenClass == "Element" %}
                             <td><a class = "btn btn-default" title = "Copy" href = "{{ url_for("elements.copyElement", elementId = child.ElementId) }}">
-                                <span class="glyphicon glyphicon-copy"></span></a></td>
+                                <span class = "glyphicon glyphicon-copy"></span></a></td>
                             <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("elements.editElement", elementId = child.ElementId) }}">
-                                <span class="glyphicon glyphicon-edit"></span></a></td>
+                                <span class = "glyphicon glyphicon-edit"></span></a></td>
                             <td><a class = "btn btn-default" title = "Delete" href = "{{ url_for("elements.deleteElement", elementId = child.ElementId) }}">
-                                <span class="glyphicon glyphicon-trash"></span></a></td>
+                                <span class = "glyphicon glyphicon-trash"></span></a></td>
                         {% elif childrenClass == "ElementAttributeTemplate" %}
                             <td></td>
                             <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("elementAttributeTemplates.editElementAttributeTemplate",
-                                elementAttributeTemplateId = child.id()) }}"><span class="glyphicon glyphicon-edit"></a></td>
+                                elementAttributeTemplateId = child.id()) }}"><span class = "glyphicon glyphicon-edit"></a></td>
                             <td><a class = "btn btn-default" title = "Delete" href = "{{ url_for("elementAttributeTemplates.deleteElementAttributeTemplate",
-                                elementAttributeTemplateId = child.id()) }}"><span class="glyphicon glyphicon-trash"></a></td>
+                                elementAttributeTemplateId = child.id()) }}"><span class = "glyphicon glyphicon-trash"></a></td>
                         {% elif childrenClass == "ElementTemplate" %}
                             <td><a class = "btn btn-default" title = "Associate Attributes with Element" href = "{{ url_for("elements.selectElement",
-                                selectedClass = "ElementAttributeTemplate", selectedId = child.id()) }}"><span class="glyphicon glyphicon-link"></a></td>
+                                selectedClass = "ElementAttributeTemplate", selectedId = child.id()) }}"><span class = "glyphicon glyphicon-link"></a></td>
                             <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("elementTemplates.editElementTemplate",
-                                elementTemplateId = child.id()) }}"><span class="glyphicon glyphicon-edit"></a></td>
+                                elementTemplateId = child.id()) }}"><span class = "glyphicon glyphicon-edit"></a></td>
                             <td><a class = "btn btn-default" title = "Delete" href = "{{ url_for("elementTemplates.deleteElementTemplate",
-                                elementTemplateId = child.id()) }}"><span class="glyphicon glyphicon-trash"></a></td>
+                                elementTemplateId = child.id()) }}"><span class = "glyphicon glyphicon-trash"></a></td>
                         {% else %}
                             <td></td>
                             <td></td>

@@ -8,7 +8,7 @@ Lookups
 
 {% block page_content %}
 <div>
-    <ol class="breadcrumb">
+    <ol class = "breadcrumb">
         {% if childrenClass == "Enterprise" %}
             <li class = "active">..</li>
             {% set tableHeader = "Enterprise" %}
@@ -34,10 +34,10 @@ Lookups
 <div>
     {% if childrenClass == "Lookup" %}
         <a class = "btn btn-default" title = "Add a Lookup" href = "{{ url_for("lookups.addLookup", enterpriseId = parent.id()) }}" role = "button">
-            <span class="glyphicon glyphicon-plus"></span></a>
+            <span class = "glyphicon glyphicon-plus"></span></a>
     {% elif childrenClass == "LookupValue" %}
         <a class = "btn btn-default" title = "Add a Lookup Value" href = "{{ url_for("lookupValues.addLookupValue", lookupId = parent.id()) }}" role = "button">
-            <span class="glyphicon glyphicon-plus"></span></a>
+            <span class = "glyphicon glyphicon-plus"></span></a>
     {% endif %}
     <br><br>
     <table id = "lookupsTable" class = "table">
@@ -56,7 +56,7 @@ Lookups
                     <tr>
                         {% if childrenClass != "LookupValue" %}
                             <td><a class = "btn btn-default" title = "Select" href = "{{ url_for("lookups.selectLookup",
-                            selectedClass = child.__class__.__name__, selectedId = child.id()) }}"><span class="glyphicon glyphicon-list"></span></a></td>
+                            selectedClass = child.__class__.__name__, selectedId = child.id()) }}"><span class = "glyphicon glyphicon-list"></span></a></td>
                         {% else %}
                             <td></td>
                         {% endif %}
@@ -64,14 +64,14 @@ Lookups
                         <td>{{ child.Selectable }}</td>
                         {% if childrenClass == "Lookup" %}
                             <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("lookups.editLookup",
-                                lookupId = child.LookupId) }}"><span class="glyphicon glyphicon-edit"></span></a></td>
+                                lookupId = child.LookupId) }}"><span class = "glyphicon glyphicon-edit"></span></a></td>
                             <td><a class = "btn btn-default" title = "Delete" href = "{{ url_for("lookups.deleteLookup",
-                                lookupId = child.LookupId) }}"><span class="glyphicon glyphicon-trash"></span></a></td>
+                                lookupId = child.LookupId) }}"><span class = "glyphicon glyphicon-trash"></span></a></td>
                         {% elif childrenClass == "LookupValue" %}
                             <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("lookupValues.editLookupValue",
-                                lookupValueId = child.LookupValueId) }}"><span class="glyphicon glyphicon-edit"></span></a></td>
+                                lookupValueId = child.LookupValueId) }}"><span class = "glyphicon glyphicon-edit"></span></a></td>
                             <td><a class = "btn btn-default" title = "Delete" href = "{{ url_for("lookupValues.deleteLookupValue",
-                                lookupValueId = child.LookupValueId) }}"><span class="glyphicon glyphicon-trash"></span></a></td>
+                                lookupValueId = child.LookupValueId) }}"><span class = "glyphicon glyphicon-trash"></span></a></td>
                         {% else %}
                             <td></td>
                             <td></td>

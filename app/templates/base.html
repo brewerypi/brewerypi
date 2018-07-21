@@ -19,7 +19,7 @@
             {% if current_user.is_authenticated %}
             <ul class = "nav navbar-nav">
                 {% if current_user.isAdministrator() %}
-                    <li class = "dropdown"><a href = "#" class = "dropdown-toggle" data-toggle = "dropdown">Configuration <span class="caret"></span></a>
+                    <li class = "dropdown"><a href = "#" class = "dropdown-toggle" data-toggle = "dropdown">Configuration <span class = "caret"></span></a>
                         <ul class = "dropdown-menu">
                             <li><a href = "{{ url_for("physicalModels.selectPhysicalModel") }}">Brewery Modeling</a></li>
                             <li><a href = "{{ url_for("lookups.selectLookup") }}">Lookups</a></li>
@@ -28,7 +28,7 @@
                         </ul>
                     </li>
                 {% endif %}
-                    <li class = "dropdown"><a href = "#" class = "dropdown-toggle" data-toggle = "dropdown">Tags <span class="caret"></span></a>
+                    <li class = "dropdown"><a href = "#" class = "dropdown-toggle" data-toggle = "dropdown">Tags <span class = "caret"></span></a>
                         <ul class = "dropdown-menu">
                             <li><a href = "{{ url_for("tags.selectTag") }}">Tags</a></li>
                             {% if current_user.isAdministrator() %}
@@ -38,7 +38,7 @@
                         </ul>
                     </li>
                 {% if current_user.isAdministrator() %}
-                    <li class = "dropdown"><a href = "#" class = "dropdown-toggle" data-toggle = "dropdown">Elements <span class="caret"></span></a>
+                    <li class = "dropdown"><a href = "#" class = "dropdown-toggle" data-toggle = "dropdown">Elements <span class = "caret"></span></a>
                         <ul class = "dropdown-menu">
                             <li><a href = "{{ url_for("elements.selectElement") }}">Elements</a></li>
                             <li><a href = "{{ url_for("elementAttributes.importElementAttributes") }}">Import</a></li>
@@ -46,7 +46,7 @@
                         </ul>
                     </li>
                     {% if config["IS_RASPBERRY_PI"] %}
-                        <li class = "dropdown"><a href = "#" class = "dropdown-toggle" data-toggle = "dropdown">Raspberry Pi <span class="caret"></span></a>
+                        <li class = "dropdown"><a href = "#" class = "dropdown-toggle" data-toggle = "dropdown">Raspberry Pi <span class = "caret"></span></a>
                             <ul class = "dropdown-menu">
                                 <li><a href = "{{ url_for("raspberryPiUtilities.backupDatabase") }}">Backup Database</a></li>
                                 <li><a href = "{{ url_for("raspberryPiUtilities.info") }}">Info</a></li>
@@ -57,7 +57,7 @@
                         </li>
                     {% endif %}
                 {% endif %}
-                <li class = "dropdown"><a href = "#" class = "dropdown-toggle" data-toggle = "dropdown">Event Frames <span class="caret"></span></a>
+                <li class = "dropdown"><a href = "#" class = "dropdown-toggle" data-toggle = "dropdown">Event Frames <span class = "caret"></span></a>
                     <ul class = "dropdown-menu">
                         <li><a href = "{{ url_for("eventFrames.selectEventFrame") }}">Event Frames</a></li>
                     </ul>
@@ -69,7 +69,8 @@
             {% endif %}
             <ul class = "nav navbar-nav navbar-right">
                 {% if current_user.is_authenticated %}
-                <li class = "dropdown"><a href = "#" class = "dropdown-toggle" data-toggle = "dropdown">{{ current_user.Name }} <span class="caret"></span></a>
+                <li class = "dropdown"><a href = "#" class = "dropdown-toggle" data-toggle = "dropdown">{{ current_user.Name }} <span class = "caret"></span>
+                    </a>
                     <ul class = "dropdown-menu">
                         <li><a href = "{{ url_for("authentications.logout") }}">Logout</a></li>
                         <li><a href = "{{ url_for("users.changePassword", userId = current_user.UserId) }}">Change Password</a></li>

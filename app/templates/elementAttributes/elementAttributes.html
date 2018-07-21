@@ -6,7 +6,7 @@ Element Attributes
 
 {% block page_content %}
 <div>
-    <ol class="breadcrumb">
+    <ol class = "breadcrumb">
         <li><a href = "{{ url_for("elements.selectElement", selectedClass = "Root", selectedId = None) }}">..</a></li>
         <li><a href = "{{ url_for("elements.selectElement", selectedClass = "Enterprise",
             selectedId = element.ElementTemplate.Site.Enterprise.EnterpriseId) }}">{{ element.ElementTemplate.Site.Enterprise.Name }}</a></li>
@@ -22,7 +22,7 @@ Element Attributes
 </div>
 <div>
     <a class = "btn btn-default" title = "Add" href = "{{ url_for("elementAttributes.addElementAttribute", elementId = element.ElementId) }}"
-        role = "button"><span class="glyphicon glyphicon-plus"></span></a>
+        role = "button"><span class = "glyphicon glyphicon-plus"></span></a>
     <br><br>
     <table id = "elementAttributesTable" class = "table">
         <thead>
@@ -41,9 +41,9 @@ Element Attributes
                 <td>{{ elementAttribute.Tag.Area.Site.Enterprise.Abbreviation + "_" + elementAttribute.Tag.Area.Site.Abbreviation + "_" +
                     elementAttribute.Tag.Area.Abbreviation + "_" + elementAttribute.Tag.Name }}</td>
                 <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("elementAttributes.editElementAttribute",
-                    elementAttributeId = elementAttribute.ElementAttributeId) }}"><span class="glyphicon glyphicon-edit"></span></a></td>
+                    elementAttributeId = elementAttribute.ElementAttributeId) }}"><span class = "glyphicon glyphicon-edit"></span></a></td>
                 <td><a class = "btn btn-default" title = "Delete" href = "{{ url_for("elementAttributes.deleteElementAttribute",
-                    elementAttributeId = elementAttribute.ElementAttributeId) }}"><span class="glyphicon glyphicon-trash"></span></a></td>
+                    elementAttributeId = elementAttribute.ElementAttributeId) }}"><span class = "glyphicon glyphicon-trash"></span></a></td>
             </tr>
             {% endfor %}
         </tbody>

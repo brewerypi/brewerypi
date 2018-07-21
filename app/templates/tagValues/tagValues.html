@@ -6,7 +6,7 @@ Tag Values
 
 {% block page_content %}
 <div>
-    <ol class="breadcrumb">
+    <ol class = "breadcrumb">
         {% if elementAttribute %}
             <li><a href = "{{ url_for("elements.selectElement", selectedClass = "Root") }}">..</a></li>
             <li><a href = "{{ url_for("elements.selectElement", selectedClass = "Enterprise",
@@ -35,10 +35,10 @@ Tag Values
 <div>
     {% if elementAttribute %}
         <a class = "btn btn-default" title = "Add" href = "{{ url_for("tagValues.addTagValue", tagId = tag.TagId,
-            elementAttributeId = elementAttribute.ElementAttributeId) }}" role = "button"><span class="glyphicon glyphicon-plus"></span></a>
+            elementAttributeId = elementAttribute.ElementAttributeId) }}" role = "button"><span class = "glyphicon glyphicon-plus"></span></a>
     {% else %}
         <a class = "btn btn-default" title = "Add" href = "{{ url_for("tagValues.addTagValue", tagId = tag.TagId) }}" role = "button">
-            <span class="glyphicon glyphicon-plus"></span></a>
+            <span class = "glyphicon glyphicon-plus"></span></a>
     {% endif %}
     <br><br>
     <table id = "tagValuesTable" class = "table">
@@ -68,7 +68,7 @@ Tag Values
                         <td>{{ tagValue.Tag.UnitOfMeasurement.Abbreviation }}</td>
                     {% endif %}
                     <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("tagValues.editTagValue", tagValueId = tagValue.TagValueId) }}">
-                        <span class="glyphicon glyphicon-edit"></span></a></td>
+                        <span class = "glyphicon glyphicon-edit"></span></a></td>
                     {% if tagValue.TagValueNotes[0] %}
                         {% set noteButtonClass = "btn btn-default has-note" %}
                     {% else %}
@@ -77,13 +77,13 @@ Tag Values
                     {% if elementAttribute %}
                         <td><a class = "{{ noteButtonClass }}" title = "Note" href = "{{ url_for("tagValues.listTagValueNotes", 
                             tagValueId = tagValue.TagValueId, elementAttributeId = elementAttribute.ElementAttributeId) }}">
-                            <span class="glyphicon glyphicon-comment"></span></a></td>
+                            <span class = "glyphicon glyphicon-comment"></span></a></td>
                     {% else %}
                         <td><a class = "{{ noteButtonClass }}" title = "Note" href = "{{ url_for("tagValueNotes.listTagValueNotes", 
-                            tagValueId = tagValue.TagValueId) }}"><span class="glyphicon glyphicon-comment"></span></a></td>
+                            tagValueId = tagValue.TagValueId) }}"><span class = "glyphicon glyphicon-comment"></span></a></td>
                     {% endif %}
                     <td><a class = "btn btn-default" title = "Delete" href = "{{ url_for("tagValues.deleteTagValue", tagValueId = tagValue.TagValueId) }}">
-                        <span class="glyphicon glyphicon-trash"></span></a></td>
+                        <span class = "glyphicon glyphicon-trash"></span></a></td>
                 </tr>
             {% endfor %}
         </tbody>
