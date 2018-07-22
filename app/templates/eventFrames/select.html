@@ -46,6 +46,22 @@ Event Frames
             <li class = "active">{{ parent.Name }}</li>
             {% set tableHeader = "Event Frame" %}
             {% set pageHeaderSubText = "" %}
+        {% elif childrenClass == "DescendantEventFrameTemplate" %}
+            {% set origin = parent.origin() %}
+            <li><a href = "{{ url_for("eventFrames.selectEventFrame", selectedClass = "Root") }}">..</a></li>
+            <li><a href = "{{ url_for("eventFrames.selectEventFrame", selectedClass = "Enterprise",
+                selectedId = origin.ElementTemplate.Site.Enterprise.id()) }}">{{ origin.ElementTemplate.Site.Enterprise.Name }}</a></li>
+            <li><a href = "{{ url_for("eventFrames.selectEventFrame", selectedClass = "Site",
+                selectedId = origin.ElementTemplate.Site.id()) }}">{{ origin.ElementTemplate.Site.Name }}</a></li>
+            <li><a href = "{{ url_for("eventFrames.selectEventFrame", selectedClass = "ElementTemplate",
+                selectedId = origin.ElementTemplate.id()) }}">{{ origin.ElementTemplate.Name }}</a></li>
+            {% for ancestor in parent.ancestors([]) %}
+                <li><a href = "{{ url_for("eventFrames.selectEventFrame", selectedClass = "EventFrameTemplate", selectedId = ancestor.id(),
+                    selectedOperation = "configure") }}">{{ ancestor.Name }}</a></li>
+            {% endfor %}
+            <li class = "active">{{ parent.Name }}</li>
+                {% set tableHeader = "Event Frame Template" %}
+                {% set pageHeaderSubText = "Event Frame Templates" %}
         {% endif %}
     </ol>
 </div>
@@ -56,10 +72,12 @@ Event Frames
     {% if childrenClass == "EventFrameTemplate" %}
         <a class = "btn btn-default" title = "Add" href = "{{ url_for("eventFrameTemplates.addEventFrameTemplate", elementTemplateId = parent.id()) }}"
             role = "button"><span class = "glyphicon glyphicon-plus"></span></a>
-    {% elif childrenClass == "DescendantEventFrameTemplate" %}
     {% elif childrenClass == "EventFrame" %}
         <a class = "btn btn-default" title = "Add" href = "{{ url_for("eventFrames.addEventFrame", eventFrameTemplateId = parent.id()) }}" role = "button">
             <span class = "glyphicon glyphicon-plus"></span></a>
+    {% elif childrenClass == "DescendantEventFrameTemplate" %}
+        <a class = "btn btn-default" title = "Add" href = "{{ url_for("eventFrameTemplates.addEventFrameTemplate",
+            parentEventFrameTemplateId = parent.id()) }}" role = "button"><span class = "glyphicon glyphicon-plus"></span></a>
     {% endif %}
     <br><br>
     <table id = "table" class = "table">
@@ -81,6 +99,12 @@ Event Frames
                     <th></th>
                     <th></th>
                     <th></th>
+                {% elif childrenClass == "DescendantEventFrameTemplate" %}
+                    <th>Description</th>
+                    <th>Order</th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
                 {% endif %}
             </tr>
         </thead>
@@ -91,6 +115,10 @@ Event Frames
                         {% if childrenClass == "EventFrame" %}
                             <td><a class = "btn btn-default" title = "Select" href = "{{ url_for("eventFrames.dashboard", eventFrameId = child.id(),) }}">
                                 <span class = "glyphicon glyphicon-list"></span></a></td>
+                        {% elif childrenClass == "DescendantEventFrameTemplate" %}
+                            <td><a class = "btn btn-default" title = "Select" href = "{{ url_for("eventFrames.selectEventFrame",
+                                selectedClass = child.__class__.__name__, selectedId = child.id(),
+                                selectedOperation = "configure") }}"><span class = "glyphicon glyphicon-list"></span></a></td>
                         {% else %}
                             <td><a class = "btn btn-default" title = "Select" href = "{{ url_for("eventFrames.selectEventFrame",
                                 selectedClass = child.__class__.__name__, selectedId = child.id()) }}"><span class = "glyphicon glyphicon-list"></span></a></td>
@@ -101,9 +129,9 @@ Event Frames
                         {% elif childrenClass == "EventFrameTemplate" %}
                             <td>{{ child.Name }}</td>
                             <td>{{ child.Description }}</td>
-                            <td><a class = "btn btn-default" title = "Configure Event Frame Template"
-                                href = "{{ url_for("eventFrameTemplates.selectEventFrameTemplate", eventFrameTemplateId = child.id()) }}">
-                                <span class = "glyphicon glyphicon-duplicate"></span></a></td>
+                            <td><a class = "btn btn-default" title = "Configure Event Frame Template" href = "{{ url_for("eventFrames.selectEventFrame",
+                                selectedClass = "EventFrameTemplate", selectedId = child.id(), selectedOperation = "configure") }}">
+                                <span class = "glyphicon glyphicon-wrench"></span></a></td>
                             <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("eventFrameTemplates.editEventFrameTemplate",
                                 eventFrameTemplateId = child.id()) }}"><span class = "glyphicon glyphicon-edit"></span></a></td>
                             <td><a class = "btn btn-default" title = "Delete" href = "{{ url_for("eventFrameTemplates.deleteEventFrameTemplate",
@@ -119,6 +147,14 @@ Event Frames
                                 <span class = "glyphicon glyphicon-edit"></span></a></td>
                             <td><a class = "btn btn-default" title = "Delete" href = "{{ url_for("eventFrames.deleteEventFrame", eventFrameId = child.id()) }}">
                                 <span class = "glyphicon glyphicon-trash"></span></a></td>
+                        {% elif childrenClass == "DescendantEventFrameTemplate" %}
+                            <td>{{ child.Name }}</td>
+                            <td>{{ child.Description }}</td>
+                            <td>{{ child.Order }}</td>
+                            <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("eventFrameTemplates.editEventFrameTemplate",
+                                eventFrameTemplateId = child.id()) }}"><span class = "glyphicon glyphicon-edit"></a></td>
+                            <td><a class = "btn btn-default" title = "Delete" href = "{{ url_for("eventFrameTemplates.deleteEventFrameTemplate",
+                                eventFrameTemplateId = child.id()) }}"><span class = "glyphicon glyphicon-trash"></a></td>
                         {% endif %}
                     </tr>
                 {% endfor %}
@@ -126,6 +162,40 @@ Event Frames
         </tbody>
     </table>
 </div>
+{% if childrenClass == "DescendantEventFrameTemplate" %}
+    <div class = "page-header">
+        <h1>Event Frame Attribute Templates <small></small></h1>
+    </div>
+    <div>
+        <a class = "btn btn-default" title = "Add" href = "{{ url_for("eventFrameAttributeTemplates.addEventFrameAttributeTemplate", 
+            eventFrameTemplateId = parent.EventFrameTemplateId) }}" role = "button"><span class = "glyphicon glyphicon-plus"></span></a>
+        <br><br>
+        <table id = "eventFrameAttributeTemplatesTable" class = "table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th></th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for eventFrameAttributeTemplate in eventFrameAttributeTemplates %}
+                <tr>
+                    <td>{{ eventFrameAttributeTemplate.Name }}</td>
+                    <td>{{ eventFrameAttributeTemplate.Description }}</td>
+                    <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("eventFrameAttributeTemplates.editEventFrameAttributeTemplate",
+                        eventFrameAttributeTemplateId = eventFrameAttributeTemplate.EventFrameAttributeTemplateId) }}">
+                        <span class = "glyphicon glyphicon-edit"></span></a></td>
+                    <td><a class = "btn btn-default" title = "Delete" href = "{{ url_for("eventFrameAttributeTemplates.deleteEventFrameAttributeTemplate",
+                        eventFrameAttributeTemplateId = eventFrameAttributeTemplate.EventFrameAttributeTemplateId) }}">
+                        <span class = "glyphicon glyphicon-trash"></span></a></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endif %}
 {% endblock %}
 
 {% block scripts %}
@@ -167,7 +237,30 @@ Event Frames
                         { "orderable": false }, // Stop button.
                         { "orderable": false }, // Edit button.
                         { "orderable": false }  // Delete button.
+                    {% elif childrenClass == "DescendantEventFrameTemplate" %}
+                        null,
+                        null,
+                        null,
+                        { "orderable": false }, // Edit button.
+                        { "orderable": false }  // Delete button.
                     {% endif %}
+                ],
+                "stateSave": true,
+                "stateDuration": 0,
+                "pageLength": 25
+            })
+            $('#eventFrameAttributeTemplatesTable').DataTable
+            ({
+                "order":
+                [
+                    [0, 'asc']              // Name.
+                ],
+                "columns":
+                [
+                    null,
+                    null,
+                    { "orderable": false }, // Edit button.
+                    { "orderable": false }  // Delete button.
                 ],
                 "stateSave": true,
                 "stateDuration": 0,

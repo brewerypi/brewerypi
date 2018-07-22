@@ -64,11 +64,11 @@ def addEventFrameTemplate(elementTemplateId = None, parentEventFrameTemplateId =
 				selectedId = parentEventFrameTemplate.origin().ElementTemplate.ElementTemplateId),
 				"text" : parentEventFrameTemplate.origin().ElementTemplate.Name}]
 		for parentEventFrameTemplateAcestor in parentEventFrameTemplate.ancestors([]):
-			breadcrumbs.append({"url" : url_for("eventFrameTemplates.selectEventFrameTemplate",
-				eventFrameTemplateId = parentEventFrameTemplateAcestor.EventFrameTemplateId), "text" : parentEventFrameTemplateAcestor.Name})
+			breadcrumbs.append({"url" : url_for("eventFrames.selectEventFrame", selectedClass = "EventFrame",
+				selectedId = parentEventFrameTemplateAcestor.EventFrameTemplateId), "text" : parentEventFrameTemplateAcestor.Name})
 
-		breadcrumbs.append({"url" : url_for("eventFrameTemplates.selectEventFrameTemplate",
-			eventFrameTemplateId = parentEventFrameTemplate.EventFrameTemplateId), "text" : parentEventFrameTemplate.Name})
+		breadcrumbs.append({"url" : url_for("eventFrames.selectEventFrame", selectedClass = "EventFrame",
+			selectedId = parentEventFrameTemplate.EventFrameTemplateId), "text" : parentEventFrameTemplate.Name})
 	else:
 		elementTemplate = ElementTemplate.query.get_or_404(elementTemplateId)
 		breadcrumbs = [{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Root"), "text" : ".."},
@@ -156,8 +156,8 @@ def editEventFrameTemplate(eventFrameTemplateId):
 				selectedId = eventFrameTemplate.origin().ElementTemplate.ElementTemplateId),
 				"text" : eventFrameTemplate.origin().ElementTemplate.Name}]
 		for eventFrameTemplateAcestor in eventFrameTemplate.ancestors([]):
-			breadcrumbs.append({"url" : url_for("eventFrameTemplates.selectEventFrameTemplate",
-				eventFrameTemplateId = eventFrameTemplateAcestor.EventFrameTemplateId), "text" : eventFrameTemplateAcestor.Name})
+			breadcrumbs.append({"url" : url_for("eventFrames.selectEventFrame", selectedClass = "EventFrame",
+				selectedId = eventFrameTemplateAcestor.EventFrameTemplateId), "text" : eventFrameTemplateAcestor.Name})
 
 		breadcrumbs.append({"url" : None, "text" : eventFrameTemplate.Name})
 	else:
@@ -177,15 +177,3 @@ def editEventFrameTemplate(eventFrameTemplateId):
 	form.parentEventFrameTemplateId.data = eventFrameTemplate.ParentEventFrameTemplateId
 	form.requestReferrer.data = request.referrer
 	return render_template("addEditModel.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
-
-@eventFrameTemplates.route("/eventFrameTemplates/select/<int:eventFrameTemplateId>", methods = ["GET", "POST"])
-@login_required
-@adminRequired
-def selectEventFrameTemplate(eventFrameTemplateId):
-	parent = EventFrameTemplate.query.get_or_404(eventFrameTemplateId)
-	children = EventFrameTemplate.query.filter_by(ParentEventFrameTemplateId = eventFrameTemplateId).order_by(EventFrameTemplate.Order)
-	childrenClass = "DescendantEventFrameTemplate"
-	eventFrameAttributeTemplates = EventFrameAttributeTemplate.query. \
-		filter_by(EventFrameTemplateId = eventFrameTemplateId).order_by(EventFrameAttributeTemplate.Name)
-	return render_template("eventFrameTemplates/select.html", children = children, childrenClass = childrenClass,
-		eventFrameAttributeTemplates = eventFrameAttributeTemplates, parent = parent)

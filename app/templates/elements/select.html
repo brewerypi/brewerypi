@@ -102,8 +102,8 @@ Data Entry - Elements
                             <td><a class = "btn btn-default" title = "Delete" href = "{{ url_for("elementAttributeTemplates.deleteElementAttributeTemplate",
                                 elementAttributeTemplateId = child.id()) }}"><span class = "glyphicon glyphicon-trash"></a></td>
                         {% elif childrenClass == "ElementTemplate" %}
-                            <td><a class = "btn btn-default" title = "Associate Attributes with Element" href = "{{ url_for("elements.selectElement",
-                                selectedClass = "ElementAttributeTemplate", selectedId = child.id()) }}"><span class = "glyphicon glyphicon-link"></a></td>
+                            <td><a class = "btn btn-default" title = "Configure Element Template" href = "{{ url_for("elements.selectElement",
+                                selectedClass = "ElementAttributeTemplate", selectedId = child.id()) }}"><span class = "glyphicon glyphicon-wrench"></a></td>
                             <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("elementTemplates.editElementTemplate",
                                 elementTemplateId = child.id()) }}"><span class = "glyphicon glyphicon-edit"></a></td>
                             <td><a class = "btn btn-default" title = "Delete" href = "{{ url_for("elementTemplates.deleteElementTemplate",

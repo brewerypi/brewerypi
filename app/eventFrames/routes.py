@@ -5,7 +5,7 @@ from . import eventFrames
 from . forms import EventFrameForm
 from .. import db
 from .. decorators import permissionRequired
-from .. models import Element, ElementTemplate, Enterprise, EventFrame, EventFrameTemplate, Permission, Site
+from .. models import Element, ElementTemplate, Enterprise, EventFrame, EventFrameAttributeTemplate, EventFrameTemplate, Permission, Site
 
 modelName = "Event Frame"
 
@@ -176,11 +176,11 @@ def endEventFrame(eventFrameId):
 @eventFrames.route("/eventFrames/select", methods = ["GET", "POST"]) # Default.
 @eventFrames.route("/eventFrames/select/<string:selectedClass>", methods = ["GET", "POST"]) # Root.
 @eventFrames.route("/eventFrames/select/<string:selectedClass>/<int:selectedId>", methods = ["GET", "POST"])
-@eventFrames.route("/eventFrames/select/<string:selectedClass>/<int:selectedId>/<int:elementId>", methods = ["GET", "POST"])
+@eventFrames.route("/eventFrames/select/<string:selectedClass>/<int:selectedId>/<string:selectedOperation>", methods = ["GET", "POST"])
 @login_required
 @permissionRequired(Permission.DATA_ENTRY)
-def selectEventFrame(selectedClass = None, selectedId = None, elementId = None):
-	element = None
+def selectEventFrame(selectedClass = None, selectedId = None, selectedOperation = None):
+	eventFrameAttributeTemplates = None
 	if selectedClass == None:
 		parent = Site.query.join(Enterprise, ElementTemplate, EventFrameTemplate, EventFrame).order_by(Enterprise.Name).first()
 		if parent:
@@ -204,10 +204,17 @@ def selectEventFrame(selectedClass = None, selectedId = None, elementId = None):
 		parent = ElementTemplate.query.get_or_404(selectedId)
 		children = EventFrameTemplate.query.filter_by(ElementTemplateId = selectedId)
 		childrenClass = "EventFrameTemplate"
+	elif selectedClass == "EventFrameTemplate" and selectedOperation == "configure":
+		parent = EventFrameTemplate.query.get_or_404(selectedId)
+		children = EventFrameTemplate.query.filter_by(ParentEventFrameTemplateId = selectedId).order_by(EventFrameTemplate.Order)
+		childrenClass = "DescendantEventFrameTemplate"
+		eventFrameAttributeTemplates = EventFrameAttributeTemplate.query.filter_by(EventFrameTemplateId = selectedId). \
+			order_by(EventFrameAttributeTemplate.Name)
 	elif selectedClass == "EventFrameTemplate":
 		parent = EventFrameTemplate.query.get_or_404(selectedId)
 		children = EventFrame.query.filter_by(EventFrameTemplateId = selectedId)
 		childrenClass = "EventFrame"
+
 	# elif selectedClass == "EventFrame":
 	# 	parent = EventFrameTemplate.query.get_or_404(selectedId)
 	# 	children = EventFrame.query.filter(EventFrame.ElementId == elementId, EventFrame.EventFrameTemplateId == selectedId). \
@@ -215,7 +222,8 @@ def selectEventFrame(selectedClass = None, selectedId = None, elementId = None):
 	# 	childrenClass = "EventFrame"
 	# 	element = Element.query.get_or_404(elementId)
 
-	return render_template("eventFrames/select.html", children = children, childrenClass = childrenClass, element = element, parent = parent)
+	return render_template("eventFrames/select.html", children = children, childrenClass = childrenClass,
+		eventFrameAttributeTemplates = eventFrameAttributeTemplates, parent = parent)
 
 @eventFrames.route("/eventFrames/startEventFrame/<int:elementId>/<int:eventFrameTemplateId>", methods = ["GET", "POST"])
 @login_required
