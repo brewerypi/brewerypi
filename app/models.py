@@ -450,6 +450,9 @@ class Tag(db.Model):
 	def __repr__(self):
 		return "<Tag: {}>".format(self.Name)
 
+	def fullAbbreviatedPathName(self):
+		return "{}_{}_{}_{}".format(self.Area.Site.Enterprise.Abbreviation, self.Area.Site.Abbreviation, self.Area.Abbreviation, self.Name)
+
 	def id(self):
 		return self.TagId
 

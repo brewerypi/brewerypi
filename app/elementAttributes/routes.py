@@ -1,8 +1,8 @@
 import csv
 import os
-from flask import current_app, flash, redirect, render_template, request, send_file, url_for
+from flask import current_app, flash, jsonify, redirect, render_template, request, send_file, url_for
 from flask_login import login_required
-from sqlalchemy import or_
+from sqlalchemy import and_, or_
 from . import elementAttributes
 from . forms import ElementAttributeForm, ElementAttributeImportForm
 from .. import db
@@ -14,7 +14,11 @@ from .. models import Area, ElementAttributeTemplate, Element, ElementAttribute,
 @adminRequired
 def listElementAttributes(elementId):
 	element = Element.query.get_or_404(elementId)
-	return render_template("elementAttributes/elementAttributes.html", element = element)
+	elementAttributeTemplates = ElementAttributeTemplate.query.join(ElementTemplate, Element). \
+		outerjoin(ElementAttribute, and_(Element.ElementId == ElementAttribute.ElementId, \
+		ElementAttributeTemplate.ElementAttributeTemplateId == ElementAttribute.ElementAttributeTemplateId)).filter(Element.ElementId == elementId)
+	tags = Tag.query.join(Area, Site, Enterprise).order_by(Enterprise.Abbreviation, Site.Abbreviation, Area.Abbreviation, Tag.Name)
+	return render_template("elementAttributes/elementAttributes.html", element = element, elementAttributeTemplates = elementAttributeTemplates, tags = tags)
 
 @elementAttributes.route("/elementAttributes/add/<int:elementId>", methods = ["GET", "POST"])
 @login_required
@@ -249,3 +253,41 @@ def importElementAttributes():
 						successes.append("Element Attribute Template \"{}\" updated for Element \"{}\".".format(elementAttributeTemplateName, elementName))
 
 	return render_template("import.html", errors = errors, form = form, importing = "Element Attributes", successes = successes, warnings = warnings)
+
+@elementAttributes.route("/elementAttributes/updateMultiple/<int:elementId>", methods = ["GET", "POST"])
+@login_required
+@adminRequired
+def updateMultiple(elementId):
+	# Get the data, loop through it and add new value.
+	data = request.get_json(force = True)
+	count = 0
+	for item in data:
+		# elementAttribute = ElementAttribute.query.get_or_404(item["ElementAttributeId"])
+		elementAttributeTemplateId = item["ElementAttributeTemplateId"]
+		tagId = item["TagId"]
+		elementAttribute = ElementAttribute.query.filter_by(ElementAttributeTemplateId = elementAttributeTemplateId, ElementId = elementId).first()
+		if elementAttribute:
+			if tagId == "-1":
+				# Delete.
+				db.session.delete(elementAttribute)
+				count = count + 1
+			else:
+				if str(elementAttribute.TagId) != tagId:
+					# Update tag id.
+					elementAttribute.TagId = tagId
+					count = count + 1
+		else:
+			if tagId != "-1":
+				# Create new.
+				elementAttribute = ElementAttribute(ElementAttributeTemplateId = elementAttributeTemplateId, ElementId = elementId, TagId = tagId)
+				db.session.add(elementAttribute)
+				count = count + 1
+
+	if count > 0:
+		db.session.commit()
+		message = "You have successfully added or updated one or more element attributes."
+		flash(message, "alert alert-success")
+	else:
+		message = "Nothing updated to save."
+		flash(message, "alert alert-warning")
+	return jsonify({"response": message})
