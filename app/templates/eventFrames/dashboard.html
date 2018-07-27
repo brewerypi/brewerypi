@@ -23,7 +23,49 @@ Event Frame Dashboard
     </ol>
 </div>
 <div class = "page-header">
-    <h1>Event Frame Notes <small>{{ eventFrame.Element.Name }}</small></h1>
+    <h1>Child Event Frames <small>{{ eventFrame.Element.Name }}</small></h1>
+</div>
+<div>
+    <a class = "btn btn-default" title = "Add" href = "{{ url_for("eventFrames.addEventFrame", parentEventFrameId = eventFrame.EventFrameId) }}"
+        role = "button"><span class = "glyphicon glyphicon-plus"></span></a>
+    <br><br>
+    <table id = "childEventFramesTable" class = "table">
+        <thead>
+            <tr>
+                <th></th>
+                <th>Template</th>
+                <th>Name</th>
+                <th>Start</th>
+                <th>End</th>
+                <th></th>
+                <th></th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for eventFrame in eventFrame.EventFrames %}
+                <tr>
+                    <td></td>
+                    <td>{{ eventFrame.EventFrameTemplate.Name }}</td>
+                    <td>{{ eventFrame.friendlyName() }}</td>
+                    <td>{{ eventFrame.StartTimestamp }}</td>
+                    <td>{{ eventFrame.EndTimestamp }}</td>
+                    {% if eventFrame.EndTimestamp == None %}
+                        <td><a class = "btn btn-default" title = "End" href = "{{ url_for("eventFrames.endEventFrame",
+                            eventFrameId = eventFrame.EventFrameId) }}"><span class = "glyphicon glyphicon-stop"></span></a></td>
+                    {% else %}
+                        <td></td>
+                    {% endif %}
+                    <td></td>
+                    <td><a class = "btn btn-default" title = "Delete" href = "{{ url_for("eventFrames.deleteEventFrame",
+                        eventFrameId = eventFrame.EventFrameId) }}"><span class = "glyphicon glyphicon-trash"></span></a></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+<div class = "page-header">
+    <h1>Notes <small>{{ eventFrame.Element.Name }}</small></h1>
 </div>
 <div>
     <a class = "btn btn-default" title = "Add" href = "{{ url_for("eventFrameNotes.addEventFrameNote", eventFrameId = eventFrame.id()) }}" role = "button">
@@ -62,6 +104,27 @@ Event Frame Dashboard
     <script>
         $(document).ready(function()
         {
+            $("#childEventFramesTable").DataTable
+            ({
+                "order":
+                [
+                    [2, "desc"],             // Start timestamp.
+                ],
+                "columns":
+                [
+                    { "orderable": false }, // Select button.
+                    null,
+                    null,
+                    null,
+                    null,
+                    { "orderable": false }, // Stop button.
+                    { "orderable": false }, // Edit button.
+                    { "orderable": false }  // Delete button.
+                ],
+                "stateSave": true,
+                "stateDuration": 0,
+                "pageLength": 25
+            })
             $("#eventFrameNotesTable").DataTable
             ({
                 "order":

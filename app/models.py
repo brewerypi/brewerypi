@@ -378,16 +378,6 @@ class Role(db.Model):
 
 	Users = db.relationship("User", backref = "Role", lazy = "dynamic")
 
-	# @staticmethod
-	# def insertRoles():
-	# 	roles = {"User" : Permission.DATA_ENTRY, "Administrator" : 0xff}
-	# 	for r in roles:
-	# 		role = Role.query.filter_by(Name = r).first()
-	# 		if role is None:
-	# 			role = Role(Name = r)
-	# 		role.Permissions = roles[r]
-	# 		db.session.add(role)
-	# 	db.session.commit()
 	@staticmethod
 	def insertDefaultRoles():
 		defaultRoles = {"User" : Permission.DATA_ENTRY, "Administrator" : 0xff}

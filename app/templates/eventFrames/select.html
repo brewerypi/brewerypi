@@ -60,7 +60,7 @@ Event Frames
                     selectedOperation = "configure") }}">{{ ancestor.Name }}</a></li>
             {% endfor %}
             <li class = "active">{{ parent.Name }}</li>
-                {% set tableHeader = "ChildEvent Frame Template" %}
+                {% set tableHeader = "Child Event Frame Template" %}
                 {% set pageHeaderSubText = "Child Event Frame Templates" %}
         {% endif %}
     </ol>
@@ -164,7 +164,7 @@ Event Frames
 </div>
 {% if childrenClass == "DescendantEventFrameTemplate" %}
     <div class = "page-header">
-        <h1>Event Frame Attribute Templates <small></small></h1>
+        <h1>Event Frames <small>Attribute Templates</small></h1>
     </div>
     <div>
         <a class = "btn btn-default" title = "Add" href = "{{ url_for("eventFrameAttributeTemplates.addEventFrameAttributeTemplate", 

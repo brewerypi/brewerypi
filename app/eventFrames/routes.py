@@ -28,18 +28,22 @@ def listEventFrames(elementId = None, eventFrameTemplateId = None, parentEventFr
 	return render_template("eventFrames/eventFrames.html", element = element, eventFrames = eventFrames, eventFrameTemplate = eventFrameTemplate,
 		parentEventFrame = parentEventFrame)
 
-# @eventFrames.route("/eventFrames/add/<int:parentEventFrameId>", methods = ["GET", "POST"])
 # @eventFrames.route("/eventFrames/add/<int:elementId>/<int:eventFrameTemplateId>", methods = ["GET", "POST"])
 @eventFrames.route("/eventFrames/add/<int:eventFrameTemplateId>", methods = ["GET", "POST"])
+@eventFrames.route("/eventFrames/add/child/<int:parentEventFrameId>", methods = ["GET", "POST"])
 @login_required
 @permissionRequired(Permission.DATA_ENTRY)
 # def addEventFrame(elementId = None, eventFrameTemplateId = None, parentEventFrameId = None):
-def addEventFrame(eventFrameTemplateId = None):
+def addEventFrame(eventFrameTemplateId = None, parentEventFrameId = None):
 	operation = "Add"
 	form = EventFrameForm()
-	eventFrameTemplate = EventFrameTemplate.query.get_or_404(eventFrameTemplateId)
-	form.element.query = Element.query.join(ElementTemplate).filter(ElementTemplate.ElementTemplateId == eventFrameTemplate.ElementTemplateId). \
-		order_by(Element.Name)
+	if parentEventFrameId:
+		pass
+	else:
+		del form.eventFrameTemplate
+		eventFrameTemplate = EventFrameTemplate.query.get_or_404(eventFrameTemplateId)
+		form.element.query = Element.query.join(ElementTemplate).filter(ElementTemplate.ElementTemplateId == eventFrameTemplate.ElementTemplateId). \
+			order_by(Element.Name)
 
 	# Configure the form based on if the event frame has a parent.
 	# if parentEventFrameId:
@@ -59,8 +63,12 @@ def addEventFrame(eventFrameTemplateId = None):
 	# 		eventFrame = EventFrame(ElementId = form.elementId.data, EndTimestamp = form.endTimestamp.data,
 	# 			EventFrameTemplateId = form.eventFrameTemplateId.data, StartTimestamp = form.startTimestamp.data)
 
-		eventFrame = EventFrame(Element = form.element.data, EndTimestamp = form.endTimestamp.data, EventFrameTemplateId = eventFrameTemplateId,
-			StartTimestamp = form.startTimestamp.data)
+		if parentEventFrameId:
+			pass
+		else:
+			eventFrame = EventFrame(Element = form.element.data, EndTimestamp = form.endTimestamp.data, EventFrameTemplateId = eventFrameTemplateId,
+				StartTimestamp = form.startTimestamp.data)
+
 		db.session.add(eventFrame)
 		db.session.commit()
 		flash("You have successfully added a new Event Frame.", "alert alert-success")
@@ -74,16 +82,22 @@ def addEventFrame(eventFrameTemplateId = None):
 	# 	form.eventFrameTemplateId.data = eventFrameTemplateId
 
 	form.requestReferrer.data = request.referrer
-	eventFrameTemplate = EventFrameTemplate.query.get_or_404(eventFrameTemplateId)
-	breadcrumbs = [{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Root"), "text" : ".."},
-		{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Enterprise",
-			selectedId = eventFrameTemplate.ElementTemplate.Site.Enterprise.EnterpriseId), "text" : eventFrameTemplate.ElementTemplate.Site.Enterprise.Name},
-		{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Site", selectedId = eventFrameTemplate.ElementTemplate.Site.SiteId),
-			"text" : eventFrameTemplate.ElementTemplate.Site.Name},
-		{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "ElementTemplate", selectedId = eventFrameTemplate.ElementTemplate.ElementTemplateId),
-			"text" : eventFrameTemplate.ElementTemplate.Name},
-		{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "EventFrameTemplate", selectedId = eventFrameTemplate.EventFrameTemplateId),
-			"text" : eventFrameTemplate.Name}]	
+	# eventFrameTemplate = EventFrameTemplate.query.get_or_404(eventFrameTemplateId)
+	if parentEventFrameId:
+		pass
+	else:
+		breadcrumbs = [{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Root"), "text" : ".."},
+			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Enterprise",
+				selectedId = eventFrameTemplate.ElementTemplate.Site.Enterprise.EnterpriseId),
+				"text" : eventFrameTemplate.ElementTemplate.Site.Enterprise.Name},
+			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Site", selectedId = eventFrameTemplate.ElementTemplate.Site.SiteId),
+				"text" : eventFrameTemplate.ElementTemplate.Site.Name},
+			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "ElementTemplate",
+				selectedId = eventFrameTemplate.ElementTemplate.ElementTemplateId),
+				"text" : eventFrameTemplate.ElementTemplate.Name},
+			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "EventFrameTemplate", selectedId = eventFrameTemplate.EventFrameTemplateId),
+				"text" : eventFrameTemplate.Name}]	
+
 	return render_template("addEditModel.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
 
 # @eventFrames.route("/eventFrames/dashboard/<int:eventFrameId>/<int:selectedEventFrameTemplateId>", methods = ["GET", "POST"])
