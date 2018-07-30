@@ -29,18 +29,22 @@ def addEventFrameNote(eventFrameId):
 	# Present a form to add a new event frame note.
 	form.requestReferrer.data = request.referrer
 	eventFrame = EventFrame.query.get_or_404(eventFrameId)
-	breadcrumbs = [{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Root"), "text" : ".."},
-		{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Enterprise",
-			selectedId = eventFrame.EventFrameTemplate.ElementTemplate.Site.Enterprise.EnterpriseId),
-			"text" : eventFrame.EventFrameTemplate.ElementTemplate.Site.Enterprise.Name},
-		{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Site", selectedId = eventFrame.EventFrameTemplate.ElementTemplate.Site.SiteId),
-			"text" : eventFrame.EventFrameTemplate.ElementTemplate.Site.Name},
-		{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "ElementTemplate",
-			selectedId = eventFrame.EventFrameTemplate.ElementTemplate.ElementTemplateId),
-			"text" : eventFrame.EventFrameTemplate.ElementTemplate.Name},
-		{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "EventFrameTemplate", selectedId = eventFrame.EventFrameTemplate.EventFrameTemplateId),
-			"text" : eventFrame.EventFrameTemplate.Name},
-		{"url" : url_for("eventFrames.dashboard", eventFrameId = eventFrame.EventFrameId), "text" : eventFrame.friendlyName()}]
+	if eventFrame.ParentEventFrameId:
+		breadcrumbs = []
+	else:
+		breadcrumbs = [{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Root"), "text" : ".."},
+			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Enterprise",
+				selectedId = eventFrame.EventFrameTemplate.ElementTemplate.Site.Enterprise.EnterpriseId),
+				"text" : eventFrame.EventFrameTemplate.ElementTemplate.Site.Enterprise.Name},
+			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Site", selectedId = eventFrame.EventFrameTemplate.ElementTemplate.Site.SiteId),
+				"text" : eventFrame.EventFrameTemplate.ElementTemplate.Site.Name},
+			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "ElementTemplate",
+				selectedId = eventFrame.EventFrameTemplate.ElementTemplate.ElementTemplateId),
+				"text" : eventFrame.EventFrameTemplate.ElementTemplate.Name},
+			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "EventFrameTemplate",
+				selectedId = eventFrame.EventFrameTemplate.EventFrameTemplateId), "text" : eventFrame.EventFrameTemplate.Name},
+			{"url" : url_for("eventFrames.dashboard", eventFrameId = eventFrame.EventFrameId), "text" : eventFrame.friendlyName()}]
+
 	return render_template("addEditModel.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
 
 @eventFrameNotes.route("/eventFrameNotes/delete/<int:eventFrameId>/<int:noteId>", methods = ["GET", "POST"])
@@ -76,17 +80,21 @@ def editEventFrameNote(eventFrameId, noteId):
 	form.timestamp.data = note.Timestamp
 	form.requestReferrer.data = request.referrer
 	eventFrame = EventFrame.query.get_or_404(eventFrameId)
-	breadcrumbs = [{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Root"), "text" : ".."},
-		{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Enterprise",
-			selectedId = eventFrame.EventFrameTemplate.ElementTemplate.Site.Enterprise.EnterpriseId),
-			"text" : eventFrame.EventFrameTemplate.ElementTemplate.Site.Enterprise.Name},
-		{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Site", selectedId = eventFrame.EventFrameTemplate.ElementTemplate.Site.SiteId),
-			"text" : eventFrame.EventFrameTemplate.ElementTemplate.Site.Name},
-		{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "ElementTemplate",
-			selectedId = eventFrame.EventFrameTemplate.ElementTemplate.ElementTemplateId),
-			"text" : eventFrame.EventFrameTemplate.ElementTemplate.Name},
-		{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "EventFrameTemplate", selectedId = eventFrame.EventFrameTemplate.EventFrameTemplateId),
-			"text" : eventFrame.EventFrameTemplate.Name},
-		{"url" : url_for("eventFrames.dashboard", eventFrameId = eventFrame.EventFrameId), "text" : eventFrame.friendlyName()},
-		{"url" : None, "text" : note.Timestamp}]
+	if eventFrame.ParentEventFrameId:
+		breadcrumbs = []
+	else:
+		breadcrumbs = [{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Root"), "text" : ".."},
+			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Enterprise",
+				selectedId = eventFrame.EventFrameTemplate.ElementTemplate.Site.Enterprise.EnterpriseId),
+				"text" : eventFrame.EventFrameTemplate.ElementTemplate.Site.Enterprise.Name},
+			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Site", selectedId = eventFrame.EventFrameTemplate.ElementTemplate.Site.SiteId),
+				"text" : eventFrame.EventFrameTemplate.ElementTemplate.Site.Name},
+			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "ElementTemplate",
+				selectedId = eventFrame.EventFrameTemplate.ElementTemplate.ElementTemplateId),
+				"text" : eventFrame.EventFrameTemplate.ElementTemplate.Name},
+			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "EventFrameTemplate",
+				selectedId = eventFrame.EventFrameTemplate.EventFrameTemplateId), "text" : eventFrame.EventFrameTemplate.Name},
+			{"url" : url_for("eventFrames.dashboard", eventFrameId = eventFrame.EventFrameId), "text" : eventFrame.friendlyName()},
+			{"url" : None, "text" : note.Timestamp}]
+
 	return render_template("addEditModel.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)

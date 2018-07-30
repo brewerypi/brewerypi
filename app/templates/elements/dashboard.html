@@ -20,71 +20,6 @@
     </ol>
 </div>
 <div class = "page-header">
-    <h1>{{ element.Name }} <small>Event Frames</small></h1>
-</div>
-<div>
-    <table id = "eventFramesTable" class = "table">
-        <thead>
-            <tr>
-                <th></th>
-                <th>Event Frame</th>
-                <th>Last Start Timestamp</th>
-                <th>Last End Timestamp</th>
-                <th></th>
-                <th></th>
-                <th></th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for eventFrameTemplate in eventFrameTemplates %}
-                <tr>
-                    {% set firstEventFrame = None %}
-                    {% set eventFrames = eventFrameTemplate.EventFrames.filter_by(ElementId = element.ElementId) %}
-                    {% if eventFrames.count() > 0 %}
-                        {% set firstEventFrame = eventFrames | sort (attribute = "StartTimestamp", reverse = True) | first %}
-                        <td><a class = "btn btn-default" title = "List Values"
-                            href = "{{ url_for("eventFrames.listEventFrames", elementId = firstEventFrame.Element.ElementId,
-                            eventFrameTemplateId = firstEventFrame.EventFrameTemplate.EventFrameTemplateId) }}"><span class="glyphicon glyphicon-list"></span>
-                            </a></td>
-                    {% else %}
-                        <td></td>
-                    {% endif %}
-                    <td>{{ eventFrameTemplate.Name }}</td>
-                    {% if firstEventFrame %}
-                        <td>{{ firstEventFrame.StartTimestamp }}</td>
-                        <td>{{ firstEventFrame.EndTimestamp }}</td>
-                        {% if firstEventFrame.EndTimestamp == None %}
-                            <td><a class = "btn btn-default" title = "End" href = "{{ url_for("eventFrames.endEventFrame",
-                                eventFrameId = firstEventFrame.EventFrameId) }}"><span class = "glyphicon glyphicon-stop"></span></a></td>
-                        {% else %}
-                            <td></td>
-                        {% endif %}
-                    {% else %}
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                    {% endif %}
-                    <td><a class = "btn btn-default" title = "Add" href = "{{ url_for("eventFrames.startEventFrame",
-                        elementId = element.ElementId, eventFrameTemplateId = eventFrameTemplate.EventFrameTemplateId) }}">
-                        <span class = "glyphicon glyphicon-plus"></span></a></td>
-                    {% if firstEventFrame %}
-                        <td><a class = "btn btn-default" title = "Edit"
-                            href = "{{ url_for("eventFrames.editEventFrame", eventFrameId = firstEventFrame.EventFrameId) }}">
-                            <span class = "glyphicon glyphicon-edit"></span></a></td>
-                        <td><a class = "btn btn-default" title = "Delete"
-                            href = "{{ url_for("eventFrames.deleteEventFrame", eventFrameId = firstEventFrame.EventFrameId) }}">
-                            <span class = "glyphicon glyphicon-trash"></span></a></td>
-                    {% else %}
-                        <td></td>
-                        <td></td>
-                    {% endif %}
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</div>
-<div class = "page-header">
     <h1>{{ element.Name }} <small>Attributes <a class = "btn btn-default" title = "Associate Attributes with Tags"
         href = "{{ url_for("elementAttributes.listElementAttributes", elementId = element.ElementId) }}">
         <span class = "glyphicon glyphicon-link"></span></a></small></h1>
@@ -189,27 +124,6 @@
     <script type = "text/javascript" src = {{ url_for("static", filename = "js/moment.min.js") }}></script>
     <script>
         $(document).ready(function() {
-            $("#eventFramesTable").DataTable({
-                "order":
-                [
-                    [1, "asc"]              // Event frame template name.
-                ],
-                "columns":
-                [
-                    { "orderable": false }, // Event frame values button.
-                    null,
-                    null,
-                    null,
-                    { "orderable": false }, // Stop event frame button.
-                    { "orderable": false }, // Add event frame button.
-                    { "orderable": false }, // Edit event frame button.
-                    { "orderable": false }  // Delete event frame button.
-                ],
-                "stateSave": true,
-                "stateDuration": 0,
-                "pageLength": 25
-            })
-
             // Update the focus and tabindex upon an order event.
             var orderEvent = function(type) {
                 var tabIndex = 1

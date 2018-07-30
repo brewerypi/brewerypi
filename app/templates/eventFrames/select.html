@@ -141,8 +141,12 @@ Event Frames
                             <td>{{ child.Element.Name }}</td>
                             <td>{{ child.StartTimestamp }}</td>
                             <td>{{ child.EndTimestamp }}</td>
-                            <td><a class = "btn btn-default" title = "End" href = "{{ url_for("eventFrames.endEventFrame",
-                                eventFrameId = child.id()) }}"><span class = "glyphicon glyphicon-stop"></span></a></td>
+                            {% if child.EndTimestamp == None %}
+                                <td><a class = "btn btn-default" title = "End" href = "{{ url_for("eventFrames.endEventFrame",
+                                    eventFrameId = child.id()) }}"><span class = "glyphicon glyphicon-stop"></span></a></td>
+                            {% else %}
+                                <td></td>
+                            {% endif %}
                             <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("eventFrames.editEventFrame", eventFrameId = child.id()) }}">
                                 <span class = "glyphicon glyphicon-edit"></span></a></td>
                             <td><a class = "btn btn-default" title = "Delete" href = "{{ url_for("eventFrames.deleteEventFrame", eventFrameId = child.id()) }}">
