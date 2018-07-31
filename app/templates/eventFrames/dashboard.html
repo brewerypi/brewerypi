@@ -42,7 +42,7 @@ Event Frame Dashboard
             {% endfor %}
     </ol>
 </div>
-{% if eventFrame.hasDescendants() %}
+{% if eventFrame.EventFrameTemplate.hasDescendants() %}
     <div class = "page-header">
         <h1>Child Event Frames <small>{{ eventFrame.origin().Element.Name }}</small></h1>
     </div>
