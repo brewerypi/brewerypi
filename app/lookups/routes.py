@@ -78,6 +78,7 @@ def selectLookup(selectedClass = None, selectedId = None):
 		if parent:
 			children = Lookup.query.filter_by(EnterpriseId = parent.id())
 		else:
+			parent = Enterprise.query.order_by(Enterprise.Name).first()
 			children = None
 		childrenClass = "Lookup"
 	elif selectedClass == "Root":

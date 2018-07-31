@@ -73,7 +73,8 @@ def changePassword(userId):
 
 	# Present a form to change an user password.
 	form.requestReferrer.data = request.referrer
-	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
+	breadcrumbs = [{"url" : url_for("users.listUsers"), "text" : ".."}, {"url" : None, "text" : user.Name}]
+	return render_template("addEditModel.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
 
 @users.route("/users/edit/<int:userId>", methods = ["GET", "POST"])
 @login_required

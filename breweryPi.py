@@ -28,3 +28,4 @@ def deploy():
 	print ("Inserting default roles if needed...")
 	Role.insertDefaultRoles()
 	print ("Inserting default administrator if needed...")
+	User.insertDefaultAdministrator()

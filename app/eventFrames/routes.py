@@ -57,10 +57,18 @@ def addEventFrame(eventFrameTemplateId = None, parentEventFrameId = None):
 			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "EventFrameTemplate",
 				selectedId = parentEventFrame.origin().EventFrameTemplate.EventFrameTemplateId),
 				"text" : parentEventFrame.origin().EventFrameTemplate.Name}]
-		for eventFrameAcestor in parentEventFrame.ancestors([]):
-			breadcrumbs.append({"url" : url_for("eventFrames.dashboard", eventFrameId = eventFrameAcestor.EventFrameId), "text" : eventFrameAcestor.Name})
+		for eventFrameAncestor in parentEventFrame.ancestors([]):
+			if eventFrameAncestor.ParentEventFrameId:
+				text = eventFrameAncestor.EventFrameTemplate.Name + "&nbsp;&nbsp;/&nbsp;&nbsp;" + eventFrameAncestor.friendlyName()
+			else:
+				text = eventFrameAncestor.friendlyName()
+			breadcrumbs.append({"url" : url_for("eventFrames.dashboard", eventFrameId = eventFrameAncestor.EventFrameId), "text" : text})
 
-		breadcrumbs.append({"url" : url_for("eventFrames.dashboard", eventFrameId = parentEventFrame.EventFrameId), "text" : parentEventFrame.friendlyName()})
+		if parentEventFrame.ParentEventFrameId:
+			text = parentEventFrame.EventFrameTemplate.Name + "&nbsp;&nbsp;/&nbsp;&nbsp;" + parentEventFrame.friendlyName()
+		else:
+			text = parentEventFrame.friendlyName()
+		breadcrumbs.append({"url" : url_for("eventFrames.dashboard", eventFrameId = parentEventFrame.EventFrameId), "text" : text})
 	else:
 		form.eventFrameTemplateId.data = eventFrameTemplateId
 		breadcrumbs = [{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Root"), "text" : ".."},
@@ -147,10 +155,18 @@ def editEventFrame(eventFrameId):
 			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "EventFrameTemplate",
 				selectedId = eventFrame.origin().EventFrameTemplate.EventFrameTemplateId),
 				"text" : eventFrame.origin().EventFrameTemplate.Name}]
-		for eventFrameAcestor in eventFrame.ancestors([]):
-			breadcrumbs.append({"url" : url_for("eventFrames.dashboard", eventFrameId = eventFrameAcestor.EventFrameId), "text" : eventFrameAcestor.Name})
+		for eventFrameAncestor in eventFrame.ancestors([]):
+			if eventFrameAncestor.ParentEventFrameId:
+				text = eventFrameAncestor.EventFrameTemplate.Name + "&nbsp;&nbsp;/&nbsp;&nbsp;" + eventFrameAncestor.friendlyName()
+			else:
+				text = eventFrameAncestor.friendlyName()
+			breadcrumbs.append({"url" : url_for("eventFrames.dashboard", eventFrameId = eventFrameAncestor.EventFrameId), "text" : text})
 
-		breadcrumbs.append({"url" : None, "text" : eventFrame.friendlyName()})
+		if eventFrame.ParentEventFrameId:
+			text = eventFrame.EventFrameTemplate.Name + "&nbsp;&nbsp;/&nbsp;&nbsp;" + eventFrame.friendlyName()
+		else:
+			text = eventFrame.friendlyName()
+		breadcrumbs.append({"url" : None, "text" : text})
 	else:
 		form.element.data = eventFrame.Element
 		form.eventFrameTemplateId.data = eventFrame.EventFrameTemplateId
@@ -196,7 +212,8 @@ def selectEventFrame(selectedClass = None, selectedId = None, selectedOperation 
 		if parent:
 			children = ElementTemplate.query.filter_by(SiteId = parent.id())
 		else:
-			children = None
+			parent = Site.query.join(Enterprise, ElementTemplate).order_by(Enterprise.Name).first()
+			children = ElementTemplate.query.filter_by(SiteId = parent.id())
 		childrenClass = "ElementTemplate"
 	elif selectedClass == "Root":
 		parent = None

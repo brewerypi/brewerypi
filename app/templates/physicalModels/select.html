@@ -11,19 +11,16 @@ Physical Models
     <ol class = "breadcrumb">
         {% if childrenClass == "Enterprise" %}
             <li class = "active">..</li>
-            {% set tableHeader = "Enterprise" %}
             {% set pageHeaderSubText = "Enterprises" %}
         {% elif childrenClass == "Site" %}
             <li><a href = "{{ url_for("physicalModels.selectPhysicalModel", selectedClass = "Root") }}">..</a></li>
             <li class = "active">{{ parent.Name }}</li>
-            {% set tableHeader = "Site" %}
             {% set pageHeaderSubText = "Sites" %}
         {% elif childrenClass == "Area" %}
             <li><a href = "{{ url_for("physicalModels.selectPhysicalModel", selectedClass = "Root") }}">..</a></li>
             <li><a href = "{{ url_for("physicalModels.selectPhysicalModel", selectedClass = "Enterprise", selectedId = parent.Enterprise.id()) }}">
                 {{ parent.Enterprise.Name }}</a></li>
             <li class = "active">{{ parent.Name }}</li>
-            {% set tableHeader = "Area" %}
             {% set pageHeaderSubText = "Areas" %}
         {% endif %}
     </ol>
@@ -33,13 +30,13 @@ Physical Models
 </div>
 <div>
     {% if childrenClass == "Enterprise" %}
-        <a class = "btn btn-default" title = "Add an Enterprise" href = "{{ url_for("enterprises.addEnterprise") }}" role = "button">
+        <a class = "btn btn-default" title = "Add" href = "{{ url_for("enterprises.addEnterprise") }}" role = "button">
             <span class = "glyphicon glyphicon-plus"></span></a>
     {% elif childrenClass == "Site" %}
-        <a class = "btn btn-default" title = "Add a Site" href = "{{ url_for("sites.addSite", enterpriseId = parent.id()) }}" role = "button">
+        <a class = "btn btn-default" title = "Add" href = "{{ url_for("sites.addSite", enterpriseId = parent.id()) }}" role = "button">
             <span class = "glyphicon glyphicon-plus"></span></a>
     {% elif childrenClass == "Area" %}
-        <a class = "btn btn-default" title = "Add an Area" href = "{{ url_for("areas.addArea", siteId = parent.id()) }}" role = "button">
+        <a class = "btn btn-default" title = "Add" href = "{{ url_for("areas.addArea", siteId = parent.id()) }}" role = "button">
             <span class = "glyphicon glyphicon-plus"></span></a>
     {% endif %}
     <br><br>
@@ -47,7 +44,7 @@ Physical Models
         <thead>
             <tr>
                 <th></th>
-                <th>{{ tableHeader }}</th>
+                <th>Name</th>
                 <th>Abbreviation</th>
                 <th>Description</th>
                 <th></th>
@@ -59,7 +56,7 @@ Physical Models
                 {% for child in children %}
                     <tr>
                         {% if childrenClass != "Area" %}
-                            <td><a class = "btn btn-default" title = "Children" href = "{{ url_for("physicalModels.selectPhysicalModel",
+                            <td><a class = "btn btn-default" title = "Select" href = "{{ url_for("physicalModels.selectPhysicalModel",
                             selectedClass = child.__class__.__name__, selectedId = child.id()) }}"><span class = "glyphicon glyphicon-list"></span></a></td>
                         {% else %}
                             <td></td>

@@ -33,7 +33,7 @@ def addElementAttributeTemplate(elementTemplateId):
 			"text" : elementTemplate.Site.Enterprise.Name},
 		{"url" : url_for("elements.selectElement", selectedClass = "Site", selectedId = elementTemplate.Site.SiteId),
 			"text" : elementTemplate.Site.Name},
-		{"url" : url_for("elements.selectElement", selectedClass = "ElementTemplate", selectedId = elementTemplate.ElementTemplateId),
+		{"url" : url_for("elements.selectElement", selectedClass = "ElementAttributeTemplate", selectedId = elementTemplate.ElementTemplateId),
 			"text" : elementTemplate.Name}]
 	return render_template("addEditModel.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
 
@@ -75,7 +75,7 @@ def editElementAttributeTemplate(elementAttributeTemplateId):
 			"text" : elementAttributeTemplate.ElementTemplate.Site.Enterprise.Name},
 		{"url" : url_for("elements.selectElement", selectedClass = "Site", selectedId = elementAttributeTemplate.ElementTemplate.Site.SiteId),
 			"text" : elementAttributeTemplate.ElementTemplate.Site.Name},
-		{"url" : url_for("elements.selectElement", selectedClass = "ElementTemplate",
+		{"url" : url_for("elements.selectElement", selectedClass = "ElementAttributeTemplate",
 			selectedId = elementAttributeTemplate.ElementTemplate.ElementTemplateId),
 			"text" : elementAttributeTemplate.ElementTemplate.Name},
 		{"url" : None, "text" : elementAttributeTemplate.Name}]

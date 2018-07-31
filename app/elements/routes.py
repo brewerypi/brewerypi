@@ -160,6 +160,7 @@ def selectElement(selectedClass = None, selectedId = None):
 		if parent:
 			children = ElementTemplate.query.filter_by(SiteId = parent.id())
 		else:
+			parent = Site.query.join(Enterprise).order_by(Enterprise.Name).first()
 			children = None
 		childrenClass = "ElementTemplate"
 	elif selectedClass == "Root":

@@ -45,7 +45,7 @@
         <tbody>
             {% for elementAttribute in elementAttributes %}
                 <tr>
-                    <td><a class = "btn btn-default" title = "List Values" href = "{{ url_for("tagValues.listTagValues", tagId = elementAttribute.Tag.TagId,
+                    <td><a class = "btn btn-default" title = "Select" href = "{{ url_for("tagValues.listTagValues", tagId = elementAttribute.Tag.TagId,
                         elementAttributeId = elementAttribute.ElementAttributeId) }}"><span class = "glyphicon glyphicon-list"></span></a></td>
                     <td>{{ elementAttribute.ElementAttributeTemplate.Name }}</td>
                     {% if elementAttribute.Tag.TagValues[0] %}

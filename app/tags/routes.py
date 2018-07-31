@@ -246,6 +246,7 @@ def selectTag(selectedClass = None, selectedId = None):
 		if parent:
 			children = Tag.query.filter_by(AreaId = parent.id())
 		else:
+			parent = Area.query.join(Site, Enterprise).order_by(Enterprise.Name, Site.Name, Area.Name).first()
 			children = None
 		childrenClass = "Tag"
 	elif selectedClass == "Root":
