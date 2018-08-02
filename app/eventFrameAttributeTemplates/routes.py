@@ -57,7 +57,7 @@ def addEventFrameAttributeTemplate(eventFrameTemplateId):
 			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "EventFrameTemplate",
 				selectedId = eventFrameTemplate.EventFrameTemplateId, selectedOperation = "configure"),
 				"text" : eventFrameTemplate.Name}]
-	return render_template("addEditModel.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
+	return render_template("addEdit.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
 
 @eventFrameAttributeTemplates.route("/eventFrameAttributeTemplates/delete/eventFrameAttributeTemplateId/<int:eventFrameAttributeTemplateId>",
 	methods = ["GET", "POST"])
@@ -128,4 +128,4 @@ def editEventFrameAttributeTemplate(eventFrameAttributeTemplateId):
 				"text" : eventFrameAttributeTemplate.EventFrameTemplate.Name},
 			{"url" : None, "text" : eventFrameAttributeTemplate.Name}]
 
-	return render_template("addEditModel.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
+	return render_template("addEdit.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)

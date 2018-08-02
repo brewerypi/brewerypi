@@ -83,7 +83,7 @@ def addEventFrame(eventFrameTemplateId = None, parentEventFrameId = None):
 			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "EventFrameTemplate", selectedId = eventFrameTemplate.EventFrameTemplateId),
 				"text" : eventFrameTemplate.Name}]	
 
-	return render_template("addEditModel.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
+	return render_template("addEdit.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
 
 @eventFrames.route("/eventFrames/dashboard/<int:eventFrameId>", methods = ["GET", "POST"])
 @login_required
@@ -186,7 +186,7 @@ def editEventFrame(eventFrameId):
 	form.name.data = eventFrame.Name
 	form.startTimestamp.data = eventFrame.StartTimestamp
 	form.requestReferrer.data = request.referrer
-	return render_template("addEditModel.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
+	return render_template("addEdit.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
 
 @eventFrames.route("/eventFrames/endEventFrame/<int:eventFrameId>", methods = ["GET", "POST"])
 @login_required

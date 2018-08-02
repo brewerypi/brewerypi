@@ -80,7 +80,7 @@ def addEventFrameTemplate(elementTemplateId = None, parentEventFrameTemplateId =
 			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "ElementTemplate", selectedId = elementTemplate.ElementTemplateId),
 				"text" : elementTemplate.Name}]	
 	form.requestReferrer.data = request.referrer
-	return render_template("addEditModel.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
+	return render_template("addEdit.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
 
 @eventFrameTemplates.route("/eventFrameTemplates/delete/<int:eventFrameTemplateId>", methods = ["GET", "POST"])
 @login_required
@@ -177,4 +177,4 @@ def editEventFrameTemplate(eventFrameTemplateId):
 	form.name.data = eventFrameTemplate.Name
 	form.parentEventFrameTemplateId.data = eventFrameTemplate.ParentEventFrameTemplateId
 	form.requestReferrer.data = request.referrer
-	return render_template("addEditModel.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
+	return render_template("addEdit.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)

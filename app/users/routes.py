@@ -32,7 +32,7 @@ def addUser():
 
 	# Present a form to add a new user.
 	breadcrumbs = [{"url" : url_for("users.listUsers"), "text" : ".."}]
-	return render_template("addEditModel.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
+	return render_template("addEdit.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
 
 @users.route("/users/delete/<int:userId>", methods = ["GET", "POST"])
 @login_required
@@ -74,7 +74,7 @@ def changePassword(userId):
 	# Present a form to change an user password.
 	form.requestReferrer.data = request.referrer
 	breadcrumbs = [{"url" : url_for("users.listUsers"), "text" : ".."}, {"url" : None, "text" : user.Name}]
-	return render_template("addEditModel.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
+	return render_template("addEdit.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
 
 @users.route("/users/edit/<int:userId>", methods = ["GET", "POST"])
 @login_required
@@ -105,4 +105,4 @@ def editUser(userId):
 	form.role.data = user.Role
 	breadcrumbs = [{"url" : url_for("users.listUsers"), "text" : ".."},
 		{"url" : None, "text" : user.Name}]
-	return render_template("addEditModel.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
+	return render_template("addEdit.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)

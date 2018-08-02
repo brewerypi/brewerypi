@@ -43,7 +43,7 @@ def addTag(areaId, lookup = False):
 		{"url" : url_for("tags.selectTag", selectedClass = "Enterprise", selectedId = area.Site.Enterprise.EnterpriseId), "text" : area.Site.Enterprise.Name},
 		{"url" : url_for("tags.selectTag", selectedClass = "Site", selectedId = area.Site.SiteId), "text" : area.Site.Name},
 		{"url" : url_for("tags.selectTag", selectedClass = "Area", selectedId = area.AreaId), "text" : area.Name}]
-	return render_template("addEditModel.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
+	return render_template("addEdit.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
 
 @tags.route("/tags/delete/<int:tagId>", methods = ["GET", "POST"])
 @login_required
@@ -102,7 +102,7 @@ def editTag(tagId):
 		{"url" : url_for("tags.selectTag", selectedClass = "Site", selectedId = tag.Area.Site.SiteId), "text" : tag.Area.Site.Name},
 		{"url" : url_for("tags.selectTag", selectedClass = "Area", selectedId = tag.Area.AreaId), "text" : tag.Area.Name},
 		{"url" : None, "text" : tag.Name}]
-	return render_template("addEditModel.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
+	return render_template("addEdit.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
 
 @tags.route("/tags/export")
 @login_required

@@ -30,7 +30,7 @@ def addArea(siteId):
 		{"url" : url_for("physicalModels.selectPhysicalModel", selectedClass = "Enterprise", selectedId = site.Enterprise.EnterpriseId),
 			"text" : site.Enterprise.Name},
 		{"url" : url_for("physicalModels.selectPhysicalModel", selectedClass = "Site", selectedId = site.SiteId), "text" : site.Name}]
-	return render_template("addEditModel.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
+	return render_template("addEdit.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
 
 @areas.route("/areas/delete/<int:areaId>", methods = ["GET", "POST"])
 @login_required
@@ -71,4 +71,4 @@ def editArea(areaId):
 			"text" : area.Site.Enterprise.Name},
 		{"url" : url_for("physicalModels.selectPhysicalModel", selectedClass = "Site", selectedId = area.Site.SiteId), "text" : area.Site.Name},
 		{"url" : None, "text" : area.Name}]
-	return render_template("addEditModel.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
+	return render_template("addEdit.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)

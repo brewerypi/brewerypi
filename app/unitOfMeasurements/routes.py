@@ -34,7 +34,7 @@ def addUnitOfMeasurement():
 
 	# Present a form to add a new unit of measurement.
 	breadcrumbs = [{"url" : url_for("unitOfMeasurements.listUnitOfMeasurements"), "text" : ".."}]
-	return render_template("addEditModel.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
+	return render_template("addEdit.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
 
 @unitOfMeasurements.route("/units/addDefaultUnitsOfMeasurements", methods = ["GET", "POST"])
 @login_required
@@ -153,4 +153,4 @@ def editUnitOfMeasurement(unitOfMeasurementId):
 	form.name.data = unitOfMeasurement.Name
 	breadcrumbs = [{"url" : url_for("unitOfMeasurements.listUnitOfMeasurements"), "text" : ".."},
 		{"url" : None, "text" : unitOfMeasurement.Name}]
-	return render_template("addEditModel.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
+	return render_template("addEdit.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)

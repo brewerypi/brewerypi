@@ -35,7 +35,7 @@ def addElementAttributeTemplate(elementTemplateId):
 			"text" : elementTemplate.Site.Name},
 		{"url" : url_for("elements.selectElement", selectedClass = "ElementAttributeTemplate", selectedId = elementTemplate.ElementTemplateId),
 			"text" : elementTemplate.Name}]
-	return render_template("addEditModel.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
+	return render_template("addEdit.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
 
 @elementAttributeTemplates.route("/elementAttributeTemplates/delete/<int:elementAttributeTemplateId>", methods = ["GET", "POST"])
 @login_required
@@ -79,4 +79,4 @@ def editElementAttributeTemplate(elementAttributeTemplateId):
 			selectedId = elementAttributeTemplate.ElementTemplate.ElementTemplateId),
 			"text" : elementAttributeTemplate.ElementTemplate.Name},
 		{"url" : None, "text" : elementAttributeTemplate.Name}]
-	return render_template("addEditModel.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
+	return render_template("addEdit.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)

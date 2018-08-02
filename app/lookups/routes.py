@@ -29,7 +29,7 @@ def addLookup(enterpriseId):
 	enterprise = Enterprise.query.get_or_404(enterpriseId)
 	breadcrumbs = [{"url" : url_for("lookups.selectLookup", selectedClass = "Root"), "text" : ".."},
 		{"url" : url_for("lookups.selectLookup", selectedClass = "Enterprise", selectedId = enterprise.EnterpriseId), "text" : enterprise.Name}]
-	return render_template("addEditModel.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
+	return render_template("addEdit.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
 
 @lookups.route("/lookups/delete/<int:lookupId>", methods = ["GET", "POST"])
 @login_required
@@ -61,11 +61,11 @@ def editLookup(lookupId):
 	form.enterpriseId.data = lookup.EnterpriseId
 	form.name.data = lookup.Name
 	form.requestReferrer.data = request.referrer
-	# return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
+	# return render_template("addEdit.html", form = form, modelName = modelName, operation = operation)
 	breadcrumbs = [{"url" : url_for("lookups.selectLookup", selectedClass = "Root"), "text" : ".."},
 		{"url" : url_for("lookups.selectLookup", selectedClass = "Enterprise", selectedId = lookup.Enterprise.EnterpriseId), "text" : lookup.Enterprise.Name},
 		{"url" : None, "text" : lookup.Name}]
-	return render_template("addEditModel.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
+	return render_template("addEdit.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
 
 @lookups.route("/lookups/select", methods = ["GET", "POST"]) # Default.
 @lookups.route("/lookups/select/<string:selectedClass>", methods = ["GET", "POST"]) # Root.

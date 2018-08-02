@@ -35,7 +35,7 @@ def addElement(elementTemplateId):
 		{"url" : url_for("elements.selectElement", selectedClass = "Site", selectedId = elementTemplate.Site.SiteId), "text" : elementTemplate.Site.Name},
 		{"url" : url_for("elements.selectElement", selectedClass = "ElementTemplate", selectedId = elementTemplate.ElementTemplateId),
 			"text" : elementTemplate.Name}]
-	return render_template("addEditModel.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
+	return render_template("addEdit.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
 
 @elements.route("/elements/copy/<int:elementId>", methods = ["GET", "POST"])
 @login_required
@@ -91,7 +91,7 @@ def copyElement(elementId):
 	del form.elementTemplateId
 	form.elementIdToCopy.data = elementId
 	form.requestReferrer.data = request.referrer
-	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
+	return render_template("addEdit.html", form = form, modelName = modelName, operation = operation)
 
 @elements.route("/elements/dashboard/<int:elementId>", methods = ["GET", "POST"])
 @login_required
@@ -147,7 +147,7 @@ def editElement(elementId):
 		{"url" : url_for("elements.selectElement", selectedClass = "ElementTemplate", selectedId = element.ElementTemplate.ElementTemplateId),
 			"text" : element.ElementTemplate.Name},
 		{"url" : None, "text" : element.Name}]
-	return render_template("addEditModel.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
+	return render_template("addEdit.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
 
 @elements.route("/elements/select", methods = ["GET", "POST"]) # Default.
 @elements.route("/elements/select/<string:selectedClass>", methods = ["GET", "POST"]) # Root.

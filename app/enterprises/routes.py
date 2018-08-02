@@ -26,7 +26,7 @@ def addEnterprise():
 	# Present a form to add a new enterprise.
 	form.requestReferrer.data = request.referrer
 	breadcrumbs = [{"url" : url_for("physicalModels.selectPhysicalModel", selectedClass = "Root"), "text" : ".."}]
-	return render_template("addEditModel.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
+	return render_template("addEdit.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
 
 @enterprises.route("/enterprises/delete/<int:enterpriseId>", methods = ["GET", "POST"])
 @login_required
@@ -62,4 +62,4 @@ def editEnterprise(enterpriseId):
 	form.requestReferrer.data = request.referrer
 	breadcrumbs = [{"url" : url_for("physicalModels.selectPhysicalModel", selectedClass = "Root"), "text" : ".."},
 		{"url" : None, "text" : enterprise.Name}]
-	return render_template("addEditModel.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
+	return render_template("addEdit.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)

@@ -79,7 +79,7 @@ def addTagValue(tagId, elementAttributeId = None):
 			{"url" : url_for("tags.selectTag", selectedClass = "Area", selectedId = tag.Area.AreaId), "text" : tag.Area.Name},
 			{"url" : url_for("tagValues.listTagValues", tagId = tag.TagId), "text" : tag.Name}]
 
-	return render_template("addEditModel.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
+	return render_template("addEdit.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
 
 @tagValues.route("/tagValues/addMultiple", methods = ["GET", "POST"])
 @login_required
@@ -177,4 +177,4 @@ def editTagValue(tagValueId, elementAttributeId = None):
 			{"url" : url_for("tagValues.listTagValues", tagId = tag.TagId), "text" : tag.Name},
 			{"url" : None, "text" : tagValue.Timestamp}]
 
-	return render_template("addEditModel.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
+	return render_template("addEdit.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
