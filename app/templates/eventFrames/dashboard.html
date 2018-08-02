@@ -462,7 +462,7 @@ Event Frame Dashboard
                 {
                     $.ajax({
                         type : "POST",
-                        url : "/tagValues/new/addMultiple",
+                        url : "/tagValues/addMultiple",
                         data : JSON.stringify(rows)
                     }).done(function(response) {
                         location.reload(true)
