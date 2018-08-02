@@ -99,6 +99,7 @@ Event Frames
                     <th></th>
                     <th></th>
                     <th></th>
+                    <th></th>
                 {% elif childrenClass == "DescendantEventFrameTemplate" %}
                     <th>Description</th>
                     <th>Order</th>
@@ -141,6 +142,9 @@ Event Frames
                             <td>{{ child.Element.Name }}</td>
                             <td>{{ child.StartTimestamp }}</td>
                             <td>{{ child.EndTimestamp }}</td>
+                            <td><a class = "btn btn-default" title = "Associate Attributes with Tags"
+                                href = "{#{ url_for("elementAttributes.listElementAttributes") }#}">
+                                <span class = "glyphicon glyphicon-link"></span></a></td>
                             {% if child.EndTimestamp == None %}
                                 <td><a class = "btn btn-default" title = "End" href = "{{ url_for("eventFrames.endEventFrame",
                                     eventFrameId = child.id()) }}"><span class = "glyphicon glyphicon-stop"></span></a></td>
@@ -238,6 +242,7 @@ Event Frames
                         null,
                         null,
                         null,
+                        { "orderable": false }, // Associate button.
                         { "orderable": false }, // Stop button.
                         { "orderable": false }, // Edit button.
                         { "orderable": false }  // Delete button.

@@ -68,6 +68,7 @@ Data Entry - Elements
                 <th></th>
                 <th></th>
                 <th></th>
+                <th></th>
             </tr>
         </thead>
         <tbody>
@@ -85,7 +86,18 @@ Data Entry - Elements
                         {% endif %}
                         <td>{{ child.Name }}</td>
                         <td>{{ child.Description }}</td>
-                        {% if childrenClass == "Element" %}
+                        {% if childrenClass == "ElementTemplate" %}
+                            <td></td>
+                            <td><a class = "btn btn-default" title = "Configure" href = "{{ url_for("elements.selectElement",
+                                selectedClass = "ElementAttributeTemplate", selectedId = child.id()) }}"><span class = "glyphicon glyphicon-wrench"></a></td>
+                            <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("elementTemplates.editElementTemplate",
+                                elementTemplateId = child.id()) }}"><span class = "glyphicon glyphicon-edit"></a></td>
+                            <td><a class = "btn btn-default" title = "Delete" href = "{{ url_for("elementTemplates.deleteElementTemplate",
+                                elementTemplateId = child.id()) }}"><span class = "glyphicon glyphicon-trash"></a></td>
+                        {% elif childrenClass == "Element" %}
+                            <td><a class = "btn btn-default" title = "Associate Attributes with Tags"
+                                href = "{{ url_for("elementAttributes.listElementAttributes", elementId = child.ElementId) }}">
+                                <span class = "glyphicon glyphicon-link"></span></a></td>
                             <td><a class = "btn btn-default" title = "Copy" href = "{{ url_for("elements.copyElement", elementId = child.ElementId) }}">
                                 <span class = "glyphicon glyphicon-copy"></span></a></td>
                             <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("elements.editElement", elementId = child.ElementId) }}">
@@ -94,18 +106,13 @@ Data Entry - Elements
                                 <span class = "glyphicon glyphicon-trash"></span></a></td>
                         {% elif childrenClass == "ElementAttributeTemplate" %}
                             <td></td>
+                            <td></td>
                             <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("elementAttributeTemplates.editElementAttributeTemplate",
                                 elementAttributeTemplateId = child.id()) }}"><span class = "glyphicon glyphicon-edit"></a></td>
                             <td><a class = "btn btn-default" title = "Delete" href = "{{ url_for("elementAttributeTemplates.deleteElementAttributeTemplate",
                                 elementAttributeTemplateId = child.id()) }}"><span class = "glyphicon glyphicon-trash"></a></td>
-                        {% elif childrenClass == "ElementTemplate" %}
-                            <td><a class = "btn btn-default" title = "Configure" href = "{{ url_for("elements.selectElement",
-                                selectedClass = "ElementAttributeTemplate", selectedId = child.id()) }}"><span class = "glyphicon glyphicon-wrench"></a></td>
-                            <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("elementTemplates.editElementTemplate",
-                                elementTemplateId = child.id()) }}"><span class = "glyphicon glyphicon-edit"></a></td>
-                            <td><a class = "btn btn-default" title = "Delete" href = "{{ url_for("elementTemplates.deleteElementTemplate",
-                                elementTemplateId = child.id()) }}"><span class = "glyphicon glyphicon-trash"></a></td>
                         {% else %}
+                            <td></td>
                             <td></td>
                             <td></td>
                             <td></td>
@@ -136,6 +143,7 @@ Data Entry - Elements
                     { "orderable": false }, // Details button.
                     null,
                     null,
+                    { "orderable": false }, // Associate button.
                     { "orderable": false }, // Copy button.
                     { "orderable": false }, // Edit button.
                     { "orderable": false }  // Delete button.

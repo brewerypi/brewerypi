@@ -89,9 +89,7 @@ Event Frame Dashboard
     </div>
 {% endif %}
 <div class = "page-header">
-    <h1>Attributes <small>{{ eventFrame.origin().Element.Name }} <a class = "btn btn-default" title = "Associate Attributes with Tags"
-        href = "{#{ url_for("elementAttributes.listElementAttributes", elementId = element.ElementId) }#}">
-        <span class = "glyphicon glyphicon-link"></span></a></small></h1>
+    <h1>Attributes <small>{{ eventFrame.origin().Element.Name }}</small></h1>
 </div>
 <div>
     <table id = "attributesTable" class = "table">
