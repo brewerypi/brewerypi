@@ -54,8 +54,8 @@ def addEventFrameAttributeTemplate(eventFrameTemplateId):
 				"text" : eventFrameTemplate.ElementTemplate.Site.Name},
 			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "ElementTemplate",
 				selectedId = eventFrameTemplate.ElementTemplate.ElementTemplateId), "text" : eventFrameTemplate.ElementTemplate.Name},
-			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "EventFrame",
-				eventselectedIdFrameTemplateId = eventFrameTemplate.EventFrameTemplateId),
+			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "EventFrameTemplate",
+				selectedId = eventFrameTemplate.EventFrameTemplateId, selectedOperation = "configure"),
 				"text" : eventFrameTemplate.Name}]
 	return render_template("addEditModel.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
 
@@ -123,8 +123,8 @@ def editEventFrameAttributeTemplate(eventFrameAttributeTemplateId):
 			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "ElementTemplate",
 				selectedId = eventFrameAttributeTemplate.EventFrameTemplate.ElementTemplate.ElementTemplateId),
 				"text" : eventFrameAttributeTemplate.EventFrameTemplate.ElementTemplate.Name},
-			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "EventFrame",
-				selectedId = eventFrameAttributeTemplate.EventFrameTemplate.EventFrameTemplateId),
+			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "EventFrameTemplate",
+				selectedId = eventFrameAttributeTemplate.EventFrameTemplate.EventFrameTemplateId, selectedOperation = "configure"),
 				"text" : eventFrameAttributeTemplate.EventFrameTemplate.Name},
 			{"url" : None, "text" : eventFrameAttributeTemplate.Name}]
 
