@@ -1,74 +1,57 @@
-import csv
-import os
-from flask import current_app, flash, redirect, render_template, send_file, url_for
+from flask import flash, jsonify, request, render_template
 from flask_login import login_required
-from sqlalchemy import or_
+from sqlalchemy import and_, or_
 from . import eventFrameAttributes
-from . forms import EventFrameAttributeForm, EventFrameAttributeImportForm
 from .. import db
-from .. decorators import adminRequired, permissionRequired
-from .. models import Area, Element, EventFrame, EventFrameAttribute, EventFrameAttributeTemplate, EventFrameTemplate, Enterprise, LookupValue, Permission, Site, Tag, TagValue
-from .. tagValues . forms import TagValueForm
+from .. decorators import adminRequired
+from .. models import Area, Element, Enterprise, EventFrame, EventFrameAttribute, EventFrameAttributeTemplate, EventFrameTemplate, Site, Tag
 
-@eventFrameAttributes.route("/eventFrameAttributes", methods = ["GET", "POST"])
+@eventFrameAttributes.route("/eventFrameAttributes/<int:eventFrameId>", methods = ["GET", "POST"])
 @login_required
 @adminRequired
-def listEventFrameAttributes():
-	eventFrameAttributes = EventFrameAttribute.query.all()
-	return render_template("eventFrameEAttributes/eventFrameAttributes.html", eventFrameEAttributes = eventFrameEAttributes)
+def listEventFrameAttributes(eventFrameId):
+	eventFrame = EventFrame.query.get_or_404(eventFrameId)
+	eventFrameAttributeTemplates = EventFrameAttributeTemplate.query.join(EventFrameTemplate, EventFrame). \
+		outerjoin(EventFrameAttribute, and_(EventFrame.ElementId == EventFrameAttribute.ElementId, \
+		EventFrameAttributeTemplate.EventFrameAttributeTemplateId == EventFrameAttribute.EventFrameAttributeTemplateId)).filter(EventFrame.EventFrameId == eventFrameId)
+	tags = Tag.query.join(Area, Site, Enterprise).order_by(Enterprise.Abbreviation, Site.Abbreviation, Area.Abbreviation, Tag.Name)
+	return render_template("eventFrameAttributes/eventFrameAttributes.html", eventFrame = eventFrame,
+		eventFrameAttributeTemplates = eventFrameAttributeTemplates, tags = tags)
 
-@eventFrameAttributes.route("/eventFrameAttributes/add", methods = ["GET", "POST"])
+@eventFrameAttributes.route("/eventFrameAttributes/updateMultiple/<int:eventFrameId>", methods = ["GET", "POST"])
 @login_required
 @adminRequired
-def addEventFrameAttribute():
-	modelName = "Event Frame Attribute"
-	operation = "Add"
-	form = EventFrameAttributeForm()
+def updateMultiple(eventFrameId):
+	# Get the data, loop through it and add new value.
+	data = request.get_json(force = True)
+	eventFrame = EventFrame.query.get_or_404(eventFrameId)
+	count = 0
+	for item in data:
+		eventFrameAttributeTemplateId = item["EventFrameAttributeTemplateId"]
+		tagId = item["TagId"]
+		eventFrameAttribute = EventFrameAttribute.query.filter_by(ElementId = eventFrame.ElementId, EventFrameAttributeTemplateId = eventFrameAttributeTemplateId).first()
+		if eventFrameAttribute:
+			if tagId == "-1":
+				# Delete.
+				db.session.delete(eventFrameAttribute)
+				count = count + 1
+			else:
+				if str(eventFrameAttribute.TagId) != tagId:
+					# Update tag id.
+					eventFrameAttribute.TagId = tagId
+					count = count + 1
+		else:
+			if tagId != "-1":
+				# Create new.
+				eventFrameAttribute = EventFrameAttribute(ElementId = eventFrame.ElementId, EventFrameAttributeTemplateId = eventFrameAttributeTemplateId, TagId = tagId)
+				db.session.add(eventFrameAttribute)
+				count = count + 1
 
-	# Add a new event frame attribute.
-	if form.validate_on_submit():
-		eventFrameAttribute = EventFrameAttribute(EventFrameAttributeTemplate = form.eventFrameAttributeTemplate.data, EventFrame = form.eventFrame.data, 
-			Tag = form.tag.data)
-		db.session.add(eventFrameAttribute)
+	if count > 0:
 		db.session.commit()
-		flash("You have successfully added the event frame attribute \"" + form.eventFrameAttributeTemplate.data.Name + "\" for \"" + form.eventFrame.data.Name + "\".", "alert alert-success")
-		return redirect(url_for("eventFrameAttributes.listEventFrameAttributes"))
-
-	# Present a form to add a new event frame attribute.
-	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
-
-@eventFrameAttributes.route("/eventFrameAttributes/delete/<int:eventFrameAttributeId>", methods = ["GET", "POST"])
-@login_required
-@adminRequired
-def deleteEventFrameAttribute(eventFrameAttributeId):
-	eventFrameAttribute = EventFrameAttribute.query.get_or_404(eventFrameAttributeId)
-	eventFrameAttributeTemplateName = eventFrameAttribute.EventFrameAttributeTemplate.Name
-	eventFrameName = eventFrameAttribute.EventFrame.Name
-	db.session.delete(eventFrameAttribute)
-	db.session.commit()
-	flash("You have successfully deleted the event frame attribute \"" + eventFrameAttributeTemplateName + "\" for \"" + eventFrameName + "\".", "alert alert-success")
-	return redirect(url_for("eventFrameAttributes.listEventFrameAttributes"))
-
-@eventFrameAttributes.route("/eventFrameAttributes/edit/<int:eventFrameAttributeId>", methods = ["GET", "POST"])
-@login_required
-@adminRequired
-def editEventFrameAttribute(eventFrameAttributeId):
-	modelName = "Event Frame Attribute"
-	operation = "Add"
-	eventFrameAttribute = EventFrameAttribute.query.get_or_404(eventFrameAttributeId)
-	form = EventFrameAttributeForm(obj = eventFrameAttribute)
-
-	# Edit an existing event frame attribute.
-	if form.validate_on_submit():	
-		eventFrameAttribute.EventFrameAttributeTemplate = form.eventFrameAttributeTemplate.data
-		eventFrameAttribute.EventFrame = form.eventFrame.data
-		eventFrameAttribute.Tag = form.tag.data
-		db.session.commit()
-		flash("You have successfully edited the event frame attribute \"" + eventFrameAttribute.EventFrameAttributeTemplate.Name + "\" for \"" + eventFrameAttribute.EventFrame.Name + "\".", "alert alert-success")
-		return redirect(url_for("eventFrameAttributes.listEventFrameAttributes"))
-
-	# Present a form to edit an existing event frame attribute.
-	form.eventFrameAttributeTemplate.data = eventFrameAttribute.EventFrameAttributeTemplate
-	form.eventFrame.data = eventFrameAttribute.EventFrame
-	form.tag.data = eventFrameAttribute.Tag
-	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
+		message = "You have successfully added or updated one or more element attributes."
+		flash(message, "alert alert-success")
+	else:
+		message = "Nothing updated to save."
+		flash(message, "alert alert-warning")
+	return jsonify({"response": message})

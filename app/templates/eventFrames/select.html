@@ -143,7 +143,7 @@ Event Frames
                             <td>{{ child.StartTimestamp }}</td>
                             <td>{{ child.EndTimestamp }}</td>
                             <td><a class = "btn btn-default" title = "Associate Attributes with Tags"
-                                href = "{#{ url_for("elementAttributes.listElementAttributes") }#}">
+                                href = "{{ url_for("eventFrameAttributes.listEventFrameAttributes", eventFrameId = child.id()) }}">
                                 <span class = "glyphicon glyphicon-link"></span></a></td>
                             {% if child.EndTimestamp == None %}
                                 <td><a class = "btn btn-default" title = "End" href = "{{ url_for("eventFrames.endEventFrame",

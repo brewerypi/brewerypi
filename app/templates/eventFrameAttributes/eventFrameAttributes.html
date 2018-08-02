@@ -1,52 +1,55 @@
 {% extends "base.html" %}
 
 {% block title %}
-Element Attributes
+Event Frame Attributes
 {% endblock %}
 
 {% block page_content %}
 <div>
     <ol class = "breadcrumb">
-        <li><a href = "{{ url_for("elements.selectElement", selectedClass = "Root", selectedId = None) }}">..</a></li>
-        <li><a href = "{{ url_for("elements.selectElement", selectedClass = "Enterprise",
-            selectedId = element.ElementTemplate.Site.Enterprise.EnterpriseId) }}">{{ element.ElementTemplate.Site.Enterprise.Name }}</a></li>
-        <li><a href = "{{ url_for("elements.selectElement", selectedClass = "Site",
-            selectedId = element.ElementTemplate.Site.SiteId) }}">{{ element.ElementTemplate.Site.Name }}</a></li>
-        <li><a href = "{{ url_for("elements.selectElement", selectedClass = "ElementTemplate",
-            selectedId = element.ElementTemplate.ElementTemplateId) }}">{{ element.ElementTemplate.Name }}</a></li>
-        <li class = "active">{{ element.Name }}</a></li>
+        <li><a href = "{{ url_for("eventFrames.selectEventFrame", selectedClass = "Root", selectedId = None) }}">..</a></li>
+        <li><a href = "{{ url_for("eventFrames.selectEventFrame", selectedClass = "Enterprise",
+            selectedId = eventFrame.EventFrameTemplate.ElementTemplate.Site.Enterprise.EnterpriseId) }}">
+            {{ eventFrame.EventFrameTemplate.ElementTemplate.Site.Enterprise.Name }}</a></li>
+        <li><a href = "{{ url_for("eventFrames.selectEventFrame", selectedClass = "Site",
+            selectedId = eventFrame.EventFrameTemplate.ElementTemplate.Site.SiteId) }}">{{ eventFrame.EventFrameTemplate.ElementTemplate.Site.Name }}</a></li>
+        <li><a href = "{{ url_for("eventFrames.selectEventFrame", selectedClass = "ElementTemplate",
+            selectedId = eventFrame.EventFrameTemplate.ElementTemplate.ElementTemplateId) }}">{{ eventFrame.EventFrameTemplate.ElementTemplate.Name }}</a></li>
+        <li><a href = "{{ url_for("eventFrames.selectEventFrame", selectedClass = "EventFrameTemplate",
+            selectedId = eventFrame.EventFrameTemplate.EventFrameTemplateId) }}">{{ eventFrame.EventFrameTemplate.Name }}</a></li>
+        <li class = "active">{{ eventFrame.Element.Name }}</a></li>
     </ol>
 </div>
 <div class = "page-header">
-    <h1>Element Attributes <small></small></h1>
+    <h1>Event Frame Attributes <small></small></h1>
 </div>
 <div>
-    <table id = "elementAttributesTable" class = "table">
+    <table id = "eventFrameAttributesTable" class = "table">
         <thead>
             <tr>
-                <th>Element Attribute Template</th>
+                <th>Event Frame Attribute Template</th>
                 <th>Tag</th>
                 <th><button class = "btn btn-default" id = "buttonAttributesSaveAll" title = "Save All"><span class="glyphicon glyphicon-floppy-disk"></span>
                     </button></th>
             </tr>
         </thead>
         <tbody>
-            {% for elementAttributeTemplate in elementAttributeTemplates %}
-                {% set elementAttributes = elementAttributeTemplate.ElementAttributes.
-                    filter_by(ElementAttributeTemplateId = elementAttributeTemplate.ElementAttributeTemplateId, ElementId = element.ElementId) %}
-                {% if elementAttributes.count() > 0 %}
-                    {% set elementAttribute = elementAttributes | first %}
+            {% for eventFrameAttributeTemplate in eventFrameAttributeTemplates %}
+                {% set eventFrameAttributes = eventFrameAttributeTemplate.EventFrameAttributes.
+                    filter_by(EventFrameAttributeTemplateId = eventFrameAttributeTemplate.EventFrameAttributeTemplateId, ElementId = eventFrame.ElementId) %}
+                {% if eventFrameAttributes.count() > 0 %}
+                    {% set eventFrameAttribute = eventFrameAttributes | first %}
                 {% else %}
-                    {% set elementAttribute = None %}
+                    {% set eventFrameAttribute = None %}
                 {% endif %}
                 <tr>
-                <td>{{ elementAttributeTemplate.Name }}</td>
+                <td>{{ eventFrameAttributeTemplate.Name }}</td>
                 <td>
                     <div class = "form-group">
-                        <select class = "form-control" id = "selectUpdatedValue{{ elementAttributeTemplate.ElementAttributeTemplateId }}">
+                        <select class = "form-control" id = "selectUpdatedValue{{ eventFrameAttributeTemplate.EventFrameAttributeTemplateId }}">
                             <option value = "-1"></option>
                             {% for tag in tags %}
-                                {% if elementAttribute.TagId == tag.TagId %}
+                                {% if eventFrameAttribute.TagId == tag.TagId %}
                                     {% set selected = "selected" %}
                                 {% else %}
                                     {% set selected = "" %}
@@ -71,11 +74,11 @@ Element Attributes
     <script>
         $(document).ready(function()
         {
-            var elementAttributesTable = $("#elementAttributesTable").DataTable
+            var eventFrameAttributesTable = $("#eventFrameAttributesTable").DataTable
             ({
                 "order":
                 [
-                    [0, "asc"]                                      // Element Attribute Template.
+                    [0, "asc"]                                      // Event Frame Attribute Template.
                 ],
                 "columns":
                 [
@@ -100,19 +103,19 @@ Element Attributes
             {
                 var rows = []
                 // Loop through the select values.
-                elementAttributesTable.$("[id^=selectUpdatedValue]").each(function()
+                eventFrameAttributesTable.$("[id^=selectUpdatedValue]").each(function()
                 {
                     var id = $(this).attr("id").split("selectUpdatedValue")[1]
                     var value = $.trim($(this).val())
                     var row = {}
-                    row["ElementAttributeTemplateId"] = id
+                    row["EventFrameAttributeTemplateId"] = id
                     row["TagId"] = value
                     rows.push(row)
                 })
                 $.ajax(
                 {
                     type : "POST",
-                    url : "/elementAttributes/updateMultiple/{{ element.ElementId }}",
+                    url : "/eventFrameAttributes/updateMultiple/{{ eventFrame.EventFrameId }}",
                     data : JSON.stringify(rows)
                 }).done(function(response)
                 {
@@ -120,7 +123,7 @@ Element Attributes
                 }).fail(function()
                 {
                     $("#divFlashedMessages").append("<div class = \"alert alert-danger\"><button type = \"button\" class = \"close\" " +
-                        "data-dismiss = \"alert\">&times;</button>The attempt to update one or more element attributes failed.</div>")                        
+                        "data-dismiss = \"alert\">&times;</button>The attempt to update one or more event frame attributes failed.</div>")                        
                 })
             })
         })

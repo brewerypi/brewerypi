@@ -1,10 +1,10 @@
 import csv
 import os
-from flask import current_app, flash, jsonify, redirect, render_template, request, send_file, url_for
+from flask import current_app, flash, jsonify, render_template, request, send_file
 from flask_login import login_required
 from sqlalchemy import and_, or_
 from . import elementAttributes
-from . forms import ElementAttributeForm, ElementAttributeImportForm
+from . forms import ElementAttributeImportForm
 from .. import db
 from .. decorators import adminRequired
 from .. models import Area, ElementAttributeTemplate, Element, ElementAttribute, ElementTemplate, Enterprise, Site, Tag
@@ -19,91 +19,6 @@ def listElementAttributes(elementId):
 		ElementAttributeTemplate.ElementAttributeTemplateId == ElementAttribute.ElementAttributeTemplateId)).filter(Element.ElementId == elementId)
 	tags = Tag.query.join(Area, Site, Enterprise).order_by(Enterprise.Abbreviation, Site.Abbreviation, Area.Abbreviation, Tag.Name)
 	return render_template("elementAttributes/elementAttributes.html", element = element, elementAttributeTemplates = elementAttributeTemplates, tags = tags)
-
-@elementAttributes.route("/elementAttributes/add/<int:elementId>", methods = ["GET", "POST"])
-@login_required
-@adminRequired
-def addElementAttribute(elementId):
-	modelName = "Element Attribute"
-	operation = "Add"
-	form = ElementAttributeForm()
-	element = Element.query.get_or_404(elementId)
-	form.elementAttributeTemplate.query = ElementAttributeTemplate.query.join(ElementTemplate, Site, Enterprise). \
-		filter(ElementAttributeTemplate.ElementTemplateId == element.ElementTemplateId). \
-		order_by(Enterprise.Abbreviation, Site.Abbreviation, ElementTemplate.Name, ElementAttributeTemplate.Name)
-
-	# Add a new element attribute.
-	if form.validate_on_submit():
-		elementAttribute = ElementAttribute(ElementAttributeTemplate = form.elementAttributeTemplate.data, ElementId = form.elementId.data, Tag = form.tag.data)
-		db.session.add(elementAttribute)
-		db.session.commit()
-		flash("You have successfully added the element attribute \"{}\" for \"{}\".".format(elementAttribute.ElementAttributeTemplate.Name, element.Name),
-			"alert alert-success")
-		return redirect(form.requestReferrer.data)
-
-	# Present a form to add a new element attribute.
-	form.elementId.data = elementId
-	form.requestReferrer.data = request.referrer
-	breadcrumbs = [{"url" : url_for("elements.selectElement", selectedClass = "Root"), "text" : ".."},
-		{"url" : url_for("elements.selectElement", selectedClass = "Enterprise", selectedId = element.ElementTemplate.Site.Enterprise.EnterpriseId),
-			"text" : element.ElementTemplate.Site.Enterprise.Name},
-		{"url" : url_for("elements.selectElement", selectedClass = "Site", selectedId = element.ElementTemplate.Site.SiteId),
-			"text" : element.ElementTemplate.Site.Name},
-		{"url" : url_for("elements.selectElement", selectedClass = "ElementTemplate", selectedId = element.ElementTemplate.ElementTemplateId),
-			"text" : element.ElementTemplate.Name},
-		{"url" : url_for("elementAttributes.listElementAttributes", elementId = elementId), "text" : element.Name}]
-	return render_template("addEditModel.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
-
-@elementAttributes.route("/elementAttributes/delete/<int:elementAttributeId>", methods = ["GET", "POST"])
-@login_required
-@adminRequired
-def deleteElementAttribute(elementAttributeId):
-	elementAttribute = ElementAttribute.query.get_or_404(elementAttributeId)
-	elementAttributeTemplateName = elementAttribute.ElementAttributeTemplate.Name
-	elementName = elementAttribute.Element.Name
-	db.session.delete(elementAttribute)
-	db.session.commit()
-	flash("You have successfully deleted the element attribute \"{}\" for \"{}\".".format(elementAttributeTemplateName, elementName), "alert alert-success")
-	return redirect(request.referrer)
-
-@elementAttributes.route("/elementAttributes/edit/<int:elementAttributeId>", methods = ["GET", "POST"])
-@login_required
-@adminRequired
-def editElementAttribute(elementAttributeId):
-	modelName = "Element Attribute"
-	operation = "Edit"
-	elementAttribute = ElementAttribute.query.get_or_404(elementAttributeId)
-	form = ElementAttributeForm(obj = elementAttribute)
-	form.elementAttributeTemplate.query = ElementAttributeTemplate.query.join(ElementTemplate, Site, Enterprise). \
-		filter(ElementAttributeTemplate.ElementTemplateId == elementAttribute.Element.ElementTemplateId). \
-		order_by(Enterprise.Abbreviation, Site.Abbreviation, ElementTemplate.Name, ElementAttributeTemplate.Name)
-
-	# Edit an existing element attribute.
-	if form.validate_on_submit():	
-		elementAttribute.ElementAttributeTemplate = form.elementAttributeTemplate.data
-		elementAttribute.ElementId = form.elementId.data
-		elementAttribute.Tag = form.tag.data
-		db.session.commit()
-		flash("You have successfully edited the element attribute \"" + elementAttribute.ElementAttributeTemplate.Name + "\" for \"" + \
-			elementAttribute.Element.Name + "\".", "alert alert-success")
-		return redirect(form.requestReferrer.data)
-
-	# Present a form to edit an existing element attribute.
-	form.elementAttributeTemplate.data = elementAttribute.ElementAttributeTemplate
-	form.elementId.data = elementAttribute.ElementId
-	form.tag.data = elementAttribute.Tag
-	form.requestReferrer.data = request.referrer
-	breadcrumbs = [{"url" : url_for("elements.selectElement", selectedClass = "Root"), "text" : ".."},
-		{"url" : url_for("elements.selectElement", selectedClass = "Enterprise",
-			selectedId = elementAttribute.Element.ElementTemplate.Site.Enterprise.EnterpriseId),
-			"text" : elementAttribute.Element.ElementTemplate.Site.Enterprise.Name},
-		{"url" : url_for("elements.selectElement", selectedClass = "Site", selectedId = elementAttribute.Element.ElementTemplate.Site.SiteId),
-			"text" : elementAttribute.Element.ElementTemplate.Site.Name},
-		{"url" : url_for("elements.selectElement", selectedClass = "ElementTemplate", selectedId = elementAttribute.Element.ElementTemplate.ElementTemplateId),
-			"text" : elementAttribute.Element.ElementTemplate.Name},
-		{"url" : url_for("elementAttributes.listElementAttributes", elementId = elementAttribute.ElementId), "text" : elementAttribute.Element.Name},
-		{"url" : None, "text" : elementAttribute.ElementAttributeTemplate.Name}]
-	return render_template("addEditModel.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
 
 @elementAttributes.route("/elementAttributes/export")
 @login_required
@@ -262,7 +177,6 @@ def updateMultiple(elementId):
 	data = request.get_json(force = True)
 	count = 0
 	for item in data:
-		# elementAttribute = ElementAttribute.query.get_or_404(item["ElementAttributeId"])
 		elementAttributeTemplateId = item["ElementAttributeTemplateId"]
 		tagId = item["TagId"]
 		elementAttribute = ElementAttribute.query.filter_by(ElementAttributeTemplateId = elementAttributeTemplateId, ElementId = elementId).first()
