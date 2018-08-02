@@ -27,7 +27,7 @@
         <thead>
             <tr>
                 <th></th>
-                <th>Attribute</th>
+                <th>Name</th>
                 <th>Last Timestamp</th>
                 <th>Last Value</th>
                 <th>Unit</th>
@@ -48,24 +48,24 @@
                     <td>{{ elementAttribute.ElementAttributeTemplate.Name }}</td>
                     {% if elementAttribute.Tag.TagValues[0] %}
                         {% set firstTagValue = elementAttribute.Tag.TagValues | sort(attribute = "Timestamp", reverse = True) | first %}
-                        <td id = "tdLastTimestamp{{ elementAttribute.ElementAttributeId }}">{{ firstTagValue.Timestamp }}</td>
+                        <td id = "tdLastTimestamp{{ elementAttribute.Tag.TagId }}">{{ firstTagValue.Timestamp }}</td>
                         {% if elementAttribute.Tag.LookupId %}
-                            <td id = "tdLastValue{{ elementAttribute.ElementAttributeId }}">{{ elementAttribute.Tag.Lookup.LookupValues | 
+                            <td id = "tdLastValue{{ elementAttribute.Tag.TagId }}">{{ elementAttribute.Tag.Lookup.LookupValues | 
                                     selectattr("Value", "equalto", firstTagValue.Value) | map(attribute = "Name") | list | first }}          
                             <td>{{ elementAttribute.Tag.Lookup.Name }}</td>
                         {% else %}
-                            <td id = "tdLastValue{{ elementAttribute.ElementAttributeId }}">{{ firstTagValue.Value }}</td>                    
+                            <td id = "tdLastValue{{ elementAttribute.Tag.TagId }}">{{ firstTagValue.Value }}</td>                    
                             <td>{{ firstTagValue.Tag.UnitOfMeasurement.Abbreviation }}</td>
                         {% endif %}
                     {% else %}
-                        <td id = "tdLastTimestamp{{ elementAttribute.ElementAttributeId }}"></td>
-                        <td id = "tdLastValue{{ elementAttribute.ElementAttributeId }}"></td>
+                        <td id = "tdLastTimestamp{{ elementAttribute.Tag.TagId }}"></td>
+                        <td id = "tdLastValue{{ elementAttribute.Tag.TagId }}"></td>
                         <td></td>
                     {% endif %}
                     <td>
-                        <div class = "form-group" id = "divNewValue{{ elementAttribute.ElementAttributeId }}">
+                        <div class = "form-group" id = "divNewValue{{ elementAttribute.Tag.TagId }}">
                         {% if elementAttribute.Tag.LookupId %}
-                            <select class = "form-control" id = "selectNewValue{{ elementAttribute.ElementAttributeId }}">
+                            <select class = "form-control" id = "selectNewValue{{ elementAttribute.Tag.TagId }}">
                                 <option value = "-1"></option>
                                 {% for lookupValue in elementAttribute.Tag.Lookup.LookupValues %}
                                     {% if lookupValue.Selectable %}
@@ -73,17 +73,17 @@
                                     {% endif %}
                                 {% endfor %}
                             </select>
-                            <p class = "help-block" id = "pNewValue{{ elementAttribute.ElementAttributeId }}"></p>
+                            <p class = "help-block" id = "pNewValue{{ elementAttribute.Tag.TagId }}"></p>
                         {% else %}
-                            <input class = "form-control" id = "inputNewValue{{ elementAttribute.ElementAttributeId }}" value = "">
-                            <p class = "help-block" id = "pNewValue{{ elementAttribute.ElementAttributeId }}"></p>
+                            <input class = "form-control" id = "inputNewValue{{ elementAttribute.Tag.TagId }}" value = "">
+                            <p class = "help-block" id = "pNewValue{{ elementAttribute.Tag.TagId }}"></p>
                         {% endif %}
                         </div>
                     </td>
                     <td>
-                        <div class = "form-group" id = "divNewTimestamp{{ elementAttribute.ElementAttributeId }}">
-                            <input class = "form-control" id = "inputNewTimestamp{{ elementAttribute.ElementAttributeId }}" value = "">
-                            <p class = "help-block" id = "pNewTimestamp{{ elementAttribute.ElementAttributeId }}"></p>
+                        <div class = "form-group" id = "divNewTimestamp{{ elementAttribute.Tag.TagId }}">
+                            <input class = "form-control" id = "inputNewTimestamp{{ elementAttribute.Tag.TagId }}" value = "">
+                            <p class = "help-block" id = "pNewTimestamp{{ elementAttribute.Tag.TagId }}"></p>
                         </div>
                     </td>
                     <td></td>
@@ -272,7 +272,7 @@
                         $("#divNewTimestamp" + id).removeClass("has-error")
                         var helpBlock = $("#pNewTimestamp" + id).html("")
                         var row = {}
-                        row["id"] = id
+                        row["tagId"] = id
                         row["type"] = "input"
                         row["value"] = value
                         row["timestamp"] = timestamp
@@ -328,7 +328,7 @@
                         $("#divNewTimestamp" + id).removeClass("has-error")
                         var helpBlock = $("#pNewTimestamp" + id).html("")
                         var row = {}
-                        row["id"] = id
+                        row["tagId"] = id
                         row["type"] = "select"
                         row["value"] = value
                         row["timestamp"] = timestamp

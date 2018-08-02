@@ -99,12 +99,7 @@ def copyElement(elementId):
 def dashboard(elementId):
 	element = Element.query.get_or_404(elementId)
 	elementAttributes = ElementAttribute.query.filter_by(ElementId = elementId)
-	eventFrameTemplates = EventFrameTemplate.query. \
-		join(ElementTemplate, Element). \
-		outerjoin(EventFrame, and_(Element.ElementId == EventFrame.ElementId, EventFrameTemplate.EventFrameTemplateId == EventFrame.EventFrameTemplateId)). \
-		filter(Element.ElementId == elementId)
-	return render_template("elements/dashboard.html", elementAttributes = elementAttributes, element = element,
-		eventFrameTemplates = eventFrameTemplates)
+	return render_template("elements/dashboard.html", elementAttributes = elementAttributes, element = element)
 
 @elements.route("/elements/delete/<int:elementId>", methods = ["GET", "POST"])
 @login_required

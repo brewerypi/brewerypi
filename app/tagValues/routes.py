@@ -89,8 +89,7 @@ def addMultiple():
 	data = request.get_json(force = True)
 	count = 0
 	for item in data:
-		elementAttribute = ElementAttribute.query.get_or_404(item["id"])
-		tagValue = TagValue(TagId = elementAttribute.TagId, Timestamp = item["timestamp"], Value = item["value"])
+		tagValue = TagValue(TagId = item["tagId"], Timestamp = item["timestamp"], Value = item["value"])
 		db.session.add(tagValue)
 		count = count + 1
 

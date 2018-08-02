@@ -5,7 +5,7 @@ from . import eventFrames
 from . forms import EventFrameForm
 from .. import db
 from .. decorators import permissionRequired
-from .. models import Element, ElementTemplate, Enterprise, EventFrame, EventFrameAttributeTemplate, EventFrameTemplate, Permission, Site
+from .. models import Element, ElementTemplate, Enterprise, EventFrame, EventFrameAttribute, EventFrameAttributeTemplate, EventFrameTemplate, Permission, Site
 
 modelName = "Event Frame"
 
@@ -90,7 +90,8 @@ def addEventFrame(eventFrameTemplateId = None, parentEventFrameId = None):
 @permissionRequired(Permission.DATA_ENTRY)
 def dashboard(eventFrameId):
 	eventFrame = EventFrame.query.get_or_404(eventFrameId)
-	return render_template("eventFrames/dashboard.html", eventFrame = eventFrame)
+	eventFrameAttributes = EventFrameAttribute.query.filter_by(ElementId = eventFrame.ElementId)
+	return render_template("eventFrames/dashboard.html", eventFrame = eventFrame, eventFrameAttributes = eventFrameAttributes)
 
 @eventFrames.route("/eventFrames/delete/<int:eventFrameId>", methods = ["GET", "POST"])
 @login_required
