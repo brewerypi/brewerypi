@@ -11,12 +11,10 @@ Event Frames
     <ol class = "breadcrumb">
         {% if childrenClass == "Enterprise" %}
             <li class = "active">..</li>
-            {% set tableHeader = "Name" %}
             {% set pageHeaderSubText = "Enterprises" %}
         {% elif childrenClass == "Site" %}
             <li><a href = "{{ url_for("eventFrames.selectEventFrame", selectedClass = "Root") }}">..</a></li>
             <li class = "active">{{ parent.Name }}</li>
-            {% set tableHeader = "Name" %}
             {% set pageHeaderSubText = "Sites" %}
         <!-- "and parent" checks for systems that have not been configured with a site yet. -->
         {% elif childrenClass == "ElementTemplate" and parent %}
@@ -24,7 +22,6 @@ Event Frames
             <li><a href = "{{ url_for("eventFrames.selectEventFrame", selectedClass = "Enterprise",
                 selectedId = parent.Enterprise.id()) }}">{{ parent.Enterprise.Name }}</a></li>
             <li class = "active">{{ parent.Name }}</li>
-            {% set tableHeader = "Name" %}
             {% set pageHeaderSubText = "Element Templates" %}
         {% elif childrenClass == "EventFrameTemplate" %}
             <li><a href = "{{ url_for("eventFrames.selectEventFrame", selectedClass = "Root") }}">..</a></li>
@@ -33,7 +30,6 @@ Event Frames
             <li><a href = "{{ url_for("eventFrames.selectEventFrame", selectedClass = "Site",
                 selectedId = parent.Site.id()) }}">{{ parent.Site.Name }}</a></li>
             <li class = "active">{{ parent.Name }}</li>
-            {% set tableHeader = "Name" %}
             {% set pageHeaderSubText = "Event Frame Templates" %}
         {% elif childrenClass == "EventFrame" %}
             <li><a href = "{{ url_for("eventFrames.selectEventFrame", selectedClass = "Root") }}">..</a></li>
@@ -44,7 +40,6 @@ Event Frames
             <li><a href = "{{ url_for("eventFrames.selectEventFrame", selectedClass = "ElementTemplate",
                 selectedId = parent.ElementTemplate.id()) }}">{{ parent.ElementTemplate.Name }}</a></li>
             <li class = "active">{{ parent.Name }}</li>
-            {% set tableHeader = "Event Frame" %}
             {% set pageHeaderSubText = "" %}
         {% elif childrenClass == "DescendantEventFrameTemplate" %}
             {% set origin = parent.origin() %}
@@ -60,8 +55,7 @@ Event Frames
                     selectedOperation = "configure") }}">{{ ancestor.Name }}</a></li>
             {% endfor %}
             <li class = "active">{{ parent.Name }}</li>
-                {% set tableHeader = "Name" %}
-                {% set pageHeaderSubText = "Child Event Frame Templates" %}
+            {% set pageHeaderSubText = "Child Event Frame Templates" %}
         {% endif %}
     </ol>
 </div>
@@ -84,7 +78,7 @@ Event Frames
         <thead>
             <tr>
                 <th></th>
-                <th>{{ tableHeader }}</th>
+                <th>Name</th>
                 {% if childrenClass == "Enterprise" or childrenClass == "Site" or childrenClass == "ElementTemplate" %}
                     <th>Description</th>
                 {% elif childrenClass == "EventFrameTemplate" %}
