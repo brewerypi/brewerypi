@@ -91,7 +91,16 @@ def copyElement(elementId):
 	del form.elementTemplateId
 	form.elementIdToCopy.data = elementId
 	form.requestReferrer.data = request.referrer
-	return render_template("addEdit.html", form = form, modelName = modelName, operation = operation)
+	element = Element.query.get_or_404(elementId)
+	breadcrumbs = [{"url" : url_for("elements.selectElement", selectedClass = "Root"), "text" : ".."},
+		{"url" : url_for("elements.selectElement", selectedClass = "Enterprise", selectedId = element.ElementTemplate.Site.Enterprise.EnterpriseId),
+			"text" : element.ElementTemplate.Site.Enterprise.Name},
+		{"url" : url_for("elements.selectElement", selectedClass = "Site", selectedId = element.ElementTemplate.Site.SiteId),
+			"text" : element.ElementTemplate.Site.Name},
+		{"url" : url_for("elements.selectElement", selectedClass = "ElementTemplate", selectedId = element.ElementTemplate.ElementTemplateId),
+			"text" : element.ElementTemplate.Name},
+		{"url" : None, "text" : element.Name}]
+	return render_template("addEdit.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
 
 @elements.route("/elements/dashboard/<int:elementId>", methods = ["GET", "POST"])
 @login_required
