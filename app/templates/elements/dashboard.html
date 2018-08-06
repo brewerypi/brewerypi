@@ -65,7 +65,7 @@
                     <td>
                         <div class = "form-group" id = "divNewValue{{ elementAttribute.Tag.TagId }}">
                         {% if elementAttribute.Tag.LookupId %}
-                            <select class = "form-control" id = "selectNewValue{{ elementAttribute.Tag.TagId }}">
+                            <select class = "form-control" id = "inputOrSelectNewValue{{ elementAttribute.Tag.TagId }}">
                                 <option value = "-1"></option>
                                 {% for lookupValue in elementAttribute.Tag.Lookup.LookupValues %}
                                     {% if lookupValue.Selectable %}
@@ -75,7 +75,7 @@
                             </select>
                             <p class = "help-block" id = "pNewValue{{ elementAttribute.Tag.TagId }}"></p>
                         {% else %}
-                            <input class = "form-control" id = "inputNewValue{{ elementAttribute.Tag.TagId }}" value = "">
+                            <input class = "form-control" id = "inputOrSelectNewValue{{ elementAttribute.Tag.TagId }}" value = "">
                             <p class = "help-block" id = "pNewValue{{ elementAttribute.Tag.TagId }}"></p>
                         {% endif %}
                         </div>
@@ -127,23 +127,12 @@
                 var tabIndex = 1
                 $("[id^=divNewValue]").each(function() {
                     var id = $(this).attr("id").split("divNewValue")[1]
+                    $("#inputOrSelectNewValue" + id).attr("tabindex", tabIndex)
+                    if (tabIndex == 1)
+                    {
+                        $("#inputOrSelectNewValue" + id).focus()
+                    }
 
-                    if ($("#inputNewValue" + id).length)
-                    {
-                        $("#inputNewValue" + id).attr("tabindex", tabIndex)
-                        if (tabIndex == 1)
-                        {
-                            $("#inputNewValue" + id).focus()
-                        }
-                    }
-                    else
-                    {
-                        $("#selectNewValue" + id).attr("tabindex", tabIndex)
-                        if (tabIndex == 1)
-                        {
-                            $("#selectNewValue" + id).focus()
-                        }
-                    }
                     tabIndex = tabIndex + 1
                 })
                 $("#buttonAttributesSaveAll").attr("tabindex", tabIndex)
@@ -181,26 +170,11 @@
                     "pageLength": 25
                 })
 
-            // Update the timestamp for input new values appropriately.
-            $("[id^=inputNewValue]").blur(function() {
+            // Update the timestamp for input or select new values appropriately.
+            $("[id^=inputOrSelectNewValue]").blur(function() {
                 var value = $.trim($(this).val())
-                var id = $(this).attr("id").split("inputNewValue")[1]
-                if (value == "")
-                {
-                    $("#inputNewTimestamp" + id).val("")
-                }
-                else
-                {
-                    var timestamp = new moment().local().format("YYYY-MM-DD HH:mm:ss")
-                    $("#inputNewTimestamp" + id).val(timestamp)
-                }
-            })
-
-            // Update the timestamp for select new values appropriately.
-            $("[id^=selectNewValue]").change(function() {
-                var value = $.trim($(this).val())
-                var id = $(this).attr("id").split("selectNewValue")[1]
-                if (value == "-1")
+                var id = $(this).attr("id").split("inputOrSelectNewValue")[1]
+                if ($(this).is("input") && value == "" || $(this).is("select") && value == "-1")
                 {
                     $("#inputNewTimestamp" + id).val("")
                 }
@@ -216,7 +190,6 @@
                 if (event.which == 13)
                 {
                     $("#buttonAttributesSaveAll").focus()
-                    $("#buttonAttributesSaveAll").click()
                 }
             })
 
@@ -224,72 +197,25 @@
                 var error = false
                 var rows = []
 
-                // Loop through the input values and check for validation errors.
-                attributesTable.$("[id^=inputNewValue]").each(function() {
-                    var id = $(this).attr("id").split("inputNewValue")[1]
+                // Loop through the new input or select values and check for validation errors.
+                attributesTable.$("[id^=inputOrSelectNewValue]").each(function() {
+                    var id = $(this).attr("id").split("inputOrSelectNewValue")[1]
                     var value = $.trim($(this).val())
-                    var valueIsBlank = value == ""
+                    var valueIsBlank = true
                     var valueIsValid = $.isNumeric(value)
                     var timestamp = $.trim($("#inputNewTimestamp" + id).val())
                     var timestampIsBlank = timestamp == ""
                     var timestampIsValid = moment(timestamp, "YYYY-M-D H:m:s", true).isValid()
                     
-                    if (valueIsBlank && timestampIsBlank)
+                    if ($(this).is("input"))
                     {
-                        $("#divNewValue" + id).removeClass("has-error")
-                        var helpBlock = $("#pNewValue" + id).html("")
-                        $("#divNewTimestamp" + id).removeClass("has-error")
-                        var helpBlock = $("#pNewTimestamp" + id).html("")
+                        valueIsBlank = value == ""
                     }
-                    else if ((valueIsBlank && timestampIsValid) || (!valueIsValid && timestampIsValid))
+                    else if ($(this).is("select"))
                     {
-                        error = true
-                        $("#divNewValue" + id).addClass("has-error")
-                        var helpBlock = $("#pNewValue" + id).html("Not a valid float value")
-                        $("#divNewTimestamp" + id).removeClass("has-error")
-                        var helpBlock = $("#pNewTimestamp" + id).html("")
+                        valueIsBlank = value == "-1"
                     }
-                    else if ((valueIsBlank && !timestampIsValid) || (!valueIsValid && (timestampIsBlank || !timestampIsValid)))
-                    {
-                        error = true
-                        $("#divNewValue" + id).addClass("has-error")
-                        var helpBlock = $("#pNewValue" + id).html("Not a valid float value")
-                        $("#divNewTimestamp" + id).addClass("has-error")
-                        var helpBlock = $("#pNewTimestamp" + id).html("This field is required.")
-                    }
-                    else if (valueIsValid && (timestampIsBlank || !timestampIsValid))
-                    {
-                        error = true
-                        $("#divNewValue" + id).removeClass("has-error")
-                        var helpBlock = $("#pNewValue" + id).html("")
-                        $("#divNewTimestamp" + id).addClass("has-error")
-                        var helpBlock = $("#pNewTimestamp" + id).html("This field is required.")
-                    }
-                    else
-                    {
-                        $("#divNewValue" + id).removeClass("has-error")
-                        var helpBlock = $("#pNewValue" + id).html("")
-                        $("#divNewTimestamp" + id).removeClass("has-error")
-                        var helpBlock = $("#pNewTimestamp" + id).html("")
-                        var row = {}
-                        row["tagId"] = id
-                        row["type"] = "input"
-                        row["value"] = value
-                        row["timestamp"] = timestamp
-                        rows.push(row)
-                    }
-                })
 
-                // Loop through the select values and check for validation errors.
-                attributesTable.$("[id^=selectNewValue]").each(function() {
-                    var id = $(this).attr("id").split("selectNewValue")[1]
-                    var value = $.trim($(this).val())
-                    var valueIsBlank = value == "-1"
-                    var valueIsValid = $.isNumeric(value)
-                    var timestamp = $.trim($("#inputNewTimestamp" + id).val())
-                    var timestampIsBlank = timestamp == ""
-                    var timestampIsValid = moment(timestamp, "YYYY-M-D H:m:s", true).isValid()
-                    
                     if (valueIsBlank && timestampIsBlank)
                     {
                         $("#divNewValue" + id).removeClass("has-error")
@@ -329,7 +255,6 @@
                         var helpBlock = $("#pNewTimestamp" + id).html("")
                         var row = {}
                         row["tagId"] = id
-                        row["type"] = "select"
                         row["value"] = value
                         row["timestamp"] = timestamp
                         rows.push(row)

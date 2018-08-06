@@ -26,6 +26,27 @@ def listTagValues(tagId, elementAttributeId = None):
 		tagValues = TagValue.query.filter_by(TagId = tagId)
 	return render_template("tagValues/tagValues.html", elementAttribute = elementAttribute, tag = tag, tagValues = tagValues)
 
+@tagValues.route("/tagValues/addMultiple", methods = ["GET", "POST"])
+@login_required
+@permissionRequired(Permission.DATA_ENTRY)
+def addMultiple():
+	# Get the data, loop through it and add new value.
+	data = request.get_json(force = True)
+	count = 0
+	for item in data:
+		tagValue = TagValue(TagId = item["tagId"], Timestamp = item["timestamp"], Value = item["value"])
+		db.session.add(tagValue)
+		count = count + 1
+
+	if count > 0:
+		db.session.commit()
+		message = "You have successfully added one or more new tag values."
+		flash(message, "alert alert-success")
+	else:
+		message = "Nothing added to save."
+		flash(message, "alert alert-warning")
+	return jsonify({"response": message})
+
 @tagValues.route("/tagValues/add/<int:tagId>", methods = ["GET", "POST"])
 @tagValues.route("/tagValues/add/<int:tagId>/<int:elementAttributeId>", methods = ["GET", "POST"])
 @login_required
@@ -80,27 +101,6 @@ def addTagValue(tagId, elementAttributeId = None):
 			{"url" : url_for("tagValues.listTagValues", tagId = tag.TagId), "text" : tag.Name}]
 
 	return render_template("addEdit.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
-
-@tagValues.route("/tagValues/addMultiple", methods = ["GET", "POST"])
-@login_required
-@permissionRequired(Permission.DATA_ENTRY)
-def addMultiple():
-	# Get the data, loop through it and add new value.
-	data = request.get_json(force = True)
-	count = 0
-	for item in data:
-		tagValue = TagValue(TagId = item["tagId"], Timestamp = item["timestamp"], Value = item["value"])
-		db.session.add(tagValue)
-		count = count + 1
-
-	if count > 0:
-		db.session.commit()
-		message = "You have successfully added one or more new tag values."
-		flash(message, "alert alert-success")
-	else:
-		message = "Nothing added to save."
-		flash(message, "alert alert-warning")
-	return jsonify({"response": message})
 
 @tagValues.route("/tagValues/delete/<int:tagValueId>", methods = ["GET", "POST"])
 @login_required
