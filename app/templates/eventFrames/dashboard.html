@@ -112,7 +112,7 @@ Event Frame Dashboard
         <tbody>
             {% for eventFrameAttribute in eventFrameAttributes %}
                 <tr id = "trEventFrame", startTimestamp = "{{ eventFrame.StartTimestamp }}", endTimestamp = "{{ eventFrame.EndTimestamp }}">
-                    <td><a class = "btn btn-default" title = "Select" href = "{{ url_for("tagValues.listTagValues", tagId = eventFrameAttribute.Tag.TagId,
+                    <td><a class = "btn btn-default" title = "Select" href = "{{ url_for("tagValues.listTagValues", eventFrameId = eventFrame.EventFrameId,
                         eventFrameAttributeId = eventFrameAttribute.EventFrameAttributeId) }}"><span class = "glyphicon glyphicon-list"></span></a></td>
                     <td>{{ eventFrameAttribute.EventFrameAttributeTemplate.Name }}</td>
                     {% if tagValues.filter_by(TagId = eventFrameAttribute.TagId).count() > 0 %}

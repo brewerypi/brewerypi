@@ -19,6 +19,19 @@ Tag Values
             <li><a href = "{{ url_for("elements.dashboard", elementId = elementAttribute.Element.ElementId) }}">
                 {{ elementAttribute.Element.Name }}</a></li>
             <li class = "active">{{ elementAttribute.ElementAttributeTemplate.Name }}</li>
+        {% elif eventFrame %}
+            <li><a href = "{{ url_for("eventFrames.selectEventFrame", selectedClass = "Root") }}">..</a></li>
+            <li><a href = "{{ url_for("eventFrames.selectEventFrame", selectedClass = "Enterprise",
+                selectedId = eventFrame.Element.ElementTemplate.Site.Enterprise.EnterpriseId) }}">
+                {{ eventFrame.Element.ElementTemplate.Site.Enterprise.Name }}</a></li>
+            <li><a href = "{{ url_for("eventFrames.selectEventFrame", selectedClass = "Site", selectedId = eventFrame.Element.ElementTemplate.Site.SiteId) }}">
+                {{ eventFrame.Element.ElementTemplate.Site.Name }}</a></li>
+            <li><a href = "{{ url_for("eventFrames.selectEventFrame", selectedClass = "ElementTemplate",
+                selectedId = eventFrame.Element.ElementTemplate.ElementTemplateId) }}">{{ eventFrame.Element.ElementTemplate.Name }}</a></li>
+            <li><a href = "{{ url_for("eventFrames.selectEventFrame", selectedClass = "EventFrameTemplate",
+                selectedId = eventFrame.EventFrameTemplate.EventFrameTemplateId) }}">{{ eventFrame.EventFrameTemplate.Name }}</a></li>
+            <li><a href = "{{ url_for("eventFrames.dashboard", eventFrameId = eventFrame.EventFrameId) }}">{{ eventFrame.friendlyName(True) }}</a></li>
+            <li class = "active">{{ eventFrameAttribute.EventFrameAttributeTemplate.Name }}</li>
         {% else %}
             <li><a href = "{{ url_for("tags.selectTag", selectedClass = "Root") }}">..</a></li>
             <li><a href = "{{ url_for("tags.selectTag", selectedClass = "Enterprise", selectedId = tag.Area.Site.Enterprise.EnterpriseId) }}">
@@ -36,6 +49,9 @@ Tag Values
     {% if elementAttribute %}
         <a class = "btn btn-default" title = "Add" href = "{{ url_for("tagValues.addTagValue", tagId = tag.TagId,
             elementAttributeId = elementAttribute.ElementAttributeId) }}" role = "button"><span class = "glyphicon glyphicon-plus"></span></a>
+    {% elif eventFrame %}
+        <a class = "btn btn-default" title = "Add" href = "{{ url_for("tagValues.addTagValue", eventFrameId = eventFrame.EventFrameId,
+            eventFrameAttributeId = eventFrameAttribute.EventFrameAttributeId) }}" role = "button"><span class = "glyphicon glyphicon-plus"></span></a>
     {% else %}
         <a class = "btn btn-default" title = "Add" href = "{{ url_for("tagValues.addTagValue", tagId = tag.TagId) }}" role = "button">
             <span class = "glyphicon glyphicon-plus"></span></a>
