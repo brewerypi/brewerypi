@@ -5,7 +5,8 @@ from . import eventFrames
 from . forms import EventFrameForm
 from .. import db
 from .. decorators import permissionRequired
-from .. models import Element, ElementTemplate, Enterprise, EventFrame, EventFrameAttribute, EventFrameAttributeTemplate, EventFrameTemplate, Permission, Site
+from .. models import Element, ElementTemplate, Enterprise, EventFrame, EventFrameAttribute, EventFrameAttributeTemplate, EventFrameTemplate, Permission, \
+	Site, Tag, TagValue
 
 modelName = "Event Frame"
 
@@ -90,8 +91,19 @@ def addEventFrame(eventFrameTemplateId = None, parentEventFrameId = None):
 @permissionRequired(Permission.DATA_ENTRY)
 def dashboard(eventFrameId):
 	eventFrame = EventFrame.query.get_or_404(eventFrameId)
-	eventFrameAttributes = EventFrameAttribute.query.filter_by(ElementId = eventFrame.ElementId)
-	return render_template("eventFrames/dashboard.html", eventFrame = eventFrame, eventFrameAttributes = eventFrameAttributes)
+	eventFrameAttributes = EventFrameAttribute.query.join(Element, EventFrameAttributeTemplate, EventFrameTemplate, EventFrame). \
+		filter(Element.ElementId == eventFrame.ElementId, EventFrame.EventFrameId == eventFrameId)
+	eventFrameAttributeIds = []
+	for eventFrameAttribute in eventFrameAttributes:
+		eventFrameAttributeIds.append(eventFrameAttribute.EventFrameAttributeId)
+
+	if eventFrame.EndTimestamp:
+		tagValues = TagValue.query.join(Tag, EventFrameAttribute).filter(EventFrameAttribute.EventFrameAttributeId.in_(eventFrameAttributeIds),
+			TagValue.Timestamp >= eventFrame.StartTimestamp, TagValue.Timestamp <= eventFrame.EndTimestamp)
+	else:
+		tagValues = TagValue.query.join(Tag, EventFrameAttribute).filter(EventFrameAttribute.EventFrameAttributeId.in_(eventFrameAttributeIds),
+			TagValue.Timestamp >= eventFrame.StartTimestamp)
+	return render_template("eventFrames/dashboard.html", eventFrame = eventFrame, eventFrameAttributes = eventFrameAttributes, tagValues = tagValues)
 
 @eventFrames.route("/eventFrames/delete/<int:eventFrameId>", methods = ["GET", "POST"])
 @login_required

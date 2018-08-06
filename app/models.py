@@ -168,11 +168,20 @@ class EventFrame(db.Model):
 			ancestors.insert(0, self.ParentEventFrame)
 			return self.ParentEventFrame.ancestors(ancestors)
 
-	def friendlyName(self):
+	def friendlyName(self, seconds = False):
 		if self.Name:
 			return self.Name
 		else:
-			return self.StartTimestamp.strftime("%m/%d/%y %H:%M") + " - "			
+			if self.EndTimestamp:
+				if seconds:
+					return "{} - {}".format(self.StartTimestamp.strftime("%Y-%m-%d %H:%M:%S"), self.EndTimestamp.strftime("%Y-%m-%d %H:%M"))
+				else:
+					return "{} - {}".format(self.StartTimestamp.strftime("%Y-%m-%d %H:%M"), self.EndTimestamp.strftime("%Y-%m-%d %H:%M"))
+			else:
+				if seconds:
+					return "{} -".format(self.StartTimestamp.strftime("%Y-%m-%d %H:%M:%S"))
+				else:
+					return "{} -".format(self.StartTimestamp.strftime("%Y-%m-%d %H:%M"))
 
 	def hasDescendants(self):
 		if self.EventFrames:

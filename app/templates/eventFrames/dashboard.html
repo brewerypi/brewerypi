@@ -27,7 +27,7 @@ Event Frame Dashboard
             {% for eventFrame in eventFrames %}
                 {% if loop.last %}
                     {% if eventFrame.ParentEventFrameId == None %}
-                        <li class = "active">{{ eventFrame.friendlyName() }}</li>
+                        <li class = "active">{{ eventFrame.friendlyName(True) }}</li>
                     {% else %}
                         <li class = "active">{{ eventFrame.EventFrameTemplate.Name }}&nbsp;&nbsp;/&nbsp;&nbsp;{{ eventFrame.friendlyName() }}</li>
                     {% endif %}
@@ -111,24 +111,13 @@ Event Frame Dashboard
         </thead>
         <tbody>
             {% for eventFrameAttribute in eventFrameAttributes %}
-                <tr id = "{{ eventFrame.StartTimestamp }}">
+                <tr id = "trEventFrame{{ eventFrame.StartTimestamp }}", startTimestamp = "{{ eventFrame.StartTimestamp }}", 
+                    endTimestamp = "{{ eventFrame.EndTimestamp }}">
                     <td><a class = "btn btn-default" title = "Select" href = "{{ url_for("tagValues.listTagValues", tagId = eventFrameAttribute.Tag.TagId,
                         eventFrameAttributeId = eventFrameAttribute.EventFrameAttributeId) }}"><span class = "glyphicon glyphicon-list"></span></a></td>
                     <td>{{ eventFrameAttribute.EventFrameAttributeTemplate.Name }}</td>
-                    {% set firstTagValueInEventFrame = false %}
-                    {% if eventFrameAttribute.Tag.TagValues[0] %}
-                        {% set firstTagValue = eventFrameAttribute.Tag.TagValues | sort(attribute = "Timestamp", reverse = True) | first %}
-                        {% if eventFrame.EndTimestamp %}
-                            {% if firstTagValue.Timestamp >= eventFrame.StartTimestamp and firstTagValue.Timestamp <= eventFrame.EndTimestamp %}
-                                {% set firstTagValueInEventFrame = true %}
-                            {% endif %}
-                        {% else %}
-                            {% if firstTagValue.Timestamp >= eventFrame.StartTimestamp %}
-                                {% set firstTagValueInEventFrame = true %}
-                            {% endif %}
-                        {% endif %}
-                    {% endif %}
-                    {% if firstTagValueInEventFrame %}
+                    {% if tagValues.filter_by(TagId = eventFrameAttribute.TagId).count() > 0 %}
+                        {% set firstTagValue = tagValues.filter_by(TagId = eventFrameAttribute.TagId ) | sort(attribute = "Timestamp", reverse = True) | first %}
                         <td id = "tdLastTimestamp{{ eventFrameAttribute.Tag.TagId }}">{{ firstTagValue.Timestamp }}</td>
                         {% if eventFrameAttribute.Tag.LookupId %}
                             <td id = "tdLastValue{{ eventFrameAttribute.Tag.TagId }}">{{ eventFrameAttribute.Tag.Lookup.LookupValues | 
@@ -168,7 +157,7 @@ Event Frame Dashboard
                         </div>
                     </td>
                     <td></td>
-                    {% if eventFrameAttribute.Tag.TagValues[0] %}
+                    {% if tagValues.filter_by(TagId = eventFrameAttribute.TagId).count() > 0 %}
                         {% if eventFrameAttribute.Tag.TagValues[0].TagValueNotes[0] %}
                             {% set noteButtonClass = "btn btn-default has-note" %}
                         {% else %}
@@ -349,7 +338,10 @@ Event Frame Dashboard
             $(document).keypress(function(event) {
                 if (event.which == 13)
                 {
-                    $("#buttonAttributesSaveAll").focus()
+                    if (!$("#buttonAttributesSaveAll").is(":focus"))
+                    {
+                        $("#buttonAttributesSaveAll").focus()
+                    }
                     $("#buttonAttributesSaveAll").click()
                 }
             })
@@ -357,6 +349,9 @@ Event Frame Dashboard
             $("#buttonAttributesSaveAll").click(function() {
                 var error = false
                 var rows = []
+
+                var eventFrameStartTimestamp = $("[id^=trEventFrame]").attr("startTimestamp")
+                var eventFrameEndTimestamp = $("[id^=trEventFrame]").attr("endTimestamp")
 
                 // Loop through the input values and check for validation errors.
                 attributesTable.$("[id^=inputNewValue]").each(function() {
@@ -367,7 +362,16 @@ Event Frame Dashboard
                     var timestamp = $.trim($("#inputNewTimestamp" + id).val())
                     var timestampIsBlank = timestamp == ""
                     var timestampIsValid = moment(timestamp, "YYYY-M-D H:m:s", true).isValid()
-                    
+                    var timestampIsInEventFrame
+                    if (eventFrameEndTimestamp == "None")
+                    {
+                        timestampIsInEventFrame = moment(timestamp).isSameOrAfter(eventFrameStartTimestamp)
+                    }
+                    else
+                    {
+                        timestampIsInEventFrame = moment(timestamp).isBetween(eventFrameStartTimestamp, eventFrameEndTimestamp)
+                    }
+
                     if (valueIsBlank && timestampIsBlank)
                     {
                         $("#divNewValue" + id).removeClass("has-error")
@@ -399,9 +403,16 @@ Event Frame Dashboard
                         $("#divNewTimestamp" + id).addClass("has-error")
                         var helpBlock = $("#pNewTimestamp" + id).html("This field is required.")
                     }
+                    else if (!timestampIsInEventFrame)
+                    {
+                        error = true
+                        $("#divNewValue" + id).removeClass("has-error")
+                        var helpBlock = $("#pNewValue" + id).html("")
+                        $("#divNewTimestamp" + id).addClass("has-error")
+                        var helpBlock = $("#pNewTimestamp" + id).html("This timestamp is outside of the event frame.")
+                    }
                     else
                     {
-                        timestamp.isBetween()
                         $("#divNewValue" + id).removeClass("has-error")
                         var helpBlock = $("#pNewValue" + id).html("")
                         $("#divNewTimestamp" + id).removeClass("has-error")
