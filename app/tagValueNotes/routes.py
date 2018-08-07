@@ -5,28 +5,36 @@ from . import tagValueNotes
 from . forms import TagValueNoteForm
 from .. import db
 from .. decorators import permissionRequired
-from .. models import ElementAttribute, Note, Permission, TagValue, TagValueNote
+from .. models import ElementAttribute, EventFrame, EventFrameAttribute, Note, Permission, TagValue, TagValueNote
 
 modelName = "Tag Value Note"
 
 @tagValueNotes.route("/tagValueNotes/<int:tagValueId>", methods = ["GET", "POST"])
 @tagValueNotes.route("/tagValueNotes/<int:tagValueId>/<int:elementAttributeId>", methods = ["GET", "POST"])
+@tagValueNotes.route("/tagValueNotes/<int:tagValueId>/<int:eventFrameId>/<int:eventFrameAttributeId>", methods = ["GET", "POST"])
 @login_required
 @permissionRequired(Permission.DATA_ENTRY)
-def listTagValueNotes(tagValueId, elementAttributeId = None):
+def listTagValueNotes(tagValueId, elementAttributeId = None, eventFrameId = None, eventFrameAttributeId = None):
+	elementAttribute = None
+	eventFrame = None
+	eventFrameAttribute = None
 	if elementAttributeId:
 		elementAttribute = ElementAttribute.query.get_or_404(elementAttributeId)
-	else:
-		elementAttribute = None
+	elif eventFrameId:
+		eventFrame = EventFrame.query.get_or_404(eventFrameId)
+		eventFrameAttribute = EventFrameAttribute.query.get_or_404(eventFrameAttributeId)
 
 	tagValue = TagValue.query.get_or_404(tagValueId)
 	tagValueNotes = TagValueNote.query.filter_by(TagValueId = tagValueId)
-	return render_template("tagValueNotes/tagValueNotes.html", elementAttribute = elementAttribute, tagValue = tagValue, tagValueNotes = tagValueNotes)
+	return render_template("tagValueNotes/tagValueNotes.html", elementAttribute = elementAttribute, eventFrame = eventFrame,
+		eventFrameAttribute = eventFrameAttribute, tagValue = tagValue, tagValueNotes = tagValueNotes)
 
 @tagValueNotes.route("/tagValueNotes/add/<int:tagValueId>", methods = ["GET", "POST"])
+@tagValueNotes.route("/tagValueNotes/add/<int:tagValueId>/<int:elementAttributeId>", methods = ["GET", "POST"])
+@tagValueNotes.route("/tagValueNotes/add/<int:tagValueId>/<int:eventFrameId>/<int:eventFrameAttributeId>", methods = ["GET", "POST"])
 @login_required
 @permissionRequired(Permission.DATA_ENTRY)
-def addTagValueNote(tagValueId):
+def addTagValueNote(tagValueId, elementAttributeId = None, eventFrameId = None, eventFrameAttributeId = None):
 	operation = "Add"
 	modelName = "Tag Value Note"
 	form = TagValueNoteForm()
@@ -45,13 +53,45 @@ def addTagValueNote(tagValueId):
 	# Present a form to add a new tag value note.
 	form.requestReferrer.data = request.referrer
 	tagValue = TagValue.query.get_or_404(tagValueId)
-	breadcrumbs = [{"url" : url_for("tags.selectTag", selectedClass = "Root"), "text" : ".."},
-		{"url" : url_for("tags.selectTag", selectedClass = "Enterprise", 
-			selectedId = tagValue.Tag.Area.Site.Enterprise.EnterpriseId), "text" : tagValue.Tag.Area.Site.Enterprise.Name},
-		{"url" : url_for("tags.selectTag", selectedClass = "Site", selectedId = tagValue.Tag.Area.Site.SiteId), "text" : tagValue.Tag.Area.Site.Name},
-		{"url" : url_for("tags.selectTag", selectedClass = "Area", selectedId = tagValue.Tag.Area.AreaId), "text" : tagValue.Tag.Area.Name},
-		{"url" : url_for("tagValues.listTagValues", tagId = tagValue.Tag.TagId), "text" : tagValue.Tag.Name},
-		{"url" : url_for("tagValueNotes.listTagValueNotes", tagValueId = tagValue.TagValueId), "text" : tagValue.Timestamp}]
+	if elementAttributeId:
+		elementAttribute = ElementAttribute.query.get_or_404(elementAttributeId)
+		breadcrumbs = [{"url" : url_for("tags.selectTag", selectedClass = "Root"), "text" : ".."},
+			{"url" : url_for("elements.selectElement", selectedClass = "Enterprise",
+				selectedId = elementAttribute.Element.ElementTemplate.Site.Enterprise.EnterpriseId),
+				"text" : elementAttribute.Element.ElementTemplate.Site.Enterprise.Name},
+			{"url" : url_for("elements.selectElement", selectedClass = "Site",
+				selectedId = elementAttribute.Element.ElementTemplate.Site.SiteId), "text" : elementAttribute.Element.ElementTemplate.Site.Name},
+			{"url" : url_for("elements.selectElement", selectedClass = "ElementTemplate",
+				selectedId = elementAttribute.Element.ElementTemplate.ElementTemplateId), "text" : elementAttribute.Element.ElementTemplate.Name},
+			{"url" : url_for("elements.dashboard", elementId = elementAttribute.Element.ElementId), "text" : elementAttribute.Element.Name},
+			{"url" : url_for("tagValueNotes.listTagValueNotes", tagValueId = tagValue.TagValueId, elementAttributeId = elementAttribute.ElementAttributeId),
+				"text" : "{}&nbsp;&nbsp;/&nbsp;&nbsp;{}".format(elementAttribute.ElementAttributeTemplate.Name, tagValue.Timestamp)}]
+	elif eventFrameId:
+		eventFrame = EventFrame.query.get_or_404(eventFrameId)
+		eventFrameAttribute = EventFrameAttribute.query.get_or_404(eventFrameAttributeId)
+		breadcrumbs = [{"url" : url_for("tags.selectTag", selectedClass = "Root"), "text" : ".."},
+			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Enterprise",
+				selectedId = eventFrame.Element.ElementTemplate.Site.Enterprise.EnterpriseId),
+				"text" : eventFrame.Element.ElementTemplate.Site.Enterprise.Name},
+			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Site", selectedId = eventFrame.Element.ElementTemplate.Site.SiteId),
+				"text" : eventFrame.Element.ElementTemplate.Site.Name},
+			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "ElementTemplate",
+				selectedId = eventFrame.Element.ElementTemplate.ElementTemplateId), "text" : eventFrame.Element.ElementTemplate.Name},
+			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "EventFrameTemplate",
+				selectedId = eventFrame.EventFrameTemplate.EventFrameTemplateId), "text" : eventFrame.EventFrameTemplate.Name},
+			{"url" : url_for("eventFrames.dashboard", eventFrameId = eventFrame.EventFrameId), "text" : eventFrame.friendlyName(True)},
+			{"url" : url_for("tagValueNotes.listTagValueNotes", tagValueId = tagValue.TagValueId, eventFrameId = eventFrame.EventFrameId,
+				eventFrameAttributeId = eventFrameAttributeId),
+				"text" : "{}&nbsp;&nbsp;/&nbsp;&nbsp;{}".format(eventFrameAttribute.EventFrameAttributeTemplate.Name, tagValue.Timestamp)}]
+	else:
+		breadcrumbs = [{"url" : url_for("tags.selectTag", selectedClass = "Root"), "text" : ".."},
+			{"url" : url_for("tags.selectTag", selectedClass = "Enterprise", 
+				selectedId = tagValue.Tag.Area.Site.Enterprise.EnterpriseId), "text" : tagValue.Tag.Area.Site.Enterprise.Name},
+			{"url" : url_for("tags.selectTag", selectedClass = "Site", selectedId = tagValue.Tag.Area.Site.SiteId), "text" : tagValue.Tag.Area.Site.Name},
+			{"url" : url_for("tags.selectTag", selectedClass = "Area", selectedId = tagValue.Tag.Area.AreaId), "text" : tagValue.Tag.Area.Name},
+			{"url" : url_for("tagValues.listTagValues", tagId = tagValue.Tag.TagId), "text" : tagValue.Tag.Name},
+			{"url" : url_for("tagValueNotes.listTagValueNotes", tagValueId = tagValue.TagValueId), "text" : tagValue.Timestamp}]
+
 	return render_template("addEdit.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
 
 @tagValueNotes.route("/tagValueNotes/delete/<int:noteId>/<int:tagValueId>", methods = ["GET", "POST"])

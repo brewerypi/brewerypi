@@ -82,8 +82,6 @@ def addTagValue(tagId = None, elementAttributeId = None, eventFrameId = None, ev
 	if elementAttributeId:
 		tag = Tag.query.get_or_404(elementAttribute.TagId)
 	elif eventFrameId:
-		eventFrame = EventFrame.query.get_or_404(eventFrameId)
-		eventFrameAttribute = EventFrameAttribute.query.get_or_404(eventFrameAttributeId)
 		tag = Tag.query.get_or_404(eventFrameAttribute.TagId)
 	else:
 		tag = Tag.query.get_or_404(tagId)
@@ -127,6 +125,7 @@ def addTagValue(tagId = None, elementAttributeId = None, eventFrameId = None, ev
 			{"url" : url_for("tagValues.listTagValues", tagId = tag.TagId, elementAttributeId = elementAttribute.ElementAttributeId),
 				"text" : elementAttribute.ElementAttributeTemplate.Name}]
 	elif eventFrameId:
+		eventFrame = EventFrame.query.get_or_404(eventFrameId)
 		eventFrameAttribute = EventFrameAttribute.query.get_or_404(eventFrameAttributeId)
 		breadcrumbs = [{"url" : url_for("tags.selectTag", selectedClass = "Root"), "text" : ".."},
 			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Enterprise",
@@ -163,9 +162,10 @@ def deleteTagValue(tagValueId):
 
 @tagValues.route("/tagValues/edit/<int:tagValueId>", methods = ["GET", "POST"])
 @tagValues.route("/tagValues/edit/<int:tagValueId>/<int:elementAttributeId>", methods = ["GET", "POST"])
+@tagValues.route("/tagValues/edit/<int:tagValueId>/<int:eventFrameId>/<int:eventFrameAttributeId>", methods = ["GET", "POST"])
 @login_required
 @permissionRequired(Permission.DATA_ENTRY)
-def editTagValue(tagValueId, elementAttributeId = None):
+def editTagValue(tagValueId, elementAttributeId = None, eventFrameId = None, eventFrameAttributeId = None):
 	operation = "Edit"
 	tagValue = TagValue.query.get_or_404(tagValueId)
 	tag = Tag.query.get_or_404(tagValue.TagId)
@@ -215,6 +215,22 @@ def editTagValue(tagValueId, elementAttributeId = None):
 				selectedId = elementAttribute.Element.ElementTemplate.ElementTemplateId), "text" : elementAttribute.Element.ElementTemplate.Name},
 			{"url" : url_for("elements.dashboard", elementId = elementAttribute.Element.ElementId), "text" : elementAttribute.Element.Name},
 			{"url" : None, "text" : elementAttribute.ElementAttributeTemplate.Name},
+			{"url" : None, "text" : tagValue.Timestamp}]
+	elif eventFrameId:
+		eventFrame = EventFrame.query.get_or_404(eventFrameId)
+		eventFrameAttribute = EventFrameAttribute.query.get_or_404(eventFrameAttributeId)
+		breadcrumbs = [{"url" : url_for("tags.selectTag", selectedClass = "Root"), "text" : ".."},
+			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Enterprise",
+				selectedId = eventFrame.Element.ElementTemplate.Site.Enterprise.EnterpriseId),
+				"text" : eventFrame.Element.ElementTemplate.Site.Enterprise.Name},
+			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Site", selectedId = eventFrame.Element.ElementTemplate.Site.SiteId),
+				"text" : eventFrame.Element.ElementTemplate.Site.Name},
+			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "ElementTemplate",
+				selectedId = eventFrame.Element.ElementTemplate.ElementTemplateId), "text" : eventFrame.Element.ElementTemplate.Name},
+			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "EventFrameTemplate",
+				selectedId = eventFrame.EventFrameTemplate.EventFrameTemplateId), "text" : eventFrame.EventFrameTemplate.Name},
+			{"url" : url_for("eventFrames.dashboard", eventFrameId = eventFrame.EventFrameId), "text" : eventFrame.friendlyName(True)},
+			{"url" : None, "text" : eventFrameAttribute.EventFrameAttributeTemplate.Name},
 			{"url" : None, "text" : tagValue.Timestamp}]
 	else:
 		breadcrumbs = [{"url" : url_for("tags.selectTag", selectedClass = "Root"), "text" : ".."},

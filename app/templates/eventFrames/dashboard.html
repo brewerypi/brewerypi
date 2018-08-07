@@ -163,10 +163,11 @@ Event Frame Dashboard
                             {% set noteButtonClass = "btn btn-default" %}
                         {% endif %}
                         <td><a class = "{{ noteButtonClass }}" title = "Last Value Notes" href = "{{ url_for("tagValueNotes.listTagValueNotes", 
-                                tagValueId = firstTagValue.TagValueId, eventFrameAttributeId = eventFrameAttribute.EventFrameAttributeId) }}">
-                                <span class = "glyphicon glyphicon-comment"></span></a></td>
+                                tagValueId = firstTagValue.TagValueId, eventFrameId = eventFrame.EventFrameId,
+                                eventFrameAttributeId = eventFrameAttribute.EventFrameAttributeId) }}"><span class = "glyphicon glyphicon-comment"></span></a>
+                                </td>
                         <td><a class = "btn btn-default" title = "Edit Last Value"
-                            href = "{{ url_for("tagValues.editTagValue", tagValueId = firstTagValue.TagValueId,
+                            href = "{{ url_for("tagValues.editTagValue", tagValueId = firstTagValue.TagValueId, eventFrameId = eventFrame.EventFrameId,
                             eventFrameAttributeId = eventFrameAttribute.EventFrameAttributeId) }}"><span class = "glyphicon glyphicon-edit"></span></a></td>
                         <td><a class = "btn btn-default" title = "Delete Last Value"
                             href = "{{ url_for("tagValues.deleteTagValue", tagValueId = firstTagValue.TagValueId) }}">
