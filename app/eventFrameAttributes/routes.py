@@ -11,10 +11,14 @@ from .. models import Area, Element, Enterprise, EventFrame, EventFrameAttribute
 @adminRequired
 def listEventFrameAttributes(eventFrameId):
 	eventFrame = EventFrame.query.get_or_404(eventFrameId)
+	eventFrameTemplate = EventFrameTemplate.query.get_or_404(eventFrame.EventFrameTemplate.EventFrameTemplateId)
+	eventFrameTemplateIds = []
+	for descendantEventFrameTemplate in eventFrameTemplate.descendants([], 0):
+		eventFrameTemplateIds.append(descendantEventFrameTemplate["eventFrameTemplate"].EventFrameTemplateId)
 	eventFrameAttributeTemplates = EventFrameAttributeTemplate.query.join(EventFrameTemplate, EventFrame). \
 		outerjoin(EventFrameAttribute, and_(EventFrame.ElementId == EventFrameAttribute.ElementId, \
 		EventFrameAttributeTemplate.EventFrameAttributeTemplateId == EventFrameAttribute.EventFrameAttributeTemplateId)). \
-		filter(EventFrame.EventFrameId == eventFrameId)
+		filter(EventFrameTemplate.EventFrameTemplateId.in_(eventFrameTemplateIds))
 	tags = Tag.query.join(Area, Site, Enterprise).order_by(Enterprise.Abbreviation, Site.Abbreviation, Area.Abbreviation, Tag.Name)
 	return render_template("eventFrameAttributes/eventFrameAttributes.html", eventFrame = eventFrame,
 		eventFrameAttributeTemplates = eventFrameAttributeTemplates, tags = tags)

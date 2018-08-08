@@ -212,7 +212,7 @@ class EventFrameAttribute(db.Model):
 	TagId = db.Column(db.Integer, db.ForeignKey("Tag.TagId", name = "FK__Tag$Have$EventFrameAttribute"), nullable = False)
 
 	def __repr__(self):
-		return "<EventFrameAttribute: {}>".format(self.Name)
+		return "<EventFrameAttribute: {} - {} - {}>".format(self.Element.Name, self.EventFrameAttributeTemplate.Name, self.Tag.Name)
 
 	def id(self):
 		return self.EventFrameAttributeId
