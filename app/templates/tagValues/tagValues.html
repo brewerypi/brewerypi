@@ -47,10 +47,10 @@ Tag Values
 </div>
 <div>
     {% if elementAttribute %}
-        <a class = "btn btn-default" title = "Add" href = "{{ url_for("tagValues.addTagValue", tagId = tag.TagId,
-            elementAttributeId = elementAttribute.ElementAttributeId) }}" role = "button"><span class = "glyphicon glyphicon-plus"></span></a>
+        <a class = "btn btn-default" title = "Add" href = "{{ url_for("tagValues.addTagValue", elementAttributeId = elementAttribute.ElementAttributeId) }}"
+            role = "button"><span class = "glyphicon glyphicon-plus"></span></a>
     {% elif eventFrame %}
-        <a class = "btn btn-default" title = "Add" href = "{{ url_for("tagValues.addTagValue", tagId = tag.TagId, eventFrameId = eventFrame.EventFrameId,
+        <a class = "btn btn-default" title = "Add" href = "{{ url_for("tagValues.addTagValue", eventFrameId = eventFrame.EventFrameId,
             eventFrameAttributeId = eventFrameAttribute.EventFrameAttributeId) }}" role = "button"><span class = "glyphicon glyphicon-plus"></span></a>
     {% else %}
         <a class = "btn btn-default" title = "Add" href = "{{ url_for("tagValues.addTagValue", tagId = tag.TagId) }}" role = "button">
@@ -83,8 +83,17 @@ Tag Values
                         <td>{{ tagValue.Value }}</td>
                         <td>{{ tagValue.Tag.UnitOfMeasurement.Abbreviation }}</td>
                     {% endif %}
-                    <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("tagValues.editTagValue", tagValueId = tagValue.TagValueId) }}">
-                        <span class = "glyphicon glyphicon-edit"></span></a></td>
+                    {% if elementAttribute %}
+                        <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("tagValues.editTagValue", tagValueId = tagValue.TagValueId,
+                            elementAttributeId = elementAttribute.ElementAttributeId) }}"><span class = "glyphicon glyphicon-edit"></span></a></td>
+                    {% elif eventFrame %}
+                        <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("tagValues.editTagValue", tagValueId = tagValue.TagValueId,
+                            eventFrameId = eventFrame.EventFrameId, eventFrameAttributeId = eventFrameAttribute.EventFrameAttributeId) }}">
+                            <span class = "glyphicon glyphicon-edit"></span></a></td>
+                    {% else %}
+                        <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("tagValues.editTagValue", tagValueId = tagValue.TagValueId) }}">
+                            <span class = "glyphicon glyphicon-edit"></span></a></td>
+                    {% endif %}
                     {% if tagValue.TagValueNotes[0] %}
                         {% set noteButtonClass = "btn btn-default has-note" %}
                     {% else %}

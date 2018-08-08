@@ -80,8 +80,10 @@ def addMultiple():
 def addTagValue(tagId = None, elementAttributeId = None, eventFrameId = None, eventFrameAttributeId = None):
 	operation = "Add"
 	if elementAttributeId:
+		elementAttribute = ElementAttribute.query.get_or_404(elementAttributeId)
 		tag = Tag.query.get_or_404(elementAttribute.TagId)
 	elif eventFrameId:
+		eventFrameAttribute = EventFrameAttribute.query.get_or_404(eventFrameAttributeId)
 		tag = Tag.query.get_or_404(eventFrameAttribute.TagId)
 	else:
 		tag = Tag.query.get_or_404(tagId)
@@ -112,7 +114,6 @@ def addTagValue(tagId = None, elementAttributeId = None, eventFrameId = None, ev
 	form.tagId.data = tag.TagId
 	form.requestReferrer.data = request.referrer
 	if elementAttributeId:
-		elementAttribute = ElementAttribute.query.get_or_404(elementAttributeId)
 		breadcrumbs = [{"url" : url_for("tags.selectTag", selectedClass = "Root"), "text" : ".."},
 			{"url" : url_for("elements.selectElement", selectedClass = "Enterprise",
 				selectedId = elementAttribute.Element.ElementTemplate.Site.Enterprise.EnterpriseId),
@@ -126,7 +127,6 @@ def addTagValue(tagId = None, elementAttributeId = None, eventFrameId = None, ev
 				"text" : elementAttribute.ElementAttributeTemplate.Name}]
 	elif eventFrameId:
 		eventFrame = EventFrame.query.get_or_404(eventFrameId)
-		eventFrameAttribute = EventFrameAttribute.query.get_or_404(eventFrameAttributeId)
 		breadcrumbs = [{"url" : url_for("tags.selectTag", selectedClass = "Root"), "text" : ".."},
 			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Enterprise",
 				selectedId = eventFrame.Element.ElementTemplate.Site.Enterprise.EnterpriseId),
@@ -214,7 +214,8 @@ def editTagValue(tagValueId, elementAttributeId = None, eventFrameId = None, eve
 			{"url" : url_for("elements.selectElement", selectedClass = "ElementTemplate",
 				selectedId = elementAttribute.Element.ElementTemplate.ElementTemplateId), "text" : elementAttribute.Element.ElementTemplate.Name},
 			{"url" : url_for("elements.dashboard", elementId = elementAttribute.Element.ElementId), "text" : elementAttribute.Element.Name},
-			{"url" : None, "text" : elementAttribute.ElementAttributeTemplate.Name},
+			{"url" : url_for("tagValues.listTagValues", elementAttributeId = elementAttribute.ElementAttributeId),
+				"text" : elementAttribute.ElementAttributeTemplate.Name},
 			{"url" : None, "text" : tagValue.Timestamp}]
 	elif eventFrameId:
 		eventFrame = EventFrame.query.get_or_404(eventFrameId)
@@ -230,7 +231,8 @@ def editTagValue(tagValueId, elementAttributeId = None, eventFrameId = None, eve
 			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "EventFrameTemplate",
 				selectedId = eventFrame.EventFrameTemplate.EventFrameTemplateId), "text" : eventFrame.EventFrameTemplate.Name},
 			{"url" : url_for("eventFrames.dashboard", eventFrameId = eventFrame.EventFrameId), "text" : eventFrame.friendlyName(True)},
-			{"url" : None, "text" : eventFrameAttribute.EventFrameAttributeTemplate.Name},
+			{"url" : url_for("tagValues.listTagValues", eventFrameId = eventFrame.EventFrameId,
+				eventFrameAttributeId = eventFrameAttribute.EventFrameAttributeId), "text" : eventFrameAttribute.EventFrameAttributeTemplate.Name},
 			{"url" : None, "text" : tagValue.Timestamp}]
 	else:
 		breadcrumbs = [{"url" : url_for("tags.selectTag", selectedClass = "Root"), "text" : ".."},

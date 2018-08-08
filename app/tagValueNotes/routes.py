@@ -64,8 +64,10 @@ def addTagValueNote(tagValueId, elementAttributeId = None, eventFrameId = None, 
 			{"url" : url_for("elements.selectElement", selectedClass = "ElementTemplate",
 				selectedId = elementAttribute.Element.ElementTemplate.ElementTemplateId), "text" : elementAttribute.Element.ElementTemplate.Name},
 			{"url" : url_for("elements.dashboard", elementId = elementAttribute.Element.ElementId), "text" : elementAttribute.Element.Name},
+			{"url" : url_for("tagValues.listTagValues", tagValueId = tagValue.TagValueId, elementAttributeId = elementAttribute.ElementAttributeId),
+				"text" : elementAttribute.ElementAttributeTemplate.Name},
 			{"url" : url_for("tagValueNotes.listTagValueNotes", tagValueId = tagValue.TagValueId, elementAttributeId = elementAttribute.ElementAttributeId),
-				"text" : "{}&nbsp;&nbsp;/&nbsp;&nbsp;{}".format(elementAttribute.ElementAttributeTemplate.Name, tagValue.Timestamp)}]
+				"text" : tagValue.Timestamp}]
 	elif eventFrameId:
 		eventFrame = EventFrame.query.get_or_404(eventFrameId)
 		eventFrameAttribute = EventFrameAttribute.query.get_or_404(eventFrameAttributeId)
@@ -80,9 +82,11 @@ def addTagValueNote(tagValueId, elementAttributeId = None, eventFrameId = None, 
 			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "EventFrameTemplate",
 				selectedId = eventFrame.EventFrameTemplate.EventFrameTemplateId), "text" : eventFrame.EventFrameTemplate.Name},
 			{"url" : url_for("eventFrames.dashboard", eventFrameId = eventFrame.EventFrameId), "text" : eventFrame.friendlyName(True)},
+			{"url" : url_for("tagValues.listTagValues", eventFrameId = eventFrame.EventFrameId,
+				eventFrameAttributeId = eventFrameAttribute.EventFrameAttributeId), "text" : eventFrameAttribute.EventFrameAttributeTemplate.Name},
 			{"url" : url_for("tagValueNotes.listTagValueNotes", tagValueId = tagValue.TagValueId, eventFrameId = eventFrame.EventFrameId,
 				eventFrameAttributeId = eventFrameAttributeId),
-				"text" : "{}&nbsp;&nbsp;/&nbsp;&nbsp;{}".format(eventFrameAttribute.EventFrameAttributeTemplate.Name, tagValue.Timestamp)}]
+				"text" : tagValue.Timestamp}]
 	else:
 		breadcrumbs = [{"url" : url_for("tags.selectTag", selectedClass = "Root"), "text" : ".."},
 			{"url" : url_for("tags.selectTag", selectedClass = "Enterprise", 
@@ -107,9 +111,11 @@ def deleteTagValueNote(noteId, tagValueId):
 	return redirect(request.referrer)
 
 @tagValueNotes.route("/tagValueNotes/edit/<int:noteId>/<int:tagValueId>", methods = ["GET", "POST"])
+@tagValueNotes.route("/tagValueNotes/edit/<int:noteId>/<int:tagValueId>/<int:elementAttributeId>", methods = ["GET", "POST"])
+@tagValueNotes.route("/tagValueNotes/edit/<int:noteId>/<int:tagValueId>/<int:eventFrameId>/<int:eventFrameAttributeId>", methods = ["GET", "POST"])
 @login_required
 @permissionRequired(Permission.DATA_ENTRY)
-def editTagValueNote(noteId, tagValueId):
+def editTagValueNote(noteId, tagValueId, elementAttributeId = None, eventFrameId = None, eventFrameAttributeId = None):
 	operation = "Edit"
 	modelName = "Tag Value Note"
 	note = Note.query.get_or_404(noteId)
@@ -128,13 +134,48 @@ def editTagValueNote(noteId, tagValueId):
 	form.timestamp.data = note.Timestamp
 	form.requestReferrer.data = request.referrer
 	tagValue = TagValue.query.get_or_404(tagValueId)
-	breadcrumbs = [{"url" : url_for("tags.selectTag", selectedClass = "Root"), "text" : ".."},
-		{"url" : url_for("tags.selectTag", selectedClass = "Enterprise",
-			selectedId = tagValue.Tag.Area.Site.Enterprise.EnterpriseId), "text" : tagValue.Tag.Area.Site.Enterprise.Name},
-		{"url" : url_for("tags.selectTag", selectedClass = "Site", selectedId = tagValue.Tag.Area.Site.SiteId),
-			"text" : tagValue.Tag.Area.Site.Name},
-		{"url" : url_for("tags.selectTag", selectedClass = "Area", selectedId = tagValue.Tag.Area.AreaId),
-			"text" : tagValue.Tag.Area.Name},
-		{"url" : url_for("tagValues.listTagValues", tagId = tagValue.Tag.TagId), "text" : tagValue.Tag.Name},
-		{"url" : url_for("tagValueNotes.listTagValueNotes", tagValueId = tagValue.TagValueId), "text" : tagValue.Timestamp}]
+	if elementAttributeId:
+		elementAttribute = ElementAttribute.query.get_or_404(elementAttributeId)
+		breadcrumbs = [{"url" : url_for("tags.selectTag", selectedClass = "Root"), "text" : ".."},
+			{"url" : url_for("elements.selectElement", selectedClass = "Enterprise",
+				selectedId = elementAttribute.Element.ElementTemplate.Site.Enterprise.EnterpriseId),
+				"text" : elementAttribute.Element.ElementTemplate.Site.Enterprise.Name},
+			{"url" : url_for("elements.selectElement", selectedClass = "Site",
+				selectedId = elementAttribute.Element.ElementTemplate.Site.SiteId), "text" : elementAttribute.Element.ElementTemplate.Site.Name},
+			{"url" : url_for("elements.selectElement", selectedClass = "ElementTemplate",
+				selectedId = elementAttribute.Element.ElementTemplate.ElementTemplateId), "text" : elementAttribute.Element.ElementTemplate.Name},
+			{"url" : url_for("elements.dashboard", elementId = elementAttribute.Element.ElementId), "text" : elementAttribute.Element.Name},
+			{"url" : url_for("tagValues.listTagValues", elementAttributeId = elementAttribute.ElementAttributeId),
+				"text" : elementAttribute.ElementAttributeTemplate.Name},
+			{"url" : url_for("tagValueNotes.listTagValueNotes", tagValueId = tagValue.TagValueId, elementAttributeId = elementAttribute.ElementAttributeId),
+				"text" : tagValue.Timestamp},
+			{"url" : None, "text" : note.Timestamp}]
+	elif eventFrameId:
+		eventFrame = EventFrame.query.get_or_404(eventFrameId)
+		eventFrameAttribute = EventFrameAttribute.query.get_or_404(eventFrameAttributeId)
+		breadcrumbs = [{"url" : url_for("tags.selectTag", selectedClass = "Root"), "text" : ".."},
+			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Enterprise",
+				selectedId = eventFrame.Element.ElementTemplate.Site.Enterprise.EnterpriseId),
+				"text" : eventFrame.Element.ElementTemplate.Site.Enterprise.Name},
+			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Site", selectedId = eventFrame.Element.ElementTemplate.Site.SiteId),
+				"text" : eventFrame.Element.ElementTemplate.Site.Name},
+			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "ElementTemplate",
+				selectedId = eventFrame.Element.ElementTemplate.ElementTemplateId), "text" : eventFrame.Element.ElementTemplate.Name},
+			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "EventFrameTemplate",
+				selectedId = eventFrame.EventFrameTemplate.EventFrameTemplateId), "text" : eventFrame.EventFrameTemplate.Name},
+			{"url" : url_for("eventFrames.dashboard", eventFrameId = eventFrame.EventFrameId), "text" : eventFrame.friendlyName(True)},
+			{"url" : url_for("tagValues.listTagValues", eventFrameId = eventFrame.EventFrameId, eventFrameAttributeId = eventFrameAttributeId),
+				"text" : eventFrameAttribute.EventFrameAttributeTemplate.Name},
+			{"url" : url_for("tagValueNotes.listTagValueNotes", tagValueId = tagValue.TagValueId, eventFrameId = eventFrame.EventFrameId,
+				eventFrameAttributeId = eventFrameAttributeId), "text" : tagValue.Timestamp}]
+	else:
+		breadcrumbs = [{"url" : url_for("tags.selectTag", selectedClass = "Root"), "text" : ".."},
+			{"url" : url_for("tags.selectTag", selectedClass = "Enterprise",
+				selectedId = tagValue.Tag.Area.Site.Enterprise.EnterpriseId), "text" : tagValue.Tag.Area.Site.Enterprise.Name},
+			{"url" : url_for("tags.selectTag", selectedClass = "Site", selectedId = tagValue.Tag.Area.Site.SiteId),
+				"text" : tagValue.Tag.Area.Site.Name},
+			{"url" : url_for("tags.selectTag", selectedClass = "Area", selectedId = tagValue.Tag.Area.AreaId),
+				"text" : tagValue.Tag.Area.Name},
+			{"url" : url_for("tagValues.listTagValues", tagId = tagValue.Tag.TagId), "text" : tagValue.Tag.Name},
+			{"url" : url_for("tagValueNotes.listTagValueNotes", tagValueId = tagValue.TagValueId), "text" : tagValue.Timestamp}]
 	return render_template("addEdit.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
