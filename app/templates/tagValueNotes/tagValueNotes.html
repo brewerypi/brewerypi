@@ -31,7 +31,8 @@ Tag Value Notes
             <li><a href = "{{ url_for("eventFrames.selectEventFrame", selectedClass = "EventFrameTemplate",
                 selectedId = eventFrame.EventFrameTemplate.EventFrameTemplateId) }}">{{ eventFrame.EventFrameTemplate.Name }}</a></li>
             <li><a href = "{{ url_for("eventFrames.dashboard", eventFrameId = eventFrame.EventFrameId) }}">{{ eventFrame.friendlyName(True) }}</a></li>
-            <li class = "active">{{ eventFrameAttribute.EventFrameAttributeTemplate.Name }}</li>
+            <li><a href = "{{ url_for("tagValues.listTagValues", eventFrameId = eventFrame.EventFrameId,
+                eventFrameAttributeId = eventFrameAttribute.EventFrameAttributeId) }}">{{ eventFrameAttribute.EventFrameAttributeTemplate.Name }}</a></li>
             <li class = "active">{{ tagValue.Timestamp }}</li>
         {% else %}
             <li><a href = "{{ url_for("tags.selectTag", selectedClass = "Root") }}">..</a></li>
