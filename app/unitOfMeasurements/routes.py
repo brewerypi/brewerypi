@@ -126,9 +126,13 @@ def addDefaultUnitsOfMeasurements():
 @adminRequired
 def deleteUnitOfMeasurement(unitOfMeasurementId):
 	unitOfMeasurement = UnitOfMeasurement.query.get_or_404(unitOfMeasurementId)
-	db.session.delete(unitOfMeasurement)
-	db.session.commit()
-	flash("You have successfully deleted the unit of measurement \"" + unitOfMeasurement.Abbreviation + "\".", "alert alert-success")
+	if unitOfMeasurement.isReferenced():
+		flash("Unit of Measurement \"{}\" is referenced by one or more tags and cannot be deleted.". \
+			format(unitOfMeasurement.Abbreviation), "alert alert-danger")
+	else:
+		db.session.delete(unitOfMeasurement)
+		db.session.commit()
+		flash("You have successfully deleted the unit of measurement \"" + unitOfMeasurement.Abbreviation + "\".", "alert alert-success")
 
 	return redirect(url_for("unitOfMeasurements.listUnitOfMeasurements"))
 

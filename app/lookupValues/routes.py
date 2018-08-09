@@ -51,6 +51,7 @@ def deleteLookupValue(lookupValueId):
 		db.session.delete(lookupValue)
 		db.session.commit()
 		flash("You have successfully deleted the lookup value \"{}\".".format(lookupValue.Name), "alert alert-success")
+
 	return redirect(request.referrer)
 
 @lookupValues.route("/lookupValues/edit/<int:lookupValueId>", methods = ["GET", "POST"])

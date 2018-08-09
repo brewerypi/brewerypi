@@ -511,6 +511,9 @@ class UnitOfMeasurement(db.Model):
 	def id(self):
 		return self.UnitOfMeasurementId
 
+	def isReferenced(self):
+		return Tag.query.filter_by(UnitOfMeasurementId = self.UnitOfMeasurementId).count() > 0
+
 class User(UserMixin, db.Model):
 	__tablename__ = "User"
 	__table_args__ = \
