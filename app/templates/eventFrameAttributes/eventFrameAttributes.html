@@ -27,7 +27,8 @@ Event Frame Attributes
     <table id = "eventFrameAttributesTable" class = "table">
         <thead>
             <tr>
-                <th>Event Frame Attribute Template</th>
+                <th>Event Frame Template</th>
+                <th>Attribute</th>
                 <th>Tag</th>
                 <th><button class = "btn btn-default" id = "buttonAttributesSaveAll" title = "Save All"><span class="glyphicon glyphicon-floppy-disk"></span>
                     </button></th>
@@ -43,6 +44,7 @@ Event Frame Attributes
                     {% set eventFrameAttribute = None %}
                 {% endif %}
                 <tr>
+                <td>{{ eventFrameAttributeTemplate.path() }}</td>
                 <td>{{ eventFrameAttributeTemplate.Name }}</td>
                 <td>
                     <div class = "form-group">
@@ -78,10 +80,12 @@ Event Frame Attributes
             ({
                 "order":
                 [
-                    [0, "asc"]                                      // Event Frame Attribute Template.
+                    [0, "asc"],                                     // Event Frame Template.
+                    [1, "asc"]                                      // Event Frame Attribute Template
                 ],
                 "columns":
                 [
+                    null,
                     null,
                     { "orderable": false, "searchable": false },    // Tag select list.
                     { "orderable": false }                          // Save all button.
@@ -96,7 +100,6 @@ Event Frame Attributes
                 if (event.which == 13)
                 {
                     $("#buttonAttributesSaveAll").focus()
-                    $("#buttonAttributesSaveAll").click()
                 }
             })
             $("#buttonAttributesSaveAll").click(function()

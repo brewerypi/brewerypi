@@ -238,6 +238,12 @@ class EventFrameAttributeTemplate(db.Model):
 	def id(self):
 		return self.EventFrameAttributeTemplateId
 
+	def path(self):
+		path = ""
+		for ancestor in self.EventFrameTemplate.ancestors([]):
+			path += "\{}".format(ancestor.Name)
+		return  "{}\{}".format(path, self.EventFrameTemplate.Name)
+
 class EventFrameNote(db.Model):
 	__tablename__ = "EventFrameNote"
 	__table_args__ = \

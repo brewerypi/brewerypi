@@ -91,8 +91,13 @@ def addEventFrame(eventFrameTemplateId = None, parentEventFrameId = None):
 @permissionRequired(Permission.DATA_ENTRY)
 def dashboard(eventFrameId):
 	eventFrame = EventFrame.query.get_or_404(eventFrameId)
-	eventFrameAttributes = EventFrameAttribute.query.join(EventFrameAttributeTemplate, EventFrameTemplate, EventFrame). \
-		filter(EventFrame.EventFrameId == eventFrameId)
+	if eventFrame.ElementId:
+		elementId = eventFrame.ElementId
+	else:
+		elementId = eventFrame.origin().ElementId
+
+	eventFrameAttributes = EventFrameAttribute.query.join(EventFrameAttributeTemplate, EventFrameTemplate). \
+		filter(EventFrameAttribute.ElementId == elementId, EventFrameTemplate.EventFrameTemplateId == eventFrame.EventFrameTemplate.EventFrameTemplateId)
 	eventFrameAttributeIds = []
 	for eventFrameAttribute in eventFrameAttributes:
 		eventFrameAttributeIds.append(eventFrameAttribute.EventFrameAttributeId)
