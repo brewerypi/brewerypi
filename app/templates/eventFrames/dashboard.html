@@ -10,7 +10,7 @@ Event Frame Dashboard
 <div>
     <ol class = "breadcrumb">
         {#% if eventFrame.ParentEventFrameId %#}
-            <li><a href = "{{ url_for("eventFrames.selectEventFrame", selectedClass = "Root") }}">..</a></li>
+            <li><a href = "{{ url_for("eventFrames.selectEventFrame", selectedClass = "Root") }}"><span class = "glyphicon glyphicon-home"></a></li>
             <li><a href = "{{ url_for("eventFrames.selectEventFrame", selectedClass = "Enterprise",
                 selectedId = eventFrame.origin().EventFrameTemplate.ElementTemplate.Site.Enterprise.id()) }}">
                 {{ eventFrame.origin().EventFrameTemplate.ElementTemplate.Site.Enterprise.Name }}</a></li>

@@ -10,21 +10,21 @@ Tags
 <div>
     <ol class = "breadcrumb">
         {% if childrenClass == "Enterprise" %}
-            <li class = "active">..</li>
+            <li class = "active"><span class = "glyphicon glyphicon-home"></li>
             {% set pageHeaderSubText = "Enterprises" %}
         {% elif childrenClass == "Site" %}
-            <li><a href = "{{ url_for("tags.selectTag", selectedClass = "Root") }}">..</a></li>
+            <li><a href = "{{ url_for("tags.selectTag", selectedClass = "Root") }}"><span class = "glyphicon glyphicon-home"></a></li>
             <li class = "active">{{ parent.Name }}</li>
             {% set pageHeaderSubText = "Sites" %}
         {% elif childrenClass == "Area" %}
-            <li><a href = "{{ url_for("tags.selectTag", selectedClass = "Root") }}">..</a></li>
+            <li><a href = "{{ url_for("tags.selectTag", selectedClass = "Root") }}"><span class = "glyphicon glyphicon-home"></span></a></li>
             <li><a href = "{{ url_for("tags.selectTag", selectedClass = "Enterprise",
                 selectedId = parent.Enterprise.id()) }}">{{ parent.Enterprise.Name }}</a></li>
             <li class = "active">{{ parent.Name }}</li>
             {% set pageHeaderSubText = "Areas" %}
         <!-- "and parent" checks for systems that have not been configured with an area yet. -->
         {% elif childrenClass == "Tag" and parent %}
-            <li><a href = "{{ url_for("tags.selectTag", selectedClass = "Root") }}">..</a></li>
+            <li><a href = "{{ url_for("tags.selectTag", selectedClass = "Root") }}"><span class = "glyphicon glyphicon-home"></a></li>
             <li><a href = "{{ url_for("tags.selectTag", selectedClass = "Enterprise",
                 selectedId = parent.Site.Enterprise.id()) }}">{{ parent.Site.Enterprise.Name }}</a></li>
             <li><a href = "{{ url_for("tags.selectTag", selectedClass = "Site",

@@ -7,7 +7,7 @@ Event Frame Attributes
 {% block page_content %}
 <div>
     <ol class = "breadcrumb">
-        <li><a href = "{{ url_for("eventFrames.selectEventFrame", selectedClass = "Root", selectedId = None) }}">..</a></li>
+        <li><a href = "{{ url_for("eventFrames.selectEventFrame", selectedClass = "Root", selectedId = None) }}"><span class = "glyphicon glyphicon-home"></a></li>
         <li><a href = "{{ url_for("eventFrames.selectEventFrame", selectedClass = "Enterprise",
             selectedId = eventFrame.EventFrameTemplate.ElementTemplate.Site.Enterprise.EnterpriseId) }}">
             {{ eventFrame.EventFrameTemplate.ElementTemplate.Site.Enterprise.Name }}</a></li>

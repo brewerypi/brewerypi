@@ -10,14 +10,14 @@ Physical Models
 <div>
     <ol class = "breadcrumb">
         {% if childrenClass == "Enterprise" %}
-            <li class = "active">..</li>
+            <li class = "active"><span class = "glyphicon glyphicon-home"></li>
             {% set pageHeaderSubText = "Enterprises" %}
         {% elif childrenClass == "Site" %}
-            <li><a href = "{{ url_for("physicalModels.selectPhysicalModel", selectedClass = "Root") }}">..</a></li>
+            <li><a href = "{{ url_for("physicalModels.selectPhysicalModel", selectedClass = "Root") }}"><span class = "glyphicon glyphicon-home"></a></li>
             <li class = "active">{{ parent.Name }}</li>
             {% set pageHeaderSubText = "Sites" %}
         {% elif childrenClass == "Area" %}
-            <li><a href = "{{ url_for("physicalModels.selectPhysicalModel", selectedClass = "Root") }}">..</a></li>
+            <li><a href = "{{ url_for("physicalModels.selectPhysicalModel", selectedClass = "Root") }}"><span class = "glyphicon glyphicon-home"></a></li>
             <li><a href = "{{ url_for("physicalModels.selectPhysicalModel", selectedClass = "Enterprise", selectedId = parent.Enterprise.id()) }}">
                 {{ parent.Enterprise.Name }}</a></li>
             <li class = "active">{{ parent.Name }}</li>

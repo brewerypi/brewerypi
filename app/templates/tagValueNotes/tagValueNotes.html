@@ -8,7 +8,7 @@ Tag Value Notes
 <div>
     <ol class = "breadcrumb">
         {% if elementAttribute %}
-            <li><a href = "{{ url_for("elements.selectElement", selectedClass = "Root", id = None) }}">..</a></li>
+            <li><a href = "{{ url_for("elements.selectElement", selectedClass = "Root", id = None) }}"><span class = "glyphicon glyphicon-home"></a></li>
             <li><a href = "{{ url_for("elements.selectElement", selectedClass = "Enterprise",
                 selectedId = elementAttribute.Element.ElementTemplate.Site.Enterprise.EnterpriseId) }}">
                 {{ elementAttribute.Element.ElementTemplate.Site.Enterprise.Name }}</a></li>
@@ -21,7 +21,7 @@ Tag Value Notes
                 {{ elementAttribute.ElementAttributeTemplate.Name }}</a></li>
             <li class = "active">{{ tagValue.Timestamp }}</li>
         {% elif eventFrame %}
-            <li><a href = "{{ url_for("eventFrames.selectEventFrame", selectedClass = "Root") }}">..</a></li>
+            <li><a href = "{{ url_for("eventFrames.selectEventFrame", selectedClass = "Root") }}"><span class = "glyphicon glyphicon-home"></a></li>
             <li><a href = "{{ url_for("eventFrames.selectEventFrame", selectedClass = "Enterprise",
                 selectedId = eventFrame.Element.ElementTemplate.Site.Enterprise.EnterpriseId) }}">
                 {{ eventFrame.Element.ElementTemplate.Site.Enterprise.Name }}</a></li>
@@ -36,7 +36,7 @@ Tag Value Notes
                 eventFrameAttributeId = eventFrameAttribute.EventFrameAttributeId) }}">{{ eventFrameAttribute.EventFrameAttributeTemplate.Name }}</a></li>
             <li class = "active">{{ tagValue.Timestamp }}</li>
         {% else %}
-            <li><a href = "{{ url_for("tags.selectTag", selectedClass = "Root") }}">..</a></li>
+            <li><a href = "{{ url_for("tags.selectTag", selectedClass = "Root") }}"><span class = "glyphicon glyphicon-home"></a></li>
             <li><a href = "{{ url_for("tags.selectTag", selectedClass = "Enterprise",
                 selectedId = tagValue.Tag.Area.Site.Enterprise.EnterpriseId) }}">{{ tagValue.Tag.Area.Site.Enterprise.Name }}</a></li>
             <li><a href = "{{ url_for("tags.selectTag", selectedClass = "Site", selectedId = tagValue.Tag.Area.Site.SiteId) }}">

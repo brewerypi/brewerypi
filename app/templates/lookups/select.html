@@ -10,14 +10,14 @@ Lookups
 <div>
     <ol class = "breadcrumb">
         {% if childrenClass == "Enterprise" %}
-            <li class = "active">..</li>
+            <li class = "active"><span class = "glyphicon glyphicon-home"></li>
             {% set pageHeaderSubText = "Enterprises" %}
         {% elif childrenClass == "Lookup" %}
-            <li><a href = "{{ url_for("lookups.selectLookup", selectedClass = "Root") }}">..</a></li>
+            <li><a href = "{{ url_for("lookups.selectLookup", selectedClass = "Root") }}"><span class = "glyphicon glyphicon-home"></a></li>
             <li class = "active">{{ parent.Name }}</li>
             {% set pageHeaderSubText = "" %}
         {% elif childrenClass == "LookupValue" %}
-            <li><a href = "{{ url_for("lookups.selectLookup", selectedClass = "Root") }}">..</a></li>
+            <li><a href = "{{ url_for("lookups.selectLookup", selectedClass = "Root") }}"><span class = "glyphicon glyphicon-home"></a></li>
             <li><a href = "{{ url_for("lookups.selectLookup", selectedClass = "Enterprise", selectedId = parent.Enterprise.id()) }}">
                 {{ parent.Enterprise.Name }}</a></li>
             <li class = "active">{{ parent.Name }}</li>
