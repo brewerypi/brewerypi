@@ -1,9 +1,9 @@
 from flask_wtf import FlaskForm
 from datetime import datetime
-from wtforms import DateTimeField, HiddenField, SelectField, StringField, SubmitField
+from wtforms import DateTimeField, HiddenField, SelectField, StringField, SubmitField, ValidationError
 from wtforms.ext.sqlalchemy.fields import QuerySelectField
 from wtforms.validators import Required, Optional
-from .. models import Element
+from .. models import EventFrame
 
 class EventFrameForm(FlaskForm):
 	element = QuerySelectField("Element", validators = [Required()], get_label = "Name")
@@ -15,3 +15,17 @@ class EventFrameForm(FlaskForm):
 	parentEventFrameId = HiddenField()
 	requestReferrer = HiddenField()
 	submit = SubmitField("Save")
+
+	def validate_startTimestamp(self, field):
+		if self.parentEventFrameId:
+			parentEventFrame = EventFrame.query.get_or_404(self.parentEventFrameId.data)
+			error = False
+			if parentEventFrame.EndTimestamp:
+				if self.startTimestamp.data < parentEventFrame.StartTimestamp or self.startTimestamp.data > parentEventFrame.EndTimestamp:
+					error = True
+			else:
+				if self.startTimestamp.data < parentEventFrame.StartTimestamp:
+					error = True
+
+			if error:
+				raise ValidationError("This timestamp is outside of the event frame.")

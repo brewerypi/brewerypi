@@ -118,7 +118,6 @@ def deleteEventFrame(eventFrameId):
 	if eventFrame.hasDescendants():
 		flash("This event frame contains one or more child event frames and cannot be deleted.", "alert alert-danger")
 	else:
-		elementId = eventFrame.ElementId
 		db.session.delete(eventFrame)
 		db.session.commit()
 		flash("You have successfully deleted the event frame.", "alert alert-success")
