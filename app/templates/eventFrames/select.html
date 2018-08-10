@@ -63,7 +63,7 @@ Event Frames
     <h1>Event Frames <small>{{ pageHeaderSubText }}</small></h1>
 </div>
 <div>
-    {% if childrenClass == "EventFrameTemplate" %}
+    {% if childrenClass == "EventFrameTemplate" and current_user.isAdministrator() %}
         <a class = "btn btn-default" title = "Add" href = "{{ url_for("eventFrameTemplates.addEventFrameTemplate", elementTemplateId = parent.id()) }}"
             role = "button"><span class = "glyphicon glyphicon-plus"></span></a>
         <br><br>
@@ -126,21 +126,31 @@ Event Frames
                         {% elif childrenClass == "EventFrameTemplate" %}
                             <td>{{ child.Name }}</td>
                             <td>{{ child.Description }}</td>
-                            <td><a class = "btn btn-default" title = "Configure" href = "{{ url_for("eventFrames.selectEventFrame",
-                                selectedClass = "EventFrameTemplate", selectedId = child.id(), selectedOperation = "configure") }}">
-                                <span class = "glyphicon glyphicon-wrench"></span></a></td>
-                            <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("eventFrameTemplates.editEventFrameTemplate",
-                                eventFrameTemplateId = child.id()) }}"><span class = "glyphicon glyphicon-edit"></span></a></td>
-                            <td><a class = "btn btn-default" title = "Delete" href = "{{ url_for("eventFrameTemplates.deleteEventFrameTemplate",
-                                eventFrameTemplateId = child.id()) }}"><span class = "glyphicon glyphicon-trash"></span></a></td>                        
+                            {% if current_user.isAdministrator() %}
+                                <td><a class = "btn btn-default" title = "Configure" href = "{{ url_for("eventFrames.selectEventFrame",
+                                    selectedClass = "EventFrameTemplate", selectedId = child.id(), selectedOperation = "configure") }}">
+                                    <span class = "glyphicon glyphicon-wrench"></span></a></td>
+                                <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("eventFrameTemplates.editEventFrameTemplate",
+                                    eventFrameTemplateId = child.id()) }}"><span class = "glyphicon glyphicon-edit"></span></a></td>
+                                <td><a class = "btn btn-default" title = "Delete" href = "{{ url_for("eventFrameTemplates.deleteEventFrameTemplate",
+                                    eventFrameTemplateId = child.id()) }}"><span class = "glyphicon glyphicon-trash"></span></a></td>
+                            {% else %}
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            {% endif %}
                         {% elif childrenClass == "EventFrame" %}
                             <td>{{ child.friendlyName() }}</td>
                             <td>{{ child.Element.Name }}</td>
                             <td>{{ child.StartTimestamp }}</td>
                             <td>{{ child.EndTimestamp }}</td>
-                            <td><a class = "btn btn-default" title = "Associate Attributes with Tags"
-                                href = "{{ url_for("eventFrameAttributes.listEventFrameAttributes", eventFrameId = child.id()) }}">
-                                <span class = "glyphicon glyphicon-link"></span></a></td>
+                            {% if current_user.isAdministrator() %}
+                                <td><a class = "btn btn-default" title = "Associate Attributes with Tags"
+                                    href = "{{ url_for("eventFrameAttributes.listEventFrameAttributes", eventFrameId = child.id()) }}">
+                                    <span class = "glyphicon glyphicon-link"></span></a></td>
+                            {% else %}
+                                <td></td>
+                            {% endif %}
                             {% if child.EndTimestamp == None %}
                                 <td><a class = "btn btn-default" title = "End" href = "{{ url_for("eventFrames.endEventFrame",
                                     eventFrameId = child.id()) }}"><span class = "glyphicon glyphicon-stop"></span></a></td>
