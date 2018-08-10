@@ -29,7 +29,7 @@ def addElement(elementTemplateId):
 	form.elementTemplateId.data = elementTemplateId
 	form.requestReferrer.data = request.referrer
 	elementTemplate = ElementTemplate.query.get_or_404(elementTemplateId)
-	breadcrumbs = [{"url" : url_for("elements.selectElement", selectedClass = "Root"), "text" : ".."},
+	breadcrumbs = [{"url" : url_for("elements.selectElement", selectedClass = "Root"), "text" : "<span class = \"glyphicon glyphicon-home\">"},
 		{"url" : url_for("elements.selectElement", selectedClass = "Enterprise", selectedId = elementTemplate.Site.Enterprise.EnterpriseId),
 			"text" : elementTemplate.Site.Enterprise.Name},
 		{"url" : url_for("elements.selectElement", selectedClass = "Site", selectedId = elementTemplate.Site.SiteId), "text" : elementTemplate.Site.Name},
@@ -92,7 +92,7 @@ def copyElement(elementId):
 	form.elementIdToCopy.data = elementId
 	form.requestReferrer.data = request.referrer
 	element = Element.query.get_or_404(elementId)
-	breadcrumbs = [{"url" : url_for("elements.selectElement", selectedClass = "Root"), "text" : ".."},
+	breadcrumbs = [{"url" : url_for("elements.selectElement", selectedClass = "Root"), "text" : "<span class = \"glyphicon glyphicon-home\">"},
 		{"url" : url_for("elements.selectElement", selectedClass = "Enterprise", selectedId = element.ElementTemplate.Site.Enterprise.EnterpriseId),
 			"text" : element.ElementTemplate.Site.Enterprise.Name},
 		{"url" : url_for("elements.selectElement", selectedClass = "Site", selectedId = element.ElementTemplate.Site.SiteId),
@@ -143,7 +143,7 @@ def editElement(elementId):
 	form.elementTemplateId.data = element.ElementTemplateId
 	form.name.data = element.Name
 	form.requestReferrer.data = request.referrer
-	breadcrumbs = [{"url" : url_for("elements.selectElement", selectedClass = "Root"), "text" : ".."},
+	breadcrumbs = [{"url" : url_for("elements.selectElement", selectedClass = "Root"), "text" : "<span class = \"glyphicon glyphicon-home\">"},
 		{"url" : url_for("elements.selectElement", selectedClass = "Enterprise", selectedId = element.ElementTemplate.Site.Enterprise.EnterpriseId),
 			"text" : element.ElementTemplate.Site.Enterprise.Name},
 		{"url" : url_for("elements.selectElement", selectedClass = "Site", selectedId = element.ElementTemplate.Site.SiteId),

@@ -25,7 +25,7 @@ def addEnterprise():
 
 	# Present a form to add a new enterprise.
 	form.requestReferrer.data = request.referrer
-	breadcrumbs = [{"url" : url_for("physicalModels.selectPhysicalModel", selectedClass = "Root"), "text" : ".."}]
+	breadcrumbs = [{"url" : url_for("physicalModels.selectPhysicalModel", selectedClass = "Root"), "text" : "<span class = \"glyphicon glyphicon-home\">"}]
 	return render_template("addEdit.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
 
 @enterprises.route("/enterprises/delete/<int:enterpriseId>", methods = ["GET", "POST"])
@@ -60,6 +60,6 @@ def editEnterprise(enterpriseId):
 	form.description.data = enterprise.Description
 	form.name.data = enterprise.Name
 	form.requestReferrer.data = request.referrer
-	breadcrumbs = [{"url" : url_for("physicalModels.selectPhysicalModel", selectedClass = "Root"), "text" : ".."},
+	breadcrumbs = [{"url" : url_for("physicalModels.selectPhysicalModel", selectedClass = "Root"), "text" : "<span class = \"glyphicon glyphicon-home\">"},
 		{"url" : None, "text" : enterprise.Name}]
 	return render_template("addEdit.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)

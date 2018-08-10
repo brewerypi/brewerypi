@@ -27,7 +27,7 @@ def addElementTemplate(siteId):
 	form.siteId.data = siteId
 	form.requestReferrer.data = request.referrer
 	site = Site.query.get_or_404(siteId)
-	breadcrumbs = [{"url" : url_for("elements.selectElement", selectedClass = "Root"), "text" : ".."},
+	breadcrumbs = [{"url" : url_for("elements.selectElement", selectedClass = "Root"), "text" : "<span class = \"glyphicon glyphicon-home\">"},
 		{"url" : url_for("elements.selectElement", selectedClass = "Enterprise", selectedId = site.Enterprise.EnterpriseId),
 			"text" : site.Enterprise.Name},
 		{"url" : url_for("elements.selectElement", selectedClass = "Site", selectedId = site.SiteId), "text" : site.Name}]
@@ -65,7 +65,7 @@ def editElementTemplate(elementTemplateId):
 	form.name.data = elementTemplate.Name
 	form.siteId.data = elementTemplate.SiteId
 	form.requestReferrer.data = request.referrer
-	breadcrumbs = [{"url" : url_for("elements.selectElement", selectedClass = "Root"), "text" : ".."},
+	breadcrumbs = [{"url" : url_for("elements.selectElement", selectedClass = "Root"), "text" : "<span class = \"glyphicon glyphicon-home\">"},
 		{"url" : url_for("elements.selectElement", selectedClass = "Enterprise", selectedId = elementTemplate.Site.Enterprise.EnterpriseId),
 			"text" : elementTemplate.Site.Enterprise.Name},
 		{"url" : url_for("elements.selectElement", selectedClass = "Site", selectedId = elementTemplate.Site.SiteId),

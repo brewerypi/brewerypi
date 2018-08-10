@@ -33,7 +33,7 @@ def addUnitOfMeasurement():
 		return redirect(url_for("unitOfMeasurements.listUnitOfMeasurements"))
 
 	# Present a form to add a new unit of measurement.
-	breadcrumbs = [{"url" : url_for("unitOfMeasurements.listUnitOfMeasurements"), "text" : ".."}]
+	breadcrumbs = [{"url" : url_for("unitOfMeasurements.listUnitOfMeasurements"), "text" : "<span class = \"glyphicon glyphicon-home\">"}]
 	return render_template("addEdit.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
 
 @unitOfMeasurements.route("/units/addDefaultUnitsOfMeasurements", methods = ["GET", "POST"])
@@ -158,6 +158,6 @@ def editUnitOfMeasurement(unitOfMeasurementId):
 	# Present a form to edit an existing unit of measurement.
 	form.abbreviation.data = unitOfMeasurement.Abbreviation
 	form.name.data = unitOfMeasurement.Name
-	breadcrumbs = [{"url" : url_for("unitOfMeasurements.listUnitOfMeasurements"), "text" : ".."},
+	breadcrumbs = [{"url" : url_for("unitOfMeasurements.listUnitOfMeasurements"), "text" : "<span class = \"glyphicon glyphicon-home\">"},
 		{"url" : None, "text" : unitOfMeasurement.Name}]
 	return render_template("addEdit.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)

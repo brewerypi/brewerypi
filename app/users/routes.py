@@ -31,7 +31,7 @@ def addUser():
 		return redirect(url_for("users.listUsers"))
 
 	# Present a form to add a new user.
-	breadcrumbs = [{"url" : url_for("users.listUsers"), "text" : ".."}]
+	breadcrumbs = [{"url" : url_for("users.listUsers"), "text" : "<span class = \"glyphicon glyphicon-home\">"}]
 	return render_template("addEdit.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
 
 @users.route("/users/delete/<int:userId>", methods = ["GET", "POST"])
@@ -73,7 +73,8 @@ def changePassword(userId):
 
 	# Present a form to change an user password.
 	form.requestReferrer.data = request.referrer
-	breadcrumbs = [{"url" : url_for("users.listUsers"), "text" : ".."}, {"url" : None, "text" : user.Name}]
+	breadcrumbs = [{"url" : url_for("users.listUsers"), "text" : "<span class = \"glyphicon glyphicon-home\">"},
+		{"url" : None, "text" : user.Name}]
 	return render_template("addEdit.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
 
 @users.route("/users/edit/<int:userId>", methods = ["GET", "POST"])
@@ -103,6 +104,6 @@ def editUser(userId):
 	form.userId.data = user.UserId
 	form.name.data = user.Name
 	form.role.data = user.Role
-	breadcrumbs = [{"url" : url_for("users.listUsers"), "text" : ".."},
+	breadcrumbs = [{"url" : url_for("users.listUsers"), "text" : "<span class = \"glyphicon glyphicon-home\">"},
 		{"url" : None, "text" : user.Name}]
 	return render_template("addEdit.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)

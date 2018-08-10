@@ -32,7 +32,7 @@ def addEventFrameNote(eventFrameId):
 	if eventFrame.ParentEventFrameId:
 		breadcrumbs = []
 	else:
-		breadcrumbs = [{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Root"), "text" : ".."},
+		breadcrumbs = [{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Root"), "text" : "<span class = \"glyphicon glyphicon-home\">"},
 			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Enterprise",
 				selectedId = eventFrame.EventFrameTemplate.ElementTemplate.Site.Enterprise.EnterpriseId),
 				"text" : eventFrame.EventFrameTemplate.ElementTemplate.Site.Enterprise.Name},
@@ -83,7 +83,7 @@ def editEventFrameNote(eventFrameId, noteId):
 	if eventFrame.ParentEventFrameId:
 		breadcrumbs = []
 	else:
-		breadcrumbs = [{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Root"), "text" : ".."},
+		breadcrumbs = [{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Root"), "text" : "<span class = \"glyphicon glyphicon-home\">"},
 			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Enterprise",
 				selectedId = eventFrame.EventFrameTemplate.ElementTemplate.Site.Enterprise.EnterpriseId),
 				"text" : eventFrame.EventFrameTemplate.ElementTemplate.Site.Enterprise.Name},

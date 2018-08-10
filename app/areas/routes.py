@@ -26,7 +26,7 @@ def addArea(siteId):
 	# Present a form to add a new area.
 	form.requestReferrer.data = request.referrer
 	site = Site.query.get_or_404(siteId)
-	breadcrumbs = [{"url" : url_for("physicalModels.selectPhysicalModel", selectedClass = "Root"), "text" : ".."},
+	breadcrumbs = [{"url" : url_for("physicalModels.selectPhysicalModel", selectedClass = "Root"), "text" : "<span class = \"glyphicon glyphicon-home\">"},
 		{"url" : url_for("physicalModels.selectPhysicalModel", selectedClass = "Enterprise", selectedId = site.Enterprise.EnterpriseId),
 			"text" : site.Enterprise.Name},
 		{"url" : url_for("physicalModels.selectPhysicalModel", selectedClass = "Site", selectedId = site.SiteId), "text" : site.Name}]
@@ -66,7 +66,7 @@ def editArea(areaId):
 	form.name.data = area.Name
 	form.siteId.data = area.SiteId
 	form.requestReferrer.data = request.referrer
-	breadcrumbs = [{"url" : url_for("physicalModels.selectPhysicalModel", selectedClass = "Root"), "text" : ".."},
+	breadcrumbs = [{"url" : url_for("physicalModels.selectPhysicalModel", selectedClass = "Root"), "text" : "<span class = \"glyphicon glyphicon-home\">"},
 		{"url" : url_for("physicalModels.selectPhysicalModel", selectedClass = "Enterprise", selectedId = area.Site.Enterprise.EnterpriseId),
 			"text" : area.Site.Enterprise.Name},
 		{"url" : url_for("physicalModels.selectPhysicalModel", selectedClass = "Site", selectedId = area.Site.SiteId), "text" : area.Site.Name},

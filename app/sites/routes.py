@@ -26,7 +26,7 @@ def addSite(enterpriseId):
 	# Present a form to add a new site.
 	form.requestReferrer.data = request.referrer
 	enterprise = Enterprise.query.get_or_404(enterpriseId)
-	breadcrumbs = [{"url" : url_for("physicalModels.selectPhysicalModel", selectedClass = "Root"), "text" : ".."},
+	breadcrumbs = [{"url" : url_for("physicalModels.selectPhysicalModel", selectedClass = "Root"), "text" : "<span class = \"glyphicon glyphicon-home\">"},
 		{"url" : url_for("physicalModels.selectPhysicalModel", selectedClass = "Enterprise", selectedId = enterprise.EnterpriseId), "text" : enterprise.Name}]
 	return render_template("addEdit.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
 
@@ -64,7 +64,7 @@ def editSite(siteId):
 	form.enterpriseId.data = site.EnterpriseId
 	form.name.data = site.Name
 	form.requestReferrer.data = request.referrer
-	breadcrumbs = [{"url" : url_for("physicalModels.selectPhysicalModel", selectedClass = "Root"), "text" : ".."},
+	breadcrumbs = [{"url" : url_for("physicalModels.selectPhysicalModel", selectedClass = "Root"), "text" : "<span class = \"glyphicon glyphicon-home\">"},
 		{"url" : url_for("physicalModels.selectPhysicalModel", selectedClass = "Enterprise", selectedId = site.Enterprise.EnterpriseId),
 			"text" : site.Enterprise.Name},
 		{"url" : None, "text" : site.Name}]
