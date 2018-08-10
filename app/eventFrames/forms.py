@@ -17,7 +17,7 @@ class EventFrameForm(FlaskForm):
 	submit = SubmitField("Save")
 
 	def validate_startTimestamp(self, field):
-		if self.parentEventFrameId:
+		if self.parentEventFrameId.data:
 			parentEventFrame = EventFrame.query.get_or_404(self.parentEventFrameId.data)
 			error = False
 			if parentEventFrame.EndTimestamp:
