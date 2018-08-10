@@ -174,7 +174,7 @@ class EventFrame(db.Model):
 		else:
 			if self.EndTimestamp:
 				if seconds:
-					return "{} - {}".format(self.StartTimestamp.strftime("%Y-%m-%d %H:%M:%S"), self.EndTimestamp.strftime("%Y-%m-%d %H:%M"))
+					return "{} - {}".format(self.StartTimestamp.strftime("%Y-%m-%d %H:%M:%S"), self.EndTimestamp.strftime("%Y-%m-%d %H:%M:%S"))
 				else:
 					return "{} - {}".format(self.StartTimestamp.strftime("%Y-%m-%d %H:%M"), self.EndTimestamp.strftime("%Y-%m-%d %H:%M"))
 			else:

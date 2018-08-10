@@ -16,6 +16,17 @@ class EventFrameForm(FlaskForm):
 	requestReferrer = HiddenField()
 	submit = SubmitField("Save")
 
+	def validate_endTimestamp(self, field):
+		if self.endTimestamp.data < self.startTimestamp.data:
+			raise ValidationError("The End Timestamp must occur after the Start Timestamp.")
+
+		if self.parentEventFrameId.data:
+			parentEventFrame = EventFrame.query.get_or_404(self.parentEventFrameId.data)
+			error = False
+			if parentEventFrame.EndTimestamp:
+				if self.endTimestamp.data > parentEventFrame.EndTimestamp:
+					raise ValidationError("This timestamp is outside of the parent event frame.")
+
 	def validate_startTimestamp(self, field):
 		if self.parentEventFrameId.data:
 			parentEventFrame = EventFrame.query.get_or_404(self.parentEventFrameId.data)
@@ -28,4 +39,4 @@ class EventFrameForm(FlaskForm):
 					error = True
 
 			if error:
-				raise ValidationError("This timestamp is outside of the event frame.")
+				raise ValidationError("This timestamp is outside of the parent event frame.")

@@ -60,15 +60,15 @@ def addEventFrame(eventFrameTemplateId = None, parentEventFrameId = None):
 				"text" : parentEventFrame.origin().EventFrameTemplate.Name}]
 		for eventFrameAncestor in parentEventFrame.ancestors([]):
 			if eventFrameAncestor.ParentEventFrameId:
-				text = eventFrameAncestor.EventFrameTemplate.Name + "&nbsp;&nbsp;/&nbsp;&nbsp;" + eventFrameAncestor.friendlyName()
+				text = eventFrameAncestor.EventFrameTemplate.Name + "&nbsp;&nbsp;/&nbsp;&nbsp;" + eventFrameAncestor.friendlyName(True)
 			else:
-				text = eventFrameAncestor.friendlyName()
+				text = eventFrameAncestor.friendlyName(True)
 			breadcrumbs.append({"url" : url_for("eventFrames.dashboard", eventFrameId = eventFrameAncestor.EventFrameId), "text" : text})
 
 		if parentEventFrame.ParentEventFrameId:
-			text = parentEventFrame.EventFrameTemplate.Name + "&nbsp;&nbsp;/&nbsp;&nbsp;" + parentEventFrame.friendlyName()
+			text = parentEventFrame.EventFrameTemplate.Name + "&nbsp;&nbsp;/&nbsp;&nbsp;" + parentEventFrame.friendlyName(True)
 		else:
-			text = parentEventFrame.friendlyName()
+			text = parentEventFrame.friendlyName(True)
 		breadcrumbs.append({"url" : url_for("eventFrames.dashboard", eventFrameId = parentEventFrame.EventFrameId), "text" : text})
 	else:
 		form.eventFrameTemplateId.data = eventFrameTemplateId
@@ -174,15 +174,15 @@ def editEventFrame(eventFrameId):
 				"text" : eventFrame.origin().EventFrameTemplate.Name}]
 		for eventFrameAncestor in eventFrame.ancestors([]):
 			if eventFrameAncestor.ParentEventFrameId:
-				text = eventFrameAncestor.EventFrameTemplate.Name + "&nbsp;&nbsp;/&nbsp;&nbsp;" + eventFrameAncestor.friendlyName()
+				text = eventFrameAncestor.EventFrameTemplate.Name + "&nbsp;&nbsp;/&nbsp;&nbsp;" + eventFrameAncestor.friendlyName(True)
 			else:
-				text = eventFrameAncestor.friendlyName()
+				text = eventFrameAncestor.friendlyName(True)
 			breadcrumbs.append({"url" : url_for("eventFrames.dashboard", eventFrameId = eventFrameAncestor.EventFrameId), "text" : text})
 
 		if eventFrame.ParentEventFrameId:
-			text = eventFrame.EventFrameTemplate.Name + "&nbsp;&nbsp;/&nbsp;&nbsp;" + eventFrame.friendlyName()
+			text = eventFrame.EventFrameTemplate.Name + "&nbsp;&nbsp;/&nbsp;&nbsp;" + eventFrame.friendlyName(True)
 		else:
-			text = eventFrame.friendlyName()
+			text = eventFrame.friendlyName(True)
 		breadcrumbs.append({"url" : None, "text" : text})
 	else:
 		form.element.data = eventFrame.Element
@@ -197,7 +197,7 @@ def editEventFrame(eventFrameId):
 				selectedId = eventFrame.EventFrameTemplate.ElementTemplate.ElementTemplateId), "text" : eventFrame.EventFrameTemplate.ElementTemplate.Name},
 			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "EventFrameTemplate",
 				selectedId = eventFrame.EventFrameTemplate.EventFrameTemplateId), "text" : eventFrame.EventFrameTemplate.Name},
-			{"url" : None, "text" : eventFrame.friendlyName()}]	
+			{"url" : None, "text" : eventFrame.friendlyName(True)}]	
 
 	form.endTimestamp.data = eventFrame.EndTimestamp
 	form.name.data = eventFrame.Name
@@ -212,7 +212,7 @@ def endEventFrame(eventFrameId):
 	eventFrame = EventFrame.query.get_or_404(eventFrameId)
 	eventFrame.EndTimestamp = datetime.now()
 	db.session.commit()
-	flash("You have successfully ended \"{}\" for event frame \"{}\".".format(eventFrame.EventFrameTemplate.Name, eventFrame.friendlyName()),
+	flash("You have successfully ended \"{}\" for event frame \"{}\".".format(eventFrame.EventFrameTemplate.Name, eventFrame.friendlyName(True)),
 		"alert alert-success")
 	return redirect(request.referrer)
 
