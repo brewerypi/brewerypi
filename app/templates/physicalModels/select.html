@@ -32,14 +32,16 @@ Physical Models
     {% if childrenClass == "Enterprise" %}
         <a class = "btn btn-default" title = "Add" href = "{{ url_for("enterprises.addEnterprise") }}" role = "button">
             <span class = "glyphicon glyphicon-plus"></span></a>
+        <br><br>
     {% elif childrenClass == "Site" %}
         <a class = "btn btn-default" title = "Add" href = "{{ url_for("sites.addSite", enterpriseId = parent.id()) }}" role = "button">
             <span class = "glyphicon glyphicon-plus"></span></a>
+        <br><br>
     {% elif childrenClass == "Area" %}
         <a class = "btn btn-default" title = "Add" href = "{{ url_for("areas.addArea", siteId = parent.id()) }}" role = "button">
             <span class = "glyphicon glyphicon-plus"></span></a>
+        <br><br>
     {% endif %}
-    <br><br>
     <table id = "physicalModelsTable" class = "table">
         <thead>
             <tr>

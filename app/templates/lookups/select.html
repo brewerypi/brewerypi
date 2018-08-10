@@ -32,11 +32,12 @@ Lookups
     {% if childrenClass == "Lookup" and parent %}
         <a class = "btn btn-default" title = "Add" href = "{{ url_for("lookups.addLookup", enterpriseId = parent.id()) }}" role = "button">
             <span class = "glyphicon glyphicon-plus"></span></a>
+        <br><br>
     {% elif childrenClass == "LookupValue" %}
         <a class = "btn btn-default" title = "Add" href = "{{ url_for("lookupValues.addLookupValue", lookupId = parent.id()) }}" role = "button">
             <span class = "glyphicon glyphicon-plus"></span></a>
+        <br><br>
     {% endif %}
-    <br><br>
     <table id = "lookupsTable" class = "table">
         <thead>
             <tr>

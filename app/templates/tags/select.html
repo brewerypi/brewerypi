@@ -43,8 +43,8 @@ Tags
             <span class = "glyphicon glyphicon-plus"></span>Tag</a>
         <a class = "btn btn-default" title = "Add Lookup Tag" href = "{{ url_for("tags.addTag", areaId = parent.id(), lookup = True) }}" role = "button">
             <span class = "glyphicon glyphicon-plus"></span> Lookup Tag</a>
-    {% endif %}
     <br><br>    
+    {% endif %}
     <table id = "tagsTable" class = "table">
         <thead>
             <tr>

@@ -54,15 +54,17 @@ Tag Value Notes
     {% if elementAttribute %}
         <a class = "btn btn-default" title = "Add" href = "{{ url_for("tagValueNotes.addTagValueNote", tagValueId = tagValue.TagValueId,
             elementAttributeId = elementAttribute.ElementAttributeId) }}" role = "button"><span class = "glyphicon glyphicon-plus"></span></a>
+        <br><br>
     {% elif eventFrame %}
         <a class = "btn btn-default" title = "Add" href = "{{ url_for("tagValueNotes.addTagValueNote", tagValueId = tagValue.TagValueId,
             eventFrameId = eventFrame.EventFrameId, eventFrameAttributeId = eventFrameAttribute.EventFrameAttributeId) }}" role = "button">
             <span class = "glyphicon glyphicon-plus"></span></a>
+        <br><br>
     {% else %}
         <a class = "btn btn-default" title = "Add" href = "{{ url_for("tagValueNotes.addTagValueNote", tagValueId = tagValue.TagValueId) }}" role = "button">
             <span class = "glyphicon glyphicon-plus"></span></a>
+        <br><br>
     {% endif %}
-    <br><br>
     <table id = "tagValueNotesTable" class = "table">
         <thead>
             <tr>

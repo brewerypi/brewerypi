@@ -66,14 +66,16 @@ Event Frames
     {% if childrenClass == "EventFrameTemplate" %}
         <a class = "btn btn-default" title = "Add" href = "{{ url_for("eventFrameTemplates.addEventFrameTemplate", elementTemplateId = parent.id()) }}"
             role = "button"><span class = "glyphicon glyphicon-plus"></span></a>
+        <br><br>
     {% elif childrenClass == "EventFrame" %}
         <a class = "btn btn-default" title = "Add" href = "{{ url_for("eventFrames.addEventFrame", eventFrameTemplateId = parent.id()) }}" role = "button">
             <span class = "glyphicon glyphicon-plus"></span></a>
+        <br><br>
     {% elif childrenClass == "DescendantEventFrameTemplate" %}
         <a class = "btn btn-default" title = "Add" href = "{{ url_for("eventFrameTemplates.addEventFrameTemplate",
             parentEventFrameTemplateId = parent.id()) }}" role = "button"><span class = "glyphicon glyphicon-plus"></span></a>
+        <br><br>
     {% endif %}
-    <br><br>
     <table id = "table" class = "table">
         <thead>
             <tr>

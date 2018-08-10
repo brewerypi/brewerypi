@@ -49,14 +49,16 @@ Tag Values
     {% if elementAttribute %}
         <a class = "btn btn-default" title = "Add" href = "{{ url_for("tagValues.addTagValue", elementAttributeId = elementAttribute.ElementAttributeId) }}"
             role = "button"><span class = "glyphicon glyphicon-plus"></span></a>
+        <br><br>
     {% elif eventFrame %}
         <a class = "btn btn-default" title = "Add" href = "{{ url_for("tagValues.addTagValue", eventFrameId = eventFrame.EventFrameId,
             eventFrameAttributeId = eventFrameAttribute.EventFrameAttributeId) }}" role = "button"><span class = "glyphicon glyphicon-plus"></span></a>
+        <br><br>
     {% else %}
         <a class = "btn btn-default" title = "Add" href = "{{ url_for("tagValues.addTagValue", tagId = tag.TagId) }}" role = "button">
             <span class = "glyphicon glyphicon-plus"></span></a>
+        <br><br>
     {% endif %}
-    <br><br>
     <table id = "tagValuesTable" class = "table">
         <thead>
             <tr>
