@@ -36,8 +36,7 @@ Event Frame Attributes
         </thead>
         <tbody>
             {% for eventFrameAttributeTemplate in eventFrameAttributeTemplates %}
-                {% set eventFrameAttributes = eventFrameAttributeTemplate.EventFrameAttributes.
-                    filter_by(EventFrameAttributeTemplateId = eventFrameAttributeTemplate.EventFrameAttributeTemplateId, ElementId = eventFrame.ElementId) %}
+                {% set eventFrameAttributes = eventFrameAttributeTemplate.EventFrameAttributes.filter_by(ElementId = eventFrame.ElementId) %}
                 {% if eventFrameAttributes.count() > 0 %}
                     {% set eventFrameAttribute = eventFrameAttributes | first %}
                 {% else %}
