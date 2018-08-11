@@ -15,10 +15,7 @@ def listEventFrameAttributes(eventFrameId):
 	eventFrameTemplateIds = []
 	for descendantEventFrameTemplate in eventFrameTemplate.descendants([], 0):
 		eventFrameTemplateIds.append(descendantEventFrameTemplate["eventFrameTemplate"].EventFrameTemplateId)
-	eventFrameAttributeTemplates = EventFrameAttributeTemplate.query.join(EventFrameTemplate, EventFrame). \
-		outerjoin(EventFrameAttribute, and_(EventFrame.ElementId == EventFrameAttribute.ElementId, \
-		EventFrameAttributeTemplate.EventFrameAttributeTemplateId == EventFrameAttribute.EventFrameAttributeTemplateId)). \
-		filter(EventFrameTemplate.EventFrameTemplateId.in_(eventFrameTemplateIds))
+	eventFrameAttributeTemplates = EventFrameAttributeTemplate.query.filter(EventFrameAttributeTemplate.EventFrameTemplateId.in_(eventFrameTemplateIds))
 	tags = Tag.query.join(Area, Site, Enterprise).order_by(Enterprise.Abbreviation, Site.Abbreviation, Area.Abbreviation, Tag.Name)
 	return render_template("eventFrameAttributes/eventFrameAttributes.html", eventFrame = eventFrame,
 		eventFrameAttributeTemplates = eventFrameAttributeTemplates, tags = tags)
