@@ -8,12 +8,37 @@ Create Date: 2018-06-16 09:32:46.708758
 from alembic import op
 import sqlalchemy as sa
 from sqlalchemy.dialects import mysql
+from app.replaceableObjects import ReplaceableObject
+
 
 # revision identifiers, used by Alembic.
 revision = 'ef09d330ca05'
 down_revision = 'f64c7735ec58'
 branch_labels = None
 depends_on = None
+
+
+spElementSummary = ReplaceableObject(
+    "spElementSummary",
+    "IN elementAttributeTemplateNames TEXT, IN elementIds TEXT",
+    None,
+    """
+BEGIN
+	SET @@group_concat_max_len = 5000;
+	SET @sql = NULL;
+
+	SELECT GROUP_CONCAT(DISTINCT CONCAT('MAX(IF(ElementAttributeTemplate.Name = ''', ElementAttributeTemplate.Name, ''', IF(Tag.LookupId IS NULL, t3.Value, LookupValue.Name), '''')) AS ''', ElementAttributeTemplate.Name, '''')) INTO @sql
+	FROM ElementAttributeTemplate
+    WHERE FIND_IN_SET(ElementAttributeTemplate.Name, elementAttributeTemplateNames) > 0;
+
+	SET @sql = CONCAT('SELECT t2.Name AS ''Element'', ElementTemplate.Name AS ''Template'', ', @sql, ' FROM ElementAttribute t1 INNER JOIN ElementAttributeTemplate ON t1.ElementAttributeTemplateId = ElementAttributeTemplate.ElementAttributeTemplateId INNER JOIN Element t2 ON t1.ElementId = t2.ElementId INNER JOIN ElementTemplate ON t2.ElementTemplateId = ElementTemplate.ElementTemplateId INNER JOIN Tag ON t1.TagId = Tag.TagId LEFT OUTER JOIN Lookup ON Tag.LookupId = Lookup.LookupId LEFT OUTER JOIN LookupValue ON Lookup.LookupId = LookupValue.LookupId INNER JOIN TagValue t3 ON CASE WHEN Tag.LookupId IS NULL THEN Tag.TagId = t3.TagId ELSE Tag.TagId = t3.TagId AND LookupValue.Value = t3.Value END INNER JOIN (SELECT ElementAttribute.ElementId, ElementAttributeTemplate.ElementAttributeTemplateId, MAX(TagValue.Timestamp) AS MaxTimestamp FROM ElementAttribute INNER JOIN ElementAttributeTemplate ON ElementAttribute.ElementAttributeTemplateId = ElementAttributeTemplate.ElementAttributeTemplateId INNER JOIN Tag ON ElementAttribute.TagId = Tag.TagId INNER JOIN TagValue ON Tag.TagId = TagValue.TagId GROUP BY ElementAttribute.ElementId, ElementAttributeTemplate.ElementAttributeTemplateId) t4 ON t1.ElementId = t4.ElementId AND t1.ElementAttributeTemplateId = t4.ElementAttributeTemplateId AND t3.Timestamp = t4.MaxTimestamp WHERE t2.ElementId IN (', elementIds ,') GROUP BY t1.ElementId ORDER BY ElementTemplate.Name, t2.Name');
+
+	PREPARE stmt FROM @sql;
+	EXECUTE stmt;
+	DEALLOCATE PREPARE stmt;
+END;
+    """
+)
 
 
 def upgrade():
@@ -81,6 +106,7 @@ def upgrade():
     # op.drop_constraint('FK__AttributeTemplate$Have$ElementAttribute', 'ElementAttribute', type_='foreignkey')
     op.create_foreign_key('FK__ElementAttributeTemplate$Have$ElementAttribute', 'ElementAttribute', 'ElementAttributeTemplate', ['ElementAttributeTemplateId'], ['ElementAttributeTemplateId'])
     op.drop_column('ElementAttribute', 'AttributeTemplateId')
+    op.replaceStoredProcedure(spElementSummary, replaces = "1476a62140ae.spElementSummary")
     # ### end Alembic commands ###
 
 
@@ -130,4 +156,5 @@ def downgrade():
     op.drop_table('EventFrameAttribute')
     op.drop_table('EventFrameAttributeTemplate')
     op.drop_table('ElementAttributeTemplate')
+    op.replaceStoredProcedure(spElementSummary, replaceWith = "1476a62140ae.spElementSummary")
     # ### end Alembic commands ###
