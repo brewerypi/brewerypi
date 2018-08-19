@@ -63,6 +63,7 @@ Data Entry - Elements
         <thead>
             <tr>
                 <th></th>
+                <th></th>
                 <th>Name</th>
                 <th>Description</th>
                 <th></th>
@@ -78,11 +79,15 @@ Data Entry - Elements
                         {% if childrenClass == "Element" %}
                             <td><a class = "btn btn-default" title = "Select" href = "{{ url_for("elements.dashboard",
                                 elementId = child.id()) }}"><span class = "glyphicon glyphicon-list"></span></a></td>
+                            <td><a class = "btn btn-default" title = "Grafana" href = "{{ child.grafanaUrl() }}" target = "_blank">
+                                <span class = "glyphicon glyphicon-stats"></span></a></td>
                         {% elif childrenClass == "ElementAttributeTemplate" %}
+                            <td></td>
                             <td></td>
                         {% else %}
                             <td><a class = "btn btn-default" title = "Select" href = "{{ url_for("elements.selectElement",
                                 selectedClass = child.__class__.__name__, selectedId = child.id()) }}"><span class = "glyphicon glyphicon-list"></span></a></td>
+                            <td></td>
                         {% endif %}
                         <td>{{ child.Name }}</td>
                         <td>{{ child.Description }}</td>
@@ -155,6 +160,7 @@ Data Entry - Elements
                 "columns":
                 [
                     { "orderable": false }, // Details button.
+                    { "orderable": false }, // Grafana button.
                     null,
                     null,
                     { "orderable": false }, // Associate button.

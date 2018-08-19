@@ -80,6 +80,7 @@ Event Frames
         <thead>
             <tr>
                 <th></th>
+                <th></th>
                 <th>Name</th>
                 {% if childrenClass == "Enterprise" or childrenClass == "Site" or childrenClass == "ElementTemplate" %}
                     <th>Description</th>
@@ -112,13 +113,17 @@ Event Frames
                         {% if childrenClass == "EventFrame" %}
                             <td><a class = "btn btn-default" title = "Select" href = "{{ url_for("eventFrames.dashboard", eventFrameId = child.id(),) }}">
                                 <span class = "glyphicon glyphicon-list"></span></a></td>
+                            <td><a class = "btn btn-default" title = "Grafana" href = "{{ child.grafanaUrl() }}" target = "_blank">
+                                <span class = "glyphicon glyphicon-stats"></span></a></td>
                         {% elif childrenClass == "DescendantEventFrameTemplate" %}
                             <td><a class = "btn btn-default" title = "Select" href = "{{ url_for("eventFrames.selectEventFrame",
                                 selectedClass = child.__class__.__name__, selectedId = child.id(),
                                 selectedOperation = "configure") }}"><span class = "glyphicon glyphicon-list"></span></a></td>
+                            <td></td>
                         {% else %}
                             <td><a class = "btn btn-default" title = "Select" href = "{{ url_for("eventFrames.selectEventFrame",
                                 selectedClass = child.__class__.__name__, selectedId = child.id()) }}"><span class = "glyphicon glyphicon-list"></span></a></td>
+                            <td></td>
                         {% endif %}
                         {% if childrenClass == "Enterprise" or childrenClass == "Site" or childrenClass == "ElementTemplate" %}
                             <td>{{ child.Name }}</td>
@@ -224,16 +229,17 @@ Event Frames
                 "order":
                 [
                     {% if childrenClass == "Enterprise" or childrenClass == "Site" or childrenClass == "ElementTemplate" %}
-                        [1, "asc"]              // Name.
+                        [2, "asc"]              // Name.
                     {% elif childrenClass == "EventFrameTemplate" %}
-                        [1, "asc"]              // Name.
+                        [2, "asc"]              // Name.
                     {% elif childrenClass == "EventFrame" %}
-                        [3, "desc"]             // Start timestamp.
+                        [4, "desc"]             // Start timestamp.
                     {% endif %}
                 ],
                 "columns":
                 [
                     { "orderable": false },     // Select button.
+                    { "orderable": false },     // Grafana button.
                     {% if childrenClass == "Enterprise" or childrenClass == "Site" or childrenClass == "ElementTemplate" %}
                         null,
                         null
