@@ -70,7 +70,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": null,
-  "iteration": 1534657723329,
+  "iteration": 1534662028018,
   "links": [],
   "panels": [
     {
@@ -79,7 +79,7 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": "${DS_BREWERY_PI}",
-      "decimals": 1,
+      "decimals": null,
       "fill": 0,
       "gridPos": {
         "h": 12,
@@ -138,8 +138,9 @@
       },
       "yaxes": [
         {
+          "decimals": 1,
           "format": "short",
-          "label": null,
+          "label": "",
           "logBase": 1,
           "max": null,
           "min": null,
