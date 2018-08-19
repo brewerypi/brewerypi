@@ -14,7 +14,7 @@
       "type": "grafana",
       "id": "grafana",
       "name": "Grafana",
-      "version": "5.1.3"
+      "version": "5.2.2"
     },
     {
       "type": "datasource",
@@ -46,7 +46,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": null,
-  "iteration": 1530826137806,
+  "iteration": 1534657785468,
   "links": [],
   "panels": [
     {
@@ -284,5 +284,7 @@
     ]
   },
   "timezone": "",
-  "title": "Element Summary"
+  "title": "Element Summary",
+  "uid": "ElementSummary",
+  "version": 1
 }

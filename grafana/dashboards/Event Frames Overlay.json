@@ -14,7 +14,7 @@
       "type": "grafana",
       "id": "grafana",
       "name": "Grafana",
-      "version": "5.1.3"
+      "version": "5.2.2"
     },
     {
       "type": "panel",
@@ -100,7 +100,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": null,
-  "iteration": 1530826202278,
+  "iteration": 1534657924257,
   "links": [],
   "panels": [
     {
@@ -425,5 +425,7 @@
     ]
   },
   "timezone": "",
-  "title": "Event Frames Overlay"
+  "title": "Event Frames Overlay",
+  "uid": "EventFramesOverlay",
+  "version": 1
 }
