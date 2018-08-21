@@ -23,7 +23,7 @@
     <h1>{{ element.Name }} <small>Attributes</small></h1>
 </div>
 <div>
-    <a class = "btn btn-default" title = "Grafana" href = "{{ "ElementValuesGraph" | grafanaUrl(element.ElementId) }}" target = "_blank">
+    <a class = "btn btn-default" title = "Grafana" href = "{{ "ElementValuesGraph" | grafanaUrl({"elementId": element.ElementId}) }}" target = "_blank">
         <span class = "glyphicon glyphicon-stats"></span></a>
     <br><br>
     <table id = "attributesTable" class = "table">

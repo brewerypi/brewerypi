@@ -47,16 +47,24 @@ Data Entry - Elements
 </div>
 <div>
     {% if childrenClass == "Element" and current_user.isAdministrator() %}
-        <a class = "btn btn-default" title = "Add" href = "{{ url_for("elements.addElement", elementTemplateId = parent.id()) }}" role = "button">
-            <span class = "glyphicon glyphicon-plus"></span></a>
+        {% if current_user.isAdministrator() %}
+            <a class = "btn btn-default" title = "Add" href = "{{ url_for("elements.addElement", elementTemplateId = parent.id()) }}" role = "button">
+                <span class = "glyphicon glyphicon-plus"></span></a>
+        {% endif %}
+        <td><a class = "btn btn-default" title = "Grafana" href = "{{ "ElementSummary" | grafanaUrl({"elementTemplateId": parent.id()}) }}" target = "_blank">
+            <span class = "glyphicon glyphicon-stats"></span></a></td>
         <br><br>
     {% elif childrenClass == "ElementAttributeTemplate" and current_user.isAdministrator() %}
         <a class = "btn btn-default" title = "Add" href = "{{ url_for("elementAttributeTemplates.addElementAttributeTemplate",
             elementTemplateId = parent.id()) }}" role = "button"><span class = "glyphicon glyphicon-plus"></span></a>
         <br><br>
-    {% elif childrenClass == "ElementTemplate" and current_user.isAdministrator() %}
-        <a class = "btn btn-default" title = "Add" href = "{{ url_for("elementTemplates.addElementTemplate", siteId = parent.id()) }}"
-            role = "button"><span class = "glyphicon glyphicon-plus"></span></a>
+    {% elif childrenClass == "ElementTemplate" %}
+        {% if current_user.isAdministrator() %}
+            <a class = "btn btn-default" title = "Add" href = "{{ url_for("elementTemplates.addElementTemplate", siteId = parent.id()) }}"
+                role = "button"><span class = "glyphicon glyphicon-plus"></span></a>
+        {% endif %}
+        <td><a class = "btn btn-default" title = "Grafana" href = "{{ "ElementSummary" | grafanaUrl({"siteId": parent.id()}) }}" target = "_blank">
+            <span class = "glyphicon glyphicon-stats"></span></a></td>
         <br><br>
     {% endif %}
     <table id = "table" class = "table">
@@ -79,8 +87,8 @@ Data Entry - Elements
                         {% if childrenClass == "Element" %}
                             <td><a class = "btn btn-default" title = "Select" href = "{{ url_for("elements.dashboard",
                                 elementId = child.id()) }}"><span class = "glyphicon glyphicon-list"></span></a></td>
-                            <td><a class = "btn btn-default" title = "Grafana" href = "{{ "ElementValuesGraph" | grafanaUrl(child.id()) }}" target = "_blank">
-                                <span class = "glyphicon glyphicon-stats"></span></a></td>
+                            <td><a class = "btn btn-default" title = "Grafana" href = "{{ "ElementValuesGraph" | grafanaUrl({"elementId": child.id()}) }}"
+                                target = "_blank"><span class = "glyphicon glyphicon-stats"></span></a></td>
                         {% elif childrenClass == "ElementAttributeTemplate" %}
                             <td></td>
                             <td></td>
