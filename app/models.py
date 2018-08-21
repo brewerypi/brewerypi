@@ -1,5 +1,5 @@
 from flask_login import AnonymousUserMixin, UserMixin
-from sqlalchemy import and_, func, Index, PrimaryKeyConstraint, UniqueConstraint
+from sqlalchemy import and_, Index, PrimaryKeyConstraint, UniqueConstraint
 from werkzeug.security import generate_password_hash, check_password_hash
 from app import db
 from . import loginManager
@@ -53,10 +53,6 @@ class Element(db.Model):
 
 	def __repr__(self):
 		return "<Element: {}>".format(self.Name)
-
-	def grafanaUrl(self):
-		return "http://localhost:3000/d/ElementValuesGraph/element-values-graph?orgId=1&var-enterprise=2&var-site=2&var-elementTemplates=All" + \
-			"&var-elements={}&var-attributeTemplates=All&var-lookups=All".format(self.ElementId)
 
 	def id(self):
 		return self.ElementId
@@ -163,7 +159,7 @@ class EventFrame(db.Model):
 	EventFrameNotes = db.relationship("EventFrameNote", backref = "EventFrame", lazy = "dynamic")
 
 	def __repr__(self):
-		return "<EventFrame: {}>".format(self.Name)
+		return "<EventFrame: {}>".format(self.friendlyName())
 
 	def ancestors(self, ancestors):
 		if self.ParentEventFrameId == None:
@@ -186,20 +182,6 @@ class EventFrame(db.Model):
 					return "{} -".format(self.StartTimestamp.strftime("%Y-%m-%d %H:%M:%S"))
 				else:
 					return "{} -".format(self.StartTimestamp.strftime("%Y-%m-%d %H:%M"))
-
-	def grafanaUrl(self):
-		startTimestamp = EventFrame.query.with_entities(func.unix_timestamp(EventFrame.StartTimestamp)).filter_by(EventFrameId = self.EventFrameId).one()[0]
-		if self.EndTimestamp:
-			endTimestamp = EventFrame.query.with_entities(func.unix_timestamp(EventFrame.EndTimestamp)).filter_by(EventFrameId = self.EventFrameId).one()[0]
-			return "http://localhost:3000/d/EventFramesGraph/event-frames-graph?orgId=1&from={}000".format(startTimestamp) + \
-				"&to={}000".format(endTimestamp) + \
-				"&var-enterprise=2&var-site=2&var-elementTemplate=4&var-eventFrameTemplate=1&var-eventFrame={}".format(self.EventFrameId) + \
-				"&var-attributeTemplates=All&var-lookups=All"
-		else:
-			return "http://localhost:3000/d/EventFramesGraph/event-frames-graph?orgId=1&from={}000".format(startTimestamp) + \
-				"&to=now&var-enterprise=2&var-site=2&var-elementTemplate=4&var-eventFrameTemplate=1&var-eventFrame={}".format(self.EventFrameId) + \
-				"&var-attributeTemplates=All&var-lookups=All"
-			return ""
 
 	def hasDescendants(self):
 		if self.EventFrames:
@@ -475,10 +457,6 @@ class Tag(db.Model):
 
 	def fullAbbreviatedPathName(self):
 		return "{}_{}_{}_{}".format(self.Area.Site.Enterprise.Abbreviation, self.Area.Site.Abbreviation, self.Area.Abbreviation, self.Name)
-
-	def grafanaUrl(self):
-		return "http://localhost:3000/d/TagValuesGraph/tag-values-graph?orgId=1&var-enterprises=All&var-sites=All&var-areas=All&var-tags={}&var-lookups=All". \
-			format(self.TagId)
 
 	def id(self):
 		return self.TagId

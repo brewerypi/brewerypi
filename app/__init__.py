@@ -24,6 +24,9 @@ def create_app(configClass = Config):
 	from . authentications import authentications as authenticationsBlueprint
 	app.register_blueprint(authenticationsBlueprint)
 
+	from . customTemplateFilters import customTemplateFilters as customTemplateFiltersBlueprint
+	app.register_blueprint(customTemplateFiltersBlueprint)
+
 	from . elements import elements as elementsBlueprint
 	app.register_blueprint(elementsBlueprint)
 
