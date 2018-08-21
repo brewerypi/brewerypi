@@ -10,6 +10,8 @@ class Config:
 	EXPORT_ELEMENT_ATTRIBUTES_FILENAME = "elementsAttributes.csv"
 	EXPORT_FOLDER = "exports"
 	EXPORT_TAGS_FILENAME = "tags.csv"
+	GRAFANA_HOSTNAME = os.environ.get("GRAFANA_HOSTNAME") or "localhost"
+	GRAFANA_PORT = os.environ.get("GRAFANA_PORT") or "3000"
 	IMPORT_DATABASE_FILENAME = "BreweryPi.sql"
 	IMPORT_ELEMENT_ATTRIBUTES_FILENAME = "elementAttributes.csv"
 	IMPORT_FOLDER = "imports"

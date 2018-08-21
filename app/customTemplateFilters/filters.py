@@ -1,13 +1,17 @@
+from flask import current_app
 from sqlalchemy import func
 from . import customTemplateFilters
 from .. models import Element, ElementTemplate, EventFrame, Site
 
 @customTemplateFilters.app_template_filter()
-def grafanaUrl(uid, parameters):
-    if uid == "ElementSummary":
+def grafanaUrl(uid, parameters = None):
+    if uid == "":
+        return "http://{}:{}".format(current_app.config["GRAFANA_HOSTNAME"], current_app.config["GRAFANA_PORT"])
+    elif uid == "ElementSummary":
         if "siteId" in parameters:
             site = Site.query.get_or_404(parameters["siteId"])
-            return "http://localhost:3000/d/ElementSummary/element-summary?orgId=1" + \
+            return "http://{}:{}".format(current_app.config["GRAFANA_HOSTNAME"], current_app.config["GRAFANA_PORT"]) + \
+                "/d/ElementSummary/element-summary?orgId=1" + \
                 "&var-enterprise={}".format(site.Enterprise.EnterpriseId) + \
                 "&var-site={}".format(parameters["siteId"]) + \
                 "&var-elementTemplates=All" + \
@@ -18,7 +22,8 @@ def grafanaUrl(uid, parameters):
             elements = ""
             for element in elementTemplate.Elements:
                 elements += "&var-elements={}".format(element.ElementId)
-            return "http://localhost:3000/d/ElementSummary/element-summary?orgId=1" + \
+            return "http://{}:{}".format(current_app.config["GRAFANA_HOSTNAME"], current_app.config["GRAFANA_PORT"]) + \
+                "/d/ElementSummary/element-summary?orgId=1" + \
                 "&var-enterprise={}".format(elementTemplate.Site.Enterprise.EnterpriseId) + \
                 "&var-site={}".format(elementTemplate.Site.SiteId) + \
                 "&var-elementTemplates={}".format(elementTemplate.ElementTemplateId) + \
@@ -26,7 +31,8 @@ def grafanaUrl(uid, parameters):
                 "&var-attributeTemplates=All"
     elif uid == "ElementValuesGraph":
         element = Element.query.get_or_404(parameters["elementId"])
-        return "http://localhost:3000/d/ElementValuesGraph/element-values-graph?orgId=1" + \
+        return "http://{}:{}".format(current_app.config["GRAFANA_HOSTNAME"], current_app.config["GRAFANA_PORT"]) + \
+            "/d/ElementValuesGraph/element-values-graph?orgId=1" + \
             "&var-enterprise={}".format(element.ElementTemplate.Site.Enterprise.EnterpriseId) + \
             "&var-site={}".format(element.ElementTemplate.Site.SiteId) + \
             "&var-elementTemplates=All" + \
@@ -40,7 +46,8 @@ def grafanaUrl(uid, parameters):
         if eventFrame.EndTimestamp:
             endTimestamp = EventFrame.query.with_entities(func.unix_timestamp(EventFrame.EndTimestamp)).filter_by(EventFrameId = eventFrame.EventFrameId). \
                 one()[0]
-            return "http://localhost:3000/d/EventFramesGraph/event-frames-graph?orgId=1" + \
+            return "http://{}:{}".format(current_app.config["GRAFANA_HOSTNAME"], current_app.config["GRAFANA_PORT"]) + \
+                "/d/EventFramesGraph/event-frames-graph?orgId=1" + \
                 "&from={}000".format(startTimestamp) + \
                 "&to={}000".format(endTimestamp) + \
                 "&var-enterprise={}".format(eventFrame.EventFrameTemplate.ElementTemplate.Site.Enterprise.EnterpriseId) + \
@@ -51,7 +58,8 @@ def grafanaUrl(uid, parameters):
                 "&var-attributeTemplates=All" + \
                 "&var-lookups=All"
         else:
-            return "http://localhost:3000/d/EventFramesGraph/event-frames-graph?orgId=1" + \
+            return "http://{}:{}".format(current_app.config["GRAFANA_HOSTNAME"], current_app.config["GRAFANA_PORT"]) + \
+                "/d/EventFramesGraph/event-frames-graph?orgId=1" + \
                 "&from={}000".format(startTimestamp) + \
                 "&to=now" + \
                 "&var-enterprise={}".format(eventFrame.EventFrameTemplate.ElementTemplate.Site.Enterprise.EnterpriseId) + \
@@ -62,7 +70,8 @@ def grafanaUrl(uid, parameters):
                 "&var-attributeTemplates=All" + \
                 "&var-lookups=All"
     elif uid == "TagValuesGraph":
-        return "http://localhost:3000/d/TagValuesGraph/tag-values-graph?orgId=1" + \
+        return "http://{}:{}".format(current_app.config["GRAFANA_HOSTNAME"], current_app.config["GRAFANA_PORT"]) + \
+            "/d/TagValuesGraph/tag-values-graph?orgId=1" + \
             "&var-enterprises=All" + \
             "&var-sites=All" + \
             "&var-areas=All" + \

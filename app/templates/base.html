@@ -62,9 +62,7 @@
                         <li><a href = "{{ url_for("eventFrames.selectEventFrame") }}">Event Frames</a></li>
                     </ul>
                 </li>
-                {% if config["IS_RASPBERRY_PI"] %}
-                    <li><a href = "/grafana" target = "_blank">Reports</a></li>
-                {% endif %}
+                <li><a href = {{ "" | grafanaUrl() }} target = "_blank">Grafana</a></li>
             </ul>
             {% endif %}
             <ul class = "nav navbar-nav navbar-right">
