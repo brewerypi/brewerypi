@@ -63,13 +63,23 @@ Event Frames
     <h1>Event Frames <small>{{ pageHeaderSubText }}</small></h1>
 </div>
 <div>
-    {% if childrenClass == "EventFrameTemplate" and current_user.isAdministrator() %}
-        <a class = "btn btn-default" title = "Add" href = "{{ url_for("eventFrameTemplates.addEventFrameTemplate", elementTemplateId = parent.id()) }}"
-            role = "button"><span class = "glyphicon glyphicon-plus"></span></a>
+    {% if childrenClass == "ElementTemplate" %}
+        <td><a class = "btn btn-default" title = "Grafana" href = "{{ "ActiveEventFrameSummary" | grafanaUrl({"siteId": parent.id()}) }}"
+            target = "_blank"><span class = "glyphicon glyphicon-stats"></span></a></td>
+        <br><br>
+    {% elif childrenClass == "EventFrameTemplate" %}
+        {% if current_user.isAdministrator() %}
+            <a class = "btn btn-default" title = "Add" href = "{{ url_for("eventFrameTemplates.addEventFrameTemplate", elementTemplateId = parent.id()) }}"
+                role = "button"><span class = "glyphicon glyphicon-plus"></span></a>
+        {% endif %}
+        <td><a class = "btn btn-default" title = "Grafana" href = "{{ "ActiveEventFrameSummary" | grafanaUrl({"elementTemplateId": parent.id()}) }}"
+            target = "_blank"><span class = "glyphicon glyphicon-stats"></span></a></td>
         <br><br>
     {% elif childrenClass == "EventFrame" %}
         <a class = "btn btn-default" title = "Add" href = "{{ url_for("eventFrames.addEventFrame", eventFrameTemplateId = parent.id()) }}" role = "button">
             <span class = "glyphicon glyphicon-plus"></span></a>
+        <td><a class = "btn btn-default" title = "Grafana" href = "{{ "ActiveEventFrameSummary" | grafanaUrl({"eventFrameTemplateId": parent.id()}) }}"
+            target = "_blank"><span class = "glyphicon glyphicon-stats"></span></a></td>
         <br><br>
     {% elif childrenClass == "DescendantEventFrameTemplate" %}
         <a class = "btn btn-default" title = "Add" href = "{{ url_for("eventFrameTemplates.addEventFrameTemplate",

@@ -1,12 +1,40 @@
 from flask import current_app
 from sqlalchemy import func
 from . import customTemplateFilters
-from .. models import Element, ElementTemplate, EventFrame, Site
+from .. models import Element, ElementTemplate, EventFrame, EventFrameTemplate, Site
 
 @customTemplateFilters.app_template_filter()
 def grafanaUrl(uid, parameters = None):
     if uid == "":
         return "http://{}:{}".format(current_app.config["GRAFANA_HOSTNAME"], current_app.config["GRAFANA_PORT"])
+    elif uid == "ActiveEventFrameSummary":
+        if "elementTemplateId" in parameters:
+            elementTemplate = ElementTemplate.query.get_or_404(parameters["elementTemplateId"])
+            return "http://{}:{}".format(current_app.config["GRAFANA_HOSTNAME"], current_app.config["GRAFANA_PORT"]) + \
+                "/d/ActiveEventFrameSummary/active-event-frame-summary?orgId=1" + \
+                "&var-enterprise={}".format(elementTemplate.Site.Enterprise.EnterpriseId) + \
+                "&var-site={}".format(elementTemplate.Site.SiteId) + \
+                "&var-elementTemplates={}".format(elementTemplate.ElementTemplateId) + \
+                "&var-eventFrameTemplates=All" + \
+                "&var-eventFrameAttributeTemplates=All"
+        elif "eventFrameTemplateId" in parameters:
+            eventFrameTemplate = EventFrameTemplate.query.get_or_404(parameters["eventFrameTemplateId"])
+            return "http://{}:{}".format(current_app.config["GRAFANA_HOSTNAME"], current_app.config["GRAFANA_PORT"]) + \
+                "/d/ActiveEventFrameSummary/active-event-frame-summary?orgId=1" + \
+                "&var-enterprise={}".format(eventFrameTemplate.ElementTemplate.Site.Enterprise.EnterpriseId) + \
+                "&var-site={}".format(eventFrameTemplate.ElementTemplate.Site.SiteId) + \
+                "&var-elementTemplates={}".format(eventFrameTemplate.ElementTemplate.ElementTemplateId) + \
+                "&var-eventFrameTemplates={}".format(eventFrameTemplate.EventFrameTemplateId) + \
+                "&var-eventFrameAttributeTemplates=All"
+        elif "siteId" in parameters:
+            site = Site.query.get_or_404(parameters["siteId"])
+            return "http://{}:{}".format(current_app.config["GRAFANA_HOSTNAME"], current_app.config["GRAFANA_PORT"]) + \
+                "/d/ActiveEventFrameSummary/active-event-frame-summary?orgId=1" + \
+                "&var-enterprise={}".format(site.Enterprise.EnterpriseId) + \
+                "&var-site={}".format(site.SiteId) + \
+                "&var-elementTemplates=All" + \
+                "&var-eventFrameTemplates=All" + \
+                "&var-eventFrameAttributeTemplates=All"
     elif uid == "ElementSummary":
         if "siteId" in parameters:
             site = Site.query.get_or_404(parameters["siteId"])
