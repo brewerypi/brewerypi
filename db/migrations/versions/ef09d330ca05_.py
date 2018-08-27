@@ -61,9 +61,9 @@ BEGIN
     WHERE FIND_IN_SET(EventFrameAttributeTemplate.Name, eventFrameAttributeTemplateNames) > 0;
 
 	SET @sql = CONCAT('
-		SELECT EventFrameTemplate.Name  AS EventFrameTemplate,
+		SELECT EventFrameTemplate.Name  AS Template,
 			Element.Name AS Element,
-			DATE_FORMAT(t1.StartTimestamp, ''%m/%d/%y %H:%i'') AS ''Start Timestamp'',
+			DATE_FORMAT(t1.StartTimestamp, ''%m/%d/%y %H:%i'') AS Start,
             ', @query1DynamicColumns, '
 		FROM EventFrame t1
 			INNER JOIN EventFrameTemplate ON t1.EventFrameTemplateId = EventFrameTemplate.EventFrameTemplateId
@@ -104,9 +104,9 @@ BEGIN
 			EventFrameTemplate.EventFrameTemplateId IN (', eventFrameTemplateIds ,')
         GROUP BY t1.EventFrameId
 		UNION ALL
-		SELECT EventFrameTemplate.Name AS EventFrameTemplate,
+		SELECT EventFrameTemplate.Name AS Template,
 			Element.Name AS Element,
-			EventFrame.StartTimestamp ''Start Timestamp'',
+			DATE_FORMAT(EventFrame.StartTimestamp, ''%m/%d/%y %H:%i'') AS Start,
             ', @query2DynamicColumns, '
 		FROM EventFrame
 			INNER JOIN Element ON EventFrame.ElementId = Element.ElementId
@@ -121,7 +121,7 @@ BEGIN
 			(TagValue.Timestamp >= EventFrame.StartTimestamp OR TagValue.Value IS NULL)
 		GROUP BY EventFrame.EventFrameId
 		HAVING (COUNT(TagValue.Value) = 0)
-		ORDER BY EventFrameTemplate,
+		ORDER BY Template,
 			Element');
 
 	PREPARE stmt FROM @sql;
