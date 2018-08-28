@@ -1,8 +1,8 @@
 {
   "__inputs": [
     {
-      "name": "DS_BREWERY_PI",
-      "label": "Brewery Pi",
+      "name": "DS_BREWERYPI",
+      "label": "BreweryPi",
       "description": "",
       "type": "datasource",
       "pluginId": "mysql",
@@ -43,7 +43,7 @@
         "type": "dashboard"
       },
       {
-        "datasource": "${DS_BREWERY_PI}",
+        "datasource": "${DS_BREWERYPI}",
         "enable": true,
         "hide": false,
         "iconColor": "rgb(0, 255, 0)",
@@ -55,7 +55,7 @@
         "type": "tags"
       },
       {
-        "datasource": "${DS_BREWERY_PI}",
+        "datasource": "${DS_BREWERYPI}",
         "enable": true,
         "hide": false,
         "iconColor": "rgb(255, 0, 0)",
@@ -67,25 +67,25 @@
         "type": "tags"
       },
       {
-        "datasource": "${DS_BREWERY_PI}",
+        "datasource": "${DS_BREWERYPI}",
         "enable": true,
         "hide": false,
         "iconColor": "rgb(255, 255, 0)",
         "limit": 100,
         "name": "Notes",
-        "rawQuery": "SELECT UNIX_TIMESTAMP(TagValue.Timestamp) AS time_sec,\n\tGROUP_CONCAT(DATE_FORMAT(Note.Timestamp, '%m/%d/%y %H:%i'), ' - ', Note.Note ORDER BY Note.Timestamp SEPARATOR '<br>') AS text,\n\tCONCAT(Element.Name, ',', AttributeTemplate.Name) AS tags\nFROM ElementAttribute\n\tINNER JOIN Element ON ElementAttribute.ElementId = Element.ElementId\n\tINNER JOIN AttributeTemplate ON ElementAttribute.AttributeTemplateId = AttributeTemplate.AttributeTemplateId\n\tINNER JOIN Tag ON ElementAttribute.TagId = Tag.TagId\n\tINNER JOIN TagValue ON Tag.TagId = TagValue.TagId\n\tINNER JOIN TagValueNote ON TagValue.TagValueId = TagValueNote.TagValueId\n\tINNER JOIN Note ON TagValueNote.NoteId = Note.NoteId\nWHERE (Element.ElementId IN ($elements)) AND (AttributeTemplate.AttributeTemplateId IN ($attributeTemplates)) AND $__timeFilter(TagValue.Timestamp)\nGROUP BY TagValue.TagValueId\n",
+        "rawQuery": "SELECT UNIX_TIMESTAMP(TagValue.Timestamp) AS time_sec,\n\tGROUP_CONCAT(DATE_FORMAT(Note.Timestamp, '%m/%d/%y %H:%i'), ' - ', Note.Note ORDER BY Note.Timestamp SEPARATOR '<br>') AS text,\n\tCONCAT(Element.Name, ',', ElementAttributeTemplate.Name) AS tags\nFROM ElementAttribute\n\tINNER JOIN Element ON ElementAttribute.ElementId = Element.ElementId\n\tINNER JOIN ElementAttributeTemplate ON ElementAttribute.ElementAttributeTemplateId = ElementAttributeTemplate.ElementAttributeTemplateId\n\tINNER JOIN Tag ON ElementAttribute.TagId = Tag.TagId\n\tINNER JOIN TagValue ON Tag.TagId = TagValue.TagId\n\tINNER JOIN TagValueNote ON TagValue.TagValueId = TagValueNote.TagValueId\n\tINNER JOIN Note ON TagValueNote.NoteId = Note.NoteId\nWHERE (Element.ElementId IN ($elements)) AND (ElementAttributeTemplate.ElementAttributeTemplateId IN ($elementAttributeTemplates)) AND $__timeFilter(TagValue.Timestamp)\nGROUP BY TagValue.TagValueId",
         "showIn": 0,
         "tags": [],
         "type": "tags"
       },
       {
-        "datasource": "${DS_BREWERY_PI}",
+        "datasource": "${DS_BREWERYPI}",
         "enable": false,
         "hide": false,
         "iconColor": "rgb(255, 255, 255)",
         "limit": 100,
         "name": "Lookups",
-        "rawQuery": "SELECT UNIX_TIMESTAMP(TagValue.Timestamp) AS time_sec,\n\t'' AS text,\n\tCONCAT(Element.Name, ',', AttributeTemplate.Name, ',', LookupValue.Name) AS tags\nFROM ElementAttribute\n\tINNER JOIN Element ON ElementAttribute.ElementId = Element.ElementId\n\tINNER JOIN AttributeTemplate ON ElementAttribute.AttributeTemplateId = AttributeTemplate.AttributeTemplateId\n\tINNER JOIN Tag ON ElementAttribute.TagId = Tag.TagId\n\tINNER JOIN Lookup ON Tag.LookupId = Lookup.LookupId\n\tINNER JOIN TagValue ON Tag.TagId = TagValue.TagId\n\tINNER JOIN LookupValue ON Lookup.LookupId = LookupValue.LookupId AND\n\t\tTagValue.Value = LookupValue.Value\nWHERE (Element.ElementId IN ($elements)) AND\n\t(AttributeTemplate.AttributeTemplateId IN ($attributeTemplates)) AND\n\tLookup.LookupId IN ($lookups) AND\n\t$__timeFilter(TagValue.Timestamp)\n",
+        "rawQuery": "SELECT UNIX_TIMESTAMP(TagValue.Timestamp) AS time_sec,\n\t'' AS text,\n\tCONCAT(Element.Name, ',', ElementAttributeTemplate.Name, ',', LookupValue.Name) AS tags\nFROM ElementAttribute\n\tINNER JOIN Element ON ElementAttribute.ElementId = Element.ElementId\n\tINNER JOIN ElementAttributeTemplate ON ElementAttribute.ElementAttributeTemplateId = ElementAttributeTemplate.ElementAttributeTemplateId\n\tINNER JOIN Tag ON ElementAttribute.TagId = Tag.TagId\n\tINNER JOIN Lookup ON Tag.LookupId = Lookup.LookupId\n\tINNER JOIN TagValue ON Tag.TagId = TagValue.TagId\n\tINNER JOIN LookupValue ON Lookup.LookupId = LookupValue.LookupId AND\n\t\tTagValue.Value = LookupValue.Value\nWHERE (Element.ElementId IN ($elements)) AND\n\t(ElementAttributeTemplate.ElementAttributeTemplateId IN ($elementAttributeTemplates)) AND\n\tLookup.LookupId IN ($lookups) AND\n\t$__timeFilter(TagValue.Timestamp)",
         "showIn": 0,
         "tags": [],
         "type": "tags"
@@ -96,7 +96,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": null,
-  "iteration": 1534661854324,
+  "iteration": 1535415122609,
   "links": [],
   "panels": [
     {
@@ -104,7 +104,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "${DS_BREWERY_PI}",
+      "datasource": "${DS_BREWERYPI}",
       "decimals": null,
       "fill": 0,
       "gridPos": {
@@ -141,7 +141,7 @@
           "alias": "",
           "format": "time_series",
           "hide": false,
-          "rawSql": "SELECT UNIX_TIMESTAMP(TagValue.Timestamp) AS time_sec,\n\tTagValue.Value AS value,\n\tCONCAT(Element.Name, '_', AttributeTemplate.Name) AS metric \nFROM ElementAttribute\n\tINNER JOIN Element ON ElementAttribute.ElementId = Element.ElementId\n\tINNER JOIN AttributeTemplate ON ElementAttribute.AttributeTemplateId = AttributeTemplate.AttributeTemplateId\n\tINNER JOIN Tag ON ElementAttribute.TagId = Tag.TagId\n\tINNER JOIN TagValue ON Tag.TagId = TagValue.TagId\nWHERE (Element.ElementId IN ($elements)) AND (AttributeTemplate.AttributeTemplateId IN ($attributeTemplates)) AND $__timeFilter(TagValue.Timestamp)",
+          "rawSql": "SELECT UNIX_TIMESTAMP(TagValue.Timestamp) AS time_sec,\n\tTagValue.Value AS value,\n\tCONCAT(Element.Name, '_', ElementAttributeTemplate.Name) AS metric \nFROM ElementAttribute\n\tINNER JOIN Element ON ElementAttribute.ElementId = Element.ElementId\n\tINNER JOIN ElementAttributeTemplate ON ElementAttribute.ElementAttributeTemplateId = ElementAttributeTemplate.ElementAttributeTemplateId\n\tINNER JOIN Tag ON ElementAttribute.TagId = Tag.TagId\n\tINNER JOIN TagValue ON Tag.TagId = TagValue.TagId\nWHERE (Element.ElementId IN ($elements)) AND (ElementAttributeTemplate.ElementAttributeTemplateId IN ($elementAttributeTemplates)) AND $__timeFilter(TagValue.Timestamp)",
           "refId": "A"
         }
       ],
@@ -196,14 +196,14 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "${DS_BREWERY_PI}",
+        "datasource": "${DS_BREWERYPI}",
         "hide": 0,
         "includeAll": false,
         "label": "Enterprise:",
         "multi": false,
         "name": "enterprise",
         "options": [],
-        "query": "SELECT DISTINCT Enterprise.EnterpriseId AS __value, \tEnterprise.Name AS __text FROM Enterprise \tINNER JOIN Site ON Enterprise.EnterpriseId = Site.EnterpriseId \tINNER JOIN ElementTemplate ON Site.SiteId = ElementTemplate.SiteId \tINNER JOIN AttributeTemplate ON ElementTemplate.ElementTemplateId = AttributeTemplate.ElementTemplateId \tINNER JOIN Element ON ElementTemplate.ElementTemplateId = Element.ElementTemplateId",
+        "query": "SELECT DISTINCT Enterprise.EnterpriseId AS __value,      Enterprise.Name AS __text FROM Enterprise  \tINNER JOIN Site ON Enterprise.EnterpriseId = Site.EnterpriseId     INNER JOIN ElementTemplate ON Site.SiteId = ElementTemplate.SiteId     INNER JOIN ElementAttributeTemplate ON ElementTemplate.ElementTemplateId = ElementAttributeTemplate.ElementTemplateId     INNER JOIN Element ON ElementTemplate.ElementTemplateId = Element.ElementTemplateId",
         "refresh": 1,
         "regex": "",
         "sort": 5,
@@ -216,14 +216,14 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "${DS_BREWERY_PI}",
+        "datasource": "${DS_BREWERYPI}",
         "hide": 0,
         "includeAll": false,
         "label": "Site:",
         "multi": false,
         "name": "site",
         "options": [],
-        "query": "SELECT DISTINCT Site.SiteId AS __value, Site.Name AS __text FROM Site \tINNER JOIN ElementTemplate ON Site.SiteId = ElementTemplate.SiteId \tINNER JOIN AttributeTemplate ON ElementTemplate.ElementTemplateId = AttributeTemplate.ElementTemplateId \tINNER JOIN Element ON ElementTemplate.ElementTemplateId = Element.ElementTemplateId WHERE Site.EnterpriseId = $enterprise",
+        "query": "SELECT DISTINCT Site.SiteId AS __value,      Site.Name AS __text  FROM Site      INNER JOIN ElementTemplate ON Site.SiteId = ElementTemplate.SiteId      INNER JOIN ElementAttributeTemplate ON ElementTemplate.ElementTemplateId = ElementAttributeTemplate.ElementTemplateId      INNER JOIN Element ON ElementTemplate.ElementTemplateId = Element.ElementTemplateId  WHERE Site.EnterpriseId = $enterprise",
         "refresh": 1,
         "regex": "",
         "sort": 5,
@@ -236,14 +236,14 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "${DS_BREWERY_PI}",
+        "datasource": "${DS_BREWERYPI}",
         "hide": 0,
         "includeAll": true,
         "label": "Element Templates:",
         "multi": true,
         "name": "elementTemplates",
         "options": [],
-        "query": "SELECT DISTINCT ElementTemplate.ElementTemplateId AS __value, ElementTemplate.Name AS __text FROM ElementTemplate \tINNER JOIN AttributeTemplate ON ElementTemplate.ElementTemplateId = AttributeTemplate.ElementTemplateId \tINNER JOIN Element ON ElementTemplate.ElementTemplateId = Element.ElementTemplateId WHERE ElementTemplate.SiteId = $site",
+        "query": "SELECT DISTINCT ElementTemplate.ElementTemplateId AS __value,      ElementTemplate.Name AS __text  FROM ElementTemplate  \tINNER JOIN ElementAttributeTemplate ON ElementTemplate.ElementTemplateId = ElementAttributeTemplate.ElementTemplateId      INNER JOIN Element ON ElementTemplate.ElementTemplateId = Element.ElementTemplateId  WHERE ElementTemplate.SiteId = $site",
         "refresh": 1,
         "regex": "",
         "sort": 5,
@@ -256,14 +256,14 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "${DS_BREWERY_PI}",
+        "datasource": "${DS_BREWERYPI}",
         "hide": 0,
         "includeAll": true,
         "label": "Elements:",
         "multi": true,
         "name": "elements",
         "options": [],
-        "query": "SELECT DISTINCT ElementId AS __value, CONCAT(Element.Name, ' (', ElementTemplate.Name, ')') AS __text FROM Element \tINNER JOIN ElementTemplate ON Element.ElementTemplateId = ElementTemplate.ElementTemplateId WHERE Element.ElementTemplateId IN ($elementTemplates) ORDER BY ElementTemplate.Name, Element.Name",
+        "query": "SELECT DISTINCT ElementId AS __value,      CONCAT(Element.Name, ' (', ElementTemplate.Name, ')') AS __text  FROM Element      INNER JOIN ElementTemplate ON Element.ElementTemplateId = ElementTemplate.ElementTemplateId  WHERE Element.ElementTemplateId IN ($elementTemplates) ORDER BY ElementTemplate.Name, Element.Name",
         "refresh": 1,
         "regex": "",
         "sort": 0,
@@ -276,14 +276,14 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "${DS_BREWERY_PI}",
+        "datasource": "${DS_BREWERYPI}",
         "hide": 0,
         "includeAll": true,
-        "label": "Attributes:",
+        "label": "Element Attributes:",
         "multi": true,
-        "name": "attributeTemplates",
+        "name": "elementAttributeTemplates",
         "options": [],
-        "query": "SELECT AttributeTemplate.AttributeTemplateId AS __value, AttributeTemplate.Name AS __text FROM AttributeTemplate INNER JOIN ElementTemplate ON AttributeTemplate.ElementTemplateId = ElementTemplate.ElementTemplateId INNER JOIN Element ON ElementTemplate.ElementTemplateId = Element.ElementTemplateId WHERE (Element.ElementId IN ($elements))",
+        "query": "SELECT ElementAttributeTemplate.ElementAttributeTemplateId AS __value,      ElementAttributeTemplate.Name AS __text  FROM ElementAttributeTemplate      INNER JOIN ElementTemplate ON ElementAttributeTemplate.ElementTemplateId = ElementTemplate.ElementTemplateId      INNER JOIN Element ON ElementTemplate.ElementTemplateId = Element.ElementTemplateId WHERE (Element.ElementId IN ($elements))",
         "refresh": 1,
         "regex": "",
         "sort": 5,
@@ -296,7 +296,7 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "${DS_BREWERY_PI}",
+        "datasource": "${DS_BREWERYPI}",
         "hide": 0,
         "includeAll": true,
         "label": "Lookups:",
@@ -346,6 +346,5 @@
   },
   "timezone": "",
   "title": "Element Values Graph",
-  "uid": "ElementValuesGraph",
-  "version": 1
+  "uid": "ElementValuesGraph"
 }
