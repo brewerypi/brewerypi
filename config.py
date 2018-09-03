@@ -8,12 +8,14 @@ class Config:
 	BOOTSTRAP_SERVE_LOCAL = True
 	EXPORT_DATABASE_FILENAME = "BreweryPi.sql"
 	EXPORT_ELEMENT_ATTRIBUTES_FILENAME = "elementsAttributes.csv"
+	EXPORT_EVENT_FRAME_ATTRIBUTES_FILENAME = "eventFrameAttributes.csv"
 	EXPORT_FOLDER = "exports"
 	EXPORT_TAGS_FILENAME = "tags.csv"
 	GRAFANA_HOSTNAME = os.environ.get("GRAFANA_HOSTNAME") or "localhost"
 	GRAFANA_PORT = os.environ.get("GRAFANA_PORT") or "3000"
 	IMPORT_DATABASE_FILENAME = "BreweryPi.sql"
 	IMPORT_ELEMENT_ATTRIBUTES_FILENAME = "elementAttributes.csv"
+	IMPORT_EVENT_FRAME_ATTRIBUTES_FILENAME = "eventFrameAttributes.csv"
 	IMPORT_FOLDER = "imports"
 	IMPORT_TAGS_FILENAME = "tags.csv"
 	IS_RASPBERRY_PI = True if os.environ.get("IS_RASPBERRY_PI") == "1" else False

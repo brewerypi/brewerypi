@@ -206,9 +206,9 @@ class EventFrameAttribute(db.Model):
 	)
 
 	EventFrameAttributeId = db.Column(db.Integer, primary_key = True)
+	ElementId = db.Column(db.Integer, db.ForeignKey("Element.ElementId", name = "FK__Element$Have$EventFrameAttribute"), nullable = False)
 	EventFrameAttributeTemplateId = db.Column(db.Integer, db.ForeignKey("EventFrameAttributeTemplate.EventFrameAttributeTemplateId", 
 		name = "FK__EventFrameAttributeTemplate$Have$EventFrameAttribute"), nullable = False)
-	ElementId = db.Column(db.Integer, db.ForeignKey("Element.ElementId", name = "FK__Element$Have$EventFrameAttribute"), nullable = False)
 	TagId = db.Column(db.Integer, db.ForeignKey("Tag.TagId", name = "FK__Tag$Have$EventFrameAttribute"), nullable = False)
 
 	def __repr__(self):

@@ -29,17 +29,17 @@ def exportElementAttributes():
 		order_by(Enterprise.Abbreviation, Site.Abbreviation, ElementTemplate.Name, Element.Name, ElementAttributeTemplate.Name)
 	with open(os.path.join(current_app.config["EXPORT_FOLDER"], current_app.config["EXPORT_ELEMENT_ATTRIBUTES_FILENAME"]), "w", encoding = "latin-1") \
 		as elementsFile:
-		fieldnames = ["Selected", "Element Attribute Id", "Enterprise", "Site", "Element Template", "Element Name", "Element Attribute Template", "Area",
-			"Tag Name"]
+		fieldnames = ["Selected", "Element Attribute Id", "Enterprise", "Site", "Element Template", "Element", "Element Attribute Template", "Area",
+			"Tag"]
 		elementAttributesWriter = csv.DictWriter(elementsFile, fieldnames = fieldnames, lineterminator = "\n")
 		elementAttributesWriter.writeheader()
 		
 		for elementAttribute in elementAttributes:
-			elementAttributesWriter.writerow({"Selected" : "", "Element Attribute Id" : elementAttribute.ElementAttributeId, \
-			"Enterprise" : elementAttribute.Element.ElementTemplate.Site.Enterprise.Abbreviation, \
-			"Site" : elementAttribute.Element.ElementTemplate.Site.Abbreviation, "Element Template" : elementAttribute.Element.ElementTemplate.Name, \
-			"Element Name" : elementAttribute.Element.Name, "Element Attribute Template" : elementAttribute.ElementAttributeTemplate.Name, \
-			"Area" : elementAttribute.Tag.Area.Abbreviation, "Tag Name" : elementAttribute.Tag.Name})
+			elementAttributesWriter.writerow({"Selected" : "", "Element Attribute Id" : elementAttribute.ElementAttributeId,
+			"Enterprise" : elementAttribute.Element.ElementTemplate.Site.Enterprise.Abbreviation,
+			"Site" : elementAttribute.Element.ElementTemplate.Site.Abbreviation, "Element Template" : elementAttribute.Element.ElementTemplate.Name,
+			"Element" : elementAttribute.Element.Name, "Element Attribute Template" : elementAttribute.ElementAttributeTemplate.Name,
+			"Area" : elementAttribute.Tag.Area.Abbreviation, "Tag" : elementAttribute.Tag.Name})
 	
 	return send_file(os.path.join("..", current_app.config["EXPORT_FOLDER"], current_app.config["EXPORT_ELEMENT_ATTRIBUTES_FILENAME"]), as_attachment = True)
 
@@ -66,9 +66,9 @@ def importElementAttributes():
 			# Make sure that the header is well formed.
 			if "Selected" not in elementAttributesReader.fieldnames or "Element Attribute Id" not in elementAttributesReader.fieldnames or \
 				"Enterprise" not in elementAttributesReader.fieldnames or "Site" not in elementAttributesReader.fieldnames or \
-				"Element Template" not in elementAttributesReader.fieldnames or "Element Name" not in elementAttributesReader.fieldnames or \
+				"Element Template" not in elementAttributesReader.fieldnames or "Element" not in elementAttributesReader.fieldnames or \
 				"Element Attribute Template" not in elementAttributesReader.fieldnames or "Area" not in elementAttributesReader.fieldnames or \
-				"Tag Name" not in elementAttributesReader.fieldnames:
+				"Tag" not in elementAttributesReader.fieldnames:
 				errors.append("Header malformed. Aborting upload.")
 			else:
 				# Iterate through each row.
@@ -79,10 +79,10 @@ def importElementAttributes():
 					enterpriseAbbreviation = row["Enterprise"].strip()
 					siteAbbreviation = row["Site"].strip()
 					elementTemplateName = row["Element Template"].strip()
-					elementName = row["Element Name"].strip()
+					elementName = row["Element"].strip()
 					elementAttributeTemplateName = row["Element Attribute Template"].strip()
 					areaAbbreviation = row["Area"].strip()
-					tagName = row["Tag Name"].strip()
+					tagName = row["Tag"].strip()
 
 					# Skip rows that are now selected.
 					if "" == selected:

@@ -167,8 +167,8 @@ def upgrade():
     )
     op.create_table('EventFrameAttribute',
     sa.Column('EventFrameAttributeId', sa.Integer(), nullable=False),
-    sa.Column('EventFrameAttributeTemplateId', sa.Integer(), nullable=False),
     sa.Column('ElementId', sa.Integer(), nullable=False),
+    sa.Column('EventFrameAttributeTemplateId', sa.Integer(), nullable=False),
     sa.Column('TagId', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['ElementId'], ['Element.ElementId'], name='FK__Element$Have$EventFrameAttribute'),
     sa.ForeignKeyConstraint(['EventFrameAttributeTemplateId'], ['EventFrameAttributeTemplate.EventFrameAttributeTemplateId'], name='FK__EventFrameAttributeTemplate$Have$EventFrameAttribute'),
