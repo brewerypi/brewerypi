@@ -32,8 +32,8 @@
                     <ul class = "dropdown-menu">
                         <li><a href = "{{ url_for("tags.selectTag") }}">Tags</a></li>
                         {% if current_user.isAdministrator() %}
-                            <li><a href = "{{ url_for("tags.importTags") }}">Import</a></li>
                             <li><a href = "{{ url_for("tags.exportTags") }}">Export</a></li>
+                            <li><a href = "{{ url_for("tags.importTags") }}">Import</a></li>
                         {% endif %}
                     </ul>
                 </li>
@@ -41,8 +41,8 @@
                     <ul class = "dropdown-menu">
                         <li><a href = "{{ url_for("elements.selectElement") }}">Elements</a></li>
                         {% if current_user.isAdministrator() %}
-                            <li><a href = "{{ url_for("elementAttributes.importElementAttributes") }}">Import</a></li>
                             <li><a href = "{{ url_for("elementAttributes.exportElementAttributes") }}">Export</a></li>
+                            <li><a href = "{{ url_for("elementAttributes.importElementAttributes") }}">Import</a></li>
                         {% endif %}
                     </ul>
                 </li>
@@ -50,7 +50,8 @@
                     <ul class = "dropdown-menu">
                         <li><a href = "{{ url_for("eventFrames.selectEventFrame") }}">Event Frames</a></li>
                         {% if current_user.isAdministrator() %}
-                            <li><a href = "{{ url_for("eventFrameAttributes.exportEventFrameAttributes") }}">Export</a></li>
+                        <li><a href = "{{ url_for("eventFrameAttributes.exportEventFrameAttributes") }}">Export</a></li>
+                        <li><a href = "{{ url_for("eventFrameAttributes.importEventFrameAttributes") }}">Import</a></li>
                         {% endif %}
                     </ul>
                 </li>

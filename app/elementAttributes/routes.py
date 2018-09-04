@@ -107,7 +107,7 @@ def importElementAttributes():
 
 					elementAttributeTemplate = ElementAttributeTemplate.query. \
 						filter(ElementAttributeTemplate.ElementTemplateId == elementTemplate.ElementTemplateId,
-						ElementAttributeTemplate.Name == elementAttributeTemplateName).first()
+							ElementAttributeTemplate.Name == elementAttributeTemplateName).first()
 					if elementAttributeTemplate is None:
 						errors.append("Element Attribute Template \"{}\" does not exist in site \"{}\". Skipping row {}.".format(elementAttributeTemplateName,
 							site.Name, str(rowNumber)))
@@ -135,7 +135,7 @@ def importElementAttributes():
 						# Check for existing element attribute.
 						elementAttribute = ElementAttribute.query. \
 							filter(ElementAttribute.ElementAttributeTemplateId == elementAttributeTemplate.ElementAttributeTemplateId,
-							ElementAttribute.ElementId == element.ElementId).first()
+								ElementAttribute.ElementId == element.ElementId).first()
 						if elementAttribute is not None:
 							warnings.append("Element Attribute Template \"{}\" already exists for Element \"{}\". Skipping row {}.". \
 								format(elementAttributeTemplateName, elementName, str(rowNumber)))
@@ -155,7 +155,7 @@ def importElementAttributes():
 							elementAttribute.ElementId != element.ElementId:
 							elementAttributeCheck = ElementAttribute.query.join(ElementAttributeTemplate, Element). \
 								filter(ElementAttribute.ElementAttributeTemplateId == elementAttributeTemplate.ElementAttributeTemplateId, \
-								ElementAttribute.ElementId == element.ElementId).first()
+									ElementAttribute.ElementId == element.ElementId).first()
 							if elementAttributeCheck is not None:
 								warnings.append("Element Attribute Template  \"{}\" already exists for Element \"{}\". Skipping row {}.". \
 									format(elementAttributeName, elementName, str(rowNumber)))
