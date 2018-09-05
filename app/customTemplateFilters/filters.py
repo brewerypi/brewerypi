@@ -44,7 +44,7 @@ def grafanaUrl(uid, parameters = None):
                 "&var-site={}".format(parameters["siteId"]) + \
                 "&var-elementTemplates=All" + \
                 "&var-elements=All" + \
-                "&var-attributeTemplates=All"
+                "&var-elementAttributeTemplates=All"
         elif "elementTemplateId" in parameters:
             elementTemplate = ElementTemplate.query.get_or_404(parameters["elementTemplateId"])
             elements = ""
@@ -56,7 +56,7 @@ def grafanaUrl(uid, parameters = None):
                 "&var-site={}".format(elementTemplate.Site.SiteId) + \
                 "&var-elementTemplates={}".format(elementTemplate.ElementTemplateId) + \
                 elements + \
-                "&var-attributeTemplates=All"
+                "&var-elementAttributeTemplates=All"
     elif uid == "ElementValuesGraph":
         element = Element.query.get_or_404(parameters["elementId"])
         return "http://{}:{}".format(current_app.config["GRAFANA_HOSTNAME"], current_app.config["GRAFANA_PORT"]) + \
@@ -65,7 +65,7 @@ def grafanaUrl(uid, parameters = None):
             "&var-site={}".format(element.ElementTemplate.Site.SiteId) + \
             "&var-elementTemplates=All" + \
             "&var-elements={}".format(parameters["elementId"]) + \
-            "&var-attributeTemplates=All" + \
+            "&var-elementAttributeTemplates=All" + \
             "&var-lookups=All"
     elif uid == "EventFramesGraph":
         eventFrame = EventFrame.query.get_or_404(parameters["eventFrameId"])
@@ -83,7 +83,7 @@ def grafanaUrl(uid, parameters = None):
                 "&var-elementTemplate={}".format(eventFrame.EventFrameTemplate.ElementTemplate.ElementTemplateId) + \
                 "&var-eventFrameTemplate={}".format(eventFrame.EventFrameTemplate.EventFrameTemplateId) + \
                 "&var-eventFrame={}".format(parameters["eventFrameId"]) + \
-                "&var-attributeTemplates=All" + \
+                "&var-eventFrameAttributeTemplates=All" + \
                 "&var-lookups=All"
         else:
             return "http://{}:{}".format(current_app.config["GRAFANA_HOSTNAME"], current_app.config["GRAFANA_PORT"]) + \
@@ -95,7 +95,7 @@ def grafanaUrl(uid, parameters = None):
                 "&var-elementTemplate={}".format(eventFrame.EventFrameTemplate.ElementTemplate.ElementTemplateId) + \
                 "&var-eventFrameTemplate={}".format(eventFrame.EventFrameTemplate.EventFrameTemplateId) + \
                 "&var-eventFrame={}".format(parameters["eventFrameId"]) + \
-                "&var-attributeTemplates=All" + \
+                "&var-eventFrameAttributeTemplates=All" + \
                 "&var-lookups=All"
     elif uid == "TagValuesGraph":
         return "http://{}:{}".format(current_app.config["GRAFANA_HOSTNAME"], current_app.config["GRAFANA_PORT"]) + \

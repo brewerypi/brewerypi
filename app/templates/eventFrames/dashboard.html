@@ -92,8 +92,11 @@ Event Frame Dashboard
     <h1>Attributes <small>{{ eventFrame.origin().Element.Name }}</small></h1>
 </div>
 <div>
-    <a class = "btn btn-default" title = "Grafana" href = "{{ "EventFramesGraph" | grafanaUrl({"eventFrameId": eventFrame.EventFrameId}) }}" target = "_blank">
-        <span class = "glyphicon glyphicon-stats"></span></a>
+    {% if eventFrame.ParentEventFrameId == None %}
+        <a class = "btn btn-default" title = "Grafana" 
+            href = "{{ "EventFramesGraph" | grafanaUrl({"eventFrameId": eventFrame.EventFrameId}) }}" target = "_blank">
+            <span class = "glyphicon glyphicon-stats"></span></a>
+    {% endif %}
     <br><br>
     <table id = "attributesTable" class = "table">
         <thead>
