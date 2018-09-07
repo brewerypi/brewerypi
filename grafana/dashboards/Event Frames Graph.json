@@ -77,7 +77,7 @@
         "iconColor": "rgb(255, 255, 255)",
         "limit": 100,
         "name": "Lookups",
-        "rawQuery": "SELECT UNIX_TIMESTAMP(TagValue.Timestamp) AS time_sec,\n\t'' AS text,\n\tCONCAT(Element.Name, ',', EventFrame.Name, ',', EventFrameAttributeTemplate.Name, ',', LookupValue.Name) AS tags\nFROM EventFrameAttribute\n\tINNER JOIN Element ON EventFrameAttribute.ElementId = Element.ElementId\n\tINNER JOIN EventFrame ON Element.ElementId = EventFrame.ElementId\n\tINNER JOIN EventFrameAttributeTemplate ON EventFrameAttribute.EventFrameAttributeTemplateId = EventFrameAttributeTemplate.EventFrameAttributeTemplateId\n\tINNER JOIN Tag ON EventFrameAttribute.TagId = Tag.TagId\n\tINNER JOIN Lookup ON Tag.LookupId = Lookup.LookupId\n\tINNER JOIN TagValue ON Tag.TagId = TagValue.TagId\n\tINNER JOIN LookupValue ON Lookup.LookupId = LookupValue.LookupId AND\n\t\tTagValue.Value = LookupValue.Value\nWHERE (EventFrame.EventFrameId = $eventFrame) AND\n\t(EventFrameAttributeTemplate.EventFrameAttributeTemplateId IN ($eventFrameAttributeTemplates)) AND\n\tLookup.LookupId IN ($lookups) AND\n\tIF (EventFrame.EndTimestamp IS NULL, (TagValue.Timestamp >= EventFrame.StartTimestamp), (TagValue.Timestamp >= EventFrame.StartTimestamp) AND\n\t(TagValue.Timestamp <= EventFrame.EndTimestamp))\n",
+        "rawQuery": "SELECT UNIX_TIMESTAMP(TagValue.Timestamp) AS time_sec,\n\t'' AS text,\n\tCONCAT(Element.Name, ',', fxGetEventFrameFriendlyName(EventFrame.EventFrameId), ',', EventFrameAttributeTemplate.Name, ',', LookupValue.Name) AS tags\nFROM EventFrameAttribute\n\tINNER JOIN Element ON EventFrameAttribute.ElementId = Element.ElementId\n\tINNER JOIN EventFrame ON Element.ElementId = EventFrame.ElementId\n\tINNER JOIN EventFrameAttributeTemplate ON EventFrameAttribute.EventFrameAttributeTemplateId = EventFrameAttributeTemplate.EventFrameAttributeTemplateId\n\tINNER JOIN Tag ON EventFrameAttribute.TagId = Tag.TagId\n\tINNER JOIN Lookup ON Tag.LookupId = Lookup.LookupId\n\tINNER JOIN TagValue ON Tag.TagId = TagValue.TagId\n\tINNER JOIN LookupValue ON Lookup.LookupId = LookupValue.LookupId AND\n\t\tTagValue.Value = LookupValue.Value\nWHERE (EventFrame.EventFrameId = $eventFrame) AND\n\t(EventFrameAttributeTemplate.EventFrameAttributeTemplateId IN ($eventFrameAttributeTemplates)) AND\n\tLookup.LookupId IN ($lookups) AND\n\tIF (EventFrame.EndTimestamp IS NULL, (TagValue.Timestamp >= EventFrame.StartTimestamp), (TagValue.Timestamp >= EventFrame.StartTimestamp) AND\n\t(TagValue.Timestamp <= EventFrame.EndTimestamp))\n",
         "showIn": 0,
         "tags": [],
         "type": "tags"
@@ -89,7 +89,7 @@
         "iconColor": "rgb(255, 255, 0)",
         "limit": 100,
         "name": "Notes",
-        "rawQuery": "SELECT UNIX_TIMESTAMP(TagValue.Timestamp) AS time_sec,\n    GROUP_CONCAT(DATE_FORMAT(Note.Timestamp, '%m/%d/%y %H:%i'), ' - ', Note.Note ORDER BY Note.Timestamp SEPARATOR '<br>') AS text,\n    CONCAT(Element.Name, ',', EventFrame.Name, ',', EventFrameAttributeTemplate.Name) AS tags\nFROM Note\n    INNER JOIN TagValueNote ON Note.NoteId = TagValueNote.NoteId\n    INNER JOIN TagValue ON TagValueNote.TagValueId = TagValue.TagValueId\n    INNER JOIN Tag ON TagValue.TagId = Tag.TagId\n    INNER JOIN EventFrameAttribute ON Tag.TagId = EventFrameAttribute.TagId\n    INNER JOIN EventFrameAttributeTemplate ON EventFrameAttribute.EventFrameAttributeTemplateId = EventFrameAttributeTemplate.EventFrameAttributeTemplateId\n    INNER JOIN Element ON EventFrameAttribute.ElementId = Element.ElementId\n    INNER JOIN EventFrame ON Element.ElementId = EventFrame.ElementId\nWHERE EventFrameAttribute.EventFrameAttributeTemplateId IN ($eventFrameAttributeTemplates) AND\n    EventFrame.EventFrameId = $eventFrame AND\n    IF (EventFrame.EndTimestamp IS NULL, TagValue.Timestamp >= EventFrame.StartTimestamp, TagValue.Timestamp >= EventFrame.StartTimestamp AND TagValue.Timestamp <= EventFrame.EndTimestamp)\nGROUP BY TagValue.TagValueId",
+        "rawQuery": "SELECT UNIX_TIMESTAMP(TagValue.Timestamp) AS time_sec,\n    GROUP_CONCAT(DATE_FORMAT(Note.Timestamp, '%m/%d/%y %H:%i'), ' - ', Note.Note ORDER BY Note.Timestamp SEPARATOR '<br>') AS text,\n    CONCAT(Element.Name, ',', fxGetEventFrameFriendlyName(EventFrame.EventFrameId), ',', EventFrameAttributeTemplate.Name) AS tags\nFROM Note\n    INNER JOIN TagValueNote ON Note.NoteId = TagValueNote.NoteId\n    INNER JOIN TagValue ON TagValueNote.TagValueId = TagValue.TagValueId\n    INNER JOIN Tag ON TagValue.TagId = Tag.TagId\n    INNER JOIN EventFrameAttribute ON Tag.TagId = EventFrameAttribute.TagId\n    INNER JOIN EventFrameAttributeTemplate ON EventFrameAttribute.EventFrameAttributeTemplateId = EventFrameAttributeTemplate.EventFrameAttributeTemplateId\n    INNER JOIN Element ON EventFrameAttribute.ElementId = Element.ElementId\n    INNER JOIN EventFrame ON Element.ElementId = EventFrame.ElementId\nWHERE EventFrameAttribute.EventFrameAttributeTemplateId IN ($eventFrameAttributeTemplates) AND\n    EventFrame.EventFrameId = $eventFrame AND\n    IF (EventFrame.EndTimestamp IS NULL, TagValue.Timestamp >= EventFrame.StartTimestamp, TagValue.Timestamp >= EventFrame.StartTimestamp AND TagValue.Timestamp <= EventFrame.EndTimestamp)\nGROUP BY TagValue.TagValueId",
         "showIn": 0,
         "tags": [],
         "type": "tags"
@@ -100,7 +100,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": null,
-  "iteration": 1536187398368,
+  "iteration": 1536349590293,
   "links": [],
   "panels": [
     {
@@ -147,7 +147,7 @@
           "alias": "",
           "format": "time_series",
           "hide": false,
-          "rawSql": "SELECT UNIX_TIMESTAMP(TagValue.Timestamp) AS time_sec,\n\tTagValue.Value AS value,\n\tCONCAT(Element.Name, '_', EventFrame.Name, '_', EventFrameAttributeTemplate.Name) AS metric \nFROM EventFrameAttribute\n\tINNER JOIN Element ON EventFrameAttribute.ElementId = Element.ElementId\n  INNER JOIN EventFrame ON Element.ElementId = EventFrame.ElementId\n\tINNER JOIN EventFrameAttributeTemplate ON EventFrameAttribute.EventFrameAttributeTemplateId = EventFrameAttributeTemplate.EventFrameAttributeTemplateId\n\tINNER JOIN Tag ON EventFrameAttribute.TagId = Tag.TagId\n\tINNER JOIN TagValue ON Tag.TagId = TagValue.TagId\nWHERE (EventFrame.EventFrameId = $eventFrame) AND (EventFrameAttributeTemplate.EventFrameAttributeTemplateId IN ($eventFrameAttributeTemplates)) AND IF (EventFrame.EndTimestamp IS NULL, (TagValue.Timestamp >= EventFrame.StartTimestamp), (TagValue.Timestamp >= EventFrame.StartTimestamp) AND (TagValue.Timestamp <= EventFrame.EndTimestamp))",
+          "rawSql": "SELECT UNIX_TIMESTAMP(TagValue.Timestamp) AS time_sec,\n\tTagValue.Value AS value,\n\tCONCAT(Element.Name, '_', fxGetEventFrameFriendlyName(EventFrame.EventFrameId), '_', EventFrameAttributeTemplate.Name) AS metric \nFROM EventFrameAttribute\n\tINNER JOIN Element ON EventFrameAttribute.ElementId = Element.ElementId\n  INNER JOIN EventFrame ON Element.ElementId = EventFrame.ElementId\n\tINNER JOIN EventFrameAttributeTemplate ON EventFrameAttribute.EventFrameAttributeTemplateId = EventFrameAttributeTemplate.EventFrameAttributeTemplateId\n\tINNER JOIN Tag ON EventFrameAttribute.TagId = Tag.TagId\n\tINNER JOIN TagValue ON Tag.TagId = TagValue.TagId\nWHERE (EventFrame.EventFrameId = $eventFrame) AND (EventFrameAttributeTemplate.EventFrameAttributeTemplateId IN ($eventFrameAttributeTemplates)) AND IF (EventFrame.EndTimestamp IS NULL, (TagValue.Timestamp >= EventFrame.StartTimestamp), (TagValue.Timestamp >= EventFrame.StartTimestamp) AND (TagValue.Timestamp <= EventFrame.EndTimestamp))",
           "refId": "A"
         }
       ],
@@ -428,5 +428,5 @@
   "timezone": "",
   "title": "Event Frames Graph",
   "uid": "EventFramesGraph",
-  "version": 9
+  "version": 10
 }
