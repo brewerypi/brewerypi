@@ -47,7 +47,7 @@
         "type": "dashboard"
       },
       {
-        "datasource": "${DS_BREWERYPI}",
+        "datasource": "BreweryPi",
         "enable": false,
         "hide": false,
         "iconColor": "rgb(70, 70, 72)",
@@ -59,7 +59,7 @@
         "type": "tags"
       },
       {
-        "datasource": "${DS_BREWERYPI}",
+        "datasource": "BreweryPi",
         "enable": true,
         "hide": false,
         "iconColor": "rgb(255, 0, 0)",
@@ -71,7 +71,7 @@
         "type": "tags"
       },
       {
-        "datasource": "${DS_BREWERYPI}",
+        "datasource": "BreweryPi",
         "enable": false,
         "hide": false,
         "iconColor": "rgb(255, 255, 255)",
@@ -83,7 +83,7 @@
         "type": "tags"
       },
       {
-        "datasource": "${DS_BREWERYPI}",
+        "datasource": "BreweryPi",
         "enable": true,
         "hide": false,
         "iconColor": "rgb(255, 255, 0)",
@@ -108,7 +108,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "${DS_BREWERYPI}",
+      "datasource": "BreweryPi",
       "decimals": null,
       "fill": 0,
       "gridPos": {
@@ -195,7 +195,7 @@
     },
     {
       "columns": [],
-      "datasource": "${DS_BREWERYPI}",
+      "datasource": "BreweryPi",
       "fontSize": "100%",
       "gridPos": {
         "h": 7,
@@ -257,7 +257,7 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "${DS_BREWERYPI}",
+        "datasource": "BreweryPi",
         "hide": 0,
         "includeAll": false,
         "label": "Enterprise:",
@@ -277,7 +277,7 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "${DS_BREWERYPI}",
+        "datasource": "BreweryPi",
         "hide": 0,
         "includeAll": false,
         "label": "Site:",
@@ -297,7 +297,7 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "${DS_BREWERYPI}",
+        "datasource": "BreweryPi",
         "hide": 0,
         "includeAll": false,
         "label": "Element Template:",
@@ -317,7 +317,7 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "${DS_BREWERYPI}",
+        "datasource": "BreweryPi",
         "hide": 0,
         "includeAll": false,
         "label": "Event Frame Template:",
@@ -337,7 +337,7 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "${DS_BREWERYPI}",
+        "datasource": "BreweryPi",
         "hide": 0,
         "includeAll": false,
         "label": "Event Frames:",
@@ -357,7 +357,7 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "${DS_BREWERYPI}",
+        "datasource": "BreweryPi",
         "hide": 0,
         "includeAll": true,
         "label": "Attributes:",
@@ -377,7 +377,7 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "${DS_BREWERYPI}",
+        "datasource": "BreweryPi",
         "hide": 0,
         "includeAll": true,
         "label": "Lookups:",

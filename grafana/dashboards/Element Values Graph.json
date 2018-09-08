@@ -43,7 +43,7 @@
         "type": "dashboard"
       },
       {
-        "datasource": "${DS_BREWERYPI}",
+        "datasource": "BreweryPi",
         "enable": true,
         "hide": false,
         "iconColor": "rgb(0, 255, 0)",
@@ -55,7 +55,7 @@
         "type": "tags"
       },
       {
-        "datasource": "${DS_BREWERYPI}",
+        "datasource": "BreweryPi",
         "enable": true,
         "hide": false,
         "iconColor": "rgb(255, 0, 0)",
@@ -67,7 +67,7 @@
         "type": "tags"
       },
       {
-        "datasource": "${DS_BREWERYPI}",
+        "datasource": "BreweryPi",
         "enable": true,
         "hide": false,
         "iconColor": "rgb(255, 255, 0)",
@@ -79,7 +79,7 @@
         "type": "tags"
       },
       {
-        "datasource": "${DS_BREWERYPI}",
+        "datasource": "BreweryPi",
         "enable": false,
         "hide": false,
         "iconColor": "rgb(255, 255, 255)",
@@ -104,7 +104,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "${DS_BREWERYPI}",
+      "datasource": "BreweryPi",
       "decimals": null,
       "fill": 0,
       "gridPos": {
@@ -196,7 +196,7 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "${DS_BREWERYPI}",
+        "datasource": "BreweryPi",
         "hide": 0,
         "includeAll": false,
         "label": "Enterprise:",
@@ -216,7 +216,7 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "${DS_BREWERYPI}",
+        "datasource": "BreweryPi",
         "hide": 0,
         "includeAll": false,
         "label": "Site:",
@@ -236,7 +236,7 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "${DS_BREWERYPI}",
+        "datasource": "BreweryPi",
         "hide": 0,
         "includeAll": true,
         "label": "Element Templates:",
@@ -256,7 +256,7 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "${DS_BREWERYPI}",
+        "datasource": "BreweryPi",
         "hide": 0,
         "includeAll": true,
         "label": "Elements:",
@@ -276,7 +276,7 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "${DS_BREWERYPI}",
+        "datasource": "BreweryPi",
         "hide": 0,
         "includeAll": true,
         "label": "Element Attributes:",
@@ -296,7 +296,7 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "${DS_BREWERYPI}",
+        "datasource": "BreweryPi",
         "hide": 0,
         "includeAll": true,
         "label": "Lookups:",
