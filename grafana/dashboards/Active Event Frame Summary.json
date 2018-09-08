@@ -51,7 +51,7 @@
   "panels": [
     {
       "columns": [],
-      "datasource": "${DS_BREWERY_PI}",
+      "datasource": "BreweryPi",
       "fontSize": "100%",
       "gridPos": {
         "h": 12,
@@ -114,7 +114,7 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "${DS_BREWERY_PI}",
+        "datasource": "BreweryPi",
         "hide": 0,
         "includeAll": false,
         "label": "Enterprise:",
@@ -134,7 +134,7 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "${DS_BREWERY_PI}",
+        "datasource": "BreweryPi",
         "hide": 0,
         "includeAll": false,
         "label": "Site:",
@@ -154,7 +154,7 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "${DS_BREWERY_PI}",
+        "datasource": "BreweryPi",
         "hide": 0,
         "includeAll": true,
         "label": "Element Templates:",
@@ -174,7 +174,7 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "${DS_BREWERY_PI}",
+        "datasource": "BreweryPi",
         "hide": 0,
         "includeAll": true,
         "label": "Event Frame Templates:",
@@ -194,7 +194,7 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "${DS_BREWERY_PI}",
+        "datasource": "BreweryPi",
         "hide": 2,
         "includeAll": false,
         "label": null,
@@ -214,7 +214,7 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "${DS_BREWERY_PI}",
+        "datasource": "BreweryPi",
         "hide": 0,
         "includeAll": true,
         "label": "Event Frame Attribute Templates",
@@ -234,7 +234,7 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "${DS_BREWERY_PI}",
+        "datasource": "BreweryPi",
         "hide": 2,
         "includeAll": false,
         "label": null,

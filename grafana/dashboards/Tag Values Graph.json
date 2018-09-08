@@ -41,7 +41,7 @@
         "type": "dashboard"
       },
       {
-        "datasource": "${DS_BREWERY_PI}",
+        "datasource": "BreweryPi",
         "enable": true,
         "hide": false,
         "iconColor": "rgb(255, 255, 0)",
@@ -53,7 +53,7 @@
         "type": "tags"
       },
       {
-        "datasource": "${DS_BREWERY_PI}",
+        "datasource": "BreweryPi",
         "enable": false,
         "hide": false,
         "iconColor": "rgb(255, 255, 255)",
@@ -78,7 +78,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "${DS_BREWERY_PI}",
+      "datasource": "BreweryPi",
       "decimals": null,
       "fill": 0,
       "gridPos": {
@@ -169,7 +169,7 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "${DS_BREWERY_PI}",
+        "datasource": "BreweryPi",
         "hide": 0,
         "includeAll": true,
         "label": "Enterprises:",
@@ -189,7 +189,7 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "${DS_BREWERY_PI}",
+        "datasource": "BreweryPi",
         "hide": 0,
         "includeAll": true,
         "label": "Sites:",
@@ -209,7 +209,7 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "${DS_BREWERY_PI}",
+        "datasource": "BreweryPi",
         "hide": 0,
         "includeAll": true,
         "label": "Areas:",
@@ -229,7 +229,7 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "${DS_BREWERY_PI}",
+        "datasource": "BreweryPi",
         "hide": 0,
         "includeAll": true,
         "label": "Tags:",
@@ -249,7 +249,7 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "${DS_BREWERY_PI}",
+        "datasource": "BreweryPi",
         "hide": 0,
         "includeAll": true,
         "label": "Lookups:",
