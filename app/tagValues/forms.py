@@ -5,8 +5,8 @@ from wtforms.validators import Required
 
 class TagValueForm(FlaskForm):
 	tagId = HiddenField()
-	timestamp = DateTimeField("Timestamp", default = datetime.now, validators = [Required()])
 	value = FloatField("Value")
+	timestamp = DateTimeField("Timestamp", default = datetime.now, validators = [Required()])
 	lookupValue = SelectField("Lookup", coerce = float)
 	requestReferrer = HiddenField()
 	submit = SubmitField("Save")
