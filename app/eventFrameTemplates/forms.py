@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms import HiddenField, StringField, IntegerField, SubmitField
-from wtforms.validators import Length, Required, ValidationError
+from wtforms.validators import Length, Required
 
 class EventFrameTemplateForm(FlaskForm):
 	elementTemplateId = HiddenField()

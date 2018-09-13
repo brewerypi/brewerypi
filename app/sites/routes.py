@@ -8,30 +8,27 @@ from .. models import Enterprise, Site
 
 modelName = "Site"
 
-@sites.route("/sites", methods = ["GET", "POST"])
+@sites.route("/sites/add/<int:enterpriseId>", methods = ["GET", "POST"])
 @login_required
 @adminRequired
-def listSites():
-	sites = Site.query
-	return render_template("sites/sites.html", sites = sites)
-
-@sites.route("/sites/add", methods = ["GET", "POST"])
-@login_required
-@adminRequired
-def addSite():
+def addSite(enterpriseId):
 	operation = "Add"
 	form = SiteForm()
 
 	# Add a new site.
 	if form.validate_on_submit():
-		site = Site(Abbreviation = form.abbreviation.data, Description = form.description.data, Enterprise = form.enterprise.data, Name = form.name.data)
+		site = Site(Abbreviation = form.abbreviation.data, Description = form.description.data, EnterpriseId = enterpriseId, Name = form.name.data)
 		db.session.add(site)
 		db.session.commit()
-		flash("You have successfully added the new site \"" + site.Name + "\".", "alert alert-success")
-		return redirect(url_for("sites.listSites"))
+		flash("You have successfully added the new site \"{}\".".format(site.Name), "alert alert-success")
+		return redirect(form.requestReferrer.data)
 
 	# Present a form to add a new site.
-	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
+	form.requestReferrer.data = request.referrer
+	enterprise = Enterprise.query.get_or_404(enterpriseId)
+	breadcrumbs = [{"url" : url_for("physicalModels.selectPhysicalModel", selectedClass = "Root"), "text" : "<span class = \"glyphicon glyphicon-home\">"},
+		{"url" : url_for("physicalModels.selectPhysicalModel", selectedClass = "Enterprise", selectedId = enterprise.EnterpriseId), "text" : enterprise.Name}]
+	return render_template("addEdit.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
 
 @sites.route("/sites/delete/<int:siteId>", methods = ["GET", "POST"])
 @login_required
@@ -40,8 +37,8 @@ def deleteSite(siteId):
 	site = Site.query.get_or_404(siteId)
 	db.session.delete(site)
 	db.session.commit()
-	flash("You have successfully deleted the site \"" + site.Name + "\".", "alert alert-success")
-	return redirect(url_for("sites.listSites"))
+	flash("You have successfully deleted the site \"{}\".".format(site.Name), "alert alert-success")
+	return redirect(request.referrer)
 
 @sites.route("/sites/edit/<int:siteId>", methods = ["GET", "POST"])
 @login_required
@@ -55,15 +52,20 @@ def editSite(siteId):
 	if form.validate_on_submit():
 		site.Abbreviation = form.abbreviation.data
 		site.Description = form.description.data
-		site.Enterprise = form.enterprise.data
+		site.EnterpriseId = form.enterpriseId.data
 		site.Name = form.name.data
 		db.session.commit()
-		flash("You have successfully edited the site \"" + site.Name + "\".", "alert alert-success")
-		return redirect(url_for("sites.listSites"))
+		flash("You have successfully edited the site \"{}\".".format(site.Name), "alert alert-success")
+		return redirect(form.requestReferrer.data)
 
 	# Present a form to edit an existing site.
 	form.abbreviation.data = site.Abbreviation
 	form.description.data = site.Description
-	form.enterprise.data = site.Enterprise
+	form.enterpriseId.data = site.EnterpriseId
 	form.name.data = site.Name
-	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
+	form.requestReferrer.data = request.referrer
+	breadcrumbs = [{"url" : url_for("physicalModels.selectPhysicalModel", selectedClass = "Root"), "text" : "<span class = \"glyphicon glyphicon-home\">"},
+		{"url" : url_for("physicalModels.selectPhysicalModel", selectedClass = "Enterprise", selectedId = site.Enterprise.EnterpriseId),
+			"text" : site.Enterprise.Name},
+		{"url" : None, "text" : site.Name}]
+	return render_template("addEdit.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)

@@ -1,8 +1,8 @@
 {
   "__inputs": [
     {
-      "name": "DS_BREWERY_PI",
-      "label": "Brewery Pi",
+      "name": "DS_BREWERYPI",
+      "label": "BreweryPi",
       "description": "",
       "type": "datasource",
       "pluginId": "mysql",
@@ -14,7 +14,7 @@
       "type": "grafana",
       "id": "grafana",
       "name": "Grafana",
-      "version": "5.1.3"
+      "version": "5.2.2"
     },
     {
       "type": "datasource",
@@ -46,12 +46,12 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": null,
-  "iteration": 1530826137806,
+  "iteration": 1535416056870,
   "links": [],
   "panels": [
     {
       "columns": [],
-      "datasource": "${DS_BREWERY_PI}",
+      "datasource": "BreweryPi",
       "fontSize": "100%",
       "gridPos": {
         "h": 12,
@@ -96,7 +96,7 @@
           "alias": "",
           "format": "table",
           "hide": false,
-          "rawSql": "call BreweryPi.spElementSummary('$attributeTemplatesString', '$elementsString');",
+          "rawSql": "call BreweryPi.spElementSummary('$elementAttributeTemplatesString', '$elementsString');",
           "refId": "A"
         }
       ],
@@ -114,14 +114,14 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "${DS_BREWERY_PI}",
+        "datasource": "BreweryPi",
         "hide": 0,
         "includeAll": false,
         "label": "Enterprise:",
         "multi": false,
         "name": "enterprise",
         "options": [],
-        "query": "SELECT DISTINCT Enterprise.EnterpriseId AS __value, Enterprise.Name AS __text FROM Enterprise \tINNER JOIN Site ON Enterprise.EnterpriseId = Site.EnterpriseId \tINNER JOIN ElementTemplate ON Site.SiteId = ElementTemplate.SiteId \tINNER JOIN AttributeTemplate ON ElementTemplate.ElementTemplateId = AttributeTemplate.ElementTemplateId \tINNER JOIN Element ON ElementTemplate.ElementTemplateId = Element.ElementTemplateId",
+        "query": "SELECT DISTINCT Enterprise.EnterpriseId AS __value,      Enterprise.Name AS __text  FROM Enterprise  \tINNER JOIN Site ON Enterprise.EnterpriseId = Site.EnterpriseId      INNER JOIN ElementTemplate ON Site.SiteId = ElementTemplate.SiteId      INNER JOIN ElementAttributeTemplate ON ElementTemplate.ElementTemplateId = ElementAttributeTemplate.ElementTemplateId      INNER JOIN Element ON ElementTemplate.ElementTemplateId = Element.ElementTemplateId",
         "refresh": 1,
         "regex": "",
         "sort": 5,
@@ -134,14 +134,14 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "${DS_BREWERY_PI}",
+        "datasource": "BreweryPi",
         "hide": 0,
         "includeAll": false,
         "label": "Site:",
         "multi": false,
         "name": "site",
         "options": [],
-        "query": "SELECT DISTINCT Site.SiteId AS __value, Site.Name AS __text FROM Site \tINNER JOIN ElementTemplate ON Site.SiteId = ElementTemplate.SiteId \tINNER JOIN AttributeTemplate ON ElementTemplate.ElementTemplateId = AttributeTemplate.ElementTemplateId \tINNER JOIN Element ON ElementTemplate.ElementTemplateId = Element.ElementTemplateId WHERE Site.EnterpriseId = $enterprise",
+        "query": "SELECT DISTINCT Site.SiteId AS __value,      Site.Name AS __text  FROM Site  \tINNER JOIN ElementTemplate ON Site.SiteId = ElementTemplate.SiteId      INNER JOIN ElementAttributeTemplate ON ElementTemplate.ElementTemplateId = ElementAttributeTemplate.ElementTemplateId      INNER JOIN Element ON ElementTemplate.ElementTemplateId = Element.ElementTemplateId  WHERE Site.EnterpriseId = $enterprise",
         "refresh": 1,
         "regex": "",
         "sort": 5,
@@ -154,14 +154,14 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "${DS_BREWERY_PI}",
+        "datasource": "BreweryPi",
         "hide": 0,
         "includeAll": true,
         "label": "Element Templates:",
         "multi": true,
         "name": "elementTemplates",
         "options": [],
-        "query": "SELECT DISTINCT ElementTemplate.ElementTemplateId AS __value, ElementTemplate.Name AS __text FROM ElementTemplate \tINNER JOIN AttributeTemplate ON ElementTemplate.ElementTemplateId = AttributeTemplate.ElementTemplateId \tINNER JOIN Element ON ElementTemplate.ElementTemplateId = Element.ElementTemplateId WHERE ElementTemplate.SiteId = $site",
+        "query": "SELECT DISTINCT ElementTemplate.ElementTemplateId AS __value,      ElementTemplate.Name AS __text  FROM ElementTemplate  \tINNER JOIN ElementAttributeTemplate ON ElementTemplate.ElementTemplateId = ElementAttributeTemplate.ElementTemplateId      INNER JOIN Element ON ElementTemplate.ElementTemplateId = Element.ElementTemplateId  WHERE ElementTemplate.SiteId = $site",
         "refresh": 1,
         "regex": "",
         "sort": 5,
@@ -174,7 +174,7 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "${DS_BREWERY_PI}",
+        "datasource": "BreweryPi",
         "hide": 0,
         "includeAll": true,
         "label": "Elements:",
@@ -194,7 +194,7 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "${DS_BREWERY_PI}",
+        "datasource": "BreweryPi",
         "hide": 2,
         "includeAll": false,
         "label": null,
@@ -214,14 +214,14 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "${DS_BREWERY_PI}",
+        "datasource": "BreweryPi",
         "hide": 0,
         "includeAll": true,
-        "label": "Attributes:",
+        "label": "Element Attributes:",
         "multi": true,
-        "name": "attributeTemplates",
+        "name": "elementAttributeTemplates",
         "options": [],
-        "query": "SELECT DISTINCT AttributeTemplate.Name FROM AttributeTemplate WHERE AttributeTemplate.ElementTemplateId IN($elementTemplates)",
+        "query": "SELECT DISTINCT ElementAttributeTemplate.Name FROM ElementAttributeTemplate WHERE ElementAttributeTemplate.ElementTemplateId IN($elementTemplates)",
         "refresh": 1,
         "regex": "",
         "sort": 5,
@@ -234,14 +234,14 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "${DS_BREWERY_PI}",
+        "datasource": "BreweryPi",
         "hide": 2,
         "includeAll": false,
         "label": null,
         "multi": false,
-        "name": "attributeTemplatesString",
+        "name": "elementAttributeTemplatesString",
         "options": [],
-        "query": "SELECT CONCAT_WS(',', $attributeTemplates)",
+        "query": "SELECT CONCAT_WS(',', $elementAttributeTemplates)",
         "refresh": 1,
         "regex": "",
         "sort": 0,
@@ -284,5 +284,6 @@
     ]
   },
   "timezone": "",
-  "title": "Element Summary"
+  "title": "Element Summary",
+  "uid": "ElementSummary"
 }

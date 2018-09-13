@@ -1,0 +1,185 @@
+{% extends "base.html" %}
+
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}
+Data Entry - Elements
+{% endblock %}
+
+{% block page_content %}
+<div>
+    <ol class = "breadcrumb">
+        {% if childrenClass == "Enterprise" %}
+            <li class = "active"><span class = "glyphicon glyphicon-home"></li>
+            {% set pageHeaderSubText = "Enterprises" %}
+        {% elif childrenClass == "Site" %}
+            <li><a href = "{{ url_for("elements.selectElement", selectedClass = "Root") }}"><span class = "glyphicon glyphicon-home"></a></li>
+            <li class = "active">{{ parent.Name }}</li>
+            {% set pageHeaderSubText = "Sites" %}
+        <!-- "and parent" checks for systems that have not been configured with a site yet. -->
+        {% elif childrenClass == "ElementTemplate" and parent %}
+            <li><a href = "{{ url_for("elements.selectElement", selectedClass = "Root") }}"><span class = "glyphicon glyphicon-home"></a></li>
+            <li><a href = "{{ url_for("elements.selectElement", selectedClass = "Enterprise",
+                selectedId = parent.Enterprise.id()) }}">{{ parent.Enterprise.Name }}</a></li>
+            <li class = "active">{{ parent.Name }}</li>
+            {% set pageHeaderSubText = "Element Templates" %}
+        {% elif childrenClass == "ElementAttributeTemplate" %}
+            <li><a href = "{{ url_for("elements.selectElement", selectedClass = "Root") }}"><span class = "glyphicon glyphicon-home"></a></li>
+            <li><a href = "{{ url_for("elements.selectElement", selectedClass = "Enterprise",
+                selectedId = parent.Site.Enterprise.id()) }}">{{ parent.Site.Enterprise.Name }}</a></li>
+            <li><a href = "{{ url_for("elements.selectElement", selectedClass = "Site",
+                selectedId = parent.Site.id()) }}">{{ parent.Site.Name }}</a></li>
+            <li class = "active">{{ parent.Name }}</li>
+            {% set pageHeaderSubText = "Element Attribute Templates" %}
+        {% elif childrenClass == "Element" %}
+            <li><a href = "{{ url_for("elements.selectElement", selectedClass = "Root") }}"><span class = "glyphicon glyphicon-home"></a></li>
+            <li><a href = "{{ url_for("elements.selectElement", selectedClass = "Enterprise",
+                selectedId = parent.Site.Enterprise.id()) }}">{{ parent.Site.Enterprise.Name }}</a></li>
+            <li><a href = "{{ url_for("elements.selectElement", selectedClass = "Site",
+                selectedId = parent.Site.id()) }}">{{ parent.Site.Name }}</a></li>
+            <li class = "active">{{ parent.Name }}</li>
+            {% set pageHeaderSubText = "" %}
+        {% endif %}
+    </ol>
+</div>
+<div class = "page-header">
+    <h1>Elements <small>{{ pageHeaderSubText }}</small></h1>
+</div>
+<div>
+    {% if childrenClass == "Element" and current_user.isAdministrator() %}
+        {% if current_user.isAdministrator() %}
+            <a class = "btn btn-default" title = "Add" href = "{{ url_for("elements.addElement", elementTemplateId = parent.id()) }}" role = "button">
+                <span class = "glyphicon glyphicon-plus"></span></a>
+        {% endif %}
+        <td><a class = "btn btn-default" title = "Grafana" href = "{{ "ElementSummary" | grafanaUrl({"elementTemplateId": parent.id()}) }}" target = "_blank">
+            <span class = "glyphicon glyphicon-stats"></span></a></td>
+        <br><br>
+    {% elif childrenClass == "ElementAttributeTemplate" and current_user.isAdministrator() %}
+        <a class = "btn btn-default" title = "Add" href = "{{ url_for("elementAttributeTemplates.addElementAttributeTemplate",
+            elementTemplateId = parent.id()) }}" role = "button"><span class = "glyphicon glyphicon-plus"></span></a>
+        <br><br>
+    {% elif childrenClass == "ElementTemplate" %}
+        {% if current_user.isAdministrator() %}
+            <a class = "btn btn-default" title = "Add" href = "{{ url_for("elementTemplates.addElementTemplate", siteId = parent.id()) }}"
+                role = "button"><span class = "glyphicon glyphicon-plus"></span></a>
+        {% endif %}
+        <td><a class = "btn btn-default" title = "Grafana" href = "{{ "ElementSummary" | grafanaUrl({"siteId": parent.id()}) }}" target = "_blank">
+            <span class = "glyphicon glyphicon-stats"></span></a></td>
+        <br><br>
+    {% endif %}
+    <table id = "table" class = "table">
+        <thead>
+            <tr>
+                <th></th>
+                <th></th>
+                <th>Name</th>
+                <th>Description</th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if children %}
+                {% for child in children %}
+                    <tr>
+                        {% if childrenClass == "Element" %}
+                            <td><a class = "btn btn-default" title = "Select" href = "{{ url_for("elements.dashboard",
+                                elementId = child.id()) }}"><span class = "glyphicon glyphicon-list"></span></a></td>
+                            <td><a class = "btn btn-default" title = "Grafana" href = "{{ "ElementValuesGraph" | grafanaUrl({"elementId": child.id()}) }}"
+                                target = "_blank"><span class = "glyphicon glyphicon-stats"></span></a></td>
+                        {% elif childrenClass == "ElementAttributeTemplate" %}
+                            <td></td>
+                            <td></td>
+                        {% else %}
+                            <td><a class = "btn btn-default" title = "Select" href = "{{ url_for("elements.selectElement",
+                                selectedClass = child.__class__.__name__, selectedId = child.id()) }}"><span class = "glyphicon glyphicon-list"></span></a></td>
+                            <td></td>
+                        {% endif %}
+                        <td>{{ child.Name }}</td>
+                        <td>{{ child.Description }}</td>
+                        {% if childrenClass == "ElementTemplate" %}
+                            <td></td>
+                            {% if current_user.isAdministrator() %}
+                                <td><a class = "btn btn-default" title = "Configure" href = "{{ url_for("elements.selectElement",
+                                    selectedClass = "ElementAttributeTemplate", selectedId = child.id()) }}"><span class = "glyphicon glyphicon-wrench"></a>
+                                    </td>
+                                <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("elementTemplates.editElementTemplate",
+                                    elementTemplateId = child.id()) }}"><span class = "glyphicon glyphicon-edit"></a></td>
+                                <td><a class = "btn btn-default" title = "Delete" href = "{{ url_for("elementTemplates.deleteElementTemplate",
+                                    elementTemplateId = child.id()) }}"><span class = "glyphicon glyphicon-trash"></a></td>
+                            {% else %}
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            {% endif %}
+                        {% elif childrenClass == "Element" %}
+                            {% if current_user.isAdministrator() %}
+                                <td><a class = "btn btn-default" title = "Associate Attributes with Tags"
+                                    href = "{{ url_for("elementAttributes.listElementAttributes", elementId = child.ElementId) }}">
+                                    <span class = "glyphicon glyphicon-link"></span></a></td>
+                                <td><a class = "btn btn-default" title = "Copy" href = "{{ url_for("elements.copyElement", elementId = child.ElementId) }}">
+                                    <span class = "glyphicon glyphicon-copy"></span></a></td>
+                                <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("elements.editElement", elementId = child.ElementId) }}">
+                                    <span class = "glyphicon glyphicon-edit"></span></a></td>
+                                <td><a class = "btn btn-default" title = "Delete" href = "{{ url_for("elements.deleteElement", elementId = child.ElementId) }}">
+                                    <span class = "glyphicon glyphicon-trash"></span></a></td>
+                            {% else %}
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            {% endif %}
+                        {% elif childrenClass == "ElementAttributeTemplate" %}
+                            <td></td>
+                            <td></td>
+                            <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("elementAttributeTemplates.editElementAttributeTemplate",
+                                elementAttributeTemplateId = child.id()) }}"><span class = "glyphicon glyphicon-edit"></a></td>
+                            <td><a class = "btn btn-default" title = "Delete" href = "{{ url_for("elementAttributeTemplates.deleteElementAttributeTemplate",
+                                elementAttributeTemplateId = child.id()) }}"><span class = "glyphicon glyphicon-trash"></a></td>
+                        {% else %}
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        {% endif %}
+                    </tr>
+                {% endfor %}
+            {% endif %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <link rel = "stylesheet" type = "text/css" href = {{ url_for("static", filename = "css/datatables.min.css") }}/> 
+    <script type = "text/javascript" src = {{ url_for("static", filename = "js/datatables.min.js") }}></script>
+    <script>
+        $(document).ready(function()
+        {
+            $("#table").DataTable
+            ({
+                "order":
+                [
+                    [2, "asc"]              // Name.
+                ],
+                "columns":
+                [
+                    { "orderable": false }, // Details button.
+                    { "orderable": false }, // Grafana button.
+                    null,
+                    null,
+                    { "orderable": false }, // Associate button.
+                    { "orderable": false }, // Copy button.
+                    { "orderable": false }, // Edit button.
+                    { "orderable": false }  // Delete button.
+                ],
+                "stateSave": true,
+                "stateDuration": 0,
+                "pageLength": 25
+            })
+        })
+    </script>
+{% endblock %}

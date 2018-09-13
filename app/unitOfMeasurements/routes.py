@@ -28,45 +28,49 @@ def addUnitOfMeasurement():
 		unitOfMeasurement = UnitOfMeasurement(Abbreviation = form.abbreviation.data, Name = form.name.data)
 		db.session.add(unitOfMeasurement)
 		db.session.commit()
-		flash("You have successfully added the new unit of measurement \"" + unitOfMeasurement.Abbreviation + "\".", "alert alert-success")
+		flash("You have successfully added the new unit of measurement \"{}\".".format(unitOfMeasurement.Abbreviation), "alert alert-success")
 
 		return redirect(url_for("unitOfMeasurements.listUnitOfMeasurements"))
 
 	# Present a form to add a new unit of measurement.
-	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
+	breadcrumbs = [{"url" : url_for("unitOfMeasurements.listUnitOfMeasurements"), "text" : "<span class = \"glyphicon glyphicon-home\">"}]
+	return render_template("addEdit.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
 
 @unitOfMeasurements.route("/units/addDefaultUnitsOfMeasurements", methods = ["GET", "POST"])
 @login_required
 @adminRequired
 def addDefaultUnitsOfMeasurements():
-	defaultUnits = {"°C" : "degree celsius",
-		"°F" : "degree fahrenheit",
-		"°F/min" : "degree fahrenheit per minute",
-		"ASBC" : "american society of brewing chemists",
+	defaultUnits = {"ASBC" : "american society of brewing chemists",
+		"ADF" : "apparent degree of fermentation",
 		"bbl" : "barrel",
 		"cells/ml" : "cells per milliliter",
 		"cells/ml/°P" : "cells per ml per degree plato",
+		"°C" : "degree celsius",
+		"°F" : "degree fahrenheit",
+		"°F/min" : "degree fahrenheit per minute",
 		"EBC" : "european brewery convention",
+		"gal" : "gallon",
+		"gpm" : "gallons per minute",
 		"g" : "grams",
 		"g/bbl" : "grams per barrel",
 		"g/L" : "grams per liter",
-		"gal" : "gallon",
-		"gpm" : "gallons per minute",
 		"h" : "hour",
-		"IBU" : "international bittering unit",
 		"in" : "inches",
+		"IBU" : "international bittering unit",
 		"kg" : "kilogram",
-		"L" : "Liters",
-		"lb" : "pound",
-		"lb/bbl" : "pounds / barrel",
+		"L" : "liters",
 		"mg" : "milligram",
-		"min" : "minute",
 		"mL" : "milliliter",
 		"mm" : "millimeter",
-		"pH" : "potential of hydrogen",
+		"min" : "minute",
 		"ppb" : "parts per billion",
 		"ppm" : "parts per million",
+		"%" : "percentage",
+		"pH" : "potential of hydrogen",
+		"lb" : "pound",
+		"lb/bbl" : "pounds per barrel",
 		"psi" : "pounds per square inch",
+		"RDF" : "real degree of fermentation",
 		"RE" : "real extract",
 		"s" : "second",
 		"SG" : "specific gravity",
@@ -122,9 +126,13 @@ def addDefaultUnitsOfMeasurements():
 @adminRequired
 def deleteUnitOfMeasurement(unitOfMeasurementId):
 	unitOfMeasurement = UnitOfMeasurement.query.get_or_404(unitOfMeasurementId)
-	db.session.delete(unitOfMeasurement)
-	db.session.commit()
-	flash("You have successfully deleted the unit of measurement \"" + unitOfMeasurement.Abbreviation + "\".", "alert alert-success")
+	if unitOfMeasurement.isReferenced():
+		flash("Unit of Measurement \"{}\" is referenced by one or more tags and cannot be deleted.". \
+			format(unitOfMeasurement.Abbreviation), "alert alert-danger")
+	else:
+		db.session.delete(unitOfMeasurement)
+		db.session.commit()
+		flash("You have successfully deleted the unit of measurement \"" + unitOfMeasurement.Abbreviation + "\".", "alert alert-success")
 
 	return redirect(url_for("unitOfMeasurements.listUnitOfMeasurements"))
 
@@ -143,11 +151,13 @@ def editUnitOfMeasurement(unitOfMeasurementId):
 
 		db.session.commit()
 
-		flash("You have successfully edited the unit of measurement \"" + unitOfMeasurement.Abbreviation + "\".", "alert alert-success")
+		flash("You have successfully edited the unit of measurement \"{}\".".format(unitOfMeasurement.Abbreviation), "alert alert-success")
 
 		return redirect(url_for("unitOfMeasurements.listUnitOfMeasurements"))
 
 	# Present a form to edit an existing unit of measurement.
 	form.abbreviation.data = unitOfMeasurement.Abbreviation
 	form.name.data = unitOfMeasurement.Name
-	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
+	breadcrumbs = [{"url" : url_for("unitOfMeasurements.listUnitOfMeasurements"), "text" : "<span class = \"glyphicon glyphicon-home\">"},
+		{"url" : None, "text" : unitOfMeasurement.Name}]
+	return render_template("addEdit.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)

@@ -35,24 +35,6 @@ class Area(db.Model):
 	def id(self):
 		return self.AreaId
 
-class AttributeTemplate(db.Model):
-	__tablename__ = "AttributeTemplate"
-	__table_args__ = \
-	(
-		UniqueConstraint("ElementTemplateId", "Name", name = "AK__ElementTemplateId__Name"),
-	)
-
-	AttributeTemplateId = db.Column(db.Integer, primary_key = True)
-	Description = db.Column(db.String(255), nullable = True)
-	ElementTemplateId = db.Column(db.Integer, db.ForeignKey("ElementTemplate.ElementTemplateId", name = "FK__ElementTemplate$Have$AttributeTemplate"), \
-		nullable = False)
-	Name = db.Column(db.String(45), nullable = False)
-
-	ElementAttributes = db.relationship("ElementAttribute", backref = "AttributeTemplate", lazy = "dynamic")
-
-	def __repr__(self):
-		return "<AttributeTemplate: {}>".format(self.Name)
-
 class Element(db.Model):
 	__tablename__ = "Element"
 	__table_args__ = \
@@ -66,6 +48,7 @@ class Element(db.Model):
 	Name = db.Column(db.String(45), nullable = False)
 
 	ElementAttributes = db.relationship("ElementAttribute", backref = "Element", lazy = "dynamic")
+	EventFrameAttributes = db.relationship("EventFrameAttribute", backref = "Element", lazy = "dynamic")
 	EventFrames = db.relationship("EventFrame", backref = "Element", lazy = "dynamic")
 
 	def __repr__(self):
@@ -78,14 +61,38 @@ class ElementAttribute(db.Model):
 	__tablename__ = "ElementAttribute"
 	__table_args__ = \
 	(
-		UniqueConstraint("AttributeTemplateId", "ElementId", name = "AK__AttributeTemplateId__ElementId"),
+		UniqueConstraint("ElementAttributeTemplateId", "ElementId", name = "AK__ElementAttributeTemplateId__ElementId"),
 	)
 
 	ElementAttributeId = db.Column(db.Integer, primary_key = True)
-	AttributeTemplateId = db.Column(db.Integer, db.ForeignKey("AttributeTemplate.AttributeTemplateId", name = "FK__AttributeTemplate$Have$ElementAttribute"), \
-		nullable = False)
+	ElementAttributeTemplateId = db.Column(db.Integer, db.ForeignKey("ElementAttributeTemplate.ElementAttributeTemplateId", 
+		name = "FK__ElementAttributeTemplate$Have$ElementAttribute"), nullable = False)
 	ElementId = db.Column(db.Integer, db.ForeignKey("Element.ElementId", name = "FK__Element$Have$ElementAttribute"), nullable = False)
 	TagId = db.Column(db.Integer, db.ForeignKey("Tag.TagId", name = "FK__Tag$Have$ElementAttribute"), nullable = False)
+
+	def id(self):
+		return self.ElementAttributeId
+
+class ElementAttributeTemplate(db.Model):
+	__tablename__ = "ElementAttributeTemplate"
+	__table_args__ = \
+	(
+		UniqueConstraint("ElementTemplateId", "Name", name = "AK__ElementTemplateId__Name"),
+	)
+
+	ElementAttributeTemplateId = db.Column(db.Integer, primary_key = True)
+	Description = db.Column(db.String(255), nullable = True)
+	ElementTemplateId = db.Column(db.Integer, db.ForeignKey("ElementTemplate.ElementTemplateId", name = "FK__ElementTemplate$Have$ElementAttributeTemplate"), \
+		nullable = False)
+	Name = db.Column(db.String(45), nullable = False)
+
+	ElementAttributes = db.relationship("ElementAttribute", backref = "ElementAttributeTemplate", lazy = "dynamic")
+
+	def __repr__(self):
+		return "<ElementAttributeTemplate: {}>".format(self.Name)
+
+	def id(self):
+		return self.ElementAttributeTemplateId
 
 class ElementTemplate(db.Model):
 	__tablename__ = "ElementTemplate"
@@ -99,7 +106,7 @@ class ElementTemplate(db.Model):
 	Name = db.Column(db.String(45), nullable = False)
 	SiteId = db.Column(db.Integer, db.ForeignKey("Site.SiteId", name = "FK__Site$Have$ElementTemplate"), nullable = False)
 
-	AttributeTemplates = db.relationship("AttributeTemplate", backref = "ElementTemplate", lazy = "dynamic")
+	ElementAttributeTemplates = db.relationship("ElementAttributeTemplate", backref = "ElementTemplate", lazy = "dynamic")
 	Elements = db.relationship("Element", backref = "ElementTemplate", lazy = "dynamic")
 	EventFrameTemplates = db.relationship("EventFrameTemplate", backref = "ElementTemplate", lazy = "dynamic")
 
@@ -152,7 +159,7 @@ class EventFrame(db.Model):
 	EventFrameNotes = db.relationship("EventFrameNote", backref = "EventFrame", lazy = "dynamic")
 
 	def __repr__(self):
-		return "<EventFrame: {}>".format(self.Name)
+		return "<EventFrame: {}>".format(self.friendlyName())
 
 	def ancestors(self, ancestors):
 		if self.ParentEventFrameId == None:
@@ -161,11 +168,20 @@ class EventFrame(db.Model):
 			ancestors.insert(0, self.ParentEventFrame)
 			return self.ParentEventFrame.ancestors(ancestors)
 
-	def friendlyName(self):
+	def friendlyName(self, seconds = False):
 		if self.Name:
 			return self.Name
 		else:
-			return self.StartTimestamp.strftime("%m/%d/%y %H:%M") + ' - '			
+			if self.EndTimestamp:
+				if seconds:
+					return "{} - {}".format(self.StartTimestamp.strftime("%Y-%m-%d %H:%M:%S"), self.EndTimestamp.strftime("%Y-%m-%d %H:%M:%S"))
+				else:
+					return "{} - {}".format(self.StartTimestamp.strftime("%Y-%m-%d %H:%M"), self.EndTimestamp.strftime("%Y-%m-%d %H:%M"))
+			else:
+				if seconds:
+					return "{} -".format(self.StartTimestamp.strftime("%Y-%m-%d %H:%M:%S"))
+				else:
+					return "{} -".format(self.StartTimestamp.strftime("%Y-%m-%d %H:%M"))
 
 	def hasDescendants(self):
 		if self.EventFrames:
@@ -173,12 +189,61 @@ class EventFrame(db.Model):
 		else:
 			return False
 
+	def id(self):
+		return self.EventFrameId
+
 	def origin(self):
 		if self.ParentEventFrameId == None:
 			return self
 		else:
 			return self.ParentEventFrame.origin()
-	
+
+class EventFrameAttribute(db.Model):
+	__tablename__ = "EventFrameAttribute"
+	__table_args__ = \
+	(
+		UniqueConstraint("EventFrameAttributeTemplateId", "ElementId", name = "AK__EventFrameAttributeTemplateId__ElementId"),
+	)
+
+	EventFrameAttributeId = db.Column(db.Integer, primary_key = True)
+	ElementId = db.Column(db.Integer, db.ForeignKey("Element.ElementId", name = "FK__Element$Have$EventFrameAttribute"), nullable = False)
+	EventFrameAttributeTemplateId = db.Column(db.Integer, db.ForeignKey("EventFrameAttributeTemplate.EventFrameAttributeTemplateId", 
+		name = "FK__EventFrameAttributeTemplate$Have$EventFrameAttribute"), nullable = False)
+	TagId = db.Column(db.Integer, db.ForeignKey("Tag.TagId", name = "FK__Tag$Have$EventFrameAttribute"), nullable = False)
+
+	def __repr__(self):
+		return "<EventFrameAttribute: {} - {} - {}>".format(self.Element.Name, self.EventFrameAttributeTemplate.Name, self.Tag.Name)
+
+	def id(self):
+		return self.EventFrameAttributeId
+
+class EventFrameAttributeTemplate(db.Model):
+	__tablename__ = "EventFrameAttributeTemplate"
+	__table_args__ = \
+	(
+		UniqueConstraint("EventFrameTemplateId", "Name", name = "AK__EventFrameTemplateId__Name"),
+	)
+
+	EventFrameAttributeTemplateId = db.Column(db.Integer, primary_key = True)
+	Description = db.Column(db.String(255), nullable = True)
+	EventFrameTemplateId = db.Column(db.Integer, db.ForeignKey("EventFrameTemplate.EventFrameTemplateId", \
+		name = "FK__EventFrameTemplate$Have$EventFrameAttributeTemplate"), nullable = False)
+	Name = db.Column(db.String(45), nullable = False)
+
+	EventFrameAttributes = db.relationship("EventFrameAttribute", backref = "EventFrameAttributeTemplate", lazy = "dynamic")
+
+	def __repr__(self):
+		return "<EventFrameAttributeTemplate: {}>".format(self.Name)
+
+	def id(self):
+		return self.EventFrameAttributeTemplateId
+
+	def path(self):
+		path = ""
+		for ancestor in self.EventFrameTemplate.ancestors([]):
+			path += "&nbsp;\&nbsp;{}".format(ancestor.Name)
+		return  "{}&nbsp;\&nbsp;{}".format(path, self.EventFrameTemplate.Name)
+
 class EventFrameNote(db.Model):
 	__tablename__ = "EventFrameNote"
 	__table_args__ = \
@@ -207,9 +272,10 @@ class EventFrameTemplate(db.Model):
 	ParentEventFrameTemplateId = db.Column(db.Integer, db.ForeignKey("EventFrameTemplate.EventFrameTemplateId",
 		name = "FK__EventFrameTemplate$CanHave$EventFrameTemplate"), nullable = True)
 
-	ParentEventFrameTemplate = db.relationship("EventFrameTemplate", remote_side = [EventFrameTemplateId])
+	EventFrameAttributeTemplates = db.relationship("EventFrameAttributeTemplate", backref = "EventFrameTemplate", lazy = "dynamic")
 	EventFrames = db.relationship("EventFrame", backref = "EventFrameTemplate", lazy = "dynamic")
 	EventFrameTemplates = db.relationship("EventFrameTemplate", remote_side = [ParentEventFrameTemplateId])
+	ParentEventFrameTemplate = db.relationship("EventFrameTemplate", remote_side = [EventFrameTemplateId])
 
 	def __repr__(self):
 		return "<EventFrameTemplate: {}>".format(self.Name)
@@ -221,8 +287,24 @@ class EventFrameTemplate(db.Model):
 			ancestors.insert(0, self.ParentEventFrameTemplate)
 			return self.ParentEventFrameTemplate.ancestors(ancestors)
 
+	def descendants(self, descendants, level):
+		descendants.append({"eventFrameTemplate" : self, "level" : level})
+		if self.hasDescendants():
+			descendantEventFrameTemplates = EventFrameTemplate.query.filter_by(ParentEventFrameTemplateId = self.EventFrameTemplateId). \
+				order_by(EventFrameTemplate.Order)
+			for descendant in descendantEventFrameTemplates:
+				descendant.descendants(descendants, level + 1)
+		if level == 0:
+			return descendants
+
 	def hasDescendants(self):
 		if self.EventFrameTemplates:
+			return True
+		else:
+			return False
+
+	def hasParent(self):
+		if self.ParentEventFrameTemplateId:
 			return True
 		else:
 			return False
@@ -253,6 +335,9 @@ class Lookup(db.Model):
 	def __repr__(self):
 		return "<Lookup: {}>".format(self.Name)
 
+	def id(self):
+		return self.LookupId
+
 class LookupValue(db.Model):
 	__tablename__ = "LookupValue"
 	__table_args__ = \
@@ -269,6 +354,9 @@ class LookupValue(db.Model):
 
 	def __repr__(self):
 		return "<LookupValue: {}>".format(self.Name)
+
+	def id(self):
+		return self.LookupValueId
 
 	def isReferenced(self):
 		return TagValue.query.join(Tag).filter(TagValue.Value == self.Value, Tag.LookupId == self.LookupId).count() > 0
@@ -305,16 +393,6 @@ class Role(db.Model):
 
 	Users = db.relationship("User", backref = "Role", lazy = "dynamic")
 
-	# @staticmethod
-	# def insertRoles():
-	# 	roles = {"User" : Permission.DATA_ENTRY, "Administrator" : 0xff}
-	# 	for r in roles:
-	# 		role = Role.query.filter_by(Name = r).first()
-	# 		if role is None:
-	# 			role = Role(Name = r)
-	# 		role.Permissions = roles[r]
-	# 		db.session.add(role)
-	# 	db.session.commit()
 	@staticmethod
 	def insertDefaultRoles():
 		defaultRoles = {"User" : Permission.DATA_ENTRY, "Administrator" : 0xff}
@@ -328,6 +406,9 @@ class Role(db.Model):
 
 	def __repr__(self):
 		return "<Role: {}>".format(self.Name)
+
+	def id(self):
+		return self.RoleId
 
 class Site(db.Model):
 	__tablename__ = "Site"
@@ -368,10 +449,14 @@ class Tag(db.Model):
 		name = "FK__UnitOfMeasurement$CanBeUsedIn$Tag"), nullable = True)
 
 	ElementAttributes = db.relationship("ElementAttribute", backref = "Tag", lazy = "dynamic")
+	EventFrameAttributes = db.relationship("EventFrameAttribute", backref = "Tag", lazy = "dynamic")
 	TagValues = db.relationship("TagValue", backref = "Tag", lazy = "dynamic")
 
 	def __repr__(self):
 		return "<Tag: {}>".format(self.Name)
+
+	def fullAbbreviatedPathName(self):
+		return "{}_{}_{}_{}".format(self.Area.Site.Enterprise.Abbreviation, self.Area.Site.Abbreviation, self.Area.Abbreviation, self.Name)
 
 	def id(self):
 		return self.TagId
@@ -393,6 +478,9 @@ class TagValue(db.Model):
 
 	def __repr__(self):
 		return "<TagValue: {}>".format(self.TagId)
+
+	def id(self):
+		return self.TagValueId
 
 class TagValueNote(db.Model):
 	__tablename__ = "TagValueNote"
@@ -417,62 +505,17 @@ class UnitOfMeasurement(db.Model):
 
 	Tags = db.relationship("Tag", backref = "UnitOfMeasurement", lazy = "dynamic")
 
-	@staticmethod
-	def insertDefaultUnits():
-		defaultUnits = {"°C" : "degree Celsius",
-			"°F" : "degree Fahrenheit",
-			"°F/min" : "degree Fahrenheit per minute",
-			"°P" : "degree Plato",
-			"ASBC" : "American Society of Brewing Chemists",
-			"bbl" : "barrel",
-			"cells/ml" : "cells per milliliter",
-			"cells/ml/°P" : "cells per ml per degree plato",
-			"EBC" : "european brewery convention",
-			"g" : "grams",
-			"g/bbl" : "grams per barrel",
-			"g/L" : "grams per liter",
-			"gal" : "gallon",
-			"gpm" : "gallons per minute",
-			"h" : "hour",
-			"IBU" : "international bittering unit",
-			"in" : "inches",
-			"kg" : "kilogram",
-			"L" : "Liters",
-			"lb" : "pound",
-			"lb/bbl" : "pounds / barrel",
-			"mg" : "milligram",
-			"min" : "minute",
-			"mL" : "milliliter",
-			"mm" : "millimeter",
-			"pH" : "potential of hydrogen",
-			"ppb" : "parts per billion",
-			"ppm" : "parts per million",
-			"psi" : "pounds per square inch",
-			"RE" : "real extract",
-			"s" : "second",
-			"SG" : "specific gravity",
-			"SRM" : "Standard Reference Method",
-			"t/h" : "tons per hour",
-			"TA" : "Total Acidity",
-			"vol" : "volumes",
-			"x10^12 cells" : "x10^12 cells",
-			"x10^6 cells" : "x10^6 cells"}			
-			
-		for defaultUnit in defaultUnits:
-			unit = UnitOfMeasurement.query.filter(and_(UnitOfMeasurement.Abbreviation == defaultUnit,
-				UnitOfMeasurement.Name == defaultUnits[defaultUnit])).first()
-			if unit is None:
-				print("Adding unit \"{}\".".format(defaultUnit))
-				unit = UnitOfMeasurement(Abbreviation = defaultUnit)
-				unit.Name = defaultUnits[defaultUnit]
-				db.session.add(unit)
-		db.session.commit()
-
 	def __repr__(self):
 		return "<UnitOfMeasurement: {}>".format(self.Name)
 
+	def id(self):
+		return self.UnitOfMeasurementId
+
+	def isReferenced(self):
+		return Tag.query.filter_by(UnitOfMeasurementId = self.UnitOfMeasurementId).count() > 0
+
 class User(UserMixin, db.Model):
-	__tablename__ = 'User'
+	__tablename__ = "User"
 	__table_args__ = \
 	(
 		UniqueConstraint("Name", name = "AK__Name"),
@@ -510,6 +553,9 @@ class User(UserMixin, db.Model):
 		return self.Role is not None and (self.Role.Permissions & permissions) == permissions
 
 	def get_id(self):
+		return self.UserId
+
+	def id(self):
 		return self.UserId
 
 	def isAdministrator(self):

@@ -8,9 +8,16 @@ Users
 
 {% block page_content %}
 <div>
-    <h1>Users</h1>
+    <ol class = "breadcrumb">
+        <li class = "active"><span class = "glyphicon glyphicon-home"></li>
+    </ol>
+</div>
+<div class = "page-header">
+    <h1>Users <small></small></h1>
+</div>
+<div>
     <a class = "btn btn-default" title = "Add" href = "{{ url_for("users.addUser") }}" role = "button">
-        <span class="glyphicon glyphicon-plus"></span></a>
+        <span class = "glyphicon glyphicon-plus"></span></a>
     <br><br>
     <table id = "usersTable" class = "table">
         <thead>
@@ -28,12 +35,12 @@ Users
                 <td>{{ user.Name }}</td>
                 <td>{{ user.Role.Name }}</td>
                 <td><a class = "btn btn-default" title = "Change Password" href = "{{ url_for("users.changePassword", userId = user.UserId) }}">
-                    <span class="glyphicon glyphicon-lock"></span></a></td>
-                {% if user.Name != 'pi' %}
+                    <span class = "glyphicon glyphicon-lock"></span></a></td>
+                {% if user.Name != "pi" %}
                 <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("users.editUser", userId = user.UserId) }}">
-                    <span class="glyphicon glyphicon-edit"></span></a></td>
+                    <span class = "glyphicon glyphicon-edit"></span></a></td>
                 <td><a class = "btn btn-default" title = "Delete" href = "{{ url_for("users.deleteUser", 
-                    userId = user.UserId) }}"><span class="glyphicon glyphicon-trash"></span></a></td>
+                    userId = user.UserId) }}"><span class = "glyphicon glyphicon-trash"></span></a></td>
                 {% else %}
                 <td></td>
                 <td></td>
@@ -50,23 +57,26 @@ Users
     <link rel = "stylesheet" type = "text/css" href = {{ url_for("static", filename = "css/datatables.min.css") }}/> 
     <script type = "text/javascript" src = {{ url_for("static", filename = "js/datatables.min.js") }}></script>
     <script>
-        $('#usersTable').DataTable
-        ({
-            "order":
-            [
-                [0, 'asc'],             // Name.
-            ],
-            "columns":
-            [
-                null,
-                null,
-                { "orderable": false }, // Change password button.
-                { "orderable": false }, // Edit button.
-                { "orderable": false }  // Delete button.
-            ],
-            "stateSave": true,
-            "stateDuration": 0,
-            "pageLength": 25
-        });
+        $(document).ready(function()
+        {
+            $("#usersTable").DataTable
+            ({
+                "order":
+                [
+                    [0, "asc"],             // Name.
+                ],
+                "columns":
+                [
+                    null,
+                    null,
+                    { "orderable": false }, // Change password button.
+                    { "orderable": false }, // Edit button.
+                    { "orderable": false }  // Delete button.
+                ],
+                "stateSave": true,
+                "stateDuration": 0,
+                "pageLength": 25
+            })
+        })
     </script>
 {% endblock %}

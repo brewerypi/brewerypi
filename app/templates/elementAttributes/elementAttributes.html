@@ -6,36 +6,57 @@ Element Attributes
 
 {% block page_content %}
 <div>
-    <h1>Element Attributes</h1>
-    <a class = "btn btn-default" title = "Add" href = "{{ url_for("elementAttributes.addElementAttribute") }}" role = "button">
-        <span class="glyphicon glyphicon-plus"></span></a>
-    <br><br>
+    <ol class = "breadcrumb">
+        <li><a href = "{{ url_for("elements.selectElement", selectedClass = "Root", selectedId = None) }}"><span class = "glyphicon glyphicon-home"></a></li>
+        <li><a href = "{{ url_for("elements.selectElement", selectedClass = "Enterprise",
+            selectedId = element.ElementTemplate.Site.Enterprise.EnterpriseId) }}">{{ element.ElementTemplate.Site.Enterprise.Name }}</a></li>
+        <li><a href = "{{ url_for("elements.selectElement", selectedClass = "Site",
+            selectedId = element.ElementTemplate.Site.SiteId) }}">{{ element.ElementTemplate.Site.Name }}</a></li>
+        <li><a href = "{{ url_for("elements.selectElement", selectedClass = "ElementTemplate",
+            selectedId = element.ElementTemplate.ElementTemplateId) }}">{{ element.ElementTemplate.Name }}</a></li>
+        <li class = "active">{{ element.Name }}</a></li>
+    </ol>
+</div>
+<div class = "page-header">
+    <h1>Element Attributes <small></small></h1>
+</div>
+<div>
     <table id = "elementAttributesTable" class = "table">
         <thead>
             <tr>
-                <th>Element</th>
-                <th>Attribute Template</th>
+                <th>Element Attribute Template</th>
                 <th>Tag</th>
-                <th></th>
-                <th></th>
-                <th></th>
+                <th><button class = "btn btn-default" id = "buttonAttributesSaveAll" title = "Save All"><span class="glyphicon glyphicon-floppy-disk"></span>
+                    </button></th>
             </tr>
         </thead>
         <tbody>
-            {% for elementAttribute in elementAttributes %}
-            <tr>
-                <td>{{ elementAttribute.Element.ElementTemplate.Site.Enterprise.Abbreviation + "_" + 
-                    elementAttribute.Element.ElementTemplate.Site.Abbreviation + "_" + elementAttribute.Element.ElementTemplate.Name + "_" + 
-                    elementAttribute.Element.Name }}</td>
-                <td>{{ elementAttribute.AttributeTemplate.ElementTemplate.Site.Enterprise.Abbreviation + "_" + 
-                    elementAttribute.AttributeTemplate.ElementTemplate.Site.Abbreviation + "_" + 
-                    elementAttribute.AttributeTemplate.ElementTemplate.Name + "_" + elementAttribute.AttributeTemplate.Name }}</td>
-                <td>{{ elementAttribute.Tag.Area.Site.Enterprise.Abbreviation + "_" + elementAttribute.Tag.Area.Site.Abbreviation + "_" +
-                    elementAttribute.Tag.Area.Abbreviation + "_" + elementAttribute.Tag.Name }}</td>
-                <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("elementAttributes.editElementAttribute",
-                    elementAttributeId = elementAttribute.ElementAttributeId) }}"><span class="glyphicon glyphicon-edit"></span></a></td>
-                <td><a class = "btn btn-default" title = "Delete" href = "{{ url_for("elementAttributes.deleteElementAttribute",
-                    elementAttributeId = elementAttribute.ElementAttributeId) }}"><span class="glyphicon glyphicon-trash"></span></a></td>
+            {% for elementAttributeTemplate in elementAttributeTemplates %}
+                {% set elementAttributes = elementAttributeTemplate.ElementAttributes.
+                    filter_by(ElementAttributeTemplateId = elementAttributeTemplate.ElementAttributeTemplateId, ElementId = element.ElementId) %}
+                {% if elementAttributes.count() > 0 %}
+                    {% set elementAttribute = elementAttributes | first %}
+                {% else %}
+                    {% set elementAttribute = None %}
+                {% endif %}
+                <tr>
+                <td>{{ elementAttributeTemplate.Name }}</td>
+                <td>
+                    <div class = "form-group">
+                        <select class = "form-control" id = "selectUpdatedValue{{ elementAttributeTemplate.ElementAttributeTemplateId }}">
+                            <option value = "-1"></option>
+                            {% for tag in tags %}
+                                {% if elementAttribute.TagId == tag.TagId %}
+                                    {% set selected = "selected" %}
+                                {% else %}
+                                    {% set selected = "" %}
+                                {% endif %}
+                                <option value = "{{ tag.TagId }}" {{ selected }}>{{ tag.fullAbbreviatedPathName() }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </td>
+                <td></td>
             </tr>
             {% endfor %}
         </tbody>
@@ -48,24 +69,59 @@ Element Attributes
     <link rel = "stylesheet" type = "text/css" href = {{ url_for("static", filename = "css/datatables.min.css") }}/> 
     <script type = "text/javascript" src = {{ url_for("static", filename = "js/datatables.min.js") }}></script>
     <script>
-        $('#elementAttributesTable').DataTable
-        ({
-            "order":
-            [
-                [0, 'asc'],             // Element path.
-                [1, 'asc']              // Attribute Template.
-            ],
-            "columns":
-            [
-                null,
-                null,
-                null,
-                { "orderable": false }, // Edit element attribute button.
-                { "orderable": false }  // Delete element attribute button.
-            ],
-            "stateSave": true,
-            "stateDuration": 0,
-            "pageLength": 25
-        });
+        $(document).ready(function()
+        {
+            var elementAttributesTable = $("#elementAttributesTable").DataTable
+            ({
+                "order":
+                [
+                    [0, "asc"]                                      // Element Attribute Template.
+                ],
+                "columns":
+                [
+                    null,
+                    { "orderable": false, "searchable": false },    // Tag select list.
+                    { "orderable": false }                          // Save all button.
+                ],
+                "stateSave": true,
+                "stateDuration": 0,
+                "pageLength": 25
+            })
+            // Enter key call save all.
+            $(document).keypress(function(event)
+            {
+                if (event.which == 13)
+                {
+                    $("#buttonAttributesSaveAll").focus()
+                }
+            })
+            $("#buttonAttributesSaveAll").click(function()
+            {
+                var rows = []
+                // Loop through the select values.
+                elementAttributesTable.$("[id^=selectUpdatedValue]").each(function()
+                {
+                    var id = $(this).attr("id").split("selectUpdatedValue")[1]
+                    var value = $.trim($(this).val())
+                    var row = {}
+                    row["ElementAttributeTemplateId"] = id
+                    row["TagId"] = value
+                    rows.push(row)
+                })
+                $.ajax(
+                {
+                    type : "POST",
+                    url : "/elementAttributes/updateMultiple/{{ element.ElementId }}",
+                    data : JSON.stringify(rows)
+                }).done(function(response)
+                {
+                    location.reload(true)
+                }).fail(function()
+                {
+                    $("#divFlashedMessages").append("<div class = \"alert alert-danger\"><button type = \"button\" class = \"close\" " +
+                        "data-dismiss = \"alert\">&times;</button>The attempt to update one or more element attributes failed.</div>")                        
+                })
+            })
+        })
     </script>
 {% endblock %}

@@ -1,37 +1,93 @@
-from flask import flash, redirect, render_template, request, url_for
+from flask import flash, jsonify, redirect, render_template, request, url_for
 from flask_login import login_required
 from sqlalchemy import or_
 from . import tagValues
-from . forms import TagValueForm, TagValueNoteForm
+from . forms import TagValueForm
 from .. import db
 from .. decorators import permissionRequired
-from .. models import Area, ElementAttribute, Enterprise, Lookup, LookupValue, Note, Permission, Site, Tag, TagValue, TagValueNote
+from .. models import Area, ElementAttribute, Enterprise, EventFrame, EventFrameAttribute, Lookup, LookupValue, Permission, Site, Tag, TagValue
 
 modelName = "Tag Value"
 
 @tagValues.route("/tagValues/<int:tagId>", methods = ["GET", "POST"])
-@tagValues.route("/tagValues/<int:tagId>/<int:elementAttributeId>", methods = ["GET", "POST"])
+@tagValues.route("/tagValues/elementAttribute/<int:elementAttributeId>", methods = ["GET", "POST"])
+@tagValues.route("/tagValues/eventFrameAttribute/<int:eventFrameId>/<int:eventFrameAttributeId>", methods = ["GET", "POST"])
 @login_required
 @permissionRequired(Permission.DATA_ENTRY)
-def listTagValues(tagId, elementAttributeId = None):
+def listTagValues(tagId = None, elementAttributeId = None, eventFrameId = None, eventFrameAttributeId = None):
+	elementAttribute = None
+	eventFrame = None
+	eventFrameAttribute = None
 	if elementAttributeId:
 		elementAttribute = ElementAttribute.query.get_or_404(elementAttributeId)
+		tag = Tag.query.get_or_404(elementAttribute.TagId)
+	elif eventFrameId:
+		eventFrame = EventFrame.query.get_or_404(eventFrameId)
+		eventFrameAttribute = EventFrameAttribute.query.get_or_404(eventFrameAttributeId)
+		tag = Tag.query.get_or_404(eventFrameAttribute.TagId)
 	else:
-		elementAttribute = None
+		tag = Tag.query.get_or_404(tagId)
 
-	tag = Tag.query.get_or_404(tagId)
 	if tag.LookupId:
-		tagValues = TagValue.query.join(Tag, Lookup, LookupValue).filter(Tag.TagId == tagId, TagValue.Value == LookupValue.Value)
+		if eventFrame:
+			if eventFrame.EndTimestamp:
+				tagValues = TagValue.query.join(Tag, Lookup, LookupValue).filter(Tag.TagId == tag.TagId, TagValue.Value == LookupValue.Value,
+					TagValue.Timestamp >= eventFrame.StartTimestamp, TagValue.Timestamp <= eventFrame.EndTimestamp)
+			else:
+				tagValues = TagValue.query.join(Tag, Lookup, LookupValue).filter(Tag.TagId == tag.TagId, TagValue.Value == LookupValue.Value,
+					TagValue.Timestamp >= eventFrame.StartTimestamp)
+		else:
+			tagValues = TagValue.query.join(Tag, Lookup, LookupValue).filter(Tag.TagId == tag.TagId, TagValue.Value == LookupValue.Value)
 	else:
-		tagValues = TagValue.query.filter_by(TagId = tagId)
-	return render_template("tagValues/tagValues.html", elementAttribute = elementAttribute, tag = tag, tagValues = tagValues)
+		if eventFrame:
+			if eventFrame.EndTimestamp:
+				tagValues = TagValue.query.filter(TagValue.TagId == tag.TagId, TagValue.Timestamp >= eventFrame.StartTimestamp,
+					TagValue.Timestamp <= eventFrame.EndTimestamp)
+			else:
+				tagValues = TagValue.query.filter(TagValue.TagId == tag.TagId, TagValue.Timestamp >= eventFrame.StartTimestamp)
+		else:
+			tagValues = TagValue.query.filter_by(TagId = tag.TagId)
 
-@tagValues.route("/tagValues/add/<int:tagId>", methods = ["GET", "POST"])
+	return render_template("tagValues/tagValues.html", elementAttribute = elementAttribute, eventFrame = eventFrame, eventFrameAttribute = eventFrameAttribute,
+		tag = tag, tagValues = tagValues)
+
+@tagValues.route("/tagValues/addMultiple", methods = ["GET", "POST"])
 @login_required
 @permissionRequired(Permission.DATA_ENTRY)
-def addTagValue(tagId):
+def addMultiple():
+	# Get the data, loop through it and add new value.
+	data = request.get_json(force = True)
+	count = 0
+	for item in data:
+		tagValue = TagValue(TagId = item["tagId"], Timestamp = item["timestamp"], Value = item["value"])
+		db.session.add(tagValue)
+		count = count + 1
+
+	if count > 0:
+		db.session.commit()
+		message = "You have successfully added one or more new tag values."
+		flash(message, "alert alert-success")
+	else:
+		message = "Nothing added to save."
+		flash(message, "alert alert-warning")
+	return jsonify({"response": message})
+
+@tagValues.route("/tagValues/add/<int:tagId>", methods = ["GET", "POST"])
+@tagValues.route("/tagValues/add/elementAttribute/<int:elementAttributeId>", methods = ["GET", "POST"])
+@tagValues.route("/tagValues/add/eventFrameAttribute/<int:eventFrameId>/<int:eventFrameAttributeId>", methods = ["GET", "POST"])
+@login_required
+@permissionRequired(Permission.DATA_ENTRY)
+def addTagValue(tagId = None, elementAttributeId = None, eventFrameId = None, eventFrameAttributeId = None):
 	operation = "Add"
-	tag = Tag.query.get_or_404(tagId)
+	if elementAttributeId:
+		elementAttribute = ElementAttribute.query.get_or_404(elementAttributeId)
+		tag = Tag.query.get_or_404(elementAttribute.TagId)
+	elif eventFrameId:
+		eventFrameAttribute = EventFrameAttribute.query.get_or_404(eventFrameAttributeId)
+		tag = Tag.query.get_or_404(eventFrameAttribute.TagId)
+	else:
+		tag = Tag.query.get_or_404(tagId)
+
 	form = TagValueForm()
 
 	# Configure the form based on if the tag value is associated with a lookup.
@@ -55,9 +111,44 @@ def addTagValue(tagId):
 		return redirect(form.requestReferrer.data)
 
 	# Present a form to add a new tag value.
-	form.tagId.data = tagId
+	form.tagId.data = tag.TagId
 	form.requestReferrer.data = request.referrer
-	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
+	if elementAttributeId:
+		breadcrumbs = [{"url" : url_for("tags.selectTag", selectedClass = "Root"), "text" : "<span class = \"glyphicon glyphicon-home\">"},
+			{"url" : url_for("elements.selectElement", selectedClass = "Enterprise",
+				selectedId = elementAttribute.Element.ElementTemplate.Site.Enterprise.EnterpriseId),
+				"text" : elementAttribute.Element.ElementTemplate.Site.Enterprise.Name},
+			{"url" : url_for("elements.selectElement", selectedClass = "Site",
+				selectedId = elementAttribute.Element.ElementTemplate.Site.SiteId), "text" : elementAttribute.Element.ElementTemplate.Site.Name},
+			{"url" : url_for("elements.selectElement", selectedClass = "ElementTemplate",
+				selectedId = elementAttribute.Element.ElementTemplate.ElementTemplateId), "text" : elementAttribute.Element.ElementTemplate.Name},
+			{"url" : url_for("elements.dashboard", elementId = elementAttribute.Element.ElementId), "text" : elementAttribute.Element.Name},
+			{"url" : url_for("tagValues.listTagValues", tagId = tag.TagId, elementAttributeId = elementAttribute.ElementAttributeId),
+				"text" : elementAttribute.ElementAttributeTemplate.Name}]
+	elif eventFrameId:
+		eventFrame = EventFrame.query.get_or_404(eventFrameId)
+		breadcrumbs = [{"url" : url_for("tags.selectTag", selectedClass = "Root"), "text" : "<span class = \"glyphicon glyphicon-home\">"},
+			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Enterprise",
+				selectedId = eventFrame.Element.ElementTemplate.Site.Enterprise.EnterpriseId),
+				"text" : eventFrame.Element.ElementTemplate.Site.Enterprise.Name},
+			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Site", selectedId = eventFrame.Element.ElementTemplate.Site.SiteId),
+				"text" : eventFrame.Element.ElementTemplate.Site.Name},
+			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "ElementTemplate",
+				selectedId = eventFrame.Element.ElementTemplate.ElementTemplateId), "text" : eventFrame.Element.ElementTemplate.Name},
+			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "EventFrameTemplate",
+				selectedId = eventFrame.EventFrameTemplate.EventFrameTemplateId), "text" : eventFrame.EventFrameTemplate.Name},
+			{"url" : url_for("eventFrames.dashboard", eventFrameId = eventFrame.EventFrameId), "text" : eventFrame.friendlyName(True)},
+			{"url" : url_for("tagValues.listTagValues", eventFrameId = eventFrame.EventFrameId, eventFrameAttributeId = eventFrameAttributeId), 
+				"text" : eventFrameAttribute.EventFrameAttributeTemplate.Name}]
+	else:
+		breadcrumbs = [{"url" : url_for("tags.selectTag", selectedClass = "Root"), "text" : "<span class = \"glyphicon glyphicon-home\">"},
+			{"url" : url_for("tags.selectTag", selectedClass = "Enterprise", selectedId = tag.Area.Site.Enterprise.EnterpriseId),
+				"text" : tag.Area.Site.Enterprise.Name},
+			{"url" : url_for("tags.selectTag", selectedClass = "Site", selectedId = tag.Area.Site.SiteId), "text" : tag.Area.Site.Name},
+			{"url" : url_for("tags.selectTag", selectedClass = "Area", selectedId = tag.Area.AreaId), "text" : tag.Area.Name},
+			{"url" : url_for("tagValues.listTagValues", tagId = tag.TagId), "text" : tag.Name}]
+
+	return render_template("addEdit.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
 
 @tagValues.route("/tagValues/delete/<int:tagValueId>", methods = ["GET", "POST"])
 @login_required
@@ -70,9 +161,11 @@ def deleteTagValue(tagValueId):
 	return redirect(request.referrer)
 
 @tagValues.route("/tagValues/edit/<int:tagValueId>", methods = ["GET", "POST"])
+@tagValues.route("/tagValues/edit/<int:tagValueId>/<int:elementAttributeId>", methods = ["GET", "POST"])
+@tagValues.route("/tagValues/edit/<int:tagValueId>/<int:eventFrameId>/<int:eventFrameAttributeId>", methods = ["GET", "POST"])
 @login_required
 @permissionRequired(Permission.DATA_ENTRY)
-def editTagValue(tagValueId):
+def editTagValue(tagValueId, elementAttributeId = None, eventFrameId = None, eventFrameAttributeId = None):
 	operation = "Edit"
 	tagValue = TagValue.query.get_or_404(tagValueId)
 	tag = Tag.query.get_or_404(tagValue.TagId)
@@ -110,79 +203,44 @@ def editTagValue(tagValueId):
 		form.value.data = tagValue.Value
 
 	form.requestReferrer.data = request.referrer
-	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
-
-@tagValues.route("/tagValueNotes/<int:tagValueId>", methods = ["GET", "POST"])
-@tagValues.route("/tagValueNotes/<int:tagValueId>/<int:elementAttributeId>", methods = ["GET", "POST"])
-@login_required
-@permissionRequired(Permission.DATA_ENTRY)
-def listTagValueNotes(tagValueId, elementAttributeId = None):
 	if elementAttributeId:
 		elementAttribute = ElementAttribute.query.get_or_404(elementAttributeId)
+		breadcrumbs = [{"url" : url_for("tags.selectTag", selectedClass = "Root"), "text" : "<span class = \"glyphicon glyphicon-home\">"},
+			{"url" : url_for("elements.selectElement", selectedClass = "Enterprise",
+				selectedId = elementAttribute.Element.ElementTemplate.Site.Enterprise.EnterpriseId),
+				"text" : elementAttribute.Element.ElementTemplate.Site.Enterprise.Name},
+			{"url" : url_for("elements.selectElement", selectedClass = "Site",
+				selectedId = elementAttribute.Element.ElementTemplate.Site.SiteId), "text" : elementAttribute.Element.ElementTemplate.Site.Name},
+			{"url" : url_for("elements.selectElement", selectedClass = "ElementTemplate",
+				selectedId = elementAttribute.Element.ElementTemplate.ElementTemplateId), "text" : elementAttribute.Element.ElementTemplate.Name},
+			{"url" : url_for("elements.dashboard", elementId = elementAttribute.Element.ElementId), "text" : elementAttribute.Element.Name},
+			{"url" : url_for("tagValues.listTagValues", elementAttributeId = elementAttribute.ElementAttributeId),
+				"text" : elementAttribute.ElementAttributeTemplate.Name},
+			{"url" : None, "text" : tagValue.Timestamp}]
+	elif eventFrameId:
+		eventFrame = EventFrame.query.get_or_404(eventFrameId)
+		eventFrameAttribute = EventFrameAttribute.query.get_or_404(eventFrameAttributeId)
+		breadcrumbs = [{"url" : url_for("tags.selectTag", selectedClass = "Root"), "text" : "<span class = \"glyphicon glyphicon-home\">"},
+			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Enterprise",
+				selectedId = eventFrame.Element.ElementTemplate.Site.Enterprise.EnterpriseId),
+				"text" : eventFrame.Element.ElementTemplate.Site.Enterprise.Name},
+			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Site", selectedId = eventFrame.Element.ElementTemplate.Site.SiteId),
+				"text" : eventFrame.Element.ElementTemplate.Site.Name},
+			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "ElementTemplate",
+				selectedId = eventFrame.Element.ElementTemplate.ElementTemplateId), "text" : eventFrame.Element.ElementTemplate.Name},
+			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "EventFrameTemplate",
+				selectedId = eventFrame.EventFrameTemplate.EventFrameTemplateId), "text" : eventFrame.EventFrameTemplate.Name},
+			{"url" : url_for("eventFrames.dashboard", eventFrameId = eventFrame.EventFrameId), "text" : eventFrame.friendlyName(True)},
+			{"url" : url_for("tagValues.listTagValues", eventFrameId = eventFrame.EventFrameId,
+				eventFrameAttributeId = eventFrameAttribute.EventFrameAttributeId), "text" : eventFrameAttribute.EventFrameAttributeTemplate.Name},
+			{"url" : None, "text" : tagValue.Timestamp}]
 	else:
-		elementAttribute = None
+		breadcrumbs = [{"url" : url_for("tags.selectTag", selectedClass = "Root"), "text" : "<span class = \"glyphicon glyphicon-home\">"},
+			{"url" : url_for("tags.selectTag", selectedClass = "Enterprise", selectedId = tag.Area.Site.Enterprise.EnterpriseId),
+				"text" : tag.Area.Site.Enterprise.Name},
+			{"url" : url_for("tags.selectTag", selectedClass = "Site", selectedId = tag.Area.Site.SiteId), "text" : tag.Area.Site.Name},
+			{"url" : url_for("tags.selectTag", selectedClass = "Area", selectedId = tag.Area.AreaId), "text" : tag.Area.Name},
+			{"url" : url_for("tagValues.listTagValues", tagId = tag.TagId), "text" : tag.Name},
+			{"url" : None, "text" : tagValue.Timestamp}]
 
-	tagValue = TagValue.query.get_or_404(tagValueId)
-	tagValueNotes = TagValueNote.query.filter_by(TagValueId = tagValueId)
-	return render_template("tagValues/tagValueNotes.html", elementAttribute = elementAttribute, tagValue = tagValue, tagValueNotes = tagValueNotes)
-
-@tagValues.route("/tagValueNotes/add/<int:tagValueId>", methods = ["GET", "POST"])
-@login_required
-@permissionRequired(Permission.DATA_ENTRY)
-def addTagValueNote(tagValueId):
-	# check_admin()
-	operation = "Add"
-	modelName = "Tag Value Note"
-	form = TagValueNoteForm()
-
-	# Add a new tag value note.
-	if form.validate_on_submit():
-		note = Note(Note = form.note.data, Timestamp = form.timestamp.data)
-		db.session.add(note)
-		db.session.commit()
-		tagValueNote = TagValueNote(NoteId = note.NoteId, TagValueId = tagValueId)
-		db.session.add(tagValueNote)
-		db.session.commit()
-		flash("You have successfully added a new Tag Value Note.", "alert alert-success")
-		return redirect(form.requestReferrer.data)
-
-	# Present a form to add a new tag value note.
-	form.requestReferrer.data = request.referrer
-	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
-
-@tagValues.route("/tagValueNotes/delete/<int:noteId>/<int:tagValueId>", methods = ["GET", "POST"])
-@login_required
-@permissionRequired(Permission.DATA_ENTRY)
-def deleteTagValueNote(noteId, tagValueId):
-	# check_admin()
-	tagValueNote = TagValueNote.query.filter_by(TagValueId = tagValueId, NoteId = noteId).first()
-	note = Note.query.get_or_404(noteId)
-	db.session.delete(tagValueNote)
-	db.session.delete(note)
-	db.session.commit()
-	flash("You have successfully deleted the tag value note.", "alert alert-success")
-	return redirect(request.referrer)
-
-@tagValues.route("/tagValueNotes/edit/<int:noteId>", methods = ["GET", "POST"])
-@login_required
-@permissionRequired(Permission.DATA_ENTRY)
-def editTagValueNote(noteId):
-	# check_admin()
-	operation = "Edit"
-	modelName = "Tag Value Note"
-	note = Note.query.get_or_404(noteId)
-	form = TagValueNoteForm()
-
-	# Edit an existing tag value note.
-	if form.validate_on_submit():
-		note.Note = form.note.data
-		note.Timestamp = form.timestamp.data
-		db.session.commit()
-		flash("You have successfully edited the Tag Value Note.", "alert alert-success")
-		return redirect(form.requestReferrer.data)
-
-	# Present a form to edit an existing tag value.
-	form.note.data = note.Note
-	form.timestamp.data = note.Timestamp
-	form.requestReferrer.data = request.referrer
-	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
+	return render_template("addEdit.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
