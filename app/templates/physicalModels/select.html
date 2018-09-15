@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}
+Physical Models
+{% endblock %}
+
+{% block page_content %}
+<div>
+    <ol class = "breadcrumb">
+        {% if childrenClass == "Enterprise" %}
+            <li class = "active"><span class = "glyphicon glyphicon-home"></li>
+            {% set pageHeaderSubText = "Enterprises" %}
+        {% elif childrenClass == "Site" %}
+            <li><a href = "{{ url_for("physicalModels.selectPhysicalModel", selectedClass = "Root") }}"><span class = "glyphicon glyphicon-home"></a></li>
+            <li class = "active">{{ parent.Name }}</li>
+            {% set pageHeaderSubText = "Sites" %}
+        {% elif childrenClass == "Area" %}
+            <li><a href = "{{ url_for("physicalModels.selectPhysicalModel", selectedClass = "Root") }}"><span class = "glyphicon glyphicon-home"></a></li>
+            <li><a href = "{{ url_for("physicalModels.selectPhysicalModel", selectedClass = "Enterprise", selectedId = parent.Enterprise.id()) }}">
+                {{ parent.Enterprise.Name }}</a></li>
+            <li class = "active">{{ parent.Name }}</li>
+            {% set pageHeaderSubText = "Areas" %}
+        {% endif %}
+    </ol>
+</div>
+<div class = "page-header">
+    <h1>Brewery Modeling <small>{{ pageHeaderSubText }}</small></h1>
+</div>
+<div>
+    {% if childrenClass == "Enterprise" %}
+        <a class = "btn btn-default" title = "Add" href = "{{ url_for("enterprises.addEnterprise") }}" role = "button">
+            <span class = "glyphicon glyphicon-plus"></span></a>
+        <br><br>
+    {% elif childrenClass == "Site" %}
+        <a class = "btn btn-default" title = "Add" href = "{{ url_for("sites.addSite", enterpriseId = parent.id()) }}" role = "button">
+            <span class = "glyphicon glyphicon-plus"></span></a>
+        <br><br>
+    {% elif childrenClass == "Area" %}
+        <a class = "btn btn-default" title = "Add" href = "{{ url_for("areas.addArea", siteId = parent.id()) }}" role = "button">
+            <span class = "glyphicon glyphicon-plus"></span></a>
+        <br><br>
+    {% endif %}
+    <table id = "physicalModelsTable" class = "table">
+        <thead>
+            <tr>
+                <th></th>
+                <th>Name</th>
+                <th>Abbreviation</th>
+                <th>Description</th>
+                <th></th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if children %}
+                {% for child in children %}
+                    <tr>
+                        {% if childrenClass != "Area" %}
+                            <td><a class = "btn btn-default" title = "Select" href = "{{ url_for("physicalModels.selectPhysicalModel",
+                            selectedClass = child.__class__.__name__, selectedId = child.id()) }}"><span class = "glyphicon glyphicon-list"></span></a></td>
+                        {% else %}
+                            <td></td>
+                        {% endif %}
+                        <td>{{ child.Name }}</td>
+                        <td>{{ child.Abbreviation }}</td>
+                        <td>{{ child.Description }}</td>
+                        {% if childrenClass == "Enterprise" %}
+                            <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("enterprises.editEnterprise",
+                                enterpriseId = child.EnterpriseId) }}"><span class = "glyphicon glyphicon-edit"></span></a></td>
+                            <td><a class = "btn btn-default" title = "Delete" href = "{{ url_for("enterprises.deleteEnterprise",
+                                enterpriseId = child.EnterpriseId) }}"><span class = "glyphicon glyphicon-trash"></span></a></td>
+                        {% elif childrenClass == "Site" %}
+                            <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("sites.editSite",
+                                siteId = child.SiteId) }}"><span class = "glyphicon glyphicon-edit"></span></a></td>
+                            <td><a class = "btn btn-default" title = "Delete" href = "{{ url_for("sites.deleteSite",
+                                siteId = child.SiteId) }}"><span class = "glyphicon glyphicon-trash"></span></a></td>
+                        {% elif childrenClass == "Area" %}
+                            <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("areas.editArea",
+                                areaId = child.AreaId) }}"><span class = "glyphicon glyphicon-edit"></span></a></td>
+                            <td><a class = "btn btn-default" title = "Delete" href = "{{ url_for("areas.deleteArea",
+                                areaId = child.AreaId) }}"><span class = "glyphicon glyphicon-trash"></span></a></td>
+                        {% endif %}
+                    </tr>
+                {% endfor %}
+            {% endif %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <link rel = "stylesheet" type = "text/css" href = {{ url_for("static", filename = "css/datatables.min.css") }}/> 
+    <script type = "text/javascript" src = {{ url_for("static", filename = "js/datatables.min.js") }}></script>
+    <script>
+        $(document).ready(function()
+        {
+            $("#physicalModelsTable").DataTable
+            ({
+                "order":
+                [
+                    [1, "asc"],             // Name.
+                ],
+                "columns":
+                [
+                    { "orderable": false }, // Select button.
+                    null,
+                    null,
+                    null,
+                    { "orderable": false }, // Edit button.
+                    { "orderable": false }  // Delete button.
+                ],
+                "stateSave": true,
+                "stateDuration": 0,
+                "pageLength": 25
+            })
+        })
+    </script>
+{% endblock %}

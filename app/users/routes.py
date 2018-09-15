@@ -27,11 +27,12 @@ def addUser():
 		user = User(Name = form.name.data, Password = form.password.data, Role = form.role.data)
 		db.session.add(user)
 		db.session.commit()
-		flash("You have successfully added the user \"" + user.Name + "\".", "alert alert-success")
+		flash("You have successfully added the user \"\".".format(user.Name), "alert alert-success")
 		return redirect(url_for("users.listUsers"))
 
 	# Present a form to add a new user.
-	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
+	breadcrumbs = [{"url" : url_for("users.listUsers"), "text" : "<span class = \"glyphicon glyphicon-home\">"}]
+	return render_template("addEdit.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
 
 @users.route("/users/delete/<int:userId>", methods = ["GET", "POST"])
 @login_required
@@ -44,7 +45,7 @@ def deleteUser(userId):
 
 	db.session.delete(user)
 	db.session.commit()
-	flash("You have successfully deleted the user \"" + user.Name + "\".", "alert alert-success")
+	flash("You have successfully deleted the user \"{}\".".format(user.Name), "alert alert-success")
 	return redirect(url_for("users.listUsers"))
 
 @users.route("/users/changePassword/<int:userId>", methods = ["GET", "POST"])
@@ -67,12 +68,14 @@ def changePassword(userId):
 	if form.validate_on_submit():
 		user.Password = form.password.data
 		db.session.commit()
-		flash("You have successfully changed the password for user \"" + user.Name + "\".", "alert alert-success")
+		flash("You have successfully changed the password for user \"{}\".".format(user.Name), "alert alert-success")
 		return redirect(form.requestReferrer.data)
 
 	# Present a form to change an user password.
 	form.requestReferrer.data = request.referrer
-	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
+	breadcrumbs = [{"url" : url_for("users.listUsers"), "text" : "<span class = \"glyphicon glyphicon-home\">"},
+		{"url" : None, "text" : user.Name}]
+	return render_template("addEdit.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
 
 @users.route("/users/edit/<int:userId>", methods = ["GET", "POST"])
 @login_required
@@ -94,11 +97,13 @@ def editUser(userId):
 		user.Name = form.name.data
 		user.Role = form.role.data
 		db.session.commit()
-		flash("You have successfully edited the user \"" + user.Name + "\".", "alert alert-success")
+		flash("You have successfully edited the user \"{}\".".format(user.Name), "alert alert-success")
 		return redirect(url_for("users.listUsers"))
 
 	# Present a form to edit an existing user.
 	form.userId.data = user.UserId
 	form.name.data = user.Name
 	form.role.data = user.Role
-	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
+	breadcrumbs = [{"url" : url_for("users.listUsers"), "text" : "<span class = \"glyphicon glyphicon-home\">"},
+		{"url" : None, "text" : user.Name}]
+	return render_template("addEdit.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)

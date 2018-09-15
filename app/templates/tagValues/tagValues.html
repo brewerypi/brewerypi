@@ -1,39 +1,63 @@
 {% extends "base.html" %}
 
-{% import "_macros.html" as macros %}
-
 {% block title %}
 Tag Values
 {% endblock %}
 
 {% block page_content %}
 <div>
-    <ol class="breadcrumb">
+    <ol class = "breadcrumb">
         {% if elementAttribute %}
-            <li><a href = "{{ url_for("elements.selectElement", className = "Root", id = None) }}">..</a></li>
-            <li><a href = "{{ url_for("elements.selectElement", className = elementAttribute.Element.ElementTemplate.Site.Enterprise.__class__.__name__,
-                id = elementAttribute.Element.ElementTemplate.Site.Enterprise.EnterpriseId) }}">
+            <li><a href = "{{ url_for("elements.selectElement", selectedClass = "Root") }}"><span class = "glyphicon glyphicon-home"></a></li>
+            <li><a href = "{{ url_for("elements.selectElement", selectedClass = "Enterprise",
+                selectedId = elementAttribute.Element.ElementTemplate.Site.Enterprise.EnterpriseId) }}">
                 {{ elementAttribute.Element.ElementTemplate.Site.Enterprise.Name }}</a></li>
-            <li><a href = "{{ url_for("elements.selectElement", className = elementAttribute.Element.ElementTemplate.Site.__class__.__name__,
-                id = elementAttribute.Element.ElementTemplate.Site.SiteId) }}">{{ elementAttribute.Element.ElementTemplate.Site.Name }}</a></li>
-            <li><a href = "{{ url_for("elements.selectElement", className = elementAttribute.Element.ElementTemplate.__class__.__name__,
-                id = elementAttribute.Element.ElementTemplate.ElementTemplateId) }}">{{ elementAttribute.Element.ElementTemplate.Name }}</a></li>
+            <li><a href = "{{ url_for("elements.selectElement", selectedClass = "Site",
+                selectedId = elementAttribute.Element.ElementTemplate.Site.SiteId) }}">{{ elementAttribute.Element.ElementTemplate.Site.Name }}</a></li>
+            <li><a href = "{{ url_for("elements.selectElement", selectedClass = "ElementTemplate",
+                selectedId = elementAttribute.Element.ElementTemplate.ElementTemplateId) }}">{{ elementAttribute.Element.ElementTemplate.Name }}</a></li>
             <li><a href = "{{ url_for("elements.dashboard", elementId = elementAttribute.Element.ElementId) }}">
                 {{ elementAttribute.Element.Name }}</a></li>
-            <li class = "active">{{ elementAttribute.AttributeTemplate.Name }}</li>
+            <li class = "active">{{ elementAttribute.ElementAttributeTemplate.Name }}</li>
+        {% elif eventFrame %}
+            <li><a href = "{{ url_for("eventFrames.selectEventFrame", selectedClass = "Root") }}"><span class = "glyphicon glyphicon-home"></a></li>
+            <li><a href = "{{ url_for("eventFrames.selectEventFrame", selectedClass = "Enterprise",
+                selectedId = eventFrame.Element.ElementTemplate.Site.Enterprise.EnterpriseId) }}">
+                {{ eventFrame.Element.ElementTemplate.Site.Enterprise.Name }}</a></li>
+            <li><a href = "{{ url_for("eventFrames.selectEventFrame", selectedClass = "Site", selectedId = eventFrame.Element.ElementTemplate.Site.SiteId) }}">
+                {{ eventFrame.Element.ElementTemplate.Site.Name }}</a></li>
+            <li><a href = "{{ url_for("eventFrames.selectEventFrame", selectedClass = "ElementTemplate",
+                selectedId = eventFrame.Element.ElementTemplate.ElementTemplateId) }}">{{ eventFrame.Element.ElementTemplate.Name }}</a></li>
+            <li><a href = "{{ url_for("eventFrames.selectEventFrame", selectedClass = "EventFrameTemplate",
+                selectedId = eventFrame.EventFrameTemplate.EventFrameTemplateId) }}">{{ eventFrame.EventFrameTemplate.Name }}</a></li>
+            <li><a href = "{{ url_for("eventFrames.dashboard", eventFrameId = eventFrame.EventFrameId) }}">{{ eventFrame.friendlyName(True) }}</a></li>
+            <li class = "active">{{ eventFrameAttribute.EventFrameAttributeTemplate.Name }}</li>
         {% else %}
-            <li><a href = "{{ url_for("tags.selectTag", className = "Root") }}">..</a></li>
-            <li><a href = "{{ url_for("tags.selectTag", className = tag.Area.Site.Enterprise.__class__.__name__,
-                id = tag.Area.Site.Enterprise.EnterpriseId) }}">{{ tag.Area.Site.Enterprise.Name }}</a></li>
-            <li><a href = "{{ url_for("tags.selectTag", className = tag.Area.Site.__class__.__name__, id = tag.Area.Site.SiteId) }}">
-                {{ tag.Area.Site.Name }}</a></li>
-            <li><a href = "{{ url_for("tags.selectTag", className = tag.Area.__class__.__name__, id = tag.Area.AreaId) }}">{{ tag.Area.Name }}</a></li>
+            <li><a href = "{{ url_for("tags.selectTag", selectedClass = "Root") }}"><span class = "glyphicon glyphicon-home"></a></li>
+            <li><a href = "{{ url_for("tags.selectTag", selectedClass = "Enterprise", selectedId = tag.Area.Site.Enterprise.EnterpriseId) }}">
+                {{ tag.Area.Site.Enterprise.Name }}</a></li>
+            <li><a href = "{{ url_for("tags.selectTag", selectedClass = "Site", selectedId = tag.Area.Site.SiteId) }}">{{ tag.Area.Site.Name }}</a></li>
+            <li><a href = "{{ url_for("tags.selectTag", selectedClass = "Area", selectedId = tag.Area.AreaId) }}">{{ tag.Area.Name }}</a></li>
             <li class = "active">{{ tag.Name }}</li>
         {% endif %}
     </ol>
-    <h1>Tag Values</h1>
-    <a class = "btn btn-default" title = "Add" href = "{{ url_for("tagValues.addTagValue", tagId = tag.TagId) }}" role = "button">
-        <span class="glyphicon glyphicon-plus"></span></a>
+</div>
+<div class = "page-header">
+    <h1>Tag Values <small></small></h1>
+</div>
+<div>
+    {% if elementAttribute %}
+        <a class = "btn btn-default" title = "Add" href = "{{ url_for("tagValues.addTagValue", elementAttributeId = elementAttribute.ElementAttributeId) }}"
+            role = "button"><span class = "glyphicon glyphicon-plus"></span></a>
+    {% elif eventFrame %}
+        <a class = "btn btn-default" title = "Add" href = "{{ url_for("tagValues.addTagValue", eventFrameId = eventFrame.EventFrameId,
+            eventFrameAttributeId = eventFrameAttribute.EventFrameAttributeId) }}" role = "button"><span class = "glyphicon glyphicon-plus"></span></a>
+    {% else %}
+        <a class = "btn btn-default" title = "Add" href = "{{ url_for("tagValues.addTagValue", tagId = tag.TagId) }}" role = "button">
+            <span class = "glyphicon glyphicon-plus"></span></a>
+    {% endif %}
+    <a class = "btn btn-default" title = "Grafana" href = "{{ "TagValuesGraph" | grafanaUrl({"tagId": tag.TagId}) }}" target = "_blank">
+        <span class = "glyphicon glyphicon-stats"></span></a>        <br><br>
     <br><br>
     <table id = "tagValuesTable" class = "table">
         <thead>
@@ -61,17 +85,36 @@ Tag Values
                         <td>{{ tagValue.Value }}</td>
                         <td>{{ tagValue.Tag.UnitOfMeasurement.Abbreviation }}</td>
                     {% endif %}
-                    <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("tagValues.editTagValue", tagValueId = tagValue.TagValueId) }}">
-                        <span class="glyphicon glyphicon-edit"></span></a></td>
                     {% if elementAttribute %}
-                        <td><a class = "btn btn-default" title = "Note" href = "{{ url_for("tagValues.listTagValueNotes", tagValueId = tagValue.TagValueId,
-                            elementAttributeId = elementAttribute.ElementAttributeId) }}"><span class="glyphicon glyphicon-comment"></span></a></td>
+                        <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("tagValues.editTagValue", tagValueId = tagValue.TagValueId,
+                            elementAttributeId = elementAttribute.ElementAttributeId) }}"><span class = "glyphicon glyphicon-edit"></span></a></td>
+                    {% elif eventFrame %}
+                        <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("tagValues.editTagValue", tagValueId = tagValue.TagValueId,
+                            eventFrameId = eventFrame.EventFrameId, eventFrameAttributeId = eventFrameAttribute.EventFrameAttributeId) }}">
+                            <span class = "glyphicon glyphicon-edit"></span></a></td>
                     {% else %}
-                        <td><a class = "btn btn-default" title = "Note" href = "{{ url_for("tagValues.listTagValueNotes", tagValueId = tagValue.TagValueId) }}">
-                            <span class="glyphicon glyphicon-comment"></span></a></td>
+                        <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("tagValues.editTagValue", tagValueId = tagValue.TagValueId) }}">
+                            <span class = "glyphicon glyphicon-edit"></span></a></td>
+                    {% endif %}
+                    {% if tagValue.TagValueNotes[0] %}
+                        {% set noteButtonClass = "btn btn-default has-note" %}
+                    {% else %}
+                        {% set noteButtonClass = "btn btn-default" %}
+                    {% endif %}
+                    {% if elementAttribute %}
+                        <td><a class = "{{ noteButtonClass }}" title = "Notes" href = "{{ url_for("tagValueNotes.listTagValueNotes", 
+                            tagValueId = tagValue.TagValueId, elementAttributeId = elementAttribute.ElementAttributeId) }}">
+                            <span class = "glyphicon glyphicon-comment"></span></a></td>
+                    {% elif eventFrame %}
+                        <td><a class = "{{ noteButtonClass }}" title = "Notes" href = "{{ url_for("tagValueNotes.listTagValueNotes", 
+                            tagValueId = tagValue.TagValueId, eventFrameId = eventFrame.EventFrameId,
+                            eventFrameAttributeId = eventFrameAttribute.EventFrameAttributeId) }}"><span class = "glyphicon glyphicon-comment"></span></a></td>
+                    {% else %}
+                        <td><a class = "{{ noteButtonClass }}" title = "Notes" href = "{{ url_for("tagValueNotes.listTagValueNotes", 
+                            tagValueId = tagValue.TagValueId) }}"><span class = "glyphicon glyphicon-comment"></span></a></td>
                     {% endif %}
                     <td><a class = "btn btn-default" title = "Delete" href = "{{ url_for("tagValues.deleteTagValue", tagValueId = tagValue.TagValueId) }}">
-                        <span class="glyphicon glyphicon-trash"></span></a></td>
+                        <span class = "glyphicon glyphicon-trash"></span></a></td>
                 </tr>
             {% endfor %}
         </tbody>
@@ -82,26 +125,30 @@ Tag Values
 {% block scripts %}
     {{ super() }}
     <link rel = "stylesheet" type = "text/css" href = {{ url_for("static", filename = "css/datatables.min.css") }}/> 
+    <link rel = "stylesheet" type = "text/css" href = {{ url_for("static", filename = "css/styles.css") }}/>
     <script type = "text/javascript" src = {{ url_for("static", filename = "js/datatables.min.js") }}></script>
     <script>
-        $('#tagValuesTable').DataTable
-        ({
-            "order":
-            [
-                [0, 'desc']              // Timestamp.
-            ],
-            "columns":
-            [
-                null,
-                null,
-                null,
-                { "orderable": false }, // Edit tag value button.
-                { "orderable": false }, // Add note button.
-                { "orderable": false }  // Delete tag value button.
-            ],
-            "stateSave": true,
-            "stateDuration": 0,
-            "pageLength": 25
-        });
+        $(document).ready(function()
+        {
+            $("#tagValuesTable").DataTable
+            ({
+                "order":
+                [
+                    [0, "desc"]              // Timestamp.
+                ],
+                "columns":
+                [
+                    null,
+                    null,
+                    null,
+                    { "orderable": false }, // Edit tag value button.
+                    { "orderable": false }, // Add note button.
+                    { "orderable": false }  // Delete tag value button.
+                ],
+                "stateSave": true,
+                "stateDuration": 0,
+                "pageLength": 25
+            })
+        })
     </script>
 {% endblock %}

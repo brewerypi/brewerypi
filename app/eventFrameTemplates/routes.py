@@ -1,24 +1,22 @@
 from flask import flash, redirect, render_template, request, url_for
 from flask_login import login_required
-from sqlalchemy import text
-from sqlalchemy.orm import aliased
 from . import eventFrameTemplates
 from . forms import EventFrameTemplateForm
 from .. import db
 from .. decorators import adminRequired
-from .. models import ElementTemplate, EventFrameTemplate, Site, Enterprise
+from .. models import ElementTemplate, EventFrameAttributeTemplate, EventFrameTemplate, Site, Enterprise
 
-modelName = "Event Frame Templates"
+modelName = "Event Frame Template"
 
-@eventFrameTemplates.route("/eventFrameTemplates/add/elementTemplateId/<int:elementTemplateId>", methods = ["GET", "POST"])
-@eventFrameTemplates.route("/eventFrameTemplates/add/eventFrameTemplateId/<int:parentEventFrameTemplateId>", methods = ["GET", "POST"])
+@eventFrameTemplates.route("/eventFrameTemplates/add/<int:elementTemplateId>", methods = ["GET", "POST"])
+@eventFrameTemplates.route("/eventFrameTemplates/add/child/<int:parentEventFrameTemplateId>", methods = ["GET", "POST"])
 @login_required
 @adminRequired
 def addEventFrameTemplate(elementTemplateId = None, parentEventFrameTemplateId = None):
 	operation = "Add"
 	form = EventFrameTemplateForm()
 
-	if elementTemplateId:
+	if parentEventFrameTemplateId == None:
 		del form.order
 
 	# Add a new event frame template.
@@ -53,8 +51,36 @@ def addEventFrameTemplate(elementTemplateId = None, parentEventFrameTemplateId =
 			nextOrder = 1
 
 		form.order.data = nextOrder
+
+		parentEventFrameTemplate = EventFrameTemplate.query.get_or_404(parentEventFrameTemplateId)
+		breadcrumbs = [{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Root"), "text" : "<span class = \"glyphicon glyphicon-home\">"},
+			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Enterprise",
+				selectedId = parentEventFrameTemplate.origin().ElementTemplate.Site.Enterprise.EnterpriseId),
+				"text" : parentEventFrameTemplate.origin().ElementTemplate.Site.Enterprise.Name},
+			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Site",
+				selectedId = parentEventFrameTemplate.origin().ElementTemplate.Site.SiteId),
+				"text" : parentEventFrameTemplate.origin().ElementTemplate.Site.Name},
+			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "ElementTemplate",
+				selectedId = parentEventFrameTemplate.origin().ElementTemplate.ElementTemplateId),
+				"text" : parentEventFrameTemplate.origin().ElementTemplate.Name}]
+		for parentEventFrameTemplateAcestor in parentEventFrameTemplate.ancestors([]):
+			breadcrumbs.append({"url" : url_for("eventFrames.selectEventFrame", selectedClass = "EventFrameTemplate",
+				selectedId = parentEventFrameTemplateAcestor.EventFrameTemplateId, selectedOperation = "configure"),
+				"text" : parentEventFrameTemplateAcestor.Name})
+
+		breadcrumbs.append({"url" : url_for("eventFrames.selectEventFrame", selectedClass = "EventFrameTemplate",
+			selectedId = parentEventFrameTemplate.EventFrameTemplateId, selectedOperation = "configure"), "text" : parentEventFrameTemplate.Name})
+	else:
+		elementTemplate = ElementTemplate.query.get_or_404(elementTemplateId)
+		breadcrumbs = [{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Root"), "text" : "<span class = \"glyphicon glyphicon-home\">"},
+			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Enterprise",
+				selectedId = elementTemplate.Site.Enterprise.EnterpriseId), "text" : elementTemplate.Site.Enterprise.Name},
+			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Site", selectedId = elementTemplate.Site.SiteId),
+				"text" : elementTemplate.Site.Name},
+			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "ElementTemplate", selectedId = elementTemplate.ElementTemplateId),
+				"text" : elementTemplate.Name}]	
 	form.requestReferrer.data = request.referrer
-	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
+	return render_template("addEdit.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
 
 @eventFrameTemplates.route("/eventFrameTemplates/delete/<int:eventFrameTemplateId>", methods = ["GET", "POST"])
 @login_required
@@ -118,49 +144,37 @@ def editEventFrameTemplate(eventFrameTemplateId):
 		return redirect(form.requestReferrer.data)
 
 	# Present a form to edit an existing event frame template.
-	if eventFrameTemplate.ElementTemplateId:
-		form.elementTemplateId.data = eventFrameTemplate.ElementTemplateId
-	else:
+	if eventFrameTemplate.hasParent():
 		form.order.data = eventFrameTemplate.Order
+		breadcrumbs = [{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Root"), "text" : "<span class = \"glyphicon glyphicon-home\">"},
+			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Enterprise",
+				selectedId = eventFrameTemplate.origin().ElementTemplate.Site.Enterprise.EnterpriseId),
+				"text" : eventFrameTemplate.origin().ElementTemplate.Site.Enterprise.Name},
+			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Site",
+				selectedId = eventFrameTemplate.origin().ElementTemplate.Site.SiteId),
+				"text" : eventFrameTemplate.origin().ElementTemplate.Site.Name},
+			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "ElementTemplate",
+				selectedId = eventFrameTemplate.origin().ElementTemplate.ElementTemplateId),
+				"text" : eventFrameTemplate.origin().ElementTemplate.Name}]
+		for eventFrameTemplateAcestor in eventFrameTemplate.ancestors([]):
+			breadcrumbs.append({"url" : url_for("eventFrames.selectEventFrame", selectedClass = "EventFrameTemplate",
+				selectedId = eventFrameTemplateAcestor.EventFrameTemplateId, selectedOperation = "configure"), "text" : eventFrameTemplateAcestor.Name})
+
+		breadcrumbs.append({"url" : None, "text" : eventFrameTemplate.Name})
+	else:
+		form.elementTemplateId.data = eventFrameTemplate.ElementTemplateId
+		breadcrumbs = [{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Root"), "text" : "<span class = \"glyphicon glyphicon-home\">"},
+			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Enterprise",
+				selectedId = eventFrameTemplate.ElementTemplate.Site.Enterprise.EnterpriseId),
+				"text" : eventFrameTemplate.ElementTemplate.Site.Enterprise.Name},
+			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Site",
+				selectedId = eventFrameTemplate.ElementTemplate.Site.SiteId), "text" : eventFrameTemplate.ElementTemplate.Site.Name},
+			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "ElementTemplate",
+				selectedId = eventFrameTemplate.ElementTemplate.ElementTemplateId), "text" : eventFrameTemplate.ElementTemplate.Name},
+			{"url" : None, "text" : eventFrameTemplate.Name}]
 
 	form.description.data = eventFrameTemplate.Description
 	form.name.data = eventFrameTemplate.Name
 	form.parentEventFrameTemplateId.data = eventFrameTemplate.ParentEventFrameTemplateId
 	form.requestReferrer.data = request.referrer
-	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
-
-@eventFrameTemplates.route("/selectEventFrameTemplate", methods = ["GET", "POST"])
-@eventFrameTemplates.route("/selectEventFrameTemplate/<string:className>", methods = ["GET", "POST"])
-@eventFrameTemplates.route("/selectEventFrameTemplate/<string:className>/<int:id>", methods = ["GET", "POST"])
-@login_required
-@adminRequired
-def selectEventFrameTemplate(className = None, id = None):
-	if className == None:
-		parent = Site.query.join(Enterprise).order_by(Enterprise.Name, Site.Name).first()
-		if parent:
-			children = ElementTemplate.query.join(Site).filter_by(SiteId = parent.id()).order_by(ElementTemplate.Name)
-		else:
-			children = None
-		className = "ElementTemplate"
-	elif className == "Root":
-		parent = None
-		children = Enterprise.query.order_by(Enterprise.Name)
-		className = "Enterprise"
-	elif className == "Enterprise":
-		parent = Enterprise.query.get_or_404(id)
-		children = Site.query.join(Enterprise).filter_by(EnterpriseId = id).order_by(Site.Name)
-		className = "Site"
-	elif className == "Site":
-		parent = Site.query.get_or_404(id)
-		children = ElementTemplate.query.join(Site).filter_by(SiteId = id).order_by(ElementTemplate.Name)
-		className = "ElementTemplate"
-	elif className == "ElementTemplate":
-		parent = ElementTemplate.query.get_or_404(id)
-		children = EventFrameTemplate.query.join(ElementTemplate).filter_by(ElementTemplateId = id).order_by(EventFrameTemplate.Name)
-		className = "EventFrameTemplate"
-	elif className == "EventFrameTemplate":
-		parent = EventFrameTemplate.query.get_or_404(id)
-		children = EventFrameTemplate.query.filter_by(ParentEventFrameTemplateId = id).order_by(EventFrameTemplate.Order)
-		className = None
-
-	return render_template("eventFrameTemplates/selectEventFrameTemplate.html", children = children, className = className, parent = parent)
+	return render_template("addEdit.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)

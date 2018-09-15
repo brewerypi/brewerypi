@@ -15,6 +15,14 @@ Import {{ importing }}
 </div>
 <br/>
 <div>
+    {% if errors %}
+    <div class = "alert alert-danger" role = "alert">
+        {% for error in errors %}
+            <p>{{ error }}</p>
+        {% endfor %}
+    </div>
+    {% endif %}
+
     {% if successes %}
     <div class = "alert alert-success" role = "alert">
         {% for success in successes %}
@@ -30,23 +38,21 @@ Import {{ importing }}
         {% endfor %}
     </div>
     {% endif %}
-
-    {% if errors %}
-    <div class = "alert alert-danger" role = "alert">
-        {% for error in errors %}
-            <p>{{ error }}</p>
-        {% endfor %}
-    </div>
-    {% endif %}
 </div>
 {% endblock %}
 
 {% block scripts %}
     {{ super() }}
     <script>
-    $("#submit").click(function() {
-        alert("Performing an import can take several minutes dependent on the size of the data being imported. Do not leave this page until a success or " +
-            "failure message is returned.")
-    })
+        $(document).ready(function()
+        {
+            $("#submit").click(function() {
+                alert("Performing an import can take several minutes dependent on the size of the data being imported. Do not leave this page until a " +
+                    "success or failure message is returned.")
+            })
+            $("#submit").hide()
+            $("#submit").parent().append("<button class = \"btn btn-default\" title = \"Import\" type = \"submit\">" +
+                "<span class = \"glyphicon glyphicon-import\" aria-hidden = \"true\"></span></button>")
+        })
     </script>
 {% endblock %}

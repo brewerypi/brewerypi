@@ -1,98 +1,45 @@
 import csv
 import os
-from flask import current_app, flash, jsonify, redirect, render_template, request, send_file, url_for
+from flask import current_app, flash, jsonify, render_template, request, send_file
 from flask_login import login_required
-from sqlalchemy import or_
+from sqlalchemy import and_, or_
 from . import elementAttributes
-from . forms import ElementAttributeForm, ElementAttributeImportForm, ElementAttributeValueForm
+from . forms import ElementAttributeImportForm
 from .. import db
-from .. decorators import adminRequired, permissionRequired
-from .. models import Area, AttributeTemplate, Element, ElementAttribute, ElementTemplate, Enterprise, LookupValue, Permission, Site, Tag, TagValue
-from .. tagValues . forms import TagValueForm
+from .. decorators import adminRequired
+from .. models import Area, ElementAttributeTemplate, Element, ElementAttribute, ElementTemplate, Enterprise, Site, Tag
 
-@elementAttributes.route("/elementAttributes", methods = ["GET", "POST"])
+@elementAttributes.route("/elementAttributes/<int:elementId>", methods = ["GET", "POST"])
 @login_required
 @adminRequired
-def listElementAttributes():
-	elementAttributes = ElementAttribute.query.all()
-	return render_template("elementAttributes/elementAttributes.html", elementAttributes = elementAttributes)
-
-@elementAttributes.route("/elementAttributes/add", methods = ["GET", "POST"])
-@login_required
-@adminRequired
-def addElementAttribute():
-	modelName = "Element Attribute"
-	operation = "Add"
-	form = ElementAttributeForm()
-
-	# Add a new element attribute.
-	if form.validate_on_submit():
-		elementAttribute = ElementAttribute(AttributeTemplate = form.attributeTemplate.data, Element = form.element.data, Tag = form.tag.data)
-		db.session.add(elementAttribute)
-		db.session.commit()
-		flash("You have successfully added the element attribute \"" + form.attributeTemplate.data.Name + "\" for \"" + form.element.data.Name + "\".",
-			"alert alert-success")
-		return redirect(url_for("elementAttributes.listElementAttributes"))
-
-	# Present a form to add a new element attribute.
-	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
-
-@elementAttributes.route("/elementAttributes/delete/<int:elementAttributeId>", methods = ["GET", "POST"])
-@login_required
-@adminRequired
-def deleteElementAttribute(elementAttributeId):
-	elementAttribute = ElementAttribute.query.get_or_404(elementAttributeId)
-	attributeTemplateName = elementAttribute.AttributeTemplate.Name
-	elementName = elementAttribute.Element.Name
-	db.session.delete(elementAttribute)
-	db.session.commit()
-	flash("You have successfully deleted the element attribute \"" + attributeTemplateName + "\" for \"" + elementName + "\".", "alert alert-success")
-	return redirect(url_for("elementAttributes.listElementAttributes"))
-
-@elementAttributes.route("/elementAttributes/edit/<int:elementAttributeId>", methods = ["GET", "POST"])
-@login_required
-@adminRequired
-def editElementAttribute(elementAttributeId):
-	modelName = "Element Attribute"
-	operation = "Add"
-	elementAttribute = ElementAttribute.query.get_or_404(elementAttributeId)
-	form = ElementAttributeForm(obj = elementAttribute)
-
-	# Edit an existing element attribute.
-	if form.validate_on_submit():	
-		elementAttribute.AttributeTemplate = form.attributeTemplate.data
-		elementAttribute.Element = form.element.data
-		elementAttribute.Tag = form.tag.data
-		db.session.commit()
-		flash("You have successfully edited the element attribute \"" + elementAttribute.AttributeTemplate.Name + "\" for \"" + \
-			elementAttribute.Element.Name + "\".", "alert alert-success")
-		return redirect(url_for("elementAttributes.listElementAttributes"))
-
-	# Present a form to edit an existing element attribute.
-	form.attributeTemplate.data = elementAttribute.AttributeTemplate
-	form.element.data = elementAttribute.Element
-	form.tag.data = elementAttribute.Tag
-	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
+def listElementAttributes(elementId):
+	element = Element.query.get_or_404(elementId)
+	elementAttributeTemplates = ElementAttributeTemplate.query.join(ElementTemplate, Element). \
+		outerjoin(ElementAttribute, and_(Element.ElementId == ElementAttribute.ElementId, \
+		ElementAttributeTemplate.ElementAttributeTemplateId == ElementAttribute.ElementAttributeTemplateId)).filter(Element.ElementId == elementId)
+	tags = Tag.query.join(Area, Site, Enterprise).order_by(Enterprise.Abbreviation, Site.Abbreviation, Area.Abbreviation, Tag.Name)
+	return render_template("elementAttributes/elementAttributes.html", element = element, elementAttributeTemplates = elementAttributeTemplates, tags = tags)
 
 @elementAttributes.route("/elementAttributes/export")
 @login_required
 @adminRequired
 def exportElementAttributes():
 	elementAttributes = ElementAttribute.query.join(Element, Tag, ElementTemplate, Site, Enterprise). \
-		join(AttributeTemplate, ElementAttribute.AttributeTemplateId == AttributeTemplate.AttributeTemplateId). \
-		order_by(Enterprise.Abbreviation, Site.Abbreviation, ElementTemplate.Name, Element.Name, AttributeTemplate.Name)
+		join(ElementAttributeTemplate, ElementAttribute.ElementAttributeTemplateId == ElementAttributeTemplate.ElementAttributeTemplateId). \
+		order_by(Enterprise.Abbreviation, Site.Abbreviation, ElementTemplate.Name, Element.Name, ElementAttributeTemplate.Name)
 	with open(os.path.join(current_app.config["EXPORT_FOLDER"], current_app.config["EXPORT_ELEMENT_ATTRIBUTES_FILENAME"]), "w", encoding = "latin-1") \
 		as elementsFile:
-		fieldnames = ["Selected", "Element Attribute Id", "Enterprise", "Site", "Element Template", "Element Name", "Attribute Template", "Area", "Tag Name"]
+		fieldnames = ["Selected", "Element Attribute Id", "Enterprise", "Site", "Element Template", "Element", "Element Attribute Template", "Area",
+			"Tag"]
 		elementAttributesWriter = csv.DictWriter(elementsFile, fieldnames = fieldnames, lineterminator = "\n")
 		elementAttributesWriter.writeheader()
 		
 		for elementAttribute in elementAttributes:
-			elementAttributesWriter.writerow({"Selected" : "", "Element Attribute Id" : elementAttribute.ElementAttributeId, \
-			"Enterprise" : elementAttribute.Element.ElementTemplate.Site.Enterprise.Abbreviation, \
-			"Site" : elementAttribute.Element.ElementTemplate.Site.Abbreviation, "Element Template" : elementAttribute.Element.ElementTemplate.Name, \
-			"Element Name" : elementAttribute.Element.Name, "Attribute Template" : elementAttribute.AttributeTemplate.Name, \
-			"Area" : elementAttribute.Tag.Area.Abbreviation, "Tag Name" : elementAttribute.Tag.Name})
+			elementAttributesWriter.writerow({"Selected" : "", "Element Attribute Id" : elementAttribute.ElementAttributeId,
+			"Enterprise" : elementAttribute.Element.ElementTemplate.Site.Enterprise.Abbreviation,
+			"Site" : elementAttribute.Element.ElementTemplate.Site.Abbreviation, "Element Template" : elementAttribute.Element.ElementTemplate.Name,
+			"Element" : elementAttribute.Element.Name, "Element Attribute Template" : elementAttribute.ElementAttributeTemplate.Name,
+			"Area" : elementAttribute.Tag.Area.Abbreviation, "Tag" : elementAttribute.Tag.Name})
 	
 	return send_file(os.path.join("..", current_app.config["EXPORT_FOLDER"], current_app.config["EXPORT_ELEMENT_ATTRIBUTES_FILENAME"]), as_attachment = True)
 
@@ -119,213 +66,142 @@ def importElementAttributes():
 			# Make sure that the header is well formed.
 			if "Selected" not in elementAttributesReader.fieldnames or "Element Attribute Id" not in elementAttributesReader.fieldnames or \
 				"Enterprise" not in elementAttributesReader.fieldnames or "Site" not in elementAttributesReader.fieldnames or \
-				"Element Template" not in elementAttributesReader.fieldnames or "Element Name" not in elementAttributesReader.fieldnames or \
-				"Attribute Template" not in elementAttributesReader.fieldnames or "Area" not in elementAttributesReader.fieldnames or \
-				"Tag Name" not in elementAttributesReader.fieldnames:
+				"Element Template" not in elementAttributesReader.fieldnames or "Element" not in elementAttributesReader.fieldnames or \
+				"Element Attribute Template" not in elementAttributesReader.fieldnames or "Area" not in elementAttributesReader.fieldnames or \
+				"Tag" not in elementAttributesReader.fieldnames:
 				errors.append("Header malformed. Aborting upload.")
-				return render_template("elementAttributes/importElementAttributes.html", errors = errors, form = form)
+			else:
+				# Iterate through each row.
+				for n, row in enumerate(elementAttributesReader, start = 1):
+					rowNumber = n + 1
+					selected = row["Selected"].strip()
+					elementAttributeId = row["Element Attribute Id"].strip()
+					enterpriseAbbreviation = row["Enterprise"].strip()
+					siteAbbreviation = row["Site"].strip()
+					elementTemplateName = row["Element Template"].strip()
+					elementName = row["Element"].strip()
+					elementAttributeTemplateName = row["Element Attribute Template"].strip()
+					areaAbbreviation = row["Area"].strip()
+					tagName = row["Tag"].strip()
 
-			# Iterate through each row.
-			for n, row in enumerate(elementAttributesReader, start = 1):
-				rowNumber = n + 1
-				selected = row["Selected"].strip()
-				elementAttributeId = row["Element Attribute Id"].strip()
-				enterpriseAbbreviation = row["Enterprise"].strip()
-				siteAbbreviation = row["Site"].strip()
-				elementTemplateName = row["Element Template"].strip()
-				elementName = row["Element Name"].strip()
-				attributeTemplateName = row["Attribute Template"].strip()
-				areaAbbreviation = row["Area"].strip()
-				tagName = row["Tag Name"].strip()
-
-				# Skip rows that are now selected.
-				if "" == selected:
-					warnings.append("Row " + str(rowNumber) + " not selected. Skipping row " + str(rowNumber) + ".")
-					continue
-
-				enterprise = Enterprise.query.filter(Enterprise.Abbreviation == enterpriseAbbreviation).first()
-				if enterprise is None:
-					errors.append("Enterprise \"" + enterpriseAbbreviation + "\" does not exist. Skipping row " + str(rowNumber) + ".")
-					continue
-
-				site = Site.query.filter(Site.Abbreviation == siteAbbreviation, Site.EnterpriseId == enterprise.EnterpriseId).first()
-				if site is None:
-					errors.append("Site \"" + siteAbbreviation + "\" does not exist. Skipping row " + str(rowNumber) + ".")
-					continue
-
-				elementTemplate = ElementTemplate.query.filter(ElementTemplate.Name == elementTemplateName, ElementTemplate.SiteId == site.SiteId).first()
-				if elementTemplate is None:
-					errors.append("Element Template \"" + elementTemplateName + "\" does not exist in site \"" + site.Name + "\". Skipping row " + \
-						str(rowNumber) + ".")
-					continue
-
-				attributeTemplate = AttributeTemplate.query.filter(AttributeTemplate.ElementTemplateId == elementTemplate.ElementTemplateId, \
-					AttributeTemplate.Name == attributeTemplateName).first()
-				if attributeTemplate is None:
-					errors.append("Attribute Template \"" + attributeTemplateName + "\" does not exist in site \"" + site.Name + "\". Skipping row " + \
-						str(rowNumber) + ".")
-					continue
-
-				area = Area.query.filter(Area.Abbreviation == areaAbbreviation, Area.SiteId == site.SiteId).first()
-				if area is None:
-					errors.append("Area \"" + areaAbbreviation + "\" does not exist. Skipping row " + str(rowNumber) + ".")
-					continue
-
-				tag = Tag.query.filter(Tag.AreaId == area.AreaId, Tag.Name == tagName).first()
-				if tag is None:
-					errors.append("Tag \"" + tagName + "\" does not exist in area \"" + area.Name + "\". Skipping row " + str(rowNumber) + ".")
-					continue
-
-				element = Element.query.filter(Element.ElementTemplateId == elementTemplate.ElementTemplateId, Element.Name == elementName).first()
-				if element is None:
-					# Add element.
-					element = Element(ElementTemplate = elementTemplate, Name = elementName)
-					db.session.add(element)
-					db.session.commit()
-					successes.append("Element \"" + elementName + "\" added.")
-
-				if "" == elementAttributeId:
-					# Add element attribute.
-					# Check for existing element attribute.
-					elementAttribute = ElementAttribute.query.filter(ElementAttribute.AttributeTemplateId == attributeTemplate.AttributeTemplateId, \
-						ElementAttribute.ElementId == element.ElementId).first()
-					if elementAttribute is not None:
-						warnings.append("Attribute Template \"" + attributeTemplateName + "\" already exists for Element \"" + elementName + \
-							"\". Skipping row " + str(rowNumber) + ".")
+					# Skip rows that are now selected.
+					if "" == selected:
+						warnings.append("Row {} not selected. Skipping row {}.".format(str(rowNumber), str(rowNumber)))
 						continue
 
-					# Add element attribute.
-					elementAttribute = ElementAttribute(AttributeTemplate = attributeTemplate, Element = element, Tag = tag)
-					db.session.add(elementAttribute)
-					db.session.commit()
-					successes.append("Attribute Template \"" + attributeTemplateName + "\" added to Element \"" + elementName + "\".")
-				else:
-					# Edit element attribute.
-					elementAttribute = ElementAttribute.query.get_or_404(elementAttributeId)
+					enterprise = Enterprise.query.filter(Enterprise.Abbreviation == enterpriseAbbreviation).first()
+					if enterprise is None:
+						errors.append("Enterprise \"{}\" does not exist. Skipping row {}.".format(enterpriseAbbreviation, str(rowNumber)))
+						continue
 
-					# The attribute template and/or element have changed. Check for existing element attribute.
-					if elementAttribute.AttributeTemplateId != attributeTemplate.AttributeTemplateId or elementAttribute.ElementId != element.ElementId:
-						elementAttributeCheck = ElementAttribute.query.join(AttributeTemplate, Element). \
-							filter(ElementAttribute.AttributeTemplateId == attributeTemplate.AttributeTemplateId, \
-							ElementAttribute.ElementId == element.ElementId).first()
-						if elementAttributeCheck is not None:
-							warnings.append("Attribute Template  \"" + elementAttributeName + "\" already exists for Element \"" + elementName + \
-								"\". Skipping row " + str(rowNumber) + ".")
+					site = Site.query.filter(Site.Abbreviation == siteAbbreviation, Site.EnterpriseId == enterprise.EnterpriseId).first()
+					if site is None:
+						errors.append("Site \"{}\" does not exist. Skipping row {}.".format(siteAbbreviation, str(rowNumber)))
+						continue
+
+					elementTemplate = ElementTemplate.query.filter(ElementTemplate.Name == elementTemplateName, ElementTemplate.SiteId == site.SiteId).first()
+					if elementTemplate is None:
+						errors.append("Element Template \"{}\" does not exist in site \"{}\". Skipping row {}.".format(elementTemplateName, site.Name,
+							str(rowNumber)))
+						continue
+
+					elementAttributeTemplate = ElementAttributeTemplate.query. \
+						filter(ElementAttributeTemplate.ElementTemplateId == elementTemplate.ElementTemplateId,
+							ElementAttributeTemplate.Name == elementAttributeTemplateName).first()
+					if elementAttributeTemplate is None:
+						errors.append("Element Attribute Template \"{}\" does not exist in site \"{}\". Skipping row {}.".format(elementAttributeTemplateName,
+							site.Name, str(rowNumber)))
+						continue
+
+					area = Area.query.filter(Area.Abbreviation == areaAbbreviation, Area.SiteId == site.SiteId).first()
+					if area is None:
+						errors.append("Area \"{}\" does not exist. Skipping row {}.".format(areaAbbreviation, str(rowNumber)))
+						continue
+
+					tag = Tag.query.filter(Tag.AreaId == area.AreaId, Tag.Name == tagName).first()
+					if tag is None:
+						errors.append("Tag \"{}\" does not exist in area \"{}\". Skipping row {}.".format(tagName, area.Name, str(rowNumber)))
+						continue
+
+					element = Element.query.filter(Element.ElementTemplateId == elementTemplate.ElementTemplateId, Element.Name == elementName).first()
+					if element is None:
+						# Add element.
+						element = Element(ElementTemplate = elementTemplate, Name = elementName)
+						db.session.add(element)
+						db.session.commit()
+						successes.append("Element \"{}\" added.".format(elementName))
+
+					if "" == elementAttributeId:
+						# Check for existing element attribute.
+						elementAttribute = ElementAttribute.query. \
+							filter(ElementAttribute.ElementAttributeTemplateId == elementAttributeTemplate.ElementAttributeTemplateId,
+								ElementAttribute.ElementId == element.ElementId).first()
+						if elementAttribute is not None:
+							warnings.append("Element Attribute Template \"{}\" already exists for Element \"{}\". Skipping row {}.". \
+								format(elementAttributeTemplateName, elementName, str(rowNumber)))
 							continue
-							
-					elementAttribute.AttributeTemplate = attributeTemplate
-					elementAttribute.Element = element
-					elementAttribute.Tag = tag
-					db.session.commit()
-					successes.append("Attribute Template \"" + attributeTemplateName + "\" updated for Element \"" + elementName + "\".")
+
+						# Add element attribute.
+						elementAttribute = ElementAttribute(ElementAttributeTemplate = elementAttributeTemplate, Element = element, Tag = tag)
+						db.session.add(elementAttribute)
+						db.session.commit()
+						successes.append("Element Attribute Template \"{}\" added to Element \"{}\".".format(elementAttributeTemplateName, elementName))
+					else:
+						# Edit element attribute.
+						elementAttribute = ElementAttribute.query.get_or_404(elementAttributeId)
+
+						# The element attribute template and/or element have changed. Check for existing element attribute.
+						if elementAttribute.ElementAttributeTemplateId != elementAttributeTemplate.ElementAttributeTemplateId or \
+							elementAttribute.ElementId != element.ElementId:
+							elementAttributeCheck = ElementAttribute.query.join(ElementAttributeTemplate, Element). \
+								filter(ElementAttribute.ElementAttributeTemplateId == elementAttributeTemplate.ElementAttributeTemplateId, \
+									ElementAttribute.ElementId == element.ElementId).first()
+							if elementAttributeCheck is not None:
+								warnings.append("Element Attribute Template  \"{}\" already exists for Element \"{}\". Skipping row {}.". \
+									format(elementAttributeName, elementName, str(rowNumber)))
+								continue
+								
+						elementAttribute.ElementAttributeTemplate = elementAttributeTemplate
+						elementAttribute.Element = element
+						elementAttribute.Tag = tag
+						db.session.commit()
+						successes.append("Element Attribute Template \"{}\" updated for Element \"{}\".".format(elementAttributeTemplateName, elementName))
 
 	return render_template("import.html", errors = errors, form = form, importing = "Element Attributes", successes = successes, warnings = warnings)
 
-
-@elementAttributes.route("/elementAttributes/addMultipleValues", methods=["GET", "POST"])
+@elementAttributes.route("/elementAttributes/updateMultiple/<int:elementId>", methods = ["GET", "POST"])
 @login_required
-@permissionRequired(Permission.DATA_ENTRY)
-def addMultipleelementAttributeValues():
+@adminRequired
+def updateMultiple(elementId):
 	# Get the data, loop through it and add new value.
 	data = request.get_json(force = True)
 	count = 0
 	for item in data:
-		elementAttribute = ElementAttribute.query.get_or_404(item["id"])
-		tagValue = TagValue(TagId = elementAttribute.TagId, Timestamp = item["timestamp"], Value = item["value"])
-		db.session.add(tagValue)
-		count = count + 1
+		elementAttributeTemplateId = item["ElementAttributeTemplateId"]
+		tagId = item["TagId"]
+		elementAttribute = ElementAttribute.query.filter_by(ElementAttributeTemplateId = elementAttributeTemplateId, ElementId = elementId).first()
+		if elementAttribute:
+			if tagId == "-1":
+				# Delete.
+				db.session.delete(elementAttribute)
+				count = count + 1
+			else:
+				if str(elementAttribute.TagId) != tagId:
+					# Update tag id.
+					elementAttribute.TagId = tagId
+					count = count + 1
+		else:
+			if tagId != "-1":
+				# Create new.
+				elementAttribute = ElementAttribute(ElementAttributeTemplateId = elementAttributeTemplateId, ElementId = elementId, TagId = tagId)
+				db.session.add(elementAttribute)
+				count = count + 1
 
 	if count > 0:
 		db.session.commit()
-		message = "You have successfully added one or more new element attribute values."
+		message = "You have successfully added or updated one or more element attributes."
 		flash(message, "alert alert-success")
 	else:
-		message = "Nothing added to save."
+		message = "Nothing updated to save."
 		flash(message, "alert alert-warning")
 	return jsonify({"response": message})
-
-@elementAttributes.route("/elementAttributes/addValue/<int:elementId>/<int:tagId>", methods = ["GET", "POST"])
-@login_required
-@permissionRequired(Permission.DATA_ENTRY)
-def addElementAttributeValue(elementId, tagId):
-	modelName = "Element Attribute Value"
-	operation = "Add"
-	tag = Tag.query.get_or_404(tagId)
-	form = TagValueForm()
-
-	# Configure the form based on if the element attribute value is associated with a lookup.
-	if tag.LookupId:
-		form.lookupValue.choices = [(lookupValue.Value, lookupValue.Name) for lookupValue in LookupValue.query. \
-			filter(LookupValue.LookupId == tag.LookupId, LookupValue.Selectable == True)]
-		del form.value
-	else:
-		del form.lookupValue
-
-	# Add a new element attribute value.
-	if form.validate_on_submit():
-		if tag.LookupId:
-			tagValue = TagValue(TagId = form.tagId.data, Timestamp = form.timestamp.data, Value = form.lookupValue.data)
-		else:
-			tagValue = TagValue(TagId = form.tagId.data, Timestamp = form.timestamp.data, Value = form.value.data)
-
-		db.session.add(tagValue)
-		db.session.commit()
-		flash("You have successfully added a new element attribute value.", "alert alert-success")
-		return redirect(url_for("elements.dashboard", elementId = elementId))
-
-	# Present a form to add a new element attribute value.
-	form.tagId.data = tag.TagId
-	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
-
-@elementAttributes.route("/elementAttributes/deleteValue/<int:elementId>/<int:tagValueId>", methods = ["GET", "POST"])
-@login_required
-@permissionRequired(Permission.DATA_ENTRY)
-def deleteElementAttributeValue(elementId, tagValueId):
-	tagValue = TagValue.query.get_or_404(tagValueId)
-	db.session.delete(tagValue)
-	db.session.commit()
-	flash("You have successfully deleted the element attribute value.", "alert alert-success")
-	return redirect(url_for("elements.dashboard", elementId = elementId))
-
-@elementAttributes.route("/elementAttributes/editValue/<int:elementId>/<int:tagValueId>", methods = ["GET", "POST"])
-@login_required
-@permissionRequired(Permission.DATA_ENTRY)
-def editElementAttributeValue(elementId, tagValueId):
-	modelName = "Element Attribute Value"
-	operation = "Edit"
-	tagValue = TagValue.query.get_or_404(tagValueId)
-	tag = Tag.query.get_or_404(tagValue.TagId)
-	form = ElementAttributeValueForm(obj = tagValue)
-
-	# Configure the form based on if the element attribute value is associated with a lookup.
-	if tag.LookupId:
-		form.lookupValue.choices = [(lookupValue.Value, lookupValue.Name) for lookupValue in LookupValue.query. \
-			filter(LookupValue.LookupId == tag.LookupId, or_(LookupValue.Selectable == True, LookupValue.Value == tagValue.Value))]
-		del form.value
-	else:
-		del form.lookupValue
-
-	# Edit an existing element attribute value.
-	if form.validate_on_submit():
-		tagValue.TagId = form.tagId.data
-		tagValue.Timestamp = form.timestamp.data
-
-		if tag.LookupId:
-			tagValue.Value = form.lookupValue.data
-		else:
-			tagValue.Value = form.value.data
-
-		db.session.commit()
-		flash("You have successfully edited the element attribute value.", "alert alert-success")
-		return redirect(url_for("elements.dashboard", elementId = elementId))
-
-	# Present a form to edit an existing element attribute value.
-	form.tagId.data = tagValue.TagId
-	form.timestamp.data = tagValue.Timestamp
-
-	if tag.LookupId:
-		form.lookupValue.data = tagValue.Value
-	else:
-		form.value.data = tagValue.Value
-
-	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)

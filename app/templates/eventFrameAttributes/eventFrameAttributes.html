@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+
+{% block title %}
+Event Frame Attributes
+{% endblock %}
+
+{% block page_content %}
+<div>
+    <ol class = "breadcrumb">
+        <li><a href = "{{ url_for("eventFrames.selectEventFrame", selectedClass = "Root", selectedId = None) }}"><span class = "glyphicon glyphicon-home"></a></li>
+        <li><a href = "{{ url_for("eventFrames.selectEventFrame", selectedClass = "Enterprise",
+            selectedId = eventFrame.EventFrameTemplate.ElementTemplate.Site.Enterprise.EnterpriseId) }}">
+            {{ eventFrame.EventFrameTemplate.ElementTemplate.Site.Enterprise.Name }}</a></li>
+        <li><a href = "{{ url_for("eventFrames.selectEventFrame", selectedClass = "Site",
+            selectedId = eventFrame.EventFrameTemplate.ElementTemplate.Site.SiteId) }}">{{ eventFrame.EventFrameTemplate.ElementTemplate.Site.Name }}</a></li>
+        <li><a href = "{{ url_for("eventFrames.selectEventFrame", selectedClass = "ElementTemplate",
+            selectedId = eventFrame.EventFrameTemplate.ElementTemplate.ElementTemplateId) }}">{{ eventFrame.EventFrameTemplate.ElementTemplate.Name }}</a></li>
+        <li><a href = "{{ url_for("eventFrames.selectEventFrame", selectedClass = "EventFrameTemplate",
+            selectedId = eventFrame.EventFrameTemplate.EventFrameTemplateId) }}">{{ eventFrame.EventFrameTemplate.Name }}</a></li>
+        <li class = "active">{{ eventFrame.Element.Name }}</a></li>
+    </ol>
+</div>
+<div class = "page-header">
+    <h1>Event Frame Attributes <small></small></h1>
+</div>
+<div>
+    <table id = "eventFrameAttributesTable" class = "table">
+        <thead>
+            <tr>
+                <th>Event Frame Template</th>
+                <th>Attribute</th>
+                <th>Tag</th>
+                <th><button class = "btn btn-default" id = "buttonAttributesSaveAll" title = "Save All"><span class="glyphicon glyphicon-floppy-disk"></span>
+                    </button></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for eventFrameAttributeTemplate in eventFrameAttributeTemplates %}
+                {% set eventFrameAttributes = eventFrameAttributeTemplate.EventFrameAttributes.filter_by(ElementId = eventFrame.ElementId) %}
+                {% if eventFrameAttributes.count() > 0 %}
+                    {% set eventFrameAttribute = eventFrameAttributes | first %}
+                {% else %}
+                    {% set eventFrameAttribute = None %}
+                {% endif %}
+                <tr>
+                <td>{{ eventFrameAttributeTemplate.path() | safe }}</td>
+                <td>{{ eventFrameAttributeTemplate.Name }}</td>
+                <td>
+                    <div class = "form-group">
+                        <select class = "form-control" id = "selectUpdatedValue{{ eventFrameAttributeTemplate.EventFrameAttributeTemplateId }}">
+                            <option value = "-1"></option>
+                            {% for tag in tags %}
+                                {% if eventFrameAttribute.TagId == tag.TagId %}
+                                    {% set selected = "selected" %}
+                                {% else %}
+                                    {% set selected = "" %}
+                                {% endif %}
+                                <option value = "{{ tag.TagId }}" {{ selected }}>{{ tag.fullAbbreviatedPathName() }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </td>
+                <td></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <link rel = "stylesheet" type = "text/css" href = {{ url_for("static", filename = "css/datatables.min.css") }}/> 
+    <script type = "text/javascript" src = {{ url_for("static", filename = "js/datatables.min.js") }}></script>
+    <script>
+        $(document).ready(function()
+        {
+            var eventFrameAttributesTable = $("#eventFrameAttributesTable").DataTable
+            ({
+                "order":
+                [
+                    [0, "asc"],                                     // Event Frame Template.
+                    [1, "asc"]                                      // Event Frame Attribute Template
+                ],
+                "columns":
+                [
+                    null,
+                    null,
+                    { "orderable": false, "searchable": false },    // Tag select list.
+                    { "orderable": false }                          // Save all button.
+                ],
+                "stateSave": true,
+                "stateDuration": 0,
+                "pageLength": 25
+            })
+            // Enter key call save all.
+            $(document).keypress(function(event)
+            {
+                if (event.which == 13)
+                {
+                    $("#buttonAttributesSaveAll").focus()
+                }
+            })
+            $("#buttonAttributesSaveAll").click(function()
+            {
+                var rows = []
+                // Loop through the select values.
+                eventFrameAttributesTable.$("[id^=selectUpdatedValue]").each(function()
+                {
+                    var id = $(this).attr("id").split("selectUpdatedValue")[1]
+                    var value = $.trim($(this).val())
+                    var row = {}
+                    row["EventFrameAttributeTemplateId"] = id
+                    row["TagId"] = value
+                    rows.push(row)
+                })
+                $.ajax(
+                {
+                    type : "POST",
+                    url : "/eventFrameAttributes/updateMultiple/{{ eventFrame.EventFrameId }}",
+                    data : JSON.stringify(rows)
+                }).done(function(response)
+                {
+                    location.reload(true)
+                }).fail(function()
+                {
+                    $("#divFlashedMessages").append("<div class = \"alert alert-danger\"><button type = \"button\" class = \"close\" " +
+                        "data-dismiss = \"alert\">&times;</button>The attempt to update one or more event frame attributes failed.</div>")                        
+                })
+            })
+        })
+    </script>
+{% endblock %}

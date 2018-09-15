@@ -8,18 +8,11 @@ from .. import db
 from .. decorators import adminRequired, permissionRequired
 from .. models import Area, Enterprise, Lookup, Permission, Site, Tag, UnitOfMeasurement
 
-@tags.route("/tags", methods = ["GET", "POST"])
+@tags.route("/tags/add/<int:areaId>", methods = ["GET", "POST"])
+@tags.route("/tags/add/<int:areaId>/<int:lookup>", methods = ["GET", "POST"])
 @login_required
 @adminRequired
-def listTags():
-	tags = Tag.query.outerjoin(UnitOfMeasurement, Lookup)
-	return render_template("tags/tags.html", tags = tags)
-
-@tags.route("/tags/add", methods = ["GET", "POST"])
-@tags.route("/tags/add/<int:lookup>", methods = ["GET", "POST"])
-@login_required
-@adminRequired
-def addTag(lookup = False):
+def addTag(areaId, lookup = False):
 	operation = "Add"
 	form = TagForm()
 
@@ -33,17 +26,24 @@ def addTag(lookup = False):
 	# Add a new tag.
 	if form.validate_on_submit():
 		if lookup:
-			tag = Tag(Area = form.area.data, Description = form.description.data, Lookup = form.lookup.data, Name = form.name.data)
+			tag = Tag(AreaId = form.areaId.data, Description = form.description.data, Lookup = form.lookup.data, Name = form.name.data)
 		else:
-			tag = Tag(Area = form.area.data, Description = form.description.data, Name = form.name.data, UnitOfMeasurement = form.unitOfMeasurement.data)
+			tag = Tag(AreaId = form.areaId.data, Description = form.description.data, Name = form.name.data, UnitOfMeasurement = form.unitOfMeasurement.data)
 
 		db.session.add(tag)
 		db.session.commit()
-		flash("You have successfully added the new tag \"" + tag.Name + "\".", "alert alert-success")
-		return redirect(url_for("tags.listTags"))
+		flash("You have successfully added the new tag \"{}\".".format(tag.Name), "alert alert-success")
+		return redirect(form.requestReferrer.data)
 
 	# Present a form to add a new tag.
-	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
+	form.areaId.data = areaId
+	form.requestReferrer.data = request.referrer
+	area = Area.query.get_or_404(areaId)
+	breadcrumbs = [{"url" : url_for("tags.selectTag", selectedClass = "Root"), "text" : "<span class = \"glyphicon glyphicon-home\">"},
+		{"url" : url_for("tags.selectTag", selectedClass = "Enterprise", selectedId = area.Site.Enterprise.EnterpriseId), "text" : area.Site.Enterprise.Name},
+		{"url" : url_for("tags.selectTag", selectedClass = "Site", selectedId = area.Site.SiteId), "text" : area.Site.Name},
+		{"url" : url_for("tags.selectTag", selectedClass = "Area", selectedId = area.AreaId), "text" : area.Name}]
+	return render_template("addEdit.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
 
 @tags.route("/tags/delete/<int:tagId>", methods = ["GET", "POST"])
 @login_required
@@ -52,8 +52,8 @@ def deleteTag(tagId):
 	tag = Tag.query.get_or_404(tagId)
 	db.session.delete(tag)
 	db.session.commit()
-	flash("You have successfully deleted the tag \"" + tag.Name + "\".", "alert alert-success")
-	return redirect(url_for("tags.listTags"))
+	flash("You have successfully deleted the tag \"{}\".".format(tag.Name), "alert alert-success")
+	return redirect(request.referrer)
 
 @tags.route("/tags/edit/<int:tagId>", methods = ["GET", "POST"])
 @login_required
@@ -72,7 +72,7 @@ def editTag(tagId):
 
 	# Edit an existing tag.
 	if form.validate_on_submit():
-		tag.Area = form.area.data
+		tag.AreaId = form.areaId.data
 		tag.Description = form.description.data
 		tag.Name = form.name.data
 
@@ -82,11 +82,11 @@ def editTag(tagId):
 			tag.UnitOfMeasurement = form.unitOfMeasurement.data
 
 		db.session.commit()
-		flash("You have successfully edited the tag \"" + tag.Name + "\".", "alert alert-success")
-		return redirect(url_for("tags.listTags"))
+		flash("You have successfully edited the tag \"{}\".".format(tag.Name), "alert alert-success")
+		return redirect(form.requestReferrer.data)
 
 	# Present a form to edit an existing tag.
-	form.area.data = tag.Area
+	form.areaId.data = tag.AreaId
 	form.description.data = tag.Description
 	form.name.data = tag.Name
 
@@ -95,7 +95,14 @@ def editTag(tagId):
 	else:
 		form.unitOfMeasurement.data = tag.UnitOfMeasurement
 
-	return render_template("addEditModel.html", form = form, modelName = modelName, operation = operation)
+	form.requestReferrer.data = request.referrer
+	breadcrumbs = [{"url" : url_for("tags.selectTag", selectedClass = "Root"), "text" : "<span class = \"glyphicon glyphicon-home\">"},
+		{"url" : url_for("tags.selectTag", selectedClass = "Enterprise", selectedId = tag.Area.Site.Enterprise.EnterpriseId),
+			"text" : tag.Area.Site.Enterprise.Name},
+		{"url" : url_for("tags.selectTag", selectedClass = "Site", selectedId = tag.Area.Site.SiteId), "text" : tag.Area.Site.Name},
+		{"url" : url_for("tags.selectTag", selectedClass = "Area", selectedId = tag.Area.AreaId), "text" : tag.Area.Name},
+		{"url" : None, "text" : tag.Name}]
+	return render_template("addEdit.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
 
 @tags.route("/tags/export")
 @login_required
@@ -143,120 +150,120 @@ def importTags():
 				"Site" not in tagsReader.fieldnames or "Area" not in tagsReader.fieldnames or "Tag Name" not in tagsReader.fieldnames or \
 				"Tag Description" not in tagsReader.fieldnames or "Lookup" not in tagsReader.fieldnames or "Unit" not in tagsReader.fieldnames:
 				errors.append("Header malformed. Aborting upload.")
-				return render_template("import.html", errors = errors, form = form, importing = "Tags")
+			else:
+				# Iterate through each row.
+				for n, row in enumerate(tagsReader, start = 1):
+					rowNumber = n + 1
+					selected = row["Selected"].strip()
+					tagId = row["Tag Id"].strip()
+					enterpriseAbbreviation = row["Enterprise"].strip()
+					enterpriseAbbreviation = row["Enterprise"].strip()
+					siteAbbreviation = row["Site"].strip()
+					areaAbbreviation = row["Area"].strip()
+					tagName = row["Tag Name"].strip()
+					tagDescription = row["Tag Description"].strip()
+					lookupName = row["Lookup"].strip()
+					UnitOfMeasurementAbbreviation = row["Unit"].strip()
 
-			# Iterate through each row.
-			for n, row in enumerate(tagsReader, start = 1):
-				rowNumber = n + 1
-				selected = row["Selected"].strip()
-				tagId = row["Tag Id"].strip()
-				enterpriseAbbreviation = row["Enterprise"].strip()
-				enterpriseAbbreviation = row["Enterprise"].strip()
-				siteAbbreviation = row["Site"].strip()
-				areaAbbreviation = row["Area"].strip()
-				tagName = row["Tag Name"].strip()
-				tagDescription = row["Tag Description"].strip()
-				lookupName = row["Lookup"].strip()
-				UnitOfMeasurementAbbreviation = row["Unit"].strip()
-
-				# Skip rows that are now selected.
-				if "" == selected:
-					warnings.append("Row " + str(rowNumber) + " not selected. Skipping row " + str(rowNumber) + ".")
-					continue
-
-				enterprise = Enterprise.query.filter(Enterprise.Abbreviation == enterpriseAbbreviation).first()
-				if enterprise is None:
-					errors.append("Enterprise \"" + enterpriseAbbreviation + "\" does not exist. Skipping row " + str(rowNumber) + ".")
-					continue
-
-				site = Site.query.filter(Site.Abbreviation == siteAbbreviation, Site.EnterpriseId == enterprise.EnterpriseId).first()
-				if site is None:
-					errors.append("Site \"" + siteAbbreviation + "\" does not exist. Skipping row " + str(rowNumber) + ".")
-					continue
-
-				area = Area.query.filter(Area.Abbreviation == areaAbbreviation, Area.SiteId == site.SiteId).first()
-				if area is None:
-					errors.append("Area \"" + areaAbbreviation + "\" does not exist. Skipping row " + str(rowNumber) + ".")
-					continue
-
-				lookup = Lookup.query.filter(Lookup.EnterpriseId == enterprise.EnterpriseId, Lookup.Name == lookupName).first()
-				unit = UnitOfMeasurement.query.filter(UnitOfMeasurement.Abbreviation == UnitOfMeasurementAbbreviation).first()
-				if lookup is None and unit is None:
-					errors.append("Lookup and Unit can't be found. Skipping row " + str(rowNumber) + ".")
-					continue
-
-				if "" == tagId:
-					# Add tag.
-					# Check for existing tag.
-					tag = Tag.query.join(Area).filter(Tag.AreaId == area.AreaId, Tag.Name == tagName).first()
-					if tag is not None:
-						warnings.append("Tag \"" + tagName + "\" already exists. Skipping row " + str(rowNumber) + ".")
+					# Skip rows that are now selected.
+					if "" == selected:
+						warnings.append("Row {} not selected. Skipping row {}.".format(str(rowNumber), str(rowNumber)))
 						continue
-					
-					if lookup:
-						tag = Tag(Area = area, Description = tagDescription, Lookup = lookup, Name = tagName)
-					else:
-						tag = Tag(Area = area, Description = tagDescription, Name = tagName, UnitOfMeasurement = unit)
-						
-					db.session.add(tag)
-					db.session.commit()
-					successes.append("Tag \"" + tagName + "\" added.")
-				else:
-					# Edit tag.
-					tag = Tag.query.get_or_404(tagId)
-					oldTagName = tag.Name
 
-					# The area and/or tag name have changed. Check for existing tag.
-					if tag.AreaId != area.AreaId or tag.Name != tagName:
-						tagCheck = Tag.query.join(Area).filter(Tag.AreaId == area.AreaId, Tag.Name == tagName).first()
-						if tagCheck is not None:
-							warnings.append("Tag \"" + tagName + "\" already exists. Skipping row " + str(rowNumber) + ".")
+					enterprise = Enterprise.query.filter(Enterprise.Abbreviation == enterpriseAbbreviation).first()
+					if enterprise is None:
+						errors.append("Enterprise \"{}\" does not exist. Skipping row {}.".format(enterpriseAbbreviation, str(rowNumber)))
+						continue
+
+					site = Site.query.filter(Site.Abbreviation == siteAbbreviation, Site.EnterpriseId == enterprise.EnterpriseId).first()
+					if site is None:
+						errors.append("Site \"{}\" does not exist. Skipping row {}.".format(siteAbbreviation, str(rowNumber)))
+						continue
+
+					area = Area.query.filter(Area.Abbreviation == areaAbbreviation, Area.SiteId == site.SiteId).first()
+					if area is None:
+						errors.append("Area \"{}\" does not exist. Skipping row {}.".format(areaAbbreviation, str(rowNumber)))
+						continue
+
+					lookup = Lookup.query.filter(Lookup.EnterpriseId == enterprise.EnterpriseId, Lookup.Name == lookupName).first()
+					unit = UnitOfMeasurement.query.filter(UnitOfMeasurement.Abbreviation == UnitOfMeasurementAbbreviation).first()
+					if lookup is None and unit is None:
+						errors.append("Lookup and Unit can't be found. Skipping row {}.".format(str(rowNumber)))
+						continue
+
+					if "" == tagId:
+						# Add tag.
+						# Check for existing tag.
+						tag = Tag.query.join(Area).filter(Tag.AreaId == area.AreaId, Tag.Name == tagName).first()
+						if tag is not None:
+							warnings.append("Tag \"{}\" already exists. Skipping row {}.".format(tagName, str(rowNumber)))
 							continue
-
-					tag.Area = area
-					tag.Description = tagDescription
-					tag.Name = tagName
-
-					if lookup:
-						tag.Lookup = lookup
-						tag.UnitOfMeasurement = None
+						
+						if lookup:
+							tag = Tag(Area = area, Description = tagDescription, Lookup = lookup, Name = tagName)
+						else:
+							tag = Tag(Area = area, Description = tagDescription, Name = tagName, UnitOfMeasurement = unit)
+							
+						db.session.add(tag)
+						db.session.commit()
+						successes.append("Tag \"{}\" added.".format(tagName))
 					else:
-						tag.Lookup = None
-						tag.UnitOfMeasurement = unit
+						# Edit tag.
+						tag = Tag.query.get_or_404(tagId)
+						oldTagName = tag.Name
 
-					db.session.commit()
-					successes.append("Tag \"" + oldTagName + "\" edited.")
+						# The area and/or tag name have changed. Check for existing tag.
+						if tag.AreaId != area.AreaId or tag.Name != tagName:
+							tagCheck = Tag.query.join(Area).filter(Tag.AreaId == area.AreaId, Tag.Name == tagName).first()
+							if tagCheck is not None:
+								warnings.append("Tag \"{}\" already exists. Skipping row {}.".format(tagName, str(rowNumber)))
+								continue
+
+						tag.Area = area
+						tag.Description = tagDescription
+						tag.Name = tagName
+
+						if lookup:
+							tag.Lookup = lookup
+							tag.UnitOfMeasurement = None
+						else:
+							tag.Lookup = None
+							tag.UnitOfMeasurement = unit
+
+						db.session.commit()
+						successes.append("Tag \"{}\" edited.".format(oldTagName))
 
 	return render_template("import.html", errors = errors, form = form, importing = "Tags", successes = successes, warnings = warnings)
 
-@tags.route("/selectTag", methods = ["GET", "POST"])
-@tags.route("/selectTag/<string:className>", methods = ["GET", "POST"])
-@tags.route("/selectTag/<string:className>/<int:id>", methods = ["GET", "POST"])
+@tags.route("/tags/select", methods = ["GET", "POST"]) # Default.
+@tags.route("/tags/select/<string:selectedClass>", methods = ["GET", "POST"]) # Root.
+@tags.route("/tags/select/<string:selectedClass>/<int:selectedId>", methods = ["GET", "POST"])
 @login_required
 @permissionRequired(Permission.DATA_ENTRY)
-def selectTag(className = None, id = None):
-	if className == None:
-		parent = Area.query.join(Site, Enterprise).order_by(Enterprise.Name, Site.Name, Area.Name).first()
+def selectTag(selectedClass = None, selectedId = None):
+	if selectedClass == None:
+		parent = Area.query.join(Tag, Site, Enterprise).order_by(Enterprise.Name, Site.Name, Area.Name).first()
 		if parent:
 			children = Tag.query.filter_by(AreaId = parent.id())
 		else:
+			parent = Area.query.join(Site, Enterprise).order_by(Enterprise.Name, Site.Name, Area.Name).first()
 			children = None
-		className = "Tag"
-	elif className == "Root":
+		childrenClass = "Tag"
+	elif selectedClass == "Root":
 		parent = None
 		children = Enterprise.query.order_by(Enterprise.Name)
-		className = "Enterprise"
-	elif className == "Enterprise":
-		parent = Enterprise.query.get_or_404(id)
-		children = Site.query.filter_by(EnterpriseId = id)
-		className = "Site"
-	elif className == "Site":
-		parent = Site.query.get_or_404(id)
-		children = Area.query.filter_by(SiteId = id)
-		className = "Area"
-	elif className == "Area":
-		parent = Area.query.get_or_404(id)
-		children = Tag.query.filter_by(AreaId = id)
-		className = "Tag"
+		childrenClass = "Enterprise"
+	elif selectedClass == "Enterprise":
+		parent = Enterprise.query.get_or_404(selectedId)
+		children = Site.query.filter_by(EnterpriseId = selectedId)
+		childrenClass = "Site"
+	elif selectedClass == "Site":
+		parent = Site.query.get_or_404(selectedId)
+		children = Area.query.filter_by(SiteId = selectedId)
+		childrenClass = "Area"
+	elif selectedClass == "Area":
+		parent = Area.query.get_or_404(selectedId)
+		children = Tag.query.filter_by(AreaId = selectedId)
+		childrenClass = "Tag"
 
-	return render_template("tags/selectTag.html", children = children, className = className, parent = parent)
+	return render_template("tags/select.html", children = children, childrenClass = childrenClass, parent = parent)
