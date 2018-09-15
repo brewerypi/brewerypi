@@ -91,7 +91,7 @@
                     </td>
                     <td></td>
                     {% if elementAttribute.Tag.TagValues[0] %}
-                        {% if elementAttribute.Tag.TagValues[0].TagValueNotes[0] %}
+                        {% if firstTagValue.TagValueNotes[0] %}
                             {% set noteButtonClass = "btn btn-default has-note" %}
                         {% else %}
                             {% set noteButtonClass = "btn btn-default" %}
