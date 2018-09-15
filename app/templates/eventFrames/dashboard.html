@@ -163,7 +163,7 @@ Event Frame Dashboard
                     </td>
                     <td></td>
                     {% if tagValues.filter_by(TagId = eventFrameAttribute.TagId).count() > 0 %}
-                        {% if eventFrameAttribute.Tag.TagValues[0].TagValueNotes[0] %}
+                        {% if firstTagValue.TagValueNotes[0] %}
                             {% set noteButtonClass = "btn btn-default has-note" %}
                         {% else %}
                             {% set noteButtonClass = "btn btn-default" %}
@@ -224,6 +224,7 @@ Event Frame Dashboard
 {% block scripts %}
     {{ super() }}
     <link rel = "stylesheet" type = "text/css" href = {{ url_for("static", filename = "css/datatables.min.css") }}/> 
+    <link rel = "stylesheet" type = "text/css" href = {{ url_for("static", filename = "css/styles.css") }}/>
     <script type = "text/javascript" src = {{ url_for("static", filename = "js/datatables.min.js") }}></script>
     <script type = "text/javascript" src = {{ url_for("static", filename = "js/moment.min.js") }}></script>
     <script>
