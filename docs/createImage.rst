@@ -83,7 +83,7 @@ Install Brewery Pi
 ------------------
 ::
 
-    $ nano ~/.profile`
+    $ nano ~/.profile
 
 Add the following to the end of the file, save and exit::
 
@@ -131,7 +131,6 @@ Save and exit.
 ::
 
     (venv) $ flask deploy
-    (venv) $ sudo mysql BreweryPi < db/storedProcedures/spElementSummary.sql
     (venv) $ flask run --host 0.0.0.0
 
 Point a web browser at http\://<Your Raspberry Pi IP Address>:5000 and verify that you can access the app.
@@ -155,7 +154,7 @@ Setting Up Gunicorn and Supervisor
 
 Add the following to the file and save::
 
-    [program:breweryPi]
+    [program:brewerypi]
     command=/home/pi/brewerypi/venv/bin/gunicorn -b 0.0.0.0:8000 -w 2 breweryPi:app
     directory=/home/pi/brewerypi
     user=pi
@@ -183,6 +182,7 @@ Setting Up Nginx
     Common Name (e.g. server FQDN or YOUR name) []:localhost
     Email Address []:
     $ sudo apt-get -y install nginx
+    $ sudo mkdir /var/log/brewerypi
     $ sudo rm /etc/nginx/sites-enabled/default
     $ sudo nano /etc/nginx/sites-enabled/brewerypi
 
@@ -208,8 +208,8 @@ Paste the following in the file::
         ssl_certificate_key /home/pi/brewerypi/certs/key.pem;
 
         # write access and error logs to /var/log
-        access_log /var/log/brewerypi_access.log;
-        error_log /var/log/brewerypi_error.log;
+        access_log /var/log/brewerypi/access.log;
+        error_log /var/log/brewerypi/error.log;
 
         location / {
             # forward application requests to the gunicorn server
@@ -242,10 +242,11 @@ Grafana
 -------
 ::
 
+    $ cd
     $ sudo apt-get -y install adduser libfontconfig
-    $ curl -L https://github.com/fg2it/grafana-on-raspberry/releases/download/vX.Y.Z/grafana_X.Y.Z_armhf.deb -o /tmp/grafana_X.Y.Z_armhf.deb
-    $ sudo dpkg -i /tmp/grafana_X.Y.Z_armhf.deb
-    $ rm /tmp/grafana_X.Y.Z_armhf.deb
+    $ wget https://s3-us-west-2.amazonaws.com/grafana-releases/release/grafana_X.Y.Z_armhf.deb 
+    $ sudo dpkg -i grafana_5.2.4_armhf.deb 
+    $ rm grafana_X.Y.Z_armhf.deb
     $ sudo nano /etc/grafana/grafana.ini
 
 Add the following line::
@@ -253,6 +254,60 @@ Add the following line::
     root_url = %(protocol)s://%(domain)s:/grafana
 
 Save and exit.
+
+::
+
+    $ sudo nano /etc/grafana/provisioning/dashboards/brewerypi.yaml
+
+Paste the following into the file::
+
+    # config file version
+    apiVersion: 1
+
+    providers:
+    - name: 'BreweryPi'
+      orgId: 1
+      folder: 'Brewery Pi'
+      type: file
+      options:
+        path: /home/pi/brewerypi/grafana/dashboards
+
+Save and exit.
+
+::
+
+    $ sudo nano /etc/grafana/provisioning/datasources/brewerypi.yaml
+
+Paste the following into the file::
+
+    apiVersion: 1
+
+    deleteDatasources:
+      - name: 'BreweryPi'
+        orgId: 1
+
+    datasources:
+      - name: 'BreweryPi'
+        type: mysql
+        url: localhost:3306
+        database: BreweryPi
+        user: piReader
+        password: brewery
+        isDefault: true
+        editable: true
+
+Save and exit.
+
+Change the group and permissions for the provisioning files.
+
+::
+
+    $ cd /etc/grafana/provisioning/dashboards
+    $ sudo chgrp grafana brewerypi.yaml
+    $ sudo chmod 640 brewerypi.yaml
+    $ cd /etc/grafana/provisioning/datasources
+    $ sudo chgrp grafana brewerypi.yaml
+    $ sudo chmod 640 brewerypi.yaml
 
 Run the following commands to start Grafana at boot::
 
@@ -263,23 +318,7 @@ Reboot and point a web browser at http\://<Your Raspberry Pi IP Address>/grafana
 
 Login with "admin" for both the user and password.
 
-Click on "Add data source" and set the following properties:
-
-+----------+---------------+
-| Property | Value         |
-+==========+===============+
-| Name     | BreweryPi     |
-+----------+---------------+
-| Type     | MySQL         |
-+----------+---------------+
-| Database | BreweryPi     |
-+----------+---------------+
-| User     | piReader      |
-+----------+---------------+
-| Password | brewery       |
-+----------+---------------+
-
-Download the Brewery Pi release source files from GitHub and import the Grafana dashboards into a new folder named "Brewery Pi".
+Go to Configuration->Server Admin and change the default "admin" username to "pi" and password to "brewery".
 
 Create a Compressed Image
 -------------------------
