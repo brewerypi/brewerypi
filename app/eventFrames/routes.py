@@ -262,6 +262,13 @@ def selectEventFrame(selectedClass = None, selectedId = None, selectedOperation 
 	return render_template("eventFrames/select.html", children = children, childrenClass = childrenClass,
 		eventFrameAttributeTemplates = eventFrameAttributeTemplates, parent = parent)
 
+@eventFrames.route("/eventFrames/overlay/<int:eventFrameTemplateId>", methods = ["GET", "POST"])
+@login_required
+@permissionRequired(Permission.DATA_ENTRY)
+def overlay(eventFrameTemplateId):
+	eventFrames = EventFrame.query.filter_by(EventFrameTemplateId = eventFrameTemplateId)
+	return render_template("eventFrames/overlay.html", eventFrames = eventFrames)
+
 @eventFrames.route("/eventFrames/startEventFrame/<int:elementId>/<int:eventFrameTemplateId>", methods = ["GET", "POST"])
 @login_required
 @permissionRequired(Permission.DATA_ENTRY)
