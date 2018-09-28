@@ -8,70 +8,126 @@ Event Frames
 
 {% block page_content %}
 <div>
-    <table id = "table" class = "table">
-        <thead>
-            <tr>
-                <th>Name</th>
-                <th>Element</th>
-                <th>Start Timestamp</th>
-                <th>End Timestamp</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for eventFrame in eventFrames %}
-                <td>{{ eventFrame.friendlyName() }}</td>
-                <td>{{ eventFrame.Element.Name }}</td>
-                <td>{{ eventFrame.StartTimestamp }}</td>
-                <td>{{ eventFrame.EndTimestamp }}</td>
-                </tr>
-            {% endfor %}
-        </tbody>
-        <tfoot>
-            <tr>
-                <th>Name</th>
-                <th>Element</th>
-                <th>Start Timestamp</th>
-                <th>End Timestamp</th>
-            </tr>
-        </tfoot>
-    </table>
+    <ol class = "breadcrumb">
+        <li class = "active"><span class = "glyphicon glyphicon-home"></li>
+    </ol>
 </div>
+{% if form %}
+    <div class = "page-header">
+            <h1>Event Frame Overlay <small>Date Range</small></h1>
+    </div>
+    <div>
+        <button class = "btn btn-default" id = "button3Months" title = "3 Months">3 Mo</button>
+        <button class = "btn btn-default" id = "button6Months" title = "6 Months">6 Mo</button>
+        <button class = "btn btn-default" id = "button9Months" title = "9 Months">9 Mo</button>
+        <button class = "btn btn-default" id = "button1Year" title = "1 Year">1 Yr</button>
+    </div>
+    <div>
+        {{ wtf.quick_form(form) }}
+    </div>
+{% else %}
+    <div class = "page-header">
+            <h1>Event Frame Overlay <small>Selection</small></h1>
+    </div>
+    <div>
+        <table class = "table table-condensed">
+            <thead>
+                <tr>
+                    <th>Column</th>
+                    <th>Filter</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr dataColumn = "0">
+                    <td>Name</td>
+                    <td><input type = "text" class = "regularExpressionFilter" id = "regularExpression0Filter"></td>
+                </tr>
+                <tr dataColumn = "1">
+                    <td>Element</td>
+                    <td><input type = "text" class = "regularExpressionFilter" id = "regularExpression1Filter"></td>
+                </tr>
+            </tbody>
+        </table>        
+    </div>
+    <div>
+        <table id = "table" class = "table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Element</th>
+                    <th>Start</th>
+                    <th>End</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for eventFrame in eventFrames %}
+                    <tr>
+                        <td>{{ eventFrame.friendlyName() }}</td>
+                        <td>{{ eventFrame.Element.Name }}</td>
+                        <td>{{ eventFrame.StartTimestamp }}</td>
+                        {% if eventFrame.EndTimestamp %}
+                            <td>{{ eventFrame.EndTimestamp }}</td>
+                        {% else %}
+                            <td></td>
+                        {% endif %}
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endif %}
 {% endblock %}
 
 {% block scripts %}
     {{ super() }}
     <link rel = "stylesheet" type = "text/css" href = {{ url_for("static", filename = "css/datatables.min.css") }}/> 
-    <link rel = "stylesheet" type = "text/css" href = {{ url_for("static", filename = "css/styles.css") }}/>
     <script type = "text/javascript" src = {{ url_for("static", filename = "js/datatables.min.js") }}></script>
+    <script type = "text/javascript" src = {{ url_for("static", filename = "js/moment.min.js") }}></script>
     <script>
+        function filterColumn(i)
+        {
+            $("#table").DataTable().column(i).search($("#regularExpression" + i + "Filter").val(), 1).draw()
+        }
+ 
         $(document).ready(function()
         {
-            // Setup - add a text input to each footer cell.
-            $("#table tfoot th").each(function ()
+            $(".form-control").first().focus()
+            $("#submit").hide()
+            $("#submit").parent().append("<button class = \"btn btn-default\" title = \"Search\" type = \"submit\">" +
+                "<span class = \"glyphicon glyphicon-search\" aria-hidden = \"true\"></span></button>")
+
+            $("#button3Months").click(function()
             {
-                var title = $(this).text()
-                $(this).html("<input type = \"text\" placeholder = \"Search " + title + "\" />")
-            })
-        
+                $("#startTimestamp").val(new moment().subtract(3, "months").hours(0).minutes(0).seconds(0).local().format("YYYY-MM-DD HH:mm:ss"))
+                $("#endTimestamp").val("")
+            })
+
+            $("#button6Months").click(function()
+            {
+                $("#startTimestamp").val(new moment().subtract(6, "months").hours(0).minutes(0).seconds(0).local().format("YYYY-MM-DD HH:mm:ss"))
+                $("#endTimestamp").val("")
+            })
+
+            $("#button9Months").click(function()
+            {
+                $("#startTimestamp").val(new moment().subtract(9, "months").hours(0).minutes(0).seconds(0).local().format("YYYY-MM-DD HH:mm:ss"))
+                $("#endTimestamp").val("")
+            })
+
+            $("#button1Year").click(function()
+            {
+                $("#startTimestamp").val(new moment().subtract(1, "years").hours(0).minutes(0).seconds(0).local().format("YYYY-MM-DD HH:mm:ss"))
+                $("#endTimestamp").val("")
+            })
+
             var table = $("#table").DataTable
             ({
-                "stateSave": true,
-                "stateDuration": 0,
                 "pageLength": 10
             })
 
-            // Apply the search.
-            table.columns().every(function ()
+            $("input.regularExpressionFilter").on("keyup click", function ()
             {
-                var that = this;
-        
-                $("input", this.footer()).on("keyup change", function ()
-                {
-                    if (that.search() !== this.value)
-                    {
-                        that.search(this.value, 1).draw()
-                    }
-                })
+                filterColumn($(this).parents("tr").attr("dataColumn"))
             })
         })
     </script>

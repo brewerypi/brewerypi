@@ -2,11 +2,11 @@ from datetime import datetime
 from flask import flash, redirect, render_template, request, url_for
 from flask_login import login_required
 from . import eventFrames
-from . forms import EventFrameForm
+from . forms import EventFrameForm, EventFrameOverlayForm
 from .. import db
 from .. decorators import permissionRequired
-from .. models import Element, ElementTemplate, Enterprise, EventFrame, EventFrameAttribute, EventFrameAttributeTemplate, EventFrameTemplate, Permission, \
-	Site, Tag, TagValue
+from .. models import Element, ElementTemplate, Enterprise, EventFrame, EventFrameAttribute, EventFrameAttributeTemplate, EventFrameTemplate, Lookup, \
+	LookupValue, Permission, Site, Tag, TagValue
 
 modelName = "Event Frame"
 
@@ -266,8 +266,19 @@ def selectEventFrame(selectedClass = None, selectedId = None, selectedOperation 
 @login_required
 @permissionRequired(Permission.DATA_ENTRY)
 def overlay(eventFrameTemplateId):
-	eventFrames = EventFrame.query.filter_by(EventFrameTemplateId = eventFrameTemplateId)
-	return render_template("eventFrames/overlay.html", eventFrames = eventFrames)
+	form = EventFrameOverlayForm()
+
+	if form.validate_on_submit():
+		if form.endTimestamp.data:
+			eventFrames = EventFrame.query.filter(EventFrame.EventFrameTemplateId == eventFrameTemplateId,
+				EventFrame.StartTimestamp >= form.startTimestamp.data, EventFrame.EndTimestamp <= form.endTimestamp.data)
+		else:
+			eventFrames = EventFrame.query.join(EventFrameTemplate, EventFrameAttributeTemplate, EventFrameAttribute, Element, Tag). \
+				outerjoin(Lookup, LookupValue). \
+				filter(EventFrame.EventFrameTemplateId == eventFrameTemplateId, EventFrame.StartTimestamp >= form.startTimestamp.data)
+		return render_template("eventFrames/overlay.html", eventFrames = eventFrames)
+
+	return render_template("eventFrames/overlay.html", form = form)
 
 @eventFrames.route("/eventFrames/startEventFrame/<int:elementId>/<int:eventFrameTemplateId>", methods = ["GET", "POST"])
 @login_required

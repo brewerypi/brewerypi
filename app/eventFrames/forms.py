@@ -40,3 +40,8 @@ class EventFrameForm(FlaskForm):
 
 			if error:
 				raise ValidationError("This timestamp is outside of the parent event frame.")
+
+class EventFrameOverlayForm(FlaskForm):
+	startTimestamp = DateTimeField("Start", validators = [Required()])
+	endTimestamp = DateTimeField("End", validators = [Optional()])
+	submit = SubmitField("Search")
