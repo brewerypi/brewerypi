@@ -243,6 +243,8 @@ Event Frames
             // Apply the search
             table.columns().every(function ()
             {
+                this.search("", 1).draw()
+
                 var that = this
         
                 $("input", this.footer()).on("keyup change", function ()
