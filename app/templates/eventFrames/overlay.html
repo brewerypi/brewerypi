@@ -22,14 +22,42 @@ Event Frames
         <button class = "btn btn-default" id = "button9Months" title = "9 Months">9 Mo</button>
         <button class = "btn btn-default" id = "button1Year" title = "1 Year">1 Yr</button>
     </div>
-    <div>
+    <!-- <div>
         {{ wtf.quick_form(form) }}
-    </div>
+    </div> -->
+    <form action = "" method = "post">
+        <div class = "form-group">
+            <label for = "startTimestamp">Start</label>
+            <input type = "text" class = "form-control" id = "startTimestamp" name = "startTimestamp" placeholder = "YYYY-MM-DD HH:MM:SS">
+        </div>
+        <div class = "form-group">
+            <label for = "endTimestamp">End</label>
+            <input type = "text" class = "form-control" id = "endTimestamp" name = "endTimestamp" placeholder = "YYYY-MM-DD HH:MM:SS">
+        </div>
+        {% for eventFrameAttributeTemplate in eventFrameAttributeTemplates %}
+        <div class = "form-group">
+            <label for = "{{ eventFrameAttributeTemplate.Name }}">{{ eventFrameAttributeTemplate.Name }}</label>
+            <input type = "text" class = "form-control" name = "{{ eventFrameAttributeTemplate.Name }}">
+        </div>
+        {% endfor %}
+        <button type="submit" class="btn btn-default">Submit</button>
+    </form>
 {% else %}
     <div class = "page-header">
             <h1>Event Frame Overlay <small>Selection</small></h1>
     </div>
     <div>
+        Toggle Column:
+        {% for eventFrameAttributeTemplate in eventFrameAttributeTemplates %}
+            {% set dataColumn = loop.index + 4 %}
+            {% if loop.index0 != 0 %}
+                &nbsp;|&nbsp;
+            {% endif %}
+            <a class = "toggleVisibility" dataColumn = "{{ dataColumn }}"">{{ eventFrameAttributeTemplate.Name }}</a>
+        {% endfor %}
+    </div>
+    <br>
+    <!-- <div>
         <table class = "table table-condensed">
             <thead>
                 <tr>
@@ -46,33 +74,63 @@ Event Frames
                     <td>Element</td>
                     <td><input type = "text" class = "regularExpressionFilter" id = "regularExpression1Filter"></td>
                 </tr>
+                {#% for eventFrameAttributeTemplate in eventFrameAttributeTemplates %}
+                    {% set dataColumn = loop.index + 3 %}
+                    <tr dataColumn = "{{ dataColumn }}">
+                        <td>{{ eventFrameAttributeTemplate.Name }}</td>
+                        <td><input type = "text" class = "regularExpressionFilter" id = "regularExpression{{ dataColumn }}Filter"></td>
+                    </tr>
+                {% endfor %#}
             </tbody>
         </table>        
-    </div>
+    </div> -->
+    <a class = "btn btn-default" id = "buttonEventFrameOverlay" title = "Add"><span class = "glyphicon glyphicon-stats"></span></a>
+    <br><br>
     <div>
-        <table id = "table" class = "table">
+        <table id = "table" class = "table" style = "width:100%">
+        <!-- <table id = "table" class = "table"> -->
             <thead>
                 <tr>
+                    <th>Event Frame Id</th>
                     <th>Name</th>
                     <th>Element</th>
                     <th>Start</th>
                     <th>End</th>
+                    {% for eventFrameAttributeTemplate in eventFrameAttributeTemplates %}
+                        <th>{{ eventFrameAttributeTemplate.Name }}</th>
+                    {% endfor %}
                 </tr>
             </thead>
             <tbody>
                 {% for eventFrame in eventFrames %}
-                    <tr>
-                        <td>{{ eventFrame.friendlyName() }}</td>
-                        <td>{{ eventFrame.Element.Name }}</td>
-                        <td>{{ eventFrame.StartTimestamp }}</td>
-                        {% if eventFrame.EndTimestamp %}
-                            <td>{{ eventFrame.EndTimestamp }}</td>
+                    <tr class = "trEventFrame" eventFrameId = "{{ eventFrame.EventFrameId }}">
+                        <td>{{ eventFrame.EventFrameId }}</td>
+                        <td>{{ eventFrame.Name }}</td>
+                        <td>{{ eventFrame.Element }}</td>
+                        <td>{{ eventFrame.Start }}</td>
+                        {% if eventFrame.End %}
+                            <td>{{ eventFrame.End }}</td>
                         {% else %}
                             <td></td>
                         {% endif %}
+                        {% for eventFrameAttributeTemplate in eventFrameAttributeTemplates %}
+                            <td>{{ eventFrame[eventFrameAttributeTemplate.Name] }}</td>
+                        {% endfor %}
                     </tr>
                 {% endfor %}
             </tbody>
+            <tfoot>
+                <tr>
+                    <th>Event Frame Id</th>
+                    <th>Name</th>
+                    <th>Element</th>
+                    <th>Start</th>
+                    <th>End</th>
+                    {% for eventFrameAttributeTemplate in eventFrameAttributeTemplates %}
+                        <th>{{ eventFrameAttributeTemplate.Name }}</th>
+                    {% endfor %}
+                </tr>
+            </tfoot>
         </table>
     </div>
 {% endif %}
@@ -81,6 +139,7 @@ Event Frames
 {% block scripts %}
     {{ super() }}
     <link rel = "stylesheet" type = "text/css" href = {{ url_for("static", filename = "css/datatables.min.css") }}/> 
+    <link rel = "stylesheet" type = "text/css" href = {{ url_for("static", filename = "css/styles.css") }}/>
     <script type = "text/javascript" src = {{ url_for("static", filename = "js/datatables.min.js") }}></script>
     <script type = "text/javascript" src = {{ url_for("static", filename = "js/moment.min.js") }}></script>
     <script>
@@ -96,6 +155,20 @@ Event Frames
             $("#submit").parent().append("<button class = \"btn btn-default\" title = \"Search\" type = \"submit\">" +
                 "<span class = \"glyphicon glyphicon-search\" aria-hidden = \"true\"></span></button>")
 
+            // Setup - add a text input to each footer cell
+            $("#table tfoot th").each(function ()
+            {
+                var title = $(this).text()
+                if (title != "Start" && title != "End")
+                {
+                    $(this).html("<input type = \"text\" placeholder = \"Search " + title + "\" />")
+                }
+                else
+                {
+                    $(this).html("")
+                }
+            })
+    
             $("#button3Months").click(function()
             {
                 $("#startTimestamp").val(new moment().subtract(3, "months").hours(0).minutes(0).seconds(0).local().format("YYYY-MM-DD HH:mm:ss"))
@@ -122,12 +195,63 @@ Event Frames
 
             var table = $("#table").DataTable
             ({
+                "columnDefs":
+                [
+                    {
+                        "targets": [0],
+                        "visible": false
+                    }
+                ],
+                "order":
+                [
+                    [3, "desc"],             // Start timestamp.
+                ],
+                "stateSave": true,
+                "stateDuration": 0,
                 "pageLength": 10
             })
 
             $("input.regularExpressionFilter").on("keyup click", function ()
             {
                 filterColumn($(this).parents("tr").attr("dataColumn"))
+            })
+
+            $("a.toggleVisibility").on("click", function (e)
+            {
+                e.preventDefault();
+        
+                // Get the column API object
+                var column = table.column($(this).attr("dataColumn"))
+        
+                // Toggle the visibility
+                column.visible(!column.visible())
+            })
+
+            $("#buttonEventFrameOverlay").on("click", function (e)
+            {
+                var link = "http://localhost:3000/d/EventFramesOverlay/event-frames-overlay?orgId=1&var-enterprise=2&var-site=2&var-elementTemplate=4&" + 
+                    "var-eventFrameTemplate=1"
+                table.rows({filter: "applied"}).every(function()
+                {
+                    console.log(this.data()[0])
+                    link = link + "&var-eventFrames=111&var-eventFrames=" + this.data()[0]
+                })
+                link = link + "&var-eventFrameAttributeTemplates=All&var-lookups=All"
+                window.open(link, "_blank");
+            })
+
+            // Apply the search
+            table.columns().every(function ()
+            {
+                var that = this
+        
+                $("input", this.footer()).on("keyup change", function ()
+                {
+                    if ( that.search() !== this.value )
+                    {
+                        that.search(this.value, 1).draw()
+                    }
+                })
             })
         })
     </script>

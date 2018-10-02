@@ -266,19 +266,85 @@ def selectEventFrame(selectedClass = None, selectedId = None, selectedOperation 
 @login_required
 @permissionRequired(Permission.DATA_ENTRY)
 def overlay(eventFrameTemplateId):
-	form = EventFrameOverlayForm()
+	s = ""
+	eventFrameAttributeTemplates = EventFrameAttributeTemplate.query.filter_by(EventFrameTemplateId = eventFrameTemplateId).order_by(EventFrameAttributeTemplate.Name)
+	for eventFrameAttributeTemplate in eventFrameAttributeTemplates:
+		if s != "":
+			s = s + ", "
+		s = s + "MAX(IF(t2.Name = '{}', IF(Tag.LookupId IS NULL, t3.Value, LookupValue.Name), '')) AS '{}'".format(eventFrameAttributeTemplate.Name, eventFrameAttributeTemplate.Name)
+	# print(s)
 
-	if form.validate_on_submit():
-		if form.endTimestamp.data:
-			eventFrames = EventFrame.query.filter(EventFrame.EventFrameTemplateId == eventFrameTemplateId,
-				EventFrame.StartTimestamp >= form.startTimestamp.data, EventFrame.EndTimestamp <= form.endTimestamp.data)
-		else:
-			eventFrames = EventFrame.query.join(EventFrameTemplate, EventFrameAttributeTemplate, EventFrameAttribute, Element, Tag). \
-				outerjoin(Lookup, LookupValue). \
-				filter(EventFrame.EventFrameTemplateId == eventFrameTemplateId, EventFrame.StartTimestamp >= form.startTimestamp.data)
-		return render_template("eventFrames/overlay.html", eventFrames = eventFrames)
+	query = """
+	SELECT t1.EventFrameId AS EventFrameId,
+		fxGetEventFrameFriendlyName(t1.EventFrameId) AS Name,
+		Element.Name AS Element,
+		DATE_FORMAT(t1.StartTimestamp, '%m/%d/%y %H:%i') AS Start,
+		DATE_FORMAT(t1.EndTimestamp, '%m/%d/%y %H:%i') AS End,
+		{}
+	FROM EventFrame t1
+		INNER JOIN EventFrameTemplate ON t1.EventFrameTemplateId = EventFrameTemplate.EventFrameTemplateId
+		INNER JOIN EventFrameAttributeTemplate t2 ON EventFrameTemplate.EventFrameTemplateId = t2.EventFrameTemplateId
+		INNER JOIN EventFrameAttribute ON t2.EventFrameAttributeTemplateId = EventFrameAttribute.EventFrameAttributeTemplateId
+		INNER JOIN Element ON t1.ElementId = Element.ElementId AND EventFrameAttribute.ElementId = Element.ElementId
+		INNER JOIN Tag ON EventFrameAttribute.TagId = Tag.TagId
+		LEFT JOIN Lookup ON Tag.LookupId = Lookup.LookupId
+		LEFT JOIN LookupValue ON Lookup.LookupId = LookupValue.LookupId
+		INNER JOIN TagValue t3 ON
+			CASE
+				WHEN Tag.LookupId IS NULL
+					THEN Tag.TagId = t3.TagId
+				ELSE
+					Tag.TagId = t3.TagId AND LookupValue.Value = t3.Value
+			END
+		INNER JOIN
+		(
+			SELECT EventFrame.EventFrameId,
+				EventFrameAttributeTemplate.Name,
+				Max(TagValue.Timestamp) AS MaxTimestamp
+			FROM EventFrame
+				INNER JOIN EventFrameTemplate ON EventFrame.EventFrameTemplateId = EventFrameTemplate.EventFrameTemplateId
+				INNER JOIN EventFrameAttributeTemplate ON EventFrameTemplate.EventFrameTemplateId = EventFrameAttributeTemplate.EventFrameTemplateId
+				INNER JOIN EventFrameAttribute ON EventFrameAttributeTemplate.EventFrameAttributeTemplateId = EventFrameAttribute.EventFrameAttributeTemplateId
+				INNER JOIN Element ON EventFrame.ElementId = Element.ElementId
+					AND EventFrameAttribute.ElementId = Element.ElementId
+				INNER JOIN Tag ON EventFrameAttribute.TagId = Tag.TagId
+				INNER JOIN TagValue ON Tag.TagId = TagValue.TagId
+			WHERE EventFrameTemplate.EventFrameTemplateId IN ({})
+			GROUP BY EventFrame.EventFrameId,
+				EventFrameAttributeTemplate.Name
+		) t4 ON t1.EventFrameId = t4.EventFrameId AND
+			t2.Name = t4.Name AND
+			t3.Timestamp = t4.MaxTimestamp
+	WHERE EventFrameTemplate.EventFrameTemplateId IN ({})
+	GROUP BY t1.EventFrameId
+	""".format(s, eventFrameTemplateId, eventFrameTemplateId)
 
-	return render_template("eventFrames/overlay.html", form = form)
+	eventFrames = db.session.execute(query).fetchall()
+	for eventFrame in eventFrames:
+		print(eventFrame.Element)
+	# return "kats"
+	# form = EventFrameOverlayForm()
+	# eventFrameAttributeTemplates = EventFrameAttributeTemplate.query.filter_by(EventFrameTemplateId = eventFrameTemplateId)
+
+	# if request.method == "POST":
+	# 	startTimestamp = request.form.get("startTimestamp")
+	# 	print(startTimestamp)
+	# 	endTimestamp = request.form.get("endTimestamp")
+	# 	print(endTimestamp)
+	# 	for eventFrameAttributeTemplate in eventFrameAttributeTemplates:
+	# 		print("{}: {}".format(eventFrameAttributeTemplate.Name, request.form.get(eventFrameAttributeTemplate.Name)))
+
+	# if form.validate_on_submit():
+	# 	if form.endTimestamp.data:
+	# 		eventFrames = EventFrame.query.filter(EventFrame.EventFrameTemplateId == eventFrameTemplateId,
+	# 			EventFrame.StartTimestamp >= form.startTimestamp.data, EventFrame.EndTimestamp <= form.endTimestamp.data)
+	# 	else:
+	# 		eventFrames = EventFrame.query.join(EventFrameTemplate, EventFrameAttributeTemplate, EventFrameAttribute, Element, Tag). \
+	# 			outerjoin(Lookup, LookupValue). \
+	# 			filter(EventFrame.EventFrameTemplateId == eventFrameTemplateId, EventFrame.StartTimestamp >= form.startTimestamp.data)
+	# 	return render_template("eventFrames/overlay.html", eventFrames = eventFrames)
+
+	return render_template("eventFrames/overlay.html", eventFrames = eventFrames, eventFrameAttributeTemplates = eventFrameAttributeTemplates)
 
 @eventFrames.route("/eventFrames/startEventFrame/<int:elementId>/<int:eventFrameTemplateId>", methods = ["GET", "POST"])
 @login_required
