@@ -17,31 +17,15 @@ Event Frames
             <h1>Event Frame Overlay <small>Date Range</small></h1>
     </div>
     <div>
-        <button class = "btn btn-default" id = "button3Months" title = "3 Months">3 Mo</button>
-        <button class = "btn btn-default" id = "button6Months" title = "6 Months">6 Mo</button>
-        <button class = "btn btn-default" id = "button9Months" title = "9 Months">9 Mo</button>
-        <button class = "btn btn-default" id = "button1Year" title = "1 Year">1 Yr</button>
+        <button class = "btn btn-primary" id = "buttonMonthPicker3" months = "1" title = "1 Month">1 Mo</button>
+        <button class = "btn btn-primary" id = "buttonMonthPicker3" months = "3" title = "3 Months">3 Mo</button>
+        <button class = "btn btn-primary" id = "buttonMonthPicker6" months = "6" title = "6 Months">6 Mo</button>
+        <button class = "btn btn-primary" id = "buttonMonthPicker9" months = "9" title = "9 Months">9 Mo</button>
+        <button class = "btn btn-primary" id = "buttonMonthPicker12" months = "12" title = "1 Year">1 Yr</button>
     </div>
-    <!-- <div>
+    <div>
         {{ wtf.quick_form(form) }}
-    </div> -->
-    <form action = "" method = "post">
-        <div class = "form-group">
-            <label for = "startTimestamp">Start</label>
-            <input type = "text" class = "form-control" id = "startTimestamp" name = "startTimestamp" placeholder = "YYYY-MM-DD HH:MM:SS">
-        </div>
-        <div class = "form-group">
-            <label for = "endTimestamp">End</label>
-            <input type = "text" class = "form-control" id = "endTimestamp" name = "endTimestamp" placeholder = "YYYY-MM-DD HH:MM:SS">
-        </div>
-        {% for eventFrameAttributeTemplate in eventFrameAttributeTemplates %}
-        <div class = "form-group">
-            <label for = "{{ eventFrameAttributeTemplate.Name }}">{{ eventFrameAttributeTemplate.Name }}</label>
-            <input type = "text" class = "form-control" name = "{{ eventFrameAttributeTemplate.Name }}">
-        </div>
-        {% endfor %}
-        <button type="submit" class="btn btn-default">Submit</button>
-    </form>
+    </div>
 {% else %}
     <div class = "page-header">
             <h1>Event Frame Overlay <small>Selection</small></h1>
@@ -50,45 +34,15 @@ Event Frames
         Toggle Column:
         {% for eventFrameAttributeTemplate in eventFrameAttributeTemplates %}
             {% set dataColumn = loop.index + 4 %}
-            {% if loop.index0 != 0 %}
-                &nbsp;|&nbsp;
-            {% endif %}
-            <a class = "toggleVisibility" dataColumn = "{{ dataColumn }}"">{{ eventFrameAttributeTemplate.Name }}</a>
+            <button type = "button" class = "btn btn-primary btn-xs" dataColumn = "{{ dataColumn }}"
+                id = "buttonToggleColumn{{ eventFrameAttributeTemplate.Name }}">{{ eventFrameAttributeTemplate.Name }}</button>
         {% endfor %}
     </div>
     <br>
-    <!-- <div>
-        <table class = "table table-condensed">
-            <thead>
-                <tr>
-                    <th>Column</th>
-                    <th>Filter</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr dataColumn = "0">
-                    <td>Name</td>
-                    <td><input type = "text" class = "regularExpressionFilter" id = "regularExpression0Filter"></td>
-                </tr>
-                <tr dataColumn = "1">
-                    <td>Element</td>
-                    <td><input type = "text" class = "regularExpressionFilter" id = "regularExpression1Filter"></td>
-                </tr>
-                {#% for eventFrameAttributeTemplate in eventFrameAttributeTemplates %}
-                    {% set dataColumn = loop.index + 3 %}
-                    <tr dataColumn = "{{ dataColumn }}">
-                        <td>{{ eventFrameAttributeTemplate.Name }}</td>
-                        <td><input type = "text" class = "regularExpressionFilter" id = "regularExpression{{ dataColumn }}Filter"></td>
-                    </tr>
-                {% endfor %#}
-            </tbody>
-        </table>        
-    </div> -->
     <a class = "btn btn-default" id = "buttonEventFrameOverlay" title = "Add"><span class = "glyphicon glyphicon-stats"></span></a>
     <br><br>
     <div>
-        <table id = "table" class = "table" style = "width:100%">
-        <!-- <table id = "table" class = "table"> -->
+        <table id = "table" class = "table">
             <thead>
                 <tr>
                     <th>Event Frame Id</th>
@@ -124,8 +78,8 @@ Event Frames
                     <th>Event Frame Id</th>
                     <th>Name</th>
                     <th>Element</th>
-                    <th>Start</th>
-                    <th>End</th>
+                    <th id = "thStartTimestamp">Start</th>
+                    <th id = "thEndTimestamp">End</th>
                     {% for eventFrameAttributeTemplate in eventFrameAttributeTemplates %}
                         <th>{{ eventFrameAttributeTemplate.Name }}</th>
                     {% endfor %}
@@ -142,24 +96,22 @@ Event Frames
     <link rel = "stylesheet" type = "text/css" href = {{ url_for("static", filename = "css/styles.css") }}/>
     <script type = "text/javascript" src = {{ url_for("static", filename = "js/datatables.min.js") }}></script>
     <script type = "text/javascript" src = {{ url_for("static", filename = "js/moment.min.js") }}></script>
-    <script>
-        function filterColumn(i)
-        {
-            $("#table").DataTable().column(i).search($("#regularExpression" + i + "Filter").val(), 1).draw()
-        }
- 
+    <script> 
         $(document).ready(function()
         {
-            $(".form-control").first().focus()
-            $("#submit").hide()
-            $("#submit").parent().append("<button class = \"btn btn-default\" title = \"Search\" type = \"submit\">" +
-                "<span class = \"glyphicon glyphicon-search\" aria-hidden = \"true\"></span></button>")
+            {% if form %}
+                $(".form-control").first().focus()
+                $("#submit").hide()
+                $("#submit").parent().append("<button class = \"btn btn-default\" title = \"Search\" type = \"submit\">" +
+                    "<span class = \"glyphicon glyphicon-search\" aria-hidden = \"true\"></span></button>")
+            {% endif %}
 
             // Setup - add a text input to each footer cell
             $("#table tfoot th").each(function ()
             {
+                var id = $(this).attr("id")
                 var title = $(this).text()
-                if (title != "Start" && title != "End")
+                if (id != "thStartTimestamp" && id != "thEndTimestamp")
                 {
                     $(this).html("<input type = \"text\" placeholder = \"Search " + title + "\" />")
                 }
@@ -168,36 +120,13 @@ Event Frames
                     $(this).html("")
                 }
             })
-    
-            $("#button3Months").click(function()
-            {
-                $("#startTimestamp").val(new moment().subtract(3, "months").hours(0).minutes(0).seconds(0).local().format("YYYY-MM-DD HH:mm:ss"))
-                $("#endTimestamp").val("")
-            })
-
-            $("#button6Months").click(function()
-            {
-                $("#startTimestamp").val(new moment().subtract(6, "months").hours(0).minutes(0).seconds(0).local().format("YYYY-MM-DD HH:mm:ss"))
-                $("#endTimestamp").val("")
-            })
-
-            $("#button9Months").click(function()
-            {
-                $("#startTimestamp").val(new moment().subtract(9, "months").hours(0).minutes(0).seconds(0).local().format("YYYY-MM-DD HH:mm:ss"))
-                $("#endTimestamp").val("")
-            })
-
-            $("#button1Year").click(function()
-            {
-                $("#startTimestamp").val(new moment().subtract(1, "years").hours(0).minutes(0).seconds(0).local().format("YYYY-MM-DD HH:mm:ss"))
-                $("#endTimestamp").val("")
-            })
 
             var table = $("#table").DataTable
             ({
                 "columnDefs":
                 [
                     {
+                        // Hide the EventFrameId.
                         "targets": [0],
                         "visible": false
                     }
@@ -211,12 +140,7 @@ Event Frames
                 "pageLength": 10
             })
 
-            $("input.regularExpressionFilter").on("keyup click", function ()
-            {
-                filterColumn($(this).parents("tr").attr("dataColumn"))
-            })
-
-            $("a.toggleVisibility").on("click", function (e)
+            $("[id^=buttonToggleColumn]").on("click", function (e)
             {
                 e.preventDefault();
         
@@ -225,24 +149,38 @@ Event Frames
         
                 // Toggle the visibility
                 column.visible(!column.visible())
+
+                if ($(this).hasClass("active"))
+                {
+                    $(this).removeClass("active")
+                }
+                else
+                {
+                    $(this).addClass("active")
+                }
             })
 
             $("#buttonEventFrameOverlay").on("click", function (e)
             {
-                var link = "http://localhost:3000/d/EventFramesOverlay/event-frames-overlay?orgId=1&var-enterprise=2&var-site=2&var-elementTemplate=4&" + 
-                    "var-eventFrameTemplate=1"
-                table.rows({filter: "applied"}).every(function()
-                {
-                    console.log(this.data()[0])
-                    link = link + "&var-eventFrames=111&var-eventFrames=" + this.data()[0]
-                })
-                link = link + "&var-eventFrameAttributeTemplates=All&var-lookups=All"
-                window.open(link, "_blank");
+                {% if eventFrameTemplate %}
+                    var link = "http://localhost:3000/d/EventFramesOverlay/event-frames-overlay?orgId=1" +
+                        "&var-enterprise={{ eventFrameTemplate.ElementTemplate.Site.Enterprise.EnterpriseId }}" +
+                        "&var-site={{ eventFrameTemplate.ElementTemplate.Site.SiteId }}" +
+                        "&var-elementTemplate={{ eventFrameTemplate.ElementTemplate.ElementTemplateId }}" + 
+                        "&var-eventFrameTemplate={{ eventFrameTemplate.EventFrameTemplateId }}"
+                    table.rows({filter: "applied"}).every(function()
+                    {
+                        link = link + "&var-eventFrames=" + this.data()[0]
+                    })
+                    link = link + "&var-eventFrameAttributeTemplates=All&var-lookups=All"
+                    window.open(link, "_blank");
+                {% endif %}
             })
 
             // Apply the search
             table.columns().every(function ()
             {
+                // Clear any left over filtering from state saving.
                 this.search("", 1).draw()
 
                 var that = this
@@ -254,6 +192,22 @@ Event Frames
                         that.search(this.value, 1).draw()
                     }
                 })
+
+                if (this.visible())
+                {
+                    $(".btn.btn-primary.btn-xs[datacolumn = " + this.index() + "]").addClass("active")
+                }
+                else
+                {
+                    $(".btn.btn-primary.btn-xs[datacolumn = " + this.index() + "]").removeClass("active")
+                }
+            })
+
+            $("[id^=buttonMonthPicker]").click(function()
+            {
+                var months = $(this).attr("months")
+                $("#startTimestamp").val(new moment().subtract(months, "months").hours(0).minutes(0).seconds(0).local().format("YYYY-MM-DD HH:mm:ss"))
+                $("#endTimestamp").val("")
             })
         })
     </script>
