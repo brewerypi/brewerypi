@@ -9,7 +9,6 @@ Event Frame Dashboard
 {% block page_content %}
 <div>
     <ol class = "breadcrumb">
-        {#% if eventFrame.ParentEventFrameId %#}
             <li><a href = "{{ url_for("eventFrames.selectEventFrame", selectedClass = "Root") }}"><span class = "glyphicon glyphicon-home"></span></a></li>
             <li><a href = "{{ url_for("eventFrames.selectEventFrame", selectedClass = "Enterprise",
                 selectedId = eventFrame.origin().EventFrameTemplate.ElementTemplate.Site.Enterprise.id()) }}">
@@ -32,14 +31,17 @@ Event Frame Dashboard
                         <li class = "active">{{ eventFrame.EventFrameTemplate.Name }}&nbsp;&nbsp;/&nbsp;&nbsp;{{ eventFrame.friendlyName() }}</li>
                     {% endif %}
                 {% else %}
-                    {% if eventFrame.ParentEventFrameId == None %}
-                        <li><a href = "{{ url_for("eventFrames.dashboard", eventFrameId = eventFrame.EventFrameId) }}">{{ eventFrame.friendlyName() }}</a></li>
-                    {% else %}
-                        <li><a href = "{{ url_for("eventFrames.dashboard", eventFrameId = eventFrame.EventFrameId) }}">
-                            {{ eventFrame.EventFrameTemplate.Name }}&nbsp;&nbsp;/&nbsp;&nbsp;{{ eventFrame.friendlyName() }}</a></li>
-                    {% endif %}
+                    <li class = "active">{{ eventFrame.EventFrameTemplate.Name }}&nbsp;&nbsp;/&nbsp;&nbsp;{{ eventFrame.friendlyName() }}</li>
                 {% endif %}
-            {% endfor %}
+            {% else %}
+                {% if eventFrame.ParentEventFrameId == None %}
+                    <li><a href = "{{ url_for("eventFrames.dashboard", eventFrameId = eventFrame.EventFrameId) }}">{{ eventFrame.friendlyName() }}</a></li>
+                {% else %}
+                    <li><a href = "{{ url_for("eventFrames.dashboard", eventFrameId = eventFrame.EventFrameId) }}">
+                        {{ eventFrame.EventFrameTemplate.Name }}&nbsp;&nbsp;/&nbsp;&nbsp;{{ eventFrame.friendlyName() }}</a></li>
+                {% endif %}
+            {% endif %}
+        {% endfor %}
     </ol>
 </div>
 {% if eventFrame.EventFrameTemplate.hasDescendants() %}
