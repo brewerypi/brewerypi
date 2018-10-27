@@ -9,37 +9,36 @@ Event Frame Dashboard
 {% block page_content %}
 <div>
     <ol class = "breadcrumb">
-        {#% if eventFrame.ParentEventFrameId %#}
-            <li><a href = "{{ url_for("eventFrames.selectEventFrame", selectedClass = "Root") }}"><span class = "glyphicon glyphicon-home"></a></li>
-            <li><a href = "{{ url_for("eventFrames.selectEventFrame", selectedClass = "Enterprise",
-                selectedId = eventFrame.origin().EventFrameTemplate.ElementTemplate.Site.Enterprise.id()) }}">
-                {{ eventFrame.origin().EventFrameTemplate.ElementTemplate.Site.Enterprise.Name }}</a></li>
-            <li><a href = "{{ url_for("eventFrames.selectEventFrame", selectedClass = "Site",
-                selectedId = eventFrame.origin().EventFrameTemplate.ElementTemplate.Site.id()) }}">
-                {{ eventFrame.origin().EventFrameTemplate.ElementTemplate.Site.Name }}</a></li>
-            <li><a href = "{{ url_for("eventFrames.selectEventFrame", selectedClass = "ElementTemplate",
-                selectedId = eventFrame.origin().EventFrameTemplate.ElementTemplate.id()) }}">
-                {{ eventFrame.origin().EventFrameTemplate.ElementTemplate.Name }}</a></li>
-            <li><a href = "{{ url_for("eventFrames.selectEventFrame", selectedClass = "EventFrameTemplate",
-                selectedId = eventFrame.origin().EventFrameTemplate.EventFrameTemplateId) }}">{{ eventFrame.origin().EventFrameTemplate.Name }}</a></li>
-            {% set eventFrames = eventFrame.ancestors([]) %}
-            {% do eventFrames.append(eventFrame) %}
-            {% for eventFrame in eventFrames %}
-                {% if loop.last %}
-                    {% if eventFrame.ParentEventFrameId == None %}
-                        <li class = "active">{{ eventFrame.friendlyName(True) }}</li>
-                    {% else %}
-                        <li class = "active">{{ eventFrame.EventFrameTemplate.Name }}&nbsp;&nbsp;/&nbsp;&nbsp;{{ eventFrame.friendlyName() }}</li>
-                    {% endif %}
+        <li><a href = "{{ url_for("eventFrames.selectEventFrame", selectedClass = "Root") }}"><span class = "glyphicon glyphicon-home"></a></li>
+        <li><a href = "{{ url_for("eventFrames.selectEventFrame", selectedClass = "Enterprise",
+            selectedId = eventFrame.origin().EventFrameTemplate.ElementTemplate.Site.Enterprise.id()) }}">
+            {{ eventFrame.origin().EventFrameTemplate.ElementTemplate.Site.Enterprise.Name }}</a></li>
+        <li><a href = "{{ url_for("eventFrames.selectEventFrame", selectedClass = "Site",
+            selectedId = eventFrame.origin().EventFrameTemplate.ElementTemplate.Site.id()) }}">
+            {{ eventFrame.origin().EventFrameTemplate.ElementTemplate.Site.Name }}</a></li>
+        <li><a href = "{{ url_for("eventFrames.selectEventFrame", selectedClass = "ElementTemplate",
+            selectedId = eventFrame.origin().EventFrameTemplate.ElementTemplate.id()) }}">
+            {{ eventFrame.origin().EventFrameTemplate.ElementTemplate.Name }}</a></li>
+        <li><a href = "{{ url_for("eventFrames.selectEventFrame", selectedClass = "EventFrameTemplate",
+            selectedId = eventFrame.origin().EventFrameTemplate.EventFrameTemplateId) }}">{{ eventFrame.origin().EventFrameTemplate.Name }}</a></li>
+        {% set eventFrames = eventFrame.ancestors([]) %}
+        {% do eventFrames.append(eventFrame) %}
+        {% for eventFrame in eventFrames %}
+            {% if loop.last %}
+                {% if eventFrame.ParentEventFrameId == None %}
+                    <li class = "active">{{ eventFrame.friendlyName(True) }}</li>
                 {% else %}
-                    {% if eventFrame.ParentEventFrameId == None %}
-                        <li><a href = "{{ url_for("eventFrames.dashboard", eventFrameId = eventFrame.EventFrameId) }}">{{ eventFrame.friendlyName() }}</a></li>
-                    {% else %}
-                        <li><a href = "{{ url_for("eventFrames.dashboard", eventFrameId = eventFrame.EventFrameId) }}">
-                            {{ eventFrame.EventFrameTemplate.Name }}&nbsp;&nbsp;/&nbsp;&nbsp;{{ eventFrame.friendlyName() }}</a></li>
-                    {% endif %}
+                    <li class = "active">{{ eventFrame.EventFrameTemplate.Name }}&nbsp;&nbsp;/&nbsp;&nbsp;{{ eventFrame.friendlyName() }}</li>
                 {% endif %}
-            {% endfor %}
+            {% else %}
+                {% if eventFrame.ParentEventFrameId == None %}
+                    <li><a href = "{{ url_for("eventFrames.dashboard", eventFrameId = eventFrame.EventFrameId) }}">{{ eventFrame.friendlyName() }}</a></li>
+                {% else %}
+                    <li><a href = "{{ url_for("eventFrames.dashboard", eventFrameId = eventFrame.EventFrameId) }}">
+                        {{ eventFrame.EventFrameTemplate.Name }}&nbsp;&nbsp;/&nbsp;&nbsp;{{ eventFrame.friendlyName() }}</a></li>
+                {% endif %}
+            {% endif %}
+        {% endfor %}
     </ol>
 </div>
 {% if eventFrame.EventFrameTemplate.hasDescendants() %}

@@ -1,5 +1,5 @@
 from datetime import datetime
-from flask import flash, redirect, render_template, request, url_for
+from flask import flash, jsonify, redirect, render_template, request, url_for
 from flask_login import login_required
 from . import eventFrames
 from . forms import EventFrameForm, EventFrameOverlayForm
@@ -216,56 +216,11 @@ def endEventFrame(eventFrameId):
 		"alert alert-success")
 	return redirect(request.referrer)
 
-@eventFrames.route("/eventFrames/select", methods = ["GET", "POST"]) # Default.
-@eventFrames.route("/eventFrames/select/<string:selectedClass>", methods = ["GET", "POST"]) # Root.
-@eventFrames.route("/eventFrames/select/<string:selectedClass>/<int:selectedId>", methods = ["GET", "POST"])
-@eventFrames.route("/eventFrames/select/<string:selectedClass>/<int:selectedId>/<string:selectedOperation>", methods = ["GET", "POST"])
-@login_required
-@permissionRequired(Permission.DATA_ENTRY)
-def selectEventFrame(selectedClass = None, selectedId = None, selectedOperation = None):
-	eventFrameAttributeTemplates = None
-	if selectedClass == None:
-		parent = Site.query.join(Enterprise, ElementTemplate, EventFrameTemplate, EventFrame).order_by(Enterprise.Name).first()
-		if parent:
-			children = ElementTemplate.query.filter_by(SiteId = parent.id())
-		else:
-			parent = Site.query.join(Enterprise, ElementTemplate).order_by(Enterprise.Name).first()
-			children = ElementTemplate.query.filter_by(SiteId = parent.id())
-		childrenClass = "ElementTemplate"
-	elif selectedClass == "Root":
-		parent = None
-		children = Enterprise.query.order_by(Enterprise.Name)
-		childrenClass = "Enterprise"
-	elif selectedClass == "Enterprise":
-		parent = Enterprise.query.get_or_404(selectedId)
-		children = Site.query.filter_by(EnterpriseId = selectedId)
-		childrenClass = "Site"
-	elif selectedClass == "Site":
-		parent = Site.query.get_or_404(selectedId)
-		children = ElementTemplate.query.filter_by(SiteId = selectedId)
-		childrenClass = "ElementTemplate"
-	elif selectedClass == "ElementTemplate":
-		parent = ElementTemplate.query.get_or_404(selectedId)
-		children = EventFrameTemplate.query.filter_by(ElementTemplateId = selectedId)
-		childrenClass = "EventFrameTemplate"
-	elif selectedClass == "EventFrameTemplate" and selectedOperation == "configure":
-		parent = EventFrameTemplate.query.get_or_404(selectedId)
-		children = EventFrameTemplate.query.filter_by(ParentEventFrameTemplateId = selectedId).order_by(EventFrameTemplate.Order)
-		childrenClass = "DescendantEventFrameTemplate"
-		eventFrameAttributeTemplates = EventFrameAttributeTemplate.query.filter_by(EventFrameTemplateId = selectedId). \
-			order_by(EventFrameAttributeTemplate.Name)
-	elif selectedClass == "EventFrameTemplate":
-		parent = EventFrameTemplate.query.get_or_404(selectedId)
-		children = EventFrame.query.filter_by(EventFrameTemplateId = selectedId)
-		childrenClass = "EventFrame"
-
-	return render_template("eventFrames/select.html", children = children, childrenClass = childrenClass,
-		eventFrameAttributeTemplates = eventFrameAttributeTemplates, parent = parent)
-
 @eventFrames.route("/eventFrames/overlay/<int:eventFrameTemplateId>", methods = ["GET", "POST"])
 @login_required
 @permissionRequired(Permission.DATA_ENTRY)
 def overlay(eventFrameTemplateId):
+	eventFrameTemplate = EventFrameTemplate.query.get_or_404(eventFrameTemplateId)
 	eventFrameAttributeTemplates = EventFrameAttributeTemplate.query.filter_by(EventFrameTemplateId = eventFrameTemplateId)
 	form = EventFrameOverlayForm()
 
@@ -273,7 +228,7 @@ def overlay(eventFrameTemplateId):
 		startTimestamp = request.form.get("startTimestamp")
 		endTimestamp = request.form.get("endTimestamp")
 		if endTimestamp == "":
-			endTimestamp = datetime.now()
+			endTimestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 		dynamicSql = ""
 		eventFrameAttributeTemplates = EventFrameAttributeTemplate.query.filter_by(EventFrameTemplateId = eventFrameTemplateId). \
@@ -340,11 +295,94 @@ def overlay(eventFrameTemplateId):
 		GROUP BY t1.EventFrameId
 		""".format(dynamicSql, eventFrameTemplateId, eventFrameTemplateId, startTimestamp, startTimestamp, endTimestamp)
 		eventFrames = db.session.execute(query).fetchall()
-		eventFrameTemplate = EventFrameTemplate.query.get_or_404(eventFrameTemplateId)
-		return render_template("eventFrames/overlay.html", eventFrames = eventFrames, eventFrameAttributeTemplates = eventFrameAttributeTemplates,
-			eventFrameTemplate = eventFrameTemplate)
+		return render_template("eventFrames/overlay.html", endTimestamp = endTimestamp, eventFrames = eventFrames,
+			eventFrameAttributeTemplates = eventFrameAttributeTemplates, eventFrameTemplate = eventFrameTemplate, startTimestamp = startTimestamp)
 
-	return render_template("eventFrames/overlay.html", eventFrameAttributeTemplates = eventFrameAttributeTemplates, form = form)
+	return render_template("eventFrames/overlay.html", eventFrameAttributeTemplates = eventFrameAttributeTemplates, eventFrameTemplate = eventFrameTemplate,
+		form = form)
+
+@eventFrames.route("/eventFrames/overlay/grafana", methods = ["GET", "POST"])
+@login_required
+@permissionRequired(Permission.DATA_ENTRY)
+def test():
+	data = request.get_json(force = True)
+	dynamicSql = ""
+	for item in data:
+		if dynamicSql != "":
+			dynamicSql = dynamicSql + ", "
+		dynamicSql = dynamicSql +  item["EventFrameId"]
+
+	query = """
+	SELECT CEILING(IF(EventFrame.EndTimestamp IS NULL,
+		(UNIX_TIMESTAMP(TagValue.Timestamp) - UNIX_TIMESTAMP(EventFrame.StartTimestamp)) / 86400,
+		(UNIX_TIMESTAMP(EventFrame.EndTimestamp) - UNIX_TIMESTAMP(EventFrame.StartTimestamp)) / 86400)) AS Days
+	FROM EventFrame
+		INNER JOIN Element ON EventFrame.ElementId = Element.ElementId
+		INNER JOIN EventFrameTemplate ON EventFrame.EventFrameTemplateId = EventFrameTemplate.EventFrameTemplateId
+		INNER JOIN EventFrameAttributeTemplate ON EventFrameTemplate.EventFrameTemplateId = EventFrameAttributeTemplate.EventFrameTemplateId
+		INNER JOIN EventFrameAttribute ON Element.ElementId = EventFrameAttribute.ElementId AND
+			EventFrameAttributeTemplate.EventFrameAttributeTemplateId = EventFrameAttribute.EventFrameAttributeTemplateId
+		INNER JOIN Tag ON EventFrameAttribute.TagId = Tag.TagId
+		INNER JOIN TagValue ON Tag.TagId = TagValue.TagId
+	WHERE EventFrame.EventFrameId IN ({}) AND
+		(
+			EventFrame.EndTimestamp IS NULL AND
+			TagValue.Timestamp >= EventFrame.StartTimestamp OR
+			EventFrame.EndTimestamp IS NOT NULL AND
+			TagValue.Timestamp >= EventFrame.StartTimestamp AND
+			TagValue.Timestamp <= EventFrame.EndTimestamp
+		)
+	ORDER BY Days DESC
+	LIMIT 1
+	""".format(dynamicSql)
+	days = db.session.execute(query).fetchone()["Days"]
+	return jsonify({"days": days})
+
+@eventFrames.route("/eventFrames/select", methods = ["GET", "POST"]) # Default.
+@eventFrames.route("/eventFrames/select/<string:selectedClass>", methods = ["GET", "POST"]) # Root.
+@eventFrames.route("/eventFrames/select/<string:selectedClass>/<int:selectedId>", methods = ["GET", "POST"])
+@eventFrames.route("/eventFrames/select/<string:selectedClass>/<int:selectedId>/<string:selectedOperation>", methods = ["GET", "POST"])
+@login_required
+@permissionRequired(Permission.DATA_ENTRY)
+def selectEventFrame(selectedClass = None, selectedId = None, selectedOperation = None):
+	eventFrameAttributeTemplates = None
+	if selectedClass == None:
+		parent = Site.query.join(Enterprise, ElementTemplate, EventFrameTemplate, EventFrame).order_by(Enterprise.Name).first()
+		if parent:
+			children = ElementTemplate.query.filter_by(SiteId = parent.id())
+		else:
+			parent = Site.query.join(Enterprise, ElementTemplate).order_by(Enterprise.Name).first()
+			children = ElementTemplate.query.filter_by(SiteId = parent.id())
+		childrenClass = "ElementTemplate"
+	elif selectedClass == "Root":
+		parent = None
+		children = Enterprise.query.order_by(Enterprise.Name)
+		childrenClass = "Enterprise"
+	elif selectedClass == "Enterprise":
+		parent = Enterprise.query.get_or_404(selectedId)
+		children = Site.query.filter_by(EnterpriseId = selectedId)
+		childrenClass = "Site"
+	elif selectedClass == "Site":
+		parent = Site.query.get_or_404(selectedId)
+		children = ElementTemplate.query.filter_by(SiteId = selectedId)
+		childrenClass = "ElementTemplate"
+	elif selectedClass == "ElementTemplate":
+		parent = ElementTemplate.query.get_or_404(selectedId)
+		children = EventFrameTemplate.query.filter_by(ElementTemplateId = selectedId)
+		childrenClass = "EventFrameTemplate"
+	elif selectedClass == "EventFrameTemplate" and selectedOperation == "configure":
+		parent = EventFrameTemplate.query.get_or_404(selectedId)
+		children = EventFrameTemplate.query.filter_by(ParentEventFrameTemplateId = selectedId).order_by(EventFrameTemplate.Order)
+		childrenClass = "DescendantEventFrameTemplate"
+		eventFrameAttributeTemplates = EventFrameAttributeTemplate.query.filter_by(EventFrameTemplateId = selectedId). \
+			order_by(EventFrameAttributeTemplate.Name)
+	elif selectedClass == "EventFrameTemplate":
+		parent = EventFrameTemplate.query.get_or_404(selectedId)
+		children = EventFrame.query.filter_by(EventFrameTemplateId = selectedId)
+		childrenClass = "EventFrame"
+
+	return render_template("eventFrames/select.html", children = children, childrenClass = childrenClass,
+		eventFrameAttributeTemplates = eventFrameAttributeTemplates, parent = parent)
 
 @eventFrames.route("/eventFrames/startEventFrame/<int:elementId>/<int:eventFrameTemplateId>", methods = ["GET", "POST"])
 @login_required

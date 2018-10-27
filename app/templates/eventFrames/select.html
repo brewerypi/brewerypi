@@ -99,6 +99,7 @@ Event Frames
                     <th></th>
                     <th></th>
                     <th></th>
+                    <th></th>
                 {% elif childrenClass == "EventFrame" %}
                     <th>Element</th>
                     <th>Start Timestamp</th>
@@ -145,6 +146,12 @@ Event Frames
                                 <td><a class = "btn btn-default" title = "Configure" href = "{{ url_for("eventFrames.selectEventFrame",
                                     selectedClass = "EventFrameTemplate", selectedId = child.id(), selectedOperation = "configure") }}">
                                     <span class = "glyphicon glyphicon-wrench"></span></a></td>
+                            {% else %}
+                                <td></td>
+                            {% endif %}
+                            <td><a class = "btn btn-default" title = "Overlay" href = "{{ url_for("eventFrames.overlay",
+                                eventFrameTemplateId = child.id()) }}"><span class = "glyphicon glyphicon-random"></span></a></td>
+                            {% if current_user.isAdministrator() %}
                                 <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("eventFrameTemplates.editEventFrameTemplate",
                                     eventFrameTemplateId = child.id()) }}"><span class = "glyphicon glyphicon-edit"></span></a></td>
                                 <td><a class = "btn btn-default" title = "Delete" href = "{{ url_for("eventFrameTemplates.deleteEventFrameTemplate",
@@ -152,9 +159,8 @@ Event Frames
                             {% else %}
                                 <td></td>
                                 <td></td>
-                                <td></td>
                             {% endif %}
-                        {% elif childrenClass == "EventFrame" %}
+                    {% elif childrenClass == "EventFrame" %}
                             <td>{{ child.friendlyName() }}</td>
                             <td>{{ child.Element.Name }}</td>
                             <td>{{ child.StartTimestamp }}</td>
@@ -257,6 +263,7 @@ Event Frames
                         null,
                         null,
                         { "orderable": false }, // Associate button.
+                        { "orderable": false }, // Overlay button.
                         { "orderable": false }, // Edit button.
                         { "orderable": false }  // Delete button.
                     {% elif childrenClass == "EventFrame" %}

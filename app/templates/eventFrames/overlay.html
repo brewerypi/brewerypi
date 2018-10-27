@@ -9,15 +9,26 @@ Event Frames
 {% block page_content %}
 <div>
     <ol class = "breadcrumb">
-        <li class = "active"><span class = "glyphicon glyphicon-home"></li>
+        <li><a href = "{{ url_for("eventFrames.selectEventFrame", selectedClass = "Root") }}"><span class = "glyphicon glyphicon-home"></a></li>
+        <li><a href = "{{ url_for("eventFrames.selectEventFrame", selectedClass = "Enterprise",
+            selectedId = eventFrameTemplate.ElementTemplate.Site.Enterprise.id()) }}">{{ eventFrameTemplate.ElementTemplate.Site.Enterprise.Name }}</a></li>
+        <li><a href = "{{ url_for("eventFrames.selectEventFrame", selectedClass = "Site",
+            selectedId = eventFrameTemplate.ElementTemplate.Site.id()) }}">{{ eventFrameTemplate.ElementTemplate.Site.Name }}</a></li>
+        <li><a href = "{{ url_for("eventFrames.selectEventFrame", selectedClass = "ElementTemplate",
+            selectedId = eventFrameTemplate.ElementTemplate.id()) }}">{{ eventFrameTemplate.ElementTemplate.Name }}</a></li>
+        <li class = "active">{{ eventFrameTemplate.Name }}</li>
+        {% if startTimestamp and endTimestamp %}
+            <li class = "active">{{ startTimestamp }} - {{ endTimestamp }}</li>
+        {% endif %}
     </ol>
 </div>
+<div class = "page-header">
+        <h1>Event Frames<small> Overlay Selection</small></h1>
+</div>
 {% if form %}
-    <div class = "page-header">
-            <h1>Event Frame Overlay <small>Date Range</small></h1>
-    </div>
     <div>
-        <button class = "btn btn-primary" id = "buttonMonthPicker3" months = "1" title = "1 Month">1 Mo</button>
+        <button class = "btn btn-primary" id = "buttonMonthPicker1" months = "1" title = "1 Month">1 Mo</button>
+        <button class = "btn btn-primary" id = "buttonMonthPicker2" months = "2" title = "2 Months">2 Mo</button>
         <button class = "btn btn-primary" id = "buttonMonthPicker3" months = "3" title = "3 Months">3 Mo</button>
         <button class = "btn btn-primary" id = "buttonMonthPicker6" months = "6" title = "6 Months">6 Mo</button>
         <button class = "btn btn-primary" id = "buttonMonthPicker9" months = "9" title = "9 Months">9 Mo</button>
@@ -27,22 +38,21 @@ Event Frames
         {{ wtf.quick_form(form) }}
     </div>
 {% else %}
-    <div class = "page-header">
-            <h1>Event Frame Overlay <small>Selection</small></h1>
-    </div>
     <div>
         Toggle Column:
+        <button type = "button" class = "btn btn-primary btn-xs" id = "buttonHideAllColumns">Hide All</button>
         {% for eventFrameAttributeTemplate in eventFrameAttributeTemplates %}
             {% set dataColumn = loop.index + 4 %}
             <button type = "button" class = "btn btn-primary btn-xs" dataColumn = "{{ dataColumn }}"
                 id = "buttonToggleColumn{{ eventFrameAttributeTemplate.Name }}">{{ eventFrameAttributeTemplate.Name }}</button>
         {% endfor %}
+        <button type = "button" class = "btn btn-primary btn-xs" id = "buttonShowAllColumns">Show All</button>
     </div>
     <br>
-    <a class = "btn btn-default" id = "buttonEventFrameOverlay" title = "Add"><span class = "glyphicon glyphicon-stats"></span></a>
+    <a class = "btn btn-default" id = "buttonEventFrameOverlay" title = "Grafana"><span class = "glyphicon glyphicon-stats"></span></a>
     <br><br>
     <div>
-        <table id = "table" class = "table">
+        <table id = "table" class = "table" style = "width:100%">
             <thead>
                 <tr>
                     <th>Event Frame Id</th>
@@ -96,7 +106,7 @@ Event Frames
     <link rel = "stylesheet" type = "text/css" href = {{ url_for("static", filename = "css/styles.css") }}/>
     <script type = "text/javascript" src = {{ url_for("static", filename = "js/datatables.min.js") }}></script>
     <script type = "text/javascript" src = {{ url_for("static", filename = "js/moment.min.js") }}></script>
-    <script> 
+    <script>
         $(document).ready(function()
         {
             {% if form %}
@@ -140,7 +150,31 @@ Event Frames
                 "pageLength": 10
             })
 
-            $("[id^=buttonToggleColumn]").on("click", function (e)
+            $("#buttonHideAllColumns").on("click", function()
+            {
+                table.columns().every(function ()
+                {
+                    if (this.index() == 0 || this.index() > 4)
+                    {
+                        this.visible(false)
+                        $(".btn.btn-primary.btn-xs[datacolumn = " + this.index() + "]").removeClass("active")
+                    }
+                })
+            })
+
+            $("#buttonShowAllColumns").on("click", function()
+            {
+                table.columns().every(function ()
+                {
+                    if (this.index() != 0 || this.index() > 4)
+                    {
+                        this.visible(true)
+                        $(".btn.btn-primary.btn-xs[datacolumn = " + this.index() + "]").addClass("active")
+                    }
+                })
+            })
+
+            $("[id^=buttonToggleColumn]").on("click", function(e)
             {
                 e.preventDefault();
         
@@ -160,21 +194,58 @@ Event Frames
                 }
             })
 
-            $("#buttonEventFrameOverlay").on("click", function (e)
+            $("#buttonEventFrameOverlay").on("click", function()
             {
-                {% if eventFrameTemplate %}
-                    var link = "http://localhost:3000/d/EventFramesOverlay/event-frames-overlay?orgId=1" +
-                        "&var-enterprise={{ eventFrameTemplate.ElementTemplate.Site.Enterprise.EnterpriseId }}" +
-                        "&var-site={{ eventFrameTemplate.ElementTemplate.Site.SiteId }}" +
-                        "&var-elementTemplate={{ eventFrameTemplate.ElementTemplate.ElementTemplateId }}" + 
-                        "&var-eventFrameTemplate={{ eventFrameTemplate.EventFrameTemplateId }}"
-                    table.rows({filter: "applied"}).every(function()
-                    {
-                        link = link + "&var-eventFrames=" + this.data()[0]
-                    })
-                    link = link + "&var-eventFrameAttributeTemplates=All&var-lookups=All"
-                    window.open(link, "_blank");
+                var rows = []
+                var numberOfRows = 0
+
+                // Get every row in the filter and store the EventFrameId.
+                table.rows({filter: "applied"}).every(function()
+                {
+                    var row = {}
+                    row["EventFrameId"] = this.data()[0]
+                    rows.push(row)
+                    numberOfRows = numberOfRows + 1
+                })
+
+                {% if startTimestamp != None and endTimestamp != None %}
+                    var startTimestamp = moment("{{ startTimestamp }}").unix()
+                    var endTimestamp = moment("{{ endTimestamp }}").unix()
                 {% endif %}
+
+                if (numberOfRows > 0)
+                {
+                    $.ajax({
+                        type : "POST",
+                        url : "/eventFrames/overlay/grafana",
+                        data : JSON.stringify(rows)
+                    }).done(function(response) {
+                        var days = response["days"]
+                        var from = moment()
+                        from = from.subtract(days, "days")
+                        from = from.format("x")
+                        {% if eventFrameTemplate %}
+                            var link = "http://localhost:3000/d/EventFramesOverlay/event-frames-overlay?orgId=1" +
+                                "&from=" + from + 
+                                "&to=now" +
+                                "&var-enterprise={{ eventFrameTemplate.ElementTemplate.Site.Enterprise.EnterpriseId }}" +
+                                "&var-site={{ eventFrameTemplate.ElementTemplate.Site.SiteId }}" +
+                                "&var-elementTemplate={{ eventFrameTemplate.ElementTemplate.ElementTemplateId }}" + 
+                                "&var-eventFrameTemplate={{ eventFrameTemplate.EventFrameTemplateId }}" +
+                                "&var-startTimestamp=" + startTimestamp +
+                                "&var-endTimestamp=" + endTimestamp
+                            table.rows({filter: "applied"}).every(function()
+                            {
+                                link = link + "&var-eventFrames=" + this.data()[0]
+                            })
+                            window.open(link, "_blank")
+                        {% endif %}
+                    }).fail(function() {
+                        $(".alert").remove()
+                        $("#divFlashedMessages").append("<div class = \"alert alert-danger\"><button type = \"button\" class = \"close\" " +
+                            "data-dismiss = \"alert\">&times;</button>The attempt to load the event frame overlay has failed.</div>")                        
+                    })
+                }
             })
 
             // Apply the search
