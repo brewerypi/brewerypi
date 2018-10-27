@@ -10,21 +10,21 @@ Event Frames
 <div>
     <ol class = "breadcrumb">
         {% if childrenClass == "Enterprise" %}
-            <li class = "active"><span class = "glyphicon glyphicon-home"></li>
+            <li class = "active"><span class = "glyphicon glyphicon-home"></span></li>
             {% set pageHeaderSubText = "Enterprises" %}
         {% elif childrenClass == "Site" %}
-            <li><a href = "{{ url_for("eventFrames.selectEventFrame", selectedClass = "Root") }}"><span class = "glyphicon glyphicon-home"></a></li>
+            <li><a href = "{{ url_for("eventFrames.selectEventFrame", selectedClass = "Root") }}"><span class = "glyphicon glyphicon-home"></span></a></li>
             <li class = "active">{{ parent.Name }}</li>
             {% set pageHeaderSubText = "Sites" %}
         <!-- "and parent" checks for systems that have not been configured with a site yet. -->
         {% elif childrenClass == "ElementTemplate" and parent %}
-            <li><a href = "{{ url_for("eventFrames.selectEventFrame", selectedClass = "Root") }}"><span class = "glyphicon glyphicon-home"></a></li>
+            <li><a href = "{{ url_for("eventFrames.selectEventFrame", selectedClass = "Root") }}"><span class = "glyphicon glyphicon-home"></span></a></li>
             <li><a href = "{{ url_for("eventFrames.selectEventFrame", selectedClass = "Enterprise",
                 selectedId = parent.Enterprise.id()) }}">{{ parent.Enterprise.Name }}</a></li>
             <li class = "active">{{ parent.Name }}</li>
             {% set pageHeaderSubText = "Element Templates" %}
         {% elif childrenClass == "EventFrameTemplate" %}
-            <li><a href = "{{ url_for("eventFrames.selectEventFrame", selectedClass = "Root") }}"><span class = "glyphicon glyphicon-home"></a></li>
+            <li><a href = "{{ url_for("eventFrames.selectEventFrame", selectedClass = "Root") }}"><span class = "glyphicon glyphicon-home"></span></a></li>
             <li><a href = "{{ url_for("eventFrames.selectEventFrame", selectedClass = "Enterprise",
                 selectedId = parent.Site.Enterprise.id()) }}">{{ parent.Site.Enterprise.Name }}</a></li>
             <li><a href = "{{ url_for("eventFrames.selectEventFrame", selectedClass = "Site",
@@ -32,7 +32,7 @@ Event Frames
             <li class = "active">{{ parent.Name }}</li>
             {% set pageHeaderSubText = "Event Frame Templates" %}
         {% elif childrenClass == "EventFrame" %}
-            <li><a href = "{{ url_for("eventFrames.selectEventFrame", selectedClass = "Root") }}"><span class = "glyphicon glyphicon-home"></a></li>
+            <li><a href = "{{ url_for("eventFrames.selectEventFrame", selectedClass = "Root") }}"><span class = "glyphicon glyphicon-home"></span></a></li>
             <li><a href = "{{ url_for("eventFrames.selectEventFrame", selectedClass = "Enterprise",
                 selectedId = parent.ElementTemplate.Site.Enterprise.id()) }}">{{ parent.ElementTemplate.Site.Enterprise.Name }}</a></li>
             <li><a href = "{{ url_for("eventFrames.selectEventFrame", selectedClass = "Site",
@@ -43,7 +43,7 @@ Event Frames
             {% set pageHeaderSubText = "" %}
         {% elif childrenClass == "DescendantEventFrameTemplate" %}
             {% set origin = parent.origin() %}
-            <li><a href = "{{ url_for("eventFrames.selectEventFrame", selectedClass = "Root") }}"><span class = "glyphicon glyphicon-home"></a></li>
+            <li><a href = "{{ url_for("eventFrames.selectEventFrame", selectedClass = "Root") }}"><span class = "glyphicon glyphicon-home"></span></a></li>
             <li><a href = "{{ url_for("eventFrames.selectEventFrame", selectedClass = "Enterprise",
                 selectedId = origin.ElementTemplate.Site.Enterprise.id()) }}">{{ origin.ElementTemplate.Site.Enterprise.Name }}</a></li>
             <li><a href = "{{ url_for("eventFrames.selectEventFrame", selectedClass = "Site",
@@ -64,29 +64,29 @@ Event Frames
 </div>
 <div>
     {% if childrenClass == "ElementTemplate" %}
-        <td><a class = "btn btn-default" title = "Grafana" href = "{{ "ActiveEventFrameSummary" | grafanaUrl({"siteId": parent.id()}) }}"
-            target = "_blank"><span class = "glyphicon glyphicon-stats"></span></a></td>
+        <a class = "btn btn-default" title = "Grafana" href = "{{ "ActiveEventFrameSummary" | grafanaUrl({"siteId": parent.id()}) }}"
+            target = "_blank"><span class = "glyphicon glyphicon-stats"></span></a>
         <br><br>
     {% elif childrenClass == "EventFrameTemplate" %}
         {% if current_user.isAdministrator() %}
             <a class = "btn btn-default" title = "Add" href = "{{ url_for("eventFrameTemplates.addEventFrameTemplate", elementTemplateId = parent.id()) }}"
                 role = "button"><span class = "glyphicon glyphicon-plus"></span></a>
         {% endif %}
-        <td><a class = "btn btn-default" title = "Grafana" href = "{{ "ActiveEventFrameSummary" | grafanaUrl({"elementTemplateId": parent.id()}) }}"
-            target = "_blank"><span class = "glyphicon glyphicon-stats"></span></a></td>
+        <a class = "btn btn-default" title = "Grafana" href = "{{ "ActiveEventFrameSummary" | grafanaUrl({"elementTemplateId": parent.id()}) }}"
+            target = "_blank"><span class = "glyphicon glyphicon-stats"></span></a>
         <br><br>
     {% elif childrenClass == "EventFrame" %}
         <a class = "btn btn-default" title = "Add" href = "{{ url_for("eventFrames.addEventFrame", eventFrameTemplateId = parent.id()) }}" role = "button">
             <span class = "glyphicon glyphicon-plus"></span></a>
-        <td><a class = "btn btn-default" title = "Grafana" href = "{{ "ActiveEventFrameSummary" | grafanaUrl({"eventFrameTemplateId": parent.id()}) }}"
-            target = "_blank"><span class = "glyphicon glyphicon-stats"></span></a></td>
+        <a class = "btn btn-default" title = "Grafana" href = "{{ "ActiveEventFrameSummary" | grafanaUrl({"eventFrameTemplateId": parent.id()}) }}"
+            target = "_blank"><span class = "glyphicon glyphicon-stats"></span></a>
         <br><br>
     {% elif childrenClass == "DescendantEventFrameTemplate" %}
         <a class = "btn btn-default" title = "Add" href = "{{ url_for("eventFrameTemplates.addEventFrameTemplate",
             parentEventFrameTemplateId = parent.id()) }}" role = "button"><span class = "glyphicon glyphicon-plus"></span></a>
         <br><br>
     {% endif %}
-    <table id = "table" class = "table">
+    <table id = "table" class = "table" style = "width:100%">
         <thead>
             <tr>
                 <th></th>
@@ -181,9 +181,9 @@ Event Frames
                             <td>{{ child.Description }}</td>
                             <td>{{ child.Order }}</td>
                             <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("eventFrameTemplates.editEventFrameTemplate",
-                                eventFrameTemplateId = child.id()) }}"><span class = "glyphicon glyphicon-edit"></a></td>
+                                eventFrameTemplateId = child.id()) }}"><span class = "glyphicon glyphicon-edit"></span></a></td>
                             <td><a class = "btn btn-default" title = "Delete" href = "{{ url_for("eventFrameTemplates.deleteEventFrameTemplate",
-                                eventFrameTemplateId = child.id()) }}"><span class = "glyphicon glyphicon-trash"></a></td>
+                                eventFrameTemplateId = child.id()) }}"><span class = "glyphicon glyphicon-trash"></span></a></td>
                         {% endif %}
                     </tr>
                 {% endfor %}
@@ -199,7 +199,7 @@ Event Frames
         <a class = "btn btn-default" title = "Add" href = "{{ url_for("eventFrameAttributeTemplates.addEventFrameAttributeTemplate", 
             eventFrameTemplateId = parent.EventFrameTemplateId) }}" role = "button"><span class = "glyphicon glyphicon-plus"></span></a>
         <br><br>
-        <table id = "eventFrameAttributeTemplatesTable" class = "table">
+        <table id = "eventFrameAttributeTemplatesTable" class = "table" style = "width:100%">
             <thead>
                 <tr>
                     <th>Name</th>

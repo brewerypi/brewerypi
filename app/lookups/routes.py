@@ -27,7 +27,7 @@ def addLookup(enterpriseId):
 	form.enterpriseId.data = enterpriseId
 	form.requestReferrer.data = request.referrer
 	enterprise = Enterprise.query.get_or_404(enterpriseId)
-	breadcrumbs = [{"url" : url_for("lookups.selectLookup", selectedClass = "Root"), "text" : "<span class = \"glyphicon glyphicon-home\">"},
+	breadcrumbs = [{"url" : url_for("lookups.selectLookup", selectedClass = "Root"), "text" : "<span class = \"glyphicon glyphicon-home\"></span>"},
 		{"url" : url_for("lookups.selectLookup", selectedClass = "Enterprise", selectedId = enterprise.EnterpriseId), "text" : enterprise.Name}]
 	return render_template("addEdit.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
 
@@ -62,7 +62,7 @@ def editLookup(lookupId):
 	form.name.data = lookup.Name
 	form.requestReferrer.data = request.referrer
 	# return render_template("addEdit.html", form = form, modelName = modelName, operation = operation)
-	breadcrumbs = [{"url" : url_for("lookups.selectLookup", selectedClass = "Root"), "text" : "<span class = \"glyphicon glyphicon-home\">"},
+	breadcrumbs = [{"url" : url_for("lookups.selectLookup", selectedClass = "Root"), "text" : "<span class = \"glyphicon glyphicon-home\"></span>"},
 		{"url" : url_for("lookups.selectLookup", selectedClass = "Enterprise", selectedId = lookup.Enterprise.EnterpriseId), "text" : lookup.Enterprise.Name},
 		{"url" : None, "text" : lookup.Name}]
 	return render_template("addEdit.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)

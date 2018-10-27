@@ -45,7 +45,7 @@ def addEventFrame(eventFrameTemplateId = None, parentEventFrameId = None):
 	form.requestReferrer.data = request.referrer
 	if parentEventFrameId:
 		form.parentEventFrameId.data = parentEventFrameId
-		breadcrumbs = [{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Root"), "text" : "<span class = \"glyphicon glyphicon-home\">"},
+		breadcrumbs = [{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Root"), "text" : "<span class = \"glyphicon glyphicon-home\"></span>"},
 			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Enterprise",
 				selectedId = parentEventFrame.origin().Element.ElementTemplate.Site.Enterprise.EnterpriseId),
 				"text" : parentEventFrame.origin().Element.ElementTemplate.Site.Enterprise.Name},
@@ -72,7 +72,7 @@ def addEventFrame(eventFrameTemplateId = None, parentEventFrameId = None):
 		breadcrumbs.append({"url" : url_for("eventFrames.dashboard", eventFrameId = parentEventFrame.EventFrameId), "text" : text})
 	else:
 		form.eventFrameTemplateId.data = eventFrameTemplateId
-		breadcrumbs = [{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Root"), "text" : "<span class = \"glyphicon glyphicon-home\">"},
+		breadcrumbs = [{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Root"), "text" : "<span class = \"glyphicon glyphicon-home\"></span>"},
 			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Enterprise",
 				selectedId = eventFrameTemplate.ElementTemplate.Site.Enterprise.EnterpriseId),
 				"text" : eventFrameTemplate.ElementTemplate.Site.Enterprise.Name},
@@ -159,7 +159,7 @@ def editEventFrame(eventFrameId):
 	if eventFrame.ParentEventFrameId:
 		form.eventFrameTemplate.data = eventFrame.EventFrameTemplate
 		form.parentEventFrameId.data = eventFrame.ParentEventFrameId
-		breadcrumbs = [{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Root"), "text" : "<span class = \"glyphicon glyphicon-home\">"},
+		breadcrumbs = [{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Root"), "text" : "<span class = \"glyphicon glyphicon-home\"></span>"},
 			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Enterprise",
 				selectedId = eventFrame.origin().Element.ElementTemplate.Site.Enterprise.EnterpriseId),
 				"text" : eventFrame.origin().Element.ElementTemplate.Site.Enterprise.Name},
@@ -187,7 +187,7 @@ def editEventFrame(eventFrameId):
 	else:
 		form.element.data = eventFrame.Element
 		form.eventFrameTemplateId.data = eventFrame.EventFrameTemplateId
-		breadcrumbs = [{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Root"), "text" : "<span class = \"glyphicon glyphicon-home\">"},
+		breadcrumbs = [{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Root"), "text" : "<span class = \"glyphicon glyphicon-home\"></span>"},
 			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Enterprise",
 				selectedId = eventFrame.EventFrameTemplate.ElementTemplate.Site.Enterprise.EnterpriseId),
 				"text" : eventFrame.EventFrameTemplate.ElementTemplate.Site.Enterprise.Name},

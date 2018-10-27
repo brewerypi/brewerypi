@@ -7,7 +7,8 @@ Element Attributes
 {% block page_content %}
 <div>
     <ol class = "breadcrumb">
-        <li><a href = "{{ url_for("elements.selectElement", selectedClass = "Root", selectedId = None) }}"><span class = "glyphicon glyphicon-home"></a></li>
+        <li><a href = "{{ url_for("elements.selectElement", selectedClass = "Root", selectedId = None) }}"><span class = "glyphicon glyphicon-home"></span></a>
+            </li>
         <li><a href = "{{ url_for("elements.selectElement", selectedClass = "Enterprise",
             selectedId = element.ElementTemplate.Site.Enterprise.EnterpriseId) }}">{{ element.ElementTemplate.Site.Enterprise.Name }}</a></li>
         <li><a href = "{{ url_for("elements.selectElement", selectedClass = "Site",
@@ -21,7 +22,7 @@ Element Attributes
     <h1>Element Attributes <small></small></h1>
 </div>
 <div>
-    <table id = "elementAttributesTable" class = "table">
+    <table id = "elementAttributesTable" class = "table" style = "width:100%">
         <thead>
             <tr>
                 <th>Element Attribute Template</th>

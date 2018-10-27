@@ -10,14 +10,14 @@ Lookups
 <div>
     <ol class = "breadcrumb">
         {% if childrenClass == "Enterprise" %}
-            <li class = "active"><span class = "glyphicon glyphicon-home"></li>
+            <li class = "active"><span class = "glyphicon glyphicon-home"></span></li>
             {% set pageHeaderSubText = "Enterprises" %}
         {% elif childrenClass == "Lookup" %}
-            <li><a href = "{{ url_for("lookups.selectLookup", selectedClass = "Root") }}"><span class = "glyphicon glyphicon-home"></a></li>
+            <li><a href = "{{ url_for("lookups.selectLookup", selectedClass = "Root") }}"><span class = "glyphicon glyphicon-home"></span></a></li>
             <li class = "active">{{ parent.Name }}</li>
             {% set pageHeaderSubText = "" %}
         {% elif childrenClass == "LookupValue" %}
-            <li><a href = "{{ url_for("lookups.selectLookup", selectedClass = "Root") }}"><span class = "glyphicon glyphicon-home"></a></li>
+            <li><a href = "{{ url_for("lookups.selectLookup", selectedClass = "Root") }}"><span class = "glyphicon glyphicon-home"></span></a></li>
             <li><a href = "{{ url_for("lookups.selectLookup", selectedClass = "Enterprise", selectedId = parent.Enterprise.id()) }}">
                 {{ parent.Enterprise.Name }}</a></li>
             <li class = "active">{{ parent.Name }}</li>
@@ -38,7 +38,7 @@ Lookups
             <span class = "glyphicon glyphicon-plus"></span></a>
         <br><br>
     {% endif %}
-    <table id = "lookupsTable" class = "table">
+    <table id = "lookupsTable" class = "table" style = "width:100%">
         <thead>
             <tr>
                 <th></th>

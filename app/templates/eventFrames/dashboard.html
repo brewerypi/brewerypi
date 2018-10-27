@@ -10,7 +10,7 @@ Event Frame Dashboard
 <div>
     <ol class = "breadcrumb">
         {#% if eventFrame.ParentEventFrameId %#}
-            <li><a href = "{{ url_for("eventFrames.selectEventFrame", selectedClass = "Root") }}"><span class = "glyphicon glyphicon-home"></a></li>
+            <li><a href = "{{ url_for("eventFrames.selectEventFrame", selectedClass = "Root") }}"><span class = "glyphicon glyphicon-home"></span></a></li>
             <li><a href = "{{ url_for("eventFrames.selectEventFrame", selectedClass = "Enterprise",
                 selectedId = eventFrame.origin().EventFrameTemplate.ElementTemplate.Site.Enterprise.id()) }}">
                 {{ eventFrame.origin().EventFrameTemplate.ElementTemplate.Site.Enterprise.Name }}</a></li>
@@ -50,7 +50,7 @@ Event Frame Dashboard
         <a class = "btn btn-default" title = "Add" href = "{{ url_for("eventFrames.addEventFrame", parentEventFrameId = eventFrame.EventFrameId) }}"
             role = "button"><span class = "glyphicon glyphicon-plus"></span></a>
         <br><br>
-        <table id = "childEventFramesTable" class = "table">
+        <table id = "childEventFramesTable" class = "table" style = "width:100%">
             <thead>
                 <tr>
                     <th></th>
@@ -98,7 +98,7 @@ Event Frame Dashboard
             <span class = "glyphicon glyphicon-stats"></span></a>
     {% endif %}
     <br><br>
-    <table id = "attributesTable" class = "table">
+    <table id = "attributesTable" class = "table" style = "width:100%">
         <thead>
             <tr>
                 <th></th>
@@ -195,7 +195,7 @@ Event Frame Dashboard
     <a class = "btn btn-default" title = "Add" href = "{{ url_for("eventFrameNotes.addEventFrameNote", eventFrameId = eventFrame.id()) }}" role = "button">
         <span class = "glyphicon glyphicon-plus"></span></a>
     <br><br>
-    <table id = "eventFrameNotesTable" class = "table">
+    <table id = "eventFrameNotesTable" class = "table" style = "width:100%">
         <thead>
             <tr>
                 <th>Timestamp</th>
