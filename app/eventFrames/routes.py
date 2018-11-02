@@ -18,15 +18,15 @@ def addEventFrame(eventFrameTemplateId = None, parentEventFrameId = None):
 	operation = "Add"
 	form = EventFrameForm()
 	if parentEventFrameId:
-		del form.element
 		parentEventFrame = EventFrame.query.get_or_404(parentEventFrameId)
+		form.element.query = Element.query.join(EventFrame).filter(EventFrame.ElementId == parentEventFrame.origin().ElementId)
 		form.eventFrameTemplate.query = EventFrameTemplate.query. \
 			filter(EventFrameTemplate.ParentEventFrameTemplateId == parentEventFrame.EventFrameTemplateId).order_by(EventFrameTemplate.Name)
 	else:
-		del form.eventFrameTemplate
 		eventFrameTemplate = EventFrameTemplate.query.get_or_404(eventFrameTemplateId)
 		form.element.query = Element.query.join(ElementTemplate).filter(ElementTemplate.ElementTemplateId == eventFrameTemplate.ElementTemplateId). \
 			order_by(Element.Name)
+		form.eventFrameTemplate.query = EventFrameTemplate.query.filter_by(EventFrameTemplateId = eventFrameTemplateId)
 
 	# Add a new event frame.
 	if form.validate_on_submit():
