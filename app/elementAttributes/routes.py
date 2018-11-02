@@ -126,7 +126,7 @@ def importElementAttributes():
 					element = Element.query.filter(Element.ElementTemplateId == elementTemplate.ElementTemplateId, Element.Name == elementName).first()
 					if element is None:
 						# Add element.
-						element = Element(ElementTemplate = elementTemplate, Name = elementName)
+						element = Element(Description = "", ElementTemplate = elementTemplate, Name = elementName)
 						db.session.add(element)
 						db.session.commit()
 						successes.append("Element \"{}\" added.".format(elementName))

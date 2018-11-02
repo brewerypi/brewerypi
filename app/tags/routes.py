@@ -39,7 +39,7 @@ def addTag(areaId, lookup = False):
 	form.areaId.data = areaId
 	form.requestReferrer.data = request.referrer
 	area = Area.query.get_or_404(areaId)
-	breadcrumbs = [{"url" : url_for("tags.selectTag", selectedClass = "Root"), "text" : "<span class = \"glyphicon glyphicon-home\">"},
+	breadcrumbs = [{"url" : url_for("tags.selectTag", selectedClass = "Root"), "text" : "<span class = \"glyphicon glyphicon-home\"></span>"},
 		{"url" : url_for("tags.selectTag", selectedClass = "Enterprise", selectedId = area.Site.Enterprise.EnterpriseId), "text" : area.Site.Enterprise.Name},
 		{"url" : url_for("tags.selectTag", selectedClass = "Site", selectedId = area.Site.SiteId), "text" : area.Site.Name},
 		{"url" : url_for("tags.selectTag", selectedClass = "Area", selectedId = area.AreaId), "text" : area.Name}]
@@ -96,7 +96,7 @@ def editTag(tagId):
 		form.unitOfMeasurement.data = tag.UnitOfMeasurement
 
 	form.requestReferrer.data = request.referrer
-	breadcrumbs = [{"url" : url_for("tags.selectTag", selectedClass = "Root"), "text" : "<span class = \"glyphicon glyphicon-home\">"},
+	breadcrumbs = [{"url" : url_for("tags.selectTag", selectedClass = "Root"), "text" : "<span class = \"glyphicon glyphicon-home\"></span>"},
 		{"url" : url_for("tags.selectTag", selectedClass = "Enterprise", selectedId = tag.Area.Site.Enterprise.EnterpriseId),
 			"text" : tag.Area.Site.Enterprise.Name},
 		{"url" : url_for("tags.selectTag", selectedClass = "Site", selectedId = tag.Area.Site.SiteId), "text" : tag.Area.Site.Name},

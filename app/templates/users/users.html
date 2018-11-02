@@ -9,7 +9,7 @@ Users
 {% block page_content %}
 <div>
     <ol class = "breadcrumb">
-        <li class = "active"><span class = "glyphicon glyphicon-home"></li>
+        <li class = "active"><span class = "glyphicon glyphicon-home"></span></li>
     </ol>
 </div>
 <div class = "page-header">
@@ -19,7 +19,7 @@ Users
     <a class = "btn btn-default" title = "Add" href = "{{ url_for("users.addUser") }}" role = "button">
         <span class = "glyphicon glyphicon-plus"></span></a>
     <br><br>
-    <table id = "usersTable" class = "table">
+    <table id = "usersTable" class = "table" style = "width:100%">
         <thead>
             <tr>
                 <th>Name</th>
