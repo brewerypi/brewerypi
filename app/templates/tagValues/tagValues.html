@@ -8,7 +8,7 @@ Tag Values
 <div>
     <ol class = "breadcrumb">
         {% if elementAttribute %}
-            <li><a href = "{{ url_for("elements.selectElement", selectedClass = "Root") }}"><span class = "glyphicon glyphicon-home"></a></li>
+            <li><a href = "{{ url_for("elements.selectElement", selectedClass = "Root") }}"><span class = "glyphicon glyphicon-home"></span></a></li>
             <li><a href = "{{ url_for("elements.selectElement", selectedClass = "Enterprise",
                 selectedId = elementAttribute.Element.ElementTemplate.Site.Enterprise.EnterpriseId) }}">
                 {{ elementAttribute.Element.ElementTemplate.Site.Enterprise.Name }}</a></li>
@@ -20,7 +20,7 @@ Tag Values
                 {{ elementAttribute.Element.Name }}</a></li>
             <li class = "active">{{ elementAttribute.ElementAttributeTemplate.Name }}</li>
         {% elif eventFrame %}
-            <li><a href = "{{ url_for("eventFrames.selectEventFrame", selectedClass = "Root") }}"><span class = "glyphicon glyphicon-home"></a></li>
+            <li><a href = "{{ url_for("eventFrames.selectEventFrame", selectedClass = "Root") }}"><span class = "glyphicon glyphicon-home"></span></a></li>
             <li><a href = "{{ url_for("eventFrames.selectEventFrame", selectedClass = "Enterprise",
                 selectedId = eventFrame.Element.ElementTemplate.Site.Enterprise.EnterpriseId) }}">
                 {{ eventFrame.Element.ElementTemplate.Site.Enterprise.Name }}</a></li>
@@ -33,7 +33,7 @@ Tag Values
             <li><a href = "{{ url_for("eventFrames.dashboard", eventFrameId = eventFrame.EventFrameId) }}">{{ eventFrame.friendlyName(True) }}</a></li>
             <li class = "active">{{ eventFrameAttribute.EventFrameAttributeTemplate.Name }}</li>
         {% else %}
-            <li><a href = "{{ url_for("tags.selectTag", selectedClass = "Root") }}"><span class = "glyphicon glyphicon-home"></a></li>
+            <li><a href = "{{ url_for("tags.selectTag", selectedClass = "Root") }}"><span class = "glyphicon glyphicon-home"></span></a></li>
             <li><a href = "{{ url_for("tags.selectTag", selectedClass = "Enterprise", selectedId = tag.Area.Site.Enterprise.EnterpriseId) }}">
                 {{ tag.Area.Site.Enterprise.Name }}</a></li>
             <li><a href = "{{ url_for("tags.selectTag", selectedClass = "Site", selectedId = tag.Area.Site.SiteId) }}">{{ tag.Area.Site.Name }}</a></li>
@@ -59,7 +59,7 @@ Tag Values
     <a class = "btn btn-default" title = "Grafana" href = "{{ "TagValuesGraph" | grafanaUrl({"tagId": tag.TagId}) }}" target = "_blank">
         <span class = "glyphicon glyphicon-stats"></span></a>        <br><br>
     <br><br>
-    <table id = "tagValuesTable" class = "table">
+    <table id = "tagValuesTable" class = "table" style = "width:100%">
         <thead>
             <tr>
                 <th>Timestamp</th>

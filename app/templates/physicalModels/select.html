@@ -10,14 +10,16 @@ Physical Models
 <div>
     <ol class = "breadcrumb">
         {% if childrenClass == "Enterprise" %}
-            <li class = "active"><span class = "glyphicon glyphicon-home"></li>
+            <li class = "active"><span class = "glyphicon glyphicon-home"></span></li>
             {% set pageHeaderSubText = "Enterprises" %}
         {% elif childrenClass == "Site" %}
-            <li><a href = "{{ url_for("physicalModels.selectPhysicalModel", selectedClass = "Root") }}"><span class = "glyphicon glyphicon-home"></a></li>
+            <li><a href = "{{ url_for("physicalModels.selectPhysicalModel", selectedClass = "Root") }}"><span class = "glyphicon glyphicon-home"></span></a>
+                </li>
             <li class = "active">{{ parent.Name }}</li>
             {% set pageHeaderSubText = "Sites" %}
         {% elif childrenClass == "Area" %}
-            <li><a href = "{{ url_for("physicalModels.selectPhysicalModel", selectedClass = "Root") }}"><span class = "glyphicon glyphicon-home"></a></li>
+            <li><a href = "{{ url_for("physicalModels.selectPhysicalModel", selectedClass = "Root") }}"><span class = "glyphicon glyphicon-home"></span></a>
+                </li>
             <li><a href = "{{ url_for("physicalModels.selectPhysicalModel", selectedClass = "Enterprise", selectedId = parent.Enterprise.id()) }}">
                 {{ parent.Enterprise.Name }}</a></li>
             <li class = "active">{{ parent.Name }}</li>
@@ -42,7 +44,7 @@ Physical Models
             <span class = "glyphicon glyphicon-plus"></span></a>
         <br><br>
     {% endif %}
-    <table id = "physicalModelsTable" class = "table">
+    <table id = "physicalModelsTable" class = "table" style = "width:100%">
         <thead>
             <tr>
                 <th></th>

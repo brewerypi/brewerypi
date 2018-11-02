@@ -9,7 +9,8 @@
 {% block page_content %}
 <div>
     <ol class = "breadcrumb">
-        <li><a href = "{{ url_for("elements.selectElement", selectedClass = "Root", selectedId = None) }}"><span class = "glyphicon glyphicon-home"></a></li>
+        <li><a href = "{{ url_for("elements.selectElement", selectedClass = "Root", selectedId = None) }}"><span class = "glyphicon glyphicon-home"></span></a>
+            </li>
         <li><a href = "{{ url_for("elements.selectElement", selectedClass = "Enterprise",
             selectedId = element.ElementTemplate.Site.Enterprise.EnterpriseId) }}">{{ element.ElementTemplate.Site.Enterprise.Name }}</a></li>
         <li><a href = "{{ url_for("elements.selectElement", selectedClass = "Site",
@@ -26,7 +27,7 @@
     <a class = "btn btn-default" title = "Grafana" href = "{{ "ElementValuesGraph" | grafanaUrl({"elementId": element.ElementId}) }}" target = "_blank">
         <span class = "glyphicon glyphicon-stats"></span></a>
     <br><br>
-    <table id = "attributesTable" class = "table">
+    <table id = "attributesTable" class = "table" style = "width:100%">
         <thead>
             <tr>
                 <th></th>
