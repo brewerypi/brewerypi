@@ -225,7 +225,7 @@ Event Frames
                         from = from.subtract(days, "days")
                         from = from.format("x")
                         {% if eventFrameTemplate %}
-                            var link = "http://localhost:3000/d/EventFramesOverlay/event-frames-overlay?orgId=1" +
+                            var link = "{{ grafanaBaseUri }}/d/EventFramesOverlay/event-frames-overlay?orgId=1" +
                                 "&from=" + from + 
                                 "&to=now" +
                                 "&var-enterprise={{ eventFrameTemplate.ElementTemplate.Site.Enterprise.EnterpriseId }}" +
