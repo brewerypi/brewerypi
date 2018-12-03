@@ -231,8 +231,8 @@
       {
         "allValue": null,
         "current": {
-          "text": "Brewery 1",
-          "value": "2"
+          "text": "",
+          "value": ""
         },
         "datasource": "BreweryPi",
         "hide": 0,
@@ -254,8 +254,8 @@
       {
         "allValue": null,
         "current": {
-          "text": "FV",
-          "value": "4"
+          "text": "",
+          "value": ""
         },
         "datasource": "BreweryPi",
         "hide": 0,
@@ -277,8 +277,8 @@
       {
         "allValue": null,
         "current": {
-          "text": "Fermentation",
-          "value": "1"
+          "text": "",
+          "value": ""
         },
         "datasource": "BreweryPi",
         "hide": 0,
@@ -300,8 +300,8 @@
       {
         "allValue": null,
         "current": {
-          "text": "1532570985",
-          "value": "1532570985"
+          "text": "",
+          "value": ""
         },
         "datasource": "BreweryPi",
         "hide": 2,
@@ -323,8 +323,8 @@
       {
         "allValue": null,
         "current": {
-          "text": "1540346938",
-          "value": "1540346938"
+          "text": "",
+          "value": ""
         },
         "datasource": "BreweryPi",
         "hide": 2,
@@ -346,8 +346,8 @@
       {
         "allValue": null,
         "current": {
-          "text": "From 463",
-          "value": "115"
+          "text": "",
+          "value": ""
         },
         "datasource": "BreweryPi",
         "hide": 0,
@@ -356,7 +356,7 @@
         "multi": true,
         "name": "eventFrames",
         "options": [],
-        "query": "SELECT EventFrame.EventFrameId AS __value,     fxGetEventFrameFriendlyName(eventFrameId) AS __text FROM EventFrame  WHERE EventFrame.EventFrameTemplateId = 1 AND     (         EventFrame.EndTimestamp IS NULL AND         UNIX_TIMESTAMP(EventFrame.StartTimestamp) >= $startTimestamp OR         EventFrame.EndTimestamp IS NOT NULL AND         UNIX_TIMESTAMP(EventFrame.StartTimestamp) >= $startTimestamp AND         UNIX_TIMESTAMP(EventFrame.EndTimestamp) <= $endTimestamp     ) ORDER BY StartTimestamp DESC",
+        "query": "SELECT EventFrame.EventFrameId AS __value,     fxGetEventFrameFriendlyName(eventFrameId) AS __text FROM EventFrame  WHERE EventFrame.EventFrameTemplateId = $eventFrameTemplate AND     (         EventFrame.EndTimestamp IS NULL AND         UNIX_TIMESTAMP(EventFrame.StartTimestamp) >= $startTimestamp OR         EventFrame.EndTimestamp IS NOT NULL AND         UNIX_TIMESTAMP(EventFrame.StartTimestamp) >= $startTimestamp AND         UNIX_TIMESTAMP(EventFrame.EndTimestamp) <= $endTimestamp     ) ORDER BY StartTimestamp DESC",
         "refresh": 1,
         "regex": "",
         "sort": 0,
@@ -417,8 +417,8 @@
       {
         "allValue": null,
         "current": {
-          "text": "1",
-          "value": "1"
+          "text": "",
+          "value": ""
         },
         "datasource": "BreweryPi",
         "hide": 2,

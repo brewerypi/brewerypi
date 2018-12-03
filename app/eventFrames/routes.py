@@ -1,5 +1,5 @@
 from datetime import datetime
-from flask import flash, jsonify, redirect, render_template, request, url_for
+from flask import current_app, flash, jsonify, redirect, render_template, request, url_for
 from flask_login import login_required
 from . import eventFrames
 from . forms import EventFrameForm, EventFrameOverlayForm
@@ -296,7 +296,8 @@ def overlay(eventFrameTemplateId):
 		""".format(dynamicSql, eventFrameTemplateId, eventFrameTemplateId, startTimestamp, startTimestamp, endTimestamp)
 		eventFrames = db.session.execute(query).fetchall()
 		return render_template("eventFrames/overlay.html", endTimestamp = endTimestamp, eventFrames = eventFrames,
-			eventFrameAttributeTemplates = eventFrameAttributeTemplates, eventFrameTemplate = eventFrameTemplate, startTimestamp = startTimestamp)
+			eventFrameAttributeTemplates = eventFrameAttributeTemplates, eventFrameTemplate = eventFrameTemplate,
+			grafanaBaseUri = current_app.config["GRAFANA_BASE_URI"], startTimestamp = startTimestamp)
 
 	return render_template("eventFrames/overlay.html", eventFrameAttributeTemplates = eventFrameAttributeTemplates, eventFrameTemplate = eventFrameTemplate,
 		form = form)
