@@ -18,6 +18,7 @@ class Config:
 	IMPORT_FOLDER = "imports"
 	IMPORT_TAGS_FILENAME = "tags.csv"
 	IS_RASPBERRY_PI = True if os.environ.get("IS_RASPBERRY_PI") == "1" else False
+	LOCAL_TIMEZONE = os.environ.get("LOCAL_TIMEZONE")
 	MYSQL_DATABASE = os.environ.get("MYSQL_DATABASE") or "BreweryPi"
 	SECRET_KEY = os.environ.get("SECRET_KEY") or "Replace with a hard to guess string."
 	SQLALCHEMY_DATABASE_URI = os.environ.get("SQLALCHEMY_DATABASE_URI") or "mysql://pi:brewery@localhost/BreweryPi"

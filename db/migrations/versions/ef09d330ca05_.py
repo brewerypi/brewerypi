@@ -8,7 +8,7 @@ Create Date: 2018-06-16 09:32:46.708758
 from alembic import op
 import sqlalchemy as sa
 from sqlalchemy.dialects import mysql
-from app.replaceableObjects import ReplaceableObject
+from db.migrations.replaceableObjects import ReplaceableObject
 
 
 # revision identifiers, used by Alembic.

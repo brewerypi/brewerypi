@@ -3,7 +3,7 @@ from flask import current_app
 from flask_migrate import Migrate, upgrade
 from sqlalchemy import create_engine
 from app import create_app, db
-from app . models import Area, Element, ElementAttribute, ElementAttributeTemplate, ElementTemplate, Enterprise, EventFrame, EventFrameAttribute, \
+from app.models import Area, Element, ElementAttribute, ElementAttributeTemplate, ElementTemplate, Enterprise, EventFrame, EventFrameAttribute, \
 	EventFrameAttributeTemplate, EventFrameNote, EventFrameTemplate, Lookup, LookupValue, Note, Role, Site, Tag, TagValue, TagValueNote, UnitOfMeasurement, User
 
 app = create_app()

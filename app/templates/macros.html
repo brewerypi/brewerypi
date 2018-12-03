@@ -3,9 +3,17 @@
     <ol class = "breadcrumb">
     {% for breadcrumb in breadcrumbs %}
         {% if breadcrumb["url"] == None %}
-            <li class = "active">{{ breadcrumb["text"] | safe }}</li>
+            {% if breadcrumb["type"] == "timestamp" %}
+                <li class = "active">{{ moment(breadcrumb["text"]).format("YYYY-MM-DD HH:mm:ss") }}</li>
+            {% else %}
+                <li class = "active">{{ breadcrumb["text"] | safe }}</li>
+            {% endif %}
         {% else %}
-            <li><a href = "{{ breadcrumb["url"] }}">{{ breadcrumb["text"] | safe }}</a></li>
+            {% if breadcrumb["type"] == "timestamp" %}
+                <li><a href = "{{ breadcrumb["url"] }}">{{ moment(breadcrumb["text"]).format("YYYY-MM-DD HH:mm:ss") }}</a></li>
+            {% else %}
+                <li><a href = "{{ breadcrumb["url"] }}">{{ breadcrumb["text"] | safe }}</a></li>
+            {% endif %}
         {% endif %}
     {% endfor %}
     </ol>

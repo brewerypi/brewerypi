@@ -7,7 +7,7 @@ Create Date: 2018-04-08 21:06:56.523613
 """
 from alembic import op
 import sqlalchemy as sa
-from app.replaceableObjects import ReplaceableObject
+from db.migrations.replaceableObjects import ReplaceableObject
 
 
 # revision identifiers, used by Alembic.

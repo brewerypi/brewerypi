@@ -160,11 +160,15 @@ Event Frames
                                 <td></td>
                                 <td></td>
                             {% endif %}
-                    {% elif childrenClass == "EventFrame" %}
-                            <td>{{ child.friendlyName() }}</td>
+                        {% elif childrenClass == "EventFrame" %}
+                            <td>{{ child.Name }}</td>
                             <td>{{ child.Element.Name }}</td>
-                            <td>{{ child.StartTimestamp }}</td>
-                            <td>{{ child.EndTimestamp }}</td>
+                            <td>{{ moment(child.StartTimestamp).format("YYYY-MM-DD HH:mm:ss") }}</td>
+                            {% if child.EndTimestamp %}
+                                <td>{{ moment(child.EndTimestamp).format("YYYY-MM-DD HH:mm:ss") }}</td>
+                            {% else %}
+                                <td></td>
+                            {% endif %}
                             {% if current_user.isAdministrator() %}
                                 <td><a class = "btn btn-default" title = "Associate Attributes with Tags"
                                     href = "{{ url_for("eventFrameAttributes.listEventFrameAttributes", eventFrameId = child.id()) }}">

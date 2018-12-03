@@ -91,7 +91,7 @@
       "id": 1,
       "legend": {
         "avg": false,
-        "current": false,
+        "": false,
         "max": false,
         "min": false,
         "show": true,
@@ -299,6 +299,5 @@
   },
   "timezone": "",
   "title": "Tag Values Graph",
-  "uid": "TagValuesGraph",
-  "version": 1
+  "uid": "TagValuesGraph"
 }
