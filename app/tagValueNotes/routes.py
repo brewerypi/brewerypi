@@ -41,7 +41,7 @@ def addTagValueNote(tagValueId, elementAttributeId = None, eventFrameId = None, 
 
 	# Add a new tag value note.
 	if form.validate_on_submit():
-		note = Note(Note = form.note.data, Timestamp = form.timestamp.data)
+		note = Note(Note = form.note.data, Timestamp = form.utcTimestamp.data)
 		db.session.add(note)
 		db.session.commit()
 		tagValueNote = TagValueNote(NoteId = note.NoteId, TagValueId = tagValueId)
@@ -67,7 +67,7 @@ def addTagValueNote(tagValueId, elementAttributeId = None, eventFrameId = None, 
 			{"url" : url_for("tagValues.listTagValues", tagValueId = tagValue.TagValueId, elementAttributeId = elementAttribute.ElementAttributeId),
 				"text" : elementAttribute.ElementAttributeTemplate.Name},
 			{"url" : url_for("tagValueNotes.listTagValueNotes", tagValueId = tagValue.TagValueId, elementAttributeId = elementAttribute.ElementAttributeId),
-				"text" : tagValue.Timestamp}]
+				"text" : tagValue.Timestamp, "type" : "timestamp"}]
 	elif eventFrameId:
 		eventFrame = EventFrame.query.get_or_404(eventFrameId)
 		eventFrameAttribute = EventFrameAttribute.query.get_or_404(eventFrameAttributeId)
@@ -81,7 +81,7 @@ def addTagValueNote(tagValueId, elementAttributeId = None, eventFrameId = None, 
 				selectedId = eventFrame.Element.ElementTemplate.ElementTemplateId), "text" : eventFrame.Element.ElementTemplate.Name},
 			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "EventFrameTemplate",
 				selectedId = eventFrame.EventFrameTemplate.EventFrameTemplateId), "text" : eventFrame.EventFrameTemplate.Name},
-			{"url" : url_for("eventFrames.dashboard", eventFrameId = eventFrame.EventFrameId), "text" : eventFrame.friendlyName(True)},
+			{"url" : url_for("eventFrames.dashboard", eventFrameId = eventFrame.EventFrameId), "text" : eventFrame.Name},
 			{"url" : url_for("tagValues.listTagValues", eventFrameId = eventFrame.EventFrameId,
 				eventFrameAttributeId = eventFrameAttribute.EventFrameAttributeId), "text" : eventFrameAttribute.EventFrameAttributeTemplate.Name},
 			{"url" : url_for("tagValueNotes.listTagValueNotes", tagValueId = tagValue.TagValueId, eventFrameId = eventFrame.EventFrameId,
@@ -94,9 +94,9 @@ def addTagValueNote(tagValueId, elementAttributeId = None, eventFrameId = None, 
 			{"url" : url_for("tags.selectTag", selectedClass = "Site", selectedId = tagValue.Tag.Area.Site.SiteId), "text" : tagValue.Tag.Area.Site.Name},
 			{"url" : url_for("tags.selectTag", selectedClass = "Area", selectedId = tagValue.Tag.Area.AreaId), "text" : tagValue.Tag.Area.Name},
 			{"url" : url_for("tagValues.listTagValues", tagId = tagValue.Tag.TagId), "text" : tagValue.Tag.Name},
-			{"url" : url_for("tagValueNotes.listTagValueNotes", tagValueId = tagValue.TagValueId), "text" : tagValue.Timestamp}]
+			{"url" : url_for("tagValueNotes.listTagValueNotes", tagValueId = tagValue.TagValueId), "text" : tagValue.Timestamp, "type" : "timestamp"}]
 
-	return render_template("addEdit.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
+	return render_template("addEditWithTimestamp.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
 
 @tagValueNotes.route("/tagValueNotes/delete/<int:noteId>/<int:tagValueId>", methods = ["GET", "POST"])
 @login_required
@@ -124,7 +124,7 @@ def editTagValueNote(noteId, tagValueId, elementAttributeId = None, eventFrameId
 	# Edit an existing tag value note.
 	if form.validate_on_submit():
 		note.Note = form.note.data
-		note.Timestamp = form.timestamp.data
+		note.Timestamp = form.utcTimestamp.data
 		db.session.commit()
 		flash("You have successfully edited the Tag Value Note.", "alert alert-success")
 		return redirect(form.requestReferrer.data)
@@ -148,8 +148,8 @@ def editTagValueNote(noteId, tagValueId, elementAttributeId = None, eventFrameId
 			{"url" : url_for("tagValues.listTagValues", elementAttributeId = elementAttribute.ElementAttributeId),
 				"text" : elementAttribute.ElementAttributeTemplate.Name},
 			{"url" : url_for("tagValueNotes.listTagValueNotes", tagValueId = tagValue.TagValueId, elementAttributeId = elementAttribute.ElementAttributeId),
-				"text" : tagValue.Timestamp},
-			{"url" : None, "text" : note.Timestamp}]
+				"text" : tagValue.Timestamp, "type" : "timestamp"},
+			{"url" : None, "text" : note.Timestamp, "type" : "timestamp"}]
 	elif eventFrameId:
 		eventFrame = EventFrame.query.get_or_404(eventFrameId)
 		eventFrameAttribute = EventFrameAttribute.query.get_or_404(eventFrameAttributeId)
@@ -163,7 +163,7 @@ def editTagValueNote(noteId, tagValueId, elementAttributeId = None, eventFrameId
 				selectedId = eventFrame.Element.ElementTemplate.ElementTemplateId), "text" : eventFrame.Element.ElementTemplate.Name},
 			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "EventFrameTemplate",
 				selectedId = eventFrame.EventFrameTemplate.EventFrameTemplateId), "text" : eventFrame.EventFrameTemplate.Name},
-			{"url" : url_for("eventFrames.dashboard", eventFrameId = eventFrame.EventFrameId), "text" : eventFrame.friendlyName(True)},
+			{"url" : url_for("eventFrames.dashboard", eventFrameId = eventFrame.EventFrameId), "text" : eventFrame.Name},
 			{"url" : url_for("tagValues.listTagValues", eventFrameId = eventFrame.EventFrameId, eventFrameAttributeId = eventFrameAttributeId),
 				"text" : eventFrameAttribute.EventFrameAttributeTemplate.Name},
 			{"url" : url_for("tagValueNotes.listTagValueNotes", tagValueId = tagValue.TagValueId, eventFrameId = eventFrame.EventFrameId,
@@ -177,5 +177,5 @@ def editTagValueNote(noteId, tagValueId, elementAttributeId = None, eventFrameId
 			{"url" : url_for("tags.selectTag", selectedClass = "Area", selectedId = tagValue.Tag.Area.AreaId),
 				"text" : tagValue.Tag.Area.Name},
 			{"url" : url_for("tagValues.listTagValues", tagId = tagValue.Tag.TagId), "text" : tagValue.Tag.Name},
-			{"url" : url_for("tagValueNotes.listTagValueNotes", tagValueId = tagValue.TagValueId), "text" : tagValue.Timestamp}]
-	return render_template("addEdit.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
+			{"url" : url_for("tagValueNotes.listTagValueNotes", tagValueId = tagValue.TagValueId), "text" : tagValue.Timestamp, "type" : "timestamp"}]
+	return render_template("addEditWithTimestamp.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)

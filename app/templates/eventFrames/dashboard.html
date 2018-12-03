@@ -26,16 +26,16 @@ Event Frame Dashboard
         {% for eventFrame in eventFrames %}
             {% if loop.last %}
                 {% if eventFrame.ParentEventFrameId == None %}
-                    <li class = "active">{{ eventFrame.friendlyName(True) }}</li>
+                    <li class = "active">{{ eventFrame.Name }}</li>
                 {% else %}
-                    <li class = "active">{{ eventFrame.EventFrameTemplate.Name }}&nbsp;&nbsp;/&nbsp;&nbsp;{{ eventFrame.friendlyName() }}</li>
+                    <li class = "active">{{ eventFrame.EventFrameTemplate.Name }}&nbsp;&nbsp;/&nbsp;&nbsp;{{ eventFrame.Name }}</li>
                 {% endif %}
             {% else %}
                 {% if eventFrame.ParentEventFrameId == None %}
-                    <li><a href = "{{ url_for("eventFrames.dashboard", eventFrameId = eventFrame.EventFrameId) }}">{{ eventFrame.friendlyName() }}</a></li>
+                    <li><a href = "{{ url_for("eventFrames.dashboard", eventFrameId = eventFrame.EventFrameId) }}">{{ eventFrame.Name }}</a></li>
                 {% else %}
                     <li><a href = "{{ url_for("eventFrames.dashboard", eventFrameId = eventFrame.EventFrameId) }}">
-                        {{ eventFrame.EventFrameTemplate.Name }}&nbsp;&nbsp;/&nbsp;&nbsp;{{ eventFrame.friendlyName() }}</a></li>
+                        {{ eventFrame.EventFrameTemplate.Name }}&nbsp;&nbsp;/&nbsp;&nbsp;{{ eventFrame.Name }}</a></li>
                 {% endif %}
             {% endif %}
         {% endfor %}
@@ -68,9 +68,13 @@ Event Frame Dashboard
                         <td><a class = "btn btn-default" title = "Select" href = "{{ url_for("eventFrames.dashboard",
                             eventFrameId = eventFrame.EventFrameId,) }}"><span class = "glyphicon glyphicon-list"></span></a></td>
                         <td>{{ eventFrame.EventFrameTemplate.Name }}</td>
-                        <td>{{ eventFrame.friendlyName() }}</td>
-                        <td>{{ eventFrame.StartTimestamp }}</td>
-                        <td>{{ eventFrame.EndTimestamp }}</td>
+                        <td>{{ eventFrame.Name }}</td>
+                        <td>{{ moment(eventFrame.StartTimestamp).format("YYYY-MM-DD HH:mm:ss") }}</td>
+                        {% if eventFrame.EndTimestamp %}
+                            <td>{{ moment(eventFrame.EndTimestamp).format("YYYY-MM-DD HH:mm:ss") }}</td>
+                        {% else %}
+                            <td></td>
+                        {% endif %}
                         {% if eventFrame.EndTimestamp == None %}
                             <td><a class = "btn btn-default" title = "End" href = "{{ url_for("eventFrames.endEventFrame",
                                 eventFrameId = eventFrame.EventFrameId) }}"><span class = "glyphicon glyphicon-stop"></span></a></td>
@@ -121,8 +125,9 @@ Event Frame Dashboard
                         eventFrameAttributeId = eventFrameAttribute.EventFrameAttributeId) }}"><span class = "glyphicon glyphicon-list"></span></a></td>
                     <td>{{ eventFrameAttribute.EventFrameAttributeTemplate.Name }}</td>
                     {% if tagValues.filter_by(TagId = eventFrameAttribute.TagId).count() > 0 %}
-                        {% set firstTagValue = tagValues.filter_by(TagId = eventFrameAttribute.TagId ) | sort(attribute = "Timestamp", reverse = True) | first %}
-                        <td id = "tdLastTimestamp{{ eventFrameAttribute.Tag.TagId }}">{{ firstTagValue.Timestamp }}</td>
+                        {% set firstTagValue = tagValues.filter_by(TagId = eventFrameAttribute.TagId ) | sort(attribute = "Timestamp", reverse = True) |
+                            first %}
+                        <td id = "tdLastTimestamp{{ eventFrameAttribute.Tag.TagId }}">{{ moment(firstTagValue.Timestamp).format("YYYY-MM-DD HH:mm:ss") }}</td>
                         {% if eventFrameAttribute.Tag.LookupId %}
                             <td id = "tdLastValue{{ eventFrameAttribute.Tag.TagId }}">{{ eventFrameAttribute.Tag.Lookup.LookupValues | 
                                     selectattr("Value", "equalto", firstTagValue.Value) | map(attribute = "Name") | list | first }}          
@@ -206,7 +211,7 @@ Event Frame Dashboard
         <tbody>
             {% for eventFrameNote in eventFrame.EventFrameNotes %}
                 <tr>
-                    <td>{{ eventFrameNote.Note.Timestamp }}</td>
+                    <td>{{ moment(eventFrameNote.Note.Timestamp).format("YYYY-MM-DD HH:mm:ss") }}</td>
                     <td>{{ eventFrameNote.Note.Note }}</td>
                     <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("eventFrameNotes.editEventFrameNote",
                         eventFrameId = eventFrame.EventFrameId, noteId = eventFrameNote.NoteId) }}"><span class = "glyphicon glyphicon-edit"></span></a></td>
@@ -225,15 +230,14 @@ Event Frame Dashboard
     <link rel = "stylesheet" type = "text/css" href = {{ url_for("static", filename = "css/datatables.min.css") }}/> 
     <link rel = "stylesheet" type = "text/css" href = {{ url_for("static", filename = "css/styles.css") }}/>
     <script type = "text/javascript" src = {{ url_for("static", filename = "js/datatables.min.js") }}></script>
-    <script type = "text/javascript" src = {{ url_for("static", filename = "js/moment.min.js") }}></script>
     <script>
         $(document).ready(function()
         {
-            $("#childEventFramesTable").DataTable
-            ({
+            $("#childEventFramesTable").DataTable(
+            {
                 "order":
                 [
-                    [3, "desc"],             // Start timestamp.
+                    [3, "desc"],            // Start timestamp.
                 ],
                 "columns":
                 [
@@ -252,7 +256,8 @@ Event Frame Dashboard
             })
 
             // Update the focus and tabindex upon an order event.
-            var orderEvent = function(type) {
+            var orderEvent = function(type)
+            {
                 var tabIndex = 1
                 $("[id^=divNewValue]").each(function() {
                     var id = $(this).attr("id").split("divNewValue")[1]
@@ -267,159 +272,169 @@ Event Frame Dashboard
                 $("#buttonAttributesSaveAll").attr("tabindex", tabIndex)
             }
 
-            var attributesTable = $("#attributesTable")
-                .on("order.dt", function() {
-                    orderEvent()
-                })
-                .DataTable({
-                    fixedHeader: {
-                        header: true,
-                        footer: false
-                    },
-                    "order":
-                    [
-                        [1, "asc"]              // Attribute.
-                    ],
-                    "columns":
-                    [
-                        { "orderable": false }, // Attribute values button.
-                        null,
-                        null,
-                        null,
-                        { "orderable": false }, // Unit.
-                        { "orderable": false }, // New value.
-                        { "orderable": false }, // New timestamp.
-                        { "orderable": false }, // Save all button.
-                        { "orderable": false }, // List attribute value notes button.
-                        { "orderable": false }, // Edit attribute value button.
-                        { "orderable": false }  // Delete attribute value button.
-                    ],
-                    "stateSave": true,
-                    "stateDuration": 0,
-                    "pageLength": 25
-                })
+            var attributesTable = $("#attributesTable").on("order.dt", function()
+            {
+                orderEvent()
+            }).DataTable(
+            {
+                fixedHeader: {
+                    header: true,
+                    footer: false
+                },
+                "order":
+                [
+                    [1, "asc"]              // Attribute.
+                ],
+                "columns":
+                [
+                    { "orderable": false }, // Attribute values button.
+                    null,
+                    null,
+                    null,
+                    { "orderable": false }, // Unit.
+                    { "orderable": false }, // New value.
+                    { "orderable": false }, // New timestamp.
+                    { "orderable": false }, // Save all button.
+                    { "orderable": false }, // List attribute value notes button.
+                    { "orderable": false }, // Edit attribute value button.
+                    { "orderable": false }  // Delete attribute value button.
+                ],
+                "stateSave": true,
+                "stateDuration": 0,
+                "pageLength": 25
+            })
 
             // Update the timestamp for input or select new values appropriately.
-            $("[id^=inputOrSelectNewValue]").blur(function() {
-                var value = $.trim($(this).val())
+            $("[id^=inputOrSelectNewValue]").blur(function()
+            {
+                var newValue = $.trim($(this).val())
                 var id = $(this).attr("id").split("inputOrSelectNewValue")[1]
-                if ($(this).is("input") && value == "" || $(this).is("select") && value == "-1")
+                if ($(this).is("input") && newValue == "" || $(this).is("select") && newValue == "-1")
                 {
                     $("#inputNewTimestamp" + id).val("")
+                    $("#inputNewUtcTimestamp" + id).val("")
                 }
                 else
                 {
-                    var timestamp = new moment().local().format("YYYY-MM-DD HH:mm:ss")
-                    $("#inputNewTimestamp" + id).val(timestamp)
+                    var timestamp = new moment()
+                    $("#inputNewTimestamp" + id).val(timestamp.format("YYYY-MM-DD HH:mm:ss"))
                 }
             })
 
             // Enter key call save all.
-            $(document).keypress(function(event) {
+            $(document).keypress(function(event)
+            {
                 if (event.which == 13)
                 {
                     $("#buttonAttributesSaveAll").focus()
                 }
             })
 
-            $("#buttonAttributesSaveAll").click(function() {
+            $("#buttonAttributesSaveAll").click(function()
+            {
                 var error = false
                 var rows = []
                 var eventFrameStartTimestamp = $("#trEventFrame").attr("startTimestamp")
                 var eventFrameEndTimestamp = $("#trEventFrame").attr("endTimestamp")
 
                 // Loop through the new input or select values and check for validation errors.
-                attributesTable.$("[id^=inputOrSelectNewValue]").each(function() {
+                attributesTable.$("[id^=inputOrSelectNewValue]").each(function()
+                {
                     var id = $(this).attr("id").split("inputOrSelectNewValue")[1]
-                    var value = $.trim($(this).val())
-                    var valueIsBlank = true
-                    var valueIsValid = $.isNumeric(value)
-                    var timestamp = $.trim($("#inputNewTimestamp" + id).val())
-                    var timestampIsBlank = timestamp == ""
-                    var timestampIsValid = moment(timestamp, "YYYY-M-D H:m:s", true).isValid()
-                    var timestampIsInEventFrame = false
+                    var newValue = $.trim($(this).val())
+                    var newValueIsBlank = true
+                    var newValueIsValid = $.isNumeric(newValue)
+                    var newTimestamp = $.trim($("#inputNewTimestamp" + id).val())
+                    var newTimestampIsBlank = newTimestamp == ""
+                    var newTimestampIsValid = moment(newTimestamp, "YYYY-M-D H:m:s").isValid()
+                    var newTimestampIsInEventFrame = false
 
                     if ($(this).is("input"))
                     {
-                        valueIsBlank = value == ""
+                        newValueIsBlank = newValue == ""
                     }
                     else if ($(this).is("select"))
                     {
-                        valueIsBlank = value == "-1"
+                        newValueIsBlank = newValue == "-1"
                     }
 
+                    var timestamp = moment(newTimestamp)
                     if (eventFrameEndTimestamp == "None")
                     {
-                        timestampIsInEventFrame = moment(timestamp).isSameOrAfter(eventFrameStartTimestamp)
+                        newTimestampIsInEventFrame = moment(timestamp.utc().format("YYYY-MM-DD HH:mm:ss")).isSameOrAfter(eventFrameStartTimestamp)
                     }
                     else
                     {
-                        timestampIsInEventFrame = moment(timestamp).isBetween(eventFrameStartTimestamp, eventFrameEndTimestamp)
+                        newTimestampIsInEventFrame = moment(timestamp.utc().format("YYYY-MM-DD HH:mm:ss")).
+                            isBetween(eventFrameStartTimestamp, eventFrameEndTimestamp)
                     }
 
-                    if (valueIsBlank && timestampIsBlank)
+                    if (newValueIsBlank && newTimestampIsBlank)
                     {
                         $("#divNewValue" + id).removeClass("has-error")
-                        var helpBlock = $("#pNewValue" + id).html("")
+                        $("#pNewValue" + id).html("")
                         $("#divNewTimestamp" + id).removeClass("has-error")
-                        var helpBlock = $("#pNewTimestamp" + id).html("")
+                        $("#pNewTimestamp" + id).html("")
                     }
-                    else if ((valueIsBlank && timestampIsValid) || (!valueIsValid && timestampIsValid))
+                    else if ((newValueIsBlank && newTimestampIsValid) || (!newValueIsValid && newTimestampIsValid))
                     {
                         error = true
                         $("#divNewValue" + id).addClass("has-error")
-                        var helpBlock = $("#pNewValue" + id).html("Not a valid float value")
+                        $("#pNewValue" + id).html("Not a valid float value")
                         $("#divNewTimestamp" + id).removeClass("has-error")
-                        var helpBlock = $("#pNewTimestamp" + id).html("")
+                        $("#pNewTimestamp" + id).html("")
                     }
-                    else if ((valueIsBlank && !timestampIsValid) || (!valueIsValid && (timestampIsBlank || !timestampIsValid)))
+                    else if ((newValueIsBlank && !newTimestampIsValid) || (!newValueIsValid && (newTimestampIsBlank || !newTimestampIsValid)))
                     {
                         error = true
                         $("#divNewValue" + id).addClass("has-error")
-                        var helpBlock = $("#pNewValue" + id).html("Not a valid float value")
+                        $("#pNewValue" + id).html("Not a valid float value")
                         $("#divNewTimestamp" + id).addClass("has-error")
-                        var helpBlock = $("#pNewTimestamp" + id).html("This field is required.")
+                        $("#pNewTimestamp" + id).html("This field is required.")
                     }
-                    else if (valueIsValid && (timestampIsBlank || !timestampIsValid))
+                    else if (newValueIsValid && (newTimestampIsBlank || !newTimestampIsValid))
                     {
                         error = true
                         $("#divNewValue" + id).removeClass("has-error")
-                        var helpBlock = $("#pNewValue" + id).html("")
+                        $("#pNewValue" + id).html("")
                         $("#divNewTimestamp" + id).addClass("has-error")
-                        var helpBlock = $("#pNewTimestamp" + id).html("This field is required.")
+                        $("#pNewTimestamp" + id).html("This field is required.")
                     }
-                    else if (!timestampIsInEventFrame)
+                    else if (!newTimestampIsInEventFrame)
                     {
                         error = true
                         $("#divNewValue" + id).removeClass("has-error")
-                        var helpBlock = $("#pNewValue" + id).html("")
+                        $("#pNewValue" + id).html("")
                         $("#divNewTimestamp" + id).addClass("has-error")
-                        var helpBlock = $("#pNewTimestamp" + id).html("This timestamp is outside of the event frame.")
+                        $("#pNewTimestamp" + id).html("This timestamp is outside of the event frame.")
                     }
                     else
                     {
                         $("#divNewValue" + id).removeClass("has-error")
-                        var helpBlock = $("#pNewValue" + id).html("")
+                        $("#pNewValue" + id).html("")
                         $("#divNewTimestamp" + id).removeClass("has-error")
-                        var helpBlock = $("#pNewTimestamp" + id).html("")
+                        $("#pNewTimestamp" + id).html("")
                         var row = {}
                         row["tagId"] = id
                         row["type"] = "input"
-                        row["value"] = value
-                        row["timestamp"] = timestamp
+                        row["value"] = newValue
+                        row["timestamp"] = timestamp.utc().format("YYYY-MM-DD HH:mm:ss")
                         rows.push(row)
                     }
                 })
 
                 if (error != true)
                 {
-                    $.ajax({
+                    $.ajax(
+                    {
                         type : "POST",
                         url : "/tagValues/addMultiple",
                         data : JSON.stringify(rows)
-                    }).done(function(response) {
+                    }).done(function(response)
+                    {
                         location.reload(true)
-                    }).fail(function() {
+                    }).fail(function()
+                    {
                         $(".alert").remove()
                         $("#divFlashedMessages").append("<div class = \"alert alert-danger\"><button type = \"button\" class = \"close\" " +
                             "data-dismiss = \"alert\">&times;</button>The attempt to save one or more new element attribute values failed.</div>")                        
@@ -427,8 +442,8 @@ Event Frame Dashboard
                 }
             })
 
-            $("#eventFrameNotesTable").DataTable
-            ({
+            $("#eventFrameNotesTable").DataTable(
+            {
                 "order":
                 [
                     [0, "desc"],             // Timestamp.

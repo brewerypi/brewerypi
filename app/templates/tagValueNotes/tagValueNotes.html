@@ -19,7 +19,7 @@ Tag Value Notes
             <li><a href = "{{ url_for("elements.dashboard", elementId = elementAttribute.Element.ElementId) }}">{{ elementAttribute.Element.Name }}</a></li>
             <li><a href = "{{ url_for("tagValues.listTagValues", elementAttributeId = elementAttribute.ElementAttributeId) }}">
                 {{ elementAttribute.ElementAttributeTemplate.Name }}</a></li>
-            <li class = "active">{{ tagValue.Timestamp }}</li>
+            <li class = "active">{{ moment(tagValue.Timestamp).format("YYYY-MM-DD HH:mm:ss") }}</li>
         {% elif eventFrame %}
             <li><a href = "{{ url_for("eventFrames.selectEventFrame", selectedClass = "Root") }}"><span class = "glyphicon glyphicon-home"></span></a></li>
             <li><a href = "{{ url_for("eventFrames.selectEventFrame", selectedClass = "Enterprise",
@@ -31,7 +31,7 @@ Tag Value Notes
                 selectedId = eventFrame.Element.ElementTemplate.ElementTemplateId) }}">{{ eventFrame.Element.ElementTemplate.Name }}</a></li>
             <li><a href = "{{ url_for("eventFrames.selectEventFrame", selectedClass = "EventFrameTemplate",
                 selectedId = eventFrame.EventFrameTemplate.EventFrameTemplateId) }}">{{ eventFrame.EventFrameTemplate.Name }}</a></li>
-            <li><a href = "{{ url_for("eventFrames.dashboard", eventFrameId = eventFrame.EventFrameId) }}">{{ eventFrame.friendlyName(True) }}</a></li>
+            <li><a href = "{{ url_for("eventFrames.dashboard", eventFrameId = eventFrame.EventFrameId) }}">{{ eventFrame.Name }}</a></li>
             <li><a href = "{{ url_for("tagValues.listTagValues", eventFrameId = eventFrame.EventFrameId,
                 eventFrameAttributeId = eventFrameAttribute.EventFrameAttributeId) }}">{{ eventFrameAttribute.EventFrameAttributeTemplate.Name }}</a></li>
             <li class = "active">{{ tagValue.Timestamp }}</li>
@@ -43,7 +43,7 @@ Tag Value Notes
                 {{ tagValue.Tag.Area.Site.Name }}</a></li>
             <li><a href = "{{ url_for("tags.selectTag", selectedClass = "Area", selectedId = tagValue.Tag.Area.AreaId) }}">{{ tagValue.Tag.Area.Name }}</a></li>
             <li><a href = "{{ url_for("tagValues.listTagValues", tagId = tagValue.Tag.TagId) }}">{{ tagValue.Tag.Name }}</a></li>
-            <li class = "active">{{ tagValue.Timestamp }}</li>
+            <li class = "active">{{ moment(tagValue.Timestamp).format("YYYY-MM-DD HH:mm:ss") }}</li>
         {% endif %}
     </ol>
 </div>
@@ -77,7 +77,7 @@ Tag Value Notes
         <tbody>
             {% for tagValueNote in tagValueNotes %}
                 <tr>
-                    <td>{{ tagValueNote.Note.Timestamp }}</td>
+                    <td>{{ moment(tagValueNote.Note.Timestamp).format("YYYY-MM-DD HH:mm:ss") }}</td>
                     <td>{{ tagValueNote.Note.Note }}</td>
                     {% if elementAttribute %}
                         <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("tagValueNotes.editTagValueNote",

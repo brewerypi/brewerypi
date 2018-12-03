@@ -142,6 +142,7 @@ class EventFrame(db.Model):
 	__tablename__ = "EventFrame"
 	__table_args__ = \
 	(
+		Index("IX__StartTimestamp__EndTimestamp", "StartTimestamp", "EndTimestamp"),
 		UniqueConstraint("ElementId", "EventFrameTemplateId", "StartTimestamp", name = "AK__ElementId_EventFrameTemplateId_StartTimestamp"),
 	)
 
@@ -150,7 +151,7 @@ class EventFrame(db.Model):
 	EndTimestamp = db.Column(db.DateTime, nullable = True)
 	EventFrameTemplateId = db.Column(db.Integer, db.ForeignKey("EventFrameTemplate.EventFrameTemplateId", name = "FK__EventFrameTemplate$Have$EventFrame"), \
 		nullable = False)
-	Name = db.Column(db.String(45), nullable = True)
+	Name = db.Column(db.String(45), nullable = False)
 	ParentEventFrameId = db.Column(db.Integer, db.ForeignKey("EventFrame.EventFrameId", name = "FK__EventFrame$CanHave$EventFrame"), nullable = True)
 	StartTimestamp = db.Column(db.DateTime, nullable = False)
 
@@ -159,7 +160,7 @@ class EventFrame(db.Model):
 	EventFrameNotes = db.relationship("EventFrameNote", backref = "EventFrame", lazy = "dynamic")
 
 	def __repr__(self):
-		return "<EventFrame: {}>".format(self.friendlyName())
+		return "<EventFrame: {}>".format(self.Name)
 
 	def ancestors(self, ancestors):
 		if self.ParentEventFrameId == None:
@@ -168,20 +169,20 @@ class EventFrame(db.Model):
 			ancestors.insert(0, self.ParentEventFrame)
 			return self.ParentEventFrame.ancestors(ancestors)
 
-	def friendlyName(self, seconds = False):
-		if self.Name:
-			return self.Name
-		else:
-			if self.EndTimestamp:
-				if seconds:
-					return "{} - {}".format(self.StartTimestamp.strftime("%Y-%m-%d %H:%M:%S"), self.EndTimestamp.strftime("%Y-%m-%d %H:%M:%S"))
-				else:
-					return "{} - {}".format(self.StartTimestamp.strftime("%Y-%m-%d %H:%M"), self.EndTimestamp.strftime("%Y-%m-%d %H:%M"))
-			else:
-				if seconds:
-					return "{} -".format(self.StartTimestamp.strftime("%Y-%m-%d %H:%M:%S"))
-				else:
-					return "{} -".format(self.StartTimestamp.strftime("%Y-%m-%d %H:%M"))
+	# def friendlyName(self, seconds = False):
+	# 	if self.Name:
+	# 		return self.Name
+	# 	else:
+	# 		if self.EndTimestamp:
+	# 			if seconds:
+	# 				return "{} - {}".format(self.StartTimestamp.strftime("%Y-%m-%d %H:%M:%S"), self.EndTimestamp.strftime("%Y-%m-%d %H:%M:%S"))
+	# 			else:
+	# 				return "{} - {}".format(self.StartTimestamp.strftime("%Y-%m-%d %H:%M"), self.EndTimestamp.strftime("%Y-%m-%d %H:%M"))
+	# 		else:
+	# 			if seconds:
+	# 				return "{} -".format(self.StartTimestamp.strftime("%Y-%m-%d %H:%M:%S"))
+	# 			else:
+	# 				return "{} -".format(self.StartTimestamp.strftime("%Y-%m-%d %H:%M"))
 
 	def hasDescendants(self):
 		if self.EventFrames:

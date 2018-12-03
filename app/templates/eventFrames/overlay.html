@@ -18,7 +18,7 @@ Event Frames
             selectedId = eventFrameTemplate.ElementTemplate.id()) }}">{{ eventFrameTemplate.ElementTemplate.Name }}</a></li>
         <li class = "active">{{ eventFrameTemplate.Name }}</li>
         {% if startTimestamp and endTimestamp %}
-            <li class = "active">{{ startTimestamp }} - {{ endTimestamp }}</li>
+            <li class = "active">{{ moment(startTimestamp).format("YYYY-MM-DD HH:mm:ss") }} - {{ moment(endTimestamp).format("YYYY-MM-DD HH:mm:ss") }}</li>
         {% endif %}
     </ol>
 </div>
@@ -71,9 +71,9 @@ Event Frames
                         <td>{{ eventFrame.EventFrameId }}</td>
                         <td>{{ eventFrame.Name }}</td>
                         <td>{{ eventFrame.Element }}</td>
-                        <td>{{ eventFrame.Start }}</td>
-                        {% if eventFrame.End %}
-                            <td>{{ eventFrame.End }}</td>
+                        <td>{{ moment(eventFrame.StartTimestamp).format("YYYY-MM-DD HH:mm:ss") }}</td>
+                        {% if eventFrame.EndTimestamp %}
+                            <td>{{ moment(eventFrame.EndTimestamp).format("YYYY-MM-DD HH:mm:ss") }}</td>
                         {% else %}
                             <td></td>
                         {% endif %}
@@ -105,14 +105,36 @@ Event Frames
     <link rel = "stylesheet" type = "text/css" href = {{ url_for("static", filename = "css/datatables.min.css") }}/> 
     <link rel = "stylesheet" type = "text/css" href = {{ url_for("static", filename = "css/styles.css") }}/>
     <script type = "text/javascript" src = {{ url_for("static", filename = "js/datatables.min.js") }}></script>
-    <script type = "text/javascript" src = {{ url_for("static", filename = "js/moment.min.js") }}></script>
     <script>
+        function setUtcTimestamps()
+        {
+            var startTimestamp = $("#startTimestamp").val()
+            var startTimestampIsValid = moment(startTimestamp, "YYYY-M-D H:m:s").isValid()
+            var endTimestamp = $("#endTimestamp").val()
+            var endTimestampIsValid = moment(endTimestamp, "YYYY-M-D H:m:s").isValid()
+            var timestamp
+
+            // If the start timestamp is valid, update the start UTC timestamp.
+            if (startTimestampIsValid)
+            {
+                timestamp = moment(startTimestamp)
+                $("#startUtcTimestamp").val(timestamp.utc().format("YYYY-MM-DD HH:mm:ss"))
+            }
+
+            // If the end timestamp is valid, update the end UTC timestamp.
+            if (endTimestampIsValid)
+            {
+                timestamp = moment(endTimestamp)
+                $("#endUtcTimestamp").val(timestamp.utc().format("YYYY-MM-DD HH:mm:ss"))
+            }
+        }
+
         $(document).ready(function()
         {
             {% if form %}
                 $(".form-control").first().focus()
                 $("#submit").hide()
-                $("#submit").parent().append("<button class = \"btn btn-default\" title = \"Search\" type = \"submit\">" +
+                $("#submit").parent().append("<button class = \"btn btn-default\" id = \"buttonSearch\" title = \"Search\" type = \"submit\">" +
                     "<span class = \"glyphicon glyphicon-search\" aria-hidden = \"true\"></span></button>")
             {% endif %}
 
@@ -279,6 +301,19 @@ Event Frames
                 var months = $(this).attr("months")
                 $("#startTimestamp").val(new moment().subtract(months, "months").hours(0).minutes(0).seconds(0).local().format("YYYY-MM-DD HH:mm:ss"))
                 $("#endTimestamp").val("")
+            })
+
+            $("#buttonSearch").click(function()
+            {
+                setUtcTimestamps()
+            })
+
+            $(document).keypress(function(event)
+            {
+                if (event.which == 13)
+                {
+                    setUtcTimestamps()
+                }
             })
         })
     </script>

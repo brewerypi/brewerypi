@@ -30,12 +30,17 @@ def addEventFrame(eventFrameTemplateId = None, parentEventFrameId = None):
 
 	# Add a new event frame.
 	if form.validate_on_submit():
-		if parentEventFrameId:
-			eventFrame = EventFrame(EndTimestamp = form.endTimestamp.data, EventFrameTemplate = form.eventFrameTemplate.data,
-				Name = form.name.data, ParentEventFrameId = parentEventFrameId, StartTimestamp = form.startTimestamp.data)
+		if form.endUtcTimestamp.data == "":
+			endUtcTimestamp = None
 		else:
-			eventFrame = EventFrame(Element = form.element.data, EndTimestamp = form.endTimestamp.data, EventFrameTemplateId = eventFrameTemplateId,
-				Name = form.name.data, StartTimestamp = form.startTimestamp.data)
+			endUtcTimestamp = form.endUtcTimestamp.data
+
+		if parentEventFrameId:
+			eventFrame = EventFrame(EndTimestamp = endUtcTimestamp, EventFrameTemplate = form.eventFrameTemplate.data,
+				Name = form.name.data, ParentEventFrameId = parentEventFrameId, StartTimestamp = form.startUtcTimestamp.data)
+		else:
+			eventFrame = EventFrame(Element = form.element.data, EndTimestamp = endUtcTimestamp, EventFrameTemplateId = eventFrameTemplateId,
+				Name = form.name.data, StartTimestamp = form.startUtcTimestamp.data)
 
 		db.session.add(eventFrame)
 		db.session.commit()
@@ -60,15 +65,15 @@ def addEventFrame(eventFrameTemplateId = None, parentEventFrameId = None):
 				"text" : parentEventFrame.origin().EventFrameTemplate.Name}]
 		for eventFrameAncestor in parentEventFrame.ancestors([]):
 			if eventFrameAncestor.ParentEventFrameId:
-				text = eventFrameAncestor.EventFrameTemplate.Name + "&nbsp;&nbsp;/&nbsp;&nbsp;" + eventFrameAncestor.friendlyName(True)
+				text = eventFrameAncestor.EventFrameTemplate.Name + "&nbsp;&nbsp;/&nbsp;&nbsp;" + eventFrameAncestor.Name
 			else:
-				text = eventFrameAncestor.friendlyName(True)
+				text = eventFrameAncestor.Name
 			breadcrumbs.append({"url" : url_for("eventFrames.dashboard", eventFrameId = eventFrameAncestor.EventFrameId), "text" : text})
 
 		if parentEventFrame.ParentEventFrameId:
-			text = parentEventFrame.EventFrameTemplate.Name + "&nbsp;&nbsp;/&nbsp;&nbsp;" + parentEventFrame.friendlyName(True)
+			text = parentEventFrame.EventFrameTemplate.Name + "&nbsp;&nbsp;/&nbsp;&nbsp;" + parentEventFrame.Name
 		else:
-			text = parentEventFrame.friendlyName(True)
+			text = parentEventFrame.Name
 		breadcrumbs.append({"url" : url_for("eventFrames.dashboard", eventFrameId = parentEventFrame.EventFrameId), "text" : text})
 	else:
 		form.eventFrameTemplateId.data = eventFrameTemplateId
@@ -84,7 +89,7 @@ def addEventFrame(eventFrameTemplateId = None, parentEventFrameId = None):
 			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "EventFrameTemplate", selectedId = eventFrameTemplate.EventFrameTemplateId),
 				"text" : eventFrameTemplate.Name}]	
 
-	return render_template("addEdit.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
+	return render_template("eventFrames/addEdit.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
 
 @eventFrames.route("/eventFrames/dashboard/<int:eventFrameId>", methods = ["GET", "POST"])
 @login_required
@@ -148,9 +153,13 @@ def editEventFrame(eventFrameId):
 			eventFrame.Element = form.element.data
 			eventFrame.EventFrameTemplateId = form.eventFrameTemplateId.data
 
-		eventFrame.EndTimestamp = form.endTimestamp.data
+		if form.endUtcTimestamp.data == "":
+			eventFrame.EndTimestamp = None
+		else:
+			eventFrame.EndTimestamp = form.endUtcTimestamp.data
+
 		eventFrame.Name = form.name.data
-		eventFrame.StartTimestamp = form.startTimestamp.data
+		eventFrame.StartTimestamp = form.startUtcTimestamp.data
 		db.session.commit()
 		flash("You have successfully edited the Event Frame.", "alert alert-success")
 		return redirect(form.requestReferrer.data)
@@ -174,15 +183,15 @@ def editEventFrame(eventFrameId):
 				"text" : eventFrame.origin().EventFrameTemplate.Name}]
 		for eventFrameAncestor in eventFrame.ancestors([]):
 			if eventFrameAncestor.ParentEventFrameId:
-				text = eventFrameAncestor.EventFrameTemplate.Name + "&nbsp;&nbsp;/&nbsp;&nbsp;" + eventFrameAncestor.friendlyName(True)
+				text = eventFrameAncestor.EventFrameTemplate.Name + "&nbsp;&nbsp;/&nbsp;&nbsp;" + eventFrameAncestor.Name
 			else:
-				text = eventFrameAncestor.friendlyName(True)
+				text = eventFrameAncestor.Name
 			breadcrumbs.append({"url" : url_for("eventFrames.dashboard", eventFrameId = eventFrameAncestor.EventFrameId), "text" : text})
 
 		if eventFrame.ParentEventFrameId:
-			text = eventFrame.EventFrameTemplate.Name + "&nbsp;&nbsp;/&nbsp;&nbsp;" + eventFrame.friendlyName(True)
+			text = eventFrame.EventFrameTemplate.Name + "&nbsp;&nbsp;/&nbsp;&nbsp;" + eventFrame.Name
 		else:
-			text = eventFrame.friendlyName(True)
+			text = eventFrame.Name
 		breadcrumbs.append({"url" : None, "text" : text})
 	else:
 		form.element.data = eventFrame.Element
@@ -197,22 +206,22 @@ def editEventFrame(eventFrameId):
 				selectedId = eventFrame.EventFrameTemplate.ElementTemplate.ElementTemplateId), "text" : eventFrame.EventFrameTemplate.ElementTemplate.Name},
 			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "EventFrameTemplate",
 				selectedId = eventFrame.EventFrameTemplate.EventFrameTemplateId), "text" : eventFrame.EventFrameTemplate.Name},
-			{"url" : None, "text" : eventFrame.friendlyName(True)}]	
+			{"url" : None, "text" : eventFrame.Name}]	
 
 	form.endTimestamp.data = eventFrame.EndTimestamp
 	form.name.data = eventFrame.Name
 	form.startTimestamp.data = eventFrame.StartTimestamp
 	form.requestReferrer.data = request.referrer
-	return render_template("addEdit.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
+	return render_template("eventFrames/addEdit.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
 
 @eventFrames.route("/eventFrames/endEventFrame/<int:eventFrameId>", methods = ["GET", "POST"])
 @login_required
 @permissionRequired(Permission.DATA_ENTRY)
 def endEventFrame(eventFrameId):
 	eventFrame = EventFrame.query.get_or_404(eventFrameId)
-	eventFrame.EndTimestamp = datetime.now()
+	eventFrame.EndTimestamp = datetime.utcnow()
 	db.session.commit()
-	flash("You have successfully ended \"{}\" for event frame \"{}\".".format(eventFrame.EventFrameTemplate.Name, eventFrame.friendlyName(True)),
+	flash("You have successfully ended \"{}\" for event frame \"{}\".".format(eventFrame.EventFrameTemplate.Name, eventFrame.Name),
 		"alert alert-success")
 	return redirect(request.referrer)
 
@@ -225,10 +234,11 @@ def overlay(eventFrameTemplateId):
 	form = EventFrameOverlayForm()
 
 	if form.validate_on_submit():
-		startTimestamp = request.form.get("startTimestamp")
-		endTimestamp = request.form.get("endTimestamp")
-		if endTimestamp == "":
-			endTimestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+		startTimestamp = datetime.strptime(request.form.get("startUtcTimestamp"), "%Y-%m-%d %H:%M:%S")
+		if request.form.get("endUtcTimestamp") == "":
+			endTimestamp = datetime.utcnow()
+		else:
+			endTimestamp = datetime.strptime(endUtcTimestamp, "%Y-%m-%d %H:%M:%S")
 
 		dynamicSql = ""
 		eventFrameAttributeTemplates = EventFrameAttributeTemplate.query.filter_by(EventFrameTemplateId = eventFrameTemplateId). \
@@ -239,10 +249,10 @@ def overlay(eventFrameTemplateId):
 
 		query = """
 		SELECT t1.EventFrameId AS EventFrameId,
-			fxGetEventFrameFriendlyName(t1.EventFrameId) AS Name,
+			t1.Name AS Name,
 			Element.Name AS Element,
-			DATE_FORMAT(t1.StartTimestamp, '%m/%d/%y %H:%i') AS Start,
-			DATE_FORMAT(t1.EndTimestamp, '%m/%d/%y %H:%i') AS End {}
+			t1.StartTimestamp,
+			t1.EndTimestamp {}
 		FROM EventFrame t1
 			INNER JOIN EventFrameTemplate ON t1.EventFrameTemplateId = EventFrameTemplate.EventFrameTemplateId
 			INNER JOIN EventFrameAttributeTemplate t2 ON EventFrameTemplate.EventFrameTemplateId = t2.EventFrameTemplateId
@@ -285,13 +295,13 @@ def overlay(eventFrameTemplateId):
 				t2.Name = t4.Name AND
 				t3.Timestamp = t4.MaxTimestamp
 		WHERE EventFrameTemplate.EventFrameTemplateId IN ({}) AND
-			(
-				t1.EndTimestamp IS NULL AND
-				t1.StartTimestamp >= '{}' OR
-				t1.EndTimestamp IS NOT NULL AND
-				t1.StartTimestamp >= '{}' AND
-				t1.EndTimestamp <= '{}'
-			)
+		(
+			t1.EndTimestamp IS NULL AND
+			t1.StartTimestamp >= '{}' OR
+			t1.EndTimestamp IS NOT NULL AND
+			t1.StartTimestamp >= '{}' AND
+			t1.EndTimestamp <= '{}'
+		)
 		GROUP BY t1.EventFrameId
 		""".format(dynamicSql, eventFrameTemplateId, eventFrameTemplateId, startTimestamp, startTimestamp, endTimestamp)
 		eventFrames = db.session.execute(query).fetchall()
@@ -389,7 +399,7 @@ def selectEventFrame(selectedClass = None, selectedId = None, selectedOperation 
 @permissionRequired(Permission.DATA_ENTRY)
 def startEventFrame(elementId, eventFrameTemplateId):
 	eventFrame = EventFrame(ElementId = elementId, EndTimestamp = None, EventFrameTemplateId = eventFrameTemplateId, ParentEventFrameId = None,
-		StartTimestamp = datetime.now())
+		StartTimestamp = datetime.utcnow())
 	db.session.add(eventFrame)
 	db.session.commit()
 	flash("You have successfully added a new \"" + eventFrame.EventFrameTemplate.Name + "\" for element \"" + eventFrame.origin().Element.Name + "\".",
