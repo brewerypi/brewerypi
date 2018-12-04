@@ -1,34 +1,4 @@
 {
-  "__inputs": [
-    {
-      "name": "DS_BREWERY_PI",
-      "label": "Brewery Pi",
-      "description": "",
-      "type": "datasource",
-      "pluginId": "mysql",
-      "pluginName": "MySQL"
-    }
-  ],
-  "__requires": [
-    {
-      "type": "grafana",
-      "id": "grafana",
-      "name": "Grafana",
-      "version": "5.2.2"
-    },
-    {
-      "type": "datasource",
-      "id": "mysql",
-      "name": "MySQL",
-      "version": "5.0.0"
-    },
-    {
-      "type": "panel",
-      "id": "table",
-      "name": "Table",
-      "version": "5.0.0"
-    }
-  ],
   "annotations": {
     "list": [
       {
@@ -45,8 +15,7 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "id": null,
-  "iteration": 1535430716115,
+  "iteration": 1543936696013,
   "links": [],
   "panels": [
     {
@@ -75,6 +44,22 @@
           "dateFormat": "YYYY-MM-DD HH:mm:ss",
           "pattern": "Time",
           "type": "date"
+        },
+        {
+          "alias": "",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 1,
+          "pattern": "Start",
+          "thresholds": [],
+          "type": "date",
+          "unit": "short"
         },
         {
           "alias": "",
@@ -153,7 +138,8 @@
       },
       {
         "allValue": null,
-        "current": {},
+        "current": {
+},
         "datasource": "BreweryPi",
         "hide": 0,
         "includeAll": true,
