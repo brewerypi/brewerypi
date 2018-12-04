@@ -14,6 +14,7 @@ from pytz import exceptions, timezone
 import pytz
 from app import db
 from app.models import EventFrame, Note, TagValue
+from db.migrations.replaceableObjects import ReplaceableObject
 from db.migrations.versions.f64c7735ec58_ import fxGetEventFrameFriendlyName
 
 
@@ -22,6 +23,101 @@ revision = 'd35f95abedc4'
 down_revision = 'ef09d330ca05'
 branch_labels = None
 depends_on = None
+
+
+spActiveEventFrameSummary = ReplaceableObject(
+    "spActiveEventFrameSummary",
+    "IN eventFrameTemplateIds TEXT, IN eventFrameAttributeTemplateNames TEXT",
+    None,
+    """
+BEGIN
+	SET @@group_concat_max_len = 5000;
+	SET @sql = NULL;
+	SET @query1DynamicColumns = NULL;
+	SET @query2DynamicColumns = NULL;
+
+	SELECT GROUP_CONCAT(DISTINCT CONCAT('MAX(IF(t2.Name = ''', EventFrameAttributeTemplate.Name, ''', IF(Tag.LookupId IS NULL, t3.Value, LookupValue.Name), '''')) AS ''', EventFrameAttributeTemplate.Name, '''')) INTO @query1DynamicColumns
+	FROM EventFrameAttributeTemplate
+    WHERE FIND_IN_SET(EventFrameAttributeTemplate.Name, eventFrameAttributeTemplateNames) > 0;
+
+	SELECT GROUP_CONCAT(DISTINCT CONCAT('NULL AS ''', EventFrameAttributeTemplate.Name, '''')) INTO @query2DynamicColumns
+	FROM EventFrameAttributeTemplate
+    WHERE FIND_IN_SET(EventFrameAttributeTemplate.Name, eventFrameAttributeTemplateNames) > 0;
+
+	SET @sql = CONCAT('
+		SELECT EventFrameTemplate.Name  AS Template,
+            t1.Name,
+			Element.Name AS Element,
+			t1.StartTimestamp AS Start,
+            ', @query1DynamicColumns, '
+		FROM EventFrame t1
+			INNER JOIN EventFrameTemplate ON t1.EventFrameTemplateId = EventFrameTemplate.EventFrameTemplateId
+            INNER JOIN EventFrameAttributeTemplate t2 ON EventFrameTemplate.EventFrameTemplateId = t2.EventFrameTemplateId
+            INNER JOIN EventFrameAttribute ON t2.EventFrameAttributeTemplateId = EventFrameAttribute.EventFrameAttributeTemplateId
+            INNER JOIN Element ON t1.ElementId = Element.ElementId AND EventFrameAttribute.ElementId = Element.ElementId
+            INNER JOIN Tag ON EventFrameAttribute.TagId = Tag.TagId
+            LEFT JOIN Lookup ON Tag.LookupId = Lookup.LookupId
+            LEFT JOIN LookupValue ON Lookup.LookupId = LookupValue.LookupId
+            INNER JOIN TagValue t3 ON
+				CASE
+					WHEN Tag.LookupId IS NULL
+						THEN Tag.TagId = t3.TagId
+					ELSE
+						Tag.TagId = t3.TagId AND LookupValue.Value = t3.Value
+				END
+			INNER JOIN
+            (
+				SELECT EventFrame.EventFrameId,
+					EventFrameAttributeTemplate.Name,
+                    Max(TagValue.Timestamp) AS MaxTimestamp
+				FROM EventFrame
+					INNER JOIN EventFrameTemplate ON EventFrame.EventFrameTemplateId = EventFrameTemplate.EventFrameTemplateId
+                    INNER JOIN EventFrameAttributeTemplate ON EventFrameTemplate.EventFrameTemplateId = EventFrameAttributeTemplate.EventFrameTemplateId
+                    INNER JOIN EventFrameAttribute ON EventFrameAttributeTemplate.EventFrameAttributeTemplateId = EventFrameAttribute.EventFrameAttributeTemplateId
+                    INNER JOIN Element ON EventFrame.ElementId = Element.ElementId
+						AND EventFrameAttribute.ElementId = Element.ElementId
+					INNER JOIN Tag ON EventFrameAttribute.TagId = Tag.TagId
+                    INNER JOIN TagValue ON Tag.TagId = TagValue.TagId
+				WHERE EventFrame.EndTimestamp IS NULL AND
+					EventFrameTemplate.EventFrameTemplateId IN (', eventFrameTemplateIds ,')
+                GROUP BY EventFrame.EventFrameId,
+					EventFrameAttributeTemplate.Name
+			) t4 ON t1.EventFrameId = t4.EventFrameId AND
+				t2.Name = t4.Name AND
+				t3.Timestamp = t4.MaxTimestamp
+		WHERE t1.EndTimestamp IS NULL AND
+			EventFrameTemplate.EventFrameTemplateId IN (', eventFrameTemplateIds ,') AND
+            (t3.Timestamp >= t1.StartTimestamp OR t3.Value IS NULL)
+        GROUP BY t1.EventFrameId
+		UNION ALL
+		SELECT EventFrameTemplate.Name AS Template,
+            EventFrame.Name,
+			Element.Name AS Element,
+			EventFrame.StartTimestamp AS Start,
+            ', @query2DynamicColumns, '
+		FROM EventFrame
+			INNER JOIN Element ON EventFrame.ElementId = Element.ElementId
+			INNER JOIN EventFrameTemplate ON EventFrame.EventFrameTemplateId = EventFrameTemplate.EventFrameTemplateId
+			INNER JOIN EventFrameAttributeTemplate ON EventFrameTemplate.EventFrameTemplateId = EventFrameAttributeTemplate.EventFrameTemplateId
+			LEFT JOIN EventFrameAttribute ON EventFrameAttributeTemplate.EventFrameAttributeTemplateId = EventFrameAttribute.EventFrameAttributeTemplateId AND
+				Element.ElementId = EventFrameAttribute.ElementId
+			LEFT JOIN Tag ON EventFrameAttribute.TagId = Tag.TagId
+			LEFT JOIN TagValue ON Tag.TagId = TagValue.TagId
+		WHERE EventFrame.EndTimestamp IS NULL AND
+			EventFrameTemplate.EventFrameTemplateId IN (', eventFrameTemplateIds ,') AND
+			(TagValue.Timestamp >= EventFrame.StartTimestamp OR TagValue.Value IS NULL)
+		GROUP BY EventFrame.EventFrameId
+		HAVING (COUNT(TagValue.Value) = 0)
+		ORDER BY Template,
+			Element');
+
+	PREPARE stmt FROM @sql;
+	EXECUTE stmt;
+	DEALLOCATE PREPARE stmt;
+END;
+    """
+)
+
 
 def convertLocalToUtc():
     eventFrames = EventFrame.query.all()
@@ -115,6 +211,7 @@ def upgrade():
     op.create_index('IX__StartTimestamp__EndTimestamp', 'EventFrame', ['StartTimestamp', 'EndTimestamp'], unique=False)
     op.dropFunction(fxGetEventFrameFriendlyName)
     convertLocalToUtc()
+    op.replaceStoredProcedure(spActiveEventFrameSummary, replaces = "ef09d330ca05.spActiveEventFrameSummary")
     # ### end Alembic commands ###
 
 
@@ -129,4 +226,5 @@ def downgrade():
                existing_type=mysql.INTEGER(display_width=11),
                nullable=True)
     convertUtcToLocal()
+    op.replaceStoredProcedure(spActiveEventFrameSummary, replaceWith = "ef09d330ca05.spActiveEventFrameSummary")
     # ### end Alembic commands ###
