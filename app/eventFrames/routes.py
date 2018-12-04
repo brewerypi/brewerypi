@@ -47,7 +47,8 @@ def addEventFrame(eventFrameTemplateId = None, parentEventFrameId = None):
 		flash("You have successfully added a new Event Frame.", "alert alert-success")
 		return redirect(form.requestReferrer.data)
 
-	form.requestReferrer.data = request.referrer
+	if form.requestReferrer.data is None:
+		form.requestReferrer.data = request.referrer
 	if parentEventFrameId:
 		form.parentEventFrameId.data = parentEventFrameId
 		breadcrumbs = [{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Root"), "text" : "<span class = \"glyphicon glyphicon-home\"></span>"},
