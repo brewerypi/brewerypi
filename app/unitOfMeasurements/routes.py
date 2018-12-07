@@ -33,6 +33,9 @@ def addUnitOfMeasurement():
 		return redirect(url_for("unitOfMeasurements.listUnitOfMeasurements"))
 
 	# Present a form to add a new unit of measurement.
+	if form.requestReferrer.data is None:
+		# If request.referrer is None (i.e. if accessing add/edit from a bookmark), will return to home page
+		form.requestReferrer.data = request.referrer
 	breadcrumbs = [{"url" : url_for("unitOfMeasurements.listUnitOfMeasurements"), "text" : "<span class = \"glyphicon glyphicon-home\"></span>"}]
 	return render_template("addEdit.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
 
@@ -158,6 +161,9 @@ def editUnitOfMeasurement(unitOfMeasurementId):
 	# Present a form to edit an existing unit of measurement.
 	form.abbreviation.data = unitOfMeasurement.Abbreviation
 	form.name.data = unitOfMeasurement.Name
+	if form.requestReferrer.data is None:
+		# If request.referrer is None (i.e. if accessing add/edit from a bookmark), will return to home page
+		form.requestReferrer.data = request.referrer
 	breadcrumbs = [{"url" : url_for("unitOfMeasurements.listUnitOfMeasurements"), "text" : "<span class = \"glyphicon glyphicon-home\"></span>"},
 		{"url" : None, "text" : unitOfMeasurement.Name}]
 	return render_template("addEdit.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
