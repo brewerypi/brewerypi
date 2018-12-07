@@ -24,7 +24,9 @@ def addArea(siteId):
 		return redirect(form.requestReferrer.data)
 
 	# Present a form to add a new area.
-	form.requestReferrer.data = request.referrer
+	if form.requestReferrer.data is None:
+		# If request.referrer is None (i.e. if accessing add/edit from a bookmark), will return to home page
+		form.requestReferrer.data = request.referrer
 	site = Site.query.get_or_404(siteId)
 	breadcrumbs = [{"url" : url_for("physicalModels.selectPhysicalModel", selectedClass = "Root"),
 		"text" : "<span class = \"glyphicon glyphicon-home\"></span>"},
@@ -66,7 +68,9 @@ def editArea(areaId):
 	form.description.data = area.Description
 	form.name.data = area.Name
 	form.siteId.data = area.SiteId
-	form.requestReferrer.data = request.referrer
+	if form.requestReferrer.data is None:
+		# If request.referrer is None (i.e. if accessing add/edit from a bookmark), will return to home page
+		form.requestReferrer.data = request.referrer
 	breadcrumbs = [{"url" : url_for("physicalModels.selectPhysicalModel", selectedClass = "Root"),
 		"text" : "<span class = \"glyphicon glyphicon-home\"></span>"},
 		{"url" : url_for("physicalModels.selectPhysicalModel", selectedClass = "Enterprise", selectedId = area.Site.Enterprise.EnterpriseId),

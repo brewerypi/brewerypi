@@ -25,7 +25,9 @@ def addElementTemplate(siteId):
 
 	# Present a form to add a new element template.
 	form.siteId.data = siteId
-	form.requestReferrer.data = request.referrer
+	if form.requestReferrer.data is None:
+		# If request.referrer is None (i.e. if accessing add/edit from a bookmark), will return to home page
+		form.requestReferrer.data = request.referrer
 	site = Site.query.get_or_404(siteId)
 	breadcrumbs = [{"url" : url_for("elements.selectElement", selectedClass = "Root"), "text" : "<span class = \"glyphicon glyphicon-home\"></span>"},
 		{"url" : url_for("elements.selectElement", selectedClass = "Enterprise", selectedId = site.Enterprise.EnterpriseId),
@@ -64,7 +66,9 @@ def editElementTemplate(elementTemplateId):
 	form.description.data = elementTemplate.Description
 	form.name.data = elementTemplate.Name
 	form.siteId.data = elementTemplate.SiteId
-	form.requestReferrer.data = request.referrer
+	if form.requestReferrer.data is None:
+		# If request.referrer is None (i.e. if accessing add/edit from a bookmark), will return to home page
+		form.requestReferrer.data = request.referrer
 	breadcrumbs = [{"url" : url_for("elements.selectElement", selectedClass = "Root"), "text" : "<span class = \"glyphicon glyphicon-home\"></span>"},
 		{"url" : url_for("elements.selectElement", selectedClass = "Enterprise", selectedId = elementTemplate.Site.Enterprise.EnterpriseId),
 			"text" : elementTemplate.Site.Enterprise.Name},
