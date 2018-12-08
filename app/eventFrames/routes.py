@@ -312,10 +312,10 @@ def overlay(eventFrameTemplateId):
 	return render_template("eventFrames/overlay.html", eventFrameAttributeTemplates = eventFrameAttributeTemplates, eventFrameTemplate = eventFrameTemplate,
 		form = form)
 
-@eventFrames.route("/eventFrames/overlay/grafana", methods = ["GET", "POST"])
+@eventFrames.route("/eventFrames/overlay/days", methods = ["GET", "POST"])
 @login_required
 @permissionRequired(Permission.DATA_ENTRY)
-def test():
+def days():
 	data = request.get_json(force = True)
 	dynamicSql = ""
 	for item in data:
@@ -336,13 +336,13 @@ def test():
 		INNER JOIN Tag ON EventFrameAttribute.TagId = Tag.TagId
 		INNER JOIN TagValue ON Tag.TagId = TagValue.TagId
 	WHERE EventFrame.EventFrameId IN ({}) AND
-		(
-			EventFrame.EndTimestamp IS NULL AND
-			TagValue.Timestamp >= EventFrame.StartTimestamp OR
-			EventFrame.EndTimestamp IS NOT NULL AND
-			TagValue.Timestamp >= EventFrame.StartTimestamp AND
-			TagValue.Timestamp <= EventFrame.EndTimestamp
-		)
+	(
+		EventFrame.EndTimestamp IS NULL AND
+		TagValue.Timestamp >= EventFrame.StartTimestamp OR
+		EventFrame.EndTimestamp IS NOT NULL AND
+		TagValue.Timestamp >= EventFrame.StartTimestamp AND
+		TagValue.Timestamp <= EventFrame.EndTimestamp
+	)
 	ORDER BY Days DESC
 	LIMIT 1
 	""".format(dynamicSql)

@@ -145,7 +145,7 @@ Event Frames
                 var title = $(this).text()
                 if (id != "thStartTimestamp" && id != "thEndTimestamp")
                 {
-                    $(this).html("<input type = \"text\" placeholder = \"Search " + title + "\" />")
+                    $(this).html("<input type = \"text\" placeholder = \"Filter " + title + "\" />")
                 }
                 else
                 {
@@ -237,11 +237,13 @@ Event Frames
 
                 if (numberOfRows > 0)
                 {
-                    $.ajax({
+                    $.ajax(
+                    {
                         type : "POST",
-                        url : "/eventFrames/overlay/grafana",
+                        url : "/eventFrames/overlay/days",
                         data : JSON.stringify(rows)
-                    }).done(function(response) {
+                    }).done(function(response)
+                    {
                         var days = response["days"]
                         var from = moment()
                         from = from.subtract(days, "days")
@@ -262,7 +264,8 @@ Event Frames
                             })
                             window.open(link, "_blank")
                         {% endif %}
-                    }).fail(function() {
+                    }).fail(function()
+                    {
                         $(".alert").remove()
                         $("#divFlashedMessages").append("<div class = \"alert alert-danger\"><button type = \"button\" class = \"close\" " +
                             "data-dismiss = \"alert\">&times;</button>The attempt to load the event frame overlay has failed.</div>")                        

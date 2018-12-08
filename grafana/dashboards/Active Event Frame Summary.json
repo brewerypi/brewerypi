@@ -12,10 +12,10 @@
       }
     ]
   },
-  "editable": true,
+  "editable": false,
   "gnetId": null,
   "graphTooltip": 0,
-  "iteration": 1543936696013,
+  "iteration": 1544287708214,
   "links": [],
   "panels": [
     {
@@ -80,9 +80,30 @@
         {
           "alias": "",
           "format": "table",
+          "group": [],
           "hide": false,
+          "metricColumn": "none",
+          "rawQuery": true,
           "rawSql": "call BreweryPi.spActiveEventFrameSummary('$eventFrameTemplatesString', '$eventFrameAttributeTemplatesString');",
-          "refId": "A"
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "timeColumn": "time",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
         }
       ],
       "title": "Active Event Frame Summary",
@@ -100,6 +121,7 @@
         "allValue": null,
         "current": {},
         "datasource": "BreweryPi",
+        "definition": "",
         "hide": 0,
         "includeAll": false,
         "label": "Enterprise:",
@@ -109,6 +131,7 @@
         "query": "SELECT DISTINCT Enterprise.EnterpriseId AS __value,     Enterprise.Name AS __text FROM Enterprise     INNER JOIN Site ON Enterprise.EnterpriseId = Site.EnterpriseId     INNER JOIN ElementTemplate ON Site.SiteId = ElementTemplate.SiteId     INNER JOIN EventFrameTemplate ON ElementTemplate.ElementTemplateId = EventFrameTemplate.ElementTemplateId",
         "refresh": 1,
         "regex": "",
+        "skipUrlSync": false,
         "sort": 5,
         "tagValuesQuery": "",
         "tags": [],
@@ -120,6 +143,7 @@
         "allValue": null,
         "current": {},
         "datasource": "BreweryPi",
+        "definition": "",
         "hide": 0,
         "includeAll": false,
         "label": "Site:",
@@ -129,6 +153,7 @@
         "query": "SELECT DISTINCT Site.SiteId AS __value,     Site.Name AS __text FROM Site     INNER JOIN ElementTemplate ON Site.SiteId = ElementTemplate.SiteId     INNER JOIN EventFrameTemplate ON ElementTemplate.ElementTemplateId = EventFrameTemplate.ElementTemplateId WHERE Site.EnterpriseId = $enterprise",
         "refresh": 1,
         "regex": "",
+        "skipUrlSync": false,
         "sort": 5,
         "tagValuesQuery": "",
         "tags": [],
@@ -138,9 +163,9 @@
       },
       {
         "allValue": null,
-        "current": {
-},
+        "current": {},
         "datasource": "BreweryPi",
+        "definition": "",
         "hide": 0,
         "includeAll": true,
         "label": "Element Templates:",
@@ -150,6 +175,7 @@
         "query": "SELECT DISTINCT ElementTemplate.ElementTemplateId AS __value,     ElementTemplate.Name AS __text FROM ElementTemplate     INNER JOIN EventFrameTemplate ON ElementTemplate.ElementTemplateId = EventFrameTemplate.ElementTemplateId WHERE ElementTemplate.SiteId = $site",
         "refresh": 1,
         "regex": "",
+        "skipUrlSync": false,
         "sort": 5,
         "tagValuesQuery": "",
         "tags": [],
@@ -161,6 +187,7 @@
         "allValue": null,
         "current": {},
         "datasource": "BreweryPi",
+        "definition": "",
         "hide": 0,
         "includeAll": true,
         "label": "Event Frame Templates:",
@@ -170,6 +197,7 @@
         "query": "SELECT DISTINCT EventFrameTemplate.EventFrameTemplateId AS __value, EventFrameTemplate.Name AS __text FROM EventFrameTemplate WHERE EventFrameTemplate.ElementTemplateId IN($elementTemplates)",
         "refresh": 1,
         "regex": "",
+        "skipUrlSync": false,
         "sort": 5,
         "tagValuesQuery": "",
         "tags": [],
@@ -181,6 +209,7 @@
         "allValue": null,
         "current": {},
         "datasource": "BreweryPi",
+        "definition": "",
         "hide": 2,
         "includeAll": false,
         "label": null,
@@ -190,6 +219,7 @@
         "query": "SELECT CONCAT_WS(',', $eventFrameTemplates)",
         "refresh": 1,
         "regex": "",
+        "skipUrlSync": false,
         "sort": 0,
         "tagValuesQuery": "",
         "tags": [],
@@ -201,6 +231,7 @@
         "allValue": null,
         "current": {},
         "datasource": "BreweryPi",
+        "definition": "",
         "hide": 0,
         "includeAll": true,
         "label": "Event Frame Attribute Templates",
@@ -210,6 +241,7 @@
         "query": "SELECT DISTINCT EventFrameAttributeTemplate.Name FROM EventFrameAttributeTemplate WHERE EventFrameAttributeTemplate.EventFrameTemplateId IN($eventFrameTemplates)",
         "refresh": 1,
         "regex": "",
+        "skipUrlSync": false,
         "sort": 5,
         "tagValuesQuery": "",
         "tags": [],
@@ -221,6 +253,7 @@
         "allValue": null,
         "current": {},
         "datasource": "BreweryPi",
+        "definition": "",
         "hide": 2,
         "includeAll": false,
         "label": null,
@@ -230,6 +263,7 @@
         "query": "SELECT CONCAT_WS(',', $eventFrameAttributeTemplates)",
         "refresh": 1,
         "regex": "",
+        "skipUrlSync": false,
         "sort": 0,
         "tagValuesQuery": "",
         "tags": [],
