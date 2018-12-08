@@ -48,8 +48,8 @@ def addEventFrame(eventFrameTemplateId = None, parentEventFrameId = None):
 		return redirect(form.requestReferrer.data)
 
 	if form.requestReferrer.data is None:
-		# If request.referrer is None (i.e. if accessing add/edit from a bookmark), will return to home page
 		form.requestReferrer.data = request.referrer
+
 	if parentEventFrameId:
 		form.parentEventFrameId.data = parentEventFrameId
 		breadcrumbs = [{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Root"), "text" : "<span class = \"glyphicon glyphicon-home\"></span>"},
@@ -214,8 +214,8 @@ def editEventFrame(eventFrameId):
 	form.name.data = eventFrame.Name
 	form.startTimestamp.data = eventFrame.StartTimestamp
 	if form.requestReferrer.data is None:
-		# If request.referrer is None (i.e. if accessing add/edit from a bookmark), will return to home page
 		form.requestReferrer.data = request.referrer
+
 	return render_template("eventFrames/addEdit.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
 
 @eventFrames.route("/eventFrames/endEventFrame/<int:eventFrameId>", methods = ["GET", "POST"])

@@ -28,8 +28,8 @@ def addElement(elementTemplateId):
 	# Present a form to add a new element.
 	form.elementTemplateId.data = elementTemplateId
 	if form.requestReferrer.data is None:
-		# If request.referrer is None (i.e. if accessing add/edit from a bookmark), will return to home page
 		form.requestReferrer.data = request.referrer
+
 	elementTemplate = ElementTemplate.query.get_or_404(elementTemplateId)
 	breadcrumbs = [{"url" : url_for("elements.selectElement", selectedClass = "Root"), "text" : "<span class = \"glyphicon glyphicon-home\"></span>"},
 		{"url" : url_for("elements.selectElement", selectedClass = "Enterprise", selectedId = elementTemplate.Site.Enterprise.EnterpriseId),
@@ -93,8 +93,8 @@ def copyElement(elementId):
 	del form.elementTemplateId
 	form.elementIdToCopy.data = elementId
 	if form.requestReferrer.data is None:
-		# If request.referrer is None (i.e. if accessing add/edit from a bookmark), will return to home page
 		form.requestReferrer.data = request.referrer
+
 	element = Element.query.get_or_404(elementId)
 	breadcrumbs = [{"url" : url_for("elements.selectElement", selectedClass = "Root"), "text" : "<span class = \"glyphicon glyphicon-home\"></span>"},
 		{"url" : url_for("elements.selectElement", selectedClass = "Enterprise", selectedId = element.ElementTemplate.Site.Enterprise.EnterpriseId),
@@ -147,8 +147,8 @@ def editElement(elementId):
 	form.elementTemplateId.data = element.ElementTemplateId
 	form.name.data = element.Name
 	if form.requestReferrer.data is None:
-		# If request.referrer is None (i.e. if accessing add/edit from a bookmark), will return to home page
 		form.requestReferrer.data = request.referrer
+
 	breadcrumbs = [{"url" : url_for("elements.selectElement", selectedClass = "Root"), "text" : "<span class = \"glyphicon glyphicon-home\"></span>"},
 		{"url" : url_for("elements.selectElement", selectedClass = "Enterprise", selectedId = element.ElementTemplate.Site.Enterprise.EnterpriseId),
 			"text" : element.ElementTemplate.Site.Enterprise.Name},

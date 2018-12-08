@@ -27,8 +27,8 @@ def addEventFrameAttributeTemplate(eventFrameTemplateId):
 
 	# Present a form to add a new event frame attribute template.
 	if form.requestReferrer.data is None:
-		# If request.referrer is None (i.e. if accessing add/edit from a bookmark), will return to home page
 		form.requestReferrer.data = request.referrer
+
 	eventFrameTemplate = EventFrameTemplate.query.get_or_404(eventFrameTemplateId)
 	if eventFrameTemplate.hasParent():
 		breadcrumbs = [{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Root"), "text" : "<span class = \"glyphicon glyphicon-home\"></span>"},
@@ -95,7 +95,6 @@ def editEventFrameAttributeTemplate(eventFrameAttributeTemplateId):
 	form.description.data = eventFrameAttributeTemplate.Description
 	form.name.data = eventFrameAttributeTemplate.Name
 	if form.requestReferrer.data is None:
-		# If request.referrer is None (i.e. if accessing add/edit from a bookmark), will return to home page
 		form.requestReferrer.data = request.referrer
 
 	if eventFrameAttributeTemplate.EventFrameTemplate.hasParent():

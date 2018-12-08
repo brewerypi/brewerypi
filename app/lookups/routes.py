@@ -26,8 +26,8 @@ def addLookup(enterpriseId):
 	# Present a form to add a new lookup.
 	form.enterpriseId.data = enterpriseId
 	if form.requestReferrer.data is None:
-		# If request.referrer is None (i.e. if accessing add/edit from a bookmark), will return to home page
 		form.requestReferrer.data = request.referrer
+
 	enterprise = Enterprise.query.get_or_404(enterpriseId)
 	breadcrumbs = [{"url" : url_for("lookups.selectLookup", selectedClass = "Root"), "text" : "<span class = \"glyphicon glyphicon-home\"></span>"},
 		{"url" : url_for("lookups.selectLookup", selectedClass = "Enterprise", selectedId = enterprise.EnterpriseId), "text" : enterprise.Name}]
@@ -63,9 +63,8 @@ def editLookup(lookupId):
 	form.enterpriseId.data = lookup.EnterpriseId
 	form.name.data = lookup.Name
 	if form.requestReferrer.data is None:
-		# If request.referrer is None (i.e. if accessing add/edit from a bookmark), will return to home page
 		form.requestReferrer.data = request.referrer
-	# return render_template("addEdit.html", form = form, modelName = modelName, operation = operation)
+
 	breadcrumbs = [{"url" : url_for("lookups.selectLookup", selectedClass = "Root"), "text" : "<span class = \"glyphicon glyphicon-home\"></span>"},
 		{"url" : url_for("lookups.selectLookup", selectedClass = "Enterprise", selectedId = lookup.Enterprise.EnterpriseId), "text" : lookup.Enterprise.Name},
 		{"url" : None, "text" : lookup.Name}]

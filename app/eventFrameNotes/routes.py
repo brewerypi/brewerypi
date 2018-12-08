@@ -28,8 +28,8 @@ def addEventFrameNote(eventFrameId):
 
 	# Present a form to add a new event frame note.
 	if form.requestReferrer.data is None:
-		# If request.referrer is None (i.e. if accessing add/edit from a bookmark), will return to home page
 		form.requestReferrer.data = request.referrer
+
 	eventFrame = EventFrame.query.get_or_404(eventFrameId)
 	if eventFrame.ParentEventFrameId:
 		breadcrumbs = []
@@ -81,8 +81,8 @@ def editEventFrameNote(eventFrameId, noteId):
 	form.note.data = note.Note
 	form.timestamp.data = note.Timestamp
 	if form.requestReferrer.data is None:
-		# If request.referrer is None (i.e. if accessing add/edit from a bookmark), will return to home page
 		form.requestReferrer.data = request.referrer
+
 	eventFrame = EventFrame.query.get_or_404(eventFrameId)
 	if eventFrame.ParentEventFrameId:
 		breadcrumbs = []
