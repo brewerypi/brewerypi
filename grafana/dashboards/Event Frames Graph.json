@@ -201,8 +201,8 @@
         {
           "alias": "",
           "format": "table",
-          "hide": true,
-          "rawSql": "SELECT EventFrameNote.Name AS 'Event Frame',\n  Element.Name,\n  Note.Timestamp,\n  Note.Note\nFROM Note\n  INNER JOIN EventFrameNote ON Note.NoteId = EventFrameNote.NoteId\n  INNER JOIN EventFrame ON EventFrameNote.EventFrameId = EventFrame.EventFrameId\n  INNER JOIN Element ON EventFrame.ElementId = Element.ElementId\nWHERE EventFrameNote.EventFrameId = $eventFrame\nORDER BY Note.Timestamp",
+          "hide": false,
+          "rawSql": "SELECT EventFrame.Name AS 'Event Frame',\n  Element.Name,\n  Note.Timestamp,\n  Note.Note\nFROM Note\n  INNER JOIN EventFrameNote ON Note.NoteId = EventFrameNote.NoteId\n  INNER JOIN EventFrame ON EventFrameNote.EventFrameId = EventFrame.EventFrameId\n  INNER JOIN Element ON EventFrame.ElementId = Element.ElementId\nWHERE EventFrameNote.EventFrameId = $eventFrame\nORDER BY Note.Timestamp",
           "refId": "A"
         }
       ],
