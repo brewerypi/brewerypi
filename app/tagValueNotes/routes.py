@@ -51,7 +51,9 @@ def addTagValueNote(tagValueId, elementAttributeId = None, eventFrameId = None, 
 		return redirect(form.requestReferrer.data)
 
 	# Present a form to add a new tag value note.
-	form.requestReferrer.data = request.referrer
+	if form.requestReferrer.data is None:
+		# If request.referrer is None (i.e. if accessing add/edit from a bookmark), will return to home page
+		form.requestReferrer.data = request.referrer
 	tagValue = TagValue.query.get_or_404(tagValueId)
 	if elementAttributeId:
 		elementAttribute = ElementAttribute.query.get_or_404(elementAttributeId)
@@ -132,7 +134,9 @@ def editTagValueNote(noteId, tagValueId, elementAttributeId = None, eventFrameId
 	# Present a form to edit an existing tag value.
 	form.note.data = note.Note
 	form.timestamp.data = note.Timestamp
-	form.requestReferrer.data = request.referrer
+	if form.requestReferrer.data is None:
+		# If request.referrer is None (i.e. if accessing add/edit from a bookmark), will return to home page
+		form.requestReferrer.data = request.referrer
 	tagValue = TagValue.query.get_or_404(tagValueId)
 	if elementAttributeId:
 		elementAttribute = ElementAttribute.query.get_or_404(elementAttributeId)

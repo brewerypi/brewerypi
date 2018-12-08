@@ -79,7 +79,9 @@ def addEventFrameTemplate(elementTemplateId = None, parentEventFrameTemplateId =
 				"text" : elementTemplate.Site.Name},
 			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "ElementTemplate", selectedId = elementTemplate.ElementTemplateId),
 				"text" : elementTemplate.Name}]	
-	form.requestReferrer.data = request.referrer
+	if form.requestReferrer.data is None:
+		# If request.referrer is None (i.e. if accessing add/edit from a bookmark), will return to home page
+		form.requestReferrer.data = request.referrer
 	return render_template("addEdit.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
 
 @eventFrameTemplates.route("/eventFrameTemplates/delete/<int:eventFrameTemplateId>", methods = ["GET", "POST"])
@@ -176,5 +178,7 @@ def editEventFrameTemplate(eventFrameTemplateId):
 	form.description.data = eventFrameTemplate.Description
 	form.name.data = eventFrameTemplate.Name
 	form.parentEventFrameTemplateId.data = eventFrameTemplate.ParentEventFrameTemplateId
-	form.requestReferrer.data = request.referrer
+	if form.requestReferrer.data is None:
+		# If request.referrer is None (i.e. if accessing add/edit from a bookmark), will return to home page
+		form.requestReferrer.data = request.referrer
 	return render_template("addEdit.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
