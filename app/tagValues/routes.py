@@ -113,8 +113,8 @@ def addTagValue(tagId = None, elementAttributeId = None, eventFrameId = None, ev
 	# Present a form to add a new tag value.
 	form.tagId.data = tag.TagId
 	if form.requestReferrer.data is None:
-		# If request.referrer is None (i.e. if accessing add/edit from a bookmark), will return to home page
 		form.requestReferrer.data = request.referrer
+
 	if elementAttributeId:
 		breadcrumbs = [{"url" : url_for("tags.selectTag", selectedClass = "Root"), "text" : "<span class = \"glyphicon glyphicon-home\"></span>"},
 			{"url" : url_for("elements.selectElement", selectedClass = "Enterprise",
@@ -205,8 +205,8 @@ def editTagValue(tagValueId, elementAttributeId = None, eventFrameId = None, eve
 		form.value.data = tagValue.Value
 
 	if form.requestReferrer.data is None:
-		# If request.referrer is None (i.e. if accessing add/edit from a bookmark), will return to home page
 		form.requestReferrer.data = request.referrer
+
 	if elementAttributeId:
 		elementAttribute = ElementAttribute.query.get_or_404(elementAttributeId)
 		breadcrumbs = [{"url" : url_for("tags.selectTag", selectedClass = "Root"), "text" : "<span class = \"glyphicon glyphicon-home\"></span>"},

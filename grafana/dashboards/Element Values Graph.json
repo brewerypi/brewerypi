@@ -62,10 +62,10 @@
       }
     ]
   },
-  "editable": true,
+  "editable": false,
   "gnetId": null,
   "graphTooltip": 0,
-  "iteration": 1543214626926,
+  "iteration": 1544288068241,
   "links": [],
   "panels": [
     {
@@ -109,13 +109,35 @@
         {
           "alias": "",
           "format": "time_series",
+          "group": [],
           "hide": false,
+          "metricColumn": "none",
+          "rawQuery": true,
           "rawSql": "SELECT UNIX_TIMESTAMP(TagValue.Timestamp) AS time_sec,\n\tTagValue.Value AS value,\n\tCONCAT(Element.Name, '_', ElementAttributeTemplate.Name) AS metric \nFROM ElementAttribute\n\tINNER JOIN Element ON ElementAttribute.ElementId = Element.ElementId\n\tINNER JOIN ElementAttributeTemplate ON ElementAttribute.ElementAttributeTemplateId = ElementAttributeTemplate.ElementAttributeTemplateId\n\tINNER JOIN Tag ON ElementAttribute.TagId = Tag.TagId\n\tINNER JOIN TagValue ON Tag.TagId = TagValue.TagId\nWHERE (Element.ElementId IN ($elements)) AND (ElementAttributeTemplate.ElementAttributeTemplateId IN ($elementAttributeTemplates)) AND $__timeFilter(TagValue.Timestamp)",
-          "refId": "A"
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "timeColumn": "time",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
         }
       ],
       "thresholds": [],
       "timeFrom": null,
+      "timeRegions": [],
       "timeShift": null,
       "title": "Element Values",
       "tooltip": {
@@ -166,6 +188,7 @@
         "allValue": null,
         "current": {},
         "datasource": "BreweryPi",
+        "definition": "",
         "hide": 0,
         "includeAll": false,
         "label": "Enterprise:",
@@ -175,6 +198,7 @@
         "query": "SELECT DISTINCT Enterprise.EnterpriseId AS __value,      Enterprise.Name AS __text FROM Enterprise  \tINNER JOIN Site ON Enterprise.EnterpriseId = Site.EnterpriseId     INNER JOIN ElementTemplate ON Site.SiteId = ElementTemplate.SiteId     INNER JOIN ElementAttributeTemplate ON ElementTemplate.ElementTemplateId = ElementAttributeTemplate.ElementTemplateId     INNER JOIN Element ON ElementTemplate.ElementTemplateId = Element.ElementTemplateId",
         "refresh": 1,
         "regex": "",
+        "skipUrlSync": false,
         "sort": 5,
         "tagValuesQuery": "",
         "tags": [],
@@ -186,6 +210,7 @@
         "allValue": null,
         "current": {},
         "datasource": "BreweryPi",
+        "definition": "",
         "hide": 0,
         "includeAll": false,
         "label": "Site:",
@@ -195,6 +220,7 @@
         "query": "SELECT DISTINCT Site.SiteId AS __value,      Site.Name AS __text  FROM Site      INNER JOIN ElementTemplate ON Site.SiteId = ElementTemplate.SiteId      INNER JOIN ElementAttributeTemplate ON ElementTemplate.ElementTemplateId = ElementAttributeTemplate.ElementTemplateId      INNER JOIN Element ON ElementTemplate.ElementTemplateId = Element.ElementTemplateId  WHERE Site.EnterpriseId = $enterprise",
         "refresh": 1,
         "regex": "",
+        "skipUrlSync": false,
         "sort": 5,
         "tagValuesQuery": "",
         "tags": [],
@@ -206,6 +232,7 @@
         "allValue": null,
         "current": {},
         "datasource": "BreweryPi",
+        "definition": "",
         "hide": 0,
         "includeAll": true,
         "label": "Element Templates:",
@@ -215,6 +242,7 @@
         "query": "SELECT DISTINCT ElementTemplate.ElementTemplateId AS __value,      ElementTemplate.Name AS __text  FROM ElementTemplate  \tINNER JOIN ElementAttributeTemplate ON ElementTemplate.ElementTemplateId = ElementAttributeTemplate.ElementTemplateId      INNER JOIN Element ON ElementTemplate.ElementTemplateId = Element.ElementTemplateId  WHERE ElementTemplate.SiteId = $site",
         "refresh": 1,
         "regex": "",
+        "skipUrlSync": false,
         "sort": 5,
         "tagValuesQuery": "",
         "tags": [],
@@ -226,6 +254,7 @@
         "allValue": null,
         "current": {},
         "datasource": "BreweryPi",
+        "definition": "",
         "hide": 0,
         "includeAll": true,
         "label": "Elements:",
@@ -235,6 +264,7 @@
         "query": "SELECT DISTINCT ElementId AS __value,      CONCAT(Element.Name, ' (', ElementTemplate.Name, ')') AS __text  FROM Element      INNER JOIN ElementTemplate ON Element.ElementTemplateId = ElementTemplate.ElementTemplateId  WHERE Element.ElementTemplateId IN ($elementTemplates) ORDER BY ElementTemplate.Name, Element.Name",
         "refresh": 1,
         "regex": "",
+        "skipUrlSync": false,
         "sort": 0,
         "tagValuesQuery": "",
         "tags": [],
@@ -246,6 +276,7 @@
         "allValue": null,
         "current": {},
         "datasource": "BreweryPi",
+        "definition": "",
         "hide": 0,
         "includeAll": true,
         "label": "Element Attributes:",
@@ -255,6 +286,7 @@
         "query": "SELECT ElementAttributeTemplate.ElementAttributeTemplateId AS __value,      ElementAttributeTemplate.Name AS __text  FROM ElementAttributeTemplate      INNER JOIN ElementTemplate ON ElementAttributeTemplate.ElementTemplateId = ElementTemplate.ElementTemplateId      INNER JOIN Element ON ElementTemplate.ElementTemplateId = Element.ElementTemplateId WHERE (Element.ElementId IN ($elements))",
         "refresh": 1,
         "regex": "",
+        "skipUrlSync": false,
         "sort": 5,
         "tagValuesQuery": "",
         "tags": [],
@@ -266,6 +298,7 @@
         "allValue": null,
         "current": {},
         "datasource": "BreweryPi",
+        "definition": "",
         "hide": 0,
         "includeAll": true,
         "label": "Lookups:",
@@ -275,6 +308,7 @@
         "query": "SELECT Lookup.LookupId AS __value, Lookup.Name AS __text FROM Lookup WHERE Lookup.EnterpriseId = $enterprise",
         "refresh": 1,
         "regex": "",
+        "skipUrlSync": false,
         "sort": 5,
         "tagValuesQuery": "",
         "tags": [],

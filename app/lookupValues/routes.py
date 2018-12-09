@@ -34,8 +34,8 @@ def addLookupValue(lookupId):
 	form.lookupId.data = lookupId
 	form.selectable.data = True
 	if form.requestReferrer.data is None:
-		# If request.referrer is None (i.e. if accessing add/edit from a bookmark), will return to home page
 		form.requestReferrer.data = request.referrer
+
 	lookup = Lookup.query.get_or_404(lookupId)
 	breadcrumbs = [{"url" : url_for("lookups.selectLookup", selectedClass = "Root"), "text" : "<span class = \"glyphicon glyphicon-home\"></span>"},
 		{"url" : url_for("lookups.selectLookup", selectedClass = "Enterprise", selectedId = lookup.Enterprise.EnterpriseId), "text" : lookup.Enterprise.Name},
@@ -81,8 +81,8 @@ def editLookupValue(lookupValueId):
 	form.selectable.data = lookupValue.Selectable
 	form.value.data = lookupValue.Value
 	if form.requestReferrer.data is None:
-		# If request.referrer is None (i.e. if accessing add/edit from a bookmark), will return to home page
 		form.requestReferrer.data = request.referrer
+
 	breadcrumbs = [{"url" : url_for("lookups.selectLookup", selectedClass = "Root"), "text" : "<span class = \"glyphicon glyphicon-home\"></span>"},
 		{"url" : url_for("lookups.selectLookup", selectedClass = "Enterprise", selectedId = lookup.Enterprise.EnterpriseId), "text" : lookup.Enterprise.Name},
 		{"url" : url_for("lookups.selectLookup", selectedClass = "Lookup", selectedId = lookup.LookupId), "text" : lookup.Name},

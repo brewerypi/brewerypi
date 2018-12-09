@@ -1,34 +1,4 @@
 {
-  "__inputs": [
-    {
-      "name": "DS_BREWERYPI",
-      "label": "BreweryPi",
-      "description": "",
-      "type": "datasource",
-      "pluginId": "mysql",
-      "pluginName": "MySQL"
-    }
-  ],
-  "__requires": [
-    {
-      "type": "grafana",
-      "id": "grafana",
-      "name": "Grafana",
-      "version": "5.2.2"
-    },
-    {
-      "type": "datasource",
-      "id": "mysql",
-      "name": "MySQL",
-      "version": "5.0.0"
-    },
-    {
-      "type": "panel",
-      "id": "table",
-      "name": "Table",
-      "version": "5.0.0"
-    }
-  ],
   "annotations": {
     "list": [
       {
@@ -42,11 +12,10 @@
       }
     ]
   },
-  "editable": true,
+  "editable": false,
   "gnetId": null,
   "graphTooltip": 0,
-  "id": null,
-  "iteration": 1535416056870,
+  "iteration": 1544287900436,
   "links": [],
   "panels": [
     {
@@ -95,9 +64,30 @@
         {
           "alias": "",
           "format": "table",
+          "group": [],
           "hide": false,
+          "metricColumn": "none",
+          "rawQuery": true,
           "rawSql": "call BreweryPi.spElementSummary('$elementAttributeTemplatesString', '$elementsString');",
-          "refId": "A"
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "timeColumn": "time",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
         }
       ],
       "title": "Element Summary",
@@ -115,6 +105,7 @@
         "allValue": null,
         "current": {},
         "datasource": "BreweryPi",
+        "definition": "",
         "hide": 0,
         "includeAll": false,
         "label": "Enterprise:",
@@ -124,6 +115,7 @@
         "query": "SELECT DISTINCT Enterprise.EnterpriseId AS __value,      Enterprise.Name AS __text  FROM Enterprise  \tINNER JOIN Site ON Enterprise.EnterpriseId = Site.EnterpriseId      INNER JOIN ElementTemplate ON Site.SiteId = ElementTemplate.SiteId      INNER JOIN ElementAttributeTemplate ON ElementTemplate.ElementTemplateId = ElementAttributeTemplate.ElementTemplateId      INNER JOIN Element ON ElementTemplate.ElementTemplateId = Element.ElementTemplateId",
         "refresh": 1,
         "regex": "",
+        "skipUrlSync": false,
         "sort": 5,
         "tagValuesQuery": "",
         "tags": [],
@@ -135,6 +127,7 @@
         "allValue": null,
         "current": {},
         "datasource": "BreweryPi",
+        "definition": "",
         "hide": 0,
         "includeAll": false,
         "label": "Site:",
@@ -144,6 +137,7 @@
         "query": "SELECT DISTINCT Site.SiteId AS __value,      Site.Name AS __text  FROM Site  \tINNER JOIN ElementTemplate ON Site.SiteId = ElementTemplate.SiteId      INNER JOIN ElementAttributeTemplate ON ElementTemplate.ElementTemplateId = ElementAttributeTemplate.ElementTemplateId      INNER JOIN Element ON ElementTemplate.ElementTemplateId = Element.ElementTemplateId  WHERE Site.EnterpriseId = $enterprise",
         "refresh": 1,
         "regex": "",
+        "skipUrlSync": false,
         "sort": 5,
         "tagValuesQuery": "",
         "tags": [],
@@ -155,6 +149,7 @@
         "allValue": null,
         "current": {},
         "datasource": "BreweryPi",
+        "definition": "",
         "hide": 0,
         "includeAll": true,
         "label": "Element Templates:",
@@ -164,6 +159,7 @@
         "query": "SELECT DISTINCT ElementTemplate.ElementTemplateId AS __value,      ElementTemplate.Name AS __text  FROM ElementTemplate  \tINNER JOIN ElementAttributeTemplate ON ElementTemplate.ElementTemplateId = ElementAttributeTemplate.ElementTemplateId      INNER JOIN Element ON ElementTemplate.ElementTemplateId = Element.ElementTemplateId  WHERE ElementTemplate.SiteId = $site",
         "refresh": 1,
         "regex": "",
+        "skipUrlSync": false,
         "sort": 5,
         "tagValuesQuery": "",
         "tags": [],
@@ -175,6 +171,7 @@
         "allValue": null,
         "current": {},
         "datasource": "BreweryPi",
+        "definition": "",
         "hide": 0,
         "includeAll": true,
         "label": "Elements:",
@@ -184,6 +181,7 @@
         "query": "SELECT DISTINCT ElementId AS __value, CONCAT(Element.Name, ' (', ElementTemplate.Name, ')') AS __text FROM Element \tINNER JOIN ElementTemplate ON Element.ElementTemplateId = ElementTemplate.ElementTemplateId WHERE Element.ElementTemplateId IN ($elementTemplates) ORDER BY ElementTemplate.Name, Element.Name",
         "refresh": 1,
         "regex": "",
+        "skipUrlSync": false,
         "sort": 0,
         "tagValuesQuery": "",
         "tags": [],
@@ -195,6 +193,7 @@
         "allValue": null,
         "current": {},
         "datasource": "BreweryPi",
+        "definition": "",
         "hide": 2,
         "includeAll": false,
         "label": null,
@@ -204,6 +203,7 @@
         "query": "SELECT CONCAT_WS(',', $elements)",
         "refresh": 1,
         "regex": "",
+        "skipUrlSync": false,
         "sort": 0,
         "tagValuesQuery": "",
         "tags": [],
@@ -215,6 +215,7 @@
         "allValue": null,
         "current": {},
         "datasource": "BreweryPi",
+        "definition": "",
         "hide": 0,
         "includeAll": true,
         "label": "Element Attributes:",
@@ -224,6 +225,7 @@
         "query": "SELECT DISTINCT ElementAttributeTemplate.Name FROM ElementAttributeTemplate WHERE ElementAttributeTemplate.ElementTemplateId IN($elementTemplates)",
         "refresh": 1,
         "regex": "",
+        "skipUrlSync": false,
         "sort": 5,
         "tagValuesQuery": "",
         "tags": [],
@@ -235,6 +237,7 @@
         "allValue": null,
         "current": {},
         "datasource": "BreweryPi",
+        "definition": "",
         "hide": 2,
         "includeAll": false,
         "label": null,
@@ -244,6 +247,7 @@
         "query": "SELECT CONCAT_WS(',', $elementAttributeTemplates)",
         "refresh": 1,
         "regex": "",
+        "skipUrlSync": false,
         "sort": 0,
         "tagValuesQuery": "",
         "tags": [],

@@ -25,8 +25,8 @@ def addSite(enterpriseId):
 
 	# Present a form to add a new site.
 	if form.requestReferrer.data is None:
-		# If request.referrer is None (i.e. if accessing add/edit from a bookmark), will return to home page
 		form.requestReferrer.data = request.referrer
+
 	enterprise = Enterprise.query.get_or_404(enterpriseId)
 	breadcrumbs = [{"url" : url_for("physicalModels.selectPhysicalModel", selectedClass = "Root"),
 		"text" : "<span class = \"glyphicon glyphicon-home\"></span>"},
@@ -67,8 +67,8 @@ def editSite(siteId):
 	form.enterpriseId.data = site.EnterpriseId
 	form.name.data = site.Name
 	if form.requestReferrer.data is None:
-		# If request.referrer is None (i.e. if accessing add/edit from a bookmark), will return to home page
 		form.requestReferrer.data = request.referrer
+
 	breadcrumbs = [{"url" : url_for("physicalModels.selectPhysicalModel", selectedClass = "Root"),
 		"text" : "<span class = \"glyphicon glyphicon-home\"></span>"},
 		{"url" : url_for("physicalModels.selectPhysicalModel", selectedClass = "Enterprise", selectedId = site.Enterprise.EnterpriseId),
