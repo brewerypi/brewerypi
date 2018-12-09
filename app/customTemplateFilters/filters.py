@@ -70,10 +70,10 @@ def grafanaUrl(uid, parameters = None):
     elif uid == "EventFramesGraph":
         eventFrame = EventFrame.query.get_or_404(parameters["eventFrameId"])
         startTimestamp = EventFrame.query.with_entities(func.unix_timestamp(EventFrame.StartTimestamp)).filter_by(EventFrameId = eventFrame.EventFrameId). \
-            one()[0]
+            one()[0] - 1
         if eventFrame.EndTimestamp:
             endTimestamp = EventFrame.query.with_entities(func.unix_timestamp(EventFrame.EndTimestamp)).filter_by(EventFrameId = eventFrame.EventFrameId). \
-                one()[0]
+                one()[0] + 1
             return current_app.config["GRAFANA_BASE_URI"] + \
                 "/d/EventFramesGraph/event-frames-graph?orgId=1" + \
                 "&from={}000".format(startTimestamp) + \

@@ -1,0 +1,56 @@
+{% extends "addEdit.html" %}
+
+{% block scripts %}
+    {{ super() }}
+    <script>
+        function setUtcTimestamps()
+        {
+            var startTimestamp = $("#startTimestamp").val()
+            var startTimestampIsValid = moment(startTimestamp, "YYYY-M-D H:m:s").isValid()
+            var endTimestamp = $("#endTimestamp").val()
+            var endTimestampIsValid = moment(endTimestamp, "YYYY-M-D H:m:s").isValid()
+            var timestamp
+
+            // If the start timestamp is valid, update the start UTC timestamp.
+            if (startTimestampIsValid)
+            {
+                timestamp = moment(startTimestamp)
+                $("#startUtcTimestamp").val(timestamp.utc().format("YYYY-MM-DD HH:mm:ss"))
+            }
+
+            // If the end timestamp is valid, update the end UTC timestamp.
+            if (endTimestampIsValid)
+            {
+                timestamp = moment(endTimestamp)
+                $("#endUtcTimestamp").val(timestamp.utc().format("YYYY-MM-DD HH:mm:ss"))
+            }
+        }
+
+        $(document).ready(function()
+        {
+            {% if not form.errors %}
+                var startTimestamp = moment.utc($("#startTimestamp").val())
+                var endTimestampIsNotBlank = $("#endTimestamp").val() != ""
+                $("#startTimestamp").val(startTimestamp.local().format("YYYY-MM-DD HH:mm:ss"))
+                if (endTimestampIsNotBlank)
+                {
+                    var endTimestamp = moment.utc($("#endTimestamp").val())
+                    $("#endTimestamp").val(endTimestamp.local().format("YYYY-MM-DD HH:mm:ss"))
+                }
+            {% endif %}
+
+            $("#buttonSave").click(function()
+            {
+                setUtcTimestamps()
+            })
+
+            $(document).keypress(function(event)
+            {
+                if (event.which == 13)
+                {
+                    setUtcTimestamps()
+                }
+            })
+        })
+    </script>
+{% endblock %}

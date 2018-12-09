@@ -26,7 +26,9 @@ def addElementAttributeTemplate(elementTemplateId):
 
 	# Present a form to add a new element attribute template.
 	form.elementTemplateId.data = elementTemplateId
-	form.requestReferrer.data = request.referrer
+	if form.requestReferrer.data is None:
+		form.requestReferrer.data = request.referrer
+
 	elementTemplate = ElementTemplate.query.get_or_404(elementTemplateId)
 	breadcrumbs = [{"url" : url_for("elements.selectElement", selectedClass = "Root"),
 		"text" : "<span class = \"glyphicon glyphicon-home\"></span>"},
@@ -69,7 +71,9 @@ def editElementAttributeTemplate(elementAttributeTemplateId):
 	form.description.data = elementAttributeTemplate.Description
 	form.elementTemplateId.data = elementAttributeTemplate.ElementTemplateId
 	form.name.data = elementAttributeTemplate.Name
-	form.requestReferrer.data = request.referrer
+	if form.requestReferrer.data is None:
+		form.requestReferrer.data = request.referrer
+
 	breadcrumbs = [{"url" : url_for("elements.selectElement", selectedClass = "Root"),"text" : "<span class = \"glyphicon glyphicon-home\"></span>"},
 		{"url" : url_for("elements.selectElement", selectedClass = "Enterprise",
 			selectedId = elementAttributeTemplate.ElementTemplate.Site.Enterprise.EnterpriseId),

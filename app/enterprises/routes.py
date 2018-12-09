@@ -24,7 +24,9 @@ def addEnterprise():
 		return redirect(form.requestReferrer.data)
 
 	# Present a form to add a new enterprise.
-	form.requestReferrer.data = request.referrer
+	if form.requestReferrer.data is None:
+		form.requestReferrer.data = request.referrer
+
 	breadcrumbs = [{"url" : url_for("physicalModels.selectPhysicalModel", selectedClass = "Root"),
 		"text" : "<span class = \"glyphicon glyphicon-home\"></span>"}]
 	return render_template("addEdit.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
@@ -60,7 +62,9 @@ def editEnterprise(enterpriseId):
 	form.abbreviation.data = enterprise.Abbreviation
 	form.description.data = enterprise.Description
 	form.name.data = enterprise.Name
-	form.requestReferrer.data = request.referrer
+	if form.requestReferrer.data is None:
+		form.requestReferrer.data = request.referrer
+
 	breadcrumbs = [{"url" : url_for("physicalModels.selectPhysicalModel", selectedClass = "Root"),
 		"text" : "<span class = \"glyphicon glyphicon-home\"></span>"},
 		{"url" : None, "text" : enterprise.Name}]

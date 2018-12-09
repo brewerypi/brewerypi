@@ -12,7 +12,7 @@ from .. decorators import adminRequired
 @login_required
 @adminRequired
 def backupDatabase():
-	attachmentFilename = datetime.now().strftime("%Y%m%d%H%M") + "-BreweryPi.sql" 
+	attachmentFilename = datetime.utcnow().strftime("%Y%m%d%H%M") + "-BreweryPi.sql" 
 	command = "sudo mysqldump --complete-insert=TRUE {} > /home/pi/brewerypi/exports/BreweryPi.sql".format(current_app.config["MYSQL_DATABASE"])
 	process = subprocess.Popen(command, shell = True)
 	process.wait()

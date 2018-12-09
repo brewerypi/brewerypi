@@ -33,7 +33,9 @@ def addLookupValue(lookupId):
 	# Present a form to add a new lookupValue.
 	form.lookupId.data = lookupId
 	form.selectable.data = True
-	form.requestReferrer.data = request.referrer
+	if form.requestReferrer.data is None:
+		form.requestReferrer.data = request.referrer
+
 	lookup = Lookup.query.get_or_404(lookupId)
 	breadcrumbs = [{"url" : url_for("lookups.selectLookup", selectedClass = "Root"), "text" : "<span class = \"glyphicon glyphicon-home\"></span>"},
 		{"url" : url_for("lookups.selectLookup", selectedClass = "Enterprise", selectedId = lookup.Enterprise.EnterpriseId), "text" : lookup.Enterprise.Name},
@@ -78,7 +80,9 @@ def editLookupValue(lookupValueId):
 	form.name.data = lookupValue.Name
 	form.selectable.data = lookupValue.Selectable
 	form.value.data = lookupValue.Value
-	form.requestReferrer.data = request.referrer
+	if form.requestReferrer.data is None:
+		form.requestReferrer.data = request.referrer
+
 	breadcrumbs = [{"url" : url_for("lookups.selectLookup", selectedClass = "Root"), "text" : "<span class = \"glyphicon glyphicon-home\"></span>"},
 		{"url" : url_for("lookups.selectLookup", selectedClass = "Enterprise", selectedId = lookup.Enterprise.EnterpriseId), "text" : lookup.Enterprise.Name},
 		{"url" : url_for("lookups.selectLookup", selectedClass = "Lookup", selectedId = lookup.LookupId), "text" : lookup.Name},

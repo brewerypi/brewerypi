@@ -104,6 +104,9 @@ def editUser(userId):
 	form.userId.data = user.UserId
 	form.name.data = user.Name
 	form.role.data = user.Role
+	if form.requestReferrer.data is None:
+		form.requestReferrer.data = request.referrer
+
 	breadcrumbs = [{"url" : url_for("users.listUsers"), "text" : "<span class = \"glyphicon glyphicon-home\"></span>"},
 		{"url" : None, "text" : user.Name}]
 	return render_template("addEdit.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)

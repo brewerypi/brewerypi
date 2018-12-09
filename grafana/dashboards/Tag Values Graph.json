@@ -1,34 +1,4 @@
 {
-  "__inputs": [
-    {
-      "name": "DS_BREWERY_PI",
-      "label": "Brewery Pi",
-      "description": "",
-      "type": "datasource",
-      "pluginId": "mysql",
-      "pluginName": "MySQL"
-    }
-  ],
-  "__requires": [
-    {
-      "type": "grafana",
-      "id": "grafana",
-      "name": "Grafana",
-      "version": "5.2.2"
-    },
-    {
-      "type": "panel",
-      "id": "graph",
-      "name": "Graph",
-      "version": "5.0.0"
-    },
-    {
-      "type": "datasource",
-      "id": "mysql",
-      "name": "MySQL",
-      "version": "5.0.0"
-    }
-  ],
   "annotations": {
     "list": [
       {
@@ -66,11 +36,10 @@
       }
     ]
   },
-  "editable": true,
+  "editable": false,
   "gnetId": null,
   "graphTooltip": 0,
-  "id": null,
-  "iteration": 1534662028018,
+  "iteration": 1544288220606,
   "links": [],
   "panels": [
     {
@@ -90,6 +59,7 @@
       "height": "600",
       "id": 1,
       "legend": {
+        "": false,
         "avg": false,
         "current": false,
         "max": false,
@@ -114,13 +84,35 @@
         {
           "alias": "",
           "format": "time_series",
+          "group": [],
           "hide": false,
+          "metricColumn": "none",
+          "rawQuery": true,
           "rawSql": "SELECT UNIX_TIMESTAMP(TagValue.Timestamp) AS time_sec,\n\tTagValue.Value as value,\n\tTag.Name as metric\nFROM Tag\n\tINNER JOIN TagValue ON Tag.TagId = TagValue.TagId\nWHERE Tag.TagId IN ($tags) AND $__timeFilter(TagValue.Timestamp)\n",
-          "refId": "A"
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "timeColumn": "time",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
         }
       ],
       "thresholds": [],
       "timeFrom": null,
+      "timeRegions": [],
       "timeShift": null,
       "title": "Tag Values",
       "tooltip": {
@@ -170,6 +162,7 @@
         "allValue": null,
         "current": {},
         "datasource": "BreweryPi",
+        "definition": "",
         "hide": 0,
         "includeAll": true,
         "label": "Enterprises:",
@@ -179,6 +172,7 @@
         "query": "SELECT DISTINCT Enterprise.EnterpriseId AS __value, Enterprise.Name AS __text FROM Enterprise \tINNER JOIN Site ON Enterprise.EnterpriseId = Site.EnterpriseId     INNER JOIN Area ON Site.SiteId = Area.SiteId     INNER JOIN Tag ON Area.AreaId = Tag.AreaId",
         "refresh": 1,
         "regex": "",
+        "skipUrlSync": false,
         "sort": 5,
         "tagValuesQuery": "",
         "tags": [],
@@ -190,6 +184,7 @@
         "allValue": null,
         "current": {},
         "datasource": "BreweryPi",
+        "definition": "",
         "hide": 0,
         "includeAll": true,
         "label": "Sites:",
@@ -199,6 +194,7 @@
         "query": "SELECT DISTINCT Site.SiteId AS __value, Site.Name AS __text FROM Site \tINNER JOIN Area ON Site.SiteId = Area.SiteId \tINNER JOIN Tag ON Area.AreaId = Tag.AreaId WHERE Site.EnterpriseId IN ($enterprises)",
         "refresh": 1,
         "regex": "",
+        "skipUrlSync": false,
         "sort": 5,
         "tagValuesQuery": "",
         "tags": [],
@@ -210,6 +206,7 @@
         "allValue": null,
         "current": {},
         "datasource": "BreweryPi",
+        "definition": "",
         "hide": 0,
         "includeAll": true,
         "label": "Areas:",
@@ -219,6 +216,7 @@
         "query": "SELECT DISTINCT Area.AreaId AS __value, Area.Name AS __text FROM Area \tINNER JOIN Tag ON Area.AreaId = Tag.AreaId WHERE Area.SiteId IN ($sites)",
         "refresh": 1,
         "regex": "",
+        "skipUrlSync": false,
         "sort": 5,
         "tagValuesQuery": "",
         "tags": [],
@@ -230,6 +228,7 @@
         "allValue": null,
         "current": {},
         "datasource": "BreweryPi",
+        "definition": "",
         "hide": 0,
         "includeAll": true,
         "label": "Tags:",
@@ -239,6 +238,7 @@
         "query": "SELECT Tag.TagId AS __value, Tag.Name AS __text FROM Tag WHERE (Tag.AreaId IN ($areas))",
         "refresh": 1,
         "regex": "",
+        "skipUrlSync": false,
         "sort": 5,
         "tagValuesQuery": "",
         "tags": [],
@@ -250,6 +250,7 @@
         "allValue": null,
         "current": {},
         "datasource": "BreweryPi",
+        "definition": "",
         "hide": 0,
         "includeAll": true,
         "label": "Lookups:",
@@ -259,6 +260,7 @@
         "query": "SELECT Lookup.LookupId AS __value, Lookup.Name AS __text FROM Lookup WHERE Lookup.EnterpriseId IN ($enterprises)",
         "refresh": 1,
         "regex": "",
+        "skipUrlSync": false,
         "sort": 5,
         "tagValuesQuery": "",
         "tags": [],
@@ -299,6 +301,5 @@
   },
   "timezone": "",
   "title": "Tag Values Graph",
-  "uid": "TagValuesGraph",
-  "version": 1
+  "uid": "TagValuesGraph"
 }

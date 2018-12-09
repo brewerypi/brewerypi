@@ -17,7 +17,7 @@ def addEventFrameNote(eventFrameId):
 
 	# Add a new event frame note.
 	if form.validate_on_submit():
-		note = Note(Note = form.note.data, Timestamp = form.timestamp.data)
+		note = Note(Note = form.note.data, Timestamp = form.utcTimestamp.data)
 		db.session.add(note)
 		db.session.commit()
 		eventFrameNote = EventFrameNote(NoteId = note.NoteId, EventFrameId = eventFrameId)
@@ -27,7 +27,9 @@ def addEventFrameNote(eventFrameId):
 		return redirect(form.requestReferrer.data)
 
 	# Present a form to add a new event frame note.
-	form.requestReferrer.data = request.referrer
+	if form.requestReferrer.data is None:
+		form.requestReferrer.data = request.referrer
+
 	eventFrame = EventFrame.query.get_or_404(eventFrameId)
 	if eventFrame.ParentEventFrameId:
 		breadcrumbs = []
@@ -43,9 +45,9 @@ def addEventFrameNote(eventFrameId):
 				"text" : eventFrame.EventFrameTemplate.ElementTemplate.Name},
 			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "EventFrameTemplate",
 				selectedId = eventFrame.EventFrameTemplate.EventFrameTemplateId), "text" : eventFrame.EventFrameTemplate.Name},
-			{"url" : url_for("eventFrames.dashboard", eventFrameId = eventFrame.EventFrameId), "text" : eventFrame.friendlyName()}]
+			{"url" : url_for("eventFrames.dashboard", eventFrameId = eventFrame.EventFrameId), "text" : eventFrame.Name}]
 
-	return render_template("addEdit.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
+	return render_template("addEditWithTimestamp.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
 
 @eventFrameNotes.route("/eventFrameNotes/delete/<int:eventFrameId>/<int:noteId>", methods = ["GET", "POST"])
 @login_required
@@ -70,7 +72,7 @@ def editEventFrameNote(eventFrameId, noteId):
 	# Edit an existing event frame note.
 	if form.validate_on_submit():
 		note.Note = form.note.data
-		note.Timestamp = form.timestamp.data
+		note.Timestamp = form.utcTimestamp.data
 		db.session.commit()
 		flash("You have successfully edited the Event Frame Note.", "alert alert-success")
 		return redirect(form.requestReferrer.data)
@@ -78,7 +80,9 @@ def editEventFrameNote(eventFrameId, noteId):
 	# Present a form to edit an existing event frame.
 	form.note.data = note.Note
 	form.timestamp.data = note.Timestamp
-	form.requestReferrer.data = request.referrer
+	if form.requestReferrer.data is None:
+		form.requestReferrer.data = request.referrer
+
 	eventFrame = EventFrame.query.get_or_404(eventFrameId)
 	if eventFrame.ParentEventFrameId:
 		breadcrumbs = []
@@ -94,7 +98,7 @@ def editEventFrameNote(eventFrameId, noteId):
 				"text" : eventFrame.EventFrameTemplate.ElementTemplate.Name},
 			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "EventFrameTemplate",
 				selectedId = eventFrame.EventFrameTemplate.EventFrameTemplateId), "text" : eventFrame.EventFrameTemplate.Name},
-			{"url" : url_for("eventFrames.dashboard", eventFrameId = eventFrame.EventFrameId), "text" : eventFrame.friendlyName()},
+			{"url" : url_for("eventFrames.dashboard", eventFrameId = eventFrame.EventFrameId), "text" : eventFrame.Name},
 			{"url" : None, "text" : note.Timestamp}]
 
-	return render_template("addEdit.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
+	return render_template("addEditWithTimestamp.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)

@@ -5,6 +5,7 @@ from wtforms.validators import Required
 
 class EventFrameNoteForm(FlaskForm):
 	note = TextAreaField("Note", validators = [Required()])
-	timestamp = DateTimeField("Timestamp", default = datetime.now, validators = [Required()])
+	timestamp = DateTimeField("Timestamp", default = datetime.utcnow, validators = [Required()])
+	utcTimestamp = HiddenField()
 	requestReferrer = HiddenField()
 	submit = SubmitField("Save")

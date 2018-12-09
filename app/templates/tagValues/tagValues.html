@@ -30,7 +30,7 @@ Tag Values
                 selectedId = eventFrame.Element.ElementTemplate.ElementTemplateId) }}">{{ eventFrame.Element.ElementTemplate.Name }}</a></li>
             <li><a href = "{{ url_for("eventFrames.selectEventFrame", selectedClass = "EventFrameTemplate",
                 selectedId = eventFrame.EventFrameTemplate.EventFrameTemplateId) }}">{{ eventFrame.EventFrameTemplate.Name }}</a></li>
-            <li><a href = "{{ url_for("eventFrames.dashboard", eventFrameId = eventFrame.EventFrameId) }}">{{ eventFrame.friendlyName(True) }}</a></li>
+            <li><a href = "{{ url_for("eventFrames.dashboard", eventFrameId = eventFrame.EventFrameId) }}">{{ eventFrame.Name }}</a></li>
             <li class = "active">{{ eventFrameAttribute.EventFrameAttributeTemplate.Name }}</li>
         {% else %}
             <li><a href = "{{ url_for("tags.selectTag", selectedClass = "Root") }}"><span class = "glyphicon glyphicon-home"></span></a></li>
@@ -77,7 +77,7 @@ Tag Values
         <tbody>
             {% for tagValue in tagValues %}
                 <tr>
-                    <td>{{ tagValue.Timestamp }}</td>
+                    <td>{{ moment(tagValue.Timestamp).format("YYYY-MM-DD HH:mm:ss") }}</td>
                     {% if tagValue.Tag.LookupId %}
                         <td>{{ tagValue.Tag.Lookup.LookupValues | selectattr("Value", "equalto", tagValue.Value) | map(attribute = "Name") | list | first }}</td>
                         <td>{{ tagValue.Tag.Lookup.Name }}</td>

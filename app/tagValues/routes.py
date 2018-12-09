@@ -101,9 +101,9 @@ def addTagValue(tagId = None, elementAttributeId = None, eventFrameId = None, ev
 	# Add a new tag value.
 	if form.validate_on_submit():
 		if tag.LookupId:
-			tagValue = TagValue(TagId = form.tagId.data, Timestamp = form.timestamp.data, Value = form.lookupValue.data)
+			tagValue = TagValue(TagId = form.tagId.data, Timestamp = form.utcTimestamp.data, Value = form.lookupValue.data)
 		else:
-			tagValue = TagValue(TagId = form.tagId.data, Timestamp = form.timestamp.data, Value = form.value.data)
+			tagValue = TagValue(TagId = form.tagId.data, Timestamp = form.utcTimestamp.data, Value = form.value.data)
 
 		db.session.add(tagValue)
 		db.session.commit()
@@ -112,7 +112,9 @@ def addTagValue(tagId = None, elementAttributeId = None, eventFrameId = None, ev
 
 	# Present a form to add a new tag value.
 	form.tagId.data = tag.TagId
-	form.requestReferrer.data = request.referrer
+	if form.requestReferrer.data is None:
+		form.requestReferrer.data = request.referrer
+
 	if elementAttributeId:
 		breadcrumbs = [{"url" : url_for("tags.selectTag", selectedClass = "Root"), "text" : "<span class = \"glyphicon glyphicon-home\"></span>"},
 			{"url" : url_for("elements.selectElement", selectedClass = "Enterprise",
@@ -137,7 +139,7 @@ def addTagValue(tagId = None, elementAttributeId = None, eventFrameId = None, ev
 				selectedId = eventFrame.Element.ElementTemplate.ElementTemplateId), "text" : eventFrame.Element.ElementTemplate.Name},
 			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "EventFrameTemplate",
 				selectedId = eventFrame.EventFrameTemplate.EventFrameTemplateId), "text" : eventFrame.EventFrameTemplate.Name},
-			{"url" : url_for("eventFrames.dashboard", eventFrameId = eventFrame.EventFrameId), "text" : eventFrame.friendlyName(True)},
+			{"url" : url_for("eventFrames.dashboard", eventFrameId = eventFrame.EventFrameId), "text" : eventFrame.Name},
 			{"url" : url_for("tagValues.listTagValues", eventFrameId = eventFrame.EventFrameId, eventFrameAttributeId = eventFrameAttributeId), 
 				"text" : eventFrameAttribute.EventFrameAttributeTemplate.Name}]
 	else:
@@ -148,7 +150,7 @@ def addTagValue(tagId = None, elementAttributeId = None, eventFrameId = None, ev
 			{"url" : url_for("tags.selectTag", selectedClass = "Area", selectedId = tag.Area.AreaId), "text" : tag.Area.Name},
 			{"url" : url_for("tagValues.listTagValues", tagId = tag.TagId), "text" : tag.Name}]
 
-	return render_template("addEdit.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
+	return render_template("addEditWithTimestamp.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
 
 @tagValues.route("/tagValues/delete/<int:tagValueId>", methods = ["GET", "POST"])
 @login_required
@@ -182,7 +184,7 @@ def editTagValue(tagValueId, elementAttributeId = None, eventFrameId = None, eve
 	# Edit an existing tagValue.
 	if form.validate_on_submit():
 		tagValue.TagId = form.tagId.data
-		tagValue.Timestamp = form.timestamp.data
+		tagValue.Timestamp = form.utcTimestamp.data
 
 		if tag.LookupId:
 			tagValue.Value = form.lookupValue.data
@@ -202,7 +204,9 @@ def editTagValue(tagValueId, elementAttributeId = None, eventFrameId = None, eve
 	else:
 		form.value.data = tagValue.Value
 
-	form.requestReferrer.data = request.referrer
+	if form.requestReferrer.data is None:
+		form.requestReferrer.data = request.referrer
+
 	if elementAttributeId:
 		elementAttribute = ElementAttribute.query.get_or_404(elementAttributeId)
 		breadcrumbs = [{"url" : url_for("tags.selectTag", selectedClass = "Root"), "text" : "<span class = \"glyphicon glyphicon-home\"></span>"},
@@ -216,7 +220,7 @@ def editTagValue(tagValueId, elementAttributeId = None, eventFrameId = None, eve
 			{"url" : url_for("elements.dashboard", elementId = elementAttribute.Element.ElementId), "text" : elementAttribute.Element.Name},
 			{"url" : url_for("tagValues.listTagValues", elementAttributeId = elementAttribute.ElementAttributeId),
 				"text" : elementAttribute.ElementAttributeTemplate.Name},
-			{"url" : None, "text" : tagValue.Timestamp}]
+			{"url" : None, "text" : tagValue.Timestamp, "type" : "timestamp"}]
 	elif eventFrameId:
 		eventFrame = EventFrame.query.get_or_404(eventFrameId)
 		eventFrameAttribute = EventFrameAttribute.query.get_or_404(eventFrameAttributeId)
@@ -230,7 +234,7 @@ def editTagValue(tagValueId, elementAttributeId = None, eventFrameId = None, eve
 				selectedId = eventFrame.Element.ElementTemplate.ElementTemplateId), "text" : eventFrame.Element.ElementTemplate.Name},
 			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "EventFrameTemplate",
 				selectedId = eventFrame.EventFrameTemplate.EventFrameTemplateId), "text" : eventFrame.EventFrameTemplate.Name},
-			{"url" : url_for("eventFrames.dashboard", eventFrameId = eventFrame.EventFrameId), "text" : eventFrame.friendlyName(True)},
+			{"url" : url_for("eventFrames.dashboard", eventFrameId = eventFrame.EventFrameId), "text" : eventFrame.Name},
 			{"url" : url_for("tagValues.listTagValues", eventFrameId = eventFrame.EventFrameId,
 				eventFrameAttributeId = eventFrameAttribute.EventFrameAttributeId), "text" : eventFrameAttribute.EventFrameAttributeTemplate.Name},
 			{"url" : None, "text" : tagValue.Timestamp}]
@@ -241,6 +245,6 @@ def editTagValue(tagValueId, elementAttributeId = None, eventFrameId = None, eve
 			{"url" : url_for("tags.selectTag", selectedClass = "Site", selectedId = tag.Area.Site.SiteId), "text" : tag.Area.Site.Name},
 			{"url" : url_for("tags.selectTag", selectedClass = "Area", selectedId = tag.Area.AreaId), "text" : tag.Area.Name},
 			{"url" : url_for("tagValues.listTagValues", tagId = tag.TagId), "text" : tag.Name},
-			{"url" : None, "text" : tagValue.Timestamp}]
+			{"url" : None, "text" : tagValue.Timestamp, "type" : "timestamp"}]
 
-	return render_template("addEdit.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
+	return render_template("addEditWithTimestamp.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)

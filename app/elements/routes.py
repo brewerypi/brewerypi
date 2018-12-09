@@ -27,7 +27,9 @@ def addElement(elementTemplateId):
 
 	# Present a form to add a new element.
 	form.elementTemplateId.data = elementTemplateId
-	form.requestReferrer.data = request.referrer
+	if form.requestReferrer.data is None:
+		form.requestReferrer.data = request.referrer
+
 	elementTemplate = ElementTemplate.query.get_or_404(elementTemplateId)
 	breadcrumbs = [{"url" : url_for("elements.selectElement", selectedClass = "Root"), "text" : "<span class = \"glyphicon glyphicon-home\"></span>"},
 		{"url" : url_for("elements.selectElement", selectedClass = "Enterprise", selectedId = elementTemplate.Site.Enterprise.EnterpriseId),
@@ -90,7 +92,9 @@ def copyElement(elementId):
 	# Present a form to copy an element.
 	del form.elementTemplateId
 	form.elementIdToCopy.data = elementId
-	form.requestReferrer.data = request.referrer
+	if form.requestReferrer.data is None:
+		form.requestReferrer.data = request.referrer
+
 	element = Element.query.get_or_404(elementId)
 	breadcrumbs = [{"url" : url_for("elements.selectElement", selectedClass = "Root"), "text" : "<span class = \"glyphicon glyphicon-home\"></span>"},
 		{"url" : url_for("elements.selectElement", selectedClass = "Enterprise", selectedId = element.ElementTemplate.Site.Enterprise.EnterpriseId),
@@ -142,7 +146,9 @@ def editElement(elementId):
 	form.description.data = element.Description
 	form.elementTemplateId.data = element.ElementTemplateId
 	form.name.data = element.Name
-	form.requestReferrer.data = request.referrer
+	if form.requestReferrer.data is None:
+		form.requestReferrer.data = request.referrer
+
 	breadcrumbs = [{"url" : url_for("elements.selectElement", selectedClass = "Root"), "text" : "<span class = \"glyphicon glyphicon-home\"></span>"},
 		{"url" : url_for("elements.selectElement", selectedClass = "Enterprise", selectedId = element.ElementTemplate.Site.Enterprise.EnterpriseId),
 			"text" : element.ElementTemplate.Site.Enterprise.Name},
