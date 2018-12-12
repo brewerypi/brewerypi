@@ -38,7 +38,16 @@ Once you know the IP address of your Raspberry Pi, connect to it using your SSH 
 Configure and Update the Raspberry Pi
 -------------------------------------
 
-Once logged in change the password of pi user to "brewery"::
+Change the timezone to UTC::
+
+    $ sudo raspi-config
+    Choose "4" Localisation Options
+    Choose "I2" Change timezone
+    Choose "None of the above"
+    Choose "UTC"
+    Select "Finish"
+
+Change the password of pi user to "brewery"::
 
     $ sudo passwd pi
 
@@ -99,7 +108,7 @@ Logout and then log back in.
     $ sudo apt-get -y install python3-venv
     $ python3 -m venv venv
     $ source venv/bin/activate
-    (venv) $ pip install --upgrade pip
+    (venv) $ pip install --upgrade pip setuptools
     (venv) $ pip install -r requirements.txt
     (venv) $ pip list --outdated
 
@@ -119,6 +128,7 @@ Copy the entire string and paste it below in .env after "SECRET_KEY=".
 Add the following to the file::
 
     IS_RASPBERRY_PI=1
+    LOCAL_TIMEZONE=
     MYSQL_USERNAME=pi
     MYSQL_PASSWORD=brewery
     MYSQL_HOST=localhost
@@ -245,7 +255,7 @@ Grafana
     $ cd
     $ sudo apt-get -y install adduser libfontconfig
     $ wget https://s3-us-west-2.amazonaws.com/grafana-releases/release/grafana_X.Y.Z_armhf.deb 
-    $ sudo dpkg -i grafana_5.2.4_armhf.deb 
+    $ sudo dpkg -i grafana_X.Y.Z_armhf.deb 
     $ rm grafana_X.Y.Z_armhf.deb
     $ sudo nano /etc/grafana/grafana.ini
 
@@ -261,7 +271,6 @@ Save and exit.
 
 Paste the following into the file::
 
-    # config file version
     apiVersion: 1
 
     providers:
@@ -319,6 +328,34 @@ Reboot and point a web browser at http\://<Your Raspberry Pi IP Address>/grafana
 Login with "admin" for both the user and password.
 
 Go to Configuration->Server Admin and change the default "admin" username to "pi" and password to "brewery".
+
+Expand Filesystem on 1st Boot
+-----------------------------
+
+::
+
+    $ sudo nano /boot/cmdline.txt
+
+Add the following to the end of the 1st line after a space::
+
+    quiet init=/usr/lib/raspi-config/init_resize.sh
+
+Save and exit.
+
+Copy the resize2fs_once file from the RPi-Distro / pi-gen GitHub repository::
+
+    $ sudo wget -O /etc/init.d/resize2fs_once https://raw.githubusercontent.com/RPi-Distro/pi-gen/master/stage2/01-sys-tweaks/files/resize2fs_once
+
+Configure resize2fs_once to run at the next boot::
+
+    $ sudo chmod +x /etc/init.d/resize2fs_once
+    $ sudo update-rc.d resize2fs_once defaults
+
+Shutdown::
+
+    $ sudo shutdown -h now
+
+Continue to the next section below without rebooting the current image.
 
 Create a Compressed Image
 -------------------------
