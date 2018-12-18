@@ -30,6 +30,11 @@ Element Attributes
                 <th><button class = "btn btn-default" id = "buttonAttributesSaveAll" title = "Save All"><span class="glyphicon glyphicon-floppy-disk"></span>
                     </button></th>
             </tr>
+            <tr>
+                <th></th>
+                <th><input id = "inputTagFilter" type = "text" placeholder = "Filter Tags"></th>
+                <th></th>
+            </tr>
         </thead>
         <tbody>
             {% for elementAttributeTemplate in elementAttributeTemplates %}
@@ -68,10 +73,28 @@ Element Attributes
 {% block scripts %}
     {{ super() }}
     <link rel = "stylesheet" type = "text/css" href = {{ url_for("static", filename = "css/datatables.min.css") }}/> 
+    <link rel = "stylesheet" type = "text/css" href = {{ url_for("static", filename = "css/styles.css") }}/>
     <script type = "text/javascript" src = {{ url_for("static", filename = "js/datatables.min.js") }}></script>
     <script>
         $(document).ready(function()
         {
+            $("#inputTagFilter").on("keyup change", function()
+            {
+                var filter = $(this).val()
+                var regex = new RegExp(filter, "gi")
+                elementAttributesTable.$("option:not(:selected)").each(function()
+                {
+                    if ($(this).text().match(regex) || $(this).text() == "")
+                    {
+                        $(this).show()
+                    }
+                    else
+                    {
+                        $(this).hide()
+                    }
+                })
+            })
+
             var elementAttributesTable = $("#elementAttributesTable").DataTable
             ({
                 "order":
@@ -86,8 +109,11 @@ Element Attributes
                 ],
                 "stateSave": true,
                 "stateDuration": 0,
-                "pageLength": 25
+                "pageLength": 25,
+                "orderCellsTop": true,
+                "fixedHeader": true
             })
+
             // Enter key call save all.
             $(document).keypress(function(event)
             {
@@ -96,6 +122,7 @@ Element Attributes
                     $("#buttonAttributesSaveAll").focus()
                 }
             })
+
             $("#buttonAttributesSaveAll").click(function()
             {
                 var rows = []
@@ -116,7 +143,11 @@ Element Attributes
                     data : JSON.stringify(rows)
                 }).done(function(response)
                 {
-                    location.reload(true)
+                    $(".alert").remove()
+                    var alert = response["alert"]
+                    var message = response["message"]
+                    $("#divFlashedMessages").append('<div class = "' + alert + '"><button type = "button" class = "close" data-dismiss = "alert">&times;' +
+                        '</button>' + message + '</div>')                        
                 }).fail(function()
                 {
                     $("#divFlashedMessages").append("<div class = \"alert alert-danger\"><button type = \"button\" class = \"close\" " +
