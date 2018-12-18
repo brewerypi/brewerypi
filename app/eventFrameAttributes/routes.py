@@ -1,6 +1,6 @@
 import csv
 import os
-from flask import current_app, flash, jsonify, render_template, request, send_file
+from flask import current_app, jsonify, render_template, request, send_file
 from flask_login import login_required
 from sqlalchemy import and_
 from . import eventFrameAttributes
@@ -221,9 +221,9 @@ def updateMultiple(eventFrameId):
 
 	if count > 0:
 		db.session.commit()
+		alert = "alert alert-success"
 		message = "You have successfully added or updated one or more element attributes."
-		flash(message, "alert alert-success")
 	else:
+		alert = "alert alert-warning"
 		message = "Nothing updated to save."
-		flash(message, "alert alert-warning")
-	return jsonify({"response": message})
+	return jsonify(alert = alert, message = message)
