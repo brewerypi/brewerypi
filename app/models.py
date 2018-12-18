@@ -45,6 +45,7 @@ class Element(db.Model):
 	ElementId = db.Column(db.Integer, primary_key = True)
 	Description = db.Column(db.String(255), nullable = True)
 	ElementTemplateId = db.Column(db.Integer, db.ForeignKey("ElementTemplate.ElementTemplateId", name = "FK__ElementTemplate$Have$Element"), nullable = False)
+	IsManaged = db.Column(db.Boolean, nullable = False)
 	Name = db.Column(db.String(45), nullable = False)
 
 	ElementAttributes = db.relationship("ElementAttribute", backref = "Element", lazy = "dynamic")
