@@ -58,8 +58,8 @@ Event Frames
                     <th>Event Frame Id</th>
                     <th>Name</th>
                     <th>Element</th>
-                    <th>Start</th>
-                    <th>End</th>
+                    <th id = "thStartTimestamp">Start</th>
+                    <th id = "thEndTimestamp">End</th>
                     {% for eventFrameAttributeTemplate in eventFrameAttributeTemplates %}
                         <th>{{ eventFrameAttributeTemplate.Name }}</th>
                     {% endfor %}
@@ -83,18 +83,6 @@ Event Frames
                     </tr>
                 {% endfor %}
             </tbody>
-            <tfoot>
-                <tr>
-                    <th>Event Frame Id</th>
-                    <th>Name</th>
-                    <th>Element</th>
-                    <th id = "thStartTimestamp">Start</th>
-                    <th id = "thEndTimestamp">End</th>
-                    {% for eventFrameAttributeTemplate in eventFrameAttributeTemplates %}
-                        <th>{{ eventFrameAttributeTemplate.Name }}</th>
-                    {% endfor %}
-                </tr>
-            </tfoot>
         </table>
     </div>
 {% endif %}
@@ -131,27 +119,34 @@ Event Frames
 
         $(document).ready(function()
         {
-            {% if form %}
-                $(".form-control").first().focus()
-                $("#submit").hide()
-                $("#submit").parent().append("<button class = \"btn btn-default\" id = \"buttonSearch\" title = \"Search\" type = \"submit\">" +
-                    "<span class = \"glyphicon glyphicon-search\" aria-hidden = \"true\"></span></button>")
-            {% endif %}
-
-            // Setup - add a text input to each footer cell
-            $("#table tfoot th").each(function ()
+            $("#table thead tr").clone(true).appendTo("#table thead")
+            $("#table thead tr:eq(1) th").each(function(i)
             {
                 var id = $(this).attr("id")
                 var title = $(this).text()
                 if (id != "thStartTimestamp" && id != "thEndTimestamp")
                 {
-                    $(this).html("<input type = \"text\" placeholder = \"Filter " + title + "\" />")
+                    $(this).html('<input type = "text" placeholder = "Filter ' + title + '" />')
+                    $("input", this).on("keyup change", function ()
+                    {
+                        if (table.column(i).search() !== this.value)
+                        {
+                            table.column(i).search(this.value).draw()
+                        }
+                    })
                 }
                 else
                 {
                     $(this).html("")
                 }
             })
+
+            {% if form %}
+                $(".form-control").first().focus()
+                $("#submit").hide()
+                $("#submit").parent().append("<button class = \"btn btn-default\" id = \"buttonSearch\" title = \"Search\" type = \"submit\">" +
+                    "<span class = \"glyphicon glyphicon-search\" aria-hidden = \"true\"></span></button>")
+            {% endif %}
 
             var table = $("#table").DataTable
             ({
@@ -169,7 +164,9 @@ Event Frames
                 ],
                 "stateSave": true,
                 "stateDuration": 0,
-                "pageLength": 10
+                "pageLength": 10,
+                "orderCellsTop": true,
+                "fixedHeader": true
             })
 
             $("#buttonHideAllColumns").on("click", function()
@@ -278,16 +275,6 @@ Event Frames
             {
                 // Clear any left over filtering from state saving.
                 this.search("", 1).draw()
-
-                var that = this
-        
-                $("input", this.footer()).on("keyup change", function ()
-                {
-                    if ( that.search() !== this.value )
-                    {
-                        that.search(this.value, 1).draw()
-                    }
-                })
 
                 if (this.visible())
                 {
