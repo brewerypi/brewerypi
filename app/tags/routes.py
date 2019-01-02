@@ -52,7 +52,7 @@ def addTag(areaId, lookup = False):
 @adminRequired
 def deleteTag(tagId):
 	tag = Tag.query.get_or_404(tagId)
-	db.session.delete(tag)
+	tag.delete()
 	db.session.commit()
 	flash("You have successfully deleted the tag \"{}\".".format(tag.Name), "alert alert-success")
 	return redirect(request.referrer)

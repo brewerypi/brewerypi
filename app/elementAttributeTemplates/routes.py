@@ -45,7 +45,7 @@ def addElementAttributeTemplate(elementTemplateId):
 @adminRequired
 def deleteElementAttributeTemplate(elementAttributeTemplateId):
 	elementAttributeTemplate = ElementAttributeTemplate.query.get_or_404(elementAttributeTemplateId)
-	db.session.delete(elementAttributeTemplate)
+	elementAttributeTemplate.delete()
 	db.session.commit()
 	flash("You have successfully deleted the element attribute template \"{}\".".format(elementAttributeTemplate.Name), "alert alert-success")
 	return redirect(request.referrer)

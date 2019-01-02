@@ -119,7 +119,7 @@ def dashboard(elementId):
 @adminRequired
 def deleteElement(elementId):
 	element = Element.query.get_or_404(elementId)
-	db.session.delete(element)
+	element.delete()
 	db.session.commit()
 	flash("You have successfully deleted the element \"{}\".".format(element.Name), "alert alert-success")
 	return redirect(request.referrer)

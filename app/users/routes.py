@@ -43,7 +43,7 @@ def deleteUser(userId):
 		flash("Deleting the default administrator account is not allowed.", "alert alert-danger")
 		return redirect(url_for("users.listUsers"))		
 
-	db.session.delete(user)
+	user.delete()
 	db.session.commit()
 	flash("You have successfully deleted the user \"{}\".".format(user.Name), "alert alert-success")
 	return redirect(url_for("users.listUsers"))

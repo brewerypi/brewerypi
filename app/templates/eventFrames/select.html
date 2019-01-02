@@ -155,7 +155,8 @@ Event Frames
                                 <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("eventFrameTemplates.editEventFrameTemplate",
                                     eventFrameTemplateId = child.id()) }}"><span class = "glyphicon glyphicon-edit"></span></a></td>
                                 <td><a class = "btn btn-default" title = "Delete" href = "{{ url_for("eventFrameTemplates.deleteEventFrameTemplate",
-                                    eventFrameTemplateId = child.id()) }}"><span class = "glyphicon glyphicon-trash"></span></a></td>
+                                    eventFrameTemplateId = child.id()) }}", data-type = "event frame template", data-name = "{{ child.Name }}">
+                                    <span class = "glyphicon glyphicon-trash"></span></a></td>
                             {% else %}
                                 <td></td>
                                 <td></td>
@@ -184,8 +185,8 @@ Event Frames
                             {% endif %}
                             <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("eventFrames.editEventFrame", eventFrameId = child.id()) }}">
                                 <span class = "glyphicon glyphicon-edit"></span></a></td>
-                            <td><a class = "btn btn-default" title = "Delete" href = "{{ url_for("eventFrames.deleteEventFrame", eventFrameId = child.id()) }}">
-                                <span class = "glyphicon glyphicon-trash"></span></a></td>
+                            <td><a class = "btn btn-default" title = "Delete" href = "{{ url_for("eventFrames.deleteEventFrame", eventFrameId = child.id()) }}",
+                                data-type = "event frame", data-name = "{{ child.Name }}"><span class = "glyphicon glyphicon-trash"></span></a></td>
                         {% elif childrenClass == "DescendantEventFrameTemplate" %}
                             <td>{{ child.Name }}</td>
                             <td>{{ child.Description }}</td>
@@ -193,7 +194,8 @@ Event Frames
                             <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("eventFrameTemplates.editEventFrameTemplate",
                                 eventFrameTemplateId = child.id()) }}"><span class = "glyphicon glyphicon-edit"></span></a></td>
                             <td><a class = "btn btn-default" title = "Delete" href = "{{ url_for("eventFrameTemplates.deleteEventFrameTemplate",
-                                eventFrameTemplateId = child.id()) }}"><span class = "glyphicon glyphicon-trash"></span></a></td>
+                                eventFrameTemplateId = child.id()) }}", data-type = "child event frame template", data-name = "{{ child.Name }}">
+                                <span class = "glyphicon glyphicon-trash"></span></a></td>
                         {% endif %}
                     </tr>
                 {% endfor %}
@@ -227,7 +229,8 @@ Event Frames
                         eventFrameAttributeTemplateId = eventFrameAttributeTemplate.EventFrameAttributeTemplateId) }}">
                         <span class = "glyphicon glyphicon-edit"></span></a></td>
                     <td><a class = "btn btn-default" title = "Delete" href = "{{ url_for("eventFrameAttributeTemplates.deleteEventFrameAttributeTemplate",
-                        eventFrameAttributeTemplateId = eventFrameAttributeTemplate.EventFrameAttributeTemplateId) }}">
+                        eventFrameAttributeTemplateId = eventFrameAttributeTemplate.EventFrameAttributeTemplateId) }}",
+                        data-type = "event frame attribute template", data-name = "{{ eventFrameAttributeTemplate.Name }}">
                         <span class = "glyphicon glyphicon-trash"></span></a></td>
                 </tr>
                 {% endfor %}
@@ -291,6 +294,7 @@ Event Frames
                 "stateDuration": 0,
                 "pageLength": 25
             })
+
             $('#eventFrameAttributeTemplatesTable').DataTable
             ({
                 "order":
@@ -307,6 +311,16 @@ Event Frames
                 "stateSave": true,
                 "stateDuration": 0,
                 "pageLength": 25
+            })
+
+            $("a[title='Delete']").click(function ()
+            {
+                var name = $(this).attr("data-name")
+                var type = $(this).attr("data-type")
+                if(!window.confirm('Are you sure you want to delete the "' + name + '" ' + type + '?'))
+                {
+                    event.preventDefault()
+                }
             })
         })
     </script>

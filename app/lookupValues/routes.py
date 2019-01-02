@@ -50,7 +50,7 @@ def deleteLookupValue(lookupValueId):
 	if lookupValue.isReferenced():
 		flash("Lookup value \"{}\" is referenced by one or more tag values and cannot be deleted.".format(lookupValue.Name), "alert alert-danger")
 	else:
-		db.session.delete(lookupValue)
+		lookupValue.delete()
 		db.session.commit()
 		flash("You have successfully deleted the lookup value \"{}\".".format(lookupValue.Name), "alert alert-success")
 

@@ -38,9 +38,13 @@ def addLookup(enterpriseId):
 @adminRequired
 def deleteLookup(lookupId):
 	lookup = Lookup.query.get_or_404(lookupId)
-	db.session.delete(lookup)
-	db.session.commit()
-	flash("You have successfully deleted the lookup \"{}\".".format(lookup.Name), "alert alert-success")
+	if lookup.isReferenced():
+		flash('Lookup "{}" is used by one or more tag values and cannot be deleted.'.format(lookup.Name), "alert alert-danger")
+	else:
+		lookup.delete()
+		db.session.commit()
+		flash('You have successfully deleted the lookup "{}".'.format(lookup.Name), "alert alert-success")
+
 	return redirect(request.referrer)
 
 @lookups.route("/lookups/edit/<int:lookupId>", methods = ["GET", "POST"])
