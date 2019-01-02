@@ -108,7 +108,8 @@ Data Entry - Elements
                                 <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("elementTemplates.editElementTemplate",
                                     elementTemplateId = child.id()) }}"><span class = "glyphicon glyphicon-edit"></span></a></td>
                                 <td><a class = "btn btn-default" title = "Delete" href = "{{ url_for("elementTemplates.deleteElementTemplate",
-                                    elementTemplateId = child.id()) }}"><span class = "glyphicon glyphicon-trash"></span></a></td>
+                                    elementTemplateId = child.id()) }}", data-type = "element template", data-name = "{{ child.Name }}"">
+                                    <span class = "glyphicon glyphicon-trash"></span></a></td>
                             {% else %}
                                 <td></td>
                                 <td></td>
@@ -123,8 +124,8 @@ Data Entry - Elements
                                     <span class = "glyphicon glyphicon-copy"></span></a></td>
                                 <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("elements.editElement", elementId = child.ElementId) }}">
                                     <span class = "glyphicon glyphicon-edit"></span></a></td>
-                                <td><a class = "btn btn-default" title = "Delete" href = "{{ url_for("elements.deleteElement", elementId = child.ElementId) }}">
-                                    <span class = "glyphicon glyphicon-trash"></span></a></td>
+                                <td><a class = "btn btn-default" title = "Delete" href = "{{ url_for("elements.deleteElement", elementId = child.ElementId) }}",
+                                    data-type = "element", data-name = "{{ child.Name }}"><span class = "glyphicon glyphicon-trash"></span></a></td>
                             {% else %}
                                 <td></td>
                                 <td></td>
@@ -137,7 +138,8 @@ Data Entry - Elements
                             <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("elementAttributeTemplates.editElementAttributeTemplate",
                                 elementAttributeTemplateId = child.id()) }}"><span class = "glyphicon glyphicon-edit"></span></a></td>
                             <td><a class = "btn btn-default" title = "Delete" href = "{{ url_for("elementAttributeTemplates.deleteElementAttributeTemplate",
-                                elementAttributeTemplateId = child.id()) }}"><span class = "glyphicon glyphicon-trash"></span></a></td>
+                                elementAttributeTemplateId = child.id()) }}", data-type = "element attribute template", data-name = "{{ child.Name }}">
+                                <span class = "glyphicon glyphicon-trash"></span></a></td>
                         {% else %}
                             <td></td>
                             <td></td>
@@ -179,6 +181,16 @@ Data Entry - Elements
                 "stateSave": true,
                 "stateDuration": 0,
                 "pageLength": 25
+            })
+
+            $("a[title='Delete']").click(function ()
+            {
+                var name = $(this).attr("data-name")
+                var type = $(this).attr("data-type")
+                if(!window.confirm('Are you sure you want to delete the "' + name + '" ' + type + '?'))
+                {
+                    event.preventDefault()
+                }
             })
         })
     </script>

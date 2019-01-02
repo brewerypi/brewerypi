@@ -72,17 +72,20 @@ Physical Models
                             <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("enterprises.editEnterprise",
                                 enterpriseId = child.EnterpriseId) }}"><span class = "glyphicon glyphicon-edit"></span></a></td>
                             <td><a class = "btn btn-default" title = "Delete" href = "{{ url_for("enterprises.deleteEnterprise",
-                                enterpriseId = child.EnterpriseId) }}"><span class = "glyphicon glyphicon-trash"></span></a></td>
+                                enterpriseId = child.EnterpriseId) }}", data-type = "enterprise", data-name = "{{ child.Name }}">
+                                <span class = "glyphicon glyphicon-trash"></span></a></td>
                         {% elif childrenClass == "Site" %}
                             <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("sites.editSite",
                                 siteId = child.SiteId) }}"><span class = "glyphicon glyphicon-edit"></span></a></td>
                             <td><a class = "btn btn-default" title = "Delete" href = "{{ url_for("sites.deleteSite",
-                                siteId = child.SiteId) }}"><span class = "glyphicon glyphicon-trash"></span></a></td>
+                                siteId = child.SiteId) }}", data-type = "site", data-name = "{{ child.Name }}">
+                                <span class = "glyphicon glyphicon-trash"></span></a></td>
                         {% elif childrenClass == "Area" %}
                             <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("areas.editArea",
                                 areaId = child.AreaId) }}"><span class = "glyphicon glyphicon-edit"></span></a></td>
                             <td><a class = "btn btn-default" title = "Delete" href = "{{ url_for("areas.deleteArea",
-                                areaId = child.AreaId) }}"><span class = "glyphicon glyphicon-trash"></span></a></td>
+                                areaId = child.AreaId) }}",  data-type = "area", data-name = "{{ child.Name }}">
+                                <span class = "glyphicon glyphicon-trash"></span></a></td>
                         {% endif %}
                     </tr>
                 {% endfor %}
@@ -117,6 +120,16 @@ Physical Models
                 "stateSave": true,
                 "stateDuration": 0,
                 "pageLength": 25
+            })
+
+            $("a[title='Delete']").click(function ()
+            {
+                var name = $(this).attr("data-name")
+                var type = $(this).attr("data-type")
+                if(!window.confirm('Are you sure you want to delete the "' + name + '" ' + type + '?'))
+                {
+                    event.preventDefault()
+                }
             })
         })
     </script>

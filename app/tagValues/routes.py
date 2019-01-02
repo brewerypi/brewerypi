@@ -157,7 +157,7 @@ def addTagValue(tagId = None, elementAttributeId = None, eventFrameId = None, ev
 @permissionRequired(Permission.DATA_ENTRY)
 def deleteTagValue(tagValueId):
 	tagValue = TagValue.query.get_or_404(tagValueId)
-	db.session.delete(tagValue)
+	tagValue.delete()
 	db.session.commit()
 	flash("You have successfully deleted the tag value.", "alert alert-success")
 	return redirect(request.referrer)

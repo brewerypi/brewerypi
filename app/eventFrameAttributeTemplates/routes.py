@@ -67,8 +67,7 @@ def addEventFrameAttributeTemplate(eventFrameTemplateId):
 @adminRequired
 def deleteEventFrameAttributeTemplate(eventFrameAttributeTemplateId):
 	eventFrameAttributeTemplate = EventFrameAttributeTemplate.query.get_or_404(eventFrameAttributeTemplateId)
-	eventFrameTemplateId = eventFrameAttributeTemplate.EventFrameTemplate.EventFrameTemplateId
-	db.session.delete(eventFrameAttributeTemplate)
+	eventFrameAttributeTemplate.delete()
 	db.session.commit()
 	flash("You have successfully deleted the event frame attribute template \"{}\".".format(eventFrameAttributeTemplate.Name), "alert alert-success")
 	return redirect(request.referrer)

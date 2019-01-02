@@ -38,7 +38,7 @@ def addSite(enterpriseId):
 @adminRequired
 def deleteSite(siteId):
 	site = Site.query.get_or_404(siteId)
-	db.session.delete(site)
+	site.delete()
 	db.session.commit()
 	flash("You have successfully deleted the site \"{}\".".format(site.Name), "alert alert-success")
 	return redirect(request.referrer)

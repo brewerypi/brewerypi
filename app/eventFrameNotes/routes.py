@@ -54,9 +54,7 @@ def addEventFrameNote(eventFrameId):
 @permissionRequired(Permission.DATA_ENTRY)
 def deleteEventFrameNote(eventFrameId, noteId):
 	eventFrameNote = EventFrameNote.query.filter_by(EventFrameId = eventFrameId, NoteId = noteId).first()
-	note = Note.query.get_or_404(noteId)
-	db.session.delete(eventFrameNote)
-	db.session.delete(note)
+	eventFrameNote.delete()
 	db.session.commit()
 	flash("You have successfully deleted the event frame note.", "alert alert-success")
 	return redirect(request.referrer)
