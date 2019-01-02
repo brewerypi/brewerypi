@@ -130,7 +130,7 @@ def deleteUnitOfMeasurement(unitOfMeasurementId):
 		flash("Unit of Measurement \"{}\" is referenced by one or more tags and cannot be deleted.". \
 			format(unitOfMeasurement.Abbreviation), "alert alert-danger")
 	else:
-		db.session.delete(unitOfMeasurement)
+		unitOfMeasurement.delete()
 		db.session.commit()
 		flash("You have successfully deleted the unit of measurement \"" + unitOfMeasurement.Abbreviation + "\".", "alert alert-success")
 

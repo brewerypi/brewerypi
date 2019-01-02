@@ -122,12 +122,9 @@ def dashboard(eventFrameId):
 @permissionRequired(Permission.DATA_ENTRY)
 def deleteEventFrame(eventFrameId):
 	eventFrame = EventFrame.query.get_or_404(eventFrameId)
-	if eventFrame.hasDescendants():
-		flash("This event frame contains one or more child event frames and cannot be deleted.", "alert alert-danger")
-	else:
-		db.session.delete(eventFrame)
-		db.session.commit()
-		flash("You have successfully deleted the event frame.", "alert alert-success")
+	eventFrame.delete()
+	db.session.commit()
+	flash("You have successfully deleted the event frame.", "alert alert-success")
 	return redirect(request.referrer)
 
 @eventFrames.route("/eventFrames/edit/<int:eventFrameId>", methods = ["GET", "POST"])

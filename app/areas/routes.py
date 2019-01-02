@@ -40,7 +40,7 @@ def addArea(siteId):
 @adminRequired
 def deleteArea(areaId):
 	area = Area.query.get_or_404(areaId)
-	db.session.delete(area)
+	area.delete()
 	db.session.commit()
 	flash("You have successfully deleted the area \"{}\".".format(area.Name), "alert alert-success")
 	return redirect(request.referrer)

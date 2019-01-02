@@ -63,8 +63,8 @@ Tags
                         {% if childrenClass == "Tag" %}
                             <td><a class = "btn btn-default" title = "Select" href = "{{ url_for("tagValues.listTagValues",
                                 tagId = child.id()) }}"><span class = "glyphicon glyphicon-list"></span></a></td>
-                            <td><a class = "btn btn-default" title = "Grafana" href = "{{ "TagValuesGraph" | grafanaUrl({"tagId": child.id()}) }}" target = "_blank">
-                                <span class = "glyphicon glyphicon-stats"></span></a></td>
+                            <td><a class = "btn btn-default" title = "Grafana" href = "{{ "TagValuesGraph" | grafanaUrl({"tagId": child.id()}) }}"
+                                target = "_blank"><span class = "glyphicon glyphicon-stats"></span></a></td>
                         {% else %}
                             <td><a class = "btn btn-default" title = "Select" href = "{{ url_for("tags.selectTag", selectedClass = child.__class__.__name__,
                                 selectedId = child.id()) }}"><span class = "glyphicon glyphicon-list"></span></a></td>
@@ -75,8 +75,8 @@ Tags
                         {% if childrenClass == "Tag" and current_user.isAdministrator() %}
                             <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("tags.editTag", tagId = child.TagId) }}">
                                 <span class = "glyphicon glyphicon-edit"></span></a></td>
-                            <td><a class = "btn btn-default" title = "Delete" href = "{{ url_for("tags.deleteTag", tagId = child.TagId) }}">
-                                <span class = "glyphicon glyphicon-trash"></span></a></td>
+                            <td><a class = "btn btn-default" title = "Delete" href = "{{ url_for("tags.deleteTag", tagId = child.TagId) }}",
+                                data-type = "tag", data-name = "{{ child.Name }}"><span class = "glyphicon glyphicon-trash"></span></a></td>
                         {% else %}
                             <td></td>
                             <td></td>
@@ -114,6 +114,16 @@ Tags
                 "stateSave": true,
                 "stateDuration": 0,
                 "pageLength": 25
+            })
+
+            $("a[title='Delete']").click(function ()
+            {
+                var name = $(this).attr("data-name")
+                var type = $(this).attr("data-type")
+                if(!window.confirm('Are you sure you want to delete the "' + name + '" ' + type + '?'))
+                {
+                    event.preventDefault()
+                }
             })
         })
     </script>

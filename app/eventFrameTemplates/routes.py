@@ -90,24 +90,9 @@ def addEventFrameTemplate(elementTemplateId = None, parentEventFrameTemplateId =
 @adminRequired
 def deleteEventFrameTemplate(eventFrameTemplateId):
 	eventFrameTemplate = EventFrameTemplate.query.get_or_404(eventFrameTemplateId)
-	if eventFrameTemplate.hasDescendants():
-		flash("This event frame contains one or more child event frame templates and cannot be deleted.", "alert alert-danger")
-		return redirect(request.referrer)
-
-	if eventFrameTemplate.ParentEventFrameTemplateId:
-		parentEventFrameTemplate = EventFrameTemplate.query.get_or_404(eventFrameTemplate.ParentEventFrameTemplateId)
-	else:
-		elementTemplate = ElementTemplate.query.get_or_404(eventFrameTemplate.ElementTemplateId)
-
-	db.session.delete(eventFrameTemplate)
+	eventFrameTemplate.delete()
 	db.session.commit()
-
-	if eventFrameTemplate.ParentEventFrameTemplateId:
-		flash("You have successfully deleted the event frame template \"" + eventFrameTemplate.Name + "\" from \"" +
-			parentEventFrameTemplate.Name + "\".", "alert alert-success")
-	else:
-		flash("You have successfully deleted the event frame template \"" + eventFrameTemplate.Name + "\" from \"" + elementTemplate.Name + "\".",
-			"alert alert-success")
+	flash('You have successfully deleted the event frame template "{}".'.format(eventFrameTemplate.Name), "alert alert-success")
 
 	return redirect(request.referrer)
 

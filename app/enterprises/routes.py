@@ -36,7 +36,7 @@ def addEnterprise():
 @adminRequired
 def deleteEnterprise(enterpriseId):
 	enterprise = Enterprise.query.get_or_404(enterpriseId)
-	db.session.delete(enterprise)
+	enterprise.delete()
 	db.session.commit()
 	flash("You have successfully deleted the enterprise \"{}\".".format(enterprise.Name), "alert alert-success")
 	return redirect(request.referrer)

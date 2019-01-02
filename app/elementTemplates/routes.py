@@ -40,7 +40,7 @@ def addElementTemplate(siteId):
 @adminRequired
 def deleteElementTemplate(elementTemplateId):
 	elementTemplate = ElementTemplate.query.get_or_404(elementTemplateId)
-	db.session.delete(elementTemplate)
+	elementTemplate.delete()
 	db.session.commit()
 	flash("You have successfully deleted the element template \"{}\".".format(elementTemplate.Name), "alert alert-success")
 	return redirect(request.referrer)
