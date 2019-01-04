@@ -24,6 +24,7 @@ def addArea(siteId):
 		return redirect(form.requestReferrer.data)
 
 	# Present a form to add a new area.
+	form.siteId.data = siteId
 	if form.requestReferrer.data is None:
 		form.requestReferrer.data = request.referrer
 
@@ -64,6 +65,7 @@ def editArea(areaId):
 		return redirect(form.requestReferrer.data)
 
 	# Present a form to edit an existing area.
+	form.areaId.data = area.AreaId
 	form.abbreviation.data = area.Abbreviation
 	form.description.data = area.Description
 	form.name.data = area.Name

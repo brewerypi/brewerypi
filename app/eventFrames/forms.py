@@ -13,6 +13,7 @@ class EventFrameForm(FlaskForm):
 	endTimestamp = DateTimeField("End Timestamp", validators = [Optional()])
 	endUtcTimestamp = HiddenField()
 	name = StringField("Name", default = lambda : int(datetime.utcnow().timestamp()), validators = [Required()])
+	eventFrameId = HiddenField()
 	eventFrameTemplateId = HiddenField()
 	parentEventFrameId = HiddenField()
 	requestReferrer = HiddenField()
@@ -32,8 +33,8 @@ class EventFrameForm(FlaskForm):
 
 	def validate_startTimestamp(self, field):
 		if self.startTimestamp.data is not None:
+			startUtcTimestamp = datetime.strptime(self.startUtcTimestamp.data, "%Y-%m-%d %H:%M:%S")
 			if self.parentEventFrameId.data:
-				startUtcTimestamp = datetime.strptime(self.startUtcTimestamp.data, "%Y-%m-%d %H:%M:%S")
 				parentEventFrame = EventFrame.query.get_or_404(self.parentEventFrameId.data)
 				error = False
 				if parentEventFrame.EndTimestamp:
@@ -45,6 +46,21 @@ class EventFrameForm(FlaskForm):
 
 				if error:
 					raise ValidationError("This timestamp is outside of the parent event frame.")
+			else:
+				validationError = False
+				eventFrame = EventFrame.query.filter_by(ElementId = self.element.data.ElementId,
+					EventFrameTemplateId = self.eventFrameTemplateId.data, StartTimestamp = self.startUtcTimestamp.data).first()
+				if eventFrame:
+					if self.eventFrameId.data == "":
+						# Trying to add a new eventFrame using a startTimestamp that already exists.
+						validationError = True
+					else:
+						if int(self.eventFrameId.data) != eventFrame.EventFrameId:
+							# Trying to change the startTimestamp of an eventFrame to a startTimestamp that already exists.
+							validationError = True
+
+				if validationError:
+					raise ValidationError('The start timestamp "{}" already exists.'.format(field.data))
 
 class EventFrameOverlayForm(FlaskForm):
 	startTimestamp = DateTimeField("Start", validators = [Required()])

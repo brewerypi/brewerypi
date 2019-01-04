@@ -143,6 +143,7 @@ def editElement(elementId):
 		return redirect(form.requestReferrer.data)
 
 	# Present a form to edit an existing element.
+	form.elementId.data = element.ElementId
 	form.description.data = element.Description
 	form.elementTemplateId.data = element.ElementTemplateId
 	form.name.data = element.Name

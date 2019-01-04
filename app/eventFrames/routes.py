@@ -207,6 +207,7 @@ def editEventFrame(eventFrameId):
 				selectedId = eventFrame.EventFrameTemplate.EventFrameTemplateId), "text" : eventFrame.EventFrameTemplate.Name},
 			{"url" : None, "text" : eventFrame.Name}]	
 
+	form.eventFrameId.data = eventFrame.EventFrameId
 	form.endTimestamp.data = eventFrame.EndTimestamp
 	form.name.data = eventFrame.Name
 	form.startTimestamp.data = eventFrame.StartTimestamp
