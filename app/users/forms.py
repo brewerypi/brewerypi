@@ -21,12 +21,16 @@ class UserForm(FlaskForm):
 			raise ValidationError("Current password is incorrect.")
 
 	def validate_name(self, field):
+		validationError = False
 		user = User.query.filter_by(Name = field.data).first()
 		if user:
 			if self.userId.data == "":
-				# Trying to add a new user with a name that already exists.
-				raise ValidationError("Username already exists.")
+				# Trying to add a new user using a name that already exists.
+				validationError = True
 			else:
 				if int(self.userId.data) != user.UserId:
-				# Trying to change the name of an user to a name that already exists.
-					raise ValidationError("Username already exists.")
+					# Trying to change the name of an user to a name that already exists.
+					validationError = True
+
+		if validationError:
+			raise ValidationError('Username "{}" already exists.'.format(field.data))

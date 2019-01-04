@@ -148,14 +148,12 @@ def editUnitOfMeasurement(unitOfMeasurementId):
 	if form.validate_on_submit():
 		unitOfMeasurement.Abbreviation = form.abbreviation.data
 		unitOfMeasurement.Name = form.name.data
-
 		db.session.commit()
-
 		flash("You have successfully edited the unit of measurement \"{}\".".format(unitOfMeasurement.Abbreviation), "alert alert-success")
-
 		return redirect(url_for("unitOfMeasurements.listUnitOfMeasurements"))
 
 	# Present a form to edit an existing unit of measurement.
+	form.unitOfMeasurementId.data = unitOfMeasurement.UnitOfMeasurementId
 	form.abbreviation.data = unitOfMeasurement.Abbreviation
 	form.name.data = unitOfMeasurement.Name
 	breadcrumbs = [{"url" : url_for("unitOfMeasurements.listUnitOfMeasurements"), "text" : "<span class = \"glyphicon glyphicon-home\"></span>"},

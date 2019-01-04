@@ -76,6 +76,7 @@ def editLookupValue(lookupValueId):
 		return redirect(form.requestReferrer.data)
 
 	# Present a form to edit an existing lookupValue.
+	form.lookupValueId.data = lookupValue.LookupValueId
 	form.lookupId.data = lookupValue.LookupId
 	form.name.data = lookupValue.Name
 	form.selectable.data = lookupValue.Selectable

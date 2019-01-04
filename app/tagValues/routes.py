@@ -196,9 +196,9 @@ def editTagValue(tagValueId, elementAttributeId = None, eventFrameId = None, eve
 		return redirect(form.requestReferrer.data)
 
 	# Present a form to edit an existing tagValue.
+	form.tagValueId.data = tagValue.TagValueId
 	form.tagId.data = tagValue.TagId
 	form.timestamp.data = tagValue.Timestamp
-
 	if tag.LookupId:
 		form.lookupValue.data = tagValue.Value
 	else:
