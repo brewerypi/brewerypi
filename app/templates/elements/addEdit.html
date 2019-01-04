@@ -1,0 +1,28 @@
+{% extends "addEdit.html" %}
+
+{% block scripts %}
+    {{ super() }}
+    <script>
+        function areaVisibility()
+        {
+            if ($("#isManaged").prop("checked"))
+                {
+                    $("label[for=area], #area").show();
+                }
+                else
+                {
+                    $("label[for=area], #area").hide()
+                }
+        }
+
+        $(document).ready(function()
+        {
+            areaVisibility()
+            
+            $("#isManaged").change(function()
+            {
+                areaVisibility()
+            })
+        })
+    </script>
+{% endblock %}

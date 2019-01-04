@@ -27,6 +27,7 @@ def addElement(elementTemplateId):
 
 	# Present a form to add a new element.
 	form.elementTemplateId.data = elementTemplateId
+	form.area.query = Area.query.all()
 	if form.requestReferrer.data is None:
 		form.requestReferrer.data = request.referrer
 
@@ -37,7 +38,7 @@ def addElement(elementTemplateId):
 		{"url" : url_for("elements.selectElement", selectedClass = "Site", selectedId = elementTemplate.Site.SiteId), "text" : elementTemplate.Site.Name},
 		{"url" : url_for("elements.selectElement", selectedClass = "ElementTemplate", selectedId = elementTemplate.ElementTemplateId),
 			"text" : elementTemplate.Name}]
-	return render_template("addEdit.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
+	return render_template("elements/addEdit.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
 
 @elements.route("/elements/copy/<int:elementId>", methods = ["GET", "POST"])
 @login_required

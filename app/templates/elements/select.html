@@ -74,6 +74,9 @@ Data Entry - Elements
                 <th></th>
                 <th>Name</th>
                 <th>Description</th>
+                {% if childrenClass == "Element" %}
+                    <th>Tags Managed</th>
+                {% endif %}
                 <th></th>
                 <th></th>
                 <th></th>
@@ -115,6 +118,7 @@ Data Entry - Elements
                                 <td></td>
                             {% endif %}
                         {% elif childrenClass == "Element" %}
+                            <td>{{ child.IsManaged | yesNo() }}</td>
                             {% if current_user.isAdministrator() %}
                                 <td><a class = "btn btn-default" title = "Associate Attributes with Tags"
                                     href = "{{ url_for("elementAttributes.listElementAttributes", elementId = child.ElementId) }}">
@@ -171,6 +175,9 @@ Data Entry - Elements
                     { "orderable": false }, // Grafana button.
                     null,
                     null,
+                    {% if childrenClass == "Element" %}
+                        null,
+                    {% endif %}
                     { "orderable": false }, // Associate button.
                     { "orderable": false }, // Copy button.
                     { "orderable": false }, // Edit button.
