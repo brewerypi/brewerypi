@@ -183,7 +183,7 @@ def updateMultiple(elementId):
 		if elementAttribute:
 			if tagId == "-1":
 				# Delete.
-				db.session.delete(elementAttribute)
+				elementAttribute.delete()
 				count = count + 1
 			else:
 				if str(elementAttribute.TagId) != tagId:

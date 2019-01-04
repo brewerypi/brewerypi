@@ -24,6 +24,7 @@ def addArea(siteId):
 		return redirect(form.requestReferrer.data)
 
 	# Present a form to add a new area.
+	form.siteId.data = siteId
 	if form.requestReferrer.data is None:
 		form.requestReferrer.data = request.referrer
 
@@ -40,7 +41,7 @@ def addArea(siteId):
 @adminRequired
 def deleteArea(areaId):
 	area = Area.query.get_or_404(areaId)
-	db.session.delete(area)
+	area.delete()
 	db.session.commit()
 	flash("You have successfully deleted the area \"{}\".".format(area.Name), "alert alert-success")
 	return redirect(request.referrer)
@@ -64,6 +65,7 @@ def editArea(areaId):
 		return redirect(form.requestReferrer.data)
 
 	# Present a form to edit an existing area.
+	form.areaId.data = area.AreaId
 	form.abbreviation.data = area.Abbreviation
 	form.description.data = area.Description
 	form.name.data = area.Name

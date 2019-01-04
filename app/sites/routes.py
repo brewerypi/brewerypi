@@ -24,6 +24,7 @@ def addSite(enterpriseId):
 		return redirect(form.requestReferrer.data)
 
 	# Present a form to add a new site.
+	form.enterpriseId.data = enterpriseId
 	if form.requestReferrer.data is None:
 		form.requestReferrer.data = request.referrer
 
@@ -38,7 +39,7 @@ def addSite(enterpriseId):
 @adminRequired
 def deleteSite(siteId):
 	site = Site.query.get_or_404(siteId)
-	db.session.delete(site)
+	site.delete()
 	db.session.commit()
 	flash("You have successfully deleted the site \"{}\".".format(site.Name), "alert alert-success")
 	return redirect(request.referrer)
@@ -62,6 +63,7 @@ def editSite(siteId):
 		return redirect(form.requestReferrer.data)
 
 	# Present a form to edit an existing site.
+	form.siteId.data = site.SiteId
 	form.abbreviation.data = site.Abbreviation
 	form.description.data = site.Description
 	form.enterpriseId.data = site.EnterpriseId

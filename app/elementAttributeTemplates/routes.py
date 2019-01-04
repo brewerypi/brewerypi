@@ -45,7 +45,7 @@ def addElementAttributeTemplate(elementTemplateId):
 @adminRequired
 def deleteElementAttributeTemplate(elementAttributeTemplateId):
 	elementAttributeTemplate = ElementAttributeTemplate.query.get_or_404(elementAttributeTemplateId)
-	db.session.delete(elementAttributeTemplate)
+	elementAttributeTemplate.delete()
 	db.session.commit()
 	flash("You have successfully deleted the element attribute template \"{}\".".format(elementAttributeTemplate.Name), "alert alert-success")
 	return redirect(request.referrer)
@@ -68,6 +68,7 @@ def editElementAttributeTemplate(elementAttributeTemplateId):
 		return redirect(form.requestReferrer.data)
 
 	# Present a form to edit an existing elementAttributeTemplate.
+	form.elementAttributeTemplateId.data = elementAttributeTemplate.ElementAttributeTemplateId
 	form.description.data = elementAttributeTemplate.Description
 	form.elementTemplateId.data = elementAttributeTemplate.ElementTemplateId
 	form.name.data = elementAttributeTemplate.Name

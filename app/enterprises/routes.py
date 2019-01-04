@@ -36,7 +36,7 @@ def addEnterprise():
 @adminRequired
 def deleteEnterprise(enterpriseId):
 	enterprise = Enterprise.query.get_or_404(enterpriseId)
-	db.session.delete(enterprise)
+	enterprise.delete()
 	db.session.commit()
 	flash("You have successfully deleted the enterprise \"{}\".".format(enterprise.Name), "alert alert-success")
 	return redirect(request.referrer)
@@ -59,6 +59,7 @@ def editEnterprise(enterpriseId):
 		return redirect(form.requestReferrer.data)
 
 	# Present a form to edit an existing enterprise.
+	form.enterpriseId.data = enterprise.EnterpriseId
 	form.abbreviation.data = enterprise.Abbreviation
 	form.description.data = enterprise.Description
 	form.name.data = enterprise.Name

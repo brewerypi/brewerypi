@@ -157,7 +157,7 @@ def addTagValue(tagId = None, elementAttributeId = None, eventFrameId = None, ev
 @permissionRequired(Permission.DATA_ENTRY)
 def deleteTagValue(tagValueId):
 	tagValue = TagValue.query.get_or_404(tagValueId)
-	db.session.delete(tagValue)
+	tagValue.delete()
 	db.session.commit()
 	flash("You have successfully deleted the tag value.", "alert alert-success")
 	return redirect(request.referrer)
@@ -196,9 +196,9 @@ def editTagValue(tagValueId, elementAttributeId = None, eventFrameId = None, eve
 		return redirect(form.requestReferrer.data)
 
 	# Present a form to edit an existing tagValue.
+	form.tagValueId.data = tagValue.TagValueId
 	form.tagId.data = tagValue.TagId
 	form.timestamp.data = tagValue.Timestamp
-
 	if tag.LookupId:
 		form.lookupValue.data = tagValue.Value
 	else:

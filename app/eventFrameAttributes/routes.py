@@ -204,7 +204,7 @@ def updateMultiple(eventFrameId):
 		if eventFrameAttribute:
 			if tagId == "-1":
 				# Delete.
-				db.session.delete(eventFrameAttribute)
+				eventFrameAttribute.delete()
 				count = count + 1
 			else:
 				if str(eventFrameAttribute.TagId) != tagId:

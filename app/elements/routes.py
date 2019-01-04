@@ -120,7 +120,7 @@ def dashboard(elementId):
 @adminRequired
 def deleteElement(elementId):
 	element = Element.query.get_or_404(elementId)
-	db.session.delete(element)
+	element.delete()
 	db.session.commit()
 	flash("You have successfully deleted the element \"{}\".".format(element.Name), "alert alert-success")
 	return redirect(request.referrer)
@@ -144,6 +144,7 @@ def editElement(elementId):
 		return redirect(form.requestReferrer.data)
 
 	# Present a form to edit an existing element.
+	form.elementId.data = element.ElementId
 	form.description.data = element.Description
 	form.elementTemplateId.data = element.ElementTemplateId
 	form.name.data = element.Name

@@ -32,6 +32,13 @@ class Area(db.Model):
 	def __repr__(self):
 		return "<Area: {}>".format(self.Name)
 
+	def delete(self):
+		tags = self.Tags
+		for tag in tags:
+			tag.delete()
+		
+		db.session.delete(self)
+
 	def id(self):
 		return self.AreaId
 
@@ -53,7 +60,22 @@ class Element(db.Model):
 	EventFrames = db.relationship("EventFrame", backref = "Element", lazy = "dynamic")
 
 	def __repr__(self):
-		return "<Element: {}>".format(self.Name)
+		return "<Element: {}>".format(self.Name)		
+
+	def delete(self):
+		elementAttributes = self.ElementAttributes
+		for elementAttribute in elementAttributes:
+			elementAttribute.delete()
+
+		eventFrames = self.EventFrames
+		for eventFrame in eventFrames:
+			eventFrame.delete()
+
+		eventFrameAttributes = self.EventFrameAttributes
+		for eventFrameAttribute in eventFrameAttributes:
+			eventFrameAttribute.delete()
+
+		db.session.delete(self)
 
 	def id(self):
 		return self.ElementId
@@ -70,6 +92,9 @@ class ElementAttribute(db.Model):
 		name = "FK__ElementAttributeTemplate$Have$ElementAttribute"), nullable = False)
 	ElementId = db.Column(db.Integer, db.ForeignKey("Element.ElementId", name = "FK__Element$Have$ElementAttribute"), nullable = False)
 	TagId = db.Column(db.Integer, db.ForeignKey("Tag.TagId", name = "FK__Tag$Have$ElementAttribute"), nullable = False)
+
+	def delete(self):
+		db.session.delete(self)
 
 	def id(self):
 		return self.ElementAttributeId
@@ -91,6 +116,13 @@ class ElementAttributeTemplate(db.Model):
 
 	def __repr__(self):
 		return "<ElementAttributeTemplate: {}>".format(self.Name)
+
+	def delete(self):
+		elementAttributes = self.ElementAttributes
+		for elementAttribute in elementAttributes:
+			elementAttribute.delete()
+
+		db.session.delete(self)
 
 	def id(self):
 		return self.ElementAttributeTemplateId
@@ -114,6 +146,21 @@ class ElementTemplate(db.Model):
 	def __repr__(self):
 		return "<ElementTemplate: {}>".format(self.Name)
 
+	def delete(self):
+		elementAttributeTemplates = self.ElementAttributeTemplates
+		for elementAttributeTemplate in elementAttributeTemplates:
+			elementAttributeTemplate.delete()
+
+		elements = self.Elements
+		for element in elements:
+			element.delete()
+
+		eventFrameTemplates = self.EventFrameTemplates
+		for eventFrameTemplate in eventFrameTemplates:
+			eventFrameTemplate.delete()
+		
+		db.session.delete(self)
+
 	def id(self):
 		return self.ElementTemplateId
 
@@ -135,6 +182,17 @@ class Enterprise(db.Model):
 
 	def __repr__(self):
 		return "<Enterprise: {}>".format(self.Name)
+
+	def delete(self):
+		lookups = self.Lookups
+		for lookup in lookups:
+			lookup.delete()
+
+		sites = self.Sites
+		for site in sites:
+			site.delete()
+
+		db.session.delete(self)
 
 	def id(self):
 		return self.EnterpriseId
@@ -170,20 +228,16 @@ class EventFrame(db.Model):
 			ancestors.insert(0, self.ParentEventFrame)
 			return self.ParentEventFrame.ancestors(ancestors)
 
-	# def friendlyName(self, seconds = False):
-	# 	if self.Name:
-	# 		return self.Name
-	# 	else:
-	# 		if self.EndTimestamp:
-	# 			if seconds:
-	# 				return "{} - {}".format(self.StartTimestamp.strftime("%Y-%m-%d %H:%M:%S"), self.EndTimestamp.strftime("%Y-%m-%d %H:%M:%S"))
-	# 			else:
-	# 				return "{} - {}".format(self.StartTimestamp.strftime("%Y-%m-%d %H:%M"), self.EndTimestamp.strftime("%Y-%m-%d %H:%M"))
-	# 		else:
-	# 			if seconds:
-	# 				return "{} -".format(self.StartTimestamp.strftime("%Y-%m-%d %H:%M:%S"))
-	# 			else:
-	# 				return "{} -".format(self.StartTimestamp.strftime("%Y-%m-%d %H:%M"))
+	def delete(self):
+		eventFrameNotes = self.EventFrameNotes
+		for eventFrameNote in eventFrameNotes:
+			eventFrameNote.delete()
+
+		childEventFrames = self.EventFrames
+		for childEventFrame in childEventFrames:
+			childEventFrame.delete()
+
+		db.session.delete(self)
 
 	def hasDescendants(self):
 		if self.EventFrames:
@@ -216,6 +270,9 @@ class EventFrameAttribute(db.Model):
 	def __repr__(self):
 		return "<EventFrameAttribute: {} - {} - {}>".format(self.Element.Name, self.EventFrameAttributeTemplate.Name, self.Tag.Name)
 
+	def delete(self):
+		db.session.delete(self)
+
 	def id(self):
 		return self.EventFrameAttributeId
 
@@ -237,6 +294,13 @@ class EventFrameAttributeTemplate(db.Model):
 	def __repr__(self):
 		return "<EventFrameAttributeTemplate: {}>".format(self.Name)
 
+	def delete(self):
+		eventFrameAttributes = self.EventFrameAttributes
+		for eventFrameAttribute in eventFrameAttributes:
+			eventFrameAttribute.delete()
+
+		db.session.delete(self)
+
 	def id(self):
 		return self.EventFrameAttributeTemplateId
 
@@ -255,6 +319,11 @@ class EventFrameNote(db.Model):
 
 	EventFrameId = db.Column(db.Integer, db.ForeignKey("EventFrame.EventFrameId", name = "FK__EventFrame$CanHave$EventFrameNote"), nullable = False)
 	NoteId = db.Column(db.Integer, db.ForeignKey("Note.NoteId", name = "FK__Note$CanBe$EventFrameNote"), nullable = False)
+
+	def delete(self):
+		note = Note.query.get(self.NoteId)
+		db.session.delete(note)
+		db.session.delete(self)
 
 class EventFrameTemplate(db.Model):
 	__tablename__ = "EventFrameTemplate"
@@ -288,6 +357,21 @@ class EventFrameTemplate(db.Model):
 		else:
 			ancestors.insert(0, self.ParentEventFrameTemplate)
 			return self.ParentEventFrameTemplate.ancestors(ancestors)
+
+	def delete(self):
+		childEventFrameTemplates = self.EventFrameTemplates
+		for childEventFrameTemplate in childEventFrameTemplates:
+			childEventFrameTemplate.delete()
+
+		eventFrameAttributeTemplates = self.EventFrameAttributeTemplates
+		for eventFrameAttributeTemplate in eventFrameAttributeTemplates:
+			eventFrameAttributeTemplate.delete()
+
+		eventFrames = self.EventFrames
+		for eventFrame in eventFrames:
+			eventFrame.delete()
+
+		db.session.delete(self)
 
 	def descendants(self, descendants, level):
 		descendants.append({"eventFrameTemplate" : self, "level" : level})
@@ -337,8 +421,18 @@ class Lookup(db.Model):
 	def __repr__(self):
 		return "<Lookup: {}>".format(self.Name)
 
+	def delete(self):
+		lookupValues = self.LookupValues
+		for lookupValue in lookupValues:
+			lookupValue.delete()
+
+		db.session.delete(self)
+
 	def id(self):
 		return self.LookupId
+
+	def isReferenced(self):
+		return Tag.query.filter_by(LookupId = self.LookupId).count() > 0
 
 class LookupValue(db.Model):
 	__tablename__ = "LookupValue"
@@ -356,6 +450,9 @@ class LookupValue(db.Model):
 
 	def __repr__(self):
 		return "<LookupValue: {}>".format(self.Name)
+
+	def delete(self):
+		db.session.delete(self)
 
 	def id(self):
 		return self.LookupValueId
@@ -432,6 +529,17 @@ class Site(db.Model):
 	def __repr__(self):
 		return "<Site: {}>".format(self.Name)
 
+	def delete(self):
+		areas = self.Areas
+		for area in areas:
+			area.delete()
+
+		elementTemplates = self.ElementTemplates
+		for elementTemplate in elementTemplates:
+			elementTemplate.delete()
+
+		db.session.delete(self)
+
 	def id(self):
 		return self.SiteId
 
@@ -457,6 +565,21 @@ class Tag(db.Model):
 	def __repr__(self):
 		return "<Tag: {}>".format(self.Name)
 
+	def delete(self):
+		elementAttributes = self.ElementAttributes
+		for elementAttribute in elementAttributes:
+			elementAttribute.delete()
+
+		eventFrameAttributes = self.EventFrameAttributes
+		for eventFrameAttribute in eventFrameAttributes:
+			eventFrameAttribute.delete()
+
+		tagValues = self.TagValues
+		for tagValue in tagValues:
+			tagValue.delete()
+
+		db.session.delete(self)
+
 	def fullAbbreviatedPathName(self):
 		return "{}_{}_{}_{}".format(self.Area.Site.Enterprise.Abbreviation, self.Area.Site.Abbreviation, self.Area.Abbreviation, self.Name)
 
@@ -481,6 +604,13 @@ class TagValue(db.Model):
 	def __repr__(self):
 		return "<TagValue: {}>".format(self.TagId)
 
+	def delete(self):
+		tagValuesNotes = self.TagValueNotes
+		for tagValueNote in tagValuesNotes:
+			tagValueNote.delete()
+
+		db.session.delete(self)
+
 	def id(self):
 		return self.TagValueId
 
@@ -493,6 +623,11 @@ class TagValueNote(db.Model):
 
 	NoteId = db.Column(db.Integer, db.ForeignKey("Note.NoteId", name = "FK__Note$CanBe$TagValueNote"), nullable = False)
 	TagValueId = db.Column(db.Integer, db.ForeignKey("TagValue.TagValueId", name = "FK__TagValue$CanHave$TagValueNote"), nullable = False)
+
+	def delete(self):
+		note = Note.query.get(self.NoteId)
+		db.session.delete(note)
+		db.session.delete(self)
 
 class UnitOfMeasurement(db.Model):
 	__tablename__ = "UnitOfMeasurement"
@@ -509,6 +644,9 @@ class UnitOfMeasurement(db.Model):
 
 	def __repr__(self):
 		return "<UnitOfMeasurement: {}>".format(self.Name)
+
+	def delete(self):
+		db.session.delete(self)
 
 	def id(self):
 		return self.UnitOfMeasurementId
@@ -553,6 +691,9 @@ class User(UserMixin, db.Model):
 
 	def can(self, permissions):
 		return self.Role is not None and (self.Role.Permissions & permissions) == permissions
+
+	def delete(self):
+		db.session.delete(self)
 
 	def get_id(self):
 		return self.UserId

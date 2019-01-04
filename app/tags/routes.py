@@ -52,7 +52,7 @@ def addTag(areaId, lookup = False):
 @adminRequired
 def deleteTag(tagId):
 	tag = Tag.query.get_or_404(tagId)
-	db.session.delete(tag)
+	tag.delete()
 	db.session.commit()
 	flash("You have successfully deleted the tag \"{}\".".format(tag.Name), "alert alert-success")
 	return redirect(request.referrer)
@@ -88,10 +88,10 @@ def editTag(tagId):
 		return redirect(form.requestReferrer.data)
 
 	# Present a form to edit an existing tag.
+	form.tagId.data = tag.TagId
 	form.areaId.data = tag.AreaId
 	form.description.data = tag.Description
 	form.name.data = tag.Name
-
 	if tag.LookupId:
 		form.lookup.data = tag.Lookup
 	else:

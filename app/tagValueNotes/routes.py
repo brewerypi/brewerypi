@@ -105,9 +105,7 @@ def addTagValueNote(tagValueId, elementAttributeId = None, eventFrameId = None, 
 @permissionRequired(Permission.DATA_ENTRY)
 def deleteTagValueNote(noteId, tagValueId):
 	tagValueNote = TagValueNote.query.filter_by(TagValueId = tagValueId, NoteId = noteId).first()
-	note = Note.query.get_or_404(noteId)
-	db.session.delete(tagValueNote)
-	db.session.delete(note)
+	tagValueNote.delete()
 	db.session.commit()
 	flash("You have successfully deleted the tag value note.", "alert alert-success")
 	return redirect(request.referrer)

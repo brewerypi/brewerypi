@@ -26,6 +26,7 @@ def addEventFrameAttributeTemplate(eventFrameTemplateId):
 		return redirect(form.requestReferrer.data)
 
 	# Present a form to add a new event frame attribute template.
+	form.eventFrameTemplateId.data = eventFrameTemplateId
 	if form.requestReferrer.data is None:
 		form.requestReferrer.data = request.referrer
 
@@ -59,6 +60,7 @@ def addEventFrameAttributeTemplate(eventFrameTemplateId):
 			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "EventFrameTemplate",
 				selectedId = eventFrameTemplate.EventFrameTemplateId, selectedOperation = "configure"),
 				"text" : eventFrameTemplate.Name}]
+
 	return render_template("addEdit.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
 
 @eventFrameAttributeTemplates.route("/eventFrameAttributeTemplates/delete/eventFrameAttributeTemplateId/<int:eventFrameAttributeTemplateId>",
@@ -67,8 +69,7 @@ def addEventFrameAttributeTemplate(eventFrameTemplateId):
 @adminRequired
 def deleteEventFrameAttributeTemplate(eventFrameAttributeTemplateId):
 	eventFrameAttributeTemplate = EventFrameAttributeTemplate.query.get_or_404(eventFrameAttributeTemplateId)
-	eventFrameTemplateId = eventFrameAttributeTemplate.EventFrameTemplate.EventFrameTemplateId
-	db.session.delete(eventFrameAttributeTemplate)
+	eventFrameAttributeTemplate.delete()
 	db.session.commit()
 	flash("You have successfully deleted the event frame attribute template \"{}\".".format(eventFrameAttributeTemplate.Name), "alert alert-success")
 	return redirect(request.referrer)
@@ -92,7 +93,9 @@ def editEventFrameAttributeTemplate(eventFrameAttributeTemplateId):
 		return redirect(form.requestReferrer.data)
 
 	# Present a form to edit an existing eventFrameAttributeTemplate.
+	form.eventFrameAttributeTemplateId.data = eventFrameAttributeTemplate.EventFrameAttributeTemplateId
 	form.description.data = eventFrameAttributeTemplate.Description
+	form.eventFrameTemplateId.data = eventFrameAttributeTemplate.EventFrameTemplateId
 	form.name.data = eventFrameAttributeTemplate.Name
 	if form.requestReferrer.data is None:
 		form.requestReferrer.data = request.referrer

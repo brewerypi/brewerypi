@@ -40,7 +40,7 @@ def addElementTemplate(siteId):
 @adminRequired
 def deleteElementTemplate(elementTemplateId):
 	elementTemplate = ElementTemplate.query.get_or_404(elementTemplateId)
-	db.session.delete(elementTemplate)
+	elementTemplate.delete()
 	db.session.commit()
 	flash("You have successfully deleted the element template \"{}\".".format(elementTemplate.Name), "alert alert-success")
 	return redirect(request.referrer)
@@ -63,6 +63,7 @@ def editElementTemplate(elementTemplateId):
 		return redirect(form.requestReferrer.data)
 
 	# Present a form to edit an existing element template.
+	form.elementTemplateId.data = elementTemplate.ElementTemplateId
 	form.description.data = elementTemplate.Description
 	form.name.data = elementTemplate.Name
 	form.siteId.data = elementTemplate.SiteId
