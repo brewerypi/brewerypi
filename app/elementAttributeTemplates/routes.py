@@ -68,6 +68,7 @@ def editElementAttributeTemplate(elementAttributeTemplateId):
 		return redirect(form.requestReferrer.data)
 
 	# Present a form to edit an existing elementAttributeTemplate.
+	form.elementAttributeTemplateId.data = elementAttributeTemplate.ElementAttributeTemplateId
 	form.description.data = elementAttributeTemplate.Description
 	form.elementTemplateId.data = elementAttributeTemplate.ElementTemplateId
 	form.name.data = elementAttributeTemplate.Name

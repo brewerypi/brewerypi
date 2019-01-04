@@ -41,6 +41,8 @@ def addEventFrameTemplate(elementTemplateId = None, parentEventFrameTemplateId =
 		return redirect(form.requestReferrer.data)
 
 	# Present a form to add a new event frame template.
+	form.elementTemplateId.data = elementTemplateId
+	form.parentEventFrameTemplateId.data = parentEventFrameTemplateId
 	if parentEventFrameTemplateId:
 		childEventFrameTemplateMaximumOrder = EventFrameTemplate.query.filter_by(ParentEventFrameTemplateId = parentEventFrameTemplateId). \
 			order_by(EventFrameTemplate.Order.desc()).first()
@@ -51,7 +53,6 @@ def addEventFrameTemplate(elementTemplateId = None, parentEventFrameTemplateId =
 			nextOrder = 1
 
 		form.order.data = nextOrder
-
 		parentEventFrameTemplate = EventFrameTemplate.query.get_or_404(parentEventFrameTemplateId)
 		breadcrumbs = [{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Root"), "text" : "<span class = \"glyphicon glyphicon-home\"></span>"},
 			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Enterprise",
@@ -133,7 +134,6 @@ def editEventFrameTemplate(eventFrameTemplateId):
 
 	# Present a form to edit an existing event frame template.
 	if eventFrameTemplate.hasParent():
-		form.order.data = eventFrameTemplate.Order
 		breadcrumbs = [{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Root"), "text" : "<span class = \"glyphicon glyphicon-home\"></span>"},
 			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Enterprise",
 				selectedId = eventFrameTemplate.origin().ElementTemplate.Site.Enterprise.EnterpriseId),
@@ -150,7 +150,6 @@ def editEventFrameTemplate(eventFrameTemplateId):
 
 		breadcrumbs.append({"url" : None, "text" : eventFrameTemplate.Name})
 	else:
-		form.elementTemplateId.data = eventFrameTemplate.ElementTemplateId
 		breadcrumbs = [{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Root"), "text" : "<span class = \"glyphicon glyphicon-home\"></span>"},
 			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Enterprise",
 				selectedId = eventFrameTemplate.ElementTemplate.Site.Enterprise.EnterpriseId),
@@ -161,8 +160,11 @@ def editEventFrameTemplate(eventFrameTemplateId):
 				selectedId = eventFrameTemplate.ElementTemplate.ElementTemplateId), "text" : eventFrameTemplate.ElementTemplate.Name},
 			{"url" : None, "text" : eventFrameTemplate.Name}]
 
+	form.eventFrameTemplateId.data = eventFrameTemplate.EventFrameTemplateId
 	form.description.data = eventFrameTemplate.Description
+	form.elementTemplateId.data = eventFrameTemplate.ElementTemplateId
 	form.name.data = eventFrameTemplate.Name
+	form.order.data = eventFrameTemplate.Order
 	form.parentEventFrameTemplateId.data = eventFrameTemplate.ParentEventFrameTemplateId
 	if form.requestReferrer.data is None:
 		form.requestReferrer.data = request.referrer

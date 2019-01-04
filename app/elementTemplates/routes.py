@@ -63,6 +63,7 @@ def editElementTemplate(elementTemplateId):
 		return redirect(form.requestReferrer.data)
 
 	# Present a form to edit an existing element template.
+	form.elementTemplateId.data = elementTemplate.ElementTemplateId
 	form.description.data = elementTemplate.Description
 	form.name.data = elementTemplate.Name
 	form.siteId.data = elementTemplate.SiteId

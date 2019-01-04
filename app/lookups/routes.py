@@ -64,6 +64,7 @@ def editLookup(lookupId):
 		return redirect(form.requestReferrer.data)
 
 	# Present a form to edit an existing lookup.
+	form.lookupId.data = lookup.LookupId
 	form.enterpriseId.data = lookup.EnterpriseId
 	form.name.data = lookup.Name
 	if form.requestReferrer.data is None:
