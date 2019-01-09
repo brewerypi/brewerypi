@@ -8,7 +8,7 @@ class ElementForm(FlaskForm):
 	name = StringField("Name", validators = [Required(), Length(1, 45)])
 	description = StringField("Description", validators = [Length(0, 255)])
 	isManaged = BooleanField("Manage Tags", default = "checked")
-	area = QuerySelectField("Area", get_label = "Name")
+	area = QuerySelectField("Area", get_label = "Abbreviation")
 	elementId = HiddenField()
 	elementIdToCopy = HiddenField()
 	elementTemplateId = HiddenField()
@@ -16,6 +16,8 @@ class ElementForm(FlaskForm):
 	submit = SubmitField("Save")
 
 	def validate_name(self, field):
+		isManagedCheck = self.isManaged.data
+		areaCheck = self.area.data
 		validationError = False
 		element = Element.query.filter_by(ElementTemplateId = self.elementTemplateId.data, Name = field.data).first()
 		if element:

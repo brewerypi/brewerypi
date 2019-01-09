@@ -20,6 +20,12 @@ def addElement(elementTemplateId):
 	# Add a new element.
 	if form.validate_on_submit():
 		element = Element(Description = form.description.data, ElementTemplateId = form.elementTemplateId.data, Name = form.name.data)
+		if form.isManaged.data:
+			elementAttributeTemplates = ElementAttributeTemplate.query.filter_by(elementTemplateId = element.ElementTemplateId)
+			tagNames = []
+			for ElementAttributeTemplate in elementAttributeTemplates:
+				tagName = "{}_{}_{}_{}_{}".format(element.ElementTemplate.Site.Enterprise.Abbreviation, element.ElementTemplate.Site.Abbreviation, form.area.data, form.name.data, ElementAttributeTemplate.Name)
+				tagNames.append()
 		db.session.add(element)
 		db.session.commit()
 		flash("You have successfully added the new element \"{}\".".format(element.Name), "alert alert-success")
@@ -27,7 +33,7 @@ def addElement(elementTemplateId):
 
 	# Present a form to add a new element.
 	form.elementTemplateId.data = elementTemplateId
-	form.area.query = Area.query.all()
+	form.area.query = Area.query
 	if form.requestReferrer.data is None:
 		form.requestReferrer.data = request.referrer
 
