@@ -60,7 +60,24 @@ Event Frames
     </ol>
 </div>
 <div class = "page-header">
-    <h1>Event Frames <small>{{ pageHeaderSubText }}</small></h1>
+    <h1>Event Frames <small>{{ pageHeaderSubText }}</small>
+        {% if childrenClass == "EventFrame" %}
+            <a class = 'btn btn-primary btn-xs {{ "active" if months == 1 }}' title = "1 Mo" href = '{{ url_for("eventFrames.selectEventFrame",
+                selectedClass = "EventFrameTemplate", selectedId = parent.id(), months = 1) }}' role = "button">1 Mo</a>
+            <a class = 'btn btn-primary btn-xs {{ "active" if months == 2 }}' title = "2 Mo" href = '{{ url_for("eventFrames.selectEventFrame",
+                selectedClass = "EventFrameTemplate", selectedId = parent.id(), months = 2) }}' role = "button">2 Mo</a>
+            <a class = 'btn btn-primary btn-xs {{ "active" if months == 3 }}' title = "3 Mo" href = '{{ url_for("eventFrames.selectEventFrame",
+                selectedClass = "EventFrameTemplate", selectedId = parent.id(), months = 3) }}' role = "button">3 Mo</a>
+            <a class = 'btn btn-primary btn-xs {{ "active" if months == 6 }}' title = "6 Mo" href = '{{ url_for("eventFrames.selectEventFrame",
+                selectedClass = "EventFrameTemplate", selectedId = parent.id(), months = 6) }}' role = "button">6 Mo</a>
+            <a class = 'btn btn-primary btn-xs {{ "active" if months == 9 }}' title = "9 Mo" href = '{{ url_for("eventFrames.selectEventFrame",
+                selectedClass = "EventFrameTemplate", selectedId = parent.id(), months = 9) }}' role = "button">9 Mo</a>
+            <a class = 'btn btn-primary btn-xs {{ "active" if months == 12 }}' title = "1 Yr" href = '{{ url_for("eventFrames.selectEventFrame",
+                selectedClass = "EventFrameTemplate", selectedId = parent.id(), months = 12) }}' role = "button">1 Yr</a>
+            <a class = 'btn btn-primary btn-xs {{ "active" if months == 0 }}' title = "All" href = '{{ url_for("eventFrames.selectEventFrame",
+                selectedClass = "EventFrameTemplate", selectedId = parent.id(), months = 0) }}' role = "button">All</a>
+        {% endif %}
+    </h1>
 </div>
 <div>
     {% if childrenClass == "ElementTemplate" %}
