@@ -1,4 +1,5 @@
 from datetime import datetime
+from dateutil.relativedelta import relativedelta
 from flask import current_app, flash, jsonify, redirect, render_template, request, url_for
 from flask_login import login_required
 from . import eventFrames
@@ -354,10 +355,11 @@ def days():
 @eventFrames.route("/eventFrames/select", methods = ["GET", "POST"]) # Default.
 @eventFrames.route("/eventFrames/select/<string:selectedClass>", methods = ["GET", "POST"]) # Root.
 @eventFrames.route("/eventFrames/select/<string:selectedClass>/<int:selectedId>", methods = ["GET", "POST"])
+@eventFrames.route("/eventFrames/select/<string:selectedClass>/<int:selectedId>/<int:months>", methods = ["GET", "POST"])
 @eventFrames.route("/eventFrames/select/<string:selectedClass>/<int:selectedId>/<string:selectedOperation>", methods = ["GET", "POST"])
 @login_required
 @permissionRequired(Permission.DATA_ENTRY)
-def selectEventFrame(selectedClass = None, selectedId = None, selectedOperation = None):
+def selectEventFrame(selectedClass = None, selectedId = None, months = None, selectedOperation = None):
 	eventFrameAttributeTemplates = None
 	if selectedClass == None:
 		parent = Site.query.join(Enterprise, ElementTemplate, EventFrameTemplate, EventFrame).order_by(Enterprise.Name).first()
@@ -391,11 +393,21 @@ def selectEventFrame(selectedClass = None, selectedId = None, selectedOperation 
 			order_by(EventFrameAttributeTemplate.Name)
 	elif selectedClass == "EventFrameTemplate":
 		parent = EventFrameTemplate.query.get_or_404(selectedId)
-		children = EventFrame.query.filter_by(EventFrameTemplateId = selectedId)
+		if months is None:
+			months = 3
+
+		fromTimestamp = datetime.utcnow() - relativedelta(months = months)
+		toTimestamp = datetime.utcnow()		
+		if months == 0:
+			children = EventFrame.query.filter_by(EventFrameTemplateId = selectedId)
+		else:
+			children = EventFrame.query.filter(EventFrame.EventFrameTemplateId == selectedId, EventFrame.StartTimestamp >= fromTimestamp,
+				EventFrame.StartTimestamp <= toTimestamp)
+
 		childrenClass = "EventFrame"
 
 	return render_template("eventFrames/select.html", children = children, childrenClass = childrenClass,
-		eventFrameAttributeTemplates = eventFrameAttributeTemplates, parent = parent)
+		eventFrameAttributeTemplates = eventFrameAttributeTemplates, months = months, parent = parent)
 
 @eventFrames.route("/eventFrames/startEventFrame/<int:elementId>/<int:eventFrameTemplateId>", methods = ["GET", "POST"])
 @login_required

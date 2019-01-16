@@ -43,7 +43,42 @@ Tag Values
     </ol>
 </div>
 <div class = "page-header">
-    <h1>Tag Values <small></small></h1>
+    <h1>Tag Values <small></small>
+        {% if elementAttribute %}
+            <a class = 'btn btn-primary btn-xs {{ "active" if months == 1 }}' title = "1 Mo"
+                href = '{{ url_for("tagValues.listTagValues", elementAttributeId = elementAttribute.ElementAttributeId, months = 1) }}' role = "button">1 Mo</a>
+            <a class = 'btn btn-primary btn-xs {{ "active" if months == 2 }}' title = "2 Mo"
+                href = '{{ url_for("tagValues.listTagValues", elementAttributeId = elementAttribute.ElementAttributeId, months = 2) }}' role = "button">2 Mo</a>
+            <a class = 'btn btn-primary btn-xs {{ "active" if months == 3 }}' title = "3 Mo"
+                href = '{{ url_for("tagValues.listTagValues", elementAttributeId = elementAttribute.ElementAttributeId, months = 3) }}' role = "button">3 Mo</a>
+            <a class = 'btn btn-primary btn-xs {{ "active" if months == 6 }}' title = "6 Mo"
+                href = '{{ url_for("tagValues.listTagValues", elementAttributeId = elementAttribute.ElementAttributeId, months = 6) }}' role = "button">6 Mo</a>
+            <a class = 'btn btn-primary btn-xs {{ "active" if months == 9 }}' title = "9 Mo"
+                href = '{{ url_for("tagValues.listTagValues", elementAttributeId = elementAttribute.ElementAttributeId, months = 9) }}' role = "button">9 Mo</a>
+            <a class = 'btn btn-primary btn-xs {{ "active" if months == 12 }}' title = "1 Yr"
+                href = '{{ url_for("tagValues.listTagValues", elementAttributeId = elementAttribute.ElementAttributeId, months = 12) }}' role = "button">1 Yr
+            </a>
+            <a class = 'btn btn-primary btn-xs {{ "active" if months == 0 }}' title = "All"
+                href = '{{ url_for("tagValues.listTagValues", elementAttributeId = elementAttribute.ElementAttributeId, months = 0) }}' role = "button">All</a>
+        {% elif eventFrame %}
+            <!-- Show all values tag values for the event frame. -->
+        {% else %}
+            <a class = 'btn btn-primary btn-xs {{ "active" if months == 1 }}' title = "1 Mo"
+                href = '{{ url_for("tagValues.listTagValues", tagId = tag.TagId, months = 1) }}' role = "button">1 Mo</a>
+            <a class = 'btn btn-primary btn-xs {{ "active" if months == 2 }}' title = "2 Mo"
+                href = '{{ url_for("tagValues.listTagValues", tagId = tag.TagId, months = 2) }}' role = "button">2 Mo</a>
+            <a class = 'btn btn-primary btn-xs {{ "active" if months == 3 }}' title = "3 Mo"
+                href = '{{ url_for("tagValues.listTagValues", tagId = tag.TagId, months = 3) }}' role = "button">3 Mo</a>
+            <a class = 'btn btn-primary btn-xs {{ "active" if months == 6 }}' title = "6 Mo"
+                href = '{{ url_for("tagValues.listTagValues", tagId = tag.TagId, months = 6) }}' role = "button">6 Mo</a>
+            <a class = 'btn btn-primary btn-xs {{ "active" if months == 9 }}' title = "9 Mo"
+                href = '{{ url_for("tagValues.listTagValues", tagId = tag.TagId, months = 9) }}' role = "button">9 Mo</a>
+            <a class = 'btn btn-primary btn-xs {{ "active" if months == 12 }}' title = "1 Yr"
+                href = '{{ url_for("tagValues.listTagValues", tagId = tag.TagId, months = 12) }}' role = "button">1 Yr</a>
+            <a class = 'btn btn-primary btn-xs {{ "active" if months == 0 }}' title = "All"
+                href = '{{ url_for("tagValues.listTagValues", tagId = tag.TagId, months = 0) }}' role = "button">All</a>
+        {% endif %}
+    </h1>
 </div>
 <div>
     {% if elementAttribute %}
