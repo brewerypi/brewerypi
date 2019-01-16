@@ -19,7 +19,7 @@
         $(document).ready(function()
         {
             {% if not form.errors %}
-                var timestamp = moment.utc($("#timestamp").val())
+                var timestamp = moment.utc($("#timestamp").attr("value"))
                 $("#timestamp").val(timestamp.local().format("YYYY-MM-DD HH:mm:ss"))
             {% endif %}
 
