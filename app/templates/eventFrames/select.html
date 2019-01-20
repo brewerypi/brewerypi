@@ -98,12 +98,21 @@ Event Frames
         <a class = "btn btn-default" title = "Grafana" href = "{{ "ActiveEventFrameSummary" | grafanaUrl({"eventFrameTemplateId": parent.id()}) }}"
             target = "_blank"><span class = "glyphicon glyphicon-stats"></span></a>
         <br><br>
+        Toggle Column:
+        <button type = "button" class = "btn btn-primary btn-xs" id = "buttonHideAllColumns">Hide All</button>
+        {% for eventFrameAttributeTemplate in parent.EventFrameAttributeTemplates %}
+            {% set dataColumnIndex = loop.index + 9 %}
+            <button type = "button" class = "btn btn-primary btn-xs" data-columnIndex = "{{ dataColumnIndex }}"
+                id = "buttonToggleColumn{{ eventFrameAttributeTemplate.Name }}">{{ eventFrameAttributeTemplate.Name }}</button>
+        {% endfor %}
+        <button type = "button" class = "btn btn-primary btn-xs" id = "buttonShowAllColumns">Show All</button>
+        <br><br>
     {% elif childrenClass == "DescendantEventFrameTemplate" %}
         <a class = "btn btn-default" title = "Add" href = "{{ url_for("eventFrameTemplates.addEventFrameTemplate",
             parentEventFrameTemplateId = parent.id()) }}" role = "button"><span class = "glyphicon glyphicon-plus"></span></a>
         <br><br>
     {% endif %}
-    <table id = "table" class = "table" style = "width:100%">
+    <table id = "table" class = "table" style = "display:none">
         <thead>
             <tr>
                 <th></th>
@@ -119,12 +128,15 @@ Event Frames
                     <th></th>
                 {% elif childrenClass == "EventFrame" %}
                     <th>Element</th>
-                    <th>Start Timestamp</th>
-                    <th>End Timestamp</th>
+                    <th id = "thStartTimestamp">Start Timestamp</th>
+                    <th id = "thEndTimestamp">End Timestamp</th>
                     <th></th>
                     <th></th>
                     <th></th>
                     <th></th>
+                    {% for eventFrameAttributeTemplate in parent.EventFrameAttributeTemplates %}
+                        <th>{{ eventFrameAttributeTemplate.Name }}</th>
+                    {% endfor %}
                 {% elif childrenClass == "DescendantEventFrameTemplate" %}
                     <th>Description</th>
                     <th>Order</th>
@@ -204,7 +216,11 @@ Event Frames
                                 <span class = "glyphicon glyphicon-edit"></span></a></td>
                             <td><a class = "btn btn-default" title = "Delete" href = "{{ url_for("eventFrames.deleteEventFrame", eventFrameId = child.id()) }}",
                                 data-type = "event frame", data-name = "{{ child.Name }}"><span class = "glyphicon glyphicon-trash"></span></a></td>
-                        {% elif childrenClass == "DescendantEventFrameTemplate" %}
+                            {% set currentEventFrameAttributeValues = child.currentEventFrameAttributeValues() %}
+                            {% for eventFrameAttributeTemplate in child.EventFrameTemplate.EventFrameAttributeTemplates %}
+                                <td>{{ currentEventFrameAttributeValues[eventFrameAttributeTemplate.Name] }}</td>
+                            {% endfor %}
+                            {% elif childrenClass == "DescendantEventFrameTemplate" %}
                             <td>{{ child.Name }}</td>
                             <td>{{ child.Description }}</td>
                             <td>{{ child.Order }}</td>
@@ -264,7 +280,31 @@ Event Frames
     <script>
         $(document).ready(function()
         {
-            $("#table").DataTable
+            {% if childrenClass == "EventFrame" %}
+                $("#table thead tr").clone(true).appendTo("#table thead")
+                $("#table thead tr:eq(1) th").each(function(i)
+                {
+                    var id = $(this).attr("id")
+                    var title = $(this).text()
+                    if (title != "" && id != "thStartTimestamp" && id != "thEndTimestamp")
+                    {
+                        $(this).html('<input type = "text" placeholder = "Filter ' + title + '" />')
+                        $("input", this).on("keyup change", function ()
+                        {
+                            if (table.column(i).search() !== this.value)
+                            {
+                                table.column(i).search(this.value).draw()
+                            }
+                        })
+                    }
+                    else
+                    {
+                        $(this).html("")
+                    }
+                })
+            {% endif %}
+
+            var table = $("#table").DataTable
             ({
                 "order":
                 [
@@ -298,7 +338,10 @@ Event Frames
                         { "orderable": false }, // Associate button.
                         { "orderable": false }, // Stop button.
                         { "orderable": false }, // Edit button.
-                        { "orderable": false }  // Delete button.
+                        { "orderable": false }, // Delete button.
+                        {% for eventFrameAttributeTemplate in parent.EventFrameAttributeTemplates %}
+                            null,
+                        {% endfor %}
                     {% elif childrenClass == "DescendantEventFrameTemplate" %}
                         null,
                         null,
@@ -309,7 +352,71 @@ Event Frames
                 ],
                 "stateSave": true,
                 "stateDuration": 0,
-                "pageLength": 25
+                "pageLength": 25,
+                "orderCellsTop": true,
+                "fixedHeader": true
+            })
+
+            $("#table").attr("style", "width:100%")
+
+            // Apply the search
+            table.columns().every(function ()
+            {
+                // Clear any left over filtering from state saving.
+                this.search("", 1).draw()
+
+                if (this.visible())
+                {
+                    $(".btn.btn-primary.btn-xs[data-columnIndex = " + this.index() + "]").addClass("active")
+                }
+                else
+                {
+                    $(".btn.btn-primary.btn-xs[data-columnIndex = " + this.index() + "]").removeClass("active")
+                }
+            })
+
+            $("#buttonHideAllColumns").on("click", function()
+            {
+                table.columns().every(function ()
+                {
+                    if (this.index() > 9)
+                    {
+                        this.visible(false)
+                        $(".btn.btn-primary.btn-xs[data-columnIndex = " + this.index() + "]").removeClass("active")
+                    }
+                })
+            })
+
+            $("#buttonShowAllColumns").on("click", function()
+            {
+                table.columns().every(function ()
+                {
+                    if (this.index() > 9)
+                    {
+                        this.visible(true)
+                        $(".btn.btn-primary.btn-xs[data-columnIndex = " + this.index() + "]").addClass("active")
+                    }
+                })
+            })
+
+            $("[id^=buttonToggleColumn]").on("click", function(e)
+            {
+                e.preventDefault();
+        
+                // Get the column API object
+                var column = table.column($(this).attr("data-columnIndex"))
+        
+                // Toggle the visibility
+                column.visible(!column.visible())
+
+                if ($(this).hasClass("active"))
+                {
+                    $(this).removeClass("active")
+                }
+                else
+                {
+                    $(this).addClass("active")
+                }
             })
 
             $('#eventFrameAttributeTemplatesTable').DataTable

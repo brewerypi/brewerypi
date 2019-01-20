@@ -27,32 +27,32 @@ Event Frames
 </div>
 {% if form %}
     <div>
-        <button class = "btn btn-primary" id = "buttonMonthPicker1" months = "1" title = "1 Month">1 Mo</button>
-        <button class = "btn btn-primary" id = "buttonMonthPicker2" months = "2" title = "2 Months">2 Mo</button>
-        <button class = "btn btn-primary" id = "buttonMonthPicker3" months = "3" title = "3 Months">3 Mo</button>
-        <button class = "btn btn-primary" id = "buttonMonthPicker6" months = "6" title = "6 Months">6 Mo</button>
-        <button class = "btn btn-primary" id = "buttonMonthPicker9" months = "9" title = "9 Months">9 Mo</button>
-        <button class = "btn btn-primary" id = "buttonMonthPicker12" months = "12" title = "1 Year">1 Yr</button>
+        <button class = "btn btn-primary" id = "buttonMonthPicker1" data-months = "1" title = "1 Month">1 Mo</button>
+        <button class = "btn btn-primary" id = "buttonMonthPicker2" data-months = "2" title = "2 Months">2 Mo</button>
+        <button class = "btn btn-primary" id = "buttonMonthPicker3" data-months = "3" title = "3 Months">3 Mo</button>
+        <button class = "btn btn-primary" id = "buttonMonthPicker6" data-months = "6" title = "6 Months">6 Mo</button>
+        <button class = "btn btn-primary" id = "buttonMonthPicker9" data-months = "9" title = "9 Months">9 Mo</button>
+        <button class = "btn btn-primary" id = "buttonMonthPicker12" data-months = "12" title = "1 Year">1 Yr</button>
     </div>
     <div>
         {{ wtf.quick_form(form) }}
     </div>
 {% else %}
+    <a class = "btn btn-default" id = "buttonEventFrameOverlay" title = "Grafana"><span class = "glyphicon glyphicon-stats"></span></a>
+    <br><br>
     <div>
         Toggle Column:
         <button type = "button" class = "btn btn-primary btn-xs" id = "buttonHideAllColumns">Hide All</button>
         {% for eventFrameAttributeTemplate in eventFrameAttributeTemplates %}
-            {% set dataColumn = loop.index + 4 %}
-            <button type = "button" class = "btn btn-primary btn-xs" dataColumn = "{{ dataColumn }}"
+            {% set dataColumnIndex = loop.index + 4 %}
+            <button type = "button" class = "btn btn-primary btn-xs" data-columnIndex = "{{ dataColumnIndex }}"
                 id = "buttonToggleColumn{{ eventFrameAttributeTemplate.Name }}">{{ eventFrameAttributeTemplate.Name }}</button>
         {% endfor %}
         <button type = "button" class = "btn btn-primary btn-xs" id = "buttonShowAllColumns">Show All</button>
+        <br><br>
     </div>
-    <br>
-    <a class = "btn btn-default" id = "buttonEventFrameOverlay" title = "Grafana"><span class = "glyphicon glyphicon-stats"></span></a>
-    <br><br>
     <div>
-        <table id = "table" class = "table" style = "width:100%">
+        <table id = "table" class = "table" style = "display:none">
             <thead>
                 <tr>
                     <th>Event Frame Id</th>
@@ -119,6 +119,13 @@ Event Frames
 
         $(document).ready(function()
         {
+            {% if form %}
+                $(".form-control").first().focus()
+                $("#submit").hide()
+                $("#submit").parent().append("<button class = \"btn btn-default\" id = \"buttonSearch\" title = \"Search\" type = \"submit\">" +
+                    "<span class = \"glyphicon glyphicon-search\" aria-hidden = \"true\"></span></button>")
+            {% endif %}
+
             $("#table thead tr").clone(true).appendTo("#table thead")
             $("#table thead tr:eq(1) th").each(function(i)
             {
@@ -141,13 +148,6 @@ Event Frames
                 }
             })
 
-            {% if form %}
-                $(".form-control").first().focus()
-                $("#submit").hide()
-                $("#submit").parent().append("<button class = \"btn btn-default\" id = \"buttonSearch\" title = \"Search\" type = \"submit\">" +
-                    "<span class = \"glyphicon glyphicon-search\" aria-hidden = \"true\"></span></button>")
-            {% endif %}
-
             var table = $("#table").DataTable
             ({
                 "columnDefs":
@@ -168,6 +168,8 @@ Event Frames
                 "orderCellsTop": true,
                 "fixedHeader": true
             })
+
+            $("#table").attr("style", "width:100%")
 
             $("#buttonHideAllColumns").on("click", function()
             {
@@ -198,7 +200,7 @@ Event Frames
                 e.preventDefault();
         
                 // Get the column API object
-                var column = table.column($(this).attr("dataColumn"))
+                var column = table.column($(this).attr("data-columnIndex"))
         
                 // Toggle the visibility
                 column.visible(!column.visible())
@@ -288,7 +290,7 @@ Event Frames
 
             $("[id^=buttonMonthPicker]").click(function()
             {
-                var months = $(this).attr("months")
+                var months = $(this).attr("data-months")
                 $("#startTimestamp").val(new moment().subtract(months, "months").hours(0).minutes(0).seconds(0).local().format("YYYY-MM-DD HH:mm:ss"))
                 $("#endTimestamp").val("")
             })
