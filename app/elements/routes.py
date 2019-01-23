@@ -5,8 +5,7 @@ from . import elements
 from . forms import ElementForm
 from .. import db
 from .. decorators import adminRequired, permissionRequired
-from .. models import Area, ElementAttributeTemplate, Element, ElementAttribute, ElementTemplate, Enterprise, EventFrame, EventFrameTemplate, Permission, \
-	Site, Tag
+from .. models import Area, ElementAttributeTemplate, Element, ElementAttribute, ElementTemplate, Enterprise, EventFrame, EventFrameTemplate, Permission, Site, Tag
 
 modelName = "Element"
 
@@ -16,16 +15,20 @@ modelName = "Element"
 def addElement(elementTemplateId):
 	operation = "Add"
 	form = ElementForm()
+	elementTemplate = ElementTemplate.query.get_or_404(elementTemplateId)
+	form.area.query = Area.query.filter_by(SiteId = elementTemplate.Site.SiteId)
 
 	# Add a new element.
 	if form.validate_on_submit():
-		element = Element(Description = form.description.data, ElementTemplateId = form.elementTemplateId.data, Name = form.name.data)
+		element = Element(Description = form.description.data, ElementTemplateId = form.elementTemplateId.data, IsManaged = form.isManaged.data, 
+			Name = form.name.data)
 		if form.isManaged.data:
-			elementAttributeTemplates = ElementAttributeTemplate.query.filter_by(elementTemplateId = element.ElementTemplateId)
-			tagNames = []
-			for ElementAttributeTemplate in elementAttributeTemplates:
-				tagName = "{}_{}_{}_{}_{}".format(element.ElementTemplate.Site.Enterprise.Abbreviation, element.ElementTemplate.Site.Abbreviation, form.area.data, form.name.data, ElementAttributeTemplate.Name)
-				tagNames.append()
+			elementAttributeTemplates = ElementAttributeTemplate.query.filter_by(ElementTemplateId = element.ElementTemplateId).all()
+			for elementAttributeTemplate in elementAttributeTemplates:
+				tagName = "{}_{}_{}_{}_{}".format(elementTemplate.Site.Enterprise.Abbreviation, elementTemplate.Site.Abbreviation, form.area.data.Abbreviation, form.name.data, elementAttributeTemplate.Name.replace(" ", ""))
+				tag = Tag(AreaId = form.area.data.AreaId, Name = tagName, UnitOfMeasurementId = 2)
+				if Tag.exists(tag):
+					print("tag already exists")
 		db.session.add(element)
 		db.session.commit()
 		flash("You have successfully added the new element \"{}\".".format(element.Name), "alert alert-success")
@@ -33,11 +36,9 @@ def addElement(elementTemplateId):
 
 	# Present a form to add a new element.
 	form.elementTemplateId.data = elementTemplateId
-	form.area.query = Area.query
 	if form.requestReferrer.data is None:
 		form.requestReferrer.data = request.referrer
 
-	elementTemplate = ElementTemplate.query.get_or_404(elementTemplateId)
 	breadcrumbs = [{"url" : url_for("elements.selectElement", selectedClass = "Root"), "text" : "<span class = \"glyphicon glyphicon-home\"></span>"},
 		{"url" : url_for("elements.selectElement", selectedClass = "Enterprise", selectedId = elementTemplate.Site.Enterprise.EnterpriseId),
 			"text" : elementTemplate.Site.Enterprise.Name},
