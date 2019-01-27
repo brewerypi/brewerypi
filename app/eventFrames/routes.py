@@ -397,12 +397,35 @@ def selectEventFrame(selectedClass = None, selectedId = None, months = None, sel
 			months = 3
 
 		fromTimestamp = datetime.utcnow() - relativedelta(months = months)
-		toTimestamp = datetime.utcnow()		
+		toTimestamp = datetime.utcnow()
 		if months == 0:
 			children = EventFrame.query.filter_by(EventFrameTemplateId = selectedId)
 		else:
 			children = EventFrame.query.filter(EventFrame.EventFrameTemplateId == selectedId, EventFrame.StartTimestamp >= fromTimestamp,
 				EventFrame.StartTimestamp <= toTimestamp)
+
+		eventFrameIds = ""
+		for child in children:
+			if eventFrameIds != "":
+				eventFrameIds = eventFrameIds + ","
+			eventFrameIds = eventFrameIds + str(child.EventFrameId)
+
+		eventFrameAttributeTemplateIds = ""
+		for eventFrameAttributeTemplate in parent.EventFrameAttributeTemplates.order_by(EventFrameAttributeTemplate.Name):
+			if eventFrameAttributeTemplateIds != "":
+				eventFrameAttributeTemplateIds = eventFrameAttributeTemplateIds + ","
+			eventFrameAttributeTemplateIds = eventFrameAttributeTemplateIds + str(eventFrameAttributeTemplate.EventFrameAttributeTemplateId)
+
+		if eventFrameIds != "" and eventFrameAttributeTemplateIds != "":
+			connection = db.engine.raw_connection()
+			try:
+				cursor = connection.cursor()
+				cursor.callproc("spCurrentEventFrameAttributeValues", [eventFrameIds, eventFrameAttributeTemplateIds])
+				children = cursor.fetchall()
+				cursor.close()
+				connection.commit()
+			finally:
+				connection.close()
 
 		childrenClass = "EventFrame"
 

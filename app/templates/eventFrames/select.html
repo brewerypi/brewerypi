@@ -151,9 +151,15 @@ Event Frames
                 {% for child in children %}
                     <tr>
                         {% if childrenClass == "EventFrame" %}
-                            <td><a class = "btn btn-default" title = "Select" href = "{{ url_for("eventFrames.dashboard", eventFrameId = child.id(),) }}">
-                                <span class = "glyphicon glyphicon-list"></span></a></td>
-                            <td><a class = "btn btn-default" title = "Grafana" href = "{{ "EventFramesGraph" | grafanaUrl({"eventFrameId": child.id()}) }}"
+                            {% set eventFrameIdIndex = 0 %}
+                            {% set eventFrameNameIndex = 1 %}
+                            {% set elementNameIndex = 2 %}
+                            {% set eventFrameStartTimestampIndex = 3 %}
+                            {% set eventFrameEndTimestampIndex = 4 %}
+                            <td><a class = "btn btn-default" title = "Select" href = '{{ url_for("eventFrames.dashboard",
+                                eventFrameId = child[eventFrameIdIndex],) }}'><span class = "glyphicon glyphicon-list"></span></a></td>
+                            <td><a class = "btn btn-default" title = "Grafana"
+                                href = '{{ "EventFramesGraph" | grafanaUrl({"eventFrameId": child[eventFrameIdIndex]}) }}''
                                 target = "_blank"><span class = "glyphicon glyphicon-stats"></span></a></td>
                         {% elif childrenClass == "DescendantEventFrameTemplate" %}
                             <td><a class = "btn btn-default" title = "Select" href = "{{ url_for("eventFrames.selectEventFrame",
@@ -191,34 +197,36 @@ Event Frames
                                 <td></td>
                             {% endif %}
                         {% elif childrenClass == "EventFrame" %}
-                            <td>{{ child.Name }}</td>
-                            <td>{{ child.Element.Name }}</td>
-                            <td>{{ moment(child.StartTimestamp).format("YYYY-MM-DD HH:mm:ss") }}</td>
-                            {% if child.EndTimestamp %}
-                                <td>{{ moment(child.EndTimestamp).format("YYYY-MM-DD HH:mm:ss") }}</td>
+                            <td>{{ child[eventFrameNameIndex] }}</td>
+                            <td>{{ child[elementNameIndex] }}</td>
+                            <td>{{ moment(child[eventFrameStartTimestampIndex]).format("YYYY-MM-DD HH:mm:ss") }}</td>
+                            {% if child[eventFrameEndTimestampIndex] %}
+                                <td>{{ moment(child[eventFrameEndTimestampIndex]).format("YYYY-MM-DD HH:mm:ss") }}</td>
                             {% else %}
                                 <td></td>
                             {% endif %}
                             {% if current_user.isAdministrator() %}
                                 <td><a class = "btn btn-default" title = "Associate Attributes with Tags"
-                                    href = "{{ url_for("eventFrameAttributes.listEventFrameAttributes", eventFrameId = child.id()) }}">
+                                    href = "{{ url_for("eventFrameAttributes.listEventFrameAttributes", eventFrameId = child[eventFrameIdIndex]) }}">
                                     <span class = "glyphicon glyphicon-link"></span></a></td>
                             {% else %}
                                 <td></td>
                             {% endif %}
-                            {% if child.EndTimestamp == None %}
+                            {% if child[eventFrameEndTimestampIndex] == None %}
                                 <td><a class = "btn btn-default" title = "End" href = "{{ url_for("eventFrames.endEventFrame",
-                                    eventFrameId = child.id()) }}"><span class = "glyphicon glyphicon-stop"></span></a></td>
+                                    eventFrameId = child[eventFrameIdIndex]) }}"><span class = "glyphicon glyphicon-stop"></span></a></td>
                             {% else %}
                                 <td></td>
                             {% endif %}
-                            <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("eventFrames.editEventFrame", eventFrameId = child.id()) }}">
+                            <td><a class = "btn btn-default" title = "Edit"
+                                href = '{{ url_for("eventFrames.editEventFrame", eventFrameId = child[eventFrameIdIndex]) }}'>
                                 <span class = "glyphicon glyphicon-edit"></span></a></td>
-                            <td><a class = "btn btn-default" title = "Delete" href = "{{ url_for("eventFrames.deleteEventFrame", eventFrameId = child.id()) }}",
-                                data-type = "event frame", data-name = "{{ child.Name }}"><span class = "glyphicon glyphicon-trash"></span></a></td>
-                            {% set currentEventFrameAttributeValues = child.currentEventFrameAttributeValues() %}
-                            {% for eventFrameAttributeTemplate in child.EventFrameTemplate.EventFrameAttributeTemplates %}
-                                <td>{{ currentEventFrameAttributeValues[eventFrameAttributeTemplate.Name] }}</td>
+                            <td><a class = "btn btn-default" title = "Delete"
+                                href = '{{ url_for("eventFrames.deleteEventFrame", eventFrameId = child[eventFrameIdIndex]) }}', data-type = "event frame",
+                                data-name = "{{ child[eventFrameNameIndex] }}"><span class = "glyphicon glyphicon-trash"></span></a></td>
+                            {% for eventFrameAttributeTemplate in parent.EventFrameAttributeTemplates | sort(attribute = "Name") %}
+                                {% set value = child[loop.index + eventFrameEndTimestampIndex] %}
+                                <td>{{ "" if value is none else value }}</td>
                             {% endfor %}
                             {% elif childrenClass == "DescendantEventFrameTemplate" %}
                             <td>{{ child.Name }}</td>

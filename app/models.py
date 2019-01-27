@@ -72,11 +72,8 @@ class Element(db.Model):
 				tagValue = elementAttribute.Tag.TagValues.order_by(TagValue.Timestamp.desc()).first()
 				if tagValue is not None:
 					if tagValue.Tag.LookupId is None:
-						# value = elementAttribute.Tag.TagValues.order_by(TagValue.Timestamp.desc()).first().Value
 						value = tagValue.Value
 					else:
-						# lookupValue = LookupValue.query.filter_by(LookupId = tagValue.Tag.LookupId, Value = elementAttribute.Tag.TagValues. \
-						# 	order_by(TagValue.Timestamp.desc()).first().Value).first()
 						lookupValue = LookupValue.query.filter_by(LookupId = tagValue.Tag.LookupId, Value = tagValue.Value).first()
 						if lookupValue is not None:
 							value = lookupValue.Name
@@ -250,31 +247,6 @@ class EventFrame(db.Model):
 		else:
 			ancestors.insert(0, self.ParentEventFrame)
 			return self.ParentEventFrame.ancestors(ancestors)
-
-	def currentEventFrameAttributeValues(self):
-		eventFrameAttributeValues = {}
-		eventFrameAttributeTemplates = self.EventFrameTemplate.EventFrameAttributeTemplates.order_by(EventFrameAttributeTemplate.Name)
-		for eventFrameAttributeTemplate in eventFrameAttributeTemplates:
-			value = ""
-			eventFrameAttribute = EventFrameAttribute.query.filter_by(EventFrameAttributeTemplateId = eventFrameAttributeTemplate.EventFrameAttributeTemplateId,
-				ElementId = self.ElementId).one_or_none()
-			if eventFrameAttribute is not None:
-				if self.EndTimestamp is None:
-					tagValue = eventFrameAttribute.Tag.TagValues.filter(TagValue.Timestamp >= self.StartTimestamp).order_by(TagValue.Timestamp.desc()).first()
-				else:
-					tagValue = eventFrameAttribute.Tag.TagValues.filter(TagValue.Timestamp >= self.StartTimestamp, TagValue.Timestamp <= self.EndTimestamp). \
-						order_by(TagValue.Timestamp.desc()).first()
-				if tagValue is not None:
-					if tagValue.Tag.LookupId is None:
-						value = tagValue.Value
-					else:
-						lookupValue = LookupValue.query.filter_by(LookupId = tagValue.Tag.LookupId, Value = tagValue.Value).first()
-						if lookupValue is not None:
-							value = lookupValue.Name
-
-			eventFrameAttributeValues[eventFrameAttributeTemplate.Name] = value
-
-		return eventFrameAttributeValues
 
 	def delete(self):
 		eventFrameNotes = self.EventFrameNotes
