@@ -26,9 +26,7 @@ BEGIN
 	RETURN(SELECT IF(EventFrame.Name IS NOT NULL AND EventFrame.Name <> '', EventFrame.Name, CONCAT(DATE_FORMAT(EventFrame.StartTimestamp, '%m/%d/%y %H:%i'), ' - ', IF(EventFrame.EndTimestamp IS NULL, '', DATE_FORMAT(EventFrame.EndTimestamp, '%m/%d/%y %H:%i'))))
 	FROM EventFrame
 	WHERE EventFrame.EventFrameId = eventFrameId);
-END;
-    """
-)
+END""")
 
 
 def upgrade():

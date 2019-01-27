@@ -35,9 +35,7 @@ BEGIN
 	PREPARE stmt FROM @sql;
 	EXECUTE stmt;
 	DEALLOCATE PREPARE stmt;
-END;
-    """
-)
+END""")
 
 
 def upgrade():
