@@ -46,25 +46,25 @@ BEGIN
 				Element.ElementId = EventFrameAttribute.ElementId
 			INNER JOIN
 			(
-				SELECT EventFrame1.EventFrameId AS EventFrameId,
-					EventFrameAttributeTemplate1.Name AS EventFrameAttributeTemplateName,
-					MAX(TagValue1.Timestamp) AS Timestamp
-				FROM EventFrame EventFrame1
-					INNER JOIN Element ON EventFrame1.ElementId = Element.ElementId
-					INNER JOIN EventFrameTemplate ON EventFrame1.EventFrameTemplateId = EventFrameTemplate.EventFrameTemplateId
-					INNER JOIN EventFrameAttributeTemplate EventFrameAttributeTemplate1 ON EventFrameTemplate.EventFrameTemplateId = EventFrameAttributeTemplate1.EventFrameTemplateId
-					LEFT JOIN EventFrameAttribute ON EventFrameAttributeTemplate1.EventFrameAttributeTemplateId = EventFrameAttribute.EventFrameAttributeTemplateId AND
+				SELECT EventFrame.EventFrameId AS EventFrameId,
+					EventFrameAttributeTemplate.Name AS EventFrameAttributeTemplateName,
+					MAX(TagValue.Timestamp) AS Timestamp
+				FROM EventFrame
+					INNER JOIN Element ON EventFrame.ElementId = Element.ElementId
+					INNER JOIN EventFrameTemplate ON EventFrame.EventFrameTemplateId = EventFrameTemplate.EventFrameTemplateId
+					INNER JOIN EventFrameAttributeTemplate ON EventFrameTemplate.EventFrameTemplateId = EventFrameAttributeTemplate.EventFrameTemplateId
+					LEFT JOIN EventFrameAttribute ON EventFrameAttributeTemplate.EventFrameAttributeTemplateId = EventFrameAttribute.EventFrameAttributeTemplateId AND
 						Element.ElementId = EventFrameAttribute.ElementId
 					LEFT JOIN Tag ON EventFrameAttribute.TagId = Tag.TagId
-					LEFT JOIN TagValue TagValue1 ON Tag.TagId = TagValue1.TagId AND
+					LEFT JOIN TagValue ON Tag.TagId = TagValue.TagId AND
 						CASE
-							WHEN EventFrame1.EndTimestamp IS NULL THEN
-								(TagValue1.Timestamp >= EventFrame1.StartTimestamp)
+							WHEN EventFrame.EndTimestamp IS NULL THEN
+								(TagValue.Timestamp >= EventFrame.StartTimestamp)
 							ELSE
-								(TagValue1.Timestamp >= EventFrame1.StartTimestamp AND TagValue1.Timestamp <= EventFrame1.EndTimestamp)
+								(TagValue.Timestamp >= EventFrame.StartTimestamp AND TagValue.Timestamp <= EventFrame.EndTimestamp)
 						END
 				WHERE EventFrameTemplate.EventFrameTemplateId IN (', eventFrameTemplateIds, ') AND
-					EventFrame1.EndTimestamp IS NULL
+					EventFrame.EndTimestamp IS NULL
 				GROUP BY EventFrameId,
 					EventFrameAttributeTemplateName
 			) CurrentEventFrameAttributeValues ON EventFrame.EventFrameId = CurrentEventFrameAttributeValues.EventFrameId AND
@@ -116,24 +116,24 @@ BEGIN
 				Element.ElementId = EventFrameAttribute.ElementId
 			INNER JOIN
 			(
-				SELECT EventFrame1.EventFrameId AS EventFrameId,
-					EventFrameAttributeTemplate1.Name AS EventFrameAttributeTemplateName,
-					MAX(TagValue1.Timestamp) AS Timestamp
-				FROM EventFrame EventFrame1
-					INNER JOIN Element ON EventFrame1.ElementId = Element.ElementId
-					INNER JOIN EventFrameTemplate ON EventFrame1.EventFrameTemplateId = EventFrameTemplate.EventFrameTemplateId
-					INNER JOIN EventFrameAttributeTemplate EventFrameAttributeTemplate1 ON EventFrameTemplate.EventFrameTemplateId = EventFrameAttributeTemplate1.EventFrameTemplateId
-					LEFT JOIN EventFrameAttribute ON EventFrameAttributeTemplate1.EventFrameAttributeTemplateId = EventFrameAttribute.EventFrameAttributeTemplateId AND
+				SELECT EventFrame.EventFrameId AS EventFrameId,
+					EventFrameAttributeTemplate.Name AS EventFrameAttributeTemplateName,
+					MAX(TagValue.Timestamp) AS Timestamp
+				FROM EventFrame
+					INNER JOIN Element ON EventFrame.ElementId = Element.ElementId
+					INNER JOIN EventFrameTemplate ON EventFrame.EventFrameTemplateId = EventFrameTemplate.EventFrameTemplateId
+					INNER JOIN EventFrameAttributeTemplate ON EventFrameTemplate.EventFrameTemplateId = EventFrameAttributeTemplate.EventFrameTemplateId
+					LEFT JOIN EventFrameAttribute ON EventFrameAttributeTemplate.EventFrameAttributeTemplateId = EventFrameAttribute.EventFrameAttributeTemplateId AND
 						Element.ElementId = EventFrameAttribute.ElementId
 					LEFT JOIN Tag ON EventFrameAttribute.TagId = Tag.TagId
-					LEFT JOIN TagValue TagValue1 ON Tag.TagId = TagValue1.TagId AND
+					LEFT JOIN TagValue ON Tag.TagId = TagValue.TagId AND
 						CASE
-							WHEN EventFrame1.EndTimestamp IS NULL THEN
-								(TagValue1.Timestamp >= EventFrame1.StartTimestamp)
+							WHEN EventFrame.EndTimestamp IS NULL THEN
+								(TagValue.Timestamp >= EventFrame.StartTimestamp)
 							ELSE
-								(TagValue1.Timestamp >= EventFrame1.StartTimestamp AND TagValue1.Timestamp <= EventFrame1.EndTimestamp)
+								(TagValue.Timestamp >= EventFrame.StartTimestamp AND TagValue.Timestamp <= EventFrame.EndTimestamp)
 						END
-				WHERE EventFrame1.EventFrameId IN (', eventFrameIds ,')
+				WHERE EventFrame.EventFrameId IN (', eventFrameIds ,')
 				GROUP BY EventFrameId,
 					EventFrameAttributeTemplateName
 			) CurrentEventFrameAttributeValues ON EventFrame.EventFrameId = CurrentEventFrameAttributeValues.EventFrameId AND
@@ -178,17 +178,17 @@ BEGIN
 				Element.ElementId = ElementAttribute.ElementId
 			INNER JOIN
 			(
-				SELECT Element1.ElementId AS ElementId,
-					ElementAttributeTemplate1.Name AS ElementAttributeTemplateName,
-					MAX(TagValue1.Timestamp) AS Timestamp
-				FROM Element Element1
-					INNER JOIN ElementTemplate ON Element1.ElementTemplateId = ElementTemplate.ElementTemplateId
-					INNER JOIN ElementAttributeTemplate ElementAttributeTemplate1 ON ElementTemplate.ElementTemplateId = ElementAttributeTemplate1.ElementTemplateId
-					LEFT JOIN ElementAttribute ON ElementAttributeTemplate1.ElementAttributeTemplateId = ElementAttribute.ElementAttributeTemplateId AND
-						Element1.ElementId = ElementAttribute.ElementId
+				SELECT Element.ElementId AS ElementId,
+					ElementAttributeTemplate.Name AS ElementAttributeTemplateName,
+					MAX(TagValue.Timestamp) AS Timestamp
+				FROM Element
+					INNER JOIN ElementTemplate ON Element.ElementTemplateId = ElementTemplate.ElementTemplateId
+					INNER JOIN ElementAttributeTemplate ON ElementTemplate.ElementTemplateId = ElementAttributeTemplate.ElementTemplateId
+					LEFT JOIN ElementAttribute ON ElementAttributeTemplate.ElementAttributeTemplateId = ElementAttribute.ElementAttributeTemplateId AND
+						Element.ElementId = ElementAttribute.ElementId
 					LEFT JOIN Tag ON ElementAttribute.TagId = Tag.TagId
-					LEFT JOIN TagValue TagValue1 ON Tag.TagId = TagValue1.TagId
-				WHERE Element1.ElementId IN (', elementIds ,')
+					LEFT JOIN TagValue TagValue ON Tag.TagId = TagValue.TagId
+				WHERE Element.ElementId IN (', elementIds ,')
 				GROUP BY ElementId,
 					ElementAttributeTemplateName
 			) CurrentElementAttributeValues ON Element.ElementId = CurrentElementAttributeValues.ElementId AND
