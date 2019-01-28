@@ -297,18 +297,18 @@ Event Frames
 
             table.columns().every(function ()
             {
-                // Clear any left over filtering from state saving.
-                this.search("", 1).draw()
-
                 if (this.visible())
                 {
-                    $(".btn.btn-primary.btn-xs[datacolumn = " + this.index() + "]").addClass("active")
+                    $(".btn.btn-primary.btn-xs[data-columnIndex = " + this.index() + "]").addClass("active")
                 }
                 else
                 {
-                    $(".btn.btn-primary.btn-xs[datacolumn = " + this.index() + "]").removeClass("active")
+                    $(".btn.btn-primary.btn-xs[data-columnIndex = " + this.index() + "]").removeClass("active")
                 }
             })
+
+            // Clear any left over filtering from state saving.
+            table.search("").columns().search("").draw()
         })
     </script>
 {% endblock %}
