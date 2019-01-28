@@ -65,7 +65,7 @@ Tag Value Notes
             <span class = "glyphicon glyphicon-plus"></span></a>
         <br><br>
     {% endif %}
-    <table id = "tagValueNotesTable" class = "table" style = "width:100%">
+    <table id = "tagValueNotesTable" class = "table" style = "display:none">
         <thead>
             <tr>
                 <th>Timestamp</th>
@@ -124,6 +124,8 @@ Tag Value Notes
                 "stateDuration": 0,
                 "pageLength": 25
             })
+
+            $("#tagValueNotesTable").attr("style", "width:100%")
         })
     </script>
 {% endblock %}

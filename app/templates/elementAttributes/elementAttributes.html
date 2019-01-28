@@ -22,7 +22,7 @@ Element Attributes
     <h1>Element Attributes <small></small></h1>
 </div>
 <div>
-    <table id = "elementAttributesTable" class = "table" style = "width:100%">
+    <table id = "elementAttributesTable" class = "table" style = "display:none">
         <thead>
             <tr>
                 <th>Element Attribute Template</th>
@@ -78,23 +78,6 @@ Element Attributes
     <script>
         $(document).ready(function()
         {
-            $("#inputTagFilter").on("keyup change", function()
-            {
-                var filter = $(this).val()
-                var regex = new RegExp(filter, "gi")
-                elementAttributesTable.$("option:not(:selected)").each(function()
-                {
-                    if ($(this).text().match(regex) || $(this).text() == "")
-                    {
-                        $(this).show()
-                    }
-                    else
-                    {
-                        $(this).hide()
-                    }
-                })
-            })
-
             var elementAttributesTable = $("#elementAttributesTable").DataTable
             ({
                 "order":
@@ -114,16 +97,9 @@ Element Attributes
                 "fixedHeader": true
             })
 
-            // Enter key call save all.
-            $(document).keypress(function(event)
-            {
-                if (event.which == 13)
-                {
-                    $("#buttonAttributesSaveAll").focus()
-                }
-            })
+            $("#elementAttributesTable").attr("style", "width:100%")
 
-            $("#buttonAttributesSaveAll").click(function()
+            $("#buttonAttributesSaveAll").on("click", function()
             {
                 var rows = []
                 // Loop through the select values.
@@ -152,6 +128,32 @@ Element Attributes
                 {
                     $("#divFlashedMessages").append("<div class = \"alert alert-danger\"><button type = \"button\" class = \"close\" " +
                         "data-dismiss = \"alert\">&times;</button>The attempt to update one or more element attributes failed.</div>")                        
+                })
+            })
+
+            // Enter key call save all.
+            $(document).keypress(function(event)
+            {
+                if (event.which == 13)
+                {
+                    $("#buttonAttributesSaveAll").focus()
+                }
+            })
+
+            $("#inputTagFilter").on("keyup change", function()
+            {
+                var filter = $(this).val()
+                var regex = new RegExp(filter, "gi")
+                elementAttributesTable.$("option:not(:selected)").each(function()
+                {
+                    if ($(this).text().match(regex) || $(this).text() == "")
+                    {
+                        $(this).show()
+                    }
+                    else
+                    {
+                        $(this).hide()
+                    }
                 })
             })
         })

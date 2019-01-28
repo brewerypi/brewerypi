@@ -98,6 +98,14 @@ Event Frames
         <a class = "btn btn-default" title = "Grafana" href = "{{ "ActiveEventFrameSummary" | grafanaUrl({"eventFrameTemplateId": parent.id()}) }}"
             target = "_blank"><span class = "glyphicon glyphicon-stats"></span></a>
         <br><br>
+    {% elif childrenClass == "DescendantEventFrameTemplate" %}
+        <a class = "btn btn-default" title = "Add" href = "{{ url_for("eventFrameTemplates.addEventFrameTemplate",
+            parentEventFrameTemplateId = parent.id()) }}" role = "button"><span class = "glyphicon glyphicon-plus"></span></a>
+        <br><br>
+    {% endif %}
+</div>
+{% if childrenClass == "EventFrame" %}
+    <div>
         Toggle Column:
         <button type = "button" class = "btn btn-primary btn-xs" id = "buttonHideAllColumns">Hide All</button>
         {% for eventFrameAttributeTemplate in parent.EventFrameAttributeTemplates %}
@@ -106,12 +114,13 @@ Event Frames
                 id = "buttonToggleColumn{{ eventFrameAttributeTemplate.Name }}">{{ eventFrameAttributeTemplate.Name }}</button>
         {% endfor %}
         <button type = "button" class = "btn btn-primary btn-xs" id = "buttonShowAllColumns">Show All</button>
-        <br><br>
-    {% elif childrenClass == "DescendantEventFrameTemplate" %}
-        <a class = "btn btn-default" title = "Add" href = "{{ url_for("eventFrameTemplates.addEventFrameTemplate",
-            parentEventFrameTemplateId = parent.id()) }}" role = "button"><span class = "glyphicon glyphicon-plus"></span></a>
-        <br><br>
-    {% endif %}
+        <br><br>    
+    </div>
+    <div id = "divLoading" class = "text-center">
+        <img src = '{{ url_for("static", filename = "images/loading.gif") }}'>
+    </div>
+{% endif %}
+<div>
     <table id = "table" class = "table" style = "display:none">
         <thead>
             <tr>
@@ -252,7 +261,7 @@ Event Frames
         <a class = "btn btn-default" title = "Add" href = "{{ url_for("eventFrameAttributeTemplates.addEventFrameAttributeTemplate", 
             eventFrameTemplateId = parent.EventFrameTemplateId) }}" role = "button"><span class = "glyphicon glyphicon-plus"></span></a>
         <br><br>
-        <table id = "eventFrameAttributeTemplatesTable" class = "table" style = "width:100%">
+        <table id = "eventFrameAttributeTemplatesTable" class = "table" style = "display:none">
             <thead>
                 <tr>
                     <th>Name</th>
@@ -365,21 +374,35 @@ Event Frames
                 "fixedHeader": true
             })
 
+            $('#eventFrameAttributeTemplatesTable').DataTable
+            ({
+                "order":
+                [
+                    [0, 'asc']              // Name.
+                ],
+                "columns":
+                [
+                    null,
+                    null,
+                    { "orderable": false }, // Edit button.
+                    { "orderable": false }  // Delete button.
+                ],
+                "stateSave": true,
+                "stateDuration": 0,
+                "pageLength": 25
+            })
+
             $("#table").attr("style", "width:100%")
+            $("#eventFrameAttributeTemplatesTable").attr("style", "width:100%")
+            $("#divLoading").attr("style", "display:none")
 
-            // Apply the search
-            table.columns().every(function ()
+            $("a[title='Delete']").on("click", function ()
             {
-                // Clear any left over filtering from state saving.
-                this.search("", 1).draw()
-
-                if (this.visible())
+                var name = $(this).attr("data-name")
+                var type = $(this).attr("data-type")
+                if(!window.confirm('Are you sure you want to delete the "' + name + '" ' + type + '?'))
                 {
-                    $(".btn.btn-primary.btn-xs[data-columnIndex = " + this.index() + "]").addClass("active")
-                }
-                else
-                {
-                    $(".btn.btn-primary.btn-xs[data-columnIndex = " + this.index() + "]").removeClass("active")
+                    event.preventDefault()
                 }
             })
 
@@ -427,31 +450,18 @@ Event Frames
                 }
             })
 
-            $('#eventFrameAttributeTemplatesTable').DataTable
-            ({
-                "order":
-                [
-                    [0, 'asc']              // Name.
-                ],
-                "columns":
-                [
-                    null,
-                    null,
-                    { "orderable": false }, // Edit button.
-                    { "orderable": false }  // Delete button.
-                ],
-                "stateSave": true,
-                "stateDuration": 0,
-                "pageLength": 25
-            })
-
-            $("a[title='Delete']").click(function ()
+            table.columns().every(function ()
             {
-                var name = $(this).attr("data-name")
-                var type = $(this).attr("data-type")
-                if(!window.confirm('Are you sure you want to delete the "' + name + '" ' + type + '?'))
+                // Clear any left over filtering from state saving.
+                this.search("", 1).draw()
+
+                if (this.visible())
                 {
-                    event.preventDefault()
+                    $(".btn.btn-primary.btn-xs[data-columnIndex = " + this.index() + "]").addClass("active")
+                }
+                else
+                {
+                    $(".btn.btn-primary.btn-xs[data-columnIndex = " + this.index() + "]").removeClass("active")
                 }
             })
         })
