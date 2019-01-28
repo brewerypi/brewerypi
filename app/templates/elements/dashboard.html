@@ -27,7 +27,7 @@
     <a class = "btn btn-default" title = "Grafana" href = "{{ "ElementValuesGraph" | grafanaUrl({"elementId": element.ElementId}) }}" target = "_blank">
         <span class = "glyphicon glyphicon-stats"></span></a>
     <br><br>
-    <table id = "attributesTable" class = "table" style = "width:100%">
+    <table id = "attributesTable" class = "table" style = "display:none">
         <thead>
             <tr>
                 <th></th>
@@ -147,9 +147,8 @@
             var attributesTable = $("#attributesTable").on("order.dt", function()
             {
                 orderEvent()
-            })
-            .DataTable(
-            {
+            }).DataTable
+            ({
                 fixedHeader: {
                     header: true,
                     footer: false
@@ -177,32 +176,9 @@
                 "pageLength": 25
             })
 
-            // Update the timestamp for input or select new values appropriately.
-            $("[id^=inputOrSelectNewValue]").blur(function()
-            {
-                var newValue = $.trim($(this).val())
-                var id = $(this).attr("id").split("inputOrSelectNewValue")[1]
-                if ($(this).is("input") && newValue == "" || $(this).is("select") && newValue == "-1")
-                {
-                    $("#inputNewTimestamp" + id).val("")
-                }
-                else
-                {
-                    var timestamp = new moment()
-                    $("#inputNewTimestamp" + id).val(timestamp.local().format("YYYY-MM-DD HH:mm:ss"))
-                }
-            })
+            $("#attributesTable").attr("style", "width:100%")
 
-            // Enter key call save all.
-            $(document).keypress(function(event)
-            {
-                if (event.which == 13)
-                {
-                    $("#buttonAttributesSaveAll").focus()
-                }
-            })
-
-            $("#buttonAttributesSaveAll").click(function()
+            $("#buttonAttributesSaveAll").on("click", function()
             {
                 var error = false
                 var rows = []
@@ -291,6 +267,31 @@
                     })
                 }
             })
+        
+            // Enter key call save all.
+            $(document).keypress(function(event)
+            {
+                if (event.which == 13)
+                {
+                    $("#buttonAttributesSaveAll").focus()
+                }
+            })
+
+            // Update the timestamp for input or select new values appropriately.
+            $("[id^=inputOrSelectNewValue]").blur(function()
+            {
+                var newValue = $.trim($(this).val())
+                var id = $(this).attr("id").split("inputOrSelectNewValue")[1]
+                if ($(this).is("input") && newValue == "" || $(this).is("select") && newValue == "-1")
+                {
+                    $("#inputNewTimestamp" + id).val("")
+                }
+                else
+                {
+                    var timestamp = new moment()
+                    $("#inputNewTimestamp" + id).val(timestamp.local().format("YYYY-MM-DD HH:mm:ss"))
+                }
+            })
         })
     </script>
 {% endblock %}

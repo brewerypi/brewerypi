@@ -51,6 +51,9 @@ Event Frames
         <button type = "button" class = "btn btn-primary btn-xs" id = "buttonShowAllColumns">Show All</button>
         <br><br>
     </div>
+    <div id = "divLoading" class = "text-center">
+        <img src = '{{ url_for("static", filename = "images/loading.gif") }}'>
+    </div>
     <div>
         <table id = "table" class = "table" style = "display:none">
             <thead>
@@ -152,10 +155,9 @@ Event Frames
             ({
                 "columnDefs":
                 [
-                    {
-                        // Hide the EventFrameId.
+                    {                        
                         "targets": [0],
-                        "visible": false
+                        "visible": false    // Hide the EventFrameId.
                     }
                 ],
                 "order":
@@ -170,50 +172,7 @@ Event Frames
             })
 
             $("#table").attr("style", "width:100%")
-
-            $("#buttonHideAllColumns").on("click", function()
-            {
-                table.columns().every(function ()
-                {
-                    if (this.index() == 0 || this.index() > 4)
-                    {
-                        this.visible(false)
-                        $(".btn.btn-primary.btn-xs[datacolumn = " + this.index() + "]").removeClass("active")
-                    }
-                })
-            })
-
-            $("#buttonShowAllColumns").on("click", function()
-            {
-                table.columns().every(function ()
-                {
-                    if (this.index() != 0 || this.index() > 4)
-                    {
-                        this.visible(true)
-                        $(".btn.btn-primary.btn-xs[datacolumn = " + this.index() + "]").addClass("active")
-                    }
-                })
-            })
-
-            $("[id^=buttonToggleColumn]").on("click", function(e)
-            {
-                e.preventDefault();
-        
-                // Get the column API object
-                var column = table.column($(this).attr("data-columnIndex"))
-        
-                // Toggle the visibility
-                column.visible(!column.visible())
-
-                if ($(this).hasClass("active"))
-                {
-                    $(this).removeClass("active")
-                }
-                else
-                {
-                    $(this).addClass("active")
-                }
-            })
+            $("#divLoading").attr("style", "display:none")
 
             $("#buttonEventFrameOverlay").on("click", function()
             {
@@ -272,7 +231,70 @@ Event Frames
                 }
             })
 
-            // Apply the search
+            $("#buttonHideAllColumns").on("click", function()
+            {
+                table.columns().every(function ()
+                {
+                    if (this.index() == 0 || this.index() > 4)
+                    {
+                        this.visible(false)
+                        $(".btn.btn-primary.btn-xs[datacolumn = " + this.index() + "]").removeClass("active")
+                    }
+                })
+            })
+
+            $("#buttonSearch").on("click", function()
+            {
+                setUtcTimestamps()
+            })
+
+            $("#buttonShowAllColumns").on("click", function()
+            {
+                table.columns().every(function ()
+                {
+                    if (this.index() != 0 || this.index() > 4)
+                    {
+                        this.visible(true)
+                        $(".btn.btn-primary.btn-xs[datacolumn = " + this.index() + "]").addClass("active")
+                    }
+                })
+            })
+
+            $(document).keypress(function(event)
+            {
+                if (event.which == 13)
+                {
+                    setUtcTimestamps()
+                }
+            })
+
+            $("[id^=buttonMonthPicker]").on("click", function()
+            {
+                var months = $(this).attr("data-months")
+                $("#startTimestamp").val(new moment().subtract(months, "months").hours(0).minutes(0).seconds(0).local().format("YYYY-MM-DD HH:mm:ss"))
+                $("#endTimestamp").val("")
+            })
+
+            $("[id^=buttonToggleColumn]").on("click", function(e)
+            {
+                e.preventDefault();
+        
+                // Get the column API object
+                var column = table.column($(this).attr("data-columnIndex"))
+        
+                // Toggle the visibility
+                column.visible(!column.visible())
+
+                if ($(this).hasClass("active"))
+                {
+                    $(this).removeClass("active")
+                }
+                else
+                {
+                    $(this).addClass("active")
+                }
+            })
+
             table.columns().every(function ()
             {
                 // Clear any left over filtering from state saving.
@@ -285,26 +307,6 @@ Event Frames
                 else
                 {
                     $(".btn.btn-primary.btn-xs[datacolumn = " + this.index() + "]").removeClass("active")
-                }
-            })
-
-            $("[id^=buttonMonthPicker]").click(function()
-            {
-                var months = $(this).attr("data-months")
-                $("#startTimestamp").val(new moment().subtract(months, "months").hours(0).minutes(0).seconds(0).local().format("YYYY-MM-DD HH:mm:ss"))
-                $("#endTimestamp").val("")
-            })
-
-            $("#buttonSearch").click(function()
-            {
-                setUtcTimestamps()
-            })
-
-            $(document).keypress(function(event)
-            {
-                if (event.which == 13)
-                {
-                    setUtcTimestamps()
                 }
             })
         })

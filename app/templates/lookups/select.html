@@ -38,7 +38,7 @@ Lookups
             <span class = "glyphicon glyphicon-plus"></span></a>
         <br><br>
     {% endif %}
-    <table id = "lookupsTable" class = "table" style = "width:100%">
+    <table id = "lookupsTable" class = "table" style = "display:none">
         <thead>
             <tr>
                 <th></th>
@@ -113,6 +113,8 @@ Lookups
                 "stateDuration": 0,
                 "pageLength": 25
             })
+
+            $("#lookupsTable").attr("style", "width:100%")
         })
     </script>
 {% endblock %}

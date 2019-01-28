@@ -21,7 +21,7 @@ Units of Measurment
     <br><br>
 </div>
 <div>
-    <table id = "unitOfMeasurementsTable" class = "table" style = "width:100%">
+    <table id = "unitOfMeasurementsTable" class = "table" style = "display:none">
         <thead>
             <tr>
                 <th>Name</th>
@@ -70,6 +70,8 @@ Units of Measurment
                 "stateDuration": 0,
                 "pageLength": 25
             })
+
+            $("#unitOfMeasurementsTable").attr("style", "width:100%")
         })
     </script>
 {% endblock %}

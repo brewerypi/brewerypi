@@ -94,7 +94,10 @@ Tag Values
     <a class = "btn btn-default" title = "Grafana" href = "{{ "TagValuesGraph" | grafanaUrl({"tagId": tag.TagId}) }}" target = "_blank">
         <span class = "glyphicon glyphicon-stats"></span></a>        <br><br>
     <br><br>
-    <table id = "tagValuesTable" class = "table" style = "width:100%">
+    <div id = "divLoading" class = "text-center">
+        <img src = '{{ url_for("static", filename = "images/loading.gif") }}'>
+    </div>
+    <table id = "tagValuesTable" class = "table" style = "display:none">
         <thead>
             <tr>
                 <th>Timestamp</th>
@@ -184,6 +187,9 @@ Tag Values
                 "stateDuration": 0,
                 "pageLength": 25
             })
+
+            $("#tagValuesTable").attr("style", "width:100%")
+            $("#divLoading").attr("style", "display:none")
         })
     </script>
 {% endblock %}

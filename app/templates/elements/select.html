@@ -236,19 +236,13 @@ Data Entry - Elements
 
             $("#table").attr("style", "width:100%")
 
-            // Apply the search
-            table.columns().every(function ()
+            $("a[title='Delete']").on("click", function ()
             {
-                // Clear any left over filtering from state saving.
-                this.search("", 1).draw()
-
-                if (this.visible())
+                var name = $(this).attr("data-name")
+                var type = $(this).attr("data-type")
+                if(!window.confirm('Are you sure you want to delete the "' + name + '" ' + type + '?'))
                 {
-                    $(".btn.btn-primary.btn-xs[data-columnIndex = " + this.index() + "]").addClass("active")
-                }
-                else
-                {
-                    $(".btn.btn-primary.btn-xs[data-columnIndex = " + this.index() + "]").removeClass("active")
+                    event.preventDefault()
                 }
             })
 
@@ -296,13 +290,18 @@ Data Entry - Elements
                 }
             })
 
-            $("a[title='Delete']").click(function ()
+            table.columns().every(function ()
             {
-                var name = $(this).attr("data-name")
-                var type = $(this).attr("data-type")
-                if(!window.confirm('Are you sure you want to delete the "' + name + '" ' + type + '?'))
+                // Clear any left over filtering from state saving.
+                this.search("", 1).draw()
+
+                if (this.visible())
                 {
-                    event.preventDefault()
+                    $(".btn.btn-primary.btn-xs[data-columnIndex = " + this.index() + "]").addClass("active")
+                }
+                else
+                {
+                    $(".btn.btn-primary.btn-xs[data-columnIndex = " + this.index() + "]").removeClass("active")
                 }
             })
         })

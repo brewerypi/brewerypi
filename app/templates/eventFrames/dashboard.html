@@ -49,7 +49,7 @@ Event Frame Dashboard
         <a class = "btn btn-default" title = "Add" href = "{{ url_for("eventFrames.addEventFrame", parentEventFrameId = eventFrame.EventFrameId) }}"
             role = "button"><span class = "glyphicon glyphicon-plus"></span></a>
         <br><br>
-        <table id = "childEventFramesTable" class = "table" style = "width:100%">
+        <table id = "childEventFramesTable" class = "table" style = "display:none">
             <thead>
                 <tr>
                     <th></th>
@@ -101,7 +101,7 @@ Event Frame Dashboard
             <span class = "glyphicon glyphicon-stats"></span></a>
     {% endif %}
     <br><br>
-    <table id = "attributesTable" class = "table" style = "width:100%">
+    <table id = "attributesTable" class = "table" style = "display:none">
         <thead>
             <tr>
                 <th></th>
@@ -199,7 +199,7 @@ Event Frame Dashboard
     <a class = "btn btn-default" title = "Add" href = "{{ url_for("eventFrameNotes.addEventFrameNote", eventFrameId = eventFrame.id()) }}" role = "button">
         <span class = "glyphicon glyphicon-plus"></span></a>
     <br><br>
-    <table id = "eventFrameNotesTable" class = "table" style = "width:100%">
+    <table id = "eventFrameNotesTable" class = "table" style = "display:none">
         <thead>
             <tr>
                 <th>Timestamp</th>
@@ -233,8 +233,8 @@ Event Frame Dashboard
     <script>
         $(document).ready(function()
         {
-            $("#childEventFramesTable").DataTable(
-            {
+            $("#childEventFramesTable").DataTable
+            ({
                 "order":
                 [
                     [3, "desc"],            // Start timestamp.
@@ -275,8 +275,8 @@ Event Frame Dashboard
             var attributesTable = $("#attributesTable").on("order.dt", function()
             {
                 orderEvent()
-            }).DataTable(
-            {
+            }).DataTable
+            ({
                 fixedHeader: {
                     header: true,
                     footer: false
@@ -304,33 +304,29 @@ Event Frame Dashboard
                 "pageLength": 25
             })
 
-            // Update the timestamp for input or select new values appropriately.
-            $("[id^=inputOrSelectNewValue]").blur(function()
-            {
-                var newValue = $.trim($(this).val())
-                var id = $(this).attr("id").split("inputOrSelectNewValue")[1]
-                if ($(this).is("input") && newValue == "" || $(this).is("select") && newValue == "-1")
-                {
-                    $("#inputNewTimestamp" + id).val("")
-                    $("#inputNewUtcTimestamp" + id).val("")
-                }
-                else
-                {
-                    var timestamp = new moment()
-                    $("#inputNewTimestamp" + id).val(timestamp.format("YYYY-MM-DD HH:mm:ss"))
-                }
+            $("#eventFrameNotesTable").DataTable
+            ({
+                "order":
+                [
+                    [0, "desc"],             // Timestamp.
+                ],
+                "columns":
+                [
+                    null,
+                    null,
+                    { "orderable": false }, // Edit button.
+                    { "orderable": false }  // Delete button.
+                ],
+                "stateSave": true,
+                "stateDuration": 0,
+                "pageLength": 25
             })
 
-            // Enter key call save all.
-            $(document).keypress(function(event)
-            {
-                if (event.which == 13)
-                {
-                    $("#buttonAttributesSaveAll").focus()
-                }
-            })
+            $("#childEventFramesTable").attr("style", "width:100%")
+            $("#attributesTable").attr("style", "width:100%")
+            $("#eventFrameNotesTable").attr("style", "width:100%")
 
-            $("#buttonAttributesSaveAll").click(function()
+            $("#buttonAttributesSaveAll").on("click", function()
             {
                 var error = false
                 var rows = []
@@ -442,22 +438,30 @@ Event Frame Dashboard
                 }
             })
 
-            $("#eventFrameNotesTable").DataTable(
+            // Enter key call save all.
+            $(document).keypress(function(event)
             {
-                "order":
-                [
-                    [0, "desc"],             // Timestamp.
-                ],
-                "columns":
-                [
-                    null,
-                    null,
-                    { "orderable": false }, // Edit button.
-                    { "orderable": false }  // Delete button.
-                ],
-                "stateSave": true,
-                "stateDuration": 0,
-                "pageLength": 25
+                if (event.which == 13)
+                {
+                    $("#buttonAttributesSaveAll").focus()
+                }
+            })
+
+            // Update the timestamp for input or select new values appropriately.
+            $("[id^=inputOrSelectNewValue]").blur(function()
+            {
+                var newValue = $.trim($(this).val())
+                var id = $(this).attr("id").split("inputOrSelectNewValue")[1]
+                if ($(this).is("input") && newValue == "" || $(this).is("select") && newValue == "-1")
+                {
+                    $("#inputNewTimestamp" + id).val("")
+                    $("#inputNewUtcTimestamp" + id).val("")
+                }
+                else
+                {
+                    var timestamp = new moment()
+                    $("#inputNewTimestamp" + id).val(timestamp.format("YYYY-MM-DD HH:mm:ss"))
+                }
             })
         })
     </script>
