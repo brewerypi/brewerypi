@@ -49,7 +49,7 @@ Event Frame Dashboard
         <a class = "btn btn-default" title = "Add" href = "{{ url_for("eventFrames.addEventFrame", parentEventFrameId = eventFrame.EventFrameId) }}"
             role = "button"><span class = "glyphicon glyphicon-plus"></span></a>
         <br><br>
-        <table id = "childEventFramesTable" class = "table" style = "display:none">
+        <table id = "childEventFramesTable" class = "table table-hover" style = "display:none">
             <thead>
                 <tr>
                     <th></th>
@@ -101,7 +101,7 @@ Event Frame Dashboard
             <span class = "glyphicon glyphicon-stats"></span></a>
     {% endif %}
     <br><br>
-    <table id = "attributesTable" class = "table" style = "display:none">
+    <table id = "attributesTable" class = "table table-hover" style = "display:none">
         <thead>
             <tr>
                 <th></th>
@@ -199,7 +199,7 @@ Event Frame Dashboard
     <a class = "btn btn-default" title = "Add" href = "{{ url_for("eventFrameNotes.addEventFrameNote", eventFrameId = eventFrame.id()) }}" role = "button">
         <span class = "glyphicon glyphicon-plus"></span></a>
     <br><br>
-    <table id = "eventFrameNotesTable" class = "table" style = "display:none">
+    <table id = "eventFrameNotesTable" class = "table table-hover" style = "display:none">
         <thead>
             <tr>
                 <th>Timestamp</th>
