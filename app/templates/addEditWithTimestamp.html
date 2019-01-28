@@ -23,7 +23,7 @@
                 $("#timestamp").val(timestamp.local().format("YYYY-MM-DD HH:mm:ss"))
             {% endif %}
 
-            $("#buttonSave").click(function()
+            $("#buttonSave").on("click", function()
             {
                 setUtcTimestamp()
             })

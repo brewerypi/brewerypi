@@ -45,7 +45,7 @@ Tags
             <span class = "glyphicon glyphicon-plus"></span> Lookup Tag</a>
     <br><br>    
     {% endif %}
-    <table id = "tagsTable" class = "table" style = "width:100%">
+    <table id = "tagsTable" class = "table" style = "display:none">
         <thead>
             <tr>
                 <th></th>
@@ -116,7 +116,9 @@ Tags
                 "pageLength": 25
             })
 
-            $("a[title='Delete']").click(function ()
+            $("#tagsTable").attr("style", "width:100%")
+
+            $("a[title='Delete']").on("click", function ()
             {
                 var name = $(this).attr("data-name")
                 var type = $(this).attr("data-type")
