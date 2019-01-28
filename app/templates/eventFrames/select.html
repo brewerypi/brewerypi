@@ -108,7 +108,7 @@ Event Frames
     <div>
         Toggle Column:
         <button type = "button" class = "btn btn-primary btn-xs" id = "buttonHideAllColumns">Hide All</button>
-        {% for eventFrameAttributeTemplate in parent.EventFrameAttributeTemplates %}
+        {% for eventFrameAttributeTemplate in eventFrameAttributeTemplates %}
             {% set dataColumnIndex = loop.index + 9 %}
             <button type = "button" class = "btn btn-primary btn-xs" data-columnIndex = "{{ dataColumnIndex }}"
                 id = "buttonToggleColumn{{ eventFrameAttributeTemplate.Name }}">{{ eventFrameAttributeTemplate.Name }}</button>
@@ -143,7 +143,7 @@ Event Frames
                     <th></th>
                     <th></th>
                     <th></th>
-                    {% for eventFrameAttributeTemplate in parent.EventFrameAttributeTemplates %}
+                    {% for eventFrameAttributeTemplate in eventFrameAttributeTemplates %}
                         <th>{{ eventFrameAttributeTemplate.Name }}</th>
                     {% endfor %}
                 {% elif childrenClass == "DescendantEventFrameTemplate" %}
@@ -193,8 +193,8 @@ Event Frames
                             {% else %}
                                 <td></td>
                             {% endif %}
-                            <td><a class = "btn btn-default" title = "Overlay" href = "{{ url_for("eventFrames.overlay",
-                                eventFrameTemplateId = child.id()) }}"><span class = "glyphicon glyphicon-random"></span></a></td>
+                            <td><a class = "btn btn-default" title = "Overlay Builder" href = "{{ url_for("eventFrames.overlayBuilder",
+                                eventFrameTemplateId = child.id()) }}"><span class = "glyphicon glyphicon-stats"></span></a></td>
                             {% if current_user.isAdministrator() %}
                                 <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("eventFrameTemplates.editEventFrameTemplate",
                                     eventFrameTemplateId = child.id()) }}"><span class = "glyphicon glyphicon-edit"></span></a></td>
@@ -233,11 +233,11 @@ Event Frames
                             <td><a class = "btn btn-default" title = "Delete"
                                 href = '{{ url_for("eventFrames.deleteEventFrame", eventFrameId = child[eventFrameIdIndex]) }}', data-type = "event frame",
                                 data-name = "{{ child[eventFrameNameIndex] }}"><span class = "glyphicon glyphicon-trash"></span></a></td>
-                            {% for eventFrameAttributeTemplate in parent.EventFrameAttributeTemplates | sort(attribute = "Name") %}
+                            {% for eventFrameAttributeTemplate in eventFrameAttributeTemplates %}
                                 {% set value = child[loop.index + eventFrameEndTimestampIndex] %}
                                 <td>{{ "" if value is none else value }}</td>
                             {% endfor %}
-                            {% elif childrenClass == "DescendantEventFrameTemplate" %}
+                        {% elif childrenClass == "DescendantEventFrameTemplate" %}
                             <td>{{ child.Name }}</td>
                             <td>{{ child.Description }}</td>
                             <td>{{ child.Order }}</td>
@@ -356,7 +356,7 @@ Event Frames
                         { "orderable": false }, // Stop button.
                         { "orderable": false }, // Edit button.
                         { "orderable": false }, // Delete button.
-                        {% for eventFrameAttributeTemplate in parent.EventFrameAttributeTemplates %}
+                        {% for eventFrameAttributeTemplate in eventFrameAttributeTemplates %}
                             null,
                         {% endfor %}
                     {% elif childrenClass == "DescendantEventFrameTemplate" %}
@@ -452,9 +452,6 @@ Event Frames
 
             table.columns().every(function ()
             {
-                // Clear any left over filtering from state saving.
-                this.search("", 1).draw()
-
                 if (this.visible())
                 {
                     $(".btn.btn-primary.btn-xs[data-columnIndex = " + this.index() + "]").addClass("active")
@@ -464,6 +461,9 @@ Event Frames
                     $(".btn.btn-primary.btn-xs[data-columnIndex = " + this.index() + "]").removeClass("active")
                 }
             })
+
+            // Clear any left over filtering from state saving.
+            table.search("").columns().search("").draw()
         })
     </script>
 {% endblock %}
