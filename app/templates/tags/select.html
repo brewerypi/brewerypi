@@ -52,6 +52,7 @@ Tags
                 <th></th>
                 <th>Name</th>
                 <th>Description</th>
+                <th>Lookup</th>
                 <th></th>
                 <th></th>
             </tr>
@@ -72,6 +73,7 @@ Tags
                         {% endif %}
                         <td>{{ child.Name }}</td>
                         <td>{{ child.Description }}</td>
+                        <td>{{ "" if child.LookupId is none else child.Lookup.Name }}</td>
                         {% if childrenClass == "Tag" and current_user.isAdministrator() %}
                             <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("tags.editTag", tagId = child.TagId) }}">
                                 <span class = "glyphicon glyphicon-edit"></span></a></td>
@@ -106,6 +108,7 @@ Tags
                 [
                     { "orderable": false }, // Tag values button.
                     { "orderable": false }, // Grafana button.
+                    null,
                     null,
                     null,
                     { "orderable": false }, // Edit button.
