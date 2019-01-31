@@ -105,12 +105,12 @@ def editEventFrameTemplate(eventFrameTemplateId):
 	eventFrameTemplate = EventFrameTemplate.query.get_or_404(eventFrameTemplateId)
 	form = EventFrameTemplateForm(obj = eventFrameTemplate)
 
-	if eventFrameTemplate.ElementTemplateId:
+	if eventFrameTemplate.ParentEventFrameTemplateId is None:
 		del form.order
 
 	# Edit an existing event frame template.
 	if form.validate_on_submit():
-		if eventFrameTemplate.ElementTemplateId:
+		if eventFrameTemplate.ParentEventFrameTemplateId is None:
 			eventFrameTemplate.ElementTemplateId = form.elementTemplateId.data
 			eventFrameTemplate.Order = 1
 			eventFrameTemplate.ParentEventFrameTemplateId = None
@@ -134,6 +134,8 @@ def editEventFrameTemplate(eventFrameTemplateId):
 
 	# Present a form to edit an existing event frame template.
 	if eventFrameTemplate.hasParent():
+		form.order.data = eventFrameTemplate.Order
+
 		breadcrumbs = [{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Root"), "text" : "<span class = \"glyphicon glyphicon-home\"></span>"},
 			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Enterprise",
 				selectedId = eventFrameTemplate.origin().ElementTemplate.Site.Enterprise.EnterpriseId),
@@ -164,7 +166,6 @@ def editEventFrameTemplate(eventFrameTemplateId):
 	form.description.data = eventFrameTemplate.Description
 	form.elementTemplateId.data = eventFrameTemplate.ElementTemplateId
 	form.name.data = eventFrameTemplate.Name
-	form.order.data = eventFrameTemplate.Order
 	form.parentEventFrameTemplateId.data = eventFrameTemplate.ParentEventFrameTemplateId
 	if form.requestReferrer.data is None:
 		form.requestReferrer.data = request.referrer
