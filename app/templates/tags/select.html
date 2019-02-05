@@ -40,10 +40,10 @@ Tags
 <div>
     {% if childrenClass == "Tag" and parent and current_user.isAdministrator() %}
         <a class = "btn btn-default" title = "Add Tag" href = "{{ url_for("tags.addTag", areaId = parent.id()) }}" role = "button">
-            <span class = "glyphicon glyphicon-plus"></span>Tag</a>
+            <span class = "glyphicon glyphicon-plus"></span></a>
         <a class = "btn btn-default" title = "Add Lookup Tag" href = "{{ url_for("tags.addTag", areaId = parent.id(), lookup = True) }}" role = "button">
-            <span class = "glyphicon glyphicon-plus"></span> Lookup Tag</a>
-    <br><br>    
+            <span class = "glyphicon glyphicon-plus"></span> Lookup</a>
+        <br><br>
     {% endif %}
     <table id = "tagsTable" class = "table table-hover" style = "display:none">
         <thead>
@@ -52,7 +52,10 @@ Tags
                 <th></th>
                 <th>Name</th>
                 <th>Description</th>
-                <th>Lookup</th>
+                {% if childrenClass == "Tag" %}
+                    <th>Lookup</th>
+                    <th>Unit</th>
+                {% endif %}
                 <th></th>
                 <th></th>
             </tr>
@@ -73,12 +76,15 @@ Tags
                         {% endif %}
                         <td>{{ child.Name }}</td>
                         <td>{{ child.Description }}</td>
-                        <td>{{ "" if child.LookupId is none else child.Lookup.Name }}</td>
-                        {% if childrenClass == "Tag" and current_user.isAdministrator() %}
-                            <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("tags.editTag", tagId = child.TagId) }}">
-                                <span class = "glyphicon glyphicon-edit"></span></a></td>
-                            <td><a class = "btn btn-default" title = "Delete" href = "{{ url_for("tags.deleteTag", tagId = child.TagId) }}",
-                                data-type = "tag", data-name = "{{ child.Name }}"><span class = "glyphicon glyphicon-trash"></span></a></td>
+                        {% if childrenClass == "Tag" %}
+                            <td>{{ "" if child.LookupId is none else child.Lookup.Name }}</td>
+                            <td>{{ "" if child.UnitOfMeasurementId is none else child.UnitOfMeasurement.Abbreviation }}</td>
+                            {% if current_user.isAdministrator() %}
+                                <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("tags.editTag", tagId = child.TagId) }}">
+                                    <span class = "glyphicon glyphicon-edit"></span></a></td>
+                                <td><a class = "btn btn-default" title = "Delete" href = "{{ url_for("tags.deleteTag", tagId = child.TagId) }}",
+                                    data-type = "tag", data-name = "{{ child.Name }}"><span class = "glyphicon glyphicon-trash"></span></a></td>
+                            {% endif %}
                         {% else %}
                             <td></td>
                             <td></td>
@@ -110,7 +116,10 @@ Tags
                     { "orderable": false }, // Grafana button.
                     null,
                     null,
-                    null,
+                    {% if childrenClass == "Tag" %}
+                        null,
+                        null,
+                    {% endif %}
                     { "orderable": false }, // Edit button.
                     { "orderable": false }  // Delete button.
                 ],

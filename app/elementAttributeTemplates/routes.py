@@ -6,22 +6,33 @@ from .. import db
 from .. decorators import adminRequired
 from .. models import ElementAttributeTemplate, ElementTemplate, Enterprise, Site
 
-modelName = "Element Attribute Template"
-
 @elementAttributeTemplates.route("/elementAttributeTemplates/add/<int:elementTemplateId>", methods = ["GET", "POST"])
+@elementAttributeTemplates.route("/elementAttributeTemplates/add/<int:elementTemplateId>/<int:lookup>", methods = ["GET", "POST"])
 @login_required
 @adminRequired
-def addElementAttributeTemplate(elementTemplateId):
+def addElementAttributeTemplate(elementTemplateId, lookup = False):
 	operation = "Add"
 	form = ElementAttributeTemplateForm()
 
+	if lookup:
+		modelName = "Lookup Element Attribute Template"
+		del form.unitOfMeasurement
+	else:
+		modelName = "Element Attribute Template"
+		del form.lookup
+
 	# Add a new elementAttributeTemplate.
 	if form.validate_on_submit():
-		elementAttributeTemplate = ElementAttributeTemplate(Description = form.description.data, ElementTemplateId = form.elementTemplateId.data, \
-			Name = form.name.data)
+		if lookup:
+			elementAttributeTemplate = ElementAttributeTemplate(Description = form.description.data, ElementTemplateId = form.elementTemplateId.data, \
+				Lookup = form.lookup.data, Name = form.name.data)
+		else:
+			elementAttributeTemplate = ElementAttributeTemplate(Description = form.description.data, ElementTemplateId = form.elementTemplateId.data, \
+				Name = form.name.data, UnitOfMeasurement = form.unitOfMeasurement.data)
+
 		db.session.add(elementAttributeTemplate)
 		db.session.commit()
-		flash("You have successfully added the new element attribute template \"{}\".".format(elementAttributeTemplate.Name), "alert alert-success")
+		flash('You have successfully added the new element attribute template "{}".'.format(elementAttributeTemplate.Name), "alert alert-success")
 		return redirect(form.requestReferrer.data)
 
 	# Present a form to add a new element attribute template.
@@ -58,13 +69,26 @@ def editElementAttributeTemplate(elementAttributeTemplateId):
 	elementAttributeTemplate = ElementAttributeTemplate.query.get_or_404(elementAttributeTemplateId)
 	form = ElementAttributeTemplateForm(obj = elementAttributeTemplate)
 
+	if elementAttributeTemplate.LookupId:
+		modelName = "Lookup Element Attribute Template"
+		del form.unitOfMeasurement
+	else:
+		modelName = "Element Attribute Template"
+		del form.lookup
+
 	# Edit an existing elementAttributeTemplate.
 	if form.validate_on_submit():
 		elementAttributeTemplate.Description = form.description.data
 		elementAttributeTemplate.ElementTemplateId = form.elementTemplateId.data
 		elementAttributeTemplate.Name = form.name.data
+
+		if elementAttributeTemplate.LookupId:
+			elementAttributeTemplate.Lookup = form.lookup.data
+		else:
+			elementAttributeTemplate.UnitOfMeasurement = form.unitOfMeasurement.data
+
 		db.session.commit()
-		flash("You have successfully edited the element attribute template \"{}\".".format(elementAttributeTemplate.Name), "alert alert-success")
+		flash('You have successfully edited the element attribute template "{}".'.format(elementAttributeTemplate.Name), "alert alert-success")
 		return redirect(form.requestReferrer.data)
 
 	# Present a form to edit an existing elementAttributeTemplate.
@@ -72,6 +96,11 @@ def editElementAttributeTemplate(elementAttributeTemplateId):
 	form.description.data = elementAttributeTemplate.Description
 	form.elementTemplateId.data = elementAttributeTemplate.ElementTemplateId
 	form.name.data = elementAttributeTemplate.Name
+	if elementAttributeTemplate.LookupId:
+		form.lookup.data = elementAttributeTemplate.Lookup
+	else:
+		form.unitOfMeasurement.data = elementAttributeTemplate.UnitOfMeasurement
+
 	if form.requestReferrer.data is None:
 		form.requestReferrer.data = request.referrer
 

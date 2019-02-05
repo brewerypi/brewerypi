@@ -64,8 +64,10 @@ Data Entry - Elements
         <button type = "button" class = "btn btn-primary btn-xs" id = "buttonShowAllColumns">Show All</button>
         <br><br>
     {% elif childrenClass == "ElementAttributeTemplate" and current_user.isAdministrator() %}
-        <a class = "btn btn-default" title = "Add" href = "{{ url_for("elementAttributeTemplates.addElementAttributeTemplate",
+        <a class = "btn btn-default" title = "Add Element Attribute Template" href = "{{ url_for("elementAttributeTemplates.addElementAttributeTemplate",
             elementTemplateId = parent.id()) }}" role = "button"><span class = "glyphicon glyphicon-plus"></span></a>
+        <a class = "btn btn-default" title = "Add Element Attribute Lookup Template" href = "{{ url_for("elementAttributeTemplates.addElementAttributeTemplate",
+            elementTemplateId = parent.id(), lookup = True) }}" role = "button"><span class = "glyphicon glyphicon-plus"></span> Lookup</a>
         <br><br>
     {% elif childrenClass == "ElementTemplate" %}
         {% if current_user.isAdministrator() %}
@@ -87,6 +89,9 @@ Data Entry - Elements
                 <th>Description</th>
                 {% if childrenClass == "Element" %}
                     <th>Tags Managed</th>
+                {% elif childrenClass == "ElementAttributeTemplate" %}
+                    <th>Lookup</th>
+                    <th>Unit</th>
                 {% endif %}
                 <th></th>
                 <th></th>
@@ -157,13 +162,17 @@ Data Entry - Elements
                                 <td>{{ currentElementAttributeValues[elementAttributeTemplate.Name] }}</td>
                             {% endfor %}
                         {% elif childrenClass == "ElementAttributeTemplate" %}
+                            <td>{{ "" if child.LookupId is none else child.Lookup.Name }}</td>
+                            <td>{{ "" if child.UnitOfMeasurementId is none else child.UnitOfMeasurement.Abbreviation }}</td>
                             <td></td>
                             <td></td>
-                            <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("elementAttributeTemplates.editElementAttributeTemplate",
-                                elementAttributeTemplateId = child.id()) }}"><span class = "glyphicon glyphicon-edit"></span></a></td>
-                            <td><a class = "btn btn-default" title = "Delete" href = "{{ url_for("elementAttributeTemplates.deleteElementAttributeTemplate",
-                                elementAttributeTemplateId = child.id()) }}", data-type = "element attribute template", data-name = "{{ child.Name }}">
-                                <span class = "glyphicon glyphicon-trash"></span></a></td>
+                            {% if current_user.isAdministrator() %}
+                                <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("elementAttributeTemplates.editElementAttributeTemplate",
+                                    elementAttributeTemplateId = child.id()) }}"><span class = "glyphicon glyphicon-edit"></span></a></td>
+                                <td><a class = "btn btn-default" title = "Delete" href = "{{ url_for("elementAttributeTemplates.deleteElementAttributeTemplate",
+                                    elementAttributeTemplateId = child.id()) }}", data-type = "element attribute template", data-name = "{{ child.Name }}">
+                                    <span class = "glyphicon glyphicon-trash"></span></a></td>
+                            {% endif %}
                         {% else %}
                             <td></td>
                             <td></td>
@@ -222,6 +231,9 @@ Data Entry - Elements
                     null,
                     null,
                     {% if childrenClass == "Element" %}
+                        null,
+                    {% elif childrenClass == "ElementAttributeTemplate" %}
+                        null,
                         null,
                     {% endif %}
                     { "orderable": false }, // Associate button.

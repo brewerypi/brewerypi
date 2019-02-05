@@ -1,5 +1,5 @@
 from flask_login import AnonymousUserMixin, UserMixin
-from sqlalchemy import and_, exists, Index, PrimaryKeyConstraint, UniqueConstraint
+from sqlalchemy import Index, PrimaryKeyConstraint, UniqueConstraint
 from werkzeug.security import generate_password_hash, check_password_hash
 from app import db
 from . import loginManager
@@ -131,7 +131,10 @@ class ElementAttributeTemplate(db.Model):
 	Description = db.Column(db.String(255), nullable = True)
 	ElementTemplateId = db.Column(db.Integer, db.ForeignKey("ElementTemplate.ElementTemplateId", name = "FK__ElementTemplate$Have$ElementAttributeTemplate"), \
 		nullable = False)
+	LookupId = db.Column(db.Integer, db.ForeignKey("Lookup.LookupId", name = "FK__Lookup$CanBeUsedIn$ElementAttributeTemplate"), nullable = True)
 	Name = db.Column(db.String(45), nullable = False)
+	UnitOfMeasurementId = db.Column(db.Integer, db.ForeignKey("UnitOfMeasurement.UnitOfMeasurementId", \
+		name = "FK__UnitOfMeasurement$CanBeUsedIn$ElementAttributeTemplate"), nullable = True)
 
 	ElementAttributes = db.relationship("ElementAttribute", backref = "ElementAttributeTemplate", lazy = "dynamic")
 
@@ -436,6 +439,7 @@ class Lookup(db.Model):
 	EnterpriseId = db.Column(db.Integer, db.ForeignKey("Enterprise.EnterpriseId", name = "FK__Enterprise$Have$Lookup"), nullable = False)
 	Name = db.Column(db.String(45), nullable = False)
 
+	ElementAttributeTemplates = db.relationship("ElementAttributeTemplate", backref = "Lookup", lazy = "dynamic")
 	LookupValues = db.relationship("LookupValue", backref = "Lookup", lazy = "dynamic")
 	Tags = db.relationship("Tag", backref = "Lookup", lazy = "dynamic")
 
@@ -667,6 +671,7 @@ class UnitOfMeasurement(db.Model):
 	Abbreviation = db.Column(db.String(15), nullable = False)
 	Name = db.Column(db.String(45), nullable = False)
 
+	ElementAttributeTemplates = db.relationship("ElementAttributeTemplate", backref = "UnitOfMeasurement", lazy = "dynamic")
 	Tags = db.relationship("Tag", backref = "UnitOfMeasurement", lazy = "dynamic")
 
 	def __repr__(self):
