@@ -44,7 +44,7 @@ Physical Models
             <span class = "glyphicon glyphicon-plus"></span></a>
         <br><br>
     {% endif %}
-    <table id = "physicalModelsTable" class = "table" style = "width:100%">
+    <table id = "physicalModelsTable" class = "table table-hover" style = "display:none">
         <thead>
             <tr>
                 <th></th>
@@ -122,7 +122,9 @@ Physical Models
                 "pageLength": 25
             })
 
-            $("a[title='Delete']").click(function ()
+            $("#physicalModelsTable").attr("style", "width:100%")
+
+            $("a[title='Delete']").on("click", function ()
             {
                 var name = $(this).attr("data-name")
                 var type = $(this).attr("data-type")

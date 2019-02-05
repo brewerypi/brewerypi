@@ -1,3 +1,5 @@
+from datetime import datetime
+from dateutil.relativedelta import relativedelta
 from flask import flash, jsonify, redirect, render_template, request, url_for
 from flask_login import login_required
 from sqlalchemy import or_
@@ -10,11 +12,13 @@ from .. models import Area, ElementAttribute, Enterprise, EventFrame, EventFrame
 modelName = "Tag Value"
 
 @tagValues.route("/tagValues/<int:tagId>", methods = ["GET", "POST"])
+@tagValues.route("/tagValues/<int:tagId>/<int:months>", methods = ["GET", "POST"])
 @tagValues.route("/tagValues/elementAttribute/<int:elementAttributeId>", methods = ["GET", "POST"])
+@tagValues.route("/tagValues/elementAttribute/<int:elementAttributeId>/<int:months>", methods = ["GET", "POST"])
 @tagValues.route("/tagValues/eventFrameAttribute/<int:eventFrameId>/<int:eventFrameAttributeId>", methods = ["GET", "POST"])
 @login_required
 @permissionRequired(Permission.DATA_ENTRY)
-def listTagValues(tagId = None, elementAttributeId = None, eventFrameId = None, eventFrameAttributeId = None):
+def listTagValues(tagId = None, months = None, elementAttributeId = None, eventFrameId = None, eventFrameAttributeId = None):
 	elementAttribute = None
 	eventFrame = None
 	eventFrameAttribute = None
@@ -28,6 +32,11 @@ def listTagValues(tagId = None, elementAttributeId = None, eventFrameId = None, 
 	else:
 		tag = Tag.query.get_or_404(tagId)
 
+	if months is None:
+		months = 3
+
+	fromTimestamp = datetime.utcnow() - relativedelta(months = months)
+	toTimestamp = datetime.utcnow()
 	if tag.LookupId:
 		if eventFrame:
 			if eventFrame.EndTimestamp:
@@ -37,7 +46,11 @@ def listTagValues(tagId = None, elementAttributeId = None, eventFrameId = None, 
 				tagValues = TagValue.query.join(Tag, Lookup, LookupValue).filter(Tag.TagId == tag.TagId, TagValue.Value == LookupValue.Value,
 					TagValue.Timestamp >= eventFrame.StartTimestamp)
 		else:
-			tagValues = TagValue.query.join(Tag, Lookup, LookupValue).filter(Tag.TagId == tag.TagId, TagValue.Value == LookupValue.Value)
+			if months == 0:
+				tagValues = TagValue.query.join(Tag, Lookup, LookupValue).filter(Tag.TagId == tag.TagId, TagValue.Value == LookupValue.Value)
+			else:
+				tagValues = TagValue.query.join(Tag, Lookup, LookupValue).filter(Tag.TagId == tag.TagId, TagValue.Timestamp >= fromTimestamp,
+					TagValue.Timestamp <= toTimestamp, TagValue.Value == LookupValue.Value)
 	else:
 		if eventFrame:
 			if eventFrame.EndTimestamp:
@@ -46,10 +59,13 @@ def listTagValues(tagId = None, elementAttributeId = None, eventFrameId = None, 
 			else:
 				tagValues = TagValue.query.filter(TagValue.TagId == tag.TagId, TagValue.Timestamp >= eventFrame.StartTimestamp)
 		else:
-			tagValues = TagValue.query.filter_by(TagId = tag.TagId)
+			if months == 0:
+				tagValues = TagValue.query.filter(TagValue.TagId == tag.TagId)
+			else:
+				tagValues = TagValue.query.filter(TagValue.TagId == tag.TagId, TagValue.Timestamp >= fromTimestamp, TagValue.Timestamp <= toTimestamp)
 
 	return render_template("tagValues/tagValues.html", elementAttribute = elementAttribute, eventFrame = eventFrame, eventFrameAttribute = eventFrameAttribute,
-		tag = tag, tagValues = tagValues)
+		months = months, tag = tag, tagValues = tagValues)
 
 @tagValues.route("/tagValues/addMultiple", methods = ["GET", "POST"])
 @login_required

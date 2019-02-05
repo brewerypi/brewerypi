@@ -1,4 +1,5 @@
 from datetime import datetime
+from dateutil.relativedelta import relativedelta
 from flask import current_app, flash, jsonify, redirect, render_template, request, url_for
 from flask_login import login_required
 from . import eventFrames
@@ -227,10 +228,10 @@ def endEventFrame(eventFrameId):
 		"alert alert-success")
 	return redirect(request.referrer)
 
-@eventFrames.route("/eventFrames/overlay/<int:eventFrameTemplateId>", methods = ["GET", "POST"])
+@eventFrames.route("/eventFrames/overlayBuilder/<int:eventFrameTemplateId>", methods = ["GET", "POST"])
 @login_required
 @permissionRequired(Permission.DATA_ENTRY)
-def overlay(eventFrameTemplateId):
+def overlayBuilder(eventFrameTemplateId):
 	eventFrameTemplate = EventFrameTemplate.query.get_or_404(eventFrameTemplateId)
 	eventFrameAttributeTemplates = EventFrameAttributeTemplate.query.filter_by(EventFrameTemplateId = eventFrameTemplateId)
 	form = EventFrameOverlayForm()
@@ -242,76 +243,74 @@ def overlay(eventFrameTemplateId):
 		else:
 			endTimestamp = datetime.strptime(endUtcTimestamp, "%Y-%m-%d %H:%M:%S")
 
-		dynamicSql = ""
+		eventFrames = EventFrame.query.filter(EventFrame.EventFrameTemplateId == eventFrameTemplateId, EventFrame.StartTimestamp >= startTimestamp,
+			EventFrame.StartTimestamp <= endTimestamp)
+
+		eventFrameIds = ""
+		for eventFrame in eventFrames:
+			if eventFrameIds != "":
+				eventFrameIds = eventFrameIds + ","
+			eventFrameIds = eventFrameIds + str(eventFrame.EventFrameId)
+
+		dynamicColumns = ""
 		eventFrameAttributeTemplates = EventFrameAttributeTemplate.query.filter_by(EventFrameTemplateId = eventFrameTemplateId). \
 			order_by(EventFrameAttributeTemplate.Name)
 		for eventFrameAttributeTemplate in eventFrameAttributeTemplates:
-			dynamicSql = dynamicSql + ", MAX(IF(t2.Name = '{}', IF(Tag.LookupId IS NULL, t3.Value, LookupValue.Name), '')) AS '{}'". \
+			dynamicColumns = dynamicColumns + \
+				", MAX(IF(EventFrameAttributeTemplate.Name = '{}', IF(Tag.LookupId IS NULL, TagValue.Value, LookupValue.Name), '')) AS '{}'". \
 				format(eventFrameAttributeTemplate.Name, eventFrameAttributeTemplate.Name)
 
 		query = """
-		SELECT t1.EventFrameId AS EventFrameId,
-			t1.Name AS Name,
+		SELECT EventFrame.EventFrameId,
+			EventFrame.Name,
 			Element.Name AS Element,
-			t1.StartTimestamp,
-			t1.EndTimestamp {}
-		FROM EventFrame t1
-			INNER JOIN EventFrameTemplate ON t1.EventFrameTemplateId = EventFrameTemplate.EventFrameTemplateId
-			INNER JOIN EventFrameAttributeTemplate t2 ON EventFrameTemplate.EventFrameTemplateId = t2.EventFrameTemplateId
-			INNER JOIN EventFrameAttribute ON t2.EventFrameAttributeTemplateId = EventFrameAttribute.EventFrameAttributeTemplateId
-			INNER JOIN Element ON t1.ElementId = Element.ElementId
-				AND EventFrameAttribute.ElementId = Element.ElementId
-			INNER JOIN Tag ON EventFrameAttribute.TagId = Tag.TagId
-			LEFT JOIN Lookup ON Tag.LookupId = Lookup.LookupId
-			LEFT JOIN LookupValue ON Lookup.LookupId = LookupValue.LookupId
-			INNER JOIN TagValue t3 ON
-				CASE
-					WHEN Tag.LookupId IS NULL
-						THEN Tag.TagId = t3.TagId
-					ELSE
-						Tag.TagId = t3.TagId AND LookupValue.Value = t3.Value
-				END
+			EventFrame.StartTimestamp,
+            EventFrame.EndTimestamp {}
+		FROM EventFrame
+			INNER JOIN Element ON EventFrame.ElementId = Element.ElementId
+			INNER JOIN EventFrameTemplate ON EventFrame.EventFrameTemplateId = EventFrameTemplate.EventFrameTemplateId
+			INNER JOIN EventFrameAttributeTemplate ON EventFrameTemplate.EventFrameTemplateId = EventFrameAttributeTemplate.EventFrameTemplateId
+			LEFT JOIN EventFrameAttribute ON EventFrameAttributeTemplate.EventFrameAttributeTemplateId = EventFrameAttribute.EventFrameAttributeTemplateId AND
+				Element.ElementId = EventFrameAttribute.ElementId
 			INNER JOIN
 			(
-				SELECT EventFrame.EventFrameId,
-					EventFrameAttributeTemplate.Name,
-					Max(TagValue.Timestamp) AS MaxTimestamp
+				SELECT EventFrame.EventFrameId AS EventFrameId,
+					EventFrameAttributeTemplate.Name AS EventFrameAttributeTemplateName,
+					MAX(TagValue.Timestamp) AS Timestamp
 				FROM EventFrame
+					INNER JOIN Element ON EventFrame.ElementId = Element.ElementId
 					INNER JOIN EventFrameTemplate ON EventFrame.EventFrameTemplateId = EventFrameTemplate.EventFrameTemplateId
 					INNER JOIN EventFrameAttributeTemplate ON EventFrameTemplate.EventFrameTemplateId = EventFrameAttributeTemplate.EventFrameTemplateId
-					INNER JOIN EventFrameAttribute ON EventFrameAttributeTemplate.EventFrameAttributeTemplateId = 
-						EventFrameAttribute.EventFrameAttributeTemplateId
-					INNER JOIN Element ON EventFrame.ElementId = Element.ElementId
-						AND EventFrameAttribute.ElementId = Element.ElementId
-					INNER JOIN Tag ON EventFrameAttribute.TagId = Tag.TagId
-					INNER JOIN TagValue ON Tag.TagId = TagValue.TagId
-				WHERE EventFrameTemplate.EventFrameTemplateId IN ({}) AND
-					EventFrame.EndTimestamp IS NULL AND
-					TagValue.Timestamp >= EventFrame.StartTimestamp OR
-					EventFrame.EndTimestamp IS NOT NULL AND
-					TagValue.Timestamp >= EventFrame.StartTimestamp AND
-					TagValue.Timestamp <= EventFrame.EndTimestamp
-				GROUP BY EventFrame.EventFrameId,
-					EventFrameAttributeTemplate.Name
-			) t4 ON t1.EventFrameId = t4.EventFrameId AND
-				t2.Name = t4.Name AND
-				t3.Timestamp = t4.MaxTimestamp
-		WHERE EventFrameTemplate.EventFrameTemplateId IN ({}) AND
-		(
-			t1.EndTimestamp IS NULL AND
-			t1.StartTimestamp >= '{}' OR
-			t1.EndTimestamp IS NOT NULL AND
-			t1.StartTimestamp >= '{}' AND
-			t1.EndTimestamp <= '{}'
-		)
-		GROUP BY t1.EventFrameId
-		""".format(dynamicSql, eventFrameTemplateId, eventFrameTemplateId, startTimestamp, startTimestamp, endTimestamp)
+					LEFT JOIN EventFrameAttribute ON EventFrameAttributeTemplate.EventFrameAttributeTemplateId = EventFrameAttribute.EventFrameAttributeTemplateId AND
+						Element.ElementId = EventFrameAttribute.ElementId
+					LEFT JOIN Tag ON EventFrameAttribute.TagId = Tag.TagId
+					LEFT JOIN TagValue ON Tag.TagId = TagValue.TagId AND
+						CASE
+							WHEN EventFrame.EndTimestamp IS NULL THEN
+								(TagValue.Timestamp >= EventFrame.StartTimestamp)
+							ELSE
+								(TagValue.Timestamp >= EventFrame.StartTimestamp AND TagValue.Timestamp <= EventFrame.EndTimestamp)
+						END
+				WHERE EventFrame.EventFrameId IN ({})
+				GROUP BY EventFrameId,
+					EventFrameAttributeTemplateName
+			) CurrentEventFrameAttributeValues ON EventFrame.EventFrameId = CurrentEventFrameAttributeValues.EventFrameId AND
+				EventFrameAttributeTemplate.Name = CurrentEventFrameAttributeValues.EventFrameAttributeTemplateName
+			LEFT JOIN Tag ON EventFrameAttribute.TagId = Tag.TagId
+			LEFT JOIN TagValue ON Tag.TagId = TagValue.TagId AND
+				TagValue.Timestamp = CurrentEventFrameAttributeValues.Timestamp
+			LEFT JOIN Lookup ON Tag.LookupId = Lookup.LookupId
+			LEFT JOIN LookupValue ON Lookup.LookupId = LookupValue.LookupId AND
+				TagValue.Value = LookupValue.Value
+		WHERE EventFrame.EventFrameId IN ({})
+		GROUP BY EventFrame.EventFrameId
+		""".format(dynamicColumns, eventFrameIds, eventFrameIds)
 		eventFrames = db.session.execute(query).fetchall()
-		return render_template("eventFrames/overlay.html", endTimestamp = endTimestamp, eventFrames = eventFrames,
+		return render_template("eventFrames/overlayBuilder.html", endTimestamp = endTimestamp, eventFrames = eventFrames,
 			eventFrameAttributeTemplates = eventFrameAttributeTemplates, eventFrameTemplate = eventFrameTemplate,
 			grafanaBaseUri = current_app.config["GRAFANA_BASE_URI"], startTimestamp = startTimestamp)
 
-	return render_template("eventFrames/overlay.html", eventFrameAttributeTemplates = eventFrameAttributeTemplates, eventFrameTemplate = eventFrameTemplate,
+	return render_template("eventFrames/overlayBuilder.html", eventFrameAttributeTemplates = eventFrameAttributeTemplates, eventFrameTemplate = eventFrameTemplate,
 		form = form)
 
 @eventFrames.route("/eventFrames/overlay/days", methods = ["GET", "POST"])
@@ -319,11 +318,11 @@ def overlay(eventFrameTemplateId):
 @permissionRequired(Permission.DATA_ENTRY)
 def days():
 	data = request.get_json(force = True)
-	dynamicSql = ""
+	eventFrameIds = ""
 	for item in data:
-		if dynamicSql != "":
-			dynamicSql = dynamicSql + ", "
-		dynamicSql = dynamicSql +  item["EventFrameId"]
+		if eventFrameIds != "":
+			eventFrameIds = eventFrameIds + ", "
+		eventFrameIds = eventFrameIds +  item["EventFrameId"]
 
 	query = """
 	SELECT CEILING(IF(EventFrame.EndTimestamp IS NULL,
@@ -333,31 +332,53 @@ def days():
 		INNER JOIN Element ON EventFrame.ElementId = Element.ElementId
 		INNER JOIN EventFrameTemplate ON EventFrame.EventFrameTemplateId = EventFrameTemplate.EventFrameTemplateId
 		INNER JOIN EventFrameAttributeTemplate ON EventFrameTemplate.EventFrameTemplateId = EventFrameAttributeTemplate.EventFrameTemplateId
-		INNER JOIN EventFrameAttribute ON Element.ElementId = EventFrameAttribute.ElementId AND
-			EventFrameAttributeTemplate.EventFrameAttributeTemplateId = EventFrameAttribute.EventFrameAttributeTemplateId
-		INNER JOIN Tag ON EventFrameAttribute.TagId = Tag.TagId
-		INNER JOIN TagValue ON Tag.TagId = TagValue.TagId
-	WHERE EventFrame.EventFrameId IN ({}) AND
-	(
-		EventFrame.EndTimestamp IS NULL AND
-		TagValue.Timestamp >= EventFrame.StartTimestamp OR
-		EventFrame.EndTimestamp IS NOT NULL AND
-		TagValue.Timestamp >= EventFrame.StartTimestamp AND
-		TagValue.Timestamp <= EventFrame.EndTimestamp
-	)
+		LEFT JOIN EventFrameAttribute ON EventFrameAttributeTemplate.EventFrameAttributeTemplateId = EventFrameAttribute.EventFrameAttributeTemplateId AND
+			Element.ElementId = EventFrameAttribute.ElementId
+		INNER JOIN
+		(
+			SELECT EventFrame.EventFrameId AS EventFrameId,
+				EventFrameAttributeTemplate.Name AS EventFrameAttributeTemplateName,
+				MAX(TagValue.Timestamp) AS Timestamp
+			FROM EventFrame
+				INNER JOIN Element ON EventFrame.ElementId = Element.ElementId
+				INNER JOIN EventFrameTemplate ON EventFrame.EventFrameTemplateId = EventFrameTemplate.EventFrameTemplateId
+				INNER JOIN EventFrameAttributeTemplate ON EventFrameTemplate.EventFrameTemplateId = EventFrameAttributeTemplate.EventFrameTemplateId
+				LEFT JOIN EventFrameAttribute ON EventFrameAttributeTemplate.EventFrameAttributeTemplateId = EventFrameAttribute.EventFrameAttributeTemplateId AND
+					Element.ElementId = EventFrameAttribute.ElementId
+				LEFT JOIN Tag ON EventFrameAttribute.TagId = Tag.TagId
+				LEFT JOIN TagValue ON Tag.TagId = TagValue.TagId AND
+					CASE
+						WHEN EventFrame.EndTimestamp IS NULL THEN
+							(TagValue.Timestamp >= EventFrame.StartTimestamp)
+						ELSE
+							(TagValue.Timestamp >= EventFrame.StartTimestamp AND TagValue.Timestamp <= EventFrame.EndTimestamp)
+					END
+			WHERE EventFrame.EventFrameId IN ({})
+			GROUP BY EventFrameId,
+				EventFrameAttributeTemplateName
+		) CurrentEventFrameAttributeValues ON EventFrame.EventFrameId = CurrentEventFrameAttributeValues.EventFrameId AND
+			EventFrameAttributeTemplate.Name = CurrentEventFrameAttributeValues.EventFrameAttributeTemplateName
+		LEFT JOIN Tag ON EventFrameAttribute.TagId = Tag.TagId
+		LEFT JOIN TagValue ON Tag.TagId = TagValue.TagId AND
+			TagValue.Timestamp = CurrentEventFrameAttributeValues.Timestamp
+		LEFT JOIN Lookup ON Tag.LookupId = Lookup.LookupId
+		LEFT JOIN LookupValue ON Lookup.LookupId = LookupValue.LookupId AND
+			TagValue.Value = LookupValue.Value
+	WHERE EventFrame.EventFrameId IN ({})
 	ORDER BY Days DESC
 	LIMIT 1
-	""".format(dynamicSql)
+	""".format(eventFrameIds, eventFrameIds)
 	days = db.session.execute(query).fetchone()["Days"]
 	return jsonify({"days": days})
 
 @eventFrames.route("/eventFrames/select", methods = ["GET", "POST"]) # Default.
 @eventFrames.route("/eventFrames/select/<string:selectedClass>", methods = ["GET", "POST"]) # Root.
 @eventFrames.route("/eventFrames/select/<string:selectedClass>/<int:selectedId>", methods = ["GET", "POST"])
+@eventFrames.route("/eventFrames/select/<string:selectedClass>/<int:selectedId>/<int:months>", methods = ["GET", "POST"])
 @eventFrames.route("/eventFrames/select/<string:selectedClass>/<int:selectedId>/<string:selectedOperation>", methods = ["GET", "POST"])
 @login_required
 @permissionRequired(Permission.DATA_ENTRY)
-def selectEventFrame(selectedClass = None, selectedId = None, selectedOperation = None):
+def selectEventFrame(selectedClass = None, selectedId = None, months = None, selectedOperation = None):
 	eventFrameAttributeTemplates = None
 	if selectedClass == None:
 		parent = Site.query.join(Enterprise, ElementTemplate, EventFrameTemplate, EventFrame).order_by(Enterprise.Name).first()
@@ -391,11 +412,45 @@ def selectEventFrame(selectedClass = None, selectedId = None, selectedOperation 
 			order_by(EventFrameAttributeTemplate.Name)
 	elif selectedClass == "EventFrameTemplate":
 		parent = EventFrameTemplate.query.get_or_404(selectedId)
-		children = EventFrame.query.filter_by(EventFrameTemplateId = selectedId)
+		if months is None:
+			months = 3
+
+		fromTimestamp = datetime.utcnow() - relativedelta(months = months)
+		toTimestamp = datetime.utcnow()
+		if months == 0:
+			children = EventFrame.query.filter_by(EventFrameTemplateId = selectedId)
+		else:
+			children = EventFrame.query.filter(EventFrame.EventFrameTemplateId == selectedId, EventFrame.StartTimestamp >= fromTimestamp,
+				EventFrame.StartTimestamp <= toTimestamp)
+
+		eventFrameIds = ""
+		for child in children:
+			if eventFrameIds != "":
+				eventFrameIds = eventFrameIds + ","
+			eventFrameIds = eventFrameIds + str(child.EventFrameId)
+
+		eventFrameAttributeTemplates = parent.EventFrameAttributeTemplates.order_by(EventFrameAttributeTemplate.Name)
+		eventFrameAttributeTemplateIds = ""
+		for eventFrameAttributeTemplate in eventFrameAttributeTemplates:
+			if eventFrameAttributeTemplateIds != "":
+				eventFrameAttributeTemplateIds = eventFrameAttributeTemplateIds + ","
+			eventFrameAttributeTemplateIds = eventFrameAttributeTemplateIds + str(eventFrameAttributeTemplate.EventFrameAttributeTemplateId)
+
+		if eventFrameIds != "" and eventFrameAttributeTemplateIds != "":
+			connection = db.engine.raw_connection()
+			try:
+				cursor = connection.cursor()
+				cursor.callproc("spCurrentEventFrameAttributeValues", [eventFrameIds, eventFrameAttributeTemplateIds])
+				children = cursor.fetchall()
+				cursor.close()
+				connection.commit()
+			finally:
+				connection.close()
+
 		childrenClass = "EventFrame"
 
 	return render_template("eventFrames/select.html", children = children, childrenClass = childrenClass,
-		eventFrameAttributeTemplates = eventFrameAttributeTemplates, parent = parent)
+		eventFrameAttributeTemplates = eventFrameAttributeTemplates, months = months, parent = parent)
 
 @eventFrames.route("/eventFrames/startEventFrame/<int:elementId>/<int:eventFrameTemplateId>", methods = ["GET", "POST"])
 @login_required

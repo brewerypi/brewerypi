@@ -54,6 +54,15 @@ Data Entry - Elements
         <a class = "btn btn-default" title = "Grafana" href = "{{ "ElementSummary" | grafanaUrl({"elementTemplateId": parent.id()}) }}" target = "_blank">
             <span class = "glyphicon glyphicon-stats"></span></a>
         <br><br>
+        Toggle Column:
+        <button type = "button" class = "btn btn-primary btn-xs" id = "buttonHideAllColumns">Hide All</button>
+        {% for elementAttributeTemplate in parent.ElementAttributeTemplates %}
+            {% set dataColumnIndex = loop.index + 7 %}
+            <button type = "button" class = "btn btn-primary btn-xs" data-columnIndex = "{{ dataColumnIndex }}"
+                id = "buttonToggleColumn{{ elementAttributeTemplate.Name }}">{{ elementAttributeTemplate.Name }}</button>
+        {% endfor %}
+        <button type = "button" class = "btn btn-primary btn-xs" id = "buttonShowAllColumns">Show All</button>
+        <br><br>
     {% elif childrenClass == "ElementAttributeTemplate" and current_user.isAdministrator() %}
         <a class = "btn btn-default" title = "Add" href = "{{ url_for("elementAttributeTemplates.addElementAttributeTemplate",
             elementTemplateId = parent.id()) }}" role = "button"><span class = "glyphicon glyphicon-plus"></span></a>
@@ -67,7 +76,9 @@ Data Entry - Elements
             <span class = "glyphicon glyphicon-stats"></span></a>
         <br><br>
     {% endif %}
-    <table id = "table" class = "table" style = "width:100%">
+</div>
+<div>
+    <table id = "table" class = "table table-hover" style = "display:none">
         <thead>
             <tr>
                 <th></th>
@@ -81,6 +92,11 @@ Data Entry - Elements
                 <th></th>
                 <th></th>
                 <th></th>
+                {% if childrenClass == "Element" %}
+                    {% for elementAttributeTemplate in parent.ElementAttributeTemplates %}
+                        <th>{{ elementAttributeTemplate.Name }}</th>
+                    {% endfor %}
+                {% endif %}
             </tr>
         </thead>
         <tbody>
@@ -136,6 +152,10 @@ Data Entry - Elements
                                 <td></td>
                                 <td></td>
                             {% endif %}
+                            {% set currentElementAttributeValues = child.currentElementAttributeValues() %}
+                            {% for elementAttributeTemplate in child.ElementTemplate.ElementAttributeTemplates %}
+                                <td>{{ currentElementAttributeValues[elementAttributeTemplate.Name] }}</td>
+                            {% endfor %}
                         {% elif childrenClass == "ElementAttributeTemplate" %}
                             <td></td>
                             <td></td>
@@ -161,11 +181,35 @@ Data Entry - Elements
 {% block scripts %}
     {{ super() }}
     <link rel = "stylesheet" type = "text/css" href = {{ url_for("static", filename = "css/datatables.min.css") }}/> 
+    <link rel = "stylesheet" type = "text/css" href = {{ url_for("static", filename = "css/styles.css") }}/>
     <script type = "text/javascript" src = {{ url_for("static", filename = "js/datatables.min.js") }}></script>
     <script>
         $(document).ready(function()
         {
-            $("#table").DataTable
+            {% if childrenClass == "Element" %}
+                $("#table thead tr").clone(true).appendTo("#table thead")
+                $("#table thead tr:eq(1) th").each(function(i)
+                {
+                    var title = $(this).text()
+                    if (title != "")
+                    {
+                        $(this).html('<input type = "text" placeholder = "Filter ' + title + '" />')
+                        $("input", this).on("keyup change", function ()
+                        {
+                            if (table.column(i).search() !== this.value)
+                            {
+                                table.column(i).search(this.value).draw()
+                            }
+                        })
+                    }
+                    else
+                    {
+                        $(this).html("")
+                    }
+                })
+            {% endif %}
+
+            var table = $("#table").DataTable
             ({
                 "order":
                 [
@@ -183,14 +227,23 @@ Data Entry - Elements
                     { "orderable": false }, // Associate button.
                     { "orderable": false }, // Copy button.
                     { "orderable": false }, // Edit button.
-                    { "orderable": false }  // Delete button.
+                    { "orderable": false },  // Delete button.
+                    {% if childrenClass == "Element" %}
+                        {% for elementAttributeTemplate in parent.ElementAttributeTemplates %}
+                            null,
+                        {% endfor %}
+                    {% endif %}
                 ],
                 "stateSave": true,
                 "stateDuration": 0,
-                "pageLength": 25
+                "pageLength": 25,
+                "orderCellsTop": true,
+                "fixedHeader": true
             })
 
-            $("a[title='Delete']").click(function ()
+            $("#table").attr("style", "width:100%")
+
+            $("a[title='Delete']").on("click", function ()
             {
                 var name = $(this).attr("data-name")
                 var type = $(this).attr("data-type")
@@ -199,6 +252,65 @@ Data Entry - Elements
                     event.preventDefault()
                 }
             })
+
+            $("#buttonHideAllColumns").on("click", function()
+            {
+                table.columns().every(function ()
+                {
+                    if (this.index() > 7)
+                    {
+                        this.visible(false)
+                        $(".btn.btn-primary.btn-xs[data-columnIndex = " + this.index() + "]").removeClass("active")
+                    }
+                })
+            })
+
+            $("#buttonShowAllColumns").on("click", function()
+            {
+                table.columns().every(function ()
+                {
+                    if (this.index() > 7)
+                    {
+                        this.visible(true)
+                        $(".btn.btn-primary.btn-xs[data-columnIndex = " + this.index() + "]").addClass("active")
+                    }
+                })
+            })
+
+            $("[id^=buttonToggleColumn]").on("click", function(e)
+            {
+                e.preventDefault();
+        
+                // Get the column API object
+                var column = table.column($(this).attr("data-columnIndex"))
+        
+                // Toggle the visibility
+                column.visible(!column.visible())
+
+                if ($(this).hasClass("active"))
+                {
+                    $(this).removeClass("active")
+                }
+                else
+                {
+                    $(this).addClass("active")
+                }
+            })
+
+            table.columns().every(function ()
+            {
+                if (this.visible())
+                {
+                    $(".btn.btn-primary.btn-xs[data-columnIndex = " + this.index() + "]").addClass("active")
+                }
+                else
+                {
+                    $(".btn.btn-primary.btn-xs[data-columnIndex = " + this.index() + "]").removeClass("active")
+                }
+            })
+
+            // Clear any left over filtering from state saving.
+            table.search("").columns().search("").draw()
         })
     </script>
 {% endblock %}

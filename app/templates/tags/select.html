@@ -45,13 +45,14 @@ Tags
             <span class = "glyphicon glyphicon-plus"></span> Lookup Tag</a>
     <br><br>    
     {% endif %}
-    <table id = "tagsTable" class = "table" style = "width:100%">
+    <table id = "tagsTable" class = "table table-hover" style = "display:none">
         <thead>
             <tr>
                 <th></th>
                 <th></th>
                 <th>Name</th>
                 <th>Description</th>
+                <th>Lookup</th>
                 <th></th>
                 <th></th>
             </tr>
@@ -72,6 +73,7 @@ Tags
                         {% endif %}
                         <td>{{ child.Name }}</td>
                         <td>{{ child.Description }}</td>
+                        <td>{{ "" if child.LookupId is none else child.Lookup.Name }}</td>
                         {% if childrenClass == "Tag" and current_user.isAdministrator() %}
                             <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("tags.editTag", tagId = child.TagId) }}">
                                 <span class = "glyphicon glyphicon-edit"></span></a></td>
@@ -108,6 +110,7 @@ Tags
                     { "orderable": false }, // Grafana button.
                     null,
                     null,
+                    null,
                     { "orderable": false }, // Edit button.
                     { "orderable": false }  // Delete button.
                 ],
@@ -116,7 +119,9 @@ Tags
                 "pageLength": 25
             })
 
-            $("a[title='Delete']").click(function ()
+            $("#tagsTable").attr("style", "width:100%")
+
+            $("a[title='Delete']").on("click", function ()
             {
                 var name = $(this).attr("data-name")
                 var type = $(this).attr("data-type")

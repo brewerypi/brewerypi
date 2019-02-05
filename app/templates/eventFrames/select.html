@@ -60,7 +60,24 @@ Event Frames
     </ol>
 </div>
 <div class = "page-header">
-    <h1>Event Frames <small>{{ pageHeaderSubText }}</small></h1>
+    <h1>Event Frames <small>{{ pageHeaderSubText }}</small>
+        {% if childrenClass == "EventFrame" %}
+            <a class = 'btn btn-primary btn-xs {{ "active" if months == 1 }}' title = "1 Mo" href = '{{ url_for("eventFrames.selectEventFrame",
+                selectedClass = "EventFrameTemplate", selectedId = parent.id(), months = 1) }}' role = "button">1 Mo</a>
+            <a class = 'btn btn-primary btn-xs {{ "active" if months == 2 }}' title = "2 Mo" href = '{{ url_for("eventFrames.selectEventFrame",
+                selectedClass = "EventFrameTemplate", selectedId = parent.id(), months = 2) }}' role = "button">2 Mo</a>
+            <a class = 'btn btn-primary btn-xs {{ "active" if months == 3 }}' title = "3 Mo" href = '{{ url_for("eventFrames.selectEventFrame",
+                selectedClass = "EventFrameTemplate", selectedId = parent.id(), months = 3) }}' role = "button">3 Mo</a>
+            <a class = 'btn btn-primary btn-xs {{ "active" if months == 6 }}' title = "6 Mo" href = '{{ url_for("eventFrames.selectEventFrame",
+                selectedClass = "EventFrameTemplate", selectedId = parent.id(), months = 6) }}' role = "button">6 Mo</a>
+            <a class = 'btn btn-primary btn-xs {{ "active" if months == 9 }}' title = "9 Mo" href = '{{ url_for("eventFrames.selectEventFrame",
+                selectedClass = "EventFrameTemplate", selectedId = parent.id(), months = 9) }}' role = "button">9 Mo</a>
+            <a class = 'btn btn-primary btn-xs {{ "active" if months == 12 }}' title = "1 Yr" href = '{{ url_for("eventFrames.selectEventFrame",
+                selectedClass = "EventFrameTemplate", selectedId = parent.id(), months = 12) }}' role = "button">1 Yr</a>
+            <a class = 'btn btn-primary btn-xs {{ "active" if months == 0 }}' title = "All" href = '{{ url_for("eventFrames.selectEventFrame",
+                selectedClass = "EventFrameTemplate", selectedId = parent.id(), months = 0) }}' role = "button">All</a>
+        {% endif %}
+    </h1>
 </div>
 <div>
     {% if childrenClass == "ElementTemplate" %}
@@ -86,7 +103,25 @@ Event Frames
             parentEventFrameTemplateId = parent.id()) }}" role = "button"><span class = "glyphicon glyphicon-plus"></span></a>
         <br><br>
     {% endif %}
-    <table id = "table" class = "table" style = "width:100%">
+</div>
+{% if childrenClass == "EventFrame" %}
+    <div>
+        Toggle Column:
+        <button type = "button" class = "btn btn-primary btn-xs" id = "buttonHideAllColumns">Hide All</button>
+        {% for eventFrameAttributeTemplate in eventFrameAttributeTemplates %}
+            {% set dataColumnIndex = loop.index + 9 %}
+            <button type = "button" class = "btn btn-primary btn-xs" data-columnIndex = "{{ dataColumnIndex }}"
+                id = "buttonToggleColumn{{ eventFrameAttributeTemplate.Name }}">{{ eventFrameAttributeTemplate.Name }}</button>
+        {% endfor %}
+        <button type = "button" class = "btn btn-primary btn-xs" id = "buttonShowAllColumns">Show All</button>
+        <br><br>    
+    </div>
+    <div id = "divLoading" class = "text-center">
+        <img src = '{{ url_for("static", filename = "images/loading.gif") }}'>
+    </div>
+{% endif %}
+<div>
+    <table id = "table" class = "table table-hover" style = "display:none">
         <thead>
             <tr>
                 <th></th>
@@ -102,12 +137,15 @@ Event Frames
                     <th></th>
                 {% elif childrenClass == "EventFrame" %}
                     <th>Element</th>
-                    <th>Start Timestamp</th>
-                    <th>End Timestamp</th>
+                    <th id = "thStartTimestamp">Start Timestamp</th>
+                    <th id = "thEndTimestamp">End Timestamp</th>
                     <th></th>
                     <th></th>
                     <th></th>
                     <th></th>
+                    {% for eventFrameAttributeTemplate in eventFrameAttributeTemplates %}
+                        <th>{{ eventFrameAttributeTemplate.Name }}</th>
+                    {% endfor %}
                 {% elif childrenClass == "DescendantEventFrameTemplate" %}
                     <th>Description</th>
                     <th>Order</th>
@@ -122,9 +160,15 @@ Event Frames
                 {% for child in children %}
                     <tr>
                         {% if childrenClass == "EventFrame" %}
-                            <td><a class = "btn btn-default" title = "Select" href = "{{ url_for("eventFrames.dashboard", eventFrameId = child.id(),) }}">
-                                <span class = "glyphicon glyphicon-list"></span></a></td>
-                            <td><a class = "btn btn-default" title = "Grafana" href = "{{ "EventFramesGraph" | grafanaUrl({"eventFrameId": child.id()}) }}"
+                            {% set eventFrameIdIndex = 0 %}
+                            {% set eventFrameNameIndex = 1 %}
+                            {% set elementNameIndex = 2 %}
+                            {% set eventFrameStartTimestampIndex = 3 %}
+                            {% set eventFrameEndTimestampIndex = 4 %}
+                            <td><a class = "btn btn-default" title = "Select" href = '{{ url_for("eventFrames.dashboard",
+                                eventFrameId = child[eventFrameIdIndex],) }}'><span class = "glyphicon glyphicon-list"></span></a></td>
+                            <td><a class = "btn btn-default" title = "Grafana"
+                                href = '{{ "EventFramesGraph" | grafanaUrl({"eventFrameId": child[eventFrameIdIndex]}) }}''
                                 target = "_blank"><span class = "glyphicon glyphicon-stats"></span></a></td>
                         {% elif childrenClass == "DescendantEventFrameTemplate" %}
                             <td><a class = "btn btn-default" title = "Select" href = "{{ url_for("eventFrames.selectEventFrame",
@@ -149,8 +193,8 @@ Event Frames
                             {% else %}
                                 <td></td>
                             {% endif %}
-                            <td><a class = "btn btn-default" title = "Overlay" href = "{{ url_for("eventFrames.overlay",
-                                eventFrameTemplateId = child.id()) }}"><span class = "glyphicon glyphicon-random"></span></a></td>
+                            <td><a class = "btn btn-default" title = "Overlay Builder" href = "{{ url_for("eventFrames.overlayBuilder",
+                                eventFrameTemplateId = child.id()) }}"><span class = "glyphicon glyphicon-stats"></span></a></td>
                             {% if current_user.isAdministrator() %}
                                 <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("eventFrameTemplates.editEventFrameTemplate",
                                     eventFrameTemplateId = child.id()) }}"><span class = "glyphicon glyphicon-edit"></span></a></td>
@@ -162,31 +206,37 @@ Event Frames
                                 <td></td>
                             {% endif %}
                         {% elif childrenClass == "EventFrame" %}
-                            <td>{{ child.Name }}</td>
-                            <td>{{ child.Element.Name }}</td>
-                            <td>{{ moment(child.StartTimestamp).format("YYYY-MM-DD HH:mm:ss") }}</td>
-                            {% if child.EndTimestamp %}
-                                <td>{{ moment(child.EndTimestamp).format("YYYY-MM-DD HH:mm:ss") }}</td>
+                            <td>{{ child[eventFrameNameIndex] }}</td>
+                            <td>{{ child[elementNameIndex] }}</td>
+                            <td>{{ moment(child[eventFrameStartTimestampIndex]).format("YYYY-MM-DD HH:mm:ss") }}</td>
+                            {% if child[eventFrameEndTimestampIndex] %}
+                                <td>{{ moment(child[eventFrameEndTimestampIndex]).format("YYYY-MM-DD HH:mm:ss") }}</td>
                             {% else %}
                                 <td></td>
                             {% endif %}
                             {% if current_user.isAdministrator() %}
                                 <td><a class = "btn btn-default" title = "Associate Attributes with Tags"
-                                    href = "{{ url_for("eventFrameAttributes.listEventFrameAttributes", eventFrameId = child.id()) }}">
+                                    href = "{{ url_for("eventFrameAttributes.listEventFrameAttributes", eventFrameId = child[eventFrameIdIndex]) }}">
                                     <span class = "glyphicon glyphicon-link"></span></a></td>
                             {% else %}
                                 <td></td>
                             {% endif %}
-                            {% if child.EndTimestamp == None %}
+                            {% if child[eventFrameEndTimestampIndex] == None %}
                                 <td><a class = "btn btn-default" title = "End" href = "{{ url_for("eventFrames.endEventFrame",
-                                    eventFrameId = child.id()) }}"><span class = "glyphicon glyphicon-stop"></span></a></td>
+                                    eventFrameId = child[eventFrameIdIndex]) }}"><span class = "glyphicon glyphicon-stop"></span></a></td>
                             {% else %}
                                 <td></td>
                             {% endif %}
-                            <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("eventFrames.editEventFrame", eventFrameId = child.id()) }}">
+                            <td><a class = "btn btn-default" title = "Edit"
+                                href = '{{ url_for("eventFrames.editEventFrame", eventFrameId = child[eventFrameIdIndex]) }}'>
                                 <span class = "glyphicon glyphicon-edit"></span></a></td>
-                            <td><a class = "btn btn-default" title = "Delete" href = "{{ url_for("eventFrames.deleteEventFrame", eventFrameId = child.id()) }}",
-                                data-type = "event frame", data-name = "{{ child.Name }}"><span class = "glyphicon glyphicon-trash"></span></a></td>
+                            <td><a class = "btn btn-default" title = "Delete"
+                                href = '{{ url_for("eventFrames.deleteEventFrame", eventFrameId = child[eventFrameIdIndex]) }}', data-type = "event frame",
+                                data-name = "{{ child[eventFrameNameIndex] }}"><span class = "glyphicon glyphicon-trash"></span></a></td>
+                            {% for eventFrameAttributeTemplate in eventFrameAttributeTemplates %}
+                                {% set value = child[loop.index + eventFrameEndTimestampIndex] %}
+                                <td>{{ "" if value is none else value }}</td>
+                            {% endfor %}
                         {% elif childrenClass == "DescendantEventFrameTemplate" %}
                             <td>{{ child.Name }}</td>
                             <td>{{ child.Description }}</td>
@@ -211,7 +261,7 @@ Event Frames
         <a class = "btn btn-default" title = "Add" href = "{{ url_for("eventFrameAttributeTemplates.addEventFrameAttributeTemplate", 
             eventFrameTemplateId = parent.EventFrameTemplateId) }}" role = "button"><span class = "glyphicon glyphicon-plus"></span></a>
         <br><br>
-        <table id = "eventFrameAttributeTemplatesTable" class = "table" style = "width:100%">
+        <table id = "eventFrameAttributeTemplatesTable" class = "table table-hover" style = "display:none">
             <thead>
                 <tr>
                     <th>Name</th>
@@ -247,7 +297,31 @@ Event Frames
     <script>
         $(document).ready(function()
         {
-            $("#table").DataTable
+            {% if childrenClass == "EventFrame" %}
+                $("#table thead tr").clone(true).appendTo("#table thead")
+                $("#table thead tr:eq(1) th").each(function(i)
+                {
+                    var id = $(this).attr("id")
+                    var title = $(this).text()
+                    if (title != "" && id != "thStartTimestamp" && id != "thEndTimestamp")
+                    {
+                        $(this).html('<input type = "text" placeholder = "Filter ' + title + '" />')
+                        $("input", this).on("keyup change", function ()
+                        {
+                            if (table.column(i).search() !== this.value)
+                            {
+                                table.column(i).search(this.value).draw()
+                            }
+                        })
+                    }
+                    else
+                    {
+                        $(this).html("")
+                    }
+                })
+            {% endif %}
+
+            var table = $("#table").DataTable
             ({
                 "order":
                 [
@@ -281,7 +355,10 @@ Event Frames
                         { "orderable": false }, // Associate button.
                         { "orderable": false }, // Stop button.
                         { "orderable": false }, // Edit button.
-                        { "orderable": false }  // Delete button.
+                        { "orderable": false }, // Delete button.
+                        {% for eventFrameAttributeTemplate in eventFrameAttributeTemplates %}
+                            null,
+                        {% endfor %}
                     {% elif childrenClass == "DescendantEventFrameTemplate" %}
                         null,
                         null,
@@ -292,7 +369,9 @@ Event Frames
                 ],
                 "stateSave": true,
                 "stateDuration": 0,
-                "pageLength": 25
+                "pageLength": 25,
+                "orderCellsTop": true,
+                "fixedHeader": true
             })
 
             $('#eventFrameAttributeTemplatesTable').DataTable
@@ -313,7 +392,11 @@ Event Frames
                 "pageLength": 25
             })
 
-            $("a[title='Delete']").click(function ()
+            $("#table").attr("style", "width:100%")
+            $("#eventFrameAttributeTemplatesTable").attr("style", "width:100%")
+            $("#divLoading").attr("style", "display:none")
+
+            $("a[title='Delete']").on("click", function ()
             {
                 var name = $(this).attr("data-name")
                 var type = $(this).attr("data-type")
@@ -322,6 +405,65 @@ Event Frames
                     event.preventDefault()
                 }
             })
+
+            $("#buttonHideAllColumns").on("click", function()
+            {
+                table.columns().every(function ()
+                {
+                    if (this.index() > 9)
+                    {
+                        this.visible(false)
+                        $(".btn.btn-primary.btn-xs[data-columnIndex = " + this.index() + "]").removeClass("active")
+                    }
+                })
+            })
+
+            $("#buttonShowAllColumns").on("click", function()
+            {
+                table.columns().every(function ()
+                {
+                    if (this.index() > 9)
+                    {
+                        this.visible(true)
+                        $(".btn.btn-primary.btn-xs[data-columnIndex = " + this.index() + "]").addClass("active")
+                    }
+                })
+            })
+
+            $("[id^=buttonToggleColumn]").on("click", function(e)
+            {
+                e.preventDefault();
+        
+                // Get the column API object
+                var column = table.column($(this).attr("data-columnIndex"))
+        
+                // Toggle the visibility
+                column.visible(!column.visible())
+
+                if ($(this).hasClass("active"))
+                {
+                    $(this).removeClass("active")
+                }
+                else
+                {
+                    $(this).addClass("active")
+                }
+            })
+
+            table.columns().every(function ()
+            {
+                if (this.visible())
+                {
+                    $(".btn.btn-primary.btn-xs[data-columnIndex = " + this.index() + "]").addClass("active")
+                }
+                else
+                {
+                    $(".btn.btn-primary.btn-xs[data-columnIndex = " + this.index() + "]").removeClass("active")
+                }
+            })
+
+            // Clear any left over filtering from state saving.
+            table.search("").columns().search("").draw()
         })
     </script>
 {% endblock %}

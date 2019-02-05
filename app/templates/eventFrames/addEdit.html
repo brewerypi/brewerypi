@@ -29,17 +29,17 @@
         $(document).ready(function()
         {
             {% if not form.errors %}
-                var startTimestamp = moment.utc($("#startTimestamp").val())
+                var startTimestamp = moment.utc($("#startTimestamp").attr("value"))
                 var endTimestampIsNotBlank = $("#endTimestamp").val() != ""
                 $("#startTimestamp").val(startTimestamp.local().format("YYYY-MM-DD HH:mm:ss"))
                 if (endTimestampIsNotBlank)
                 {
-                    var endTimestamp = moment.utc($("#endTimestamp").val())
+                    var endTimestamp = moment.utc($("#endTimestamp").attr("value"))
                     $("#endTimestamp").val(endTimestamp.local().format("YYYY-MM-DD HH:mm:ss"))
                 }
             {% endif %}
 
-            $("#buttonSave").click(function()
+            $("#buttonSave").on("click", function()
             {
                 setUtcTimestamps()
             })
