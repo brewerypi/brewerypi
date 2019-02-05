@@ -258,14 +258,18 @@ Event Frames
         <h1>Event Frames <small>Attribute Templates</small></h1>
     </div>
     <div>
-        <a class = "btn btn-default" title = "Add" href = "{{ url_for("eventFrameAttributeTemplates.addEventFrameAttributeTemplate", 
+        <a class = "btn btn-default" title = "Add Event Frame Attribute Template" href = "{{ url_for("eventFrameAttributeTemplates.addEventFrameAttributeTemplate", 
             eventFrameTemplateId = parent.EventFrameTemplateId) }}" role = "button"><span class = "glyphicon glyphicon-plus"></span></a>
+        <a class = "btn btn-default" title = "Add Event Frame Attribute Lookup Template" href = "{{ url_for("eventFrameAttributeTemplates.addEventFrameAttributeTemplate", 
+            eventFrameTemplateId = parent.EventFrameTemplateId, lookup = True) }}" role = "button"><span class = "glyphicon glyphicon-plus"></span> Lookup</a>
         <br><br>
         <table id = "eventFrameAttributeTemplatesTable" class = "table table-hover" style = "display:none">
             <thead>
                 <tr>
                     <th>Name</th>
                     <th>Description</th>
+                    <th>Lookup</th>
+                    <th>Unit</th>
                     <th></th>
                     <th></th>
                 </tr>
@@ -275,6 +279,8 @@ Event Frames
                 <tr>
                     <td>{{ eventFrameAttributeTemplate.Name }}</td>
                     <td>{{ eventFrameAttributeTemplate.Description }}</td>
+                    <td>{{ "" if eventFrameAttributeTemplate.LookupId is none else eventFrameAttributeTemplate.Lookup.Name }}</td>
+                    <td>{{ "" if eventFrameAttributeTemplate.UnitOfMeasurementId is none else eventFrameAttributeTemplate.UnitOfMeasurement.Abbreviation }}</td>
                     <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("eventFrameAttributeTemplates.editEventFrameAttributeTemplate",
                         eventFrameAttributeTemplateId = eventFrameAttributeTemplate.EventFrameAttributeTemplateId) }}">
                         <span class = "glyphicon glyphicon-edit"></span></a></td>
@@ -382,6 +388,8 @@ Event Frames
                 ],
                 "columns":
                 [
+                    null,
+                    null,
                     null,
                     null,
                     { "orderable": false }, // Edit button.

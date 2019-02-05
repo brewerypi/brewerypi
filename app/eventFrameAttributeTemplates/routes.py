@@ -6,22 +6,33 @@ from .. import db
 from .. decorators import adminRequired
 from .. models import EventFrameAttributeTemplate, EventFrameTemplate
 
-modelName = "Event Frame Attribute Template"
-
 @eventFrameAttributeTemplates.route("/eventFrameAttributeTemplates/add/eventFrameTemplateId/<int:eventFrameTemplateId>", methods = ["GET", "POST"])
+@eventFrameAttributeTemplates.route("/eventFrameAttributeTemplates/add/eventFrameTemplateId/<int:eventFrameTemplateId>/<int:lookup>", methods = ["GET", "POST"])
 @login_required
 @adminRequired
-def addEventFrameAttributeTemplate(eventFrameTemplateId):
+def addEventFrameAttributeTemplate(eventFrameTemplateId, lookup = False):
 	operation = "Add"
 	form = EventFrameAttributeTemplateForm()
 
+	if lookup:
+		modelName = "Lookup Event Frame Attribute Template"
+		del form.unitOfMeasurement
+	else:
+		modelName = "Event Frame Attribute Template"
+		del form.lookup
+
 	# Add a new eventFrameAttributeTemplate
 	if form.validate_on_submit():
-		eventFrameAttributeTemplate = EventFrameAttributeTemplate(Description = form.description.data, EventFrameTemplateId = eventFrameTemplateId, 
-			Name = form.name.data)
+		if lookup:
+			eventFrameAttributeTemplate = EventFrameAttributeTemplate(Description = form.description.data, EventFrameTemplateId = eventFrameTemplateId, 
+				Lookup = form.lookup.data, Name = form.name.data)
+		else:
+			eventFrameAttributeTemplate = EventFrameAttributeTemplate(Description = form.description.data, EventFrameTemplateId = eventFrameTemplateId, 
+				Name = form.name.data, UnitOfMeasurement = form.unitOfMeasurement.data)
+
 		db.session.add(eventFrameAttributeTemplate)
 		db.session.commit()
-		flash("You have successfully added the new event frame attribute template \"{}\" to the event frame template \"{}\".". \
+		flash('You have successfully added the new event frame attribute template "{}" to the event frame template "{}".'. \
 			format(eventFrameAttributeTemplate.Name, eventFrameAttributeTemplate.EventFrameTemplate.Name), "alert alert-success")
 		return redirect(form.requestReferrer.data)
 
@@ -84,12 +95,25 @@ def editEventFrameAttributeTemplate(eventFrameAttributeTemplateId):
 	eventFrameTemplateId = eventFrameAttributeTemplate.EventFrameTemplate.EventFrameTemplateId
 	form = EventFrameAttributeTemplateForm(obj = eventFrameAttributeTemplate)
 
+	if eventFrameAttributeTemplate.LookupId:
+		modelName = "Lookup Event Frame Attribute Template"
+		del form.unitOfMeasurement
+	else:
+		modelName = "Event Frame Attribute Template"
+		del form.lookup
+
 	# Edit an existing eventFrameAttributeTemplate.
 	if form.validate_on_submit():
 		eventFrameAttributeTemplate.Description = form.description.data
 		eventFrameAttributeTemplate.Name = form.name.data
+
+		if eventFrameAttributeTemplate.LookupId:
+			eventFrameAttributeTemplate.Lookup = form.lookup.data
+		else:
+			eventFrameAttributeTemplate.UnitOfMeasurement = form.unitOfMeasurement.data
+
 		db.session.commit()
-		flash("You have successfully edited the event frame attribute template \"" + eventFrameAttributeTemplate.Name + "\".", "alert alert-success")
+		flash('You have successfully edited the event frame attribute template "{}".'.format(eventFrameAttributeTemplate.Name), "alert alert-success")
 		return redirect(form.requestReferrer.data)
 
 	# Present a form to edit an existing eventFrameAttributeTemplate.
@@ -97,6 +121,11 @@ def editEventFrameAttributeTemplate(eventFrameAttributeTemplateId):
 	form.description.data = eventFrameAttributeTemplate.Description
 	form.eventFrameTemplateId.data = eventFrameAttributeTemplate.EventFrameTemplateId
 	form.name.data = eventFrameAttributeTemplate.Name
+	if eventFrameAttributeTemplate.LookupId:
+		form.lookup.data = eventFrameAttributeTemplate.Lookup
+	else:
+		form.unitOfMeasurement.data = eventFrameAttributeTemplate.UnitOfMeasurement
+
 	if form.requestReferrer.data is None:
 		form.requestReferrer.data = request.referrer
 

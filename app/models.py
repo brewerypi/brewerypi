@@ -311,7 +311,10 @@ class EventFrameAttributeTemplate(db.Model):
 	Description = db.Column(db.String(255), nullable = True)
 	EventFrameTemplateId = db.Column(db.Integer, db.ForeignKey("EventFrameTemplate.EventFrameTemplateId", \
 		name = "FK__EventFrameTemplate$Have$EventFrameAttributeTemplate"), nullable = False)
+	LookupId = db.Column(db.Integer, db.ForeignKey("Lookup.LookupId", name = "FK__Lookup$CanBeUsedIn$EventFrameAttributeTemplate"), nullable = True)
 	Name = db.Column(db.String(45), nullable = False)
+	UnitOfMeasurementId = db.Column(db.Integer, db.ForeignKey("UnitOfMeasurement.UnitOfMeasurementId", \
+		name = "FK__UnitOfMeasurement$CanBeUsedIn$EventFrameAttributeTemplate"), nullable = True)
 
 	EventFrameAttributes = db.relationship("EventFrameAttribute", backref = "EventFrameAttributeTemplate", lazy = "dynamic")
 
@@ -440,6 +443,7 @@ class Lookup(db.Model):
 	Name = db.Column(db.String(45), nullable = False)
 
 	ElementAttributeTemplates = db.relationship("ElementAttributeTemplate", backref = "Lookup", lazy = "dynamic")
+	EventFrameAttributeTemplates = db.relationship("EventFrameAttributeTemplate", backref = "Lookup", lazy = "dynamic")
 	LookupValues = db.relationship("LookupValue", backref = "Lookup", lazy = "dynamic")
 	Tags = db.relationship("Tag", backref = "Lookup", lazy = "dynamic")
 
@@ -672,6 +676,7 @@ class UnitOfMeasurement(db.Model):
 	Name = db.Column(db.String(45), nullable = False)
 
 	ElementAttributeTemplates = db.relationship("ElementAttributeTemplate", backref = "UnitOfMeasurement", lazy = "dynamic")
+	EventFrameAttributeTemplates = db.relationship("EventFrameAttributeTemplate", backref = "UnitOfMeasurement", lazy = "dynamic")
 	Tags = db.relationship("Tag", backref = "UnitOfMeasurement", lazy = "dynamic")
 
 	def __repr__(self):

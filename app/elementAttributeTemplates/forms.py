@@ -2,7 +2,7 @@ from flask_wtf import FlaskForm
 from wtforms import HiddenField, StringField, SubmitField, ValidationError
 from wtforms.ext.sqlalchemy.fields import QuerySelectField
 from wtforms.validators import Length, Required
-from .. models import Lookup, ElementAttributeTemplate, UnitOfMeasurement
+from .. models import ElementAttributeTemplate, Lookup, UnitOfMeasurement
 
 class ElementAttributeTemplateForm(FlaskForm):
 	name = StringField("Name", validators = [Required(), Length(1, 45)])
