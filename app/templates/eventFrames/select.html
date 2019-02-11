@@ -270,6 +270,8 @@ Event Frames
                     <th>Description</th>
                     <th>Lookup</th>
                     <th>Unit</th>
+                    <th>Default Start</th>
+                    <th>Default End</th>
                     <th></th>
                     <th></th>
                 </tr>
@@ -281,6 +283,15 @@ Event Frames
                     <td>{{ eventFrameAttributeTemplate.Description }}</td>
                     <td>{{ "" if eventFrameAttributeTemplate.LookupId is none else eventFrameAttributeTemplate.Lookup.Name }}</td>
                     <td>{{ "" if eventFrameAttributeTemplate.UnitOfMeasurementId is none else eventFrameAttributeTemplate.UnitOfMeasurement.Abbreviation }}</td>
+                    {% if eventFrameAttributeTemplate.Lookup is none %}
+                        <td>{{ "" if eventFrameAttributeTemplate.DefaultStartValue is none else eventFrameAttributeTemplate.DefaultStartValue }}</td>
+                        <td>{{ "" if eventFrameAttributeTemplate.DefaultEndValue is none else eventFrameAttributeTemplate.DefaultEndValue}}</td>
+                    {% else %}
+                        <td>{{ eventFrameAttributeTemplate.Lookup.LookupValues.filter_by(Value = eventFrameAttributeTemplate.DefaultStartValue).one_or_none().
+                            Name }}</td>
+                        <td>{{ eventFrameAttributeTemplate.Lookup.LookupValues.filter_by(Value = eventFrameAttributeTemplate.DefaultEndValue).one_or_none().
+                            Name }}</td>
+                    {% endif %}
                     <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("eventFrameAttributeTemplates.editEventFrameAttributeTemplate",
                         eventFrameAttributeTemplateId = eventFrameAttributeTemplate.EventFrameAttributeTemplateId) }}">
                         <span class = "glyphicon glyphicon-edit"></span></a></td>
@@ -388,6 +399,8 @@ Event Frames
                 ],
                 "columns":
                 [
+                    null,
+                    null,
                     null,
                     null,
                     null,

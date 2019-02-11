@@ -4,7 +4,7 @@ from . import eventFrameAttributeTemplates
 from . forms import EventFrameAttributeTemplateForm
 from .. import db
 from .. decorators import adminRequired
-from .. models import EventFrameAttributeTemplate, EventFrameTemplate
+from .. models import EventFrameAttributeTemplate, EventFrameTemplate, Lookup, LookupValue
 
 @eventFrameAttributeTemplates.route("/eventFrameAttributeTemplates/add/eventFrameTemplateId/<int:eventFrameTemplateId>", methods = ["GET", "POST"])
 @eventFrameAttributeTemplates.route("/eventFrameAttributeTemplates/add/eventFrameTemplateId/<int:eventFrameTemplateId>/<int:lookup>", methods = ["GET", "POST"])
@@ -13,22 +13,41 @@ from .. models import EventFrameAttributeTemplate, EventFrameTemplate
 def addEventFrameAttributeTemplate(eventFrameTemplateId, lookup = False):
 	operation = "Add"
 	form = EventFrameAttributeTemplateForm()
-
+	eventFrameTemplate = EventFrameTemplate.query.get_or_404(eventFrameTemplateId)
 	if lookup:
 		modelName = "Lookup Event Frame Attribute Template"
+		del form.defaultEndValue
+		del form.defaultStartValue
 		del form.unitOfMeasurement
+		lookupQuery = Lookup.query.filter_by(EnterpriseId = eventFrameTemplate.origin().ElementTemplate.Site.Enterprise.EnterpriseId).order_by(Lookup.Name)
+		form.lookup.query = lookupQuery
+		firstLookup = lookupQuery.first()
+		choices = []
+		choices.append((-1, ""))
+		for lookupValue in LookupValue.query.filter_by(LookupId = firstLookup.LookupId).order_by(LookupValue.Name):
+			choices.append((lookupValue.Value, lookupValue.Name))
+
+		form.defaultEndLookupValue.choices = choices
+		form.defaultStartLookupValue.choices = choices
 	else:
 		modelName = "Event Frame Attribute Template"
+		del form.defaultStartLookupValue
+		del form.defaultEndLookupValue
 		del form.lookup
 
 	# Add a new eventFrameAttributeTemplate
 	if form.validate_on_submit():
 		if lookup:
-			eventFrameAttributeTemplate = EventFrameAttributeTemplate(Description = form.description.data, EventFrameTemplateId = eventFrameTemplateId, 
-				Lookup = form.lookup.data, Name = form.name.data)
+			defaultEndValue = None if form.defaultEndLookupValue.data == -1 else form.defaultEndLookupValue.data
+			defaultStartValue = None if form.defaultStartLookupValue.data == -1 else form.defaultStartLookupValue.data
+			eventFrameAttributeTemplate = EventFrameAttributeTemplate(DefaultEndValue = defaultEndValue, DefaultStartValue = defaultStartValue,
+				Description = form.description.data, EventFrameTemplateId = eventFrameTemplateId, Lookup = form.lookup.data, Name = form.name.data)
 		else:
-			eventFrameAttributeTemplate = EventFrameAttributeTemplate(Description = form.description.data, EventFrameTemplateId = eventFrameTemplateId, 
-				Name = form.name.data, UnitOfMeasurement = form.unitOfMeasurement.data)
+			defaultEndValue = None if form.defaultEndValue.data is None else form.defaultEndValue.data,
+			defaultStartValue = None if form.defaultStartValue.data is None else form.defaultStartValue.data,
+			eventFrameAttributeTemplate = EventFrameAttributeTemplate(DefaultEndValue = defaultEndValue, DefaultStartValue = defaultStartValue,
+				Description = form.description.data, EventFrameTemplateId = eventFrameTemplateId, Name = form.name.data,
+				UnitOfMeasurement = form.unitOfMeasurement.data)
 
 		db.session.add(eventFrameAttributeTemplate)
 		db.session.commit()
@@ -41,7 +60,6 @@ def addEventFrameAttributeTemplate(eventFrameTemplateId, lookup = False):
 	if form.requestReferrer.data is None:
 		form.requestReferrer.data = request.referrer
 
-	eventFrameTemplate = EventFrameTemplate.query.get_or_404(eventFrameTemplateId)
 	if eventFrameTemplate.hasParent():
 		breadcrumbs = [{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Root"), "text" : "<span class = \"glyphicon glyphicon-home\"></span>"},
 			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Enterprise",
@@ -72,7 +90,7 @@ def addEventFrameAttributeTemplate(eventFrameTemplateId, lookup = False):
 				selectedId = eventFrameTemplate.EventFrameTemplateId, selectedOperation = "configure"),
 				"text" : eventFrameTemplate.Name}]
 
-	return render_template("addEdit.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
+	return render_template("eventFrameAttributeTemplates/addEdit.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
 
 @eventFrameAttributeTemplates.route("/eventFrameAttributeTemplates/delete/eventFrameAttributeTemplateId/<int:eventFrameAttributeTemplateId>",
 	methods = ["GET", "POST"])
@@ -97,9 +115,23 @@ def editEventFrameAttributeTemplate(eventFrameAttributeTemplateId):
 
 	if eventFrameAttributeTemplate.LookupId:
 		modelName = "Lookup Event Frame Attribute Template"
+		del form.defaultEndValue
+		del form.defaultStartValue
 		del form.unitOfMeasurement
+		lookupQuery = Lookup.query.filter_by(EnterpriseId = eventFrameAttributeTemplate.EventFrameTemplate.origin().ElementTemplate.Site.Enterprise.EnterpriseId).order_by(Lookup.Name)
+		form.lookup.query = lookupQuery
+		firstLookup = lookupQuery.first()
+		choices = []
+		choices.append((-1, ""))
+		for lookupValue in LookupValue.query.filter_by(LookupId = firstLookup.LookupId).order_by(LookupValue.Name):
+			choices.append((lookupValue.Value, lookupValue.Name))
+
+		form.defaultStartLookupValue.choices = choices
+		form.defaultEndLookupValue.choices = choices
 	else:
 		modelName = "Event Frame Attribute Template"
+		del form.defaultStartLookupValue
+		del form.defaultEndLookupValue
 		del form.lookup
 
 	# Edit an existing eventFrameAttributeTemplate.
@@ -108,8 +140,12 @@ def editEventFrameAttributeTemplate(eventFrameAttributeTemplateId):
 		eventFrameAttributeTemplate.Name = form.name.data
 
 		if eventFrameAttributeTemplate.LookupId:
+			eventFrameAttributeTemplate.DefaultEndValue = None if form.defaultEndLookupValue.data == -1 else form.defaultEndLookupValue.data
+			eventFrameAttributeTemplate.DefaultStartValue = None if form.defaultStartLookupValue.data == -1 else form.defaultStartLookupValue.data
 			eventFrameAttributeTemplate.Lookup = form.lookup.data
 		else:
+			eventFrameAttributeTemplate.DefaultEndValue = None if form.defaultEndValue.data is None else form.defaultEndValue.data,
+			eventFrameAttributeTemplate.DefaultStartValue = None if form.defaultStartValue.data is None else form.defaultStartValue.data,
 			eventFrameAttributeTemplate.UnitOfMeasurement = form.unitOfMeasurement.data
 
 		db.session.commit()
@@ -122,8 +158,12 @@ def editEventFrameAttributeTemplate(eventFrameAttributeTemplateId):
 	form.eventFrameTemplateId.data = eventFrameAttributeTemplate.EventFrameTemplateId
 	form.name.data = eventFrameAttributeTemplate.Name
 	if eventFrameAttributeTemplate.LookupId:
+		form.defaultEndLookupValue.data = eventFrameAttributeTemplate.DefaultEndValue
+		form.defaultStartLookupValue.data = eventFrameAttributeTemplate.DefaultStartValue
 		form.lookup.data = eventFrameAttributeTemplate.Lookup
 	else:
+		form.defaultEndValue.data = eventFrameAttributeTemplate.DefaultEndValue
+		form.defaultStartValue.data = eventFrameAttributeTemplate.DefaultStartValue
 		form.unitOfMeasurement.data = eventFrameAttributeTemplate.UnitOfMeasurement
 
 	if form.requestReferrer.data is None:

@@ -309,6 +309,8 @@ class EventFrameAttributeTemplate(db.Model):
 
 	EventFrameAttributeTemplateId = db.Column(db.Integer, primary_key = True)
 	Description = db.Column(db.String(255), nullable = True)
+	DefaultEndValue = db.Column(db.Float, nullable = True)
+	DefaultStartValue = db.Column(db.Float, nullable = True)
 	EventFrameTemplateId = db.Column(db.Integer, db.ForeignKey("EventFrameTemplate.EventFrameTemplateId", \
 		name = "FK__EventFrameTemplate$Have$EventFrameAttributeTemplate"), nullable = False)
 	LookupId = db.Column(db.Integer, db.ForeignKey("Lookup.LookupId", name = "FK__Lookup$CanBeUsedIn$EventFrameAttributeTemplate"), nullable = True)

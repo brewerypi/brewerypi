@@ -1,4 +1,4 @@
-from flask import flash, redirect, render_template, request, url_for
+from flask import flash, jsonify, redirect, render_template, request, url_for
 from flask_login import login_required
 from . import lookupValues
 from . forms import LookupValueForm
@@ -89,3 +89,14 @@ def editLookupValue(lookupValueId):
 		{"url" : url_for("lookups.selectLookup", selectedClass = "Lookup", selectedId = lookup.LookupId), "text" : lookup.Name},
 		{"url" : None, "text" : lookupValue.Name}]
 	return render_template("addEdit.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
+
+@lookupValues.route("/lookupValues/getValues/<int:lookupId>", methods = ["GET", "POST"])
+@login_required
+@adminRequired
+def getValues(lookupId):
+	lookup = Lookup.query.get_or_404(lookupId)
+	lookupValues = []
+	for lookupValue in lookup.LookupValues.order_by(LookupValue.Name):
+		lookupValues.append({"value": lookupValue.Value, "name": lookupValue.Name})
+
+	return jsonify(lookupValues)
