@@ -22,15 +22,24 @@ Tag Values
         {% elif eventFrame %}
             <li><a href = "{{ url_for("eventFrames.selectEventFrame", selectedClass = "Root") }}"><span class = "glyphicon glyphicon-home"></span></a></li>
             <li><a href = "{{ url_for("eventFrames.selectEventFrame", selectedClass = "Enterprise",
-                selectedId = eventFrame.Element.ElementTemplate.Site.Enterprise.EnterpriseId) }}">
-                {{ eventFrame.Element.ElementTemplate.Site.Enterprise.Name }}</a></li>
-            <li><a href = "{{ url_for("eventFrames.selectEventFrame", selectedClass = "Site", selectedId = eventFrame.Element.ElementTemplate.Site.SiteId) }}">
-                {{ eventFrame.Element.ElementTemplate.Site.Name }}</a></li>
+                selectedId = eventFrame.origin().Element.ElementTemplate.Site.Enterprise.EnterpriseId) }}">
+                {{ eventFrame.origin().Element.ElementTemplate.Site.Enterprise.Name }}</a></li>
+            <li><a href = "{{ url_for("eventFrames.selectEventFrame", selectedClass = "Site",
+                selectedId = eventFrame.origin().Element.ElementTemplate.Site.SiteId) }}">{{ eventFrame.origin().Element.ElementTemplate.Site.Name }}</a></li>
             <li><a href = "{{ url_for("eventFrames.selectEventFrame", selectedClass = "ElementTemplate",
-                selectedId = eventFrame.Element.ElementTemplate.ElementTemplateId) }}">{{ eventFrame.Element.ElementTemplate.Name }}</a></li>
+                selectedId = eventFrame.origin().Element.ElementTemplate.ElementTemplateId) }}">{{ eventFrame.origin().Element.ElementTemplate.Name }}</a></li>
             <li><a href = "{{ url_for("eventFrames.selectEventFrame", selectedClass = "EventFrameTemplate",
-                selectedId = eventFrame.EventFrameTemplate.EventFrameTemplateId) }}">{{ eventFrame.EventFrameTemplate.Name }}</a></li>
-            <li><a href = "{{ url_for("eventFrames.dashboard", eventFrameId = eventFrame.EventFrameId) }}">{{ eventFrame.Name }}</a></li>
+                selectedId = eventFrame.origin().EventFrameTemplate.EventFrameTemplateId) }}">{{ eventFrame.origin().EventFrameTemplate.Name }}</a></li>
+            {% set eventFrames = eventFrame.ancestors([]) %}
+            {% do eventFrames.append(eventFrame) %}
+            {% for eventFrame in eventFrames %}
+                {% if eventFrame.ParentEventFrameId == None %}
+                    <li><a href = "{{ url_for("eventFrames.dashboard", eventFrameId = eventFrame.EventFrameId) }}">{{ eventFrame.Name }}</a></li>
+                {% else %}
+                    <li><a href = "{{ url_for("eventFrames.dashboard", eventFrameId = eventFrame.EventFrameId) }}">
+                            {{ eventFrame.EventFrameTemplate.Name }}&nbsp;&nbsp;/&nbsp;&nbsp;{{ eventFrame.Name }}</a></li>
+                {% endif %}
+            {% endfor %}
             <li class = "active">{{ eventFrameAttribute.EventFrameAttributeTemplate.Name }}</li>
         {% else %}
             <li><a href = "{{ url_for("tags.selectTag", selectedClass = "Root") }}"><span class = "glyphicon glyphicon-home"></span></a></li>
