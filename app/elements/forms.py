@@ -8,7 +8,7 @@ class ElementForm(FlaskForm):
 	name = StringField("Name", validators = [Required(), Length(1, 45)])
 	description = StringField("Description", validators = [Length(0, 255)])
 	isManaged = BooleanField("Manage Tags", default = "checked")
-	area = QuerySelectField("Area", get_label = "Abbreviation")
+	area = QuerySelectField("Area", validators = [Required()], get_label = "Abbreviation")
 	elementId = HiddenField()
 	elementIdToCopy = HiddenField()
 	elementTemplateId = HiddenField()
