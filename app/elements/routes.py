@@ -16,12 +16,12 @@ def addElement(elementTemplateId):
 	operation = "Add"
 	form = ElementForm()
 	elementTemplate = ElementTemplate.query.get_or_404(elementTemplateId)
-	form.area.query = Area.query.filter_by(SiteId = elementTemplate.Site.SiteId)
+	form.area.query = Area.query.filter_by(SiteId = elementTemplate.Site.SiteId).order_by(Area.Name)
 
 	# Add a new element.
 	if form.validate_on_submit():
-		element = Element(Description = form.description.data, ElementTemplateId = form.elementTemplateId.data, IsManaged = form.isManaged.data, 
-			Name = form.name.data)
+		element = Element(Description = form.description.data, ElementTemplateId = form.elementTemplateId.data,
+			TagAreaId = form.area.data.AreaId if form.isManaged.data else None, Name = form.name.data)
 		db.session.add(element)
 		db.session.commit()
 		if form.isManaged.data:
@@ -161,15 +161,14 @@ def editElement(elementId):
 	operation = "Edit"
 	element = Element.query.get_or_404(elementId)
 	form = ElementForm(obj = element)
-	form.area.query = Area.query.filter_by(SiteId = element.ElementTemplate.Site.SiteId)
+	form.area.choices = [(area.AreaId, area.Name) for area in Area.query.filter_by(SiteId = element.ElementTemplate.Site.SiteId).order_by(Area.Name)]
 
 	# Edit an existing element.
 	if form.validate_on_submit():
 		element.Description = form.description.data
 		element.ElementTemplateId = form.elementTemplateId.data
-		element.IsManaged = form.isManaged.data
 		element.Name = form.name.data
-
+		element.TagAreaId = form.area.data if form.isManaged.data else None
 		db.session.commit()
 		flash("You have successfully edited the element \"{}\".".format(element.Name), "alert alert-success")
 		return redirect(form.requestReferrer.data)
@@ -178,8 +177,13 @@ def editElement(elementId):
 	form.elementId.data = element.ElementId
 	form.description.data = element.Description
 	form.elementTemplateId.data = element.ElementTemplateId
-	form.isManaged.data = element.IsManaged
 	form.name.data = element.Name
+	if element.TagAreaId is None:
+		form.isManaged.data = False
+	else:
+		form.isManaged.data = True
+		form.area.data = element.TagAreaId
+
 	if form.requestReferrer.data is None:
 		form.requestReferrer.data = request.referrer
 

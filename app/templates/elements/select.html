@@ -89,6 +89,7 @@ Data Entry - Elements
                 <th>Description</th>
                 {% if childrenClass == "Element" %}
                     <th>Tags Managed</th>
+                    <th>Managed Area</th>
                 {% elif childrenClass == "ElementAttributeTemplate" %}
                     <th>Lookup</th>
                     <th>Unit</th>
@@ -140,7 +141,8 @@ Data Entry - Elements
                                 <td></td>
                             {% endif %}
                         {% elif childrenClass == "Element" %}
-                            <td>{{ child.IsManaged | yesNo() }}</td>
+                            <td>{{ child.TagAreaId is not none | yesNo() }}</td>
+                            <td>{{ child.Area.Name }}</td>
                             {% if current_user.isAdministrator() %}
                                 <td><a class = "btn btn-default" title = "Associate Attributes with Tags"
                                     href = "{{ url_for("elementAttributes.listElementAttributes", elementId = child.ElementId) }}">
@@ -231,6 +233,7 @@ Data Entry - Elements
                     null,
                     null,
                     {% if childrenClass == "Element" %}
+                        null,
                         null,
                     {% elif childrenClass == "ElementAttributeTemplate" %}
                         null,

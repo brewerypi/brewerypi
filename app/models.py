@@ -27,6 +27,7 @@ class Area(db.Model):
 	Name = db.Column(db.String(45), nullable = False)
 	SiteId = db.Column(db.Integer, db.ForeignKey("Site.SiteId", name = "FK__Site$Have$Area"), nullable = False)
 
+	ManagedElements = db.relationship("Element", backref = "Area", lazy = "dynamic")
 	Tags = db.relationship("Tag", backref = "Area", lazy = "dynamic")
 
 	def __repr__(self):
@@ -52,8 +53,8 @@ class Element(db.Model):
 	ElementId = db.Column(db.Integer, primary_key = True)
 	Description = db.Column(db.String(255), nullable = True)
 	ElementTemplateId = db.Column(db.Integer, db.ForeignKey("ElementTemplate.ElementTemplateId", name = "FK__ElementTemplate$Have$Element"), nullable = False)
-	IsManaged = db.Column(db.Boolean, nullable = False)
 	Name = db.Column(db.String(45), nullable = False)
+	TagAreaId = db.Column(db.Integer, db.ForeignKey("Area.AreaId", name = "FK__Area$House$ManagedElementTag"), nullable = True)
 
 	ElementAttributes = db.relationship("ElementAttribute", backref = "Element", lazy = "dynamic")
 	EventFrameAttributes = db.relationship("EventFrameAttribute", backref = "Element", lazy = "dynamic")
