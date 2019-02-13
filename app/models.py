@@ -95,6 +95,10 @@ class Element(db.Model):
 		eventFrameAttributes = self.EventFrameAttributes
 		for eventFrameAttribute in eventFrameAttributes:
 			eventFrameAttribute.delete()
+		
+		# if self.IsManaged:
+		# 	tag = elementAttribute.Tag
+		# 	tag.delete()
 
 		db.session.delete(self)
 
@@ -116,7 +120,7 @@ class ElementAttribute(db.Model):
 
 	def delete(self):
 		db.session.delete(self)
-
+	
 	def id(self):
 		return self.ElementAttributeId
 
