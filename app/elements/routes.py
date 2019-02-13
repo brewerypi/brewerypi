@@ -16,7 +16,7 @@ def addElement(elementTemplateId):
 	operation = "Add"
 	form = ElementForm()
 	elementTemplate = ElementTemplate.query.get_or_404(elementTemplateId)
-	form.area.query = Area.query.filter_by(SiteId = elementTemplate.Site.SiteId).order_by(Area.Name)
+	form.area.choices = [(area.AreaId, area.Name) for area in Area.query.filter_by(SiteId = elementTemplate.Site.SiteId).order_by(Area.Name)]
 
 	# Add a new element.
 	if form.validate_on_submit():
