@@ -161,11 +161,13 @@ def editElement(elementId):
 	operation = "Edit"
 	element = Element.query.get_or_404(elementId)
 	form = ElementForm(obj = element)
+	form.area.query = Area.query.filter_by(SiteId = element.ElementTemplate.Site.SiteId)
 
 	# Edit an existing element.
 	if form.validate_on_submit():
 		element.Description = form.description.data
 		element.ElementTemplateId = form.elementTemplateId.data
+		element.IsManaged = form.isManaged.data
 		element.Name = form.name.data
 
 		db.session.commit()
@@ -176,6 +178,7 @@ def editElement(elementId):
 	form.elementId.data = element.ElementId
 	form.description.data = element.Description
 	form.elementTemplateId.data = element.ElementTemplateId
+	form.isManaged.data = element.IsManaged
 	form.name.data = element.Name
 	if form.requestReferrer.data is None:
 		form.requestReferrer.data = request.referrer
@@ -188,7 +191,7 @@ def editElement(elementId):
 		{"url" : url_for("elements.selectElement", selectedClass = "ElementTemplate", selectedId = element.ElementTemplate.ElementTemplateId),
 			"text" : element.ElementTemplate.Name},
 		{"url" : None, "text" : element.Name}]
-	return render_template("addEdit.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
+	return render_template("elements/addEdit.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
 
 @elements.route("/elements/select", methods = ["GET", "POST"]) # Default.
 @elements.route("/elements/select/<string:selectedClass>", methods = ["GET", "POST"]) # Root.

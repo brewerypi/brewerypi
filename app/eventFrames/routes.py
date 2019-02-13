@@ -45,6 +45,20 @@ def addEventFrame(eventFrameTemplateId = None, parentEventFrameId = None):
 
 		db.session.add(eventFrame)
 		db.session.commit()
+		count = 0
+		for eventFrameAttributeTemplate in eventFrame.EventFrameTemplate.EventFrameAttributeTemplates:
+			if eventFrameAttributeTemplate.DefaultStartValue is not None:
+				eventFrameAttribute = EventFrameAttribute.query.filter(EventFrame.ElementId == eventFrame.origin().ElementId,
+					EventFrameAttribute.EventFrameAttributeTemplateId == eventFrameAttributeTemplate.EventFrameAttributeTemplateId).one_or_none()
+				if eventFrameAttribute is not None:
+					tagValue = TagValue(TagId = eventFrameAttribute.TagId, Timestamp = form.startUtcTimestamp.data,
+						Value = eventFrameAttributeTemplate.DefaultStartValue)
+					db.session.add(tagValue)
+					count = count + 1
+
+		if count > 0:
+			db.session.commit()
+
 		flash("You have successfully added a new Event Frame.", "alert alert-success")
 		return redirect(form.requestReferrer.data)
 
@@ -224,6 +238,18 @@ def endEventFrame(eventFrameId):
 	eventFrame = EventFrame.query.get_or_404(eventFrameId)
 	eventFrame.EndTimestamp = datetime.utcnow()
 	db.session.commit()
+	count = 0
+	for eventFrameAttributeTemplate in eventFrame.EventFrameTemplate.EventFrameAttributeTemplates:
+		if eventFrameAttributeTemplate.DefaultEndValue is not None:
+			eventFrameAttribute = EventFrameAttribute.query.filter(EventFrame.ElementId == eventFrame.origin().ElementId,
+				EventFrameAttribute.EventFrameAttributeTemplateId == eventFrameAttributeTemplate.EventFrameAttributeTemplateId).one_or_none()
+			if eventFrameAttribute is not None:
+				tagValue = TagValue(TagId = eventFrameAttribute.TagId, Timestamp = eventFrame.EndTimestamp, Value = eventFrameAttributeTemplate.DefaultEndValue)
+				db.session.add(tagValue)
+				count = count + 1
+
+	if count > 0:
+		db.session.commit()
 	flash("You have successfully ended \"{}\" for event frame \"{}\".".format(eventFrame.EventFrameTemplate.Name, eventFrame.Name),
 		"alert alert-success")
 	return redirect(request.referrer)
@@ -451,15 +477,3 @@ def selectEventFrame(selectedClass = None, selectedId = None, months = None, sel
 
 	return render_template("eventFrames/select.html", children = children, childrenClass = childrenClass,
 		eventFrameAttributeTemplates = eventFrameAttributeTemplates, months = months, parent = parent)
-
-@eventFrames.route("/eventFrames/startEventFrame/<int:elementId>/<int:eventFrameTemplateId>", methods = ["GET", "POST"])
-@login_required
-@permissionRequired(Permission.DATA_ENTRY)
-def startEventFrame(elementId, eventFrameTemplateId):
-	eventFrame = EventFrame(ElementId = elementId, EndTimestamp = None, EventFrameTemplateId = eventFrameTemplateId, ParentEventFrameId = None,
-		StartTimestamp = datetime.utcnow())
-	db.session.add(eventFrame)
-	db.session.commit()
-	flash("You have successfully added a new \"" + eventFrame.EventFrameTemplate.Name + "\" for element \"" + eventFrame.origin().Element.Name + "\".",
-		"alert alert-success")
-	return redirect(request.referrer)

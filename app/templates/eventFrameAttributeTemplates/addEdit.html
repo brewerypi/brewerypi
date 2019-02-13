@@ -1,0 +1,49 @@
+{% extends "addEdit.html" %}
+
+{% block head %}
+    {{ super() }}
+    <meta id = "metaIsLookup" data-isLookup = "{{ false if form.lookup is none else true }}">
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <script>
+        function populateDefaultValuesList()
+        {
+            var lookupId = $("#lookup").val()
+            $.ajax(
+            {
+                type : "POST",
+                url : "/lookupValues/getValues/" + lookupId
+            }).done(function(lookupValues)
+            {
+                var selectDefaultStartLookupValue = $("#defaultStartLookupValue")
+                var selectDefaultEndLookupValue = $("#defaultEndLookupValue")
+                selectDefaultStartLookupValue.empty().append($("<option />").val(-1).text(""))
+                selectDefaultEndLookupValue.empty().append($("<option />").val(-1).text(""))
+                $.each(lookupValues, function(i)
+                {
+                    selectDefaultStartLookupValue.append($("<option />").val(lookupValues[i].value).text(lookupValues[i].name))
+                    selectDefaultEndLookupValue.append($("<option />").val(lookupValues[i].value).text(lookupValues[i].name))
+                })
+            }).fail(function()
+            {
+                $(".alert").remove()
+                $("#divFlashedMessages").append('<div class = "alert alert-danger"><button type = "button" class = "close" ' +
+                    'data-dismiss = "alert">&times;</button>The attempt to load the "Default Value" list has failed.</div>')                        
+            })
+        }
+
+        $(document).ready(function()
+        {
+            var isLookup = $("#metaIsLookup").attr("data-isLookup") == "True"
+            if (isLookup)
+            {
+                $("#lookup").on("change", function()
+                {
+                    populateDefaultValuesList()
+                })
+            }
+        })
+    </script>
+{% endblock %}
