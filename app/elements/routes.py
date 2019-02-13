@@ -21,7 +21,7 @@ def addElement(elementTemplateId):
 	# Add a new element.
 	if form.validate_on_submit():
 		element = Element(Description = form.description.data, ElementTemplateId = form.elementTemplateId.data,
-			TagAreaId = form.area.data.AreaId if form.isManaged.data else None, Name = form.name.data)
+			TagAreaId = form.area.data if form.isManaged.data else None, Name = form.name.data)
 		db.session.add(element)
 		db.session.commit()
 		if form.isManaged.data:
@@ -32,7 +32,7 @@ def addElement(elementTemplateId):
 			for elementAttributeTemplate in elementAttributeTemplates:
 				# Create tag
 				tagName = "{}_{}".format(form.name.data, elementAttributeTemplate.Name.replace(" ", ""))
-				tag = Tag(AreaId = form.area.data.AreaId, LookupId = elementAttributeTemplate.LookupId, Name = tagName, 
+				tag = Tag(AreaId = form.area.data, LookupId = elementAttributeTemplate.LookupId, Name = tagName, 
 					UnitOfMeasurementId = elementAttributeTemplate.UnitOfMeasurementId)
 				if Tag.exists(tag):
 					skippedTags.append(tagName)
