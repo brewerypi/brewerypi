@@ -57,7 +57,7 @@ Data Entry - Elements
         Toggle Column:
         <button type = "button" class = "btn btn-primary btn-xs" id = "buttonHideAllColumns">Hide All</button>
         {% for elementAttributeTemplate in parent.ElementAttributeTemplates %}
-            {% set dataColumnIndex = loop.index + 7 %}
+            {% set dataColumnIndex = loop.index + 9 %}
             <button type = "button" class = "btn btn-primary btn-xs" data-columnIndex = "{{ dataColumnIndex }}"
                 id = "buttonToggleColumn{{ elementAttributeTemplate.Name }}">{{ elementAttributeTemplate.Name }}</button>
         {% endfor %}
@@ -272,7 +272,7 @@ Data Entry - Elements
             {
                 table.columns().every(function ()
                 {
-                    if (this.index() > 7)
+                    if (this.index() > 9)
                     {
                         this.visible(false)
                         $(".btn.btn-primary.btn-xs[data-columnIndex = " + this.index() + "]").removeClass("active")
@@ -284,7 +284,7 @@ Data Entry - Elements
             {
                 table.columns().every(function ()
                 {
-                    if (this.index() > 7)
+                    if (this.index() > 9)
                     {
                         this.visible(true)
                         $(".btn.btn-primary.btn-xs[data-columnIndex = " + this.index() + "]").addClass("active")
