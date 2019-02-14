@@ -106,6 +106,9 @@ class Element(db.Model):
 	def id(self):
 		return self.ElementId
 
+	def isManaged(self):
+		return True if self.TagAreaId is not None else False
+
 class ElementAttribute(db.Model):
 	__tablename__ = "ElementAttribute"
 	__table_args__ = \
