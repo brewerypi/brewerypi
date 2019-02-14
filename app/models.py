@@ -471,7 +471,7 @@ class Lookup(db.Model):
 		return self.LookupId
 
 	def isReferenced(self):
-		return Tag.query.filter_by(LookupId = self.LookupId).count() > 0
+		return self.Tags.count() > 0
 
 class LookupValue(db.Model):
 	__tablename__ = "LookupValue"
@@ -631,6 +631,9 @@ class Tag(db.Model):
 	def id(self):
 		return self.TagId
 
+	def isReferenced(self):
+		return self.ElementAttributes.count() > 0 or self.EventFrameAttributes.count() > 0
+
 class TagValue(db.Model):
 	__tablename__ = "TagValue"
 	__table_args__ = \
@@ -699,7 +702,7 @@ class UnitOfMeasurement(db.Model):
 		return self.UnitOfMeasurementId
 
 	def isReferenced(self):
-		return Tag.query.filter_by(UnitOfMeasurementId = self.UnitOfMeasurementId).count() > 0
+		return self.Tags.count() > 0
 
 class User(UserMixin, db.Model):
 	__tablename__ = "User"
