@@ -97,10 +97,6 @@ class Element(db.Model):
 		for eventFrameAttribute in eventFrameAttributes:
 			eventFrameAttribute.delete()
 		
-		# if self.IsManaged:
-		# 	tag = elementAttribute.Tag
-		# 	tag.delete()
-
 		db.session.delete(self)
 
 	def id(self):
@@ -620,10 +616,7 @@ class Tag(db.Model):
 		db.session.delete(self)
 
 	def exists(self):
-		if Tag.query.filter_by(Name = self.Name, AreaId = self.AreaId).scalar():
-			return True
-		else:
-			return False
+		return Tag.query.filter_by(Name = self.Name, AreaId = self.AreaId).scalar()
 
 	def fullAbbreviatedPathName(self):
 		return "{}_{}_{}_{}".format(self.Area.Site.Enterprise.Abbreviation, self.Area.Site.Abbreviation, self.Area.Abbreviation, self.Name)
