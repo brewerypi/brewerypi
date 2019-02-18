@@ -24,35 +24,40 @@ def addElement(elementTemplateId):
 			TagAreaId = form.area.data if form.isManaged.data else None, Name = form.name.data)
 		db.session.add(element)
 		db.session.commit()
+
+		# Add tags and element attributes
 		if form.isManaged.data:
 			elementAttributeTemplates = ElementAttributeTemplate.query.filter_by(ElementTemplateId = element.ElementTemplateId).all()
 			addedTags = []
 			skippedTags = []
 			addedElementAttributes = []
+
 			for elementAttributeTemplate in elementAttributeTemplates:
-				# Create tag
 				tagName = "{}_{}".format(form.name.data, elementAttributeTemplate.Name.replace(" ", ""))
 				tag = Tag(AreaId = form.area.data, LookupId = elementAttributeTemplate.LookupId, Name = tagName, 
 					UnitOfMeasurementId = elementAttributeTemplate.UnitOfMeasurementId)
-				if Tag.exists(tag):
+
+				if tag.exists():
 					skippedTags.append(tagName)
 					tag = Tag.query.filter_by(AreaId = tag.AreaId, Name = tag.Name).one()
 				else:
 					addedTags.append(tagName)
 					db.session.add(tag)
 					db.session.commit()
-				# Create Element Attribute
+
 				elementAttribute = ElementAttribute(ElementAttributeTemplateId = elementAttributeTemplate.ElementAttributeTemplateId, 
 					ElementId = element.ElementId, TagId = tag.TagId)
 				addedElementAttributes.append(elementAttributeTemplate.Name)
 				db.session.add(elementAttribute)
 				db.session.commit()
+
 			if skippedTags:
 				flash("The following tags already exist: {}.".format(skippedTags), "alert alert-warning")
 			if addedTags:
 				flash("The following tags were created: {}.".format(addedTags), "alert alert-success")
 			if addedElementAttributes:
 				flash("The following element attributes were bound to tags: {}.".format(addedElementAttributes), "alert alert-success")
+
 		flash("You have successfully added the new element \"{}\".".format(element.Name), "alert alert-success")
 		return redirect(form.requestReferrer.data)
 
@@ -149,8 +154,23 @@ def dashboard(elementId):
 @adminRequired
 def deleteElement(elementId):
 	element = Element.query.get_or_404(elementId)
+
+	# Get managed tag id's
+	tagIds = []
+	if element.isManaged():
+		tagIds = [elementAttribute.TagId for elementAttribute in element.ElementAttributes]
+
 	element.delete()
+
+	# Delete unreferenced tags
+	if tagIds:
+		tags = Tag.query.filter(Tag.TagId.in_(tagIds))
+		for tag in tags:
+			if not tag.isReferenced():
+				tag.delete()
+
 	db.session.commit()
+
 	flash("You have successfully deleted the element \"{}\".".format(element.Name), "alert alert-success")
 	return redirect(request.referrer)
 
