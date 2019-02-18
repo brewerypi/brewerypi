@@ -37,7 +37,7 @@ def addElement(elementTemplateId):
 				tag = Tag(AreaId = form.area.data, LookupId = elementAttributeTemplate.LookupId, Name = tagName, 
 					UnitOfMeasurementId = elementAttributeTemplate.UnitOfMeasurementId)
 
-				if Tag.exists(tag):
+				if tag.exists():
 					skippedTags.append(tagName)
 					tag = Tag.query.filter_by(AreaId = tag.AreaId, Name = tag.Name).one()
 				else:
@@ -154,12 +154,22 @@ def dashboard(elementId):
 @adminRequired
 def deleteElement(elementId):
 	element = Element.query.get_or_404(elementId)
+
+	# Get managed tag id's
+	tagIds = []
+	if element.isManaged():
+		tagIds = [elementAttribute.TagId for elementAttribute in element.ElementAttributes]
+
 	element.delete()
-	db.session.commit()
 
 	# Delete unreferenced tags
-	# if element.isManaged:
-	# 	tags = Tag.query.filter()
+	if tagIds:
+		tags = Tag.query.filter(Tag.TagId.in_(tagIds))
+		for tag in tags:
+			if not tag.isReferenced():
+				tag.delete()
+
+	db.session.commit()
 
 	flash("You have successfully deleted the element \"{}\".".format(element.Name), "alert alert-success")
 	return redirect(request.referrer)
