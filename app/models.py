@@ -624,6 +624,17 @@ class Tag(db.Model):
 	def id(self):
 		return self.TagId
 
+	def isManaged(self):
+		for elementAttribute in self.ElementAttributes:
+			if elementAttribute.Element.isManaged():
+				return True
+
+		for eventFrameAttribute in self.EventFrameAttributes:
+			if eventFrameAttribute.Element.isManaged():
+				return True
+
+		return False
+
 	def isReferenced(self):
 		return self.ElementAttributes.count() > 0 or self.EventFrameAttributes.count() > 0
 
