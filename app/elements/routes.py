@@ -155,19 +155,20 @@ def dashboard(elementId):
 def deleteElement(elementId):
 	element = Element.query.get_or_404(elementId)
 
-	# Get managed tag id's
-	tagIds = []
+	# Get managed tags
+	tags = []
 	if element.isManaged():
-		tagIds = [elementAttribute.TagId for elementAttribute in element.ElementAttributes]
+		for elementAttribute in element.ElementAttributes:
+			tags.append(Tag.query.get_or_404(elementAttribute.TagId))
+		for eventFrameAttribute in element.EventFrameAttributes:
+			tags.append(Tag.query.get_or_404(eventFrameAttribute.TagId))
 
 	element.delete()
 
 	# Delete unreferenced tags
-	if tagIds:
-		tags = Tag.query.filter(Tag.TagId.in_(tagIds))
-		for tag in tags:
-			if not tag.isReferenced():
-				tag.delete()
+	for tag in tags:
+		if not tag.isReferenced():
+			tag.delete()
 
 	db.session.commit()
 
