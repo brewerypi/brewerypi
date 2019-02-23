@@ -4,6 +4,7 @@ from flask import current_app, flash, jsonify, redirect, render_template, reques
 from flask_login import login_required
 from . import eventFrames
 from . forms import EventFrameForm, EventFrameOverlayForm
+from . helpers import currentEventFrameAttributeValues
 from .. import db
 from .. decorators import permissionRequired
 from .. models import Element, ElementTemplate, Enterprise, EventFrame, EventFrameAttribute, EventFrameAttributeTemplate, EventFrameTemplate, Lookup, \
@@ -271,67 +272,7 @@ def overlayBuilder(eventFrameTemplateId):
 
 		eventFrames = EventFrame.query.filter(EventFrame.EventFrameTemplateId == eventFrameTemplateId, EventFrame.StartTimestamp >= startTimestamp,
 			EventFrame.StartTimestamp <= endTimestamp)
-
-		eventFrameIds = ""
-		for eventFrame in eventFrames:
-			if eventFrameIds != "":
-				eventFrameIds = eventFrameIds + ","
-			eventFrameIds = eventFrameIds + str(eventFrame.EventFrameId)
-
-		dynamicColumns = ""
-		eventFrameAttributeTemplates = EventFrameAttributeTemplate.query.filter_by(EventFrameTemplateId = eventFrameTemplateId). \
-			order_by(EventFrameAttributeTemplate.Name)
-		for eventFrameAttributeTemplate in eventFrameAttributeTemplates:
-			dynamicColumns = dynamicColumns + \
-				", MAX(IF(EventFrameAttributeTemplate.Name = '{}', IF(Tag.LookupId IS NULL, TagValue.Value, LookupValue.Name), '')) AS '{}'". \
-				format(eventFrameAttributeTemplate.Name, eventFrameAttributeTemplate.Name)
-
-		query = """
-		SELECT EventFrame.EventFrameId,
-			EventFrame.Name,
-			Element.Name AS Element,
-			EventFrame.StartTimestamp,
-            EventFrame.EndTimestamp {}
-		FROM EventFrame
-			INNER JOIN Element ON EventFrame.ElementId = Element.ElementId
-			INNER JOIN EventFrameTemplate ON EventFrame.EventFrameTemplateId = EventFrameTemplate.EventFrameTemplateId
-			INNER JOIN EventFrameAttributeTemplate ON EventFrameTemplate.EventFrameTemplateId = EventFrameAttributeTemplate.EventFrameTemplateId
-			LEFT JOIN EventFrameAttribute ON EventFrameAttributeTemplate.EventFrameAttributeTemplateId = EventFrameAttribute.EventFrameAttributeTemplateId AND
-				Element.ElementId = EventFrameAttribute.ElementId
-			INNER JOIN
-			(
-				SELECT EventFrame.EventFrameId AS EventFrameId,
-					EventFrameAttributeTemplate.Name AS EventFrameAttributeTemplateName,
-					MAX(TagValue.Timestamp) AS Timestamp
-				FROM EventFrame
-					INNER JOIN Element ON EventFrame.ElementId = Element.ElementId
-					INNER JOIN EventFrameTemplate ON EventFrame.EventFrameTemplateId = EventFrameTemplate.EventFrameTemplateId
-					INNER JOIN EventFrameAttributeTemplate ON EventFrameTemplate.EventFrameTemplateId = EventFrameAttributeTemplate.EventFrameTemplateId
-					LEFT JOIN EventFrameAttribute ON EventFrameAttributeTemplate.EventFrameAttributeTemplateId = EventFrameAttribute.EventFrameAttributeTemplateId AND
-						Element.ElementId = EventFrameAttribute.ElementId
-					LEFT JOIN Tag ON EventFrameAttribute.TagId = Tag.TagId
-					LEFT JOIN TagValue ON Tag.TagId = TagValue.TagId AND
-						CASE
-							WHEN EventFrame.EndTimestamp IS NULL THEN
-								(TagValue.Timestamp >= EventFrame.StartTimestamp)
-							ELSE
-								(TagValue.Timestamp >= EventFrame.StartTimestamp AND TagValue.Timestamp <= EventFrame.EndTimestamp)
-						END
-				WHERE EventFrame.EventFrameId IN ({})
-				GROUP BY EventFrameId,
-					EventFrameAttributeTemplateName
-			) CurrentEventFrameAttributeValues ON EventFrame.EventFrameId = CurrentEventFrameAttributeValues.EventFrameId AND
-				EventFrameAttributeTemplate.Name = CurrentEventFrameAttributeValues.EventFrameAttributeTemplateName
-			LEFT JOIN Tag ON EventFrameAttribute.TagId = Tag.TagId
-			LEFT JOIN TagValue ON Tag.TagId = TagValue.TagId AND
-				TagValue.Timestamp = CurrentEventFrameAttributeValues.Timestamp
-			LEFT JOIN Lookup ON Tag.LookupId = Lookup.LookupId
-			LEFT JOIN LookupValue ON Lookup.LookupId = LookupValue.LookupId AND
-				TagValue.Value = LookupValue.Value
-		WHERE EventFrame.EventFrameId IN ({})
-		GROUP BY EventFrame.EventFrameId
-		""".format(dynamicColumns, eventFrameIds, eventFrameIds)
-		eventFrames = db.session.execute(query).fetchall()
+		eventFrames = currentEventFrameAttributeValues(eventFrames, eventFrameTemplateId)
 		return render_template("eventFrames/overlayBuilder.html", endTimestamp = endTimestamp, eventFrames = eventFrames,
 			eventFrameAttributeTemplates = eventFrameAttributeTemplates, eventFrameTemplate = eventFrameTemplate,
 			grafanaBaseUri = current_app.config["GRAFANA_BASE_URI"], startTimestamp = startTimestamp)
@@ -382,11 +323,11 @@ def days():
 			WHERE EventFrame.EventFrameId IN ({})
 			GROUP BY EventFrameId,
 				EventFrameAttributeTemplateName
-		) CurrentEventFrameAttributeValues ON EventFrame.EventFrameId = CurrentEventFrameAttributeValues.EventFrameId AND
-			EventFrameAttributeTemplate.Name = CurrentEventFrameAttributeValues.EventFrameAttributeTemplateName
+		) CurrentEventFrameAttributeValue ON EventFrame.EventFrameId = CurrentEventFrameAttributeValue.EventFrameId AND
+			EventFrameAttributeTemplate.Name = CurrentEventFrameAttributeValue.EventFrameAttributeTemplateName
 		LEFT JOIN Tag ON EventFrameAttribute.TagId = Tag.TagId
 		LEFT JOIN TagValue ON Tag.TagId = TagValue.TagId AND
-			TagValue.Timestamp = CurrentEventFrameAttributeValues.Timestamp
+			TagValue.Timestamp = CurrentEventFrameAttributeValue.Timestamp
 		LEFT JOIN Lookup ON Tag.LookupId = Lookup.LookupId
 		LEFT JOIN LookupValue ON Lookup.LookupId = LookupValue.LookupId AND
 			TagValue.Value = LookupValue.Value
@@ -449,30 +390,8 @@ def selectEventFrame(selectedClass = None, selectedId = None, months = None, sel
 			children = EventFrame.query.filter(EventFrame.EventFrameTemplateId == selectedId, EventFrame.StartTimestamp >= fromTimestamp,
 				EventFrame.StartTimestamp <= toTimestamp)
 
-		eventFrameIds = ""
-		for child in children:
-			if eventFrameIds != "":
-				eventFrameIds = eventFrameIds + ","
-			eventFrameIds = eventFrameIds + str(child.EventFrameId)
-
-		eventFrameAttributeTemplates = parent.EventFrameAttributeTemplates.order_by(EventFrameAttributeTemplate.Name)
-		eventFrameAttributeTemplateIds = ""
-		for eventFrameAttributeTemplate in eventFrameAttributeTemplates:
-			if eventFrameAttributeTemplateIds != "":
-				eventFrameAttributeTemplateIds = eventFrameAttributeTemplateIds + ","
-			eventFrameAttributeTemplateIds = eventFrameAttributeTemplateIds + str(eventFrameAttributeTemplate.EventFrameAttributeTemplateId)
-
-		if eventFrameIds != "" and eventFrameAttributeTemplateIds != "":
-			connection = db.engine.raw_connection()
-			try:
-				cursor = connection.cursor()
-				cursor.callproc("spCurrentEventFrameAttributeValues", [eventFrameIds, eventFrameAttributeTemplateIds])
-				children = cursor.fetchall()
-				cursor.close()
-				connection.commit()
-			finally:
-				connection.close()
-
+		eventFrameAttributeTemplates = EventFrameAttributeTemplate.query.filter_by(EventFrameTemplateId = selectedId).order_by(EventFrameAttributeTemplate.Name)
+		children = currentEventFrameAttributeValues(children, selectedId)
 		childrenClass = "EventFrame"
 
 	return render_template("eventFrames/select.html", children = children, childrenClass = childrenClass,
