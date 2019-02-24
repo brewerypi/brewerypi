@@ -28,9 +28,9 @@ def addElement(elementTemplateId):
 		# Add tags and element attributes
 		if form.isManaged.data:
 			elementAttributeTemplates = ElementAttributeTemplate.query.filter_by(ElementTemplateId = element.ElementTemplateId).all()
-			addedTags = []
-			skippedTags = []
-			addedElementAttributes = []
+			createdTags = []
+			updatedTags = []
+			createdElementAttributes = []
 
 			for elementAttributeTemplate in elementAttributeTemplates:
 				tagName = "{}_{}".format(form.name.data, elementAttributeTemplate.Name.replace(" ", ""))
@@ -38,27 +38,59 @@ def addElement(elementTemplateId):
 					UnitOfMeasurementId = elementAttributeTemplate.UnitOfMeasurementId)
 
 				if tag.exists():
-					skippedTags.append(tagName)
 					tag = Tag.query.filter_by(AreaId = tag.AreaId, Name = tag.Name).one()
+					updatedTags.append(tag)
 				else:
-					addedTags.append(tagName)
 					db.session.add(tag)
 					db.session.commit()
+					createdTags.append(tag)
 
 				elementAttribute = ElementAttribute(ElementAttributeTemplateId = elementAttributeTemplate.ElementAttributeTemplateId, 
 					ElementId = element.ElementId, TagId = tag.TagId)
-				addedElementAttributes.append(elementAttributeTemplate.Name)
 				db.session.add(elementAttribute)
 				db.session.commit()
-
-			if skippedTags:
-				flash("The following tags already exist: {}.".format(skippedTags), "alert alert-warning")
-			if addedTags:
-				flash("The following tags were created: {}.".format(addedTags), "alert alert-success")
-			if addedElementAttributes:
-				flash("The following element attributes were bound to tags: {}.".format(addedElementAttributes), "alert alert-success")
+				createdElementAttributes.append(elementAttribute)
 
 		flash("You have successfully added the new element \"{}\".".format(element.Name), "alert alert-success")
+		createdTagsMessage = ""
+		if createdTags:
+			createdTags.sort(key = lambda tag: tag.Name)
+			for tag in createdTags:
+				if createdTagsMessage == "":
+					createdTagsMessage = 'Created the following tag(s):<br>"{}"'.format(tag.Name)
+					alert = "alert alert-success"
+				else:
+					createdTagsMessage = '{}<br>"{}"'.format(createdTagsMessage, tag.Name)
+
+			flash(createdTagsMessage, alert)
+
+		updatedTagsMessage = ""
+		if updatedTags:
+			updatedTags.sort(key = lambda tag: tag.Name)
+			for tag in updatedTags:
+				if updatedTagsMessage == "":
+					updatedTagsMessage = 'Updated the following existing tag(s), if needed:<br>"{}"'.format(tag.Name)
+					alert = "alert alert-warning"
+				else:
+					updatedTagsMessage = '{}<br>"{}"'.format(updatedTagsMessage, tag.Name)
+
+			flash(updatedTagsMessage, alert)
+
+		createdElementAttributesMessage = ""
+		if createdElementAttributes:
+			createdElementAttributes.sort(key = lambda tag: tag.Element.Name)
+			for elementAttribute in createdElementAttributes:
+				if createdElementAttributesMessage == "":
+					createdElementAttributesMessage = "Created the following element attribute(s):<br>Element: " + \
+						'"{}" attribute: "{}" associated with tag: "{}"'.format(elementAttribute.Element.Name, elementAttribute.ElementAttributeTemplate.Name,
+						elementAttribute.Tag.Name)
+					alert = "alert alert-success"
+				else:
+					createdElementAttributesMessage = '{}<br>Element: "{}" attribute: "{}" associated with tag: "{}"'.format(createdElementAttributesMessage,
+						elementAttribute.Element.Name, elementAttribute.ElementAttributeTemplate.Name, elementAttribute.Tag.Name)
+
+			flash(createdElementAttributesMessage, alert)
+
 		return redirect(form.requestReferrer.data)
 
 	# Present a form to add a new element.

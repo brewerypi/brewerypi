@@ -93,8 +93,9 @@ def addElementAttributeTemplate(elementTemplateId, lookup = False):
 			createdElementAttributes.sort(key = lambda tag: tag.Element.Name)
 			for elementAttribute in createdElementAttributes:
 				if createdElementAttributesMessage == "":
-					createdElementAttributesMessage = 'Created the following element attribute(s):<br>Element: "{}" attribute: "{}" associated with tag: "{}"'. \
-						format(elementAttribute.Element.Name, elementAttribute.ElementAttributeTemplate.Name, elementAttribute.Tag.Name)
+					createdElementAttributesMessage = "Created the following element attribute(s):<br>Element: " + \
+						'{}" attribute: "{}" associated with tag: "{}"'.format(elementAttribute.Element.Name, elementAttribute.ElementAttributeTemplate.Name,
+						elementAttribute.Tag.Name)
 					alert = "alert alert-success"
 				else:
 					createdElementAttributesMessage = '{}<br>Element: "{}" attribute: "{}" associated with tag: "{}"'.format(createdElementAttributesMessage,
