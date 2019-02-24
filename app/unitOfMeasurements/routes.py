@@ -46,6 +46,7 @@ def addDefaultUnitsOfMeasurements():
 		"cells/ml" : "cells per milliliter",
 		"cells/ml/°P" : "cells per ml per degree plato",
 		"°C" : "degree celsius",
+		"°P" : "degree plato",
 		"°F" : "degree fahrenheit",
 		"°F/min" : "degree fahrenheit per minute",
 		"EBC" : "european brewery convention",
