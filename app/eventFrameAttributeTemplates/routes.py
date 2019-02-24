@@ -169,7 +169,8 @@ def deleteEventFrameAttributeTemplate(eventFrameAttributeTemplateId):
 	eventFrameAttributeTemplate = EventFrameAttributeTemplate.query.get_or_404(eventFrameAttributeTemplateId)
 	tags = []
 	for eventFrameAttribute in eventFrameAttributeTemplate.EventFrameAttributes:
-		tags.append(eventFrameAttribute.Tag)
+		if eventFrameAttribute.Element.isManaged():
+			tags.append(eventFrameAttribute.Tag)
 
 	eventFrameAttributeTemplate.delete()
 	db.session.commit()

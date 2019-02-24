@@ -186,25 +186,31 @@ def dashboard(elementId):
 @adminRequired
 def deleteElement(elementId):
 	element = Element.query.get_or_404(elementId)
-
-	# Get managed tags
 	tags = []
 	if element.isManaged():
 		for elementAttribute in element.ElementAttributes:
-			tags.append(Tag.query.get_or_404(elementAttribute.TagId))
+			tags.append(elementAttribute.Tag)
 		for eventFrameAttribute in element.EventFrameAttributes:
-			tags.append(Tag.query.get_or_404(eventFrameAttribute.TagId))
+			tags.append(eventFrameAttribute.Tag)
 
 	element.delete()
-
-	# Delete unreferenced tags
+	db.session.commit()
+	flash('You have successfully deleted the element "{}".'.format(element.Name), "alert alert-success")
+	deletedTagsMessage = ""
+	tags.sort(key = lambda tag: tag.Name)
 	for tag in tags:
 		if not tag.isReferenced():
 			tag.delete()
+			if deletedTagsMessage == "":
+				deletedTagsMessage = 'Deleted the following tag(s):<br>"{}"'.format(tag.Name)
+			else:
+				deletedTagsMessage = '{}<br>"{}"'.format(deletedTagsMessage, tag.Name)
 
 	db.session.commit()
+	if deletedTagsMessage != "":
+		alert = "alert alert-success"
+		flash(deletedTagsMessage, alert)
 
-	flash("You have successfully deleted the element \"{}\".".format(element.Name), "alert alert-success")
 	return redirect(request.referrer)
 
 @elements.route("/elements/edit/<int:elementId>", methods = ["GET", "POST"])

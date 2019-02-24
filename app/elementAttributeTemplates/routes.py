@@ -127,7 +127,8 @@ def deleteElementAttributeTemplate(elementAttributeTemplateId):
 	elementAttributeTemplate = ElementAttributeTemplate.query.get_or_404(elementAttributeTemplateId)
 	tags = []
 	for elementAttribute in elementAttributeTemplate.ElementAttributes:
-		tags.append(elementAttribute.Tag)
+		if elementAttribute.Element.isManaged():
+			tags.append(elementAttribute.Tag)
 
 	elementAttributeTemplate.delete()
 	db.session.commit()
