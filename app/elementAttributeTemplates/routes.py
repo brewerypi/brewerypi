@@ -24,9 +24,6 @@ def addElementAttributeTemplate(elementTemplateId, lookup = False):
 
 	# Add a new elementAttributeTemplate.
 	if form.validate_on_submit():
-		createdTags = []
-		updatedTags = []
-		createdElementAttributes = []
 		if lookup:
 			elementAttributeTemplate = ElementAttributeTemplate(Description = form.description.data, ElementTemplateId = form.elementTemplateId.data, \
 				Lookup = form.lookup.data, Name = form.name.data)
@@ -37,6 +34,9 @@ def addElementAttributeTemplate(elementTemplateId, lookup = False):
 		db.session.add(elementAttributeTemplate)
 		db.session.commit()
 		flash('You have successfully added the new element attribute template "{}".'.format(elementAttributeTemplate.Name), "alert alert-success")
+		createdTags = []
+		updatedTags = []
+		createdElementAttributes = []
 		for element in elementTemplate.Elements:
 			if element.isManaged():
 				# Tag management.
@@ -165,10 +165,6 @@ def editElementAttributeTemplate(elementAttributeTemplateId):
 
 	# Edit an existing elementAttributeTemplate.
 	if form.validate_on_submit():
-		createdTags = []
-		updatedTags = []
-		createdElementAttributes = []
-		updatedElementAttributes = []
 		oldElementAttributeTemplateName = elementAttributeTemplate.Name
 		elementAttributeTemplate.Description = form.description.data
 		elementAttributeTemplate.ElementTemplateId = form.elementTemplateId.data
@@ -181,6 +177,10 @@ def editElementAttributeTemplate(elementAttributeTemplateId):
 
 		db.session.commit()
 		flash('You have successfully edited the element attribute template "{}".'.format(elementAttributeTemplate.Name), "alert alert-success")
+		createdTags = []
+		updatedTags = []
+		createdElementAttributes = []
+		updatedElementAttributes = []
 		for element in elementAttributeTemplate.ElementTemplate.Elements:
 			if element.isManaged():
 				# Tag management.
