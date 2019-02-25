@@ -228,6 +228,23 @@ def editElement(elementId):
 		element.ElementTemplateId = form.elementTemplateId.data
 		element.Name = form.name.data
 		element.TagAreaId = form.area.data if form.isManaged.data else None
+
+		# Edit tags.
+		if form.isManaged.data:
+			elementAttributes = ElementAttribute.query.filter_by(ElementId = element.ElementId)
+			for elementAttribute in elementAttributes:
+				tag = Tag.query.filter_by(TagId = elementAttribute.TagId).one()
+				elementAttributeTemplate = ElementAttributeTemplate.query.filter_by(ElementAttributeTemplateId = elementAttribute.ElementAttributeTemplateId).one()
+				tagName = "{}_{}".format(form.name.data, elementAttributeTemplate.Name.replace(" ", ""))
+				tag.Name = tagName
+
+			eventFrameAttributes = EventFrameAttribute.query.filter_by(ElementId = element.ElementId)
+			for eventFrameAttribute in eventFrameAttributes:
+				tag = Tag.query.filter_by(TagId = eventFrameAttribute.TagId).one()
+				eventFrameAttributeTemplate = EventFrameAttributeTemplate.query.filter_by(EventFrameAttributeTemplateId = eventFrameAttribute.EventFrameAttributeTemplateId).one()
+				tagName = "{}_{}".format(form.name.data, eventFrameAttributeTemplate.Name.replace(" ", ""))
+				tag.Name = tagName
+
 		db.session.commit()
 		flash("You have successfully edited the element \"{}\".".format(element.Name), "alert alert-success")
 		return redirect(form.requestReferrer.data)
