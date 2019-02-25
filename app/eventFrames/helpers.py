@@ -8,6 +8,9 @@ def currentEventFrameAttributeValues(eventFrames, eventFrameTemplateId):
             eventFrameIds = eventFrameIds + ","
         eventFrameIds = eventFrameIds + str(eventFrame.EventFrameId)
 
+    if eventFrameIds == "":
+        return None
+
     dynamicColumns = ""
     eventFrameAttributeTemplates = EventFrameAttributeTemplate.query.filter_by(EventFrameTemplateId = eventFrameTemplateId). \
         order_by(EventFrameAttributeTemplate.Name)
