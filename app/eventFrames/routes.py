@@ -242,7 +242,7 @@ def endEventFrame(eventFrameId):
 	count = 0
 	for eventFrameAttributeTemplate in eventFrame.EventFrameTemplate.EventFrameAttributeTemplates:
 		if eventFrameAttributeTemplate.DefaultEndValue is not None:
-			eventFrameAttribute = EventFrameAttribute.query.filter(EventFrame.ElementId == eventFrame.origin().ElementId,
+			eventFrameAttribute = EventFrameAttribute.query.filter(EventFrameAttribute.ElementId == eventFrame.origin().ElementId,
 				EventFrameAttribute.EventFrameAttributeTemplateId == eventFrameAttributeTemplate.EventFrameAttributeTemplateId).one_or_none()
 			if eventFrameAttribute is not None:
 				tagValue = TagValue(TagId = eventFrameAttribute.TagId, Timestamp = eventFrame.EndTimestamp, Value = eventFrameAttributeTemplate.DefaultEndValue)
