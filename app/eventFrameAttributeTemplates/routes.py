@@ -378,11 +378,11 @@ def editEventFrameAttributeTemplate(eventFrameAttributeTemplateId):
 				selectedId = eventFrameAttributeTemplate.EventFrameTemplate.origin().ElementTemplate.ElementTemplateId),
 				"text" : eventFrameAttributeTemplate.EventFrameTemplate.origin().ElementTemplate.Name}]
 		for eventFrameTemplateAcestor in eventFrameAttributeTemplate.EventFrameTemplate.ancestors([]):
-			breadcrumbs.append({"url" : url_for("eventFrames.selectEventFrame", selectedClass = "EventFrame",
-				selectedId = eventFrameTemplateAcestor.EventFrameTemplateId), "text" : eventFrameTemplateAcestor.Name})
+			breadcrumbs.append({"url" : url_for("eventFrames.selectEventFrame", selectedClass = "EventFrameTemplate",
+				selectedId = eventFrameTemplateAcestor.EventFrameTemplateId, selectedOperation = "configure"), "text" : eventFrameTemplateAcestor.Name})
 
-		breadcrumbs.extend([{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "EventFrame",
-			selectedId = eventFrameAttributeTemplate.EventFrameTemplate.EventFrameTemplateId),
+		breadcrumbs.extend([{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "EventFrameTemplate",
+			selectedId = eventFrameAttributeTemplate.EventFrameTemplate.EventFrameTemplateId, selectedOperation = "configure"),
 			"text" : eventFrameAttributeTemplate.EventFrameTemplate.Name}, {"url" : None, "text" : eventFrameAttributeTemplate.Name}])
 	else:
 		breadcrumbs = [{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Root"), "text" : "<span class = \"glyphicon glyphicon-home\"></span>"},
