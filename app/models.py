@@ -340,8 +340,8 @@ class EventFrameAttributeTemplate(db.Model):
 	def path(self):
 		path = ""
 		for ancestor in self.EventFrameTemplate.ancestors([]):
-			path += "&nbsp;\&nbsp;{}".format(ancestor.Name)
-		return  "{}&nbsp;\&nbsp;{}".format(path, self.EventFrameTemplate.Name)
+			path += "\{}".format(ancestor.Name)
+		return  "{}\{}".format(path, self.EventFrameTemplate.Name)
 
 class EventFrameNote(db.Model):
 	__tablename__ = "EventFrameNote"

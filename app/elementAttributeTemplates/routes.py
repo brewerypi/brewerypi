@@ -64,6 +64,18 @@ def addElementAttributeTemplate(elementTemplateId, lookup = False):
 				db.session.commit()
 				createdElementAttributes.append(elementAttribute)
 
+		updatedEventFrameAttributeTemplates = []
+		# Check other event frame attributes from the same element template with the same element attribute name.
+		for eventFrameTemplate in elementAttributeTemplate.ElementTemplate.EventFrameTemplates:
+			for eventFrameAttributeTemplate in eventFrameTemplate.EventFrameAttributeTemplates:
+				if eventFrameAttributeTemplate.Name == elementAttributeTemplate.Name:
+					# Event frame attribute exists, so update LookupId, Name and UnitOfMeasurementId just in case.
+					eventFrameAttributeTemplate.LookupId = elementAttributeTemplate.LookupId
+					eventFrameAttributeTemplate.Name = elementAttributeTemplate.Name
+					eventFrameAttributeTemplate.UnitOfMeasurementId = elementAttributeTemplate.UnitOfMeasurementId
+					updatedEventFrameAttributeTemplates.append(eventFrameAttributeTemplate)
+
+		db.session.commit()
 		createdTagsMessage = ""
 		if createdTags:
 			createdTags.sort(key = lambda tag: tag.Name)
@@ -102,6 +114,20 @@ def addElementAttributeTemplate(elementTemplateId, lookup = False):
 						elementAttribute.Element.Name, elementAttribute.ElementAttributeTemplate.Name, elementAttribute.Tag.Name)
 
 			flash(createdElementAttributesMessage, alert)
+
+		updatedEventFrameAttributeTemplatesMessage = ""
+		if updatedEventFrameAttributeTemplates:
+			updatedEventFrameAttributeTemplates.sort(key = lambda eventFrameAttributeTemplate: eventFrameAttributeTemplate.EventFrameTemplate.Name)
+			for eventFrameAttributeTemplate in updatedEventFrameAttributeTemplates:
+				if updatedEventFrameAttributeTemplatesMessage == "":
+					updatedEventFrameAttributeTemplatesMessage = "Updated the following event frame attribute templates(s), if needed:<br>Element Template:" + \
+						' "{}" attribute template: "{}"'.format(eventFrameAttributeTemplate.EventFrameTemplate.Name, elementAttributeTemplate.Name)
+					alert = "alert alert-warning"
+				else:
+					updatedEventFrameAttributeTemplatesMessage = '{}<br>Element Template: "{}" attribute template: "{}"'. \
+						format(updatedEventFrameAttributeTemplatesMessage, eventFrameAttributeTemplate.EventFrameTemplate.Name, elementAttributeTemplate.Name)
+
+			flash(updatedEventFrameAttributeTemplatesMessage, alert)
 
 		return redirect(form.requestReferrer.data)
 
@@ -231,7 +257,18 @@ def editElementAttributeTemplate(elementAttributeTemplateId):
 					db.session.commit()
 					updatedElementAttributes.append(elementAttribute)
 
+		updatedEventFrameAttributeTemplates = []
+		# Check other event frame attributes from the same element template with the same element attribute name.
+		for eventFrameTemplate in elementAttributeTemplate.ElementTemplate.EventFrameTemplates:
+			for eventFrameAttributeTemplate in eventFrameTemplate.EventFrameAttributeTemplates:
+				if eventFrameAttributeTemplate.Name == oldElementAttributeTemplateName:
+					# Event frame attribute exists, so update LookupId, Name and UnitOfMeasurementId just in case.
+					eventFrameAttributeTemplate.LookupId = elementAttributeTemplate.LookupId
+					eventFrameAttributeTemplate.Name = elementAttributeTemplate.Name
+					eventFrameAttributeTemplate.UnitOfMeasurementId = elementAttributeTemplate.UnitOfMeasurementId
+					updatedEventFrameAttributeTemplates.append(eventFrameAttributeTemplate)
 
+		db.session.commit()
 		createdTagsMessage = ""
 		alert = "alert alert-success"
 		if createdTags:
@@ -262,8 +299,9 @@ def editElementAttributeTemplate(elementAttributeTemplateId):
 			createdElementAttributes.sort(key = lambda elementAttribute: elementAttribute.Element.Name)
 			for elementAttribute in createdElementAttributes:
 				if createdElementAttributesMessage == "":
-					createdElementAttributesMessage = 'Created the following element attribute(s):<br>Element: "{}" attribute: "{}" associated with tag: "{}"'. \
-						format(elementAttribute.Element.Name, elementAttribute.ElementAttributeTemplate.Name, elementAttribute.Tag.Name)
+					createdElementAttributesMessage = "Created the following element attribute(s):<br>Element: " + \
+						'"{}" attribute: "{}" associated with tag: "{}"'.format(elementAttribute.Element.Name, elementAttribute.ElementAttributeTemplate.Name,
+						elementAttribute.Tag.Name)
 					alert = "alert alert-success"
 				else:
 					createdElementAttributesMessage = '{}<br>Element: "{}" attribute: "{}" associated with tag: "{}"'.format(createdElementAttributesMessage,
@@ -285,6 +323,20 @@ def editElementAttributeTemplate(elementAttributeTemplateId):
 						elementAttribute.Element.Name, elementAttribute.ElementAttributeTemplate.Name, elementAttribute.Tag.Name)
 
 			flash(updatedElementAttributesMessage, alert)
+
+		updatedEventFrameAttributeTemplatesMessage = ""
+		if updatedEventFrameAttributeTemplates:
+			updatedEventFrameAttributeTemplates.sort(key = lambda eventFrameAttributeTemplate: eventFrameAttributeTemplate.EventFrameTemplate.Name)
+			for eventFrameAttributeTemplate in updatedEventFrameAttributeTemplates:
+				if updatedEventFrameAttributeTemplatesMessage == "":
+					updatedEventFrameAttributeTemplatesMessage = "Updated the following event frame attribute templates(s), if needed:<br>Element Template:" + \
+						' "{}" attribute template: "{}"'.format(eventFrameAttributeTemplate.EventFrameTemplate.Name, oldElementAttributeTemplateName)
+					alert = "alert alert-warning"
+				else:
+					updatedEventFrameAttributeTemplatesMessage = '{}<br>Element Template: "{}" attribute template: "{}"'. \
+						format(updatedEventFrameAttributeTemplatesMessage, eventFrameAttributeTemplate.EventFrameTemplate.Name, oldElementAttributeTemplateName)
+
+			flash(updatedEventFrameAttributeTemplatesMessage, alert)
 
 		return redirect(form.requestReferrer.data)
 
