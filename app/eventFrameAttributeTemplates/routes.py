@@ -139,19 +139,20 @@ def addEventFrameAttributeTemplate(eventFrameTemplateId, lookup = False):
 				elementAttributeTemplate.Name), "alert alert-warning")
 
 		# Event frame attribute template management.
-		# Loop through the event frame template hierarchy checking for an event frame attribute template with the same event frame attribute template name.
+		# Loop through all event frame template hierarchies checking for an event frame attribute template with the same event frame attribute template name.
 		updatedEventFrameAttributeTemplates = []
-		for eventFrameTemplate in eventFrameAttributeTemplate.EventFrameTemplate.origin().descendants([], 0):
-			# Skip the event frame template that is currently being added to.
-			if eventFrameTemplate["eventFrameTemplate"].EventFrameTemplateId != eventFrameAttributeTemplate.EventFrameTemplate.EventFrameTemplateId:
-				newEventFrameAttributeTemplate = eventFrameAttributeTemplate.query. \
-					filter_by(EventFrameTemplateId = eventFrameTemplate["eventFrameTemplate"].EventFrameTemplateId,
-					Name = eventFrameAttributeTemplate.Name).one_or_none()
-				if newEventFrameAttributeTemplate is not None:
-				# New event frame attribute template exists, so update LookupId and UnitOfMeasurementId just in case.
-					newEventFrameAttributeTemplate.lookupId = eventFrameAttributeTemplate.LookupId
-					newEventFrameAttributeTemplate.UnitOfMeasurementId = eventFrameAttributeTemplate.UnitOfMeasurementId
-					updatedEventFrameAttributeTemplates.append(newEventFrameAttributeTemplate)
+		for topLevelEventFrameTemplate in eventFrameAttributeTemplate.EventFrameTemplate.origin().ElementTemplate.EventFrameTemplates:
+			for eventFrameTemplate in topLevelEventFrameTemplate.descendants([], 0):
+				# Skip the event frame template that is currently being added to.
+				if eventFrameTemplate["eventFrameTemplate"].EventFrameTemplateId != eventFrameAttributeTemplate.EventFrameTemplate.EventFrameTemplateId:
+					newEventFrameAttributeTemplate = EventFrameAttributeTemplate.query. \
+						filter_by(EventFrameTemplateId = eventFrameTemplate["eventFrameTemplate"].EventFrameTemplateId,
+						Name = eventFrameAttributeTemplate.Name).one_or_none()
+					if newEventFrameAttributeTemplate is not None:
+					# New event frame attribute template exists, so update LookupId and UnitOfMeasurementId just in case.
+						newEventFrameAttributeTemplate.lookupId = eventFrameAttributeTemplate.LookupId
+						newEventFrameAttributeTemplate.UnitOfMeasurementId = eventFrameAttributeTemplate.UnitOfMeasurementId
+						updatedEventFrameAttributeTemplates.append(newEventFrameAttributeTemplate)
 
 		db.session.commit()
 
@@ -422,31 +423,31 @@ def editEventFrameAttributeTemplate(eventFrameAttributeTemplateId):
 				"alert alert-warning")
 
 		# Event frame attribute template management.
-		# Loop through the event frame template hierarchy checking for an event frame attribute template with the same event frame attribute template name.
+		# Loop through event frame template hierarchies checking for an event frame attribute template with the same event frame attribute template name.
 		updatedEventFrameAttributeTemplates = []
-		for eventFrameTemplate in eventFrameAttributeTemplate.EventFrameTemplate.origin().descendants([], 0):
-			# Skip the event frame template that is currently being added to.
-			if eventFrameTemplate["eventFrameTemplate"].EventFrameTemplateId != eventFrameAttributeTemplate.EventFrameTemplate.EventFrameTemplateId:
-				newEventFrameAttributeTemplate = EventFrameAttributeTemplate.query. \
-					filter_by(EventFrameTemplateId = eventFrameTemplate["eventFrameTemplate"].EventFrameTemplateId,
-					Name = eventFrameAttributeTemplate.Name).one_or_none()
-				oldEventFrameAttributeTemplate = EventFrameAttributeTemplate.query. \
-					filter_by(EventFrameTemplateId = eventFrameTemplate["eventFrameTemplate"].EventFrameTemplateId,
-					Name = oldEventFrameAttributeTemplateName).one_or_none()
-				if newEventFrameAttributeTemplate is not None:
-					# New event frame attribute template exists, so update LookupId and UnitOfMeasurementId just in case.
-					newEventFrameAttributeTemplate.LookupId = eventFrameAttributeTemplate.LookupId
-					newEventFrameAttributeTemplate.Name = eventFrameAttributeTemplate.Name
-					newEventFrameAttributeTemplate.UnitOfMeasurementId = eventFrameAttributeTemplate.UnitOfMeasurementId
-					db.session.commit()
-					updatedEventFrameAttributeTemplates.append(newEventFrameAttributeTemplate)
-				elif oldEventFrameAttributeTemplate is not None:
-					# Old event frame attribute template exists, so update LookupId, Name and UnitOfMeasurementId just in case.
-					oldEventFrameAttributeTemplate.LookupId = eventFrameAttributeTemplate.LookupId
-					oldEventFrameAttributeTemplate.Name = eventFrameAttributeTemplate.Name
-					oldEventFrameAttributeTemplate.UnitOfMeasurementId = eventFrameAttributeTemplate.UnitOfMeasurementId
-					db.session.commit()
-					updatedEventFrameAttributeTemplates.append(oldEventFrameAttributeTemplate)
+		for topLevelEventFrameTemplate in eventFrameAttributeTemplate.EventFrameTemplate.origin().ElementTemplate.EventFrameTemplates:
+			for eventFrameTemplate in topLevelEventFrameTemplate.descendants([], 0):
+				# Skip the event frame template that is currently being added to.
+				if eventFrameTemplate["eventFrameTemplate"].EventFrameTemplateId != eventFrameAttributeTemplate.EventFrameTemplate.EventFrameTemplateId:
+					newEventFrameAttributeTemplate = EventFrameAttributeTemplate.query. \
+						filter_by(EventFrameTemplateId = eventFrameTemplate["eventFrameTemplate"].EventFrameTemplateId,
+						Name = eventFrameAttributeTemplate.Name).one_or_none()
+					oldEventFrameAttributeTemplate = EventFrameAttributeTemplate.query. \
+						filter_by(EventFrameTemplateId = eventFrameTemplate["eventFrameTemplate"].EventFrameTemplateId,
+						Name = oldEventFrameAttributeTemplateName).one_or_none()
+					if newEventFrameAttributeTemplate is not None:
+						# New event frame attribute template exists, so update LookupId and UnitOfMeasurementId just in case.
+						newEventFrameAttributeTemplate.LookupId = eventFrameAttributeTemplate.LookupId
+						newEventFrameAttributeTemplate.UnitOfMeasurementId = eventFrameAttributeTemplate.UnitOfMeasurementId
+						db.session.commit()
+						updatedEventFrameAttributeTemplates.append(newEventFrameAttributeTemplate)
+					elif oldEventFrameAttributeTemplate is not None:
+						# Old event frame attribute template exists, so update LookupId, Name and UnitOfMeasurementId just in case.
+						oldEventFrameAttributeTemplate.LookupId = eventFrameAttributeTemplate.LookupId
+						oldEventFrameAttributeTemplate.Name = eventFrameAttributeTemplate.Name
+						oldEventFrameAttributeTemplate.UnitOfMeasurementId = eventFrameAttributeTemplate.UnitOfMeasurementId
+						db.session.commit()
+						updatedEventFrameAttributeTemplates.append(oldEventFrameAttributeTemplate)
 
 		updatedEventFrameAttributeTemplatesMessage = ""
 		if updatedEventFrameAttributeTemplates:
@@ -455,14 +456,11 @@ def editEventFrameAttributeTemplate(eventFrameAttributeTemplateId):
 			for eventFrameAttributeTemplate in updatedEventFrameAttributeTemplates:
 				if updatedEventFrameAttributeTemplatesMessage == "":
 					updatedEventFrameAttributeTemplatesMessage = "Updated the following event frame attribute templates(s), if needed:<br>" + \
-						'Element template: "{}" event frame template: "{}" attribute: "{}"'. \
-						format(eventFrameAttributeTemplate.EventFrameTemplate.origin().ElementTemplate.Name,
-						eventFrameAttributeTemplate.EventFrameTemplate.Name, eventFrameAttributeTemplate.Name)
+						'"{}\{}"'.format(eventFrameAttributeTemplate.path(), eventFrameAttributeTemplate.Name)
 					alert = "alert alert-warning"
 				else:
-					updatedEventFrameAttributeTemplatesMessage = '{}<br>Element template: "{}" event frame template: "{}" attribute: "{}"'. \
-						format(updatedEventFrameAttributeTemplatesMessage, eventFrameAttributeTemplate.EventFrameTemplate.origin().ElementTemplate.Name,
-						eventFrameAttributeTemplate.EventFrameTemplate.Name, eventFrameAttributeTemplate.Name)
+					updatedEventFrameAttributeTemplatesMessage = '{}<br>"{}\{}"'. \
+						format(updatedEventFrameAttributeTemplatesMessage, eventFrameAttributeTemplate.path(), eventFrameAttributeTemplate.Name)
 
 			flash(updatedEventFrameAttributeTemplatesMessage, alert)
 

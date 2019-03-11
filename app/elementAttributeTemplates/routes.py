@@ -4,7 +4,7 @@ from . import elementAttributeTemplates
 from . forms import ElementAttributeTemplateForm
 from .. import db
 from .. decorators import adminRequired
-from .. models import Area, ElementAttribute, ElementAttributeTemplate, ElementTemplate, Enterprise, Site, Tag
+from .. models import Area, ElementAttribute, ElementAttributeTemplate, ElementTemplate, Enterprise, EventFrameAttributeTemplate, Site, Tag
 
 @elementAttributeTemplates.route("/elementAttributeTemplates/add/<int:elementTemplateId>", methods = ["GET", "POST"])
 @elementAttributeTemplates.route("/elementAttributeTemplates/add/<int:elementTemplateId>/<int:lookup>", methods = ["GET", "POST"])
@@ -64,18 +64,6 @@ def addElementAttributeTemplate(elementTemplateId, lookup = False):
 				db.session.commit()
 				createdElementAttributes.append(elementAttribute)
 
-		updatedEventFrameAttributeTemplates = []
-		# Check other event frame attributes from the same element template with the same element attribute name.
-		for eventFrameTemplate in elementAttributeTemplate.ElementTemplate.EventFrameTemplates:
-			for eventFrameAttributeTemplate in eventFrameTemplate.EventFrameAttributeTemplates:
-				if eventFrameAttributeTemplate.Name == elementAttributeTemplate.Name:
-					# Event frame attribute exists, so update LookupId, Name and UnitOfMeasurementId just in case.
-					eventFrameAttributeTemplate.LookupId = elementAttributeTemplate.LookupId
-					eventFrameAttributeTemplate.Name = elementAttributeTemplate.Name
-					eventFrameAttributeTemplate.UnitOfMeasurementId = elementAttributeTemplate.UnitOfMeasurementId
-					updatedEventFrameAttributeTemplates.append(eventFrameAttributeTemplate)
-
-		db.session.commit()
 		createdTagsMessage = ""
 		if createdTags:
 			createdTags.sort(key = lambda tag: tag.Name)
@@ -115,17 +103,33 @@ def addElementAttributeTemplate(elementTemplateId, lookup = False):
 
 			flash(createdElementAttributesMessage, alert)
 
+		# Event frame attribute template management.
+		# Loop through all event frame template hierarchies checking for an event frame attribute template with the same event frame attribute template name.
+		updatedEventFrameAttributeTemplates = []
+		for topLevelEventFrameTemplate in elementAttributeTemplate.ElementTemplate.EventFrameTemplates:
+			for eventFrameTemplate in topLevelEventFrameTemplate.descendants([], 0):
+				newEventFrameAttributeTemplate = EventFrameAttributeTemplate.query. \
+					filter_by(EventFrameTemplateId = eventFrameTemplate["eventFrameTemplate"].EventFrameTemplateId,
+					Name = elementAttributeTemplate.Name).one_or_none()
+				if newEventFrameAttributeTemplate is not None:
+				# New event frame attribute template exists, so update LookupId and UnitOfMeasurementId just in case.
+					newEventFrameAttributeTemplate.lookupId = elementAttributeTemplate.LookupId
+					newEventFrameAttributeTemplate.UnitOfMeasurementId = elementAttributeTemplate.UnitOfMeasurementId
+					updatedEventFrameAttributeTemplates.append(newEventFrameAttributeTemplate)
+
+		db.session.commit()
+
 		updatedEventFrameAttributeTemplatesMessage = ""
 		if updatedEventFrameAttributeTemplates:
-			updatedEventFrameAttributeTemplates.sort(key = lambda eventFrameAttributeTemplate: eventFrameAttributeTemplate.EventFrameTemplate.Name)
+			updatedEventFrameAttributeTemplates.sort(key = lambda eventFrameAttributeTemplate: eventFrameAttributeTemplate.path())
 			for eventFrameAttributeTemplate in updatedEventFrameAttributeTemplates:
 				if updatedEventFrameAttributeTemplatesMessage == "":
-					updatedEventFrameAttributeTemplatesMessage = "Updated the following event frame attribute templates(s), if needed:<br>Element Template:" + \
-						' "{}" attribute template: "{}"'.format(eventFrameAttributeTemplate.EventFrameTemplate.Name, elementAttributeTemplate.Name)
+					updatedEventFrameAttributeTemplatesMessage = "Updated the following event frame attribute templates(s), if needed:<br>" + \
+						'"{}\{}"'.format(eventFrameAttributeTemplate.path(), eventFrameAttributeTemplate.Name)
 					alert = "alert alert-warning"
 				else:
-					updatedEventFrameAttributeTemplatesMessage = '{}<br>Element Template: "{}" attribute template: "{}"'. \
-						format(updatedEventFrameAttributeTemplatesMessage, eventFrameAttributeTemplate.EventFrameTemplate.Name, elementAttributeTemplate.Name)
+					updatedEventFrameAttributeTemplatesMessage = '{}<br>"{}\{}"'. \
+						format(updatedEventFrameAttributeTemplatesMessage, eventFrameAttributeTemplate.path(), eventFrameAttributeTemplate.Name)
 
 			flash(updatedEventFrameAttributeTemplatesMessage, alert)
 
@@ -212,27 +216,25 @@ def editElementAttributeTemplate(elementAttributeTemplateId):
 			if element.isManaged():
 				# Tag management.
 				newTagName = "{}_{}".format(element.Name, elementAttributeTemplate.Name.replace(" ", ""))
+				newTag = Tag.query.filter_by(AreaId = element.TagAreaId, Name = newTagName).one_or_none()
 				oldTagName = "{}_{}".format(element.Name, oldElementAttributeTemplateName.replace(" ", ""))
 				oldTag = Tag.query.filter_by(AreaId = element.TagAreaId, Name = oldTagName).one_or_none()
-				if oldTag is None:
-					# Old tag doesn't exist.
-					newTag = Tag.query.filter_by(AreaId = element.TagAreaId, Name = newTagName).one_or_none()
-					if newTag is None:
-						# New tag doesn't exist, so create it.
-						tag = Tag(AreaId = element.TagAreaId, LookupId = elementAttributeTemplate.LookupId, Name = newTagName,
-							UnitOfMeasurementId = elementAttributeTemplate.UnitOfMeasurementId)
-						db.session.add(tag)
-						db.session.commit()
-						createdTags.append(tag)
-						elementAttributeTagId = tag.TagId
-					else:
-						# New tag exists, so update LookupId and UnitOfMeasurementId just in case.
-						newTag.LookupId = elementAttributeTemplate.LookupId
-						newTag.UnitOfMeasurementId = elementAttributeTemplate.UnitOfMeasurementId
-						db.session.commit()
-						updatedTags.append(newTag)
-						elementAttributeTagId = newTag.TagId
-				else:
+				if newTag is None and oldTag is None:
+					# New tag doesn't exist, so create it.
+					tag = Tag(AreaId = element.TagAreaId, LookupId = elementAttributeTemplate.LookupId, Name = newTagName,
+						UnitOfMeasurementId = elementAttributeTemplate.UnitOfMeasurementId)
+					db.session.add(tag)
+					db.session.commit()
+					createdTags.append(tag)
+					elementAttributeTagId = tag.TagId
+				elif newTag is not None:
+					# New tag exists, so update LookupId and UnitOfMeasurementId just in case.
+					newTag.LookupId = elementAttributeTemplate.LookupId
+					newTag.UnitOfMeasurementId = elementAttributeTemplate.UnitOfMeasurementId
+					db.session.commit()
+					updatedTags.append(newTag)
+					elementAttributeTagId = newTag.TagId
+				elif oldTag is not None:
 					# Old tag exists, so update LookupId, Name and UnitOfMeasurementId just in case.
 					oldTag.LookupId = elementAttributeTemplate.LookupId
 					oldTag.Name = newTagName
@@ -257,18 +259,6 @@ def editElementAttributeTemplate(elementAttributeTemplateId):
 					db.session.commit()
 					updatedElementAttributes.append(elementAttribute)
 
-		updatedEventFrameAttributeTemplates = []
-		# Check other event frame attributes from the same element template with the same element attribute name.
-		for eventFrameTemplate in elementAttributeTemplate.ElementTemplate.EventFrameTemplates:
-			for eventFrameAttributeTemplate in eventFrameTemplate.EventFrameAttributeTemplates:
-				if eventFrameAttributeTemplate.Name == oldElementAttributeTemplateName:
-					# Event frame attribute exists, so update LookupId, Name and UnitOfMeasurementId just in case.
-					eventFrameAttributeTemplate.LookupId = elementAttributeTemplate.LookupId
-					eventFrameAttributeTemplate.Name = elementAttributeTemplate.Name
-					eventFrameAttributeTemplate.UnitOfMeasurementId = elementAttributeTemplate.UnitOfMeasurementId
-					updatedEventFrameAttributeTemplates.append(eventFrameAttributeTemplate)
-
-		db.session.commit()
 		createdTagsMessage = ""
 		alert = "alert alert-success"
 		if createdTags:
@@ -324,17 +314,44 @@ def editElementAttributeTemplate(elementAttributeTemplateId):
 
 			flash(updatedElementAttributesMessage, alert)
 
+		# Event frame attribute template management.
+		# Loop through event frame template hierarchies checking for an event frame attribute template with the same event frame attribute template name.
+		updatedEventFrameAttributeTemplates = []
+		for topLevelEventFrameTemplate in elementAttributeTemplate.ElementTemplate.EventFrameTemplates:
+			for eventFrameTemplate in topLevelEventFrameTemplate.descendants([], 0):
+				newEventFrameAttributeTemplate = EventFrameAttributeTemplate.query. \
+					filter_by(EventFrameTemplateId = eventFrameTemplate["eventFrameTemplate"].EventFrameTemplateId,
+					Name = elementAttributeTemplate.Name).one_or_none()
+				oldEventFrameAttributeTemplate = EventFrameAttributeTemplate.query. \
+					filter_by(EventFrameTemplateId = eventFrameTemplate["eventFrameTemplate"].EventFrameTemplateId,
+					Name = oldElementAttributeTemplateName).one_or_none()
+				if newEventFrameAttributeTemplate is not None:
+					# New event frame attribute template exists, so update LookupId and UnitOfMeasurementId just in case.
+					newEventFrameAttributeTemplate.LookupId = elementAttributeTemplate.LookupId
+					newEventFrameAttributeTemplate.UnitOfMeasurementId = elementAttributeTemplate.UnitOfMeasurementId
+					db.session.commit()
+					updatedEventFrameAttributeTemplates.append(newEventFrameAttributeTemplate)
+				elif oldEventFrameAttributeTemplate is not None:
+					# Old event frame attribute template exists, so update LookupId, Name and UnitOfMeasurementId just in case.
+					oldEventFrameAttributeTemplate.LookupId = elementAttributeTemplate.LookupId
+					oldEventFrameAttributeTemplate.Name = elementAttributeTemplate.Name
+					oldEventFrameAttributeTemplate.UnitOfMeasurementId = elementAttributeTemplate.UnitOfMeasurementId
+					db.session.commit()
+					updatedEventFrameAttributeTemplates.append(oldEventFrameAttributeTemplate)
+
+		db.session.commit()
+
 		updatedEventFrameAttributeTemplatesMessage = ""
 		if updatedEventFrameAttributeTemplates:
-			updatedEventFrameAttributeTemplates.sort(key = lambda eventFrameAttributeTemplate: eventFrameAttributeTemplate.EventFrameTemplate.Name)
+			updatedEventFrameAttributeTemplates.sort(key = lambda eventFrameAttributeTemplate: eventFrameAttributeTemplate.path())
 			for eventFrameAttributeTemplate in updatedEventFrameAttributeTemplates:
 				if updatedEventFrameAttributeTemplatesMessage == "":
-					updatedEventFrameAttributeTemplatesMessage = "Updated the following event frame attribute templates(s), if needed:<br>Element Template:" + \
-						' "{}" attribute template: "{}"'.format(eventFrameAttributeTemplate.EventFrameTemplate.Name, oldElementAttributeTemplateName)
+					updatedEventFrameAttributeTemplatesMessage = "Updated the following event frame attribute templates(s), if needed:<br>" + \
+						'"{}\{}"'.format(eventFrameAttributeTemplate.path(), eventFrameAttributeTemplate.Name)
 					alert = "alert alert-warning"
 				else:
-					updatedEventFrameAttributeTemplatesMessage = '{}<br>Element Template: "{}" attribute template: "{}"'. \
-						format(updatedEventFrameAttributeTemplatesMessage, eventFrameAttributeTemplate.EventFrameTemplate.Name, oldElementAttributeTemplateName)
+					updatedEventFrameAttributeTemplatesMessage = '{}<br>"{}\{}"'. \
+						format(updatedEventFrameAttributeTemplatesMessage, eventFrameAttributeTemplate.path(), eventFrameAttributeTemplate.Name)
 
 			flash(updatedEventFrameAttributeTemplatesMessage, alert)
 
