@@ -5,7 +5,7 @@ from . import elements
 from . forms import ElementForm
 from .. import db
 from .. decorators import adminRequired, permissionRequired
-from .. models import Area, ElementAttributeTemplate, Element, ElementAttribute, ElementTemplate, Enterprise, EventFrame, EventFrameTemplate, Permission, Site, Tag
+from .. models import Area, Element, ElementAttribute, ElementAttributeTemplate, ElementTemplate, Enterprise, EventFrame, EventFrameAttribute, EventFrameAttributeTemplate, EventFrameTemplate, Permission, Site, Tag
 
 modelName = "Element"
 
@@ -26,13 +26,11 @@ def addElement(elementTemplateId):
 		db.session.commit()
 
 		# Add tags and element attributes
+		createdTags = []
+		updatedTags = []
+		createdElementAttributes = []
 		if form.isManaged.data:
-			elementAttributeTemplates = ElementAttributeTemplate.query.filter_by(ElementTemplateId = element.ElementTemplateId).all()
-			createdTags = []
-			updatedTags = []
-			createdElementAttributes = []
-
-			for elementAttributeTemplate in elementAttributeTemplates:
+			for elementAttributeTemplate in ElementAttributeTemplate.query.filter_by(ElementTemplateId = element.ElementTemplateId):
 				tagName = "{}_{}".format(form.name.data, elementAttributeTemplate.Name.replace(" ", ""))
 				tag = Tag(AreaId = form.area.data, LookupId = elementAttributeTemplate.LookupId, Name = tagName, 
 					UnitOfMeasurementId = elementAttributeTemplate.UnitOfMeasurementId)
@@ -224,26 +222,55 @@ def editElement(elementId):
 
 	# Edit an existing element.
 	if form.validate_on_submit():
+		oldElementName = element.Name
 		element.Description = form.description.data
 		element.ElementTemplateId = form.elementTemplateId.data
 		element.Name = form.name.data
 		element.TagAreaId = form.area.data if form.isManaged.data else None
 
-		# Edit tags.
 		if form.isManaged.data:
-			elementAttributes = ElementAttribute.query.filter_by(ElementId = element.ElementId)
-			for elementAttribute in elementAttributes:
-				tag = Tag.query.filter_by(TagId = elementAttribute.TagId).one()
-				elementAttributeTemplate = ElementAttributeTemplate.query.filter_by(ElementAttributeTemplateId = elementAttribute.ElementAttributeTemplateId).one()
+			# Update/Add tags for every element attribute template
+			for elementAttributeTemplate in ElementAttributeTemplate.query.filter_by(ElementTemplateId = element.ElementTemplateId):
 				tagName = "{}_{}".format(form.name.data, elementAttributeTemplate.Name.replace(" ", ""))
-				tag.Name = tagName
+				elementAttribute = ElementAttribute.query.filter_by(ElementAttributeTemplateId = elementAttributeTemplate.ElementAttributeTemplateId, 
+					ElementId = elementId).one_or_none()
+				
+				# Update existing bound tag
+				if elementAttribute is not None:
+					tag = Tag.query.filter_by(TagId = elementAttribute.TagId).one()
+					tag.AreaId = form.area.data
+					tag.Name = tagName
+				# Update/Add tag and add element attribute
+				else:
+					tag = Tag.query.filter_by(AreaId = form.area.data, Name = tagName).one_or_none()
+					# !!! old area is null if element was un-managed
+					# oldTag = Tag.query.filter_by(AreaId = oldElement.TagAreaId, Name = oldTagName).one_or_none()
+					oldTagName = "{}_{}".format(oldElementName, elementAttributeTemplate.Name.replace(" ", ""))
+					oldTag = Tag.query.filter_by(AreaId = form.area.data, Name = oldTagName).one_or_none()
+				
+					# If new tag already exists, bind to element attribute
+					if tag is not None:
+						elementAttribute = ElementAttribute(ElementAttributeTemplateId = elementAttributeTemplate.ElementAttributeTemplateId, 
+							ElementId = elementId, TagId = tag.TagId)
+						db.session.add(elementAttribute)
+					# If old tag exists but not bound, update it and bind to element attribute
+					elif oldTag is not None:
+						oldTag.AreaId = form.area.data
+						oldTag.Name = tagName
 
-			eventFrameAttributes = EventFrameAttribute.query.filter_by(ElementId = element.ElementId)
-			for eventFrameAttribute in eventFrameAttributes:
-				tag = Tag.query.filter_by(TagId = eventFrameAttribute.TagId).one()
-				eventFrameAttributeTemplate = EventFrameAttributeTemplate.query.filter_by(EventFrameAttributeTemplateId = eventFrameAttribute.EventFrameAttributeTemplateId).one()
-				tagName = "{}_{}".format(form.name.data, eventFrameAttributeTemplate.Name.replace(" ", ""))
-				tag.Name = tagName
+						elementAttribute = ElementAttribute(ElementAttributeTemplateId = elementAttributeTemplate.ElementAttributeTemplateId, 
+							ElementId = elementId, TagId = oldTag.TagId)
+						db.session.add(elementAttribute)
+					# Else add new tag and element attribute
+					else:
+						tag = Tag(AreaId = form.area.data, LookupId = elementAttributeTemplate.LookupId, Name = tagName, 
+							UnitOfMeasurementId = elementAttributeTemplate.UnitOfMeasurementId)
+						db.session.add(tag)
+						db.session.commit()
+
+						elementAttribute = ElementAttribute(ElementAttributeTemplateId = elementAttributeTemplate.ElementAttributeTemplateId, 
+							ElementId = elementId, TagId = tag.TagId)
+						db.session.add(elementAttribute)
 
 		db.session.commit()
 		flash("You have successfully edited the element \"{}\".".format(element.Name), "alert alert-success")
