@@ -216,7 +216,7 @@ Event Frames
                             {% else %}
                                 <td></td>
                             {% endif %}
-                            {% if child.EventFrameEndTimestamp == None %}
+                            {% if child.EndTimestamp is none %}
                                 <td><a class = "btn btn-default" title = "End" href = "{{ url_for("eventFrames.endEventFrame",
                                     eventFrameId = child.EventFrameId) }}"><span class = "glyphicon glyphicon-stop"></span></a></td>
                             {% else %}
