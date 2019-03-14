@@ -118,9 +118,9 @@ END""")
 
 
 def convertLocalToUtc():
-    eventFrames = EventFrame.query.all()
-    notes = Note.query.all()
-    tagValues = TagValue.query.all()
+    eventFrames = EventFrame.query.with_entities(EventFrame.EndTimestamp, EventFrame.StartTimestamp).all()
+    notes = Note.query.with_entities(Note.NoteId, Note.Timestamp).all()
+    tagValues = TagValue.query.with_entities(TagValue.TagValueId, TagValue.Timestamp).all()
     if len(eventFrames) > 0 or len(notes) > 0 or len(tagValues) > 0:
         localTimezone = timezone(current_app.config["LOCAL_TIMEZONE"])
         utcTimezone = timezone("UTC")
@@ -187,7 +187,7 @@ def convertUtcToLocal():
         db.session.commit()
 
 def setNullEventFrameNames():
-    eventFrames = EventFrame.query.all()
+    eventFrames = EventFrame.query.with_entities(EventFrame.EventFrameId, EventFrame.Name, EventFrame.StartTimestamp).all()
     for eventFrame in eventFrames:
         if eventFrame.Name is None or eventFrame.Name == "":
             print("Setting Event Frame Id: {} name to unix timestamp based on start timestamp.".format(eventFrame.EventFrameId))

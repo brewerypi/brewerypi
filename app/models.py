@@ -241,6 +241,7 @@ class EventFrame(db.Model):
 	Name = db.Column(db.String(45), nullable = False)
 	ParentEventFrameId = db.Column(db.Integer, db.ForeignKey("EventFrame.EventFrameId", name = "FK__EventFrame$CanHave$EventFrame"), nullable = True)
 	StartTimestamp = db.Column(db.DateTime, nullable = False)
+	UserId = db.Column(db.Integer, db.ForeignKey("User.UserId", name = "FK__User$AddOrEdit$EventFrame"), nullable = False)
 
 	ParentEventFrame = db.relationship("EventFrame", remote_side = [EventFrameId])
 	EventFrames = db.relationship("EventFrame", remote_side = [ParentEventFrameId])
@@ -505,6 +506,7 @@ class Note(db.Model):
 	NoteId = db.Column(db.Integer, primary_key = True)
 	Note = db.Column(db.Text, nullable = False)
 	Timestamp = db.Column(db.DateTime, nullable = False)
+	UserId = db.Column(db.Integer, db.ForeignKey("User.UserId", name = "FK__User$AddOrEdit$Note"), nullable = False)
 	
 	TagValueNotes = db.relationship("TagValueNote", backref = "Note", lazy = "dynamic")
 	EventFrameNotes = db.relationship("EventFrameNote", backref = "Note", lazy = "dynamic")
@@ -649,6 +651,7 @@ class TagValue(db.Model):
 	TagValueId = db.Column(db.Integer, primary_key = True)
 	TagId = db.Column(db.Integer, db.ForeignKey("Tag.TagId", name = "FK__Tag$Have$TagValue"), nullable = False)
 	Timestamp = db.Column(db.DateTime, nullable = False)
+	UserId = db.Column(db.Integer, db.ForeignKey("User.UserId", name = "FK__User$AddOrEdit$TagValue"), nullable = False)
 	Value = db.Column(db.Float, nullable = False)
 
 	TagValueNotes = db.relationship("TagValueNote", backref = "TagValue", lazy = "dynamic")
@@ -720,6 +723,10 @@ class User(UserMixin, db.Model):
 	Name = db.Column(db.String(45), nullable = False)
 	PasswordHash = db.Column(db.String(128))
 	RoleId = db.Column(db.Integer, db.ForeignKey("Role.RoleId", name = "FK__Role$Have$User"), nullable = False)
+
+	EventFrames = db.relationship("EventFrame", backref = "User", lazy = "dynamic")
+	Notes = db.relationship("Note", backref = "User", lazy = "dynamic")
+	TagValues = db.relationship("TagValue", backref = "User", lazy = "dynamic")
 
 	@property
 	def Password(self):

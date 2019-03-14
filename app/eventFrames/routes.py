@@ -1,7 +1,7 @@
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 from flask import current_app, flash, jsonify, redirect, render_template, request, url_for
-from flask_login import login_required
+from flask_login import current_user, login_required
 from . import eventFrames
 from . forms import EventFrameForm, EventFrameOverlayForm
 from . helpers import currentEventFrameAttributeValues
@@ -39,10 +39,10 @@ def addEventFrame(eventFrameTemplateId = None, parentEventFrameId = None):
 
 		if parentEventFrameId:
 			eventFrame = EventFrame(EndTimestamp = endUtcTimestamp, EventFrameTemplate = form.eventFrameTemplate.data,
-				Name = form.name.data, ParentEventFrameId = parentEventFrameId, StartTimestamp = form.startUtcTimestamp.data)
+				Name = form.name.data, ParentEventFrameId = parentEventFrameId, StartTimestamp = form.startUtcTimestamp.data, UserId = current_user.get_id())
 		else:
 			eventFrame = EventFrame(Element = form.element.data, EndTimestamp = endUtcTimestamp, EventFrameTemplateId = eventFrameTemplateId,
-				Name = form.name.data, StartTimestamp = form.startUtcTimestamp.data)
+				Name = form.name.data, StartTimestamp = form.startUtcTimestamp.data, UserId = current_user.get_id())
 
 		db.session.add(eventFrame)
 		db.session.commit()
@@ -175,6 +175,7 @@ def editEventFrame(eventFrameId):
 
 		eventFrame.Name = form.name.data
 		eventFrame.StartTimestamp = form.startUtcTimestamp.data
+		eventFrame.UserId = current_user.get_id()
 		db.session.commit()
 		flash("You have successfully edited the Event Frame.", "alert alert-success")
 		return redirect(form.requestReferrer.data)
@@ -238,6 +239,7 @@ def editEventFrame(eventFrameId):
 def endEventFrame(eventFrameId):
 	eventFrame = EventFrame.query.get_or_404(eventFrameId)
 	eventFrame.EndTimestamp = datetime.utcnow()
+	eventFrame.UserId = current_user.get_id()
 	db.session.commit()
 	count = 0
 	for eventFrameAttributeTemplate in eventFrame.EventFrameTemplate.EventFrameAttributeTemplates:

@@ -137,6 +137,7 @@ Event Frames
                     <th></th>
                 {% elif childrenClass == "EventFrame" %}
                     <th>Element</th>
+                    <th>User</th>
                     <th id = "thStartTimestamp">Start Timestamp</th>
                     <th id = "thEndTimestamp">End Timestamp</th>
                     <th></th>
@@ -203,6 +204,7 @@ Event Frames
                         {% elif childrenClass == "EventFrame" %}
                             <td>{{ child.Name }}</td>
                             <td>{{ child.Element }}</td>
+                            <td>{{ child.User }}</td>
                             <td>{{ moment(child.StartTimestamp).format("YYYY-MM-DD HH:mm:ss") }}</td>
                             {% if child.EndTimestamp %}
                                 <td>{{ moment(child.EndTimestamp).format("YYYY-MM-DD HH:mm:ss") }}</td>
@@ -341,7 +343,7 @@ Event Frames
                     {% elif childrenClass == "EventFrameTemplate" %}
                         [2, "asc"]              // Name.
                     {% elif childrenClass == "EventFrame" %}
-                        [4, "desc"]             // Start timestamp.
+                        [5, "desc"]             // Start timestamp.
                     {% endif %}
                 ],
                 "columns":
@@ -359,6 +361,7 @@ Event Frames
                         { "orderable": false }, // Edit button.
                         { "orderable": false }  // Delete button.
                     {% elif childrenClass == "EventFrame" %}
+                        null,
                         null,
                         null,
                         null,

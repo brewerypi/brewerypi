@@ -23,10 +23,12 @@ def currentEventFrameAttributeValues(eventFrames, eventFrameTemplateId):
     SELECT EventFrame.EventFrameId,
         EventFrame.Name,
         Element.Name AS Element,
+        User.Name AS User,
         EventFrame.StartTimestamp,
         EventFrame.EndTimestamp {}
     FROM EventFrame
         INNER JOIN Element ON EventFrame.ElementId = Element.ElementId
+        INNER JOIN User ON EventFrame.UserId = User.UserId
         INNER JOIN EventFrameTemplate ON EventFrame.EventFrameTemplateId = EventFrameTemplate.EventFrameTemplateId
         LEFT JOIN EventFrameAttributeTemplate ON EventFrameTemplate.EventFrameTemplateId = EventFrameAttributeTemplate.EventFrameTemplateId
         LEFT JOIN EventFrameAttribute ON EventFrameAttributeTemplate.EventFrameAttributeTemplateId = EventFrameAttribute.EventFrameAttributeTemplateId AND
