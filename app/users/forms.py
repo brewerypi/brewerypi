@@ -22,8 +22,9 @@ class UserForm(FlaskForm):
 
 	def validate_name(self, field):
 		validationError = False
-		user = User.query.filter_by(Name = field.data).first()
-		if user:
+		user = User.query.filter_by(Name = field.data).one_or_none()
+		if user is not None:
+			# User exists.
 			if self.userId.data == "":
 				# Trying to add a new user using a name that already exists.
 				validationError = True

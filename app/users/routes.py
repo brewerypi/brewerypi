@@ -1,5 +1,5 @@
 from flask import abort, flash, redirect, render_template, request, url_for
-from flask_login import current_user, fresh_login_required, login_required
+from flask_login import current_user, fresh_login_required, login_required, logout_user
 from . import users
 from . forms import UserForm
 from .. import db
@@ -12,7 +12,7 @@ modelName = "User"
 @login_required
 @adminRequired
 def listUsers():
-	users = User.query
+	users = User.query.all()
 	return render_template("users/users.html", users = users)
 
 @users.route("/users/add", methods = ["GET", "POST"])
@@ -24,41 +24,30 @@ def addUser():
 
 	# Add a new user.
 	if form.validate_on_submit():
-		user = User(Name = form.name.data, Password = form.password.data, Role = form.role.data)
+		user = User(Enabled = True, Name = form.name.data, Password = form.password.data, Role = form.role.data)
 		db.session.add(user)
 		db.session.commit()
-		flash("You have successfully added the user \"\".".format(user.Name), "alert alert-success")
+		flash('You have successfully added the user "{}".'.format(user.Name), "alert alert-success")
 		return redirect(url_for("users.listUsers"))
 
 	# Present a form to add a new user.
 	breadcrumbs = [{"url" : url_for("users.listUsers"), "text" : "<span class = \"glyphicon glyphicon-home\"></span>"}]
 	return render_template("addEdit.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
 
-@users.route("/users/delete/<int:userId>", methods = ["GET", "POST"])
-@login_required
-@adminRequired
-def deleteUser(userId):
-	user = User.query.get_or_404(userId)
-	if user.Name == "pi":
-		flash("Deleting the default administrator account is not allowed.", "alert alert-danger")
-		return redirect(url_for("users.listUsers"))		
-
-	user.delete()
-	db.session.commit()
-	flash("You have successfully deleted the user \"{}\".".format(user.Name), "alert alert-success")
-	return redirect(url_for("users.listUsers"))
-
 @users.route("/users/changePassword/<int:userId>", methods = ["GET", "POST"])
 @fresh_login_required
 def changePassword(userId):
+	# Only adminsitrators can change other user's password.
 	if not current_user.isAdministrator() and current_user.get_id() != userId:
 		abort(403)
 
 	operation = "Edit"
 	user = User.query.get_or_404(userId)
 	form = UserForm(obj = user)
+	# Don't require current password for administrators.
 	if current_user.isAdministrator() and current_user.get_id() != userId:
 		del form.currentPassword
+
 	del form.name
 	del form.role
 	form.password.label.text = "New Password"
@@ -76,6 +65,28 @@ def changePassword(userId):
 	breadcrumbs = [{"url" : url_for("users.listUsers"), "text" : "<span class = \"glyphicon glyphicon-home\"></span>"},
 		{"url" : None, "text" : user.Name}]
 	return render_template("addEdit.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
+
+@users.route("/users/delete/<int:userId>", methods = ["GET", "POST"])
+@login_required
+@adminRequired
+def deleteUser(userId):
+	user = User.query.get_or_404(userId)
+	if user.Name == "pi":
+		flash("Deleting the default administrator account is not allowed.", "alert alert-danger")
+		return redirect(url_for("users.listUsers"))		
+
+	if user.EventFrames.count() > 0 or user.Notes.count() > 0 or user.TagValues.count() > 0:
+		flash('User "{}" has event frames, notes and/or tag values and cannot be deleted.'.format(user.Name), "alert alert-danger")
+		return redirect(url_for("users.listUsers"))
+
+	user.delete()
+	db.session.commit()
+	flash("You have successfully deleted the user \"{}\".".format(user.Name), "alert alert-success")
+	if current_user.UserId == userId:
+		logout_user()
+		return redirect(url_for("main.index"))
+	else:
+		return redirect(url_for("users.listUsers"))
 
 @users.route("/users/edit/<int:userId>", methods = ["GET", "POST"])
 @login_required
@@ -110,3 +121,21 @@ def editUser(userId):
 	breadcrumbs = [{"url" : url_for("users.listUsers"), "text" : "<span class = \"glyphicon glyphicon-home\"></span>"},
 		{"url" : None, "text" : user.Name}]
 	return render_template("addEdit.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
+
+@users.route("/users/enableDisable/<int:userId>", methods = ["GET", "POST"])
+@login_required
+@adminRequired
+def enableDisableUser(userId):
+	user = User.query.get_or_404(userId)
+	if user.Name == "pi":
+		flash("Disabling the default administrator account is not allowed.", "alert alert-danger")
+		return redirect(url_for("users.listUsers"))		
+
+	user.Enabled = not user.Enabled
+	db.session.commit()
+	flash('You have successfully {} the user "{}".'.format("enabled" if user.Enabled else "disabled", user.Name), "alert alert-success")
+	if current_user.UserId == userId:
+		logout_user()
+		return redirect(url_for("main.index"))
+	else:
+		return redirect(url_for("users.listUsers"))

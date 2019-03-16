@@ -720,6 +720,7 @@ class User(UserMixin, db.Model):
 	)
 
 	UserId = db.Column(db.Integer, primary_key = True)
+	Enabled = db.Column(db.Boolean, nullable = False)
 	Name = db.Column(db.String(45), nullable = False)
 	PasswordHash = db.Column(db.String(128))
 	RoleId = db.Column(db.Integer, db.ForeignKey("Role.RoleId", name = "FK__Role$Have$User"), nullable = False)
@@ -741,7 +742,7 @@ class User(UserMixin, db.Model):
 		user = User.query.filter_by(Name = "pi").first()
 		AdministratorRole = Role.query.filter_by(Name = "Administrator").first()
 		if user is None:
-			user = User(Name = "pi", Password = "brewery", Role = AdministratorRole)
+			user = User(Enabled = True, Name = "pi", Password = "brewery", Role = AdministratorRole)
 			db.session.add(user)
 		else:
 			user.Role = AdministratorRole

@@ -7,15 +7,13 @@ from .. models import User
 @authentications.route("/login", methods = ["GET", "POST"])
 def login():
     form = LoginForm()
-
     if form.validate_on_submit():
         user = User.query.filter_by(Name = form.name.data).first()
-
-        if user is not None and user.verifyPassword(form.password.data):
+        if user is not None and user.verifyPassword(form.password.data) and user.Enabled:
             login_user(user, form.rememberMe.data)
             return redirect(request.args.get("next") or url_for("main.index"))
 
-        flash("Invalid username or password.", "alert alert-danger")
+        flash("Invalid username and/or password or disabled user.", "alert alert-danger")
 
     return render_template("authentications/login.html", form = form)
 
