@@ -4,7 +4,7 @@ from . import elementAttributeTemplates
 from . forms import ElementAttributeTemplateForm
 from .. import db
 from .. decorators import adminRequired
-from .. models import Area, ElementAttribute, ElementAttributeTemplate, ElementTemplate, Enterprise, EventFrameAttributeTemplate, Site, Tag
+from .. models import Area, ElementAttribute, ElementAttributeTemplate, ElementTemplate, Enterprise, EventFrameAttributeTemplate, Lookup, Site, Tag
 
 @elementAttributeTemplates.route("/elementAttributeTemplates/add/<int:elementTemplateId>", methods = ["GET", "POST"])
 @elementAttributeTemplates.route("/elementAttributeTemplates/add/<int:elementTemplateId>/<int:lookup>", methods = ["GET", "POST"])
@@ -18,6 +18,8 @@ def addElementAttributeTemplate(elementTemplateId, lookup = False):
 	if lookup:
 		modelName = "Lookup Element Attribute Template"
 		del form.unitOfMeasurement
+		form.lookup.choices = [(lookup.LookupId, lookup.Name) for lookup in Lookup.query. \
+			filter_by(EnterpriseId = elementTemplate.Site.Enterprise.EnterpriseId).order_by(Lookup.Name)]
 	else:
 		modelName = "Element Attribute Template"
 		del form.lookup
@@ -26,7 +28,7 @@ def addElementAttributeTemplate(elementTemplateId, lookup = False):
 	if form.validate_on_submit():
 		if lookup:
 			elementAttributeTemplate = ElementAttributeTemplate(Description = form.description.data, ElementTemplateId = form.elementTemplateId.data, \
-				Lookup = form.lookup.data, Name = form.name.data)
+				LookupId = form.lookup.data, Name = form.name.data)
 		else:
 			elementAttributeTemplate = ElementAttributeTemplate(Description = form.description.data, ElementTemplateId = form.elementTemplateId.data, \
 				Name = form.name.data, UnitOfMeasurement = form.unitOfMeasurement.data)
@@ -190,6 +192,8 @@ def editElementAttributeTemplate(elementAttributeTemplateId):
 	if elementAttributeTemplate.LookupId:
 		modelName = "Lookup Element Attribute Template"
 		del form.unitOfMeasurement
+		form.lookup.choices = [(lookup.LookupId, lookup.Name) for lookup in Lookup.query. \
+			filter_by(EnterpriseId = elementAttributeTemplate.ElementTemplate.Site.Enterprise.EnterpriseId).order_by(Lookup.Name)]
 	else:
 		modelName = "Element Attribute Template"
 		del form.lookup
@@ -202,7 +206,7 @@ def editElementAttributeTemplate(elementAttributeTemplateId):
 		elementAttributeTemplate.Name = form.name.data
 
 		if elementAttributeTemplate.LookupId:
-			elementAttributeTemplate.Lookup = form.lookup.data
+			elementAttributeTemplate.LookupId = form.lookup.data
 		else:
 			elementAttributeTemplate.UnitOfMeasurement = form.unitOfMeasurement.data
 
@@ -363,7 +367,7 @@ def editElementAttributeTemplate(elementAttributeTemplateId):
 	form.elementTemplateId.data = elementAttributeTemplate.ElementTemplateId
 	form.name.data = elementAttributeTemplate.Name
 	if elementAttributeTemplate.LookupId:
-		form.lookup.data = elementAttributeTemplate.Lookup
+		form.lookup.data = elementAttributeTemplate.LookupId
 	else:
 		form.unitOfMeasurement.data = elementAttributeTemplate.UnitOfMeasurement
 

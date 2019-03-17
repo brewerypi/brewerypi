@@ -7,7 +7,7 @@ from .. models import EventFrameAttributeTemplate, Lookup, LookupValue, UnitOfMe
 class EventFrameAttributeTemplateForm(FlaskForm):
 	name = StringField("Name", validators = [Required(), Length(1, 45)])
 	description = StringField("Description", validators = [Length(0, 255)])
-	lookup = QuerySelectField("Lookup", query_factory = lambda: Lookup.query.order_by(Lookup.Name), validators = [Required()], get_label = "Name")
+	lookup = QuerySelectField("Lookup", validators = [Required()], get_label = "Name")
 	defaultStartLookupValue = SelectField("Default Start Value", validators = [Optional()], coerce = float)
 	defaultEndLookupValue = SelectField("Default End Value", validators = [Optional()], coerce = float)
 	unitOfMeasurement = QuerySelectField("Unit", query_factory = lambda: UnitOfMeasurement.query. \
