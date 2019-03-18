@@ -25,11 +25,11 @@ def addElement(elementTemplateId):
 		db.session.add(element)
 		db.session.commit()
 
-		# Add tags and element attributes
 		createdTags = []
-		updatedTags = []
 		createdElementAttributes = []
+		createdEventFrameAttributes = []
 		if form.isManaged.data:
+			# Add element attributes
 			for elementAttributeTemplate in ElementAttributeTemplate.query.filter_by(ElementTemplateId = element.ElementTemplateId):
 				tagName = "{}_{}".format(form.name.data, elementAttributeTemplate.Name.replace(" ", ""))
 				tag = Tag(AreaId = form.area.data, LookupId = elementAttributeTemplate.LookupId, Name = tagName, 
@@ -37,7 +37,6 @@ def addElement(elementTemplateId):
 
 				if tag.exists():
 					tag = Tag.query.filter_by(AreaId = tag.AreaId, Name = tag.Name).one()
-					updatedTags.append(tag)
 				else:
 					db.session.add(tag)
 					db.session.commit()
@@ -49,7 +48,29 @@ def addElement(elementTemplateId):
 				db.session.commit()
 				createdElementAttributes.append(elementAttribute)
 
+			# Add event frame attributes
+			for topLevelEventFrameTemplate in EventFrameTemplate.query.filter_by(ElementTemplateId = element.ElementTemplateId):
+				for eventFrameTemplate in topLevelEventFrameTemplate.descendants([], 0):
+					for eventFrameAttributeTemplate in eventFrameTemplate["eventFrameTemplate"].EventFrameAttributeTemplates:
+						tagName = "{}_{}".format(form.name.data, eventFrameAttributeTemplate.Name.replace(" ", ""))
+						tag = Tag(AreaId = form.area.data, LookupId = eventFrameAttributeTemplate.LookupId, Name = tagName, 
+							UnitOfMeasurementId = eventFrameAttributeTemplate.UnitOfMeasurementId)
+
+						if tag.exists():
+							tag = Tag.query.filter_by(AreaId = tag.AreaId, Name = tag.Name).one()
+						else:
+							db.session.add(tag)
+							db.session.commit()
+							createdTags.append(tag)
+
+						eventFrameAttribute = EventFrameAttribute(EventFrameAttributeTemplateId = eventFrameAttributeTemplate.EventFrameAttributeTemplateId, 
+							ElementId = element.ElementId, TagId = tag.TagId)
+						db.session.add(eventFrameAttribute)
+						db.session.commit()
+						createdEventFrameAttributes.append(eventFrameAttribute)
+
 		flash("You have successfully added the new element \"{}\".".format(element.Name), "alert alert-success")
+
 		createdTagsMessage = ""
 		if createdTags:
 			createdTags.sort(key = lambda tag: tag.Name)
@@ -61,18 +82,6 @@ def addElement(elementTemplateId):
 					createdTagsMessage = '{}<br>"{}"'.format(createdTagsMessage, tag.Name)
 
 			flash(createdTagsMessage, alert)
-
-		updatedTagsMessage = ""
-		if updatedTags:
-			updatedTags.sort(key = lambda tag: tag.Name)
-			for tag in updatedTags:
-				if updatedTagsMessage == "":
-					updatedTagsMessage = 'Updated the following existing tag(s), if needed:<br>"{}"'.format(tag.Name)
-					alert = "alert alert-warning"
-				else:
-					updatedTagsMessage = '{}<br>"{}"'.format(updatedTagsMessage, tag.Name)
-
-			flash(updatedTagsMessage, alert)
 
 		createdElementAttributesMessage = ""
 		if createdElementAttributes:
@@ -88,6 +97,19 @@ def addElement(elementTemplateId):
 						elementAttribute.Element.Name, elementAttribute.ElementAttributeTemplate.Name, elementAttribute.Tag.Name)
 
 			flash(createdElementAttributesMessage, alert)
+
+		createdEventFrameAttributesMessage = ""
+		if createdEventFrameAttributes:
+			createdEventFrameAttributes.sort(key = lambda tag: tag.Element.Name)
+			for eventFrameAttribute in createdEventFrameAttributes:
+				if createdEventFrameAttributesMessage == "":
+					createdEventFrameAttributesMessage = "Created the following event frame attribute(s):<br>Element: " + \
+						'"{}" attribute: "{}" associated with tag: "{}"'.format(eventFrameAttribute.Element.Name, eventFrameAttribute.EventFrameAttributeTemplate.Name, eventFrameAttribute.Tag.Name)
+					alert = "alert alert-success"
+				else:
+					createdEventFrameAttributesMessage = '{}<br>Element: "{}" attribute: "{}" associated with tag: "{}"'.format(createdEventFrameAttributesMessage, eventFrameAttribute.Element.Name, eventFrameAttribute.EventFrameAttributeTemplate.Name, eventFrameAttribute.Tag.Name)
+
+			flash(createdEventFrameAttributesMessage, alert)
 
 		return redirect(form.requestReferrer.data)
 
@@ -229,7 +251,7 @@ def editElement(elementId):
 		element.TagAreaId = form.area.data if form.isManaged.data else None
 
 		if form.isManaged.data:
-			# Update/Add tags for every element attribute template
+			# Update/Add tags and element attributes
 			for elementAttributeTemplate in ElementAttributeTemplate.query.filter_by(ElementTemplateId = element.ElementTemplateId):
 				tagName = "{}_{}".format(form.name.data, elementAttributeTemplate.Name.replace(" ", ""))
 				elementAttribute = ElementAttribute.query.filter_by(ElementAttributeTemplateId = elementAttributeTemplate.ElementAttributeTemplateId, 
@@ -243,8 +265,6 @@ def editElement(elementId):
 				# Update/Add tag and add element attribute
 				else:
 					tag = Tag.query.filter_by(AreaId = form.area.data, Name = tagName).one_or_none()
-					# !!! old area is null if element was un-managed
-					# oldTag = Tag.query.filter_by(AreaId = oldElement.TagAreaId, Name = oldTagName).one_or_none()
 					oldTagName = "{}_{}".format(oldElementName, elementAttributeTemplate.Name.replace(" ", ""))
 					oldTag = Tag.query.filter_by(AreaId = form.area.data, Name = oldTagName).one_or_none()
 				
@@ -271,6 +291,47 @@ def editElement(elementId):
 						elementAttribute = ElementAttribute(ElementAttributeTemplateId = elementAttributeTemplate.ElementAttributeTemplateId, 
 							ElementId = elementId, TagId = tag.TagId)
 						db.session.add(elementAttribute)
+
+			# Update/Add tags and event frame attributes
+			for topLevelEventFrameTemplate in EventFrameTemplate.query.filter_by(ElementTemplateId = element.ElementTemplateId):
+				for eventFrameTemplate in topLevelEventFrameTemplate.descendants([], 0):
+					for eventFrameAttributeTemplate in eventFrameTemplate["eventFrameTemplate"].EventFrameAttributeTemplates:
+						tagName = "{}_{}".format(form.name.data, eventFrameAttributeTemplate.Name.replace(" ", ""))
+						eventFrameAttribute = EventFrameAttribute.query. \
+							filter_by(EventFrameAttributeTemplateId = eventFrameAttributeTemplate.EventFrameAttributeTemplateId, ElementId = elementId). \
+							one_or_none()
+						
+						# Update existing bound tag
+						if eventFrameAttribute is not None:
+							tag = Tag.query.filter_by(TagId = eventFrameAttribute.TagId).one()
+							tag.AreaId = form.area.data
+							tag.Name = tagName
+						# Update/Add tag and add event frame attribute
+						else:
+							tag = Tag.query.filter_by(AreaId = form.area.data, Name = tagName).one_or_none()
+							oldTagName = "{}_{}".format(oldElementName, eventFrameAttributeTemplate.Name.replace(" ", ""))
+							oldTag = Tag.query.filter_by(AreaId = form.area.data, Name = oldTagName).one_or_none()
+						
+							# If new tag already exists, bind to event frame attribute
+							if tag is not None:
+								eventFrameAttribute = EventFrameAttribute(EventFrameAttributeTemplateId = eventFrameAttributeTemplate.EventFrameAttributeTemplateId, ElementId = elementId, TagId = tag.TagId)
+								db.session.add(eventFrameAttribute)
+							# If old tag exists but not bound, update it and bind to event frame attribute
+							elif oldTag is not None:
+								oldTag.AreaId = form.area.data
+								oldTag.Name = tagName
+
+								eventFrameAttribute = EventFrameAttribute(EventFrameAttributeTemplateId = eventFrameAttributeTemplate.EventFrameAttributeTemplateId, ElementId = elementId, TagId = oldTag.TagId)
+								db.session.add(eventFrameAttribute)
+							# Else add new tag and event frame attribute
+							else:
+								tag = Tag(AreaId = form.area.data, LookupId = eventFrameAttributeTemplate.LookupId, Name = tagName, 
+									UnitOfMeasurementId = eventFrameAttributeTemplate.UnitOfMeasurementId)
+								db.session.add(tag)
+								db.session.commit()
+
+								eventFrameAttribute = EventFrameAttribute(EventFrameAttributeTemplateId = eventFrameAttributeTemplate.EventFrameAttributeTemplateId, ElementId = elementId, TagId = tag.TagId)
+								db.session.add(eventFrameAttribute)
 
 		db.session.commit()
 		flash("You have successfully edited the element \"{}\".".format(element.Name), "alert alert-success")
