@@ -16,9 +16,12 @@ def addTag(areaId, lookup = False):
 	operation = "Add"
 	form = TagForm()
 
+	area = Area.query.get_or_404(areaId)
 	if lookup:
 		modelName = "Lookup Tag"
 		del form.unitOfMeasurement
+		form.lookup.choices = [(lookup.LookupId, lookup.Name) for lookup in Lookup.query. \
+			filter_by(EnterpriseId = area.Site.Enterprise.EnterpriseId).order_by(Lookup.Name)]
 	else:
 		modelName = "Tag"
 		del form.lookup
@@ -26,7 +29,7 @@ def addTag(areaId, lookup = False):
 	# Add a new tag.
 	if form.validate_on_submit():
 		if lookup:
-			tag = Tag(AreaId = form.areaId.data, Description = form.description.data, Lookup = form.lookup.data, Name = form.name.data)
+			tag = Tag(AreaId = form.areaId.data, Description = form.description.data, LookupId = form.lookup.data, Name = form.name.data)
 		else:
 			tag = Tag(AreaId = form.areaId.data, Description = form.description.data, Name = form.name.data, UnitOfMeasurement = form.unitOfMeasurement.data)
 
@@ -40,7 +43,6 @@ def addTag(areaId, lookup = False):
 	if form.requestReferrer.data is None:
 		form.requestReferrer.data = request.referrer
 
-	area = Area.query.get_or_404(areaId)
 	breadcrumbs = [{"url" : url_for("tags.selectTag", selectedClass = "Root"), "text" : "<span class = \"glyphicon glyphicon-home\"></span>"},
 		{"url" : url_for("tags.selectTag", selectedClass = "Enterprise", selectedId = area.Site.Enterprise.EnterpriseId), "text" : area.Site.Enterprise.Name},
 		{"url" : url_for("tags.selectTag", selectedClass = "Site", selectedId = area.Site.SiteId), "text" : area.Site.Name},
@@ -68,6 +70,8 @@ def editTag(tagId):
 	if tag.LookupId:
 		modelName = "Lookup Tag"
 		del form.unitOfMeasurement
+		form.lookup.choices = [(lookup.LookupId, lookup.Name) for lookup in Lookup.query. \
+			filter_by(EnterpriseId = tag.Area.Site.Enterprise.EnterpriseId).order_by(Lookup.Name)]
 	else:
 		modelName = "Tag"
 		del form.lookup
@@ -79,7 +83,7 @@ def editTag(tagId):
 		tag.Name = form.name.data
 
 		if tag.LookupId:
-			tag.Lookup = form.lookup.data
+			tag.LookupId = form.lookup.data
 		else:
 			tag.UnitOfMeasurement = form.unitOfMeasurement.data
 
@@ -93,7 +97,7 @@ def editTag(tagId):
 	form.description.data = tag.Description
 	form.name.data = tag.Name
 	if tag.LookupId:
-		form.lookup.data = tag.Lookup
+		form.lookup.data = tag.LookupId
 	else:
 		form.unitOfMeasurement.data = tag.UnitOfMeasurement
 

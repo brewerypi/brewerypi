@@ -5,7 +5,8 @@ from . import elements
 from . forms import ElementForm
 from .. import db
 from .. decorators import adminRequired, permissionRequired
-from .. models import Area, Element, ElementAttribute, ElementAttributeTemplate, ElementTemplate, Enterprise, EventFrame, EventFrameAttribute, EventFrameAttributeTemplate, EventFrameTemplate, Permission, Site, Tag
+from .. models import Area, Element, ElementAttribute, ElementAttributeTemplate, ElementTemplate, Enterprise, EventFrame, EventFrameAttribute, \
+	EventFrameAttributeTemplate, EventFrameTemplate, Permission, Site, Tag
 
 modelName = "Element"
 
