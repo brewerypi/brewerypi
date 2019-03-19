@@ -55,6 +55,7 @@ Tags
                 {% if childrenClass == "Tag" %}
                     <th>Lookup</th>
                     <th>Unit</th>
+                    <th>Managed?</th>
                 {% endif %}
                 <th></th>
                 <th></th>
@@ -79,7 +80,8 @@ Tags
                         {% if childrenClass == "Tag" %}
                             <td>{{ "" if child.LookupId is none else child.Lookup.Name }}</td>
                             <td>{{ "" if child.UnitOfMeasurementId is none else child.UnitOfMeasurement.Abbreviation }}</td>
-                            {% if current_user.isAdministrator() %}
+                            <td>{{ child.isManaged() | yesNo }}</td>
+                            {% if current_user.isAdministrator() and child.isManaged() == false %}
                                 <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("tags.editTag", tagId = child.TagId) }}">
                                     <span class = "glyphicon glyphicon-edit"></span></a></td>
                                 <td><a class = "btn btn-default" title = "Delete" href = "{{ url_for("tags.deleteTag", tagId = child.TagId) }}",
@@ -120,6 +122,7 @@ Tags
                     null,
                     null,
                     {% if childrenClass == "Tag" %}
+                        null,
                         null,
                         null,
                     {% endif %}

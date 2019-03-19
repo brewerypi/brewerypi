@@ -1,5 +1,5 @@
 from flask_login import AnonymousUserMixin, UserMixin
-from sqlalchemy import and_, Index, PrimaryKeyConstraint, UniqueConstraint
+from sqlalchemy import Index, PrimaryKeyConstraint, UniqueConstraint
 from werkzeug.security import generate_password_hash, check_password_hash
 from app import db
 from . import loginManager
@@ -27,6 +27,7 @@ class Area(db.Model):
 	Name = db.Column(db.String(45), nullable = False)
 	SiteId = db.Column(db.Integer, db.ForeignKey("Site.SiteId", name = "FK__Site$Have$Area"), nullable = False)
 
+	ManagedElements = db.relationship("Element", backref = "Area", lazy = "dynamic")
 	Tags = db.relationship("Tag", backref = "Area", lazy = "dynamic")
 
 	def __repr__(self):
@@ -53,6 +54,7 @@ class Element(db.Model):
 	Description = db.Column(db.String(255), nullable = True)
 	ElementTemplateId = db.Column(db.Integer, db.ForeignKey("ElementTemplate.ElementTemplateId", name = "FK__ElementTemplate$Have$Element"), nullable = False)
 	Name = db.Column(db.String(45), nullable = False)
+	TagAreaId = db.Column(db.Integer, db.ForeignKey("Area.AreaId", name = "FK__Area$House$ManagedElementTag"), nullable = True)
 
 	ElementAttributes = db.relationship("ElementAttribute", backref = "Element", lazy = "dynamic")
 	EventFrameAttributes = db.relationship("EventFrameAttribute", backref = "Element", lazy = "dynamic")
@@ -94,11 +96,14 @@ class Element(db.Model):
 		eventFrameAttributes = self.EventFrameAttributes
 		for eventFrameAttribute in eventFrameAttributes:
 			eventFrameAttribute.delete()
-
+		
 		db.session.delete(self)
 
 	def id(self):
 		return self.ElementId
+
+	def isManaged(self):
+		return True if self.TagAreaId is not None else False
 
 class ElementAttribute(db.Model):
 	__tablename__ = "ElementAttribute"
@@ -115,7 +120,7 @@ class ElementAttribute(db.Model):
 
 	def delete(self):
 		db.session.delete(self)
-
+	
 	def id(self):
 		return self.ElementAttributeId
 
@@ -130,7 +135,10 @@ class ElementAttributeTemplate(db.Model):
 	Description = db.Column(db.String(255), nullable = True)
 	ElementTemplateId = db.Column(db.Integer, db.ForeignKey("ElementTemplate.ElementTemplateId", name = "FK__ElementTemplate$Have$ElementAttributeTemplate"), \
 		nullable = False)
+	LookupId = db.Column(db.Integer, db.ForeignKey("Lookup.LookupId", name = "FK__Lookup$CanBeUsedIn$ElementAttributeTemplate"), nullable = True)
 	Name = db.Column(db.String(45), nullable = False)
+	UnitOfMeasurementId = db.Column(db.Integer, db.ForeignKey("UnitOfMeasurement.UnitOfMeasurementId", \
+		name = "FK__UnitOfMeasurement$CanBeUsedIn$ElementAttributeTemplate"), nullable = True)
 
 	ElementAttributes = db.relationship("ElementAttribute", backref = "ElementAttributeTemplate", lazy = "dynamic")
 
@@ -233,6 +241,7 @@ class EventFrame(db.Model):
 	Name = db.Column(db.String(45), nullable = False)
 	ParentEventFrameId = db.Column(db.Integer, db.ForeignKey("EventFrame.EventFrameId", name = "FK__EventFrame$CanHave$EventFrame"), nullable = True)
 	StartTimestamp = db.Column(db.DateTime, nullable = False)
+	UserId = db.Column(db.Integer, db.ForeignKey("User.UserId", name = "FK__User$AddOrEdit$EventFrame"), nullable = False)
 
 	ParentEventFrame = db.relationship("EventFrame", remote_side = [EventFrameId])
 	EventFrames = db.relationship("EventFrame", remote_side = [ParentEventFrameId])
@@ -305,9 +314,14 @@ class EventFrameAttributeTemplate(db.Model):
 
 	EventFrameAttributeTemplateId = db.Column(db.Integer, primary_key = True)
 	Description = db.Column(db.String(255), nullable = True)
+	DefaultEndValue = db.Column(db.Float, nullable = True)
+	DefaultStartValue = db.Column(db.Float, nullable = True)
 	EventFrameTemplateId = db.Column(db.Integer, db.ForeignKey("EventFrameTemplate.EventFrameTemplateId", \
 		name = "FK__EventFrameTemplate$Have$EventFrameAttributeTemplate"), nullable = False)
+	LookupId = db.Column(db.Integer, db.ForeignKey("Lookup.LookupId", name = "FK__Lookup$CanBeUsedIn$EventFrameAttributeTemplate"), nullable = True)
 	Name = db.Column(db.String(45), nullable = False)
+	UnitOfMeasurementId = db.Column(db.Integer, db.ForeignKey("UnitOfMeasurement.UnitOfMeasurementId", \
+		name = "FK__UnitOfMeasurement$CanBeUsedIn$EventFrameAttributeTemplate"), nullable = True)
 
 	EventFrameAttributes = db.relationship("EventFrameAttribute", backref = "EventFrameAttributeTemplate", lazy = "dynamic")
 
@@ -327,8 +341,8 @@ class EventFrameAttributeTemplate(db.Model):
 	def path(self):
 		path = ""
 		for ancestor in self.EventFrameTemplate.ancestors([]):
-			path += "&nbsp;\&nbsp;{}".format(ancestor.Name)
-		return  "{}&nbsp;\&nbsp;{}".format(path, self.EventFrameTemplate.Name)
+			path += "\{}".format(ancestor.Name)
+		return  "{}\{}".format(path, self.EventFrameTemplate.Name)
 
 class EventFrameNote(db.Model):
 	__tablename__ = "EventFrameNote"
@@ -435,6 +449,8 @@ class Lookup(db.Model):
 	EnterpriseId = db.Column(db.Integer, db.ForeignKey("Enterprise.EnterpriseId", name = "FK__Enterprise$Have$Lookup"), nullable = False)
 	Name = db.Column(db.String(45), nullable = False)
 
+	ElementAttributeTemplates = db.relationship("ElementAttributeTemplate", backref = "Lookup", lazy = "dynamic")
+	EventFrameAttributeTemplates = db.relationship("EventFrameAttributeTemplate", backref = "Lookup", lazy = "dynamic")
 	LookupValues = db.relationship("LookupValue", backref = "Lookup", lazy = "dynamic")
 	Tags = db.relationship("Tag", backref = "Lookup", lazy = "dynamic")
 
@@ -452,7 +468,7 @@ class Lookup(db.Model):
 		return self.LookupId
 
 	def isReferenced(self):
-		return Tag.query.filter_by(LookupId = self.LookupId).count() > 0
+		return self.Tags.count() > 0
 
 class LookupValue(db.Model):
 	__tablename__ = "LookupValue"
@@ -490,6 +506,7 @@ class Note(db.Model):
 	NoteId = db.Column(db.Integer, primary_key = True)
 	Note = db.Column(db.Text, nullable = False)
 	Timestamp = db.Column(db.DateTime, nullable = False)
+	UserId = db.Column(db.Integer, db.ForeignKey("User.UserId", name = "FK__User$AddOrEdit$Note"), nullable = False)
 	
 	TagValueNotes = db.relationship("TagValueNote", backref = "Note", lazy = "dynamic")
 	EventFrameNotes = db.relationship("EventFrameNote", backref = "Note", lazy = "dynamic")
@@ -600,11 +617,28 @@ class Tag(db.Model):
 
 		db.session.delete(self)
 
+	def exists(self):
+		return Tag.query.filter_by(Name = self.Name, AreaId = self.AreaId).scalar()
+
 	def fullAbbreviatedPathName(self):
 		return "{}_{}_{}_{}".format(self.Area.Site.Enterprise.Abbreviation, self.Area.Site.Abbreviation, self.Area.Abbreviation, self.Name)
 
 	def id(self):
 		return self.TagId
+
+	def isManaged(self):
+		for elementAttribute in self.ElementAttributes:
+			if elementAttribute.Element.isManaged():
+				return True
+
+		for eventFrameAttribute in self.EventFrameAttributes:
+			if eventFrameAttribute.Element.isManaged():
+				return True
+
+		return False
+
+	def isReferenced(self):
+		return self.ElementAttributes.count() > 0 or self.EventFrameAttributes.count() > 0
 
 class TagValue(db.Model):
 	__tablename__ = "TagValue"
@@ -617,6 +651,7 @@ class TagValue(db.Model):
 	TagValueId = db.Column(db.Integer, primary_key = True)
 	TagId = db.Column(db.Integer, db.ForeignKey("Tag.TagId", name = "FK__Tag$Have$TagValue"), nullable = False)
 	Timestamp = db.Column(db.DateTime, nullable = False)
+	UserId = db.Column(db.Integer, db.ForeignKey("User.UserId", name = "FK__User$AddOrEdit$TagValue"), nullable = False)
 	Value = db.Column(db.Float, nullable = False)
 
 	TagValueNotes = db.relationship("TagValueNote", backref = "TagValue", lazy = "dynamic")
@@ -660,6 +695,8 @@ class UnitOfMeasurement(db.Model):
 	Abbreviation = db.Column(db.String(15), nullable = False)
 	Name = db.Column(db.String(45), nullable = False)
 
+	ElementAttributeTemplates = db.relationship("ElementAttributeTemplate", backref = "UnitOfMeasurement", lazy = "dynamic")
+	EventFrameAttributeTemplates = db.relationship("EventFrameAttributeTemplate", backref = "UnitOfMeasurement", lazy = "dynamic")
 	Tags = db.relationship("Tag", backref = "UnitOfMeasurement", lazy = "dynamic")
 
 	def __repr__(self):
@@ -672,7 +709,7 @@ class UnitOfMeasurement(db.Model):
 		return self.UnitOfMeasurementId
 
 	def isReferenced(self):
-		return Tag.query.filter_by(UnitOfMeasurementId = self.UnitOfMeasurementId).count() > 0
+		return self.Tags.count() > 0
 
 class User(UserMixin, db.Model):
 	__tablename__ = "User"
@@ -683,9 +720,14 @@ class User(UserMixin, db.Model):
 	)
 
 	UserId = db.Column(db.Integer, primary_key = True)
+	Enabled = db.Column(db.Boolean, nullable = False)
 	Name = db.Column(db.String(45), nullable = False)
 	PasswordHash = db.Column(db.String(128))
 	RoleId = db.Column(db.Integer, db.ForeignKey("Role.RoleId", name = "FK__Role$Have$User"), nullable = False)
+
+	EventFrames = db.relationship("EventFrame", backref = "User", lazy = "dynamic")
+	Notes = db.relationship("Note", backref = "User", lazy = "dynamic")
+	TagValues = db.relationship("TagValue", backref = "User", lazy = "dynamic")
 
 	@property
 	def Password(self):
@@ -700,7 +742,7 @@ class User(UserMixin, db.Model):
 		user = User.query.filter_by(Name = "pi").first()
 		AdministratorRole = Role.query.filter_by(Name = "Administrator").first()
 		if user is None:
-			user = User(Name = "pi", Password = "brewery", Role = AdministratorRole)
+			user = User(Enabled = True, Name = "pi", Password = "brewery", Role = AdministratorRole)
 			db.session.add(user)
 		else:
 			user.Role = AdministratorRole

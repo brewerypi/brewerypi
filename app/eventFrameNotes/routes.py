@@ -1,5 +1,5 @@
 from flask import flash, redirect, render_template, request, url_for
-from flask_login import login_required
+from flask_login import current_user, login_required
 from . import eventFrameNotes
 from . forms import EventFrameNoteForm
 from .. import db
@@ -17,7 +17,7 @@ def addEventFrameNote(eventFrameId):
 
 	# Add a new event frame note.
 	if form.validate_on_submit():
-		note = Note(Note = form.note.data, Timestamp = form.utcTimestamp.data)
+		note = Note(Note = form.note.data, Timestamp = form.utcTimestamp.data, UserId = current_user.get_id())
 		db.session.add(note)
 		db.session.commit()
 		eventFrameNote = EventFrameNote(NoteId = note.NoteId, EventFrameId = eventFrameId)
@@ -90,6 +90,7 @@ def editEventFrameNote(eventFrameId, noteId):
 	if form.validate_on_submit():
 		note.Note = form.note.data
 		note.Timestamp = form.utcTimestamp.data
+		note.UserId = current_user.get_id()
 		db.session.commit()
 		flash("You have successfully edited the Event Frame Note.", "alert alert-success")
 		return redirect(form.requestReferrer.data)

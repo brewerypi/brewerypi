@@ -5,8 +5,7 @@ from . import elements
 from . forms import ElementForm
 from .. import db
 from .. decorators import adminRequired, permissionRequired
-from .. models import Area, ElementAttributeTemplate, Element, ElementAttribute, ElementTemplate, Enterprise, EventFrame, EventFrameTemplate, Permission, \
-	Site, Tag
+from .. models import Area, Element, ElementAttribute, ElementAttributeTemplate, ElementTemplate, Enterprise, EventFrame, EventFrameAttribute, EventFrameAttributeTemplate, EventFrameTemplate, Permission, Site, Tag
 
 modelName = "Element"
 
@@ -16,13 +15,80 @@ modelName = "Element"
 def addElement(elementTemplateId):
 	operation = "Add"
 	form = ElementForm()
+	elementTemplate = ElementTemplate.query.get_or_404(elementTemplateId)
+	form.area.choices = [(area.AreaId, area.Name) for area in Area.query.filter_by(SiteId = elementTemplate.Site.SiteId).order_by(Area.Name)]
 
 	# Add a new element.
 	if form.validate_on_submit():
-		element = Element(Description = form.description.data, ElementTemplateId = form.elementTemplateId.data, Name = form.name.data)
+		element = Element(Description = form.description.data, ElementTemplateId = form.elementTemplateId.data,
+			TagAreaId = form.area.data if form.isManaged.data else None, Name = form.name.data)
 		db.session.add(element)
 		db.session.commit()
+
+		# Add tags and element attributes
+		createdTags = []
+		updatedTags = []
+		createdElementAttributes = []
+		if form.isManaged.data:
+			for elementAttributeTemplate in ElementAttributeTemplate.query.filter_by(ElementTemplateId = element.ElementTemplateId):
+				tagName = "{}_{}".format(form.name.data, elementAttributeTemplate.Name.replace(" ", ""))
+				tag = Tag(AreaId = form.area.data, LookupId = elementAttributeTemplate.LookupId, Name = tagName, 
+					UnitOfMeasurementId = elementAttributeTemplate.UnitOfMeasurementId)
+
+				if tag.exists():
+					tag = Tag.query.filter_by(AreaId = tag.AreaId, Name = tag.Name).one()
+					updatedTags.append(tag)
+				else:
+					db.session.add(tag)
+					db.session.commit()
+					createdTags.append(tag)
+
+				elementAttribute = ElementAttribute(ElementAttributeTemplateId = elementAttributeTemplate.ElementAttributeTemplateId, 
+					ElementId = element.ElementId, TagId = tag.TagId)
+				db.session.add(elementAttribute)
+				db.session.commit()
+				createdElementAttributes.append(elementAttribute)
+
 		flash("You have successfully added the new element \"{}\".".format(element.Name), "alert alert-success")
+		createdTagsMessage = ""
+		if createdTags:
+			createdTags.sort(key = lambda tag: tag.Name)
+			for tag in createdTags:
+				if createdTagsMessage == "":
+					createdTagsMessage = 'Created the following tag(s):<br>"{}"'.format(tag.Name)
+					alert = "alert alert-success"
+				else:
+					createdTagsMessage = '{}<br>"{}"'.format(createdTagsMessage, tag.Name)
+
+			flash(createdTagsMessage, alert)
+
+		updatedTagsMessage = ""
+		if updatedTags:
+			updatedTags.sort(key = lambda tag: tag.Name)
+			for tag in updatedTags:
+				if updatedTagsMessage == "":
+					updatedTagsMessage = 'Updated the following existing tag(s), if needed:<br>"{}"'.format(tag.Name)
+					alert = "alert alert-warning"
+				else:
+					updatedTagsMessage = '{}<br>"{}"'.format(updatedTagsMessage, tag.Name)
+
+			flash(updatedTagsMessage, alert)
+
+		createdElementAttributesMessage = ""
+		if createdElementAttributes:
+			createdElementAttributes.sort(key = lambda tag: tag.Element.Name)
+			for elementAttribute in createdElementAttributes:
+				if createdElementAttributesMessage == "":
+					createdElementAttributesMessage = "Created the following element attribute(s):<br>Element: " + \
+						'"{}" attribute: "{}" associated with tag: "{}"'.format(elementAttribute.Element.Name, elementAttribute.ElementAttributeTemplate.Name,
+						elementAttribute.Tag.Name)
+					alert = "alert alert-success"
+				else:
+					createdElementAttributesMessage = '{}<br>Element: "{}" attribute: "{}" associated with tag: "{}"'.format(createdElementAttributesMessage,
+						elementAttribute.Element.Name, elementAttribute.ElementAttributeTemplate.Name, elementAttribute.Tag.Name)
+
+			flash(createdElementAttributesMessage, alert)
+
 		return redirect(form.requestReferrer.data)
 
 	# Present a form to add a new element.
@@ -30,14 +96,13 @@ def addElement(elementTemplateId):
 	if form.requestReferrer.data is None:
 		form.requestReferrer.data = request.referrer
 
-	elementTemplate = ElementTemplate.query.get_or_404(elementTemplateId)
 	breadcrumbs = [{"url" : url_for("elements.selectElement", selectedClass = "Root"), "text" : "<span class = \"glyphicon glyphicon-home\"></span>"},
 		{"url" : url_for("elements.selectElement", selectedClass = "Enterprise", selectedId = elementTemplate.Site.Enterprise.EnterpriseId),
 			"text" : elementTemplate.Site.Enterprise.Name},
 		{"url" : url_for("elements.selectElement", selectedClass = "Site", selectedId = elementTemplate.Site.SiteId), "text" : elementTemplate.Site.Name},
 		{"url" : url_for("elements.selectElement", selectedClass = "ElementTemplate", selectedId = elementTemplate.ElementTemplateId),
 			"text" : elementTemplate.Name}]
-	return render_template("addEdit.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
+	return render_template("elements/addEdit.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
 
 @elements.route("/elements/copy/<int:elementId>", methods = ["GET", "POST"])
 @login_required
@@ -119,9 +184,31 @@ def dashboard(elementId):
 @adminRequired
 def deleteElement(elementId):
 	element = Element.query.get_or_404(elementId)
+	tags = []
+	if element.isManaged():
+		for elementAttribute in element.ElementAttributes:
+			tags.append(elementAttribute.Tag)
+		for eventFrameAttribute in element.EventFrameAttributes:
+			tags.append(eventFrameAttribute.Tag)
+
 	element.delete()
 	db.session.commit()
-	flash("You have successfully deleted the element \"{}\".".format(element.Name), "alert alert-success")
+	flash('You have successfully deleted the element "{}".'.format(element.Name), "alert alert-success")
+	deletedTagsMessage = ""
+	tags.sort(key = lambda tag: tag.Name)
+	for tag in tags:
+		if not tag.isReferenced():
+			tag.delete()
+			if deletedTagsMessage == "":
+				deletedTagsMessage = 'Deleted the following tag(s):<br>"{}"'.format(tag.Name)
+			else:
+				deletedTagsMessage = '{}<br>"{}"'.format(deletedTagsMessage, tag.Name)
+
+	db.session.commit()
+	if deletedTagsMessage != "":
+		alert = "alert alert-success"
+		flash(deletedTagsMessage, alert)
+
 	return redirect(request.referrer)
 
 @elements.route("/elements/edit/<int:elementId>", methods = ["GET", "POST"])
@@ -131,12 +218,59 @@ def editElement(elementId):
 	operation = "Edit"
 	element = Element.query.get_or_404(elementId)
 	form = ElementForm(obj = element)
+	form.area.choices = [(area.AreaId, area.Name) for area in Area.query.filter_by(SiteId = element.ElementTemplate.Site.SiteId).order_by(Area.Name)]
 
 	# Edit an existing element.
 	if form.validate_on_submit():
+		oldElementName = element.Name
 		element.Description = form.description.data
 		element.ElementTemplateId = form.elementTemplateId.data
 		element.Name = form.name.data
+		element.TagAreaId = form.area.data if form.isManaged.data else None
+
+		if form.isManaged.data:
+			# Update/Add tags for every element attribute template
+			for elementAttributeTemplate in ElementAttributeTemplate.query.filter_by(ElementTemplateId = element.ElementTemplateId):
+				tagName = "{}_{}".format(form.name.data, elementAttributeTemplate.Name.replace(" ", ""))
+				elementAttribute = ElementAttribute.query.filter_by(ElementAttributeTemplateId = elementAttributeTemplate.ElementAttributeTemplateId, 
+					ElementId = elementId).one_or_none()
+				
+				# Update existing bound tag
+				if elementAttribute is not None:
+					tag = Tag.query.filter_by(TagId = elementAttribute.TagId).one()
+					tag.AreaId = form.area.data
+					tag.Name = tagName
+				# Update/Add tag and add element attribute
+				else:
+					tag = Tag.query.filter_by(AreaId = form.area.data, Name = tagName).one_or_none()
+					# !!! old area is null if element was un-managed
+					# oldTag = Tag.query.filter_by(AreaId = oldElement.TagAreaId, Name = oldTagName).one_or_none()
+					oldTagName = "{}_{}".format(oldElementName, elementAttributeTemplate.Name.replace(" ", ""))
+					oldTag = Tag.query.filter_by(AreaId = form.area.data, Name = oldTagName).one_or_none()
+				
+					# If new tag already exists, bind to element attribute
+					if tag is not None:
+						elementAttribute = ElementAttribute(ElementAttributeTemplateId = elementAttributeTemplate.ElementAttributeTemplateId, 
+							ElementId = elementId, TagId = tag.TagId)
+						db.session.add(elementAttribute)
+					# If old tag exists but not bound, update it and bind to element attribute
+					elif oldTag is not None:
+						oldTag.AreaId = form.area.data
+						oldTag.Name = tagName
+
+						elementAttribute = ElementAttribute(ElementAttributeTemplateId = elementAttributeTemplate.ElementAttributeTemplateId, 
+							ElementId = elementId, TagId = oldTag.TagId)
+						db.session.add(elementAttribute)
+					# Else add new tag and element attribute
+					else:
+						tag = Tag(AreaId = form.area.data, LookupId = elementAttributeTemplate.LookupId, Name = tagName, 
+							UnitOfMeasurementId = elementAttributeTemplate.UnitOfMeasurementId)
+						db.session.add(tag)
+						db.session.commit()
+
+						elementAttribute = ElementAttribute(ElementAttributeTemplateId = elementAttributeTemplate.ElementAttributeTemplateId, 
+							ElementId = elementId, TagId = tag.TagId)
+						db.session.add(elementAttribute)
 
 		db.session.commit()
 		flash("You have successfully edited the element \"{}\".".format(element.Name), "alert alert-success")
@@ -147,6 +281,12 @@ def editElement(elementId):
 	form.description.data = element.Description
 	form.elementTemplateId.data = element.ElementTemplateId
 	form.name.data = element.Name
+	if element.TagAreaId is None:
+		form.isManaged.data = False
+	else:
+		form.isManaged.data = True
+		form.area.data = element.TagAreaId
+
 	if form.requestReferrer.data is None:
 		form.requestReferrer.data = request.referrer
 
@@ -158,7 +298,7 @@ def editElement(elementId):
 		{"url" : url_for("elements.selectElement", selectedClass = "ElementTemplate", selectedId = element.ElementTemplate.ElementTemplateId),
 			"text" : element.ElementTemplate.Name},
 		{"url" : None, "text" : element.Name}]
-	return render_template("addEdit.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
+	return render_template("elements/addEdit.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
 
 @elements.route("/elements/select", methods = ["GET", "POST"]) # Default.
 @elements.route("/elements/select/<string:selectedClass>", methods = ["GET", "POST"]) # Root.

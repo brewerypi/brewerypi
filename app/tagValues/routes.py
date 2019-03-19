@@ -1,7 +1,7 @@
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 from flask import flash, jsonify, redirect, render_template, request, url_for
-from flask_login import login_required
+from flask_login import current_user, login_required
 from sqlalchemy import or_
 from . import tagValues
 from . forms import TagValueForm
@@ -75,7 +75,7 @@ def addMultiple():
 	data = request.get_json(force = True)
 	count = 0
 	for item in data:
-		tagValue = TagValue(TagId = item["tagId"], Timestamp = item["timestamp"], Value = item["value"])
+		tagValue = TagValue(TagId = item["tagId"], Timestamp = item["timestamp"], UserId = current_user.get_id(), Value = item["value"])
 		db.session.add(tagValue)
 		count = count + 1
 
@@ -117,9 +117,9 @@ def addTagValue(tagId = None, elementAttributeId = None, eventFrameId = None, ev
 	# Add a new tag value.
 	if form.validate_on_submit():
 		if tag.LookupId:
-			tagValue = TagValue(TagId = form.tagId.data, Timestamp = form.utcTimestamp.data, Value = form.lookupValue.data)
+			tagValue = TagValue(TagId = form.tagId.data, Timestamp = form.utcTimestamp.data, UserId = current_user.get_id(), Value = form.lookupValue.data)
 		else:
-			tagValue = TagValue(TagId = form.tagId.data, Timestamp = form.utcTimestamp.data, Value = form.value.data)
+			tagValue = TagValue(TagId = form.tagId.data, Timestamp = form.utcTimestamp.data, UserId = current_user.get_id(), Value = form.value.data)
 
 		db.session.add(tagValue)
 		db.session.commit()
@@ -201,6 +201,7 @@ def editTagValue(tagValueId, elementAttributeId = None, eventFrameId = None, eve
 	if form.validate_on_submit():
 		tagValue.TagId = form.tagId.data
 		tagValue.Timestamp = form.utcTimestamp.data
+		tagValue.UserId = current_user.get_id()
 
 		if tag.LookupId:
 			tagValue.Value = form.lookupValue.data
