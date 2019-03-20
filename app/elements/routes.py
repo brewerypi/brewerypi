@@ -254,17 +254,23 @@ def editElement(elementId):
 		if form.isManaged.data:
 			# Update/Add tags and element attributes
 			for elementAttributeTemplate in ElementAttributeTemplate.query.filter_by(ElementTemplateId = element.ElementTemplateId):
+				tagUpdated = False
 				tagName = "{}_{}".format(form.name.data, elementAttributeTemplate.Name.replace(" ", ""))
 				elementAttribute = ElementAttribute.query.filter_by(ElementAttributeTemplateId = elementAttributeTemplate.ElementAttributeTemplateId, 
 					ElementId = elementId).one_or_none()
 				
-				# Update existing bound tag
+				# Update existing bound tag or delete existing element attribute
 				if elementAttribute is not None:
 					tag = Tag.query.filter_by(TagId = elementAttribute.TagId).one()
-					tag.AreaId = form.area.data
-					tag.Name = tagName
+					if tag.Name.split("_")[1] == elementAttributeTemplate.Name.replace(" ", ""):
+						tag.AreaId = form.area.data
+						tag.Name = tagName
+						tagUpdated = True
+					else:
+						elementAttribute.delete()
+
 				# Update/Add tag and add element attribute
-				else:
+				if not tagUpdated:
 					tag = Tag.query.filter_by(AreaId = form.area.data, Name = tagName).one_or_none()
 					oldTagName = "{}_{}".format(oldElementName, elementAttributeTemplate.Name.replace(" ", ""))
 					oldTag = Tag.query.filter_by(AreaId = form.area.data, Name = oldTagName).one_or_none()
@@ -297,18 +303,24 @@ def editElement(elementId):
 			for topLevelEventFrameTemplate in EventFrameTemplate.query.filter_by(ElementTemplateId = element.ElementTemplateId):
 				for eventFrameTemplate in topLevelEventFrameTemplate.descendants([], 0):
 					for eventFrameAttributeTemplate in eventFrameTemplate["eventFrameTemplate"].EventFrameAttributeTemplates:
+						tagUpdated = False
 						tagName = "{}_{}".format(form.name.data, eventFrameAttributeTemplate.Name.replace(" ", ""))
 						eventFrameAttribute = EventFrameAttribute.query. \
 							filter_by(EventFrameAttributeTemplateId = eventFrameAttributeTemplate.EventFrameAttributeTemplateId, ElementId = elementId). \
 							one_or_none()
 						
-						# Update existing bound tag
+						# Update existing bound tag or delete existing event frame attribute
 						if eventFrameAttribute is not None:
 							tag = Tag.query.filter_by(TagId = eventFrameAttribute.TagId).one()
-							tag.AreaId = form.area.data
-							tag.Name = tagName
+							if tag.Name.split("_")[1] == eventFrameAttributeTemplate.Name.replace(" ", ""):
+								tag.AreaId = form.area.data
+								tag.Name = tagName
+								tagUpdated = True
+							else:
+								eventFrameAttribute.delete()
+
 						# Update/Add tag and add event frame attribute
-						else:
+						if not tagUpdated:
 							tag = Tag.query.filter_by(AreaId = form.area.data, Name = tagName).one_or_none()
 							oldTagName = "{}_{}".format(oldElementName, eventFrameAttributeTemplate.Name.replace(" ", ""))
 							oldTag = Tag.query.filter_by(AreaId = form.area.data, Name = oldTagName).one_or_none()
