@@ -254,96 +254,112 @@ def editElement(elementId):
 		if form.isManaged.data:
 			# Update/Add tags and element attributes
 			for elementAttributeTemplate in ElementAttributeTemplate.query.filter_by(ElementTemplateId = element.ElementTemplateId):
-				tagUpdated = False
-				tagName = "{}_{}".format(form.name.data, elementAttributeTemplate.Name.replace(" ", ""))
 				elementAttribute = ElementAttribute.query.filter_by(ElementAttributeTemplateId = elementAttributeTemplate.ElementAttributeTemplateId, 
 					ElementId = elementId).one_or_none()
+
+				tagUpdated = False
+				tagName = "{}_{}".format(form.name.data, elementAttributeTemplate.Name.replace(" ", ""))
+				newTag = Tag.query.filter_by(AreaId = form.area.data, Name = tagName).one_or_none()
 				
 				# Update existing bound tag or delete existing element attribute
 				if elementAttribute is not None:
-					tag = Tag.query.filter_by(TagId = elementAttribute.TagId).one()
-					if tag.Name.split("_")[1] == elementAttributeTemplate.Name.replace(" ", ""):
-						tag.AreaId = form.area.data
-						tag.Name = tagName
+					oldTag = Tag.query.filter_by(TagId = elementAttribute.TagId).one()
+					if newTag is None and oldTag.Name.split("_")[1] == elementAttributeTemplate.Name.replace(" ", ""):
+						oldTag.AreaId = form.area.data
+						oldTag.LookupId = elementAttributeTemplate.LookupId
+						oldTag.Name = tagName
+						oldTag.UnitOfMeasurementId = elementAttributeTemplate.UnitOfMeasurementId
 						tagUpdated = True
 					else:
 						elementAttribute.delete()
 
 				# Update/Add tag and add element attribute
 				if not tagUpdated:
-					tag = Tag.query.filter_by(AreaId = form.area.data, Name = tagName).one_or_none()
 					oldTagName = "{}_{}".format(oldElementName, elementAttributeTemplate.Name.replace(" ", ""))
 					oldTag = Tag.query.filter_by(AreaId = form.area.data, Name = oldTagName).one_or_none()
 				
 					# If new tag already exists, bind to element attribute
-					if tag is not None:
+					if newTag is not None:
+						newTag.LookupId = elementAttributeTemplate.LookupId
+						newTag.UnitOfMeasurementId = elementAttributeTemplate.UnitOfMeasurementId
+
 						elementAttribute = ElementAttribute(ElementAttributeTemplateId = elementAttributeTemplate.ElementAttributeTemplateId, 
-							ElementId = elementId, TagId = tag.TagId)
+							ElementId = elementId, TagId = newTag.TagId)
 						db.session.add(elementAttribute)
 					# If old tag exists but not bound, update it and bind to element attribute
 					elif oldTag is not None:
 						oldTag.AreaId = form.area.data
+						oldTag.LookupId = elementAttributeTemplate.LookupId
 						oldTag.Name = tagName
+						oldTag.UnitOfMeasurementId = elementAttributeTemplate.UnitOfMeasurementId
 
 						elementAttribute = ElementAttribute(ElementAttributeTemplateId = elementAttributeTemplate.ElementAttributeTemplateId, 
 							ElementId = elementId, TagId = oldTag.TagId)
 						db.session.add(elementAttribute)
 					# Else add new tag and element attribute
 					else:
-						tag = Tag(AreaId = form.area.data, LookupId = elementAttributeTemplate.LookupId, Name = tagName, 
+						newTag = Tag(AreaId = form.area.data, LookupId = elementAttributeTemplate.LookupId, Name = tagName, 
 							UnitOfMeasurementId = elementAttributeTemplate.UnitOfMeasurementId)
-						db.session.add(tag)
+						db.session.add(newTag)
 						db.session.commit()
 
 						elementAttribute = ElementAttribute(ElementAttributeTemplateId = elementAttributeTemplate.ElementAttributeTemplateId, 
-							ElementId = elementId, TagId = tag.TagId)
+							ElementId = elementId, TagId = newTag.TagId)
 						db.session.add(elementAttribute)
 
 			# Update/Add tags and event frame attributes
 			for topLevelEventFrameTemplate in EventFrameTemplate.query.filter_by(ElementTemplateId = element.ElementTemplateId):
 				for eventFrameTemplate in topLevelEventFrameTemplate.descendants([], 0):
 					for eventFrameAttributeTemplate in eventFrameTemplate["eventFrameTemplate"].EventFrameAttributeTemplates:
-						tagUpdated = False
-						tagName = "{}_{}".format(form.name.data, eventFrameAttributeTemplate.Name.replace(" ", ""))
 						eventFrameAttribute = EventFrameAttribute.query. \
 							filter_by(EventFrameAttributeTemplateId = eventFrameAttributeTemplate.EventFrameAttributeTemplateId, ElementId = elementId). \
 							one_or_none()
 						
+						tagUpdated = False
+						tagName = "{}_{}".format(form.name.data, eventFrameAttributeTemplate.Name.replace(" ", ""))
+						newTag = Tag.query.filter_by(AreaId = form.area.data, Name = tagName).one_or_none()
+
 						# Update existing bound tag or delete existing event frame attribute
 						if eventFrameAttribute is not None:
-							tag = Tag.query.filter_by(TagId = eventFrameAttribute.TagId).one()
-							if tag.Name.split("_")[1] == eventFrameAttributeTemplate.Name.replace(" ", ""):
-								tag.AreaId = form.area.data
-								tag.Name = tagName
+							oldTag = Tag.query.filter_by(TagId = eventFrameAttribute.TagId).one()
+							if oldTag.Name.split("_")[1] == eventFrameAttributeTemplate.Name.replace(" ", ""):
+								oldTag.AreaId = form.area.data
+								oldTag.LookupId = eventFrameAttributeTemplate.LookupId
+								oldTag.Name = tagName
+								oldTag.UnitOfMeasurementId = eventFrameAttributeTemplate.UnitOfMeasurementId
 								tagUpdated = True
 							else:
 								eventFrameAttribute.delete()
 
 						# Update/Add tag and add event frame attribute
 						if not tagUpdated:
-							tag = Tag.query.filter_by(AreaId = form.area.data, Name = tagName).one_or_none()
 							oldTagName = "{}_{}".format(oldElementName, eventFrameAttributeTemplate.Name.replace(" ", ""))
 							oldTag = Tag.query.filter_by(AreaId = form.area.data, Name = oldTagName).one_or_none()
 						
 							# If new tag already exists, bind to event frame attribute
-							if tag is not None:
-								eventFrameAttribute = EventFrameAttribute(EventFrameAttributeTemplateId = eventFrameAttributeTemplate.EventFrameAttributeTemplateId, ElementId = elementId, TagId = tag.TagId)
+							if newTag is not None:
+								newTag.LookupId = eventFrameAttributeTemplate.LookupId
+								newTag.UnitOfMeasurementId = eventFrameAttributeTemplate.UnitOfMeasurementId
+
+								eventFrameAttribute = EventFrameAttribute(EventFrameAttributeTemplateId = eventFrameAttributeTemplate.EventFrameAttributeTemplateId, ElementId = elementId, TagId = newTag.TagId)
 								db.session.add(eventFrameAttribute)
 							# If old tag exists but not bound, update it and bind to event frame attribute
 							elif oldTag is not None:
 								oldTag.AreaId = form.area.data
+								oldTag.LookupId = eventFrameAttributeTemplate.LookupId
 								oldTag.Name = tagName
+								oldTag.UnitOfMeasurementId = eventFrameAttributeTemplate.UnitOfMeasurementId
 
 								eventFrameAttribute = EventFrameAttribute(EventFrameAttributeTemplateId = eventFrameAttributeTemplate.EventFrameAttributeTemplateId, ElementId = elementId, TagId = oldTag.TagId)
 								db.session.add(eventFrameAttribute)
 							# Else add new tag and event frame attribute
 							else:
-								tag = Tag(AreaId = form.area.data, LookupId = eventFrameAttributeTemplate.LookupId, Name = tagName, 
+								newTag = Tag(AreaId = form.area.data, LookupId = eventFrameAttributeTemplate.LookupId, Name = tagName, 
 									UnitOfMeasurementId = eventFrameAttributeTemplate.UnitOfMeasurementId)
-								db.session.add(tag)
+								db.session.add(newTag)
 								db.session.commit()
 
-								eventFrameAttribute = EventFrameAttribute(EventFrameAttributeTemplateId = eventFrameAttributeTemplate.EventFrameAttributeTemplateId, ElementId = elementId, TagId = tag.TagId)
+								eventFrameAttribute = EventFrameAttribute(EventFrameAttributeTemplateId = eventFrameAttributeTemplate.EventFrameAttributeTemplateId, ElementId = elementId, TagId = newTag.TagId)
 								db.session.add(eventFrameAttribute)
 
 		db.session.commit()
