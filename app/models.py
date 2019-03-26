@@ -640,6 +640,9 @@ class Tag(db.Model):
 	def isReferenced(self):
 		return self.ElementAttributes.count() > 0 or self.EventFrameAttributes.count() > 0
 
+	def tagValuesCount(self):
+		return self.TagValues.count()
+
 class TagValue(db.Model):
 	__tablename__ = "TagValue"
 	__table_args__ = \
