@@ -127,7 +127,7 @@
         $(document).ready(function()
         {
             // Update the focus and tabindex upon an order event.
-            var orderEvent = function(type)
+            var setTabIndex = function(type)
             {
                 var tabIndex = 1
                 $("[id^=divNewValue]").each(function()
@@ -144,9 +144,9 @@
                 $("#buttonAttributesSaveAll").attr("tabindex", tabIndex)
             }
 
-            var attributesTable = $("#attributesTable").on("order.dt", function()
+            var attributesTable = $("#attributesTable").on("draw.dt", function()
             {
-                orderEvent()
+                setTabIndex()
             }).DataTable
             ({
                 fixedHeader: {
