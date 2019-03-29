@@ -18,14 +18,19 @@ def make_shell_context():
 		UnitOfMeasurement = UnitOfMeasurement, User = User)
 
 @app.cli.command()
-def deploy():
+@click.option("--admin", is_flag = True)
+@click.option("--roles", is_flag = True)
+def deploy(admin, roles):
 	print ("Creating database {} if it does not exist...".format(current_app.config["MYSQL_DATABASE"]))
 	engine = create_engine(current_app.config["SQLALCHEMY_SERVER_URI"])
 	connection = engine.connect()
 	result = connection.execute("CREATE DATABASE IF NOT EXISTS {}".format(current_app.config["MYSQL_DATABASE"]))
 	print ("Running database upgrade...")
 	upgrade()
-	print ("Inserting default roles if needed...")
-	Role.insertDefaultRoles()
-	print ("Inserting default administrator if needed...")
-	User.insertDefaultAdministrator()
+	if roles == True:
+		print ("Inserting default roles if needed...")
+		Role.insertDefaultRoles()
+
+	if admin == True:
+		print ("Inserting default administrator if needed...")
+		User.insertDefaultAdministrator()

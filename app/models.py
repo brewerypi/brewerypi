@@ -743,13 +743,17 @@ class User(UserMixin, db.Model):
 	@staticmethod
 	def insertDefaultAdministrator():
 		user = User.query.filter_by(Name = "pi").first()
-		AdministratorRole = Role.query.filter_by(Name = "Administrator").first()
-		if user is None:
-			user = User(Enabled = True, Name = "pi", Password = "brewery", Role = AdministratorRole)
-			db.session.add(user)
+		administratorRole = Role.query.filter_by(Name = "Administrator").one_or_none()
+		if administratorRole is None:
+			print('Administrator role does not exist. Cannot create default admin/"pi" user without it.')
 		else:
-			user.Role = AdministratorRole
-		db.session.commit()
+			if user is None:
+				user = User(Enabled = True, Name = "pi", Password = "brewery", Role = administratorRole)
+				db.session.add(user)
+			else:
+				user.Role = administratorRole
+
+			db.session.commit()
 
 	def __repr__(self):
 		return "<User: {}>".format(self.Name)
