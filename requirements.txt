@@ -5,5 +5,5 @@ Flask-Moment==0.7.0
 Flask-WTF==0.14.2
 gunicorn==19.9.0
 mysqlclient==1.4.2post1
-python-dotenv==0.10.0
+python-dotenv==0.10.1
 pytz==2018.9
