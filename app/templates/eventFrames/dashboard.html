@@ -256,7 +256,7 @@ Event Frame Dashboard
             })
 
             // Update the focus and tabindex upon an order event.
-            var orderEvent = function(type)
+            var setTabIndex = function(type)
             {
                 var tabIndex = 1
                 $("[id^=divNewValue]").each(function() {
@@ -272,9 +272,9 @@ Event Frame Dashboard
                 $("#buttonAttributesSaveAll").attr("tabindex", tabIndex)
             }
 
-            var attributesTable = $("#attributesTable").on("order.dt", function()
+            var attributesTable = $("#attributesTable").on("draw.dt", function()
             {
-                orderEvent()
+                setTabIndex()
             }).DataTable
             ({
                 fixedHeader: {
@@ -324,6 +324,7 @@ Event Frame Dashboard
 
             $("#childEventFramesTable").attr("style", "width:100%")
             $("#attributesTable").attr("style", "width:100%")
+            $("input[tabindex = '1']").focus()
             $("#eventFrameNotesTable").attr("style", "width:100%")
 
             $("#buttonAttributesSaveAll").on("click", function()
