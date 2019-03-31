@@ -142,7 +142,7 @@ def addEventFrameAttributeTemplate(eventFrameTemplateId, lookup = False):
 		# Loop through all event frame template hierarchies checking for an event frame attribute template with the same event frame attribute template name.
 		updatedEventFrameAttributeTemplates = []
 		for topLevelEventFrameTemplate in eventFrameAttributeTemplate.EventFrameTemplate.origin().ElementTemplate.EventFrameTemplates:
-			for eventFrameTemplate in topLevelEventFrameTemplate.descendants([], 0):
+			for eventFrameTemplate in topLevelEventFrameTemplate.lineage([], 0):
 				# Skip the event frame template that is currently being added to.
 				if eventFrameTemplate["eventFrameTemplate"].EventFrameTemplateId != eventFrameAttributeTemplate.EventFrameTemplate.EventFrameTemplateId:
 					newEventFrameAttributeTemplate = EventFrameAttributeTemplate.query. \
@@ -426,7 +426,7 @@ def editEventFrameAttributeTemplate(eventFrameAttributeTemplateId):
 		# Loop through event frame template hierarchies checking for an event frame attribute template with the same event frame attribute template name.
 		updatedEventFrameAttributeTemplates = []
 		for topLevelEventFrameTemplate in eventFrameAttributeTemplate.EventFrameTemplate.origin().ElementTemplate.EventFrameTemplates:
-			for eventFrameTemplate in topLevelEventFrameTemplate.descendants([], 0):
+			for eventFrameTemplate in topLevelEventFrameTemplate.lineage([], 0):
 				# Skip the event frame template that is currently being added to.
 				if eventFrameTemplate["eventFrameTemplate"].EventFrameTemplateId != eventFrameAttributeTemplate.EventFrameTemplate.EventFrameTemplateId:
 					newEventFrameAttributeTemplate = EventFrameAttributeTemplate.query. \

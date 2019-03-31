@@ -51,7 +51,7 @@ def addElement(elementTemplateId):
 
 			# Add event frame attributes
 			for topLevelEventFrameTemplate in EventFrameTemplate.query.filter_by(ElementTemplateId = element.ElementTemplateId):
-				for eventFrameTemplate in topLevelEventFrameTemplate.descendants([], 0):
+				for eventFrameTemplate in topLevelEventFrameTemplate.lineage([], 0):
 					for eventFrameAttributeTemplate in eventFrameTemplate["eventFrameTemplate"].EventFrameAttributeTemplates:
 						tagName = "{}_{}".format(form.name.data, eventFrameAttributeTemplate.Name.replace(" ", ""))
 						tag = Tag(AreaId = form.area.data, LookupId = eventFrameAttributeTemplate.LookupId, Name = tagName, 
@@ -309,7 +309,7 @@ def editElement(elementId):
 
 			# Update/Add tags and event frame attributes
 			for topLevelEventFrameTemplate in EventFrameTemplate.query.filter_by(ElementTemplateId = element.ElementTemplateId):
-				for eventFrameTemplate in topLevelEventFrameTemplate.descendants([], 0):
+				for eventFrameTemplate in topLevelEventFrameTemplate.lineage([], 0):
 					for eventFrameAttributeTemplate in eventFrameTemplate["eventFrameTemplate"].EventFrameAttributeTemplates:
 						eventFrameAttribute = EventFrameAttribute.query. \
 							filter_by(EventFrameAttributeTemplateId = eventFrameAttributeTemplate.EventFrameAttributeTemplateId, ElementId = elementId). \

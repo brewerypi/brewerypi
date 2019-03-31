@@ -407,13 +407,13 @@ class EventFrameTemplate(db.Model):
 
 		db.session.delete(self)
 
-	def descendants(self, descendants, level):
+	def lineage(self, descendants, level):
 		descendants.append({"eventFrameTemplate" : self, "level" : level})
 		if self.hasDescendants():
 			descendantEventFrameTemplates = EventFrameTemplate.query.filter_by(ParentEventFrameTemplateId = self.EventFrameTemplateId). \
 				order_by(EventFrameTemplate.Order)
 			for descendant in descendantEventFrameTemplates:
-				descendant.descendants(descendants, level + 1)
+				descendant.lineage(descendants, level + 1)
 		if level == 0:
 			return descendants
 

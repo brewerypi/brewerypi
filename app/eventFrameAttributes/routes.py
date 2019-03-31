@@ -181,7 +181,7 @@ def listEventFrameAttributes(eventFrameId):
 	eventFrame = EventFrame.query.get_or_404(eventFrameId)
 	eventFrameTemplate = EventFrameTemplate.query.get_or_404(eventFrame.EventFrameTemplate.EventFrameTemplateId)
 	eventFrameTemplateIds = []
-	for descendantEventFrameTemplate in eventFrameTemplate.descendants([], 0):
+	for descendantEventFrameTemplate in eventFrameTemplate.lineage([], 0):
 		eventFrameTemplateIds.append(descendantEventFrameTemplate["eventFrameTemplate"].EventFrameTemplateId)
 	eventFrameAttributeTemplates = EventFrameAttributeTemplate.query.filter(EventFrameAttributeTemplate.EventFrameTemplateId.in_(eventFrameTemplateIds))
 	tags = Tag.query.join(Area, Site, Enterprise).order_by(Enterprise.Abbreviation, Site.Abbreviation, Area.Abbreviation, Tag.Name)
