@@ -109,7 +109,7 @@ Event Frames
         Toggle Column:
         <button type = "button" class = "btn btn-primary btn-xs" id = "buttonHideAllColumns">Hide All</button>
         {% for eventFrameAttributeTemplate in eventFrameAttributeTemplates %}
-            {% set dataColumnIndex = loop.index + 9 %}
+            {% set dataColumnIndex = loop.index + 10 %}
             <button type = "button" class = "btn btn-primary btn-xs" data-columnIndex = "{{ dataColumnIndex }}"
                 id = "buttonToggleColumn{{ eventFrameAttributeTemplate.Name }}">{{ eventFrameAttributeTemplate.Name }}</button>
         {% endfor %}
@@ -428,7 +428,7 @@ Event Frames
             {
                 table.columns().every(function ()
                 {
-                    if (this.index() > 9)
+                    if (this.index() > 10)
                     {
                         this.visible(false)
                         $(".btn.btn-primary.btn-xs[data-columnIndex = " + this.index() + "]").removeClass("active")
@@ -440,7 +440,7 @@ Event Frames
             {
                 table.columns().every(function ()
                 {
-                    if (this.index() > 9)
+                    if (this.index() > 10)
                     {
                         this.visible(true)
                         $(".btn.btn-primary.btn-xs[data-columnIndex = " + this.index() + "]").addClass("active")
