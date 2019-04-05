@@ -211,7 +211,7 @@ Event Frames
                             {% else %}
                                 <td></td>
                             {% endif %}
-                            {% if current_user.isAdministrator() %}
+                            {% if current_user.isAdministrator() and child.ElementTagAreaId is none %}
                                 <td><a class = "btn btn-default" title = "Associate Attributes with Tags"
                                     href = "{{ url_for("eventFrameAttributes.listEventFrameAttributes", eventFrameId = child.EventFrameId) }}">
                                     <span class = "glyphicon glyphicon-link"></span></a></td>

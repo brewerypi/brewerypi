@@ -23,6 +23,7 @@ def currentEventFrameAttributeValues(eventFrames, eventFrameTemplateId):
     SELECT EventFrame.EventFrameId,
         EventFrame.Name,
         Element.Name AS Element,
+        Element.TagAreaId AS ElementTagAreaId,
         User.Name AS User,
         EventFrame.StartTimestamp,
         EventFrame.EndTimestamp {}
