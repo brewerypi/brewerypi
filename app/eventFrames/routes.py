@@ -52,7 +52,7 @@ def addEventFrame(eventFrameTemplateId = None, parentEventFrameId = None):
 				eventFrameAttribute = EventFrameAttribute.query.filter(EventFrameAttribute.ElementId == eventFrame.origin().ElementId,
 					EventFrameAttribute.EventFrameAttributeTemplateId == eventFrameAttributeTemplate.EventFrameAttributeTemplateId).one_or_none()
 				if eventFrameAttribute is not None:
-					tagValue = TagValue(TagId = eventFrameAttribute.TagId, Timestamp = form.startUtcTimestamp.data, UserId = current_user.get_id()
+					tagValue = TagValue(TagId = eventFrameAttribute.TagId, Timestamp = form.startUtcTimestamp.data, UserId = current_user.get_id(),
 						Value = eventFrameAttributeTemplate.DefaultStartValue)
 					db.session.add(tagValue)
 					count = count + 1
