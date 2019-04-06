@@ -25,10 +25,6 @@ def addElement(elementTemplateId):
 			TagAreaId = form.area.data if form.isManaged.data else None, Name = form.name.data)
 		db.session.add(element)
 		db.session.commit()
-
-		createdTags = []
-		createdElementAttributes = []
-		createdEventFrameAttributes = []
 		if form.isManaged.data:
 			# Add element attributes
 			for elementAttributeTemplate in ElementAttributeTemplate.query.filter_by(ElementTemplateId = element.ElementTemplateId):
@@ -41,13 +37,11 @@ def addElement(elementTemplateId):
 				else:
 					db.session.add(tag)
 					db.session.commit()
-					createdTags.append(tag)
 
 				elementAttribute = ElementAttribute(ElementAttributeTemplateId = elementAttributeTemplate.ElementAttributeTemplateId, 
 					ElementId = element.ElementId, TagId = tag.TagId)
 				db.session.add(elementAttribute)
 				db.session.commit()
-				createdElementAttributes.append(elementAttribute)
 
 			# Add event frame attributes
 			for topLevelEventFrameTemplate in EventFrameTemplate.query.filter_by(ElementTemplateId = element.ElementTemplateId):
@@ -62,56 +56,13 @@ def addElement(elementTemplateId):
 						else:
 							db.session.add(tag)
 							db.session.commit()
-							createdTags.append(tag)
 
 						eventFrameAttribute = EventFrameAttribute(EventFrameAttributeTemplateId = eventFrameAttributeTemplate.EventFrameAttributeTemplateId, 
 							ElementId = element.ElementId, TagId = tag.TagId)
 						db.session.add(eventFrameAttribute)
 						db.session.commit()
-						createdEventFrameAttributes.append(eventFrameAttribute)
 
 		flash("You have successfully added the new element \"{}\".".format(element.Name), "alert alert-success")
-
-		createdTagsMessage = ""
-		if createdTags:
-			createdTags.sort(key = lambda tag: tag.Name)
-			for tag in createdTags:
-				if createdTagsMessage == "":
-					createdTagsMessage = 'Created the following tag(s):<br>"{}"'.format(tag.Name)
-					alert = "alert alert-success"
-				else:
-					createdTagsMessage = '{}<br>"{}"'.format(createdTagsMessage, tag.Name)
-
-			flash(createdTagsMessage, alert)
-
-		createdElementAttributesMessage = ""
-		if createdElementAttributes:
-			createdElementAttributes.sort(key = lambda tag: tag.Element.Name)
-			for elementAttribute in createdElementAttributes:
-				if createdElementAttributesMessage == "":
-					createdElementAttributesMessage = "Created the following element attribute(s):<br>Element: " + \
-						'"{}" attribute: "{}" associated with tag: "{}"'.format(elementAttribute.Element.Name, elementAttribute.ElementAttributeTemplate.Name,
-						elementAttribute.Tag.Name)
-					alert = "alert alert-success"
-				else:
-					createdElementAttributesMessage = '{}<br>Element: "{}" attribute: "{}" associated with tag: "{}"'.format(createdElementAttributesMessage,
-						elementAttribute.Element.Name, elementAttribute.ElementAttributeTemplate.Name, elementAttribute.Tag.Name)
-
-			flash(createdElementAttributesMessage, alert)
-
-		createdEventFrameAttributesMessage = ""
-		if createdEventFrameAttributes:
-			createdEventFrameAttributes.sort(key = lambda tag: tag.Element.Name)
-			for eventFrameAttribute in createdEventFrameAttributes:
-				if createdEventFrameAttributesMessage == "":
-					createdEventFrameAttributesMessage = "Created the following event frame attribute(s):<br>Element: " + \
-						'"{}" attribute: "{}" associated with tag: "{}"'.format(eventFrameAttribute.Element.Name, eventFrameAttribute.EventFrameAttributeTemplate.Name, eventFrameAttribute.Tag.Name)
-					alert = "alert alert-success"
-				else:
-					createdEventFrameAttributesMessage = '{}<br>Element: "{}" attribute: "{}" associated with tag: "{}"'.format(createdEventFrameAttributesMessage, eventFrameAttribute.Element.Name, eventFrameAttribute.EventFrameAttributeTemplate.Name, eventFrameAttribute.Tag.Name)
-
-			flash(createdEventFrameAttributesMessage, alert)
-
 		return redirect(form.requestReferrer.data)
 
 	# Present a form to add a new element.
