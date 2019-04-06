@@ -351,13 +351,13 @@ def days():
 def selectEventFrame(selectedClass = None, selectedId = None, months = None, selectedOperation = None):
 	eventFrameAttributeTemplates = None
 	if selectedClass == None:
-		parent = Site.query.join(Enterprise, ElementTemplate, EventFrameTemplate, EventFrame).order_by(Enterprise.Name).first()
-		if parent:
-			children = ElementTemplate.query.filter_by(SiteId = parent.id())
+		parent = Site.query.join(Enterprise).order_by(Enterprise.Name, Site.Name).first()
+		if parent is None:
+			flash("You must create a Site first.", "alert alert-danger")
+			return redirect(request.referrer)
 		else:
-			parent = Site.query.join(Enterprise, ElementTemplate).order_by(Enterprise.Name).first()
 			children = ElementTemplate.query.filter_by(SiteId = parent.id())
-		childrenClass = "ElementTemplate"
+			childrenClass = "ElementTemplate"
 	elif selectedClass == "Root":
 		parent = None
 		children = Enterprise.query.order_by(Enterprise.Name)

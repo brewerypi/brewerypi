@@ -250,13 +250,13 @@ def importTags():
 @permissionRequired(Permission.DATA_ENTRY)
 def selectTag(selectedClass = None, selectedId = None):
 	if selectedClass == None:
-		parent = Area.query.join(Tag, Site, Enterprise).order_by(Enterprise.Name, Site.Name, Area.Name).first()
-		if parent:
-			children = Tag.query.filter_by(AreaId = parent.id())
+		parent = Site.query.join(Enterprise).order_by(Enterprise.Name, Site.Name).first()
+		if parent is None:
+			flash("You must create a Site first.", "alert alert-danger")
+			return redirect(request.referrer)
 		else:
-			parent = Area.query.join(Site, Enterprise).order_by(Enterprise.Name, Site.Name, Area.Name).first()
-			children = None
-		childrenClass = "Tag"
+			children = Area.query.filter_by(SiteId = parent.id())
+			childrenClass = "Area"
 	elif selectedClass == "Root":
 		parent = None
 		children = Enterprise.query.order_by(Enterprise.Name)

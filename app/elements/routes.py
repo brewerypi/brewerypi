@@ -398,13 +398,13 @@ def editElement(elementId):
 @permissionRequired(Permission.DATA_ENTRY)
 def selectElement(selectedClass = None, selectedId = None):
 	if selectedClass == None:
-		parent = Site.query.join(ElementTemplate, Enterprise).order_by(Enterprise.Name).first()
-		if parent:
-			children = ElementTemplate.query.filter_by(SiteId = parent.id())
+		parent = Site.query.join(Enterprise).order_by(Enterprise.Name, Site.Name).first()
+		if parent is None:
+			flash("You must create a Site first.", "alert alert-danger")
+			return redirect(request.referrer)
 		else:
-			parent = Site.query.join(Enterprise).order_by(Enterprise.Name).first()
-			children = None
-		childrenClass = "ElementTemplate"
+			children = ElementTemplate.query.filter_by(SiteId = parent.id())
+			childrenClass = "ElementTemplate"
 	elif selectedClass == "Root":
 		parent = None
 		children = Enterprise.query.order_by(Enterprise.Name)
