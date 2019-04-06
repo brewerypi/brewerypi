@@ -1,5 +1,5 @@
 from flask_login import AnonymousUserMixin, UserMixin
-from sqlalchemy import Index, PrimaryKeyConstraint, UniqueConstraint
+from sqlalchemy import func, Index, PrimaryKeyConstraint, UniqueConstraint
 from werkzeug.security import generate_password_hash, check_password_hash
 from app import db
 from . import loginManager
@@ -618,7 +618,7 @@ class Tag(db.Model):
 		db.session.delete(self)
 
 	def exists(self):
-		return Tag.query.filter_by(Name = self.Name, AreaId = self.AreaId).scalar()
+		return False if Tag.query.filter_by(Name = self.Name, AreaId = self.AreaId).scalar() is None else True
 
 	def fullAbbreviatedPathName(self):
 		return "{}_{}_{}_{}".format(self.Area.Site.Enterprise.Abbreviation, self.Area.Site.Abbreviation, self.Area.Abbreviation, self.Name)
@@ -627,21 +627,21 @@ class Tag(db.Model):
 		return self.TagId
 
 	def isManaged(self):
-		for elementAttribute in self.ElementAttributes:
-			if elementAttribute.Element.isManaged():
-				return True
-
-		for eventFrameAttribute in self.EventFrameAttributes:
-			if eventFrameAttribute.Element.isManaged():
-				return True
-
-		return False
+		if db.session.query(func.count(Element.ElementId)).join(EventFrameAttribute, Tag). \
+			filter(Element.TagAreaId != None, Tag.TagId == self.TagId).scalar() > 0:
+			return True
+		if db.session.query(func.count(Element.ElementId)).join(ElementAttribute, Tag).filter(Element.TagAreaId != None, Tag.TagId == self.TagId).scalar() > 0:
+			return True
+		else:
+			return False
 
 	def isReferenced(self):
-		return self.ElementAttributes.count() > 0 or self.EventFrameAttributes.count() > 0
-
-	def tagValuesCount(self):
-		return self.TagValues.count()
+		if db.session.query(func.count(EventFrameAttribute.EventFrameAttributeId)).filter_by(TagId = self.TagId).scalar() > 0:
+			return True
+		elif db.session.query(func.count(ElementAttribute.ElementAttributeId)).filter_by(TagId = self.TagId).scalar() > 0:
+			return True
+		else:
+			return False
 
 class TagValue(db.Model):
 	__tablename__ = "TagValue"

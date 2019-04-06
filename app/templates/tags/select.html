@@ -57,7 +57,6 @@ Tags
                     <th>Unit</th>
                     <th>Managed</th>
                     <th>Referenced</th>
-                    <th># of Values</th>
                 {% endif %}
                 <th></th>
                 <th></th>
@@ -84,7 +83,6 @@ Tags
                             <td>{{ "" if child.UnitOfMeasurementId is none else child.UnitOfMeasurement.Abbreviation }}</td>
                             <td>{{ child.isManaged() | yesNo }}</td>
                             <td>{{ child.isReferenced() | yesNo }}</td>
-                            <td>{{ child.tagValuesCount() }}</td>
                             {% if current_user.isAdministrator() and child.isManaged() == false %}
                                 <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("tags.editTag", tagId = child.TagId) }}">
                                     <span class = "glyphicon glyphicon-edit"></span></a></td>
@@ -149,7 +147,6 @@ Tags
                     null,
                     null,
                     {% if childrenClass == "Tag" %}
-                        null,
                         null,
                         null,
                         null,
