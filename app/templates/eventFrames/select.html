@@ -203,8 +203,8 @@ Event Frames
                             {% endif %}
                         {% elif childrenClass == "EventFrame" %}
                             <td>{{ child.Name }}</td>
-                            <td>{{ child.Element }}</td>
-                            <td>{{ child.User }}</td>
+                            <td>{{ child.ElementName }}</td>
+                            <td>{{ child.UserName }}</td>
                             <td>{{ moment(child.StartTimestamp).format("YYYY-MM-DD HH:mm:ss") }}</td>
                             {% if child.EndTimestamp %}
                                 <td>{{ moment(child.EndTimestamp).format("YYYY-MM-DD HH:mm:ss") }}</td>
