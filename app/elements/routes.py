@@ -133,6 +133,8 @@ def addElement(elementTemplateId):
 def copyElement(elementId):
 	operation = "Copy"
 	form = ElementForm()
+	del form.isManaged
+	del form.area
 
 	# Copy an element.
 	if form.validate_on_submit():
@@ -178,7 +180,6 @@ def copyElement(elementId):
 		return redirect(form.requestReferrer.data)
 
 	# Present a form to copy an element.
-	del form.elementTemplateId
 	form.elementIdToCopy.data = elementId
 	if form.requestReferrer.data is None:
 		form.requestReferrer.data = request.referrer
