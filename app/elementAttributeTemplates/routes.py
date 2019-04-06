@@ -43,7 +43,7 @@ def addElementAttributeTemplate(elementTemplateId, lookup = False):
 				tag = Tag.query.filter_by(AreaId = area.AreaId, Name = tagName).one_or_none()
 				if tag is None:
 					# Tag doesn't exist, so create it.
-					tag = Tag(AreaId = area.AreaId, LookupId = elementAttributeTemplate.LookupId, Name = tagName,
+					tag = Tag(AreaId = area.AreaId, Description = "", LookupId = elementAttributeTemplate.LookupId, Name = tagName,
 						UnitOfMeasurementId = elementAttributeTemplate.UnitOfMeasurementId)
 					db.session.add(tag)
 				else:
@@ -102,21 +102,12 @@ def deleteElementAttributeTemplate(elementAttributeTemplateId):
 
 	elementAttributeTemplate.delete()
 	db.session.commit()
-	flash('You have successfully deleted the element attribute template "{}".'.format(elementAttributeTemplate.Name), "alert alert-success")
-	deletedTagsMessage = ""
-	tags.sort(key = lambda tag: tag.Name)
 	for tag in tags:
 		if not tag.isReferenced():
 			tag.delete()
-			if deletedTagsMessage == "":
-				deletedTagsMessage = 'Deleted the following tag(s):<br>"{}"'.format(tag.Name)
-			else:
-				deletedTagsMessage = '{}<br>"{}"'.format(deletedTagsMessage, tag.Name)
 
 	db.session.commit()
-	if deletedTagsMessage != "":
-		alert = "alert alert-success"
-		flash(deletedTagsMessage, alert)
+	flash('You have successfully deleted the element attribute template "{}".'.format(elementAttributeTemplate.Name), "alert alert-success")
 	return redirect(request.referrer)
 
 @elementAttributeTemplates.route("/elementAttributeTemplates/edit/<int:elementAttributeTemplateId>", methods = ["GET", "POST"])
@@ -158,7 +149,7 @@ def editElementAttributeTemplate(elementAttributeTemplateId):
 				oldTag = Tag.query.filter_by(AreaId = element.TagAreaId, Name = oldTagName).one_or_none()
 				if newTag is None and oldTag is None:
 					# New tag doesn't exist, so create it.
-					tag = Tag(AreaId = element.TagAreaId, LookupId = elementAttributeTemplate.LookupId, Name = newTagName,
+					tag = Tag(AreaId = element.TagAreaId, Description = "", LookupId = elementAttributeTemplate.LookupId, Name = newTagName,
 						UnitOfMeasurementId = elementAttributeTemplate.UnitOfMeasurementId)
 					db.session.add(tag)
 					db.session.commit()

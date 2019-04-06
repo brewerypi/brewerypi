@@ -59,7 +59,7 @@ def addEventFrameAttributeTemplate(eventFrameTemplateId, lookup = False):
 				tag = Tag.query.filter_by(AreaId = area.AreaId, Name = tagName).one_or_none()
 				if tag is None:
 					# Tag doesn't exist, so create it.
-					tag = Tag(AreaId = area.AreaId, LookupId = eventFrameAttributeTemplate.LookupId, Name = tagName,
+					tag = Tag(AreaId = area.AreaId, Description = "", LookupId = eventFrameAttributeTemplate.LookupId, Name = tagName,
 						UnitOfMeasurementId = eventFrameAttributeTemplate.UnitOfMeasurementId)
 					db.session.add(tag)
 				else:
@@ -156,21 +156,12 @@ def deleteEventFrameAttributeTemplate(eventFrameAttributeTemplateId):
 
 	eventFrameAttributeTemplate.delete()
 	db.session.commit()
-	flash("You have successfully deleted the event frame attribute template \"{}\".".format(eventFrameAttributeTemplate.Name), "alert alert-success")
-	deletedTagsMessage = ""
-	tags.sort(key = lambda tag: tag.Name)
 	for tag in tags:
 		if not tag.isReferenced():
 			tag.delete()
-			if deletedTagsMessage == "":
-				deletedTagsMessage = 'Deleted the following tag(s):<br>"{}"'.format(tag.Name)
-			else:
-				deletedTagsMessage = '{}<br>"{}"'.format(deletedTagsMessage, tag.Name)
 
 	db.session.commit()
-	if deletedTagsMessage != "":
-		alert = "alert alert-success"
-		flash(deletedTagsMessage, alert)
+	flash("You have successfully deleted the event frame attribute template \"{}\".".format(eventFrameAttributeTemplate.Name), "alert alert-success")
 	return redirect(request.referrer)
 
 @eventFrameAttributeTemplates.route("/eventFrameAttributeTemplates/edit/eventFrameAttributeTemplateId/<int:eventFrameAttributeTemplateId>",
@@ -230,7 +221,7 @@ def editEventFrameAttributeTemplate(eventFrameAttributeTemplateId):
 				oldTag = Tag.query.filter_by(AreaId = element.TagAreaId, Name = oldTagName).one_or_none()
 				if newTag is None and oldTag is None:
 					# New tag doesn't exist and the old tag doesn't exist, so create it.
-					tag = Tag(AreaId = element.TagAreaId, LookupId = eventFrameAttributeTemplate.LookupId, Name = newTagName,
+					tag = Tag(AreaId = element.TagAreaId, Description = "", LookupId = eventFrameAttributeTemplate.LookupId, Name = newTagName,
 						UnitOfMeasurementId = eventFrameAttributeTemplate.UnitOfMeasurementId)
 					db.session.add(tag)
 					db.session.commit()

@@ -35,6 +35,7 @@ def addElement(elementTemplateId):
 				if tag.exists():
 					tag = Tag.query.filter_by(AreaId = tag.AreaId, Name = tag.Name).one()
 				else:
+					tag.Description = ""
 					db.session.add(tag)
 					db.session.commit()
 
@@ -54,6 +55,7 @@ def addElement(elementTemplateId):
 						if tag.exists():
 							tag = Tag.query.filter_by(AreaId = tag.AreaId, Name = tag.Name).one()
 						else:
+							tag.Description = ""
 							db.session.add(tag)
 							db.session.commit()
 
@@ -234,7 +236,6 @@ def editElement(elementId):
 					if newTag is not None:
 						newTag.LookupId = elementAttributeTemplate.LookupId
 						newTag.UnitOfMeasurementId = elementAttributeTemplate.UnitOfMeasurementId
-
 						elementAttribute = ElementAttribute(ElementAttributeTemplateId = elementAttributeTemplate.ElementAttributeTemplateId, 
 							ElementId = elementId, TagId = newTag.TagId)
 						db.session.add(elementAttribute)
@@ -244,17 +245,15 @@ def editElement(elementId):
 						oldTag.LookupId = elementAttributeTemplate.LookupId
 						oldTag.Name = tagName
 						oldTag.UnitOfMeasurementId = elementAttributeTemplate.UnitOfMeasurementId
-
 						elementAttribute = ElementAttribute(ElementAttributeTemplateId = elementAttributeTemplate.ElementAttributeTemplateId, 
 							ElementId = elementId, TagId = oldTag.TagId)
 						db.session.add(elementAttribute)
 					# Else add new tag and element attribute
 					else:
-						newTag = Tag(AreaId = form.area.data, LookupId = elementAttributeTemplate.LookupId, Name = tagName, 
+						newTag = Tag(AreaId = form.area.data, Description = "", LookupId = elementAttributeTemplate.LookupId, Name = tagName, 
 							UnitOfMeasurementId = elementAttributeTemplate.UnitOfMeasurementId)
 						db.session.add(newTag)
 						db.session.commit()
-
 						elementAttribute = ElementAttribute(ElementAttributeTemplateId = elementAttributeTemplate.ElementAttributeTemplateId, 
 							ElementId = elementId, TagId = newTag.TagId)
 						db.session.add(elementAttribute)
@@ -292,8 +291,8 @@ def editElement(elementId):
 							if newTag is not None:
 								newTag.LookupId = eventFrameAttributeTemplate.LookupId
 								newTag.UnitOfMeasurementId = eventFrameAttributeTemplate.UnitOfMeasurementId
-
-								eventFrameAttribute = EventFrameAttribute(EventFrameAttributeTemplateId = eventFrameAttributeTemplate.EventFrameAttributeTemplateId, ElementId = elementId, TagId = newTag.TagId)
+								eventFrameAttribute = EventFrameAttribute(EventFrameAttributeTemplateId = \
+									eventFrameAttributeTemplate.EventFrameAttributeTemplateId, ElementId = elementId, TagId = newTag.TagId)
 								db.session.add(eventFrameAttribute)
 							# If old tag exists but not bound, update it and bind to event frame attribute
 							elif oldTag is not None:
@@ -302,16 +301,18 @@ def editElement(elementId):
 								oldTag.Name = tagName
 								oldTag.UnitOfMeasurementId = eventFrameAttributeTemplate.UnitOfMeasurementId
 
-								eventFrameAttribute = EventFrameAttribute(EventFrameAttributeTemplateId = eventFrameAttributeTemplate.EventFrameAttributeTemplateId, ElementId = elementId, TagId = oldTag.TagId)
+								eventFrameAttribute = EventFrameAttribute(EventFrameAttributeTemplateId = \
+									eventFrameAttributeTemplate.EventFrameAttributeTemplateId, ElementId = elementId, TagId = oldTag.TagId)
 								db.session.add(eventFrameAttribute)
 							# Else add new tag and event frame attribute
 							else:
-								newTag = Tag(AreaId = form.area.data, LookupId = eventFrameAttributeTemplate.LookupId, Name = tagName, 
+								newTag = Tag(AreaId = form.area.data, Description = "", LookupId = eventFrameAttributeTemplate.LookupId, Name = tagName, 
 									UnitOfMeasurementId = eventFrameAttributeTemplate.UnitOfMeasurementId)
 								db.session.add(newTag)
 								db.session.commit()
 
-								eventFrameAttribute = EventFrameAttribute(EventFrameAttributeTemplateId = eventFrameAttributeTemplate.EventFrameAttributeTemplateId, ElementId = elementId, TagId = newTag.TagId)
+								eventFrameAttribute = EventFrameAttribute(EventFrameAttributeTemplateId = \
+									eventFrameAttributeTemplate.EventFrameAttributeTemplateId, ElementId = elementId, TagId = newTag.TagId)
 								db.session.add(eventFrameAttribute)
 
 		db.session.commit()
