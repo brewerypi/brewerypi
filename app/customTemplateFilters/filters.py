@@ -105,3 +105,10 @@ def grafanaUrl(uid, parameters = None):
             "&var-areas=All" + \
             "&var-tags={}".format(parameters["tagId"]) + \
             "&var-lookups=All"
+
+@customTemplateFilters.app_template_filter()
+def yesNo(boolean):
+    if boolean:
+        return "Yes"
+    else:
+        return "No"

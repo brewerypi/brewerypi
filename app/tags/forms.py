@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileAllowed, FileField, FileRequired
-from wtforms import HiddenField, StringField, SubmitField, ValidationError
+from wtforms import HiddenField, SelectField, StringField, SubmitField, ValidationError
 from wtforms.ext.sqlalchemy.fields import QuerySelectField
 from wtforms.validators import Length, Required
 from .. models import Lookup, Tag, UnitOfMeasurement
@@ -9,7 +9,7 @@ class TagForm(FlaskForm):
 	areaId = HiddenField()
 	name = StringField("Name", validators = [Required(), Length(1, 45)])
 	description = StringField("Description", validators = [Length(0, 255)])
-	lookup = QuerySelectField("Lookup", query_factory = lambda: Lookup.query.order_by(Lookup.Name), get_label = "Name")
+	lookup = SelectField("Lookup", validators = [Required()], coerce = int)
 	unitOfMeasurement = QuerySelectField("Unit", query_factory = lambda: UnitOfMeasurement.query. \
 		order_by(UnitOfMeasurement.Abbreviation), get_label = "Abbreviation")
 	tagId = HiddenField()

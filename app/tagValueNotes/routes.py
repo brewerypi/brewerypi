@@ -1,5 +1,5 @@
 from flask import flash, redirect, render_template, request, url_for
-from flask_login import login_required
+from flask_login import current_user, login_required
 from sqlalchemy import or_
 from . import tagValueNotes
 from . forms import TagValueNoteForm
@@ -41,7 +41,7 @@ def addTagValueNote(tagValueId, elementAttributeId = None, eventFrameId = None, 
 
 	# Add a new tag value note.
 	if form.validate_on_submit():
-		note = Note(Note = form.note.data, Timestamp = form.utcTimestamp.data)
+		note = Note(Note = form.note.data, Timestamp = form.utcTimestamp.data, UserId = current_user.get_id())
 		db.session.add(note)
 		db.session.commit()
 		tagValueNote = TagValueNote(NoteId = note.NoteId, TagValueId = tagValueId)
@@ -125,6 +125,7 @@ def editTagValueNote(noteId, tagValueId, elementAttributeId = None, eventFrameId
 	if form.validate_on_submit():
 		note.Note = form.note.data
 		note.Timestamp = form.utcTimestamp.data
+		note.UserId = current_user.get_id()
 		db.session.commit()
 		flash("You have successfully edited the Tag Value Note.", "alert alert-success")
 		return redirect(form.requestReferrer.data)

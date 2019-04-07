@@ -24,6 +24,8 @@ Users
             <tr>
                 <th>Name</th>
                 <th>Role</th>
+                <th>Enabled</th>
+                <th></th>
                 <th></th>
                 <th></th>
                 <th></th>
@@ -34,14 +36,18 @@ Users
             <tr>
                 <td>{{ user.Name }}</td>
                 <td>{{ user.Role.Name }}</td>
+                <td>{{ user.Enabled | yesNo }}</td>
                 <td><a class = "btn btn-default" title = "Change Password" href = "{{ url_for("users.changePassword", userId = user.UserId) }}">
                     <span class = "glyphicon glyphicon-lock"></span></a></td>
                 {% if user.Name != "pi" %}
                 <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("users.editUser", userId = user.UserId) }}">
                     <span class = "glyphicon glyphicon-edit"></span></a></td>
+                <td><a class = "btn btn-default" title = "Enable/Disable" href = "{{ url_for("users.enableDisableUser", 
+                    userId = user.UserId) }}"><span class = "glyphicon glyphicon-ban-circle"></span></a></td>
                 <td><a class = "btn btn-default" title = "Delete" href = "{{ url_for("users.deleteUser", 
                     userId = user.UserId) }}"><span class = "glyphicon glyphicon-trash"></span></a></td>
                 {% else %}
+                <td></td>
                 <td></td>
                 <td></td>
                 {% endif %}
@@ -69,8 +75,10 @@ Users
                 [
                     null,
                     null,
+                    null,
                     { "orderable": false }, // Change password button.
                     { "orderable": false }, // Edit button.
+                    { "orderable": false }, // Disable button.
                     { "orderable": false }  // Delete button.
                 ],
                 "stateSave": true,

@@ -55,6 +55,8 @@ Tags
                 {% if childrenClass == "Tag" %}
                     <th>Lookup</th>
                     <th>Unit</th>
+                    <th>Managed</th>
+                    <th>Referenced</th>
                 {% endif %}
                 <th></th>
                 <th></th>
@@ -79,7 +81,9 @@ Tags
                         {% if childrenClass == "Tag" %}
                             <td>{{ "" if child.LookupId is none else child.Lookup.Name }}</td>
                             <td>{{ "" if child.UnitOfMeasurementId is none else child.UnitOfMeasurement.Abbreviation }}</td>
-                            {% if current_user.isAdministrator() %}
+                            <td>{{ child.isManaged() | yesNo }}</td>
+                            <td>{{ child.isReferenced() | yesNo }}</td>
+                            {% if current_user.isAdministrator() and child.isManaged() == false %}
                                 <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("tags.editTag", tagId = child.TagId) }}">
                                     <span class = "glyphicon glyphicon-edit"></span></a></td>
                                 <td><a class = "btn btn-default" title = "Delete" href = "{{ url_for("tags.deleteTag", tagId = child.TagId) }}",
@@ -103,11 +107,34 @@ Tags
 {% block scripts %}
     {{ super() }}
     <link rel = "stylesheet" type = "text/css" href = {{ url_for("static", filename = "css/datatables.min.css") }}/>
+    <link rel = "stylesheet" type = "text/css" href = {{ url_for("static", filename = "css/styles.css") }}/>
     <script type = "text/javascript" src = {{ url_for("static", filename = "js/datatables.min.js") }}></script>
     <script>
         $(document).ready(function()
         {
-            $("#tagsTable").DataTable
+            $("#tagsTable thead tr").clone(true).appendTo("#tagsTable thead")
+            $("#tagsTable thead tr:eq(1) th").each(function(i)
+            {
+                var title = $(this).text()
+                if (title != "")
+                {
+                    $(this).html('<input type = "text" placeholder = "Filter ' + title + '" />')
+                    $("input", this).on("keyup change", function ()
+                    {
+                        if (table.column(i).search() !== this.value)
+                        {
+                            // Treat search string as a regular expressions.
+                            table.column(i).search(this.value, 1).draw()
+                        }
+                    })
+                }
+                else
+                {
+                    $(this).html("")
+                }
+            })
+
+            var table = $("#tagsTable").DataTable
             ({
                 "order":
                 [
@@ -122,13 +149,17 @@ Tags
                     {% if childrenClass == "Tag" %}
                         null,
                         null,
+                        null,
+                        null,
                     {% endif %}
                     { "orderable": false }, // Edit button.
                     { "orderable": false }  // Delete button.
                 ],
                 "stateSave": true,
                 "stateDuration": 0,
-                "pageLength": 25
+                "pageLength": 25,
+                "orderCellsTop": true,
+                "fixedHeader": true
             })
 
             $("#tagsTable").attr("style", "width:100%")
@@ -142,6 +173,9 @@ Tags
                     event.preventDefault()
                 }
             })
+
+            // Clear any left over filtering from state saving.
+            table.search("").columns().search("").draw()
         })
     </script>
 {% endblock %}

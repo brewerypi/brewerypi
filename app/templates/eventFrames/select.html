@@ -109,7 +109,7 @@ Event Frames
         Toggle Column:
         <button type = "button" class = "btn btn-primary btn-xs" id = "buttonHideAllColumns">Hide All</button>
         {% for eventFrameAttributeTemplate in eventFrameAttributeTemplates %}
-            {% set dataColumnIndex = loop.index + 9 %}
+            {% set dataColumnIndex = loop.index + 10 %}
             <button type = "button" class = "btn btn-primary btn-xs" data-columnIndex = "{{ dataColumnIndex }}"
                 id = "buttonToggleColumn{{ eventFrameAttributeTemplate.Name }}">{{ eventFrameAttributeTemplate.Name }}</button>
         {% endfor %}
@@ -137,6 +137,7 @@ Event Frames
                     <th></th>
                 {% elif childrenClass == "EventFrame" %}
                     <th>Element</th>
+                    <th>User</th>
                     <th id = "thStartTimestamp">Start Timestamp</th>
                     <th id = "thEndTimestamp">End Timestamp</th>
                     <th></th>
@@ -202,21 +203,22 @@ Event Frames
                             {% endif %}
                         {% elif childrenClass == "EventFrame" %}
                             <td>{{ child.Name }}</td>
-                            <td>{{ child.Element }}</td>
+                            <td>{{ child.ElementName }}</td>
+                            <td>{{ child.UserName }}</td>
                             <td>{{ moment(child.StartTimestamp).format("YYYY-MM-DD HH:mm:ss") }}</td>
                             {% if child.EndTimestamp %}
                                 <td>{{ moment(child.EndTimestamp).format("YYYY-MM-DD HH:mm:ss") }}</td>
                             {% else %}
                                 <td></td>
                             {% endif %}
-                            {% if current_user.isAdministrator() %}
+                            {% if current_user.isAdministrator() and child.ElementTagAreaId is none %}
                                 <td><a class = "btn btn-default" title = "Associate Attributes with Tags"
                                     href = "{{ url_for("eventFrameAttributes.listEventFrameAttributes", eventFrameId = child.EventFrameId) }}">
                                     <span class = "glyphicon glyphicon-link"></span></a></td>
                             {% else %}
                                 <td></td>
                             {% endif %}
-                            {% if child.EventFrameEndTimestamp == None %}
+                            {% if child.EndTimestamp is none %}
                                 <td><a class = "btn btn-default" title = "End" href = "{{ url_for("eventFrames.endEventFrame",
                                     eventFrameId = child.EventFrameId) }}"><span class = "glyphicon glyphicon-stop"></span></a></td>
                             {% else %}
@@ -252,14 +254,20 @@ Event Frames
         <h1>Event Frames <small>Attribute Templates</small></h1>
     </div>
     <div>
-        <a class = "btn btn-default" title = "Add" href = "{{ url_for("eventFrameAttributeTemplates.addEventFrameAttributeTemplate", 
+        <a class = "btn btn-default" title = "Add Event Frame Attribute Template" href = "{{ url_for("eventFrameAttributeTemplates.addEventFrameAttributeTemplate", 
             eventFrameTemplateId = parent.EventFrameTemplateId) }}" role = "button"><span class = "glyphicon glyphicon-plus"></span></a>
+        <a class = "btn btn-default" title = "Add Event Frame Attribute Lookup Template" href = "{{ url_for("eventFrameAttributeTemplates.addEventFrameAttributeTemplate", 
+            eventFrameTemplateId = parent.EventFrameTemplateId, lookup = True) }}" role = "button"><span class = "glyphicon glyphicon-plus"></span> Lookup</a>
         <br><br>
         <table id = "eventFrameAttributeTemplatesTable" class = "table table-hover" style = "display:none">
             <thead>
                 <tr>
                     <th>Name</th>
                     <th>Description</th>
+                    <th>Lookup</th>
+                    <th>Unit</th>
+                    <th>Default Start</th>
+                    <th>Default End</th>
                     <th></th>
                     <th></th>
                 </tr>
@@ -269,6 +277,17 @@ Event Frames
                 <tr>
                     <td>{{ eventFrameAttributeTemplate.Name }}</td>
                     <td>{{ eventFrameAttributeTemplate.Description }}</td>
+                    <td>{{ "" if eventFrameAttributeTemplate.LookupId is none else eventFrameAttributeTemplate.Lookup.Name }}</td>
+                    <td>{{ "" if eventFrameAttributeTemplate.UnitOfMeasurementId is none else eventFrameAttributeTemplate.UnitOfMeasurement.Abbreviation }}</td>
+                    {% if eventFrameAttributeTemplate.Lookup is none %}
+                        <td>{{ "" if eventFrameAttributeTemplate.DefaultStartValue is none else eventFrameAttributeTemplate.DefaultStartValue }}</td>
+                        <td>{{ "" if eventFrameAttributeTemplate.DefaultEndValue is none else eventFrameAttributeTemplate.DefaultEndValue}}</td>
+                    {% else %}
+                        <td>{{ eventFrameAttributeTemplate.Lookup.LookupValues.filter_by(Value = eventFrameAttributeTemplate.DefaultStartValue).one_or_none().
+                            Name }}</td>
+                        <td>{{ eventFrameAttributeTemplate.Lookup.LookupValues.filter_by(Value = eventFrameAttributeTemplate.DefaultEndValue).one_or_none().
+                            Name }}</td>
+                    {% endif %}
                     <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("eventFrameAttributeTemplates.editEventFrameAttributeTemplate",
                         eventFrameAttributeTemplateId = eventFrameAttributeTemplate.EventFrameAttributeTemplateId) }}">
                         <span class = "glyphicon glyphicon-edit"></span></a></td>
@@ -324,7 +343,7 @@ Event Frames
                     {% elif childrenClass == "EventFrameTemplate" %}
                         [2, "asc"]              // Name.
                     {% elif childrenClass == "EventFrame" %}
-                        [4, "desc"]             // Start timestamp.
+                        [5, "desc"]             // Start timestamp.
                     {% endif %}
                 ],
                 "columns":
@@ -342,6 +361,7 @@ Event Frames
                         { "orderable": false }, // Edit button.
                         { "orderable": false }  // Delete button.
                     {% elif childrenClass == "EventFrame" %}
+                        null,
                         null,
                         null,
                         null,
@@ -378,6 +398,10 @@ Event Frames
                 [
                     null,
                     null,
+                    null,
+                    null,
+                    null,
+                    null,
                     { "orderable": false }, // Edit button.
                     { "orderable": false }  // Delete button.
                 ],
@@ -404,7 +428,7 @@ Event Frames
             {
                 table.columns().every(function ()
                 {
-                    if (this.index() > 9)
+                    if (this.index() > 10)
                     {
                         this.visible(false)
                         $(".btn.btn-primary.btn-xs[data-columnIndex = " + this.index() + "]").removeClass("active")
@@ -416,7 +440,7 @@ Event Frames
             {
                 table.columns().every(function ()
                 {
-                    if (this.index() > 9)
+                    if (this.index() > 10)
                     {
                         this.visible(true)
                         $(".btn.btn-primary.btn-xs[data-columnIndex = " + this.index() + "]").addClass("active")

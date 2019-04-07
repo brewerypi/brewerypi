@@ -55,6 +55,7 @@ Event Frame Dashboard
                     <th></th>
                     <th>Template</th>
                     <th>Name</th>
+                    <th>User</th>
                     <th>Start</th>
                     <th>End</th>
                     <th></th>
@@ -69,6 +70,7 @@ Event Frame Dashboard
                             eventFrameId = eventFrame.EventFrameId,) }}"><span class = "glyphicon glyphicon-list"></span></a></td>
                         <td>{{ eventFrame.EventFrameTemplate.Name }}</td>
                         <td>{{ eventFrame.Name }}</td>
+                        <td>{{ eventFrame.User.Name }}</td>
                         <td>{{ moment(eventFrame.StartTimestamp).format("YYYY-MM-DD HH:mm:ss") }}</td>
                         {% if eventFrame.EndTimestamp %}
                             <td>{{ moment(eventFrame.EndTimestamp).format("YYYY-MM-DD HH:mm:ss") }}</td>
@@ -203,6 +205,7 @@ Event Frame Dashboard
         <thead>
             <tr>
                 <th>Timestamp</th>
+                <th>User</th>
                 <th>Note</th>
                 <th></th>
                 <th></th>
@@ -212,6 +215,7 @@ Event Frame Dashboard
             {% for eventFrameNote in eventFrame.EventFrameNotes %}
                 <tr>
                     <td>{{ moment(eventFrameNote.Note.Timestamp).format("YYYY-MM-DD HH:mm:ss") }}</td>
+                    <td>{{ eventFrameNote.Note.User.Name }}</td>
                     <td>{{ eventFrameNote.Note.Note }}</td>
                     <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("eventFrameNotes.editEventFrameNote",
                         eventFrameId = eventFrame.EventFrameId, noteId = eventFrameNote.NoteId) }}"><span class = "glyphicon glyphicon-edit"></span></a></td>
@@ -242,6 +246,7 @@ Event Frame Dashboard
                 "columns":
                 [
                     { "orderable": false }, // Select button.
+                    null,
                     null,
                     null,
                     null,
@@ -312,6 +317,7 @@ Event Frame Dashboard
                 ],
                 "columns":
                 [
+                    null,
                     null,
                     null,
                     { "orderable": false }, // Edit button.
