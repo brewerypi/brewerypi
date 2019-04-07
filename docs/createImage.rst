@@ -140,7 +140,7 @@ Add the following to the file::
 Save and exit.
 ::
 
-    (venv) $ flask deploy
+    (venv) $ flask deploy --admin --roles
     (venv) $ flask run --host 0.0.0.0
 
 Point a web browser at http\://<Your Raspberry Pi IP Address>:5000 and verify that you can access the app.
@@ -327,7 +327,7 @@ Reboot and point a web browser at http\://<Your Raspberry Pi IP Address>/grafana
 
 Login with "admin" for both the user and password.
 
-Go to Configuration->Server Admin and change the default "admin" username to "pi" and password to "brewery".
+Go to Server Admin->Users and change the default "admin" username to "pi" and password to "brewery".
 
 Expand Filesystem on 1st Boot
 -----------------------------
