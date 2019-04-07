@@ -39,7 +39,7 @@
   "editable": false,
   "gnetId": null,
   "graphTooltip": 0,
-  "iteration": 1544288220606,
+  "iteration": 1554051783923,
   "links": [],
   "panels": [
     {
@@ -72,6 +72,7 @@
       "linewidth": 1,
       "links": [],
       "nullPointMode": "null",
+      "paceLength": 10,
       "percentage": false,
       "pointradius": 1,
       "points": true,
@@ -153,7 +154,7 @@
       }
     }
   ],
-  "schemaVersion": 16,
+  "schemaVersion": 18,
   "style": "dark",
   "tags": [],
   "templating": {

@@ -57,15 +57,17 @@ Data Entry - Elements
         Toggle Column:
         <button type = "button" class = "btn btn-primary btn-xs" id = "buttonHideAllColumns">Hide All</button>
         {% for elementAttributeTemplate in parent.ElementAttributeTemplates %}
-            {% set dataColumnIndex = loop.index + 7 %}
+            {% set dataColumnIndex = loop.index + 9 %}
             <button type = "button" class = "btn btn-primary btn-xs" data-columnIndex = "{{ dataColumnIndex }}"
                 id = "buttonToggleColumn{{ elementAttributeTemplate.Name }}">{{ elementAttributeTemplate.Name }}</button>
         {% endfor %}
         <button type = "button" class = "btn btn-primary btn-xs" id = "buttonShowAllColumns">Show All</button>
         <br><br>
     {% elif childrenClass == "ElementAttributeTemplate" and current_user.isAdministrator() %}
-        <a class = "btn btn-default" title = "Add" href = "{{ url_for("elementAttributeTemplates.addElementAttributeTemplate",
+        <a class = "btn btn-default" title = "Add Element Attribute Template" href = "{{ url_for("elementAttributeTemplates.addElementAttributeTemplate",
             elementTemplateId = parent.id()) }}" role = "button"><span class = "glyphicon glyphicon-plus"></span></a>
+        <a class = "btn btn-default" title = "Add Element Attribute Lookup Template" href = "{{ url_for("elementAttributeTemplates.addElementAttributeTemplate",
+            elementTemplateId = parent.id(), lookup = True) }}" role = "button"><span class = "glyphicon glyphicon-plus"></span> Lookup</a>
         <br><br>
     {% elif childrenClass == "ElementTemplate" %}
         {% if current_user.isAdministrator() %}
@@ -85,6 +87,13 @@ Data Entry - Elements
                 <th></th>
                 <th>Name</th>
                 <th>Description</th>
+                {% if childrenClass == "Element" %}
+                    <th>Tags Managed</th>
+                    <th>Managed Area</th>
+                {% elif childrenClass == "ElementAttributeTemplate" %}
+                    <th>Lookup</th>
+                    <th>Unit</th>
+                {% endif %}
                 <th></th>
                 <th></th>
                 <th></th>
@@ -132,12 +141,19 @@ Data Entry - Elements
                                 <td></td>
                             {% endif %}
                         {% elif childrenClass == "Element" %}
+                            <td>{{ child.TagAreaId is not none | yesNo() }}</td>
+                            <td>{{ child.Area.Name }}</td>
                             {% if current_user.isAdministrator() %}
-                                <td><a class = "btn btn-default" title = "Associate Attributes with Tags"
-                                    href = "{{ url_for("elementAttributes.listElementAttributes", elementId = child.ElementId) }}">
-                                    <span class = "glyphicon glyphicon-link"></span></a></td>
-                                <td><a class = "btn btn-default" title = "Copy" href = "{{ url_for("elements.copyElement", elementId = child.ElementId) }}">
-                                    <span class = "glyphicon glyphicon-copy"></span></a></td>
+                                {% if child.TagAreaId is none %}
+                                    <td><a class = "btn btn-default" title = "Associate Attributes with Tags"
+                                        href = "{{ url_for("elementAttributes.listElementAttributes", elementId = child.ElementId) }}">
+                                        <span class = "glyphicon glyphicon-link"></span></a></td>
+                                    <td><a class = "btn btn-default" title = "Copy" href = "{{ url_for("elements.copyElement", elementId = child.ElementId) }}">
+                                        <span class = "glyphicon glyphicon-copy"></span></a></td>
+                                {% else %}
+                                    <td></td>
+                                    <td></td>
+                                {% endif %}
                                 <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("elements.editElement", elementId = child.ElementId) }}">
                                     <span class = "glyphicon glyphicon-edit"></span></a></td>
                                 <td><a class = "btn btn-default" title = "Delete" href = "{{ url_for("elements.deleteElement", elementId = child.ElementId) }}",
@@ -153,13 +169,17 @@ Data Entry - Elements
                                 <td>{{ currentElementAttributeValues[elementAttributeTemplate.Name] }}</td>
                             {% endfor %}
                         {% elif childrenClass == "ElementAttributeTemplate" %}
+                            <td>{{ "" if child.LookupId is none else child.Lookup.Name }}</td>
+                            <td>{{ "" if child.UnitOfMeasurementId is none else child.UnitOfMeasurement.Abbreviation }}</td>
                             <td></td>
                             <td></td>
-                            <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("elementAttributeTemplates.editElementAttributeTemplate",
-                                elementAttributeTemplateId = child.id()) }}"><span class = "glyphicon glyphicon-edit"></span></a></td>
-                            <td><a class = "btn btn-default" title = "Delete" href = "{{ url_for("elementAttributeTemplates.deleteElementAttributeTemplate",
-                                elementAttributeTemplateId = child.id()) }}", data-type = "element attribute template", data-name = "{{ child.Name }}">
-                                <span class = "glyphicon glyphicon-trash"></span></a></td>
+                            {% if current_user.isAdministrator() %}
+                                <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("elementAttributeTemplates.editElementAttributeTemplate",
+                                    elementAttributeTemplateId = child.id()) }}"><span class = "glyphicon glyphicon-edit"></span></a></td>
+                                <td><a class = "btn btn-default" title = "Delete" href = "{{ url_for("elementAttributeTemplates.deleteElementAttributeTemplate",
+                                    elementAttributeTemplateId = child.id()) }}", data-type = "element attribute template", data-name = "{{ child.Name }}">
+                                    <span class = "glyphicon glyphicon-trash"></span></a></td>
+                            {% endif %}
                         {% else %}
                             <td></td>
                             <td></td>
@@ -217,10 +237,17 @@ Data Entry - Elements
                     { "orderable": false }, // Grafana button.
                     null,
                     null,
+                    {% if childrenClass == "Element" %}
+                        null,
+                        null,
+                    {% elif childrenClass == "ElementAttributeTemplate" %}
+                        null,
+                        null,
+                    {% endif %}
                     { "orderable": false }, // Associate button.
                     { "orderable": false }, // Copy button.
                     { "orderable": false }, // Edit button.
-                    { "orderable": false },  // Delete button.
+                    { "orderable": false }, // Delete button.
                     {% if childrenClass == "Element" %}
                         {% for elementAttributeTemplate in parent.ElementAttributeTemplates %}
                             null,
@@ -250,7 +277,7 @@ Data Entry - Elements
             {
                 table.columns().every(function ()
                 {
-                    if (this.index() > 7)
+                    if (this.index() > 9)
                     {
                         this.visible(false)
                         $(".btn.btn-primary.btn-xs[data-columnIndex = " + this.index() + "]").removeClass("active")
@@ -262,7 +289,7 @@ Data Entry - Elements
             {
                 table.columns().every(function ()
                 {
-                    if (this.index() > 7)
+                    if (this.index() > 9)
                     {
                         this.visible(true)
                         $(".btn.btn-primary.btn-xs[data-columnIndex = " + this.index() + "]").addClass("active")

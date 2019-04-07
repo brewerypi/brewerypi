@@ -69,6 +69,7 @@ Tag Value Notes
         <thead>
             <tr>
                 <th>Timestamp</th>
+                <th>User</th>
                 <th>Note</th>
                 <th></th>
                 <th></th>
@@ -78,6 +79,7 @@ Tag Value Notes
             {% for tagValueNote in tagValueNotes %}
                 <tr>
                     <td>{{ moment(tagValueNote.Note.Timestamp).format("YYYY-MM-DD HH:mm:ss") }}</td>
+                    <td>{{ tagValueNote.Note.User.Name }}</td>
                     <td>{{ tagValueNote.Note.Note }}</td>
                     {% if elementAttribute %}
                         <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("tagValueNotes.editTagValueNote",
@@ -115,6 +117,7 @@ Tag Value Notes
                 ],
                 "columns":
                 [
+                    null,
                     null,
                     null,
                     { "orderable": false }, // Edit tag value button.

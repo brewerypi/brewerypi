@@ -1,11 +1,19 @@
 from flask_wtf import FlaskForm
-from wtforms import HiddenField, StringField, SubmitField, ValidationError
-from wtforms.validators import Length, Required
-from .. models import EventFrameAttributeTemplate
+from wtforms import HiddenField, FloatField, SelectField, StringField, SubmitField, ValidationError
+from wtforms.ext.sqlalchemy.fields import QuerySelectField
+from wtforms.validators import Length, Optional, Required
+from .. models import EventFrameAttributeTemplate, Lookup, LookupValue, UnitOfMeasurement
 
 class EventFrameAttributeTemplateForm(FlaskForm):
 	name = StringField("Name", validators = [Required(), Length(1, 45)])
 	description = StringField("Description", validators = [Length(0, 255)])
+	lookup = QuerySelectField("Lookup", validators = [Required()], get_label = "Name")
+	defaultStartLookupValue = SelectField("Default Start Value", validators = [Optional()], coerce = float)
+	defaultEndLookupValue = SelectField("Default End Value", validators = [Optional()], coerce = float)
+	unitOfMeasurement = QuerySelectField("Unit", query_factory = lambda: UnitOfMeasurement.query. \
+		order_by(UnitOfMeasurement.Abbreviation), get_label = "Abbreviation")
+	defaultStartValue = FloatField("Default Start Value", validators = [Optional()])
+	defaultEndValue = FloatField("Default End Value", validators = [Optional()])
 	eventFrameAttributeTemplateId = HiddenField()
 	eventFrameTemplateId = HiddenField()
 	requestReferrer = HiddenField()

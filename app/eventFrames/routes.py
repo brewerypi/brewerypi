@@ -1,7 +1,7 @@
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 from flask import current_app, flash, jsonify, redirect, render_template, request, url_for
-from flask_login import login_required
+from flask_login import current_user, login_required
 from . import eventFrames
 from . forms import EventFrameForm, EventFrameOverlayForm
 from . helpers import currentEventFrameAttributeValues
@@ -39,13 +39,27 @@ def addEventFrame(eventFrameTemplateId = None, parentEventFrameId = None):
 
 		if parentEventFrameId:
 			eventFrame = EventFrame(EndTimestamp = endUtcTimestamp, EventFrameTemplate = form.eventFrameTemplate.data,
-				Name = form.name.data, ParentEventFrameId = parentEventFrameId, StartTimestamp = form.startUtcTimestamp.data)
+				Name = form.name.data, ParentEventFrameId = parentEventFrameId, StartTimestamp = form.startUtcTimestamp.data, UserId = current_user.get_id())
 		else:
 			eventFrame = EventFrame(Element = form.element.data, EndTimestamp = endUtcTimestamp, EventFrameTemplateId = eventFrameTemplateId,
-				Name = form.name.data, StartTimestamp = form.startUtcTimestamp.data)
+				Name = form.name.data, StartTimestamp = form.startUtcTimestamp.data, UserId = current_user.get_id())
 
 		db.session.add(eventFrame)
 		db.session.commit()
+		count = 0
+		for eventFrameAttributeTemplate in eventFrame.EventFrameTemplate.EventFrameAttributeTemplates:
+			if eventFrameAttributeTemplate.DefaultStartValue is not None:
+				eventFrameAttribute = EventFrameAttribute.query.filter(EventFrameAttribute.ElementId == eventFrame.origin().ElementId,
+					EventFrameAttribute.EventFrameAttributeTemplateId == eventFrameAttributeTemplate.EventFrameAttributeTemplateId).one_or_none()
+				if eventFrameAttribute is not None:
+					tagValue = TagValue(TagId = eventFrameAttribute.TagId, Timestamp = form.startUtcTimestamp.data, UserId = current_user.get_id(),
+						Value = eventFrameAttributeTemplate.DefaultStartValue)
+					db.session.add(tagValue)
+					count = count + 1
+
+		if count > 0:
+			db.session.commit()
+
 		flash("You have successfully added a new Event Frame.", "alert alert-success")
 		return redirect(form.requestReferrer.data)
 
@@ -161,6 +175,7 @@ def editEventFrame(eventFrameId):
 
 		eventFrame.Name = form.name.data
 		eventFrame.StartTimestamp = form.startUtcTimestamp.data
+		eventFrame.UserId = current_user.get_id()
 		db.session.commit()
 		flash("You have successfully edited the Event Frame.", "alert alert-success")
 		return redirect(form.requestReferrer.data)
@@ -224,7 +239,21 @@ def editEventFrame(eventFrameId):
 def endEventFrame(eventFrameId):
 	eventFrame = EventFrame.query.get_or_404(eventFrameId)
 	eventFrame.EndTimestamp = datetime.utcnow()
+	eventFrame.UserId = current_user.get_id()
 	db.session.commit()
+	count = 0
+	for eventFrameAttributeTemplate in eventFrame.EventFrameTemplate.EventFrameAttributeTemplates:
+		if eventFrameAttributeTemplate.DefaultEndValue is not None:
+			eventFrameAttribute = EventFrameAttribute.query.filter(EventFrameAttribute.ElementId == eventFrame.origin().ElementId,
+				EventFrameAttribute.EventFrameAttributeTemplateId == eventFrameAttributeTemplate.EventFrameAttributeTemplateId).one_or_none()
+			if eventFrameAttribute is not None:
+				tagValue = TagValue(TagId = eventFrameAttribute.TagId, Timestamp = eventFrame.EndTimestamp, UserId = current_user.get_id(),
+					Value = eventFrameAttributeTemplate.DefaultEndValue)
+				db.session.add(tagValue)
+				count = count + 1
+
+	if count > 0:
+		db.session.commit()
 	flash("You have successfully ended \"{}\" for event frame \"{}\".".format(eventFrame.EventFrameTemplate.Name, eventFrame.Name),
 		"alert alert-success")
 	return redirect(request.referrer)
@@ -322,13 +351,13 @@ def days():
 def selectEventFrame(selectedClass = None, selectedId = None, months = None, selectedOperation = None):
 	eventFrameAttributeTemplates = None
 	if selectedClass == None:
-		parent = Site.query.join(Enterprise, ElementTemplate, EventFrameTemplate, EventFrame).order_by(Enterprise.Name).first()
-		if parent:
-			children = ElementTemplate.query.filter_by(SiteId = parent.id())
+		parent = Site.query.join(Enterprise).order_by(Enterprise.Name, Site.Name).first()
+		if parent is None:
+			flash("You must create a Site first.", "alert alert-danger")
+			return redirect(request.referrer)
 		else:
-			parent = Site.query.join(Enterprise, ElementTemplate).order_by(Enterprise.Name).first()
 			children = ElementTemplate.query.filter_by(SiteId = parent.id())
-		childrenClass = "ElementTemplate"
+			childrenClass = "ElementTemplate"
 	elif selectedClass == "Root":
 		parent = None
 		children = Enterprise.query.order_by(Enterprise.Name)
@@ -370,15 +399,3 @@ def selectEventFrame(selectedClass = None, selectedId = None, months = None, sel
 
 	return render_template("eventFrames/select.html", children = children, childrenClass = childrenClass,
 		eventFrameAttributeTemplates = eventFrameAttributeTemplates, months = months, parent = parent)
-
-@eventFrames.route("/eventFrames/startEventFrame/<int:elementId>/<int:eventFrameTemplateId>", methods = ["GET", "POST"])
-@login_required
-@permissionRequired(Permission.DATA_ENTRY)
-def startEventFrame(elementId, eventFrameTemplateId):
-	eventFrame = EventFrame(ElementId = elementId, EndTimestamp = None, EventFrameTemplateId = eventFrameTemplateId, ParentEventFrameId = None,
-		StartTimestamp = datetime.utcnow())
-	db.session.add(eventFrame)
-	db.session.commit()
-	flash("You have successfully added a new \"" + eventFrame.EventFrameTemplate.Name + "\" for element \"" + eventFrame.origin().Element.Name + "\".",
-		"alert alert-success")
-	return redirect(request.referrer)

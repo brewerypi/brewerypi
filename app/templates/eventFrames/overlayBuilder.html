@@ -73,7 +73,7 @@ Event Frames
                     <tr class = "trEventFrame" eventFrameId = "{{ eventFrame.EventFrameId }}">
                         <td>{{ eventFrame.EventFrameId }}</td>
                         <td>{{ eventFrame.Name }}</td>
-                        <td>{{ eventFrame.Element }}</td>
+                        <td>{{ eventFrame.ElementName }}</td>
                         <td>{{ moment(eventFrame.StartTimestamp).format("YYYY-MM-DD HH:mm:ss") }}</td>
                         {% if eventFrame.EndTimestamp %}
                             <td>{{ moment(eventFrame.EndTimestamp).format("YYYY-MM-DD HH:mm:ss") }}</td>

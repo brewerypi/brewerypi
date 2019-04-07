@@ -110,6 +110,7 @@ Tag Values
         <thead>
             <tr>
                 <th>Timestamp</th>
+                <th>User</th>
                 <th>Value</th>
                 {% if tag.LookupId %}
                     <th>Lookup Name</th>
@@ -125,6 +126,7 @@ Tag Values
             {% for tagValue in tagValues %}
                 <tr>
                     <td>{{ moment(tagValue.Timestamp).format("YYYY-MM-DD HH:mm:ss") }}</td>
+                    <td>{{ tagValue.User.Name }}</td>
                     {% if tagValue.Tag.LookupId %}
                         <td>{{ tagValue.Tag.Lookup.LookupValues | selectattr("Value", "equalto", tagValue.Value) | map(attribute = "Name") | list | first }}</td>
                         <td>{{ tagValue.Tag.Lookup.Name }}</td>
@@ -185,6 +187,7 @@ Tag Values
                 ],
                 "columns":
                 [
+                    null,
                     null,
                     null,
                     null,
