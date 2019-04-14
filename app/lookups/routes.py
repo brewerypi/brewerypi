@@ -39,7 +39,8 @@ def addLookup(enterpriseId):
 def deleteLookup(lookupId):
 	lookup = Lookup.query.get_or_404(lookupId)
 	if lookup.isReferenced():
-		flash('Lookup "{}" is used by one or more tag values and cannot be deleted.'.format(lookup.Name), "alert alert-danger")
+		flash('Lookup "{}" is referenced by one or more element and/or event frame attribute template and/or tag and cannot be deleted.'.format(lookup.Name),
+			"alert alert-danger")
 	else:
 		lookup.delete()
 		db.session.commit()
