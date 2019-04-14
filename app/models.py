@@ -468,7 +468,14 @@ class Lookup(db.Model):
 		return self.LookupId
 
 	def isReferenced(self):
-		return self.Tags.count() > 0
+		if db.session.query(func.count(EventFrameAttributeTemplate.EventFrameAttributeTemplateId)).filter_by(LookupId = self.LookupId).scalar() > 0:
+			return True
+		elif db.session.query(func.count(ElementAttributeTemplate.ElementAttributeTemplateId)).filter_by(LookupId = self.LookupId).scalar() > 0:
+			return True
+		elif db.session.query(func.count(Tag.TagId)).filter_by(LookupId = self.LookupId).scalar() > 0:
+			return True
+		else:
+			return False		
 
 class LookupValue(db.Model):
 	__tablename__ = "LookupValue"
@@ -494,7 +501,21 @@ class LookupValue(db.Model):
 		return self.LookupValueId
 
 	def isReferenced(self):
-		return TagValue.query.join(Tag).filter(TagValue.Value == self.Value, Tag.LookupId == self.LookupId).count() > 0
+		# Event frame attribute template default start value.
+		if db.session.query(func.count(EventFrameAttributeTemplate.EventFrameAttributeTemplateId)). \
+			join(TagValue, EventFrameAttributeTemplate.DefaultStartValue == self.Value).filter(EventFrameAttributeTemplate.LookupId == self.LookupId). \
+			scalar() > 0:
+			return True
+		# Event frame attribute template default end value.
+		elif db.session.query(func.count(EventFrameAttributeTemplate.EventFrameAttributeTemplateId)). \
+			join(TagValue, EventFrameAttributeTemplate.DefaultEndValue == self.Value).filter(EventFrameAttributeTemplate.LookupId == self.LookupId). \
+			scalar() > 0:
+			return True
+		# Tag value.
+		elif db.session.query(func.count(TagValue.TagValueId)).join(Tag).filter(TagValue.Value == self.Value, Tag.LookupId == self.LookupId).scalar() > 0:
+			return True
+		else:
+			return False
 
 class Note(db.Model):
 	__tablename__ = "Note"
@@ -712,7 +733,16 @@ class UnitOfMeasurement(db.Model):
 		return self.UnitOfMeasurementId
 
 	def isReferenced(self):
-		return self.Tags.count() > 0
+		if db.session.query(func.count(EventFrameAttributeTemplate.EventFrameAttributeTemplateId)).filter_by(UnitOfMeasurementId = self.UnitOfMeasurementId). \
+			scalar() > 0:
+			return True
+		elif db.session.query(func.count(ElementAttributeTemplate.ElementAttributeTemplateId)).filter_by(UnitOfMeasurementId = self.UnitOfMeasurementId). \
+			scalar() > 0:
+			return True
+		elif db.session.query(func.count(Tag.TagId)).filter_by(UnitOfMeasurementId = self.UnitOfMeasurementId).scalar() > 0:
+			return True
+		else:
+			return False
 
 class User(UserMixin, db.Model):
 	__tablename__ = "User"

@@ -48,11 +48,12 @@ def addLookupValue(lookupId):
 def deleteLookupValue(lookupValueId):
 	lookupValue = LookupValue.query.get_or_404(lookupValueId)
 	if lookupValue.isReferenced():
-		flash("Lookup value \"{}\" is referenced by one or more tag values and cannot be deleted.".format(lookupValue.Name), "alert alert-danger")
+		flash('Lookup value "{}" is referenced by one or more event frame attribute template default value and/or tag value and cannot be deleted.'. \
+			format(lookupValue.Name), "alert alert-danger")
 	else:
 		lookupValue.delete()
 		db.session.commit()
-		flash("You have successfully deleted the lookup value \"{}\".".format(lookupValue.Name), "alert alert-success")
+		flash('You have successfully deleted the lookup value "{}".'.format(lookupValue.Name), "alert alert-success")
 
 	return redirect(request.referrer)
 
