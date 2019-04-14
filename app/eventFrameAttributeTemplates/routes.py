@@ -24,7 +24,8 @@ def addEventFrameAttributeTemplate(eventFrameTemplateId, lookup = False):
 		firstLookup = lookupQuery.first()
 		choices = []
 		choices.append((-1, ""))
-		for lookupValue in LookupValue.query.filter_by(LookupId = firstLookup.LookupId).order_by(LookupValue.Name):
+		for lookupValue in LookupValue.query.filter_by(LookupId = firstLookup.LookupId if form.lookup.raw_data is None else form.lookup.raw_data[0]). \
+			order_by(LookupValue.Name):
 			choices.append((lookupValue.Value, lookupValue.Name))
 
 		form.defaultEndLookupValue.choices = choices
@@ -185,7 +186,7 @@ def editEventFrameAttributeTemplate(eventFrameAttributeTemplateId):
 		firstLookup = lookupQuery.first()
 		choices = []
 		choices.append((-1, ""))
-		for lookupValue in LookupValue.query.filter_by(LookupId = firstLookup.LookupId).order_by(LookupValue.Name):
+		for lookupValue in LookupValue.query.filter_by(LookupId = eventFrameAttributeTemplate.LookupId).order_by(LookupValue.Name):
 			choices.append((lookupValue.Value, lookupValue.Name))
 
 		form.defaultStartLookupValue.choices = choices
@@ -351,4 +352,4 @@ def editEventFrameAttributeTemplate(eventFrameAttributeTemplateId):
 				"text" : eventFrameAttributeTemplate.EventFrameTemplate.Name},
 			{"url" : None, "text" : eventFrameAttributeTemplate.Name}]
 
-	return render_template("addEdit.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
+	return render_template("eventFrameAttributeTemplates/addEdit.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
