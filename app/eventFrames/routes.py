@@ -280,8 +280,8 @@ def overlayBuilder(eventFrameTemplateId):
 			eventFrameAttributeTemplates = eventFrameAttributeTemplates, eventFrameTemplate = eventFrameTemplate,
 			grafanaBaseUri = current_app.config["GRAFANA_BASE_URI"], startTimestamp = startTimestamp)
 
-	return render_template("eventFrames/overlayBuilder.html", eventFrameAttributeTemplates = eventFrameAttributeTemplates, eventFrameTemplate = eventFrameTemplate,
-		form = form)
+	return render_template("eventFrames/overlayBuilder.html", eventFrameAttributeTemplates = eventFrameAttributeTemplates,
+		eventFrameTemplate = eventFrameTemplate, form = form)
 
 @eventFrames.route("/eventFrames/overlay/days", methods = ["GET", "POST"])
 @login_required
@@ -383,13 +383,14 @@ def selectEventFrame(selectedClass = None, selectedId = None, months = None, sel
 	elif selectedClass == "EventFrameTemplate":
 		parent = EventFrameTemplate.query.get_or_404(selectedId)
 		if months is None:
-			months = 3
-
-		fromTimestamp = datetime.utcnow() - relativedelta(months = months)
-		toTimestamp = datetime.utcnow()
-		if months == 0:
+			# Active event frames only.
+			children = EventFrame.query.filter(EventFrame.EventFrameTemplateId == selectedId, EventFrame.EndTimestamp == None)
+		elif months == 0:
+			# All event frames.
 			children = EventFrame.query.filter_by(EventFrameTemplateId = selectedId)
 		else:
+			fromTimestamp = datetime.utcnow() - relativedelta(months = months)
+			toTimestamp = datetime.utcnow()
 			children = EventFrame.query.filter(EventFrame.EventFrameTemplateId == selectedId, EventFrame.StartTimestamp >= fromTimestamp,
 				EventFrame.StartTimestamp <= toTimestamp)
 
