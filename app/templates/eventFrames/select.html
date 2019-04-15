@@ -62,6 +62,8 @@ Event Frames
 <div class = "page-header">
     <h1>Event Frames <small>{{ pageHeaderSubText }}</small>
         {% if childrenClass == "EventFrame" %}
+            <a class = 'btn btn-primary btn-xs {{ "active" if months is none }}' title = "Active" href = '{{ url_for("eventFrames.selectEventFrame",
+                selectedClass = "EventFrameTemplate", selectedId = parent.id(), months = none) }}' role = "button">Active</a>
             <a class = 'btn btn-primary btn-xs {{ "active" if months == 1 }}' title = "1 Mo" href = '{{ url_for("eventFrames.selectEventFrame",
                 selectedClass = "EventFrameTemplate", selectedId = parent.id(), months = 1) }}' role = "button">1 Mo</a>
             <a class = 'btn btn-primary btn-xs {{ "active" if months == 2 }}' title = "2 Mo" href = '{{ url_for("eventFrames.selectEventFrame",
