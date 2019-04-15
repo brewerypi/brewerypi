@@ -6,7 +6,8 @@ Brewery Pi
 
 {% block page_content %}
 <div class = "page-header">
-    <h1>Brewery Pi <small>Data for the Craft Brewer</small></h1>
+    <h1>Brewery Pi <small>{{ tagName }}</small></h1>
+    <h2>Data for the Craft Brewer</h2>
 </div>
 {% if current_user.is_authenticated %}
     <a class = "btn btn-default" title = "Log Out" href = "{{ url_for("authentications.logout") }}"><span class = "glyphicon glyphicon-log-out"></span></a>
