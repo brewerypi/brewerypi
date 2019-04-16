@@ -4,6 +4,7 @@
 # Flask-Migrate
 # Flask-Moment
 # Flask-WTF
+# GitPython
 # gunicorn
 # mysqlclient
 # python-dotenv
@@ -20,6 +21,8 @@ Flask-Migrate==2.4.0
 Flask-Moment==0.7.0
 Flask-SQLAlchemy==2.3.2
 Flask-WTF==0.14.2
+gitdb2==2.0.5
+GitPython==2.1.11
 gunicorn==19.9.0
 itsdangerous==1.1.0
 Jinja2==2.10
@@ -31,6 +34,7 @@ python-dotenv==0.10.1
 python-editor==1.0.4
 pytz==2018.9
 six==1.12.0
+smmap2==2.0.5
 SQLAlchemy==1.3.2
 visitor==0.1.3
 Werkzeug==0.15.2
