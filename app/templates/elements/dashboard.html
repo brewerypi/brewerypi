@@ -193,7 +193,7 @@
                     var newValueIsValid = $.isNumeric(newValue)
                     var newTimestamp = $.trim($("#inputNewTimestamp" + id).val())
                     var newTimestampIsBlank = newTimestamp == ""
-                    var newTimestampIsValid = moment(newTimestamp, "YYYY-M-D H:m:s").isValid()
+                    var newTimestampIsValid = moment(newTimestamp, "YYYY-M-D H:m:s", true).isValid()
                     
                     if ($(this).is("input"))
                     {
