@@ -3,6 +3,7 @@ from flask_login import login_required
 from sqlalchemy import and_
 from . import elements
 from . forms import ElementForm
+from . helpers import elementAttributeValues
 from .. import db
 from .. decorators import adminRequired, permissionRequired
 from .. models import Area, Element, ElementAttribute, ElementAttributeTemplate, ElementTemplate, Enterprise, EventFrame, EventFrameAttribute, \
@@ -349,6 +350,7 @@ def editElement(elementId):
 @login_required
 @permissionRequired(Permission.DATA_ENTRY)
 def selectElement(selectedClass = None, selectedId = None):
+	elementAttributeTemplates = None
 	if selectedClass == None:
 		parent = Site.query.join(Enterprise).order_by(Enterprise.Name, Site.Name).first()
 		if parent is None:
@@ -371,11 +373,13 @@ def selectElement(selectedClass = None, selectedId = None):
 		childrenClass = "ElementTemplate"
 	elif selectedClass == "ElementTemplate":
 		parent = ElementTemplate.query.get_or_404(selectedId)
-		children = Element.query.filter_by(ElementTemplateId = selectedId)
+		elementAttributeTemplates = ElementAttributeTemplate.query.filter_by(ElementTemplateId = parent.ElementTemplateId).order_by(ElementAttributeTemplate.Name)
+		children = elementAttributeValues(parent.ElementTemplateId)
 		childrenClass = "Element"
 	elif selectedClass == "ElementAttributeTemplate":
 		parent = ElementTemplate.query.get_or_404(selectedId)
 		children = ElementAttributeTemplate.query.filter_by(ElementTemplateId = selectedId)
 		childrenClass = "ElementAttributeTemplate"
 
-	return render_template("elements/select.html", children = children, childrenClass = childrenClass, parent = parent)
+	return render_template("elements/select.html", children = children, childrenClass = childrenClass, elementAttributeTemplates = elementAttributeTemplates,
+		parent = parent)

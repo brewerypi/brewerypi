@@ -66,27 +66,6 @@ class Element(db.Model):
 	def __repr__(self):
 		return "<Element: {}>".format(self.Name)		
 
-	def currentElementAttributeValues(self):
-		elementAttributeValues = {}
-		elementAttributeTemplates = self.ElementTemplate.ElementAttributeTemplates.order_by(ElementAttributeTemplate.Name)
-		for elementAttributeTemplate in elementAttributeTemplates:
-			value = ""
-			elementAttribute = ElementAttribute.query.filter_by(ElementAttributeTemplateId = elementAttributeTemplate.ElementAttributeTemplateId,
-				ElementId = self.ElementId).one_or_none()
-			if elementAttribute is not None:
-				tagValue = elementAttribute.Tag.TagValues.order_by(TagValue.Timestamp.desc()).first()
-				if tagValue is not None:
-					if tagValue.Tag.LookupId is None:
-						value = tagValue.Value
-					else:
-						lookupValue = LookupValue.query.filter_by(LookupId = tagValue.Tag.LookupId, Value = tagValue.Value).first()
-						if lookupValue is not None:
-							value = lookupValue.Name
-
-			elementAttributeValues[elementAttributeTemplate.Name] = value
-
-		return elementAttributeValues
-
 	def delete(self):
 		elementAttributes = self.ElementAttributes
 		for elementAttribute in elementAttributes:
