@@ -24,7 +24,7 @@ def addUser():
 
 	# Add a new user.
 	if form.validate_on_submit():
-		user = User(Enabled = True, Name = form.name.data, Password = form.password.data, Role = form.role.data)
+		user = User(Enabled = form.enabled.data, Name = form.name.data, Password = form.password.data, Role = form.role.data)
 		db.session.add(user)
 		db.session.commit()
 		flash('You have successfully added the user "{}".'.format(user.Name), "alert alert-success")
@@ -107,6 +107,7 @@ def editUser(userId):
 	if form.validate_on_submit():
 		user.Name = form.name.data
 		user.Role = form.role.data
+		user.Enabled = form.enabled.data
 		db.session.commit()
 		flash("You have successfully edited the user \"{}\".".format(user.Name), "alert alert-success")
 		return redirect(url_for("users.listUsers"))
@@ -115,6 +116,7 @@ def editUser(userId):
 	form.userId.data = user.UserId
 	form.name.data = user.Name
 	form.role.data = user.Role
+	form.enabled.data = user.Enabled
 	if form.requestReferrer.data is None:
 		form.requestReferrer.data = request.referrer
 
