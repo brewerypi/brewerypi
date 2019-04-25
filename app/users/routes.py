@@ -124,21 +124,3 @@ def editUser(userId):
 	breadcrumbs = [{"url" : url_for("users.listUsers"), "text" : "<span class = \"glyphicon glyphicon-home\"></span>"},
 		{"url" : None, "text" : user.Name}]
 	return render_template("addEdit.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
-
-@users.route("/users/enableDisable/<int:userId>", methods = ["GET", "POST"])
-@login_required
-@adminRequired
-def enableDisableUser(userId):
-	user = User.query.get_or_404(userId)
-	if user.Name == "pi":
-		flash("Disabling the default administrator account is not allowed.", "alert alert-danger")
-		return redirect(url_for("users.listUsers"))		
-
-	user.Enabled = not user.Enabled
-	db.session.commit()
-	flash('You have successfully {} the user "{}".'.format("enabled" if user.Enabled else "disabled", user.Name), "alert alert-success")
-	if current_user.UserId == userId:
-		logout_user()
-		return redirect(url_for("main.index"))
-	else:
-		return redirect(url_for("users.listUsers"))
