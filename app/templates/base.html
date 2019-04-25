@@ -71,13 +71,32 @@
             {% endif %}
             <ul class = "nav navbar-nav navbar-right">
                 {% if current_user.is_authenticated %}
-                <li class = "dropdown"><a href = "#" class = "dropdown-toggle" data-toggle = "dropdown">{{ current_user.Name }} <span class = "caret"></span>
-                    </a>
-                    <ul class = "dropdown-menu">
-                        <li><a href = "{{ url_for("authentications.logout") }}">Logout</a></li>
-                        <li><a href = "{{ url_for("users.changePassword", userId = current_user.UserId) }}">Change Password</a></li>
-                    </ul>
-                </li>
+                    {% set numberOfNewMessages = current_user.numberOfNewMessages() %}
+                    {% if numberOfNewMessages > 0 %}
+                        {% set messagesVisibility = "visible" %}
+                    {% else %}
+                        {% set messagesVisibility = "hidden" %}
+                    {% endif %}
+
+                    {% set numberOfNewNotifications = numberOfNewMessages %}
+                    {% if numberOfNewNotifications > 0 %}
+                        {% set notificationsVisibility = "visible" %}
+                    {% else %}
+                        {% set notificationsVisibility = "hidden" %}
+                    {% endif %}
+                    <li class = "dropdown"><a href = "#" class = "dropdown-toggle" data-toggle = "dropdown">
+                        <span id = "spanNotifications" class = "badge" style = "visibility: {{ notificationsVisibility }}">{{ numberOfNewNotifications }}</span>
+                        {{ current_user.Name }}
+                        <span class = "caret"></span>
+                        </a>
+                        <ul class = "dropdown-menu">
+                            <li><a href = "{{ url_for("users.changePassword", userId = current_user.UserId) }}">Change Password</a></li>
+                            <li><a href = '{{ url_for("messages.listMessages") }}'>Messages
+                                <span id = "spanMessages" class = "badge" style = "visibility: {{ messagesVisibility }}">{{ numberOfNewMessages }}</span>
+                            </a></li>
+                            <li><a href = "{{ url_for("authentications.logout") }}">Logout</a></li>
+                        </ul>
+                    </li>
                 {% else %}
                     <li><a href = "{{ url_for("authentications.login") }}">Log In</a></li>
                 {% endif %}
@@ -110,4 +129,37 @@
 {% block scripts %}
     {{ super() }}
     {{ moment.include_moment() }}
+    <script>
+        {% if current_user.is_authenticated %}
+            $(function()
+            {
+                var since = 0;
+                setInterval(function()
+                {
+                    $.ajax('{{ url_for("notifications.getNotifications") }}?since=' + since).done(function(notifications)
+                    {
+                        for (var i = 0; i < notifications.length; i++)
+                        {
+                            if (notifications[i].name == "unreadMessageCount")
+                                setNumberOfNewMessages(notifications[i].data)
+                                setNumberOfNewNotifications(notifications[i].data)
+                            since = notifications[i].UnixTimestamp
+                        }
+                    })
+                }, 10000)
+            })
+        {% endif %}
+
+        function setNumberOfNewMessages(count)
+        {
+            $("#spanMessages").text(count)
+            $("#spanMessages").css("visibility", count > 0 ? "visible" : "hidden")
+        }
+
+        function setNumberOfNewNotifications(count)
+        {
+            $("#spanNotifications").text(count)
+            $("#spanNotifications").css("visibility", count > 0 ? "visible" : "hidden")
+        }
+    </script>
 {% endblock %}
