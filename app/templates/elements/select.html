@@ -56,7 +56,7 @@ Data Entry - Elements
         <br><br>
         Toggle Column:
         <button type = "button" class = "btn btn-primary btn-xs" id = "buttonHideAllColumns">Hide All</button>
-        {% for elementAttributeTemplate in parent.ElementAttributeTemplates %}
+        {% for elementAttributeTemplate in elementAttributeTemplates %}
             {% set dataColumnIndex = loop.index + 9 %}
             <button type = "button" class = "btn btn-primary btn-xs" data-columnIndex = "{{ dataColumnIndex }}"
                 id = "buttonToggleColumn{{ elementAttributeTemplate.Name }}">{{ elementAttributeTemplate.Name }}</button>
@@ -99,7 +99,7 @@ Data Entry - Elements
                 <th></th>
                 <th></th>
                 {% if childrenClass == "Element" %}
-                    {% for elementAttributeTemplate in parent.ElementAttributeTemplates %}
+                    {% for elementAttributeTemplate in elementAttributeTemplates %}
                         <th>{{ elementAttributeTemplate.Name }}</th>
                     {% endfor %}
                 {% endif %}
@@ -111,8 +111,8 @@ Data Entry - Elements
                     <tr>
                         {% if childrenClass == "Element" %}
                             <td><a class = "btn btn-default" title = "Select" href = "{{ url_for("elements.dashboard",
-                                elementId = child.id()) }}"><span class = "glyphicon glyphicon-list"></span></a></td>
-                            <td><a class = "btn btn-default" title = "Grafana" href = "{{ "ElementValuesGraph" | grafanaUrl({"elementId": child.id()}) }}"
+                                elementId = child.ElementId) }}"><span class = "glyphicon glyphicon-list"></span></a></td>
+                            <td><a class = "btn btn-default" title = "Grafana" href = "{{ "ElementValuesGraph" | grafanaUrl({"elementId": child.ElementId}) }}"
                                 target = "_blank"><span class = "glyphicon glyphicon-stats"></span></a></td>
                         {% elif childrenClass == "ElementAttributeTemplate" %}
                             <td></td>
@@ -142,7 +142,7 @@ Data Entry - Elements
                             {% endif %}
                         {% elif childrenClass == "Element" %}
                             <td>{{ child.TagAreaId is not none | yesNo() }}</td>
-                            <td>{{ child.Area.Name }}</td>
+                            <td>{{ child.AreaName }}</td>
                             {% if current_user.isAdministrator() %}
                                 {% if child.TagAreaId is none %}
                                     <td><a class = "btn btn-default" title = "Associate Attributes with Tags"
@@ -164,9 +164,8 @@ Data Entry - Elements
                                 <td></td>
                                 <td></td>
                             {% endif %}
-                            {% set currentElementAttributeValues = child.currentElementAttributeValues() %}
-                            {% for elementAttributeTemplate in child.ElementTemplate.ElementAttributeTemplates %}
-                                <td>{{ currentElementAttributeValues[elementAttributeTemplate.Name] }}</td>
+                            {% for elementAttributeTemplate in elementAttributeTemplates %}
+                                <td>{{ child[elementAttributeTemplate.Name] }}</td>
                             {% endfor %}
                         {% elif childrenClass == "ElementAttributeTemplate" %}
                             <td>{{ "" if child.LookupId is none else child.Lookup.Name }}</td>
@@ -249,7 +248,7 @@ Data Entry - Elements
                     { "orderable": false }, // Edit button.
                     { "orderable": false }, // Delete button.
                     {% if childrenClass == "Element" %}
-                        {% for elementAttributeTemplate in parent.ElementAttributeTemplates %}
+                        {% for elementAttributeTemplate in elementAttributeTemplates %}
                             null,
                         {% endfor %}
                     {% endif %}
