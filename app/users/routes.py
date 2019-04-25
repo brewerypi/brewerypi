@@ -75,8 +75,9 @@ def deleteUser(userId):
 		flash("Deleting the default administrator account is not allowed.", "alert alert-danger")
 		return redirect(url_for("users.listUsers"))		
 
-	if user.EventFrames.count() > 0 or user.Notes.count() > 0 or user.TagValues.count() > 0:
-		flash('User "{}" has event frames, notes and/or tag values and cannot be deleted.'.format(user.Name), "alert alert-danger")
+	if user.EventFrames.count() > 0 or user.MessagesReceived.count() > 0 or user.MessagesSent.count() > 0 or user.Notes.count() > 0 or \
+		user.TagValues.count() > 0:
+		flash('User "{}" has event frames, messages, notes and/or tag values and cannot be deleted.'.format(user.Name), "alert alert-danger")
 		return redirect(url_for("users.listUsers"))
 
 	user.delete()
