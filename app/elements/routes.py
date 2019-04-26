@@ -171,22 +171,12 @@ def deleteElement(elementId):
 
 	element.delete()
 	db.session.commit()
-	flash('You have successfully deleted the element "{}".'.format(element.Name), "alert alert-success")
-	deletedTagsMessage = ""
-	tags.sort(key = lambda tag: tag.Name)
 	for tag in tags:
 		if not tag.isReferenced():
 			tag.delete()
-			if deletedTagsMessage == "":
-				deletedTagsMessage = 'Deleted the following tag(s):<br>"{}"'.format(tag.Name)
-			else:
-				deletedTagsMessage = '{}<br>"{}"'.format(deletedTagsMessage, tag.Name)
 
 	db.session.commit()
-	if deletedTagsMessage != "":
-		alert = "alert alert-success"
-		flash(deletedTagsMessage, alert)
-
+	flash('You have successfully deleted the element "{}".'.format(element.Name), "alert alert-success")
 	return redirect(request.referrer)
 
 @elements.route("/elements/edit/<int:elementId>", methods = ["GET", "POST"])
