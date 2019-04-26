@@ -4,6 +4,7 @@ from flask import current_app, flash, redirect, render_template, request, send_f
 from flask_login import login_required
 from . import tags
 from . forms import TagForm, TagImportForm
+from . helpers import areaTags
 from .. import db
 from .. decorators import adminRequired, permissionRequired
 from .. models import Area, Enterprise, Lookup, Permission, Site, Tag, UnitOfMeasurement
@@ -271,7 +272,7 @@ def selectTag(selectedClass = None, selectedId = None):
 		childrenClass = "Area"
 	elif selectedClass == "Area":
 		parent = Area.query.get_or_404(selectedId)
-		children = Tag.query.filter_by(AreaId = selectedId)
+		children = areaTags(selectedId)
 		childrenClass = "Tag"
 
 	return render_template("tags/select.html", children = children, childrenClass = childrenClass, parent = parent)

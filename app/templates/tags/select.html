@@ -68,8 +68,8 @@ Tags
                     <tr>
                         {% if childrenClass == "Tag" %}
                             <td><a class = "btn btn-default" title = "Select" href = "{{ url_for("tagValues.listTagValues",
-                                tagId = child.id()) }}"><span class = "glyphicon glyphicon-list"></span></a></td>
-                            <td><a class = "btn btn-default" title = "Grafana" href = "{{ "TagValuesGraph" | grafanaUrl({"tagId": child.id()}) }}"
+                                tagId = child.TagId) }}"><span class = "glyphicon glyphicon-list"></span></a></td>
+                            <td><a class = "btn btn-default" title = "Grafana" href = "{{ "TagValuesGraph" | grafanaUrl({"tagId": child.TagId}) }}"
                                 target = "_blank"><span class = "glyphicon glyphicon-stats"></span></a></td>
                         {% else %}
                             <td><a class = "btn btn-default" title = "Select" href = "{{ url_for("tags.selectTag", selectedClass = child.__class__.__name__,
@@ -79,11 +79,11 @@ Tags
                         <td>{{ child.Name }}</td>
                         <td>{{ child.Description }}</td>
                         {% if childrenClass == "Tag" %}
-                            <td>{{ "" if child.LookupId is none else child.Lookup.Name }}</td>
-                            <td>{{ "" if child.UnitOfMeasurementId is none else child.UnitOfMeasurement.Abbreviation }}</td>
-                            <td>{{ child.isManaged() | yesNo }}</td>
-                            <td>{{ child.isReferenced() | yesNo }}</td>
-                            {% if current_user.isAdministrator() and child.isManaged() == false %}
+                            <td>{{ "" if child.LookupName is none else child.LookupName }}</td>
+                            <td>{{ "" if child.Unit is none else child.Unit }}</td>
+                            <td>{{ child.Managed | yesNo }}</td>
+                            <td>{{ child.Referenced | yesNo }}</td>
+                            {% if current_user.isAdministrator() and child.Managed == false %}
                                 <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("tags.editTag", tagId = child.TagId) }}">
                                     <span class = "glyphicon glyphicon-edit"></span></a></td>
                                 <td><a class = "btn btn-default" title = "Delete" href = "{{ url_for("tags.deleteTag", tagId = child.TagId) }}",

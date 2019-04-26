@@ -667,15 +667,6 @@ class Tag(db.Model):
 	def id(self):
 		return self.TagId
 
-	def isManaged(self):
-		if db.session.query(func.count(Element.ElementId)).join(EventFrameAttribute, Tag). \
-			filter(Element.TagAreaId != None, Tag.TagId == self.TagId).scalar() > 0:
-			return True
-		if db.session.query(func.count(Element.ElementId)).join(ElementAttribute, Tag).filter(Element.TagAreaId != None, Tag.TagId == self.TagId).scalar() > 0:
-			return True
-		else:
-			return False
-
 	def isReferenced(self):
 		if db.session.query(func.count(EventFrameAttribute.EventFrameAttributeId)).filter_by(TagId = self.TagId).scalar() > 0:
 			return True
