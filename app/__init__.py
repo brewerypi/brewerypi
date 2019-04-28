@@ -69,6 +69,12 @@ def create_app(configClass = Config):
 	from . main import main as mainBlueprint
 	app.register_blueprint(mainBlueprint)
 
+	from . messages import messages as messagesBlueprint
+	app.register_blueprint(messagesBlueprint)
+
+	from . notifications import notifications as notificationsBlueprint
+	app.register_blueprint(notificationsBlueprint)
+
 	from . physicalModels import physicalModels as physicalModelsBlueprint
 	app.register_blueprint(physicalModelsBlueprint)
 

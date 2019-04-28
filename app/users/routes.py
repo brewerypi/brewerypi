@@ -24,7 +24,7 @@ def addUser():
 
 	# Add a new user.
 	if form.validate_on_submit():
-		user = User(Enabled = True, Name = form.name.data, Password = form.password.data, Role = form.role.data)
+		user = User(Enabled = form.enabled.data, Name = form.name.data, Password = form.password.data, Role = form.role.data)
 		db.session.add(user)
 		db.session.commit()
 		flash('You have successfully added the user "{}".'.format(user.Name), "alert alert-success")
@@ -75,8 +75,9 @@ def deleteUser(userId):
 		flash("Deleting the default administrator account is not allowed.", "alert alert-danger")
 		return redirect(url_for("users.listUsers"))		
 
-	if user.EventFrames.count() > 0 or user.Notes.count() > 0 or user.TagValues.count() > 0:
-		flash('User "{}" has event frames, notes and/or tag values and cannot be deleted.'.format(user.Name), "alert alert-danger")
+	if user.EventFrames.count() > 0 or user.MessagesReceived.count() > 0 or user.MessagesSent.count() > 0 or user.Notes.count() > 0 or \
+		user.TagValues.count() > 0:
+		flash('User "{}" has event frames, messages, notes and/or tag values and cannot be deleted.'.format(user.Name), "alert alert-danger")
 		return redirect(url_for("users.listUsers"))
 
 	user.delete()
@@ -107,6 +108,7 @@ def editUser(userId):
 	if form.validate_on_submit():
 		user.Name = form.name.data
 		user.Role = form.role.data
+		user.Enabled = form.enabled.data
 		db.session.commit()
 		flash("You have successfully edited the user \"{}\".".format(user.Name), "alert alert-success")
 		return redirect(url_for("users.listUsers"))
@@ -115,27 +117,10 @@ def editUser(userId):
 	form.userId.data = user.UserId
 	form.name.data = user.Name
 	form.role.data = user.Role
+	form.enabled.data = user.Enabled
 	if form.requestReferrer.data is None:
 		form.requestReferrer.data = request.referrer
 
 	breadcrumbs = [{"url" : url_for("users.listUsers"), "text" : "<span class = \"glyphicon glyphicon-home\"></span>"},
 		{"url" : None, "text" : user.Name}]
 	return render_template("addEdit.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
-
-@users.route("/users/enableDisable/<int:userId>", methods = ["GET", "POST"])
-@login_required
-@adminRequired
-def enableDisableUser(userId):
-	user = User.query.get_or_404(userId)
-	if user.Name == "pi":
-		flash("Disabling the default administrator account is not allowed.", "alert alert-danger")
-		return redirect(url_for("users.listUsers"))		
-
-	user.Enabled = not user.Enabled
-	db.session.commit()
-	flash('You have successfully {} the user "{}".'.format("enabled" if user.Enabled else "disabled", user.Name), "alert alert-success")
-	if current_user.UserId == userId:
-		logout_user()
-		return redirect(url_for("main.index"))
-	else:
-		return redirect(url_for("users.listUsers"))

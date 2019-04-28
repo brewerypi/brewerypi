@@ -349,7 +349,7 @@ Event Frame Dashboard
                     var newValueIsValid = $.isNumeric(newValue)
                     var newTimestamp = $.trim($("#inputNewTimestamp" + id).val())
                     var newTimestampIsBlank = newTimestamp == ""
-                    var newTimestampIsValid = moment(newTimestamp, "YYYY-M-D H:m:s").isValid()
+                    var newTimestampIsValid = moment(newTimestamp, "YYYY-M-D H:m:s", true).isValid()
                     var newTimestampIsInEventFrame = false
 
                     if ($(this).is("input"))

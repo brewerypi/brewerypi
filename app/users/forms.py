@@ -1,7 +1,7 @@
 from flask_login import current_user
 from flask_wtf import FlaskForm
 from wtforms.ext.sqlalchemy.fields import QuerySelectField
-from wtforms import HiddenField, PasswordField, StringField, SubmitField, ValidationError
+from wtforms import BooleanField, HiddenField, PasswordField, StringField, SubmitField, ValidationError
 from wtforms.validators import EqualTo, Length, Regexp, Required
 from .. models import Role, User
 
@@ -12,6 +12,7 @@ class UserForm(FlaskForm):
 	currentPassword = PasswordField("Current Password", validators = [Required()])
 	password = PasswordField("Password", validators = [EqualTo("password2", message = "Passwords must match."), Required()])
 	password2 = PasswordField("Confirm Password", validators = [Required()])
+	enabled = BooleanField("Enabled", default = "checked")
 	userId = HiddenField()
 	requestReferrer = HiddenField()
 	submit = SubmitField("Save")

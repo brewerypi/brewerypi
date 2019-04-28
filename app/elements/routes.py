@@ -3,6 +3,7 @@ from flask_login import login_required
 from sqlalchemy import and_
 from . import elements
 from . forms import ElementForm
+from . helpers import elementAttributeValues
 from .. import db
 from .. decorators import adminRequired, permissionRequired
 from .. models import Area, Element, ElementAttribute, ElementAttributeTemplate, ElementTemplate, Enterprise, EventFrame, EventFrameAttribute, \
@@ -170,22 +171,12 @@ def deleteElement(elementId):
 
 	element.delete()
 	db.session.commit()
-	flash('You have successfully deleted the element "{}".'.format(element.Name), "alert alert-success")
-	deletedTagsMessage = ""
-	tags.sort(key = lambda tag: tag.Name)
 	for tag in tags:
 		if not tag.isReferenced():
 			tag.delete()
-			if deletedTagsMessage == "":
-				deletedTagsMessage = 'Deleted the following tag(s):<br>"{}"'.format(tag.Name)
-			else:
-				deletedTagsMessage = '{}<br>"{}"'.format(deletedTagsMessage, tag.Name)
 
 	db.session.commit()
-	if deletedTagsMessage != "":
-		alert = "alert alert-success"
-		flash(deletedTagsMessage, alert)
-
+	flash('You have successfully deleted the element "{}".'.format(element.Name), "alert alert-success")
 	return redirect(request.referrer)
 
 @elements.route("/elements/edit/<int:elementId>", methods = ["GET", "POST"])
@@ -349,6 +340,7 @@ def editElement(elementId):
 @login_required
 @permissionRequired(Permission.DATA_ENTRY)
 def selectElement(selectedClass = None, selectedId = None):
+	elementAttributeTemplates = None
 	if selectedClass == None:
 		parent = Site.query.join(Enterprise).order_by(Enterprise.Name, Site.Name).first()
 		if parent is None:
@@ -371,11 +363,13 @@ def selectElement(selectedClass = None, selectedId = None):
 		childrenClass = "ElementTemplate"
 	elif selectedClass == "ElementTemplate":
 		parent = ElementTemplate.query.get_or_404(selectedId)
-		children = Element.query.filter_by(ElementTemplateId = selectedId)
+		elementAttributeTemplates = ElementAttributeTemplate.query.filter_by(ElementTemplateId = parent.ElementTemplateId).order_by(ElementAttributeTemplate.Name)
+		children = elementAttributeValues(parent.ElementTemplateId)
 		childrenClass = "Element"
 	elif selectedClass == "ElementAttributeTemplate":
 		parent = ElementTemplate.query.get_or_404(selectedId)
 		children = ElementAttributeTemplate.query.filter_by(ElementTemplateId = selectedId)
 		childrenClass = "ElementAttributeTemplate"
 
-	return render_template("elements/select.html", children = children, childrenClass = childrenClass, parent = parent)
+	return render_template("elements/select.html", children = children, childrenClass = childrenClass, elementAttributeTemplates = elementAttributeTemplates,
+		parent = parent)

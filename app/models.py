@@ -1,5 +1,9 @@
+import json
+from datetime import datetime
 from flask_login import AnonymousUserMixin, UserMixin
 from sqlalchemy import func, Index, PrimaryKeyConstraint, UniqueConstraint
+from sqlalchemy.dialects.mysql import DOUBLE
+from time import time
 from werkzeug.security import generate_password_hash, check_password_hash
 from app import db
 from . import loginManager
@@ -62,27 +66,6 @@ class Element(db.Model):
 
 	def __repr__(self):
 		return "<Element: {}>".format(self.Name)		
-
-	def currentElementAttributeValues(self):
-		elementAttributeValues = {}
-		elementAttributeTemplates = self.ElementTemplate.ElementAttributeTemplates.order_by(ElementAttributeTemplate.Name)
-		for elementAttributeTemplate in elementAttributeTemplates:
-			value = ""
-			elementAttribute = ElementAttribute.query.filter_by(ElementAttributeTemplateId = elementAttributeTemplate.ElementAttributeTemplateId,
-				ElementId = self.ElementId).one_or_none()
-			if elementAttribute is not None:
-				tagValue = elementAttribute.Tag.TagValues.order_by(TagValue.Timestamp.desc()).first()
-				if tagValue is not None:
-					if tagValue.Tag.LookupId is None:
-						value = tagValue.Value
-					else:
-						lookupValue = LookupValue.query.filter_by(LookupId = tagValue.Tag.LookupId, Value = tagValue.Value).first()
-						if lookupValue is not None:
-							value = lookupValue.Name
-
-			elementAttributeValues[elementAttributeTemplate.Name] = value
-
-		return elementAttributeValues
 
 	def delete(self):
 		elementAttributes = self.ElementAttributes
@@ -517,6 +500,28 @@ class LookupValue(db.Model):
 		else:
 			return False
 
+class Message(db.Model):
+	__tablename__ = "Message"
+	__table_args__ = \
+	(
+		Index("IX__RecipientId__Timestamp", "RecipientId", "Timestamp"),
+	)
+
+	MessageId = db.Column(db.Integer, primary_key = True)
+	Body = db.Column(db.Text, nullable = False)
+	RecipientId = db.Column(db.Integer, db.ForeignKey("User.UserId", name = "FK__User$Receive$Message"), nullable = False)
+	SenderId = db.Column(db.Integer, db.ForeignKey("User.UserId", name = "FK__User$Send$Message"), nullable = False)
+	Timestamp = db.Column(db.DateTime, nullable = False, default = datetime.utcnow)
+
+	def __repr__(self):
+		return "<Message: {}>".format(self.Body)
+
+	def delete(self):
+		db.session.delete(self)
+
+	def id(self):
+		return self.MessageId
+
 class Note(db.Model):
 	__tablename__ = "Note"
 	__table_args__ = \
@@ -531,6 +536,22 @@ class Note(db.Model):
 	
 	TagValueNotes = db.relationship("TagValueNote", backref = "Note", lazy = "dynamic")
 	EventFrameNotes = db.relationship("EventFrameNote", backref = "Note", lazy = "dynamic")
+
+class Notification(db.Model):
+	__tablename__ = "Notification"
+	__table_args__ = \
+	(
+		Index("IX__UserId__Name__UnixTimestamp", "UserId", "Name", "UnixTimestamp"),
+	)
+
+	NotificationId = db.Column(db.Integer, primary_key = True)
+	Name = db.Column(db.String(128), nullable = False)
+	Payload = db.Column(db.Text)
+	UnixTimestamp = db.Column(DOUBLE(asdecimal = False), nullable = False, default = time)
+	UserId = db.Column(db.Integer, db.ForeignKey("User.UserId", name = "FK__User$Have$Notification"), nullable = False)
+
+	def getPayload(self):
+		return json.loads(self.Payload)
 
 class Permission:
 	DATA_ENTRY = 0x01
@@ -647,15 +668,6 @@ class Tag(db.Model):
 	def id(self):
 		return self.TagId
 
-	def isManaged(self):
-		if db.session.query(func.count(Element.ElementId)).join(EventFrameAttribute, Tag). \
-			filter(Element.TagAreaId != None, Tag.TagId == self.TagId).scalar() > 0:
-			return True
-		if db.session.query(func.count(Element.ElementId)).join(ElementAttribute, Tag).filter(Element.TagAreaId != None, Tag.TagId == self.TagId).scalar() > 0:
-			return True
-		else:
-			return False
-
 	def isReferenced(self):
 		if db.session.query(func.count(EventFrameAttribute.EventFrameAttributeId)).filter_by(TagId = self.TagId).scalar() > 0:
 			return True
@@ -754,12 +766,16 @@ class User(UserMixin, db.Model):
 
 	UserId = db.Column(db.Integer, primary_key = True)
 	Enabled = db.Column(db.Boolean, nullable = False)
+	LastMessageReadTimestamp = db.Column(db.DateTime)
 	Name = db.Column(db.String(45), nullable = False)
 	PasswordHash = db.Column(db.String(128))
 	RoleId = db.Column(db.Integer, db.ForeignKey("Role.RoleId", name = "FK__Role$Have$User"), nullable = False)
 
 	EventFrames = db.relationship("EventFrame", backref = "User", lazy = "dynamic")
+	MessagesReceived = db.relationship("Message", foreign_keys = "Message.RecipientId", backref = "Recipient", lazy = "dynamic")
+	MessagesSent = db.relationship("Message", foreign_keys = "Message.SenderId", backref = "Sender", lazy = "dynamic")
 	Notes = db.relationship("Note", backref = "User", lazy = "dynamic")
+	Notifications = db.relationship("Notification", backref = "User", lazy = "dynamic")
 	TagValues = db.relationship("TagValue", backref = "User", lazy = "dynamic")
 
 	@property
@@ -788,6 +804,12 @@ class User(UserMixin, db.Model):
 	def __repr__(self):
 		return "<User: {}>".format(self.Name)
 
+	def addNotification(self, name, data):
+		self.Notifications.filter_by(Name = name).delete()
+		notification = Notification(Name = name, Payload = json.dumps(data), User = self)
+		db.session.add(notification)
+		return notification
+
 	def can(self, permissions):
 		return self.Role is not None and (self.Role.Permissions & permissions) == permissions
 
@@ -802,6 +824,10 @@ class User(UserMixin, db.Model):
 
 	def isAdministrator(self):
 		return self.can(Permission.ADMINISTER)
+
+	def numberOfNewMessages(self):
+		lastReadTimestamp = self.LastMessageReadTimestamp or datetime(1900, 1, 1)
+		return Message.query.filter(Message.RecipientId == self.UserId, Message.Timestamp > lastReadTimestamp).count()
 
 	def verifyPassword(self, password):
 		return check_password_hash(self.PasswordHash, password)
