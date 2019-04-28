@@ -2,6 +2,7 @@ import json
 from datetime import datetime
 from flask_login import AnonymousUserMixin, UserMixin
 from sqlalchemy import func, Index, PrimaryKeyConstraint, UniqueConstraint
+from sqlalchemy.dialects.mysql import DOUBLE
 from time import time
 from werkzeug.security import generate_password_hash, check_password_hash
 from app import db
@@ -546,7 +547,7 @@ class Notification(db.Model):
 	NotificationId = db.Column(db.Integer, primary_key = True)
 	Name = db.Column(db.String(128), nullable = False)
 	Payload = db.Column(db.Text)
-	UnixTimestamp = db.Column(db.Float, nullable = False, default = time)
+	UnixTimestamp = db.Column(DOUBLE(asdecimal = False), nullable = False, default = time)
 	UserId = db.Column(db.Integer, db.ForeignKey("User.UserId", name = "FK__User$Have$Notification"), nullable = False)
 
 	def getPayload(self):
@@ -666,15 +667,6 @@ class Tag(db.Model):
 
 	def id(self):
 		return self.TagId
-
-	def isManaged(self):
-		if db.session.query(func.count(Element.ElementId)).join(EventFrameAttribute, Tag). \
-			filter(Element.TagAreaId != None, Tag.TagId == self.TagId).scalar() > 0:
-			return True
-		if db.session.query(func.count(Element.ElementId)).join(ElementAttribute, Tag).filter(Element.TagAreaId != None, Tag.TagId == self.TagId).scalar() > 0:
-			return True
-		else:
-			return False
 
 	def isReferenced(self):
 		if db.session.query(func.count(EventFrameAttribute.EventFrameAttributeId)).filter_by(TagId = self.TagId).scalar() > 0:

@@ -146,7 +146,7 @@
                             since = notifications[i].UnixTimestamp
                         }
                     })
-                }, 10000)
+                }, {{ config["NOTIFICATIONS_INTERVAL_IN_MILLISECONDS"] }})
             })
         {% endif %}
 
