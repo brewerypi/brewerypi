@@ -34,7 +34,7 @@ def upgrade():
     sa.Column('NotificationId', sa.Integer(), nullable=False),
     sa.Column('Name', sa.String(length=128), nullable=False),
     sa.Column('Payload', sa.Text(), nullable=True),
-    sa.Column('UnixTimestamp', mysql.DOUBLE, nullable=False),
+    sa.Column('UnixTimestamp', mysql.DOUBLE(), nullable=False),
     sa.Column('UserId', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['UserId'], ['User.UserId'], name='FK__User$Have$Notification'),
     sa.PrimaryKeyConstraint('NotificationId')
