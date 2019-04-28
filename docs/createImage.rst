@@ -110,10 +110,6 @@ Logout and then log back in.
     $ source venv/bin/activate
     (venv) $ pip install --upgrade pip setuptools
     (venv) $ pip install -r requirements.txt
-    (venv) $ pip list --outdated
-
-Review outdated package, update packages and requirements.txt as needed.
-
     (venv) $ python3 -c "import uuid; print(uuid.uuid4().hex)"
 
 Will return something like::
@@ -128,7 +124,6 @@ Copy the entire string and paste it below in .env after "SECRET_KEY=".
 Add the following to the file::
 
     IS_RASPBERRY_PI=1
-    LOCAL_TIMEZONE=
     MYSQL_USERNAME=pi
     MYSQL_PASSWORD=brewery
     MYSQL_HOST=localhost
@@ -254,8 +249,8 @@ Grafana
 
     $ cd
     $ sudo apt-get -y install adduser libfontconfig
-    $ wget https://s3-us-west-2.amazonaws.com/grafana-releases/release/grafana_X.Y.Z_armhf.deb 
-    $ sudo dpkg -i grafana_X.Y.Z_armhf.deb 
+    $ wget https://s3-us-west-2.amazonaws.com/grafana-releases/release/grafana_X.Y.Z_armhf.deb
+    $ sudo dpkg -i grafana_X.Y.Z_armhf.deb
     $ rm grafana_X.Y.Z_armhf.deb
     $ sudo nano /etc/grafana/grafana.ini
 
