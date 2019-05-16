@@ -111,7 +111,7 @@ Event Frames
         Toggle Column:
         <button type = "button" class = "btn btn-primary btn-xs" id = "buttonHideAllColumns">Hide All</button>
         {% for eventFrameAttributeTemplate in eventFrameAttributeTemplates %}
-            {% set dataColumnIndex = loop.index + 10 %}
+            {% set dataColumnIndex = loop.index + 11 %}
             <button type = "button" class = "btn btn-primary btn-xs" data-columnIndex = "{{ dataColumnIndex }}"
                 id = "buttonToggleColumn{{ eventFrameAttributeTemplate.Name }}">{{ eventFrameAttributeTemplate.Name }}</button>
         {% endfor %}
@@ -128,6 +128,9 @@ Event Frames
             <tr>
                 <th></th>
                 <th></th>
+                {% if childrenClass == "EventFrame" %}
+                    <th></th>
+                {% endif %}
                 <th>Name</th>
                 {% if childrenClass == "Enterprise" or childrenClass == "Site" or childrenClass == "ElementTemplate" %}
                     <th>Description</th>
@@ -161,13 +164,20 @@ Event Frames
         <tbody>
             {% if children %}
                 {% for child in children %}
-                    <tr>
+                    {% if child.EventFrameId is defined %}
+                        <tr id = "trEventFrame{{ child.EventFrameId }}">
+                    {% else %}
+                        <tr>
+                    {% endif %}
                         {% if childrenClass == "EventFrame" %}
                             <td><a class = "btn btn-default" title = "Select" href = '{{ url_for("eventFrames.dashboard",
                                 eventFrameId = child.EventFrameId) }}'><span class = "glyphicon glyphicon-list"></span></a></td>
                             <td><a class = "btn btn-default" title = "Grafana"
-                                href = '{{ "EventFramesGraph" | grafanaUrl({"eventFrameId": child.EventFrameId}) }}''
+                                href = '{{ "EventFramesGraph" | grafanaUrl({"eventFrameId": child.EventFrameId}) }}'
                                 target = "_blank"><span class = "glyphicon glyphicon-stats"></span></a></td>
+                            <td><a class = "btn btn-default" title = "Send Message"
+                                href = '{{ url_for("messages.addMessage", eventFrameId = child.EventFrameId) }}'><span class = "glyphicon glyphicon-envelope">                                    
+                                </span></a></td>
                         {% elif childrenClass == "DescendantEventFrameTemplate" %}
                             <td><a class = "btn btn-default" title = "Select" href = "{{ url_for("eventFrames.selectEventFrame",
                                 selectedClass = child.__class__.__name__, selectedId = child.id(),
@@ -204,7 +214,8 @@ Event Frames
                                 <td></td>
                             {% endif %}
                         {% elif childrenClass == "EventFrame" %}
-                            <td>{{ child.Name }}</td>
+                            <td>{{ child.Name }} <a href = '{{ url_for("messages.listMessages") }}'>
+                                <span id = "spanEventFrameMessages{{ child.EventFrameId }}" class = "badge" style = "visibility: hidden"></span></td></a>
                             <td>{{ child.ElementName }}</td>
                             <td>{{ child.UserName }}</td>
                             <td>{{ moment(child.StartTimestamp).format("YYYY-MM-DD HH:mm:ss") }}</td>
@@ -345,13 +356,16 @@ Event Frames
                     {% elif childrenClass == "EventFrameTemplate" %}
                         [2, "asc"]              // Name.
                     {% elif childrenClass == "EventFrame" %}
-                        [5, "desc"]             // Start timestamp.
+                        [6, "desc"]             // Start timestamp.
                     {% endif %}
                 ],
                 "columns":
                 [
                     { "orderable": false },     // Select button.
                     { "orderable": false },     // Grafana button.
+                    {% if childrenClass == "EventFrame" %}
+                    { "orderable": false },     // Message button.
+                    {% endif %}
                     {% if childrenClass == "Enterprise" or childrenClass == "Site" or childrenClass == "ElementTemplate" %}
                         null,
                         null
@@ -389,6 +403,16 @@ Event Frames
                 "orderCellsTop": true,
                 "fixedHeader": true
             })
+
+            // Check for unread event frame messages for the current user and flag appropriately.
+            {% for notification in current_user.Notifications %}
+                {% if notification.Name == "unreadEventFrameMessageCount" %}
+                    {% set eventFrameMessageCounts = notification.getPayload() %}
+                    {% for eventFrameId in eventFrameMessageCounts %}
+                        setEventFrameMessageCount("{{ eventFrameId }}", "{{ eventFrameMessageCounts[eventFrameId] }}")
+                    {% endfor %}
+                {% endif %}
+            {% endfor %}
 
             $('#eventFrameAttributeTemplatesTable').DataTable
             ({
@@ -430,7 +454,7 @@ Event Frames
             {
                 table.columns().every(function ()
                 {
-                    if (this.index() > 10)
+                    if (this.index() > 11)
                     {
                         this.visible(false)
                         $(".btn.btn-primary.btn-xs[data-columnIndex = " + this.index() + "]").removeClass("active")
@@ -442,7 +466,7 @@ Event Frames
             {
                 table.columns().every(function ()
                 {
-                    if (this.index() > 10)
+                    if (this.index() > 11)
                     {
                         this.visible(true)
                         $(".btn.btn-primary.btn-xs[data-columnIndex = " + this.index() + "]").addClass("active")

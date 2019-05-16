@@ -140,15 +140,32 @@
                     {
                         for (var i = 0; i < notifications.length; i++)
                         {
-                            if (notifications[i].name == "unreadMessageCount")
-                                setNumberOfNewMessages(notifications[i].data)
-                                setNumberOfNewNotifications(notifications[i].data)
+                            switch (notifications[i].name)
+                            {
+                                case "unreadMessageCount":
+                                    setNumberOfNewMessages(notifications[i].data)
+                                    setNumberOfNewNotifications(notifications[i].data)
+                                    break
+                                case "unreadEventFrameMessageCount":
+                                    for (var eventFrameId in notifications[i].data)
+                                    {
+                                        setEventFrameMessageCount(eventFrameId, notifications[i].data[eventFrameId])
+                                    }
+                                    break
+                            }
                             since = notifications[i].UnixTimestamp
                         }
                     })
                 }, {{ config["NOTIFICATIONS_INTERVAL_IN_MILLISECONDS"] }})
             })
         {% endif %}
+
+        function setEventFrameMessageCount(eventFrameId, count)
+        {
+            $("#trEventFrame" + eventFrameId).addClass("alert alert-warning")
+            $("#spanEventFrameMessages" + eventFrameId).text(count)
+            $("#spanEventFrameMessages" + eventFrameId).css("visibility", "visible")
+        }
 
         function setNumberOfNewMessages(count)
         {
