@@ -18,10 +18,10 @@ def elementAttributeValues(elementTemplateId):
     FROM Element
         LEFT JOIN Area ON Element.TagAreaId = Area.AreaId
         INNER JOIN ElementTemplate ON Element.ElementTemplateId = ElementTemplate.ElementTemplateId
-        INNER JOIN ElementAttributeTemplate ON ElementTemplate.ElementTemplateId = ElementAttributeTemplate.ElementTemplateId
+        LEFT JOIN ElementAttributeTemplate ON ElementTemplate.ElementTemplateId = ElementAttributeTemplate.ElementTemplateId
         LEFT JOIN ElementAttribute ON ElementAttributeTemplate.ElementAttributeTemplateId = ElementAttribute.ElementAttributeTemplateId AND
             Element.ElementId = ElementAttribute.ElementId
-        INNER JOIN
+        LEFT JOIN
         (
             SELECT Element.ElementId AS ElementId,
                 ElementAttributeTemplate.Name AS ElementAttributeTemplateName,
