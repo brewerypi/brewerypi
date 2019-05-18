@@ -14,31 +14,39 @@ modelName = "Message"
 def addMessage(eventFrameId = None):
 	operation = "Add"
 	form = MessageForm()
+	form.recipient.choices = [(user.UserId, user.Name) for user in User.query.filter_by(Enabled = True).order_by(User.Name)]
 
 	# Add a new message.
 	if form.validate_on_submit():
-		recipient = User.query.get_or_404(form.recipient.data.UserId)
-		message = Message(Body = form.body.data, Recipient = recipient, Sender = current_user)
-		db.session.add(message)
-		recipient.addNotification("unreadMessageCount", recipient.numberOfNewMessages())
-		if eventFrameId is not None:
-			notification = Notification.query.filter_by(Name = "unreadEventFrameMessageCount", User = recipient).one_or_none()
-			if notification is None:
-				dictionary = {eventFrameId: "1"}
-			else:
-				dictionary = notification.getPayload()
-				if eventFrameId in dictionary:
-					dictionary[eventFrameId] = int(dictionary[eventFrameId]) + 1
+		recipients = ""
+		for recipient in form.recipient:
+			if recipient.checked is True:
+				recipient = User.query.get_or_404(recipient.data)
+				if recipients == "":
+					recipients = '"{}"'.format(recipient.Name)
 				else:
-					dictionary[eventFrameId] = "1"
+					recipients = '{}, "{}"'.format(recipients, recipient.Name)
 
-			recipient.addNotification("unreadEventFrameMessageCount", dictionary)
+				message = Message(Body = form.body.data, Recipient = recipient, Sender = current_user)
+				db.session.add(message)
+				recipient.addNotification("unreadMessageCount", recipient.numberOfNewMessages())
+				if eventFrameId is not None:
+					notification = Notification.query.filter_by(Name = "unreadEventFrameMessageCount", User = recipient).one_or_none()
+					if notification is None:
+						dictionary = {eventFrameId: "1"}
+					else:
+						dictionary = notification.getPayload()
+						if eventFrameId in dictionary:
+							dictionary[eventFrameId] = int(dictionary[eventFrameId]) + 1
+						else:
+							dictionary[eventFrameId] = "1"
 
-		db.session.commit()
+					recipient.addNotification("unreadEventFrameMessageCount", dictionary)
+
+				db.session.commit()
+
+		flash('Your message to {} has been sent.'.format(recipients), "alert alert-success")
 		return redirect(form.requestReferrer.data)
-
-		flash('Your message to "{}" has been sent.'.format(form.recipient.data.Name), "alert alert-success")
-		return redirect(url_for("messages.listMessages"))
 
 	# Present a form to add a new message.
 	if eventFrameId is not None:
