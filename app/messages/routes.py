@@ -28,9 +28,9 @@ def addMessage(eventFrameId = None):
 					recipients = '{}, "{}"'.format(recipients, recipient.Name)
 
 				message = Message(Body = form.body.data, Recipient = recipient, Sender = current_user)
-				db.session.add(message)
 				recipient.addNotification("unreadMessageCount", recipient.numberOfNewMessages())
 				if eventFrameId is not None:
+					message.Body = "<EventFrameId>{}</EventFrameId>{}".format(eventFrameId, message.Body)
 					notification = Notification.query.filter_by(Name = "unreadEventFrameMessageCount", User = recipient).one_or_none()
 					if notification is None:
 						dictionary = {eventFrameId: "1"}
@@ -43,6 +43,7 @@ def addMessage(eventFrameId = None):
 
 					recipient.addNotification("unreadEventFrameMessageCount", dictionary)
 
+				db.session.add(message)
 				db.session.commit()
 
 		flash('Your message to {} has been sent.'.format(recipients), "alert alert-success")
@@ -51,7 +52,6 @@ def addMessage(eventFrameId = None):
 	# Present a form to add a new message.
 	if eventFrameId is not None:
 		eventFrame = EventFrame.query.get_or_404(eventFrameId)
-		form.body.data = "Re: {} {} in element {} - ".format(eventFrame.EventFrameTemplate.Name, eventFrame.Name, eventFrame.Element.Name)
 		breadcrumbs = [{"url": url_for("eventFrames.selectEventFrame", selectedClass = "Root"), "text": "<span class = \"glyphicon glyphicon-home\"></span>"},
 			{"url": url_for("eventFrames.selectEventFrame", selectedClass = "Enterprise",
 			selectedId = eventFrame.EventFrameTemplate.ElementTemplate.Site.Enterprise.EnterpriseId),

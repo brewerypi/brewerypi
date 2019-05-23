@@ -1,4 +1,6 @@
-from flask import current_app
+import re
+from flask import current_app, url_for
+from jinja2 import Markup
 from sqlalchemy import func
 from . import customTemplateFilters
 from .. models import Element, ElementTemplate, EventFrame, EventFrameTemplate, Site
@@ -105,6 +107,22 @@ def grafanaUrl(uid, parameters = None):
             "&var-areas=All" + \
             "&var-tags={}".format(parameters["tagId"]) + \
             "&var-lookups=All"
+
+@customTemplateFilters.app_template_filter()
+def message(body):
+    print(body)
+    pattern = re.compile("^<EventFrameId>(\d*)</EventFrameId>(.*)$", re.DOTALL) # re.DOTALL will even match newlines when using '.'.
+    if pattern.match(body) is not None:
+        eventFrameId = pattern.match(body).group(1)
+        eventFrame = EventFrame.query.get(eventFrameId)
+        body = pattern.match(body).group(2)
+        if eventFrame is not None:
+            return Markup('Re: <a href = ' + url_for("eventFrames.dashboard", eventFrameId = eventFrameId) + '>{} Event Frame {}</a><br>{}'. \
+                format(eventFrame.EventFrameTemplate.Name, eventFrame.Name, body))
+        else:
+            return Markup('Re: An Event Frame that has been deleted<br>{}'.format(body))
+    else:
+        return body
 
 @customTemplateFilters.app_template_filter()
 def yesNo(boolean):
