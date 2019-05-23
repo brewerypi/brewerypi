@@ -110,7 +110,7 @@ def grafanaUrl(uid, parameters = None):
 
 @customTemplateFilters.app_template_filter()
 def message(body):
-    pattern = re.compile('^{"EventFrameId":\s"(\d+)",\s"EventFrameTemplateName":\s"(.+)",\s"EventFrameName":\s"(\d+)",\s"EventFrameElement":\s"(.+)"}(.*)$',
+    pattern = re.compile('^{"EventFrameId":\s"(\d+)",\s"EventFrameTemplateName":\s"(.+)",\s"EventFrameName":\s"(\d+)",\s"EventFrameElement":\s"(.+)"}(.*)$', \
         re.DOTALL) # re.DOTALL will even match newlines when using '.'.
     match = pattern.match(body)
     if match:
