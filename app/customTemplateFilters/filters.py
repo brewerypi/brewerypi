@@ -110,20 +110,20 @@ def grafanaUrl(uid, parameters = None):
 
 @customTemplateFilters.app_template_filter()
 def message(body):
-    pattern = re.compile('^{"EventFrameId":\s"(\d+)",\s"EventFrameTemplateName":\s"(.+)",\s"EventFrameName":\s"(\d+)",\s"EventFrameElement":\s"(.+)"}(.*)$', \
+    pattern = re.compile('^{"EventFrameId":\s"(\d+)",\s"EventFrameTemplateName":\s"(.+)",\s"EventFrameName":\s"(\d+)",\s"EventFrameElement":\s"(.+)"}(.*)$',
         re.DOTALL) # re.DOTALL will even match newlines when using '.'.
     match = pattern.match(body)
     if match:
-        eventFrameId = match[1]
+        eventFrameId = match.group(1)
         eventFrame = EventFrame.query.get(eventFrameId)
-        body = match[5]
+        body = match.group(5)
         if eventFrame is not None:
             return Markup('Re: <a href = ' + url_for("eventFrames.dashboard", eventFrameId = eventFrameId) + '>{} Event Frame {} in {}</a><br>{}'. \
                 format(eventFrame.EventFrameTemplate.Name, eventFrame.Name, eventFrame.Element.Name, body))
         else:
-            eventFrameTemplateName = match[2]
-            eventFrameName = match[3]
-            eventFrameElement = match[4]
+            eventFrameTemplateName = match.group(2)
+            eventFrameName = match.group(3)
+            eventFrameElement = match.group(4)
             return Markup('Re: Deleted {} Event Frame {} in {}<br>{}'.format(eventFrameTemplateName, eventFrameName, eventFrameElement, body))
     else:
         return body
