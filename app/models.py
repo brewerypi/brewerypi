@@ -222,12 +222,15 @@ class EventFrame(db.Model):
 	EventFrameTemplateId = db.Column(db.Integer, db.ForeignKey("EventFrameTemplate.EventFrameTemplateId", name = "FK__EventFrameTemplate$Have$EventFrame"), \
 		nullable = False)
 	Name = db.Column(db.String(45), nullable = False)
-	ParentEventFrameId = db.Column(db.Integer, db.ForeignKey("EventFrame.EventFrameId", name = "FK__EventFrame$CanHave$EventFrame"), nullable = True)
+	ParentEventFrameId = db.Column(db.Integer, db.ForeignKey("EventFrame.EventFrameId", name = "FK__EventFrame$CanHave$ParentEventFrame"), nullable = True)
+	SourceEventFrameId = db.Column(db.Integer, db.ForeignKey("EventFrame.EventFrameId", name = "FK__EventFrame$CanHave$SourceEventFrame"), nullable = True)
 	StartTimestamp = db.Column(db.DateTime, nullable = False)
 	UserId = db.Column(db.Integer, db.ForeignKey("User.UserId", name = "FK__User$AddOrEdit$EventFrame"), nullable = False)
 
 	ParentEventFrame = db.relationship("EventFrame", remote_side = [EventFrameId])
-	EventFrames = db.relationship("EventFrame", remote_side = [ParentEventFrameId])
+	ChildEventFrames = db.relationship("EventFrame", remote_side = [ParentEventFrameId])
+	SourceEventFrame = db.relationship("EventFrame", remote_side = [EventFrameId])
+	DestinationEventFrames = db.relationship("EventFrame", remote_side = [SourceEventFrameId])
 	EventFrameNotes = db.relationship("EventFrameNote", backref = "EventFrame", lazy = "dynamic")
 
 	def __repr__(self):
@@ -245,14 +248,14 @@ class EventFrame(db.Model):
 		for eventFrameNote in eventFrameNotes:
 			eventFrameNote.delete()
 
-		childEventFrames = self.EventFrames
+		childEventFrames = self.ChildEventFrames
 		for childEventFrame in childEventFrames:
 			childEventFrame.delete()
 
 		db.session.delete(self)
 
 	def hasDescendants(self):
-		if self.EventFrames:
+		if self.ChildEventFrames:
 			return True
 		else:
 			return False
@@ -358,12 +361,16 @@ class EventFrameTemplate(db.Model):
 	Name = db.Column(db.String(45), nullable = False)
 	Order = db.Column(db.Integer, nullable = False)
 	ParentEventFrameTemplateId = db.Column(db.Integer, db.ForeignKey("EventFrameTemplate.EventFrameTemplateId",
-		name = "FK__EventFrameTemplate$CanHave$EventFrameTemplate"), nullable = True)
+		name = "FK__EventFrameTemplate$CanHave$ParentEventFrameTemplate"), nullable = True)
+	SourceEventFrameTemplateId = db.Column(db.Integer, db.ForeignKey("EventFrameTemplate.EventFrameTemplateId",
+		name = "FK__EventFrameTemplate$CanHave$SourceEventFrameTemplate"), nullable = True)
 
 	EventFrameAttributeTemplates = db.relationship("EventFrameAttributeTemplate", backref = "EventFrameTemplate", lazy = "dynamic")
 	EventFrames = db.relationship("EventFrame", backref = "EventFrameTemplate", lazy = "dynamic")
-	EventFrameTemplates = db.relationship("EventFrameTemplate", remote_side = [ParentEventFrameTemplateId])
 	ParentEventFrameTemplate = db.relationship("EventFrameTemplate", remote_side = [EventFrameTemplateId])
+	ChildEventFrameTemplates = db.relationship("EventFrameTemplate", remote_side = [ParentEventFrameTemplateId])
+	SourceEventFrameTemplate = db.relationship("EventFrameTemplate", remote_side = [EventFrameTemplateId])
+	DestinationEventFrameTemplates = db.relationship("EventFrameTemplate", remote_side = [SourceEventFrameTemplateId])
 
 	def __repr__(self):
 		return "<EventFrameTemplate: {}>".format(self.Name)
@@ -376,7 +383,7 @@ class EventFrameTemplate(db.Model):
 			return self.ParentEventFrameTemplate.ancestors(ancestors)
 
 	def delete(self):
-		childEventFrameTemplates = self.EventFrameTemplates
+		childEventFrameTemplates = self.ChildEventFrameTemplates
 		for childEventFrameTemplate in childEventFrameTemplates:
 			childEventFrameTemplate.delete()
 
@@ -401,7 +408,7 @@ class EventFrameTemplate(db.Model):
 			return linealDescent
 
 	def hasDescendants(self):
-		if self.EventFrameTemplates:
+		if self.ChildEventFrameTemplates:
 			return True
 		else:
 			return False
