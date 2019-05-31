@@ -227,10 +227,10 @@ class EventFrame(db.Model):
 	StartTimestamp = db.Column(db.DateTime, nullable = False)
 	UserId = db.Column(db.Integer, db.ForeignKey("User.UserId", name = "FK__User$AddOrEdit$EventFrame"), nullable = False)
 
-	ParentEventFrame = db.relationship("EventFrame", remote_side = [EventFrameId])
-	ChildEventFrames = db.relationship("EventFrame", remote_side = [ParentEventFrameId])
-	SourceEventFrame = db.relationship("EventFrame", remote_side = [EventFrameId])
-	DestinationEventFrames = db.relationship("EventFrame", remote_side = [SourceEventFrameId])
+	ParentEventFrame = db.relationship("EventFrame", foreign_keys = [ParentEventFrameId], remote_side = [EventFrameId])
+	ChildEventFrames = db.relationship("EventFrame", foreign_keys = [ParentEventFrameId], remote_side = [ParentEventFrameId])
+	SourceEventFrame = db.relationship("EventFrame", foreign_keys = [SourceEventFrameId], remote_side = [EventFrameId])
+	DestinationEventFrames = db.relationship("EventFrame", foreign_keys = [SourceEventFrameId], remote_side = [SourceEventFrameId])
 	EventFrameNotes = db.relationship("EventFrameNote", backref = "EventFrame", lazy = "dynamic")
 
 	def __repr__(self):
@@ -367,10 +367,11 @@ class EventFrameTemplate(db.Model):
 
 	EventFrameAttributeTemplates = db.relationship("EventFrameAttributeTemplate", backref = "EventFrameTemplate", lazy = "dynamic")
 	EventFrames = db.relationship("EventFrame", backref = "EventFrameTemplate", lazy = "dynamic")
-	ParentEventFrameTemplate = db.relationship("EventFrameTemplate", remote_side = [EventFrameTemplateId])
-	ChildEventFrameTemplates = db.relationship("EventFrameTemplate", remote_side = [ParentEventFrameTemplateId])
-	SourceEventFrameTemplate = db.relationship("EventFrameTemplate", remote_side = [EventFrameTemplateId])
-	DestinationEventFrameTemplates = db.relationship("EventFrameTemplate", remote_side = [SourceEventFrameTemplateId])
+	ParentEventFrameTemplate = db.relationship("EventFrameTemplate", foreign_keys = [ParentEventFrameTemplateId], remote_side = [EventFrameTemplateId])
+	ChildEventFrameTemplates = db.relationship("EventFrameTemplate", foreign_keys = [ParentEventFrameTemplateId], remote_side = [ParentEventFrameTemplateId])
+	SourceEventFrameTemplate = db.relationship("EventFrameTemplate", foreign_keys = [SourceEventFrameTemplateId], remote_side = [EventFrameTemplateId])
+	DestinationEventFrameTemplates = db.relationship("EventFrameTemplate", foreign_keys = [SourceEventFrameTemplateId], \
+		remote_side = [SourceEventFrameTemplateId])
 
 	def __repr__(self):
 		return "<EventFrameTemplate: {}>".format(self.Name)
