@@ -45,13 +45,25 @@
         "showIn": 0,
         "tags": [],
         "type": "tags"
+      },
+      {
+        "datasource": "BreweryPi",
+        "enable": true,
+        "hide": false,
+        "iconColor": "rgba(255, 96, 96, 1)",
+        "limit": 100,
+        "name": "Days",
+        "rawQuery": "call BreweryPi.spDayTimestampsSince('$eventFrameStartTimestamp')",
+        "showIn": 0,
+        "tags": [],
+        "type": "tags"
       }
     ]
   },
   "editable": false,
   "gnetId": null,
   "graphTooltip": 0,
-  "iteration": 1554053254359,
+  "iteration": 1560308323085,
   "links": [],
   "panels": [
     {
@@ -461,6 +473,28 @@
         "query": "SELECT CEILING(IF(EventFrame.EndTimestamp IS NULL,     (UNIX_TIMESTAMP(TagValue.Timestamp) - UNIX_TIMESTAMP(EventFrame.StartTimestamp)) / 86400,     (UNIX_TIMESTAMP(EventFrame.EndTimestamp) - UNIX_TIMESTAMP(EventFrame.StartTimestamp)) / 86400)) AS Days FROM EventFrame     INNER JOIN Element ON EventFrame.ElementId = Element.ElementId     INNER JOIN EventFrameTemplate ON EventFrame.EventFrameTemplateId = EventFrameTemplate.EventFrameTemplateId     INNER JOIN EventFrameAttributeTemplate ON EventFrameTemplate.EventFrameTemplateId = EventFrameAttributeTemplate.EventFrameTemplateId     INNER JOIN EventFrameAttribute ON Element.ElementId = EventFrameAttribute.ElementId AND         EventFrameAttributeTemplate.EventFrameAttributeTemplateId = EventFrameAttribute.EventFrameAttributeTemplateId     INNER JOIN Tag ON EventFrameAttribute.TagId = Tag.TagId     INNER JOIN TagValue ON Tag.TagId = TagValue.TagId WHERE EventFrame.EventFrameId IN ($eventFrames) AND     (         EventFrame.EndTimestamp IS NULL AND         TagValue.Timestamp >= EventFrame.StartTimestamp OR         EventFrame.EndTimestamp IS NOT NULL AND         TagValue.Timestamp >= EventFrame.StartTimestamp AND         TagValue.Timestamp <= EventFrame.EndTimestamp     ) ORDER BY Days DESC LIMIT 1",
         "refresh": 1,
         "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {},
+        "datasource": "BreweryPi",
+        "definition": "SELECT DATE_SUB(CURRENT_TIMESTAMP(), INTERVAL $days DAY)",
+        "hide": 0,
+        "includeAll": false,
+        "label": null,
+        "multi": false,
+        "name": "eventFrameStartTimestamp",
+        "options": [],
+        "query": "SELECT DATE_SUB(CURRENT_TIMESTAMP(), INTERVAL $days DAY)",
+        "refresh": 1,
+        "regex": "/(.*)Z/",
         "skipUrlSync": false,
         "sort": 0,
         "tagValuesQuery": "",
