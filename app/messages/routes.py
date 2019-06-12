@@ -31,7 +31,7 @@ def addMessage(eventFrameId = None):
 				recipient.addNotification("unreadMessageCount", recipient.numberOfNewMessages())
 				if eventFrameId is not None:
 					eventFrame = EventFrame.query.get_or_404(eventFrameId)
-					message.Body = '{{"EventFrameId": "{}", "EventFrameTemplateName": "{}", "EventFrameName": "{}", "EventFrameElement": "{}"}}{}"'. \
+					message.Body = '{{"EventFrameId": "{}", "EventFrameTemplateName": "{}", "EventFrameName": "{}", "EventFrameElement": "{}"}}{}'. \
 						format(eventFrameId, eventFrame.EventFrameTemplate.Name, eventFrame.Name, eventFrame.Element.Name, message.Body)
 					notification = Notification.query.filter_by(Name = "unreadEventFrameMessageCount", User = recipient).one_or_none()
 					if notification is None:
