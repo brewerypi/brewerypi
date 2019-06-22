@@ -321,6 +321,23 @@ Event Frames
     <link rel = "stylesheet" type = "text/css" href = {{ url_for("static", filename = "css/datatables.min.css") }}/> 
     <script type = "text/javascript" src = {{ url_for("static", filename = "js/datatables.min.js") }}></script>
     <script>
+        function checkForNotifications()
+        {
+            $.ajax('{{ url_for("notifications.getNotifications") }}?since=0').done(function(notifications)
+            {
+                for (var i = 0; i < notifications.length; i++)
+                {
+                    if (notifications[i].name == "unreadEventFrameMessageCount")
+                    {
+                        for (var eventFrameId in notifications[i].data)
+                        {
+                            setEventFrameMessageCount(eventFrameId, notifications[i].data[eventFrameId])
+                        }
+                    }
+                }
+            })
+        }
+        
         $(document).ready(function()
         {
             {% if childrenClass == "EventFrame" %}
@@ -347,7 +364,10 @@ Event Frames
                 })
             {% endif %}
 
-            var table = $("#table").DataTable
+            var table = $("#table").on("draw.dt", function()
+            {
+                checkForNotifications()
+            }).DataTable
             ({
                 "order":
                 [
@@ -403,16 +423,6 @@ Event Frames
                 "orderCellsTop": true,
                 "fixedHeader": true
             })
-
-            // Check for unread event frame messages for the current user and flag appropriately.
-            {% for notification in current_user.Notifications %}
-                {% if notification.Name == "unreadEventFrameMessageCount" %}
-                    {% set eventFrameMessageCounts = notification.getPayload() %}
-                    {% for eventFrameId in eventFrameMessageCounts %}
-                        setEventFrameMessageCount("{{ eventFrameId }}", "{{ eventFrameMessageCounts[eventFrameId] }}")
-                    {% endfor %}
-                {% endif %}
-            {% endfor %}
 
             $('#eventFrameAttributeTemplatesTable').DataTable
             ({
