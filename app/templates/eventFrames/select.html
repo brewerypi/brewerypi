@@ -111,7 +111,7 @@ Event Frames
         Toggle Column:
         <button type = "button" class = "btn btn-primary btn-xs" id = "buttonHideAllColumns">Hide All</button>
         {% for eventFrameAttributeTemplate in eventFrameAttributeTemplates %}
-            {% set dataColumnIndex = loop.index + 10 %}
+            {% set dataColumnIndex = loop.index + 11 %}
             <button type = "button" class = "btn btn-primary btn-xs" data-columnIndex = "{{ dataColumnIndex }}"
                 id = "buttonToggleColumn{{ eventFrameAttributeTemplate.Name }}">{{ eventFrameAttributeTemplate.Name }}</button>
         {% endfor %}
@@ -128,6 +128,9 @@ Event Frames
             <tr>
                 <th></th>
                 <th></th>
+                {% if childrenClass == "EventFrame" %}
+                    <th></th>
+                {% endif %}
                 <th>Name</th>
                 {% if childrenClass == "Enterprise" or childrenClass == "Site" or childrenClass == "ElementTemplate" %}
                     <th>Description</th>
@@ -161,13 +164,20 @@ Event Frames
         <tbody>
             {% if children %}
                 {% for child in children %}
-                    <tr>
+                    {% if child.EventFrameId is defined %}
+                        <tr id = "trEventFrame{{ child.EventFrameId }}">
+                    {% else %}
+                        <tr>
+                    {% endif %}
                         {% if childrenClass == "EventFrame" %}
                             <td><a class = "btn btn-default" title = "Select" href = '{{ url_for("eventFrames.dashboard",
                                 eventFrameId = child.EventFrameId) }}'><span class = "glyphicon glyphicon-list"></span></a></td>
                             <td><a class = "btn btn-default" title = "Grafana"
-                                href = '{{ "EventFramesGraph" | grafanaUrl({"eventFrameId": child.EventFrameId}) }}''
+                                href = '{{ "EventFramesGraph" | grafanaUrl({"eventFrameId": child.EventFrameId}) }}'
                                 target = "_blank"><span class = "glyphicon glyphicon-stats"></span></a></td>
+                            <td><a class = "btn btn-default" title = "Send Message"
+                                href = '{{ url_for("messages.addMessage", eventFrameId = child.EventFrameId) }}'><span class = "glyphicon glyphicon-envelope">                                    
+                                </span></a></td>
                         {% elif childrenClass == "DescendantEventFrameTemplate" %}
                             <td><a class = "btn btn-default" title = "Select" href = "{{ url_for("eventFrames.selectEventFrame",
                                 selectedClass = child.__class__.__name__, selectedId = child.id(),
@@ -204,7 +214,8 @@ Event Frames
                                 <td></td>
                             {% endif %}
                         {% elif childrenClass == "EventFrame" %}
-                            <td>{{ child.Name }}</td>
+                            <td>{{ child.Name }} <a href = '{{ url_for("messages.listMessages") }}'>
+                                <span id = "spanEventFrameMessages{{ child.EventFrameId }}" class = "badge" style = "visibility: hidden"></span></td></a>
                             <td>{{ child.ElementName }}</td>
                             <td>{{ child.UserName }}</td>
                             <td>{{ moment(child.StartTimestamp).format("YYYY-MM-DD HH:mm:ss") }}</td>
@@ -310,6 +321,23 @@ Event Frames
     <link rel = "stylesheet" type = "text/css" href = {{ url_for("static", filename = "css/datatables.min.css") }}/> 
     <script type = "text/javascript" src = {{ url_for("static", filename = "js/datatables.min.js") }}></script>
     <script>
+        function checkForNotifications()
+        {
+            $.ajax('{{ url_for("notifications.getNotifications") }}?since=0').done(function(notifications)
+            {
+                for (var i = 0; i < notifications.length; i++)
+                {
+                    if (notifications[i].name == "unreadEventFrameMessageCount")
+                    {
+                        for (var eventFrameId in notifications[i].data)
+                        {
+                            setEventFrameMessageCount(eventFrameId, notifications[i].data[eventFrameId])
+                        }
+                    }
+                }
+            })
+        }
+        
         $(document).ready(function()
         {
             {% if childrenClass == "EventFrame" %}
@@ -336,7 +364,10 @@ Event Frames
                 })
             {% endif %}
 
-            var table = $("#table").DataTable
+            var table = $("#table").on("draw.dt", function()
+            {
+                checkForNotifications()
+            }).DataTable
             ({
                 "order":
                 [
@@ -345,13 +376,16 @@ Event Frames
                     {% elif childrenClass == "EventFrameTemplate" %}
                         [2, "asc"]              // Name.
                     {% elif childrenClass == "EventFrame" %}
-                        [5, "desc"]             // Start timestamp.
+                        [6, "desc"]             // Start timestamp.
                     {% endif %}
                 ],
                 "columns":
                 [
                     { "orderable": false },     // Select button.
                     { "orderable": false },     // Grafana button.
+                    {% if childrenClass == "EventFrame" %}
+                    { "orderable": false },     // Message button.
+                    {% endif %}
                     {% if childrenClass == "Enterprise" or childrenClass == "Site" or childrenClass == "ElementTemplate" %}
                         null,
                         null
@@ -430,7 +464,7 @@ Event Frames
             {
                 table.columns().every(function ()
                 {
-                    if (this.index() > 10)
+                    if (this.index() > 11)
                     {
                         this.visible(false)
                         $(".btn.btn-primary.btn-xs[data-columnIndex = " + this.index() + "]").removeClass("active")
@@ -442,7 +476,7 @@ Event Frames
             {
                 table.columns().every(function ()
                 {
-                    if (this.index() > 10)
+                    if (this.index() > 11)
                     {
                         this.visible(true)
                         $(".btn.btn-primary.btn-xs[data-columnIndex = " + this.index() + "]").addClass("active")

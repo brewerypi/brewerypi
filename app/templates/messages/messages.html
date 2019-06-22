@@ -31,7 +31,7 @@ Messages
             <tr>
                 <td>{{ message.Sender.Name }}</td>
                 <td>{{ moment(message.Timestamp).format("YYYY-MM-DD HH:mm:ss") }}</td>
-                <td>{{ message.Body }}</td>
+                <td>{{ message.Body | message}}</td>
                 <td><a class = "btn btn-default" title = "Delete" href = "{{ url_for("messages.deleteMessage", messageId = message.MessageId) }}">
                     <span class = "glyphicon glyphicon-trash"></span></a></td>
             </tr>
