@@ -55,6 +55,7 @@ Event Frame Dashboard
                     <th></th>
                     <th>Template</th>
                     <th>Name</th>
+                    <th>Source Event Frame</th>
                     <th>User</th>
                     <th>Start</th>
                     <th>End</th>
@@ -70,6 +71,7 @@ Event Frame Dashboard
                             eventFrameId = eventFrame.EventFrameId,) }}"><span class = "glyphicon glyphicon-list"></span></a></td>
                         <td>{{ eventFrame.EventFrameTemplate.Name }}</td>
                         <td>{{ eventFrame.Name }}</td>
+                        <td>{{ eventFrame.SourceEventFrame.Name }}</td>
                         <td>{{ eventFrame.User.Name }}</td>
                         <td>{{ moment(eventFrame.StartTimestamp).format("YYYY-MM-DD HH:mm:ss") }}</td>
                         {% if eventFrame.EndTimestamp %}
@@ -246,6 +248,7 @@ Event Frame Dashboard
                 "columns":
                 [
                     { "orderable": false }, // Select button.
+                    null,
                     null,
                     null,
                     null,

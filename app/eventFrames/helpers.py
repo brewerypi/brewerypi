@@ -26,7 +26,8 @@ def currentEventFrameAttributeValues(eventFrames, eventFrameTemplateId):
         Element.TagAreaId AS ElementTagAreaId,
         User.Name AS UserName,
         EventFrame.StartTimestamp,
-        EventFrame.EndTimestamp {}
+        EventFrame.EndTimestamp {},
+        SourceEventFrame.Name AS SourceEventFrameName
     FROM EventFrame
         INNER JOIN Element ON EventFrame.ElementId = Element.ElementId
         INNER JOIN User ON EventFrame.UserId = User.UserId
@@ -64,6 +65,7 @@ def currentEventFrameAttributeValues(eventFrames, eventFrameTemplateId):
         LEFT JOIN Lookup ON Tag.LookupId = Lookup.LookupId
         LEFT JOIN LookupValue ON Lookup.LookupId = LookupValue.LookupId AND
             TagValue.Value = LookupValue.Value
+        LEFT JOIN EventFrame SourceEventFrame ON SourceEventFrame.EventFrameId = EventFrame.SourceEventFrameId
     WHERE EventFrame.EventFrameId IN ({})
     GROUP BY EventFrame.EventFrameId
     """.format(dynamicColumns, eventFrameIds, eventFrameIds)
