@@ -260,6 +260,15 @@ class EventFrame(db.Model):
 	def id(self):
 		return self.EventFrameId
 
+	def lineage(self, linealDescent, level):
+		linealDescent.append({"eventFrame" : self, "level" : level})
+		if self.hasDescendants():
+			descendantEventFrames = EventFrame.query.filter_by(ParentEventFrameId = self.EventFrameId)
+			for descendant in descendantEventFrames:
+				descendant.lineage(linealDescent, level + 1)
+		if level == 0:
+			return linealDescent
+
 	def origin(self):
 		if self.ParentEventFrameId == None:
 			return self
@@ -390,16 +399,6 @@ class EventFrameTemplate(db.Model):
 
 		db.session.delete(self)
 
-	def lineage(self, linealDescent, level):
-		linealDescent.append({"eventFrameTemplate" : self, "level" : level})
-		if self.hasDescendants():
-			descendantEventFrameTemplates = EventFrameTemplate.query.filter_by(ParentEventFrameTemplateId = self.EventFrameTemplateId). \
-				order_by(EventFrameTemplate.Order)
-			for descendant in descendantEventFrameTemplates:
-				descendant.lineage(linealDescent, level + 1)
-		if level == 0:
-			return linealDescent
-
 	def hasDescendants(self):
 		if self.EventFrameTemplates:
 			return True
@@ -414,6 +413,16 @@ class EventFrameTemplate(db.Model):
 
 	def id(self):
 		return self.EventFrameTemplateId
+
+	def lineage(self, linealDescent, level):
+		linealDescent.append({"eventFrameTemplate" : self, "level" : level})
+		if self.hasDescendants():
+			descendantEventFrameTemplates = EventFrameTemplate.query.filter_by(ParentEventFrameTemplateId = self.EventFrameTemplateId). \
+				order_by(EventFrameTemplate.Order)
+			for descendant in descendantEventFrameTemplates:
+				descendant.lineage(linealDescent, level + 1)
+		if level == 0:
+			return linealDescent
 
 	def origin(self):
 		if self.ParentEventFrameTemplateId == None:
