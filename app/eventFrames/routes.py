@@ -237,24 +237,24 @@ def editEventFrame(eventFrameId):
 @login_required
 @permissionRequired(Permission.DATA_ENTRY)
 def endEventFrame(eventFrameId):
-	eventFrame = EventFrame.query.get_or_404(eventFrameId)
-	eventFrame.EndTimestamp = datetime.utcnow()
-	eventFrame.UserId = current_user.get_id()
-	db.session.commit()
-	count = 0
-	for eventFrameAttributeTemplate in eventFrame.EventFrameTemplate.EventFrameAttributeTemplates:
-		if eventFrameAttributeTemplate.DefaultEndValue is not None:
-			eventFrameAttribute = EventFrameAttribute.query.filter(EventFrameAttribute.ElementId == eventFrame.origin().ElementId,
-				EventFrameAttribute.EventFrameAttributeTemplateId == eventFrameAttributeTemplate.EventFrameAttributeTemplateId).one_or_none()
-			if eventFrameAttribute is not None:
-				tagValue = TagValue(TagId = eventFrameAttribute.TagId, Timestamp = eventFrame.EndTimestamp, UserId = current_user.get_id(),
-					Value = eventFrameAttributeTemplate.DefaultEndValue)
-				db.session.add(tagValue)
-				count = count + 1
+	rootEventFrame = EventFrame.query.get_or_404(eventFrameId)
+	endTimestamp = datetime.utcnow()
+	for dictionary in rootEventFrame.lineage([], 0):
+		eventFrame = dictionary["eventFrame"]
+		if eventFrame.EndTimestamp is None:
+			eventFrame.EndTimestamp = endTimestamp
+			eventFrame.UserId = current_user.get_id()
+			for eventFrameAttributeTemplate in eventFrame.EventFrameTemplate.EventFrameAttributeTemplates:
+				if eventFrameAttributeTemplate.DefaultEndValue is not None:
+					eventFrameAttribute = EventFrameAttribute.query.filter(EventFrameAttribute.ElementId == eventFrame.origin().ElementId,
+						EventFrameAttribute.EventFrameAttributeTemplateId == eventFrameAttributeTemplate.EventFrameAttributeTemplateId).one_or_none()
+					if eventFrameAttribute is not None:
+						tagValue = TagValue(TagId = eventFrameAttribute.TagId, Timestamp = endTimestamp, UserId = current_user.get_id(),
+							Value = eventFrameAttributeTemplate.DefaultEndValue)
+						db.session.add(tagValue)
 
-	if count > 0:
-		db.session.commit()
-	flash("You have successfully ended \"{}\" for event frame \"{}\".".format(eventFrame.EventFrameTemplate.Name, eventFrame.Name),
+	db.session.commit()
+	flash('You have successfully ended "{}" for event frame "{}".'.format(rootEventFrame.EventFrameTemplate.Name, rootEventFrame.Name),
 		"alert alert-success")
 	return redirect(request.referrer)
 
