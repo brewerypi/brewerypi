@@ -1,5 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms import HiddenField, StringField, IntegerField, SubmitField, ValidationError
+from wtforms.ext.sqlalchemy.fields import QuerySelectField
 from wtforms.validators import Length, Required
 from .. models import EventFrameTemplate
 
@@ -8,6 +9,7 @@ class EventFrameTemplateForm(FlaskForm):
 	name = StringField("Name", validators = [Required(), Length(1, 45)])
 	order = IntegerField("Order", validators = [Required()])
 	description = StringField("Description", validators = [Length(0, 255)])
+	sourceEventFrameTemplate = QuerySelectField("Source Event Frame Template", allow_blank = True, get_label = "Name")
 	eventFrameTemplateId = HiddenField()
 	elementTemplateId = HiddenField()
 	parentEventFrameTemplateId = HiddenField()

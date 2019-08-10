@@ -15,18 +15,21 @@ modelName = "Event Frame Template"
 def addEventFrameTemplate(elementTemplateId = None, parentEventFrameTemplateId = None):
 	operation = "Add"
 	form = EventFrameTemplateForm()
+	form.sourceEventFrameTemplate.query = EventFrameTemplate.query.order_by(EventFrameTemplate.Name)
 
 	if parentEventFrameTemplateId == None:
 		del form.order
 
 	# Add a new event frame template.
 	if form.validate_on_submit():
+		print(form.sourceEventFrameTemplate.data)
 		if elementTemplateId:
 			eventFrameTemplate = EventFrameTemplate(Description = form.description.data, ElementTemplateId = elementTemplateId,
-				Name = form.name.data, Order = 1, ParentEventFrameTemplateId = None)
+				Name = form.name.data, Order = 1, SourceEventFrameTemplate = form.sourceEventFrameTemplate.data, ParentEventFrameTemplateId = None)
 		else:
 			eventFrameTemplate = EventFrameTemplate(Description = form.description.data, ElementTemplateId = None,
-				Name = form.name.data, Order = form.order.data, ParentEventFrameTemplateId = parentEventFrameTemplateId)			
+				Name = form.name.data, Order = form.order.data, SourceEventFrameTemplate = form.sourceEventFrameTemplate.data, 
+				ParentEventFrameTemplateId = parentEventFrameTemplateId)			
 
 		db.session.add(eventFrameTemplate)
 		db.session.commit()
@@ -104,6 +107,7 @@ def editEventFrameTemplate(eventFrameTemplateId):
 	operation = "Edit"
 	eventFrameTemplate = EventFrameTemplate.query.get_or_404(eventFrameTemplateId)
 	form = EventFrameTemplateForm(obj = eventFrameTemplate)
+	form.sourceEventFrameTemplate.query = EventFrameTemplate.query.order_by(EventFrameTemplate.Name)
 
 	if eventFrameTemplate.ParentEventFrameTemplateId is None:
 		del form.order
@@ -121,6 +125,7 @@ def editEventFrameTemplate(eventFrameTemplateId):
 
 		eventFrameTemplate.Description = form.description.data
 		eventFrameTemplate.Name = form.name.data
+		eventFrameTemplate.SourceEventFrameTemplate = form.sourceEventFrameTemplate.data
 		db.session.commit()
 
 		if eventFrameTemplate.ParentEventFrameTemplateId:
