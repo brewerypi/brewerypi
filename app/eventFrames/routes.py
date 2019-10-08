@@ -20,15 +20,28 @@ def addEventFrame(eventFrameTemplateId = None, parentEventFrameId = None):
 	operation = "Add"
 	form = EventFrameForm()
 	if parentEventFrameId:
+		eventFrameTemplate = EventFrameTemplate.query.get_or_404(parentEventFrameId)
 		parentEventFrame = EventFrame.query.get_or_404(parentEventFrameId)
 		form.element.query = Element.query.join(EventFrame).filter(EventFrame.ElementId == parentEventFrame.origin().ElementId)
-		form.eventFrameTemplate.query = EventFrameTemplate.query. \
-			filter(EventFrameTemplate.ParentEventFrameTemplateId == parentEventFrame.EventFrameTemplateId).order_by(EventFrameTemplate.Name)
+		eventFrameTemplateQuery = EventFrameTemplate.query. \
+			filter(EventFrameTemplate.ParentEventFrameTemplateId == parentEventFrame.EventFrameTemplateId).order_by(EventFrameTemplate.Order)
+		form.eventFrameTemplate.query = eventFrameTemplateQuery
+		firstEventFrameTemplate = eventFrameTemplateQuery.first()
+		sourceEventFrames = EventFrame.query.filter_by(EventFrameTemplateId = firstEventFrameTemplate.SourceEventFrameTemplateId).order_by(EventFrame.Name).all()
 	else:
 		eventFrameTemplate = EventFrameTemplate.query.get_or_404(eventFrameTemplateId)
 		form.element.query = Element.query.join(ElementTemplate).filter(ElementTemplate.ElementTemplateId == eventFrameTemplate.ElementTemplateId). \
 			order_by(Element.Name)
 		form.eventFrameTemplate.query = EventFrameTemplate.query.filter_by(EventFrameTemplateId = eventFrameTemplateId)
+		sourceEventFrames = EventFrame.query.filter_by(EventFrameTemplateId = eventFrameTemplate.SourceEventFrameTemplateId).order_by(EventFrame.Name).all()
+	sourceEventFrameChoices = []
+	sourceEventFrameChoices.append((-1, ""))
+	if sourceEventFrames == []:
+		form.sourceEventFrame.render_kw = {'disabled': True}
+	else:
+		for eventFrame in sourceEventFrames:
+			sourceEventFrameChoices.append((eventFrame.EventFrameId, eventFrame.Name))
+	form.sourceEventFrame.choices = sourceEventFrameChoices
 
 	# Add a new event frame.
 	if form.validate_on_submit():
@@ -37,12 +50,12 @@ def addEventFrame(eventFrameTemplateId = None, parentEventFrameId = None):
 		else:
 			endUtcTimestamp = form.endUtcTimestamp.data
 
+		sourceEventFrameId = None if form.sourceEventFrame.data == -1 else form.sourceEventFrame.data
 		if parentEventFrameId:
-			eventFrame = EventFrame(EndTimestamp = endUtcTimestamp, EventFrameTemplate = form.eventFrameTemplate.data,
+			eventFrame = EventFrame(EndTimestamp = endUtcTimestamp, EventFrameTemplate = form.eventFrameTemplate.data, SourceEventFrameId = sourceEventFrameId,
 				Name = form.name.data, ParentEventFrameId = parentEventFrameId, StartTimestamp = form.startUtcTimestamp.data, UserId = current_user.get_id())
 		else:
-			eventFrame = EventFrame(Element = form.element.data, EndTimestamp = endUtcTimestamp, EventFrameTemplateId = eventFrameTemplateId,
-				Name = form.name.data, StartTimestamp = form.startUtcTimestamp.data, UserId = current_user.get_id())
+			eventFrame = EventFrame(Element = form.element.data, EndTimestamp = endUtcTimestamp, EventFrameTemplateId = eventFrameTemplateId, SourceEventFrameId = sourceEventFrameId, Name = form.name.data, StartTimestamp = form.startUtcTimestamp.data, UserId = current_user.get_id())
 
 		db.session.add(eventFrame)
 		db.session.commit()
@@ -400,3 +413,11 @@ def selectEventFrame(selectedClass = None, selectedId = None, months = None, sel
 
 	return render_template("eventFrames/select.html", children = children, childrenClass = childrenClass,
 		eventFrameAttributeTemplates = eventFrameAttributeTemplates, months = months, parent = parent)
+
+@eventFrames.route("/eventFrames/getSourceEventFrames/<int:EventFrameTemplateId>", methods = ["GET", "POST"])
+@login_required
+@permissionRequired(Permission.DATA_ENTRY)
+def getSourceEventFrames(eventFrameTemplateId):
+	sourceEventFrames = EventFrame.query.filter_by(EventFrameTemplateId = eventFrameTemplateId).all()
+
+	return jsonify(sourceEventFrames)

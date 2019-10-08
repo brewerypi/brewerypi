@@ -8,6 +8,7 @@ from .. models import Element, EventFrame
 class EventFrameForm(FlaskForm):
 	element = QuerySelectField("Element", validators = [Required()], get_label = "Name")
 	eventFrameTemplate = QuerySelectField("Event Frame Template", validators = [Required()], get_label = "Name")
+	sourceEventFrame = SelectField("Source Event Frame", validators = [Optional()], coerce = int)
 	startTimestamp = DateTimeField("Start Timestamp", default = datetime.utcnow, validators = [Required()])
 	startUtcTimestamp = HiddenField()
 	endTimestamp = DateTimeField("End Timestamp", validators = [Optional()])
