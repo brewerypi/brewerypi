@@ -1,6 +1,6 @@
 import json
 from datetime import datetime
-from flask_login import AnonymousUserMixin, UserMixin
+from flask_login import AnonymousUserMixin, current_user, UserMixin
 from sqlalchemy import func, Index, PrimaryKeyConstraint, UniqueConstraint
 from sqlalchemy.dialects.mysql import DOUBLE
 from time import time
@@ -227,6 +227,7 @@ class EventFrame(db.Model):
 	UserId = db.Column(db.Integer, db.ForeignKey("User.UserId", name = "FK__User$AddOrEdit$EventFrame"), nullable = False)
 
 	ParentEventFrame = db.relationship("EventFrame", remote_side = [EventFrameId])
+	EventFrameEventFrameGroups = db.relationship("EventFrameEventFrameGroup", backref = "EventFrame", lazy = "dynamic")
 	EventFrames = db.relationship("EventFrame", remote_side = [ParentEventFrameId])
 	EventFrameNotes = db.relationship("EventFrameNote", backref = "EventFrame", lazy = "dynamic")
 
@@ -241,6 +242,9 @@ class EventFrame(db.Model):
 			return self.ParentEventFrame.ancestors(ancestors)
 
 	def delete(self):
+		for eventFrameEventFrameGroup in self.EventFrameEventFrameGroups:
+			eventFrameEventFrameGroup.delete()
+
 		eventFrameNotes = self.EventFrameNotes
 		for eventFrameNote in eventFrameNotes:
 			eventFrameNote.delete()
@@ -250,6 +254,22 @@ class EventFrame(db.Model):
 			childEventFrame.delete()
 
 		db.session.delete(self)
+
+	def end(self):
+		endTimestamp = datetime.utcnow()
+		for dictionary in self.lineage([], 0):
+			eventFrame = dictionary["eventFrame"]
+			if eventFrame.EndTimestamp is None:
+				eventFrame.EndTimestamp = endTimestamp
+				eventFrame.UserId = current_user.get_id()
+				for eventFrameAttributeTemplate in eventFrame.EventFrameTemplate.EventFrameAttributeTemplates:
+					if eventFrameAttributeTemplate.DefaultEndValue is not None:
+						eventFrameAttribute = EventFrameAttribute.query.filter(EventFrameAttribute.ElementId == eventFrame.origin().ElementId,
+							EventFrameAttribute.EventFrameAttributeTemplateId == eventFrameAttributeTemplate.EventFrameAttributeTemplateId).one_or_none()
+						if eventFrameAttribute is not None:
+							tagValue = TagValue(TagId = eventFrameAttribute.TagId, Timestamp = endTimestamp, UserId = current_user.get_id(),
+								Value = eventFrameAttributeTemplate.DefaultEndValue)
+							db.session.add(tagValue)
 
 	def hasDescendants(self):
 		if self.EventFrames:
@@ -274,6 +294,14 @@ class EventFrame(db.Model):
 			return self
 		else:
 			return self.ParentEventFrame.origin()
+
+	def restart(self):
+		endTimestamp = datetime.utcnow()
+		for dictionary in self.lineage([], 0):
+			eventFrame = dictionary["eventFrame"]
+			if eventFrame.EndTimestamp is not None:
+				eventFrame.EndTimestamp = None
+				eventFrame.UserId = current_user.get_id()
 
 class EventFrameAttribute(db.Model):
 	__tablename__ = "EventFrameAttribute"
@@ -335,6 +363,46 @@ class EventFrameAttributeTemplate(db.Model):
 		for ancestor in self.EventFrameTemplate.ancestors([]):
 			path += "\{}".format(ancestor.Name)
 		return  "{}\{}".format(path, self.EventFrameTemplate.Name)
+
+class EventFrameEventFrameGroup(db.Model):
+	__tablename__ = "EventFrameEventFrameGroup"
+	__table_args__ = \
+	(
+		UniqueConstraint("EventFrameGroupId", "EventFrameId", name = "AK__EventFrameGroupId__EventFrameId"),
+	)
+
+	EventFrameEventFrameGroupId = db.Column(db.Integer, primary_key = True)
+	EventFrameGroupId = db.Column(db.Integer, db.ForeignKey("EventFrameGroup.EventFrameGroupId", name = "FK__EventFrameGroup$Have$EventFrameEventFrameGroup"),
+		nullable = False)
+	EventFrameId = db.Column(db.Integer, db.ForeignKey("EventFrame.EventFrameId", name = "FK__EventFrame$Have$EventFrameEventFrameGroup"), nullable = False)
+
+	def delete(self):
+		db.session.delete(self)
+
+	def id(self):
+		return self.EventFrameEventFrameGroupId
+
+class EventFrameGroup(db.Model):
+	__tablename__ = "EventFrameGroup"
+	__table_args__ = \
+	(
+		UniqueConstraint("Name", name = "AK__Name"),
+		Index("IX__Name", "Name"),
+	)
+
+	EventFrameGroupId = db.Column(db.Integer, primary_key = True)
+	Name = db.Column(db.String(45), nullable = False)
+
+	EventFrameEventFrameGroups = db.relationship("EventFrameEventFrameGroup", backref = "EventFrameGroup", lazy = "dynamic")
+
+	def id(self):
+		return self.EventFrameEventFrameGroupId
+
+	def delete(self):
+		for eventFrameEventFrameGroup in self.EventFrameEventFrameGroups:
+			eventFrameEventFrameGroup.delete()
+
+		db.session.delete(self)
 
 class EventFrameNote(db.Model):
 	__tablename__ = "EventFrameNote"

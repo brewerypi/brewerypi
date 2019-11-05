@@ -1,0 +1,341 @@
+{
+    "annotations": {
+      "list": [
+        {
+          "builtIn": 1,
+          "datasource": "-- Grafana --",
+          "enable": true,
+          "hide": true,
+          "iconColor": "rgba(0, 211, 255, 1)",
+          "name": "Annotations & Alerts",
+          "type": "dashboard"
+        }
+      ]
+    },
+    "editable": true,
+    "gnetId": null,
+    "graphTooltip": 0,
+    "id": 11,
+    "iteration": 1572664659893,
+    "links": [],
+    "panels": [
+      {
+        "columns": [],
+        "datasource": "BreweryPi",
+        "fontSize": "100%",
+        "gridPos": {
+          "h": 12,
+          "w": 24,
+          "x": 0,
+          "y": 0
+        },
+        "height": "600",
+        "id": 1,
+        "links": [],
+        "options": {},
+        "pageSize": null,
+        "scroll": true,
+        "showHeader": true,
+        "sort": {
+          "col": 0,
+          "desc": false
+        },
+        "styles": [
+          {
+            "alias": "Time",
+            "dateFormat": "YYYY-MM-DD HH:mm:ss",
+            "pattern": "Time",
+            "type": "date"
+          },
+          {
+            "alias": "",
+            "colorMode": null,
+            "colors": [
+              "rgba(245, 54, 54, 0.9)",
+              "rgba(237, 129, 40, 0.89)",
+              "rgba(50, 172, 45, 0.97)"
+            ],
+            "dateFormat": "YYYY-MM-DD HH:mm:ss",
+            "decimals": 2,
+            "mappingType": 1,
+            "pattern": "/Start|End/",
+            "thresholds": [],
+            "type": "date",
+            "unit": "short"
+          }
+        ],
+        "targets": [
+          {
+            "alias": "",
+            "format": "table",
+            "group": [],
+            "hide": false,
+            "metricColumn": "none",
+            "rawQuery": true,
+            "rawSql": "call BreweryPi.spEventFrameSummary('$eventFrameAttributeTemplatesString', '$eventFramesString');",
+            "refId": "A",
+            "select": [
+              [
+                {
+                  "params": [
+                    "value"
+                  ],
+                  "type": "column"
+                }
+              ]
+            ],
+            "timeColumn": "time",
+            "where": [
+              {
+                "name": "$__timeFilter",
+                "params": [],
+                "type": "macro"
+              }
+            ]
+          }
+        ],
+        "title": "Event Frame Group Summary",
+        "transform": "table",
+        "type": "table"
+      }
+    ],
+    "refresh": false,
+    "schemaVersion": 18,
+    "style": "dark",
+    "tags": [],
+    "templating": {
+      "list": [
+        {
+          "allValue": null,
+          "current": {},
+          "datasource": "BreweryPi",
+          "definition": "SELECT Enterprise.EnterpriseId AS __value,     Enterprise.Abbreviation AS __text FROM Enterprise",
+          "hide": 0,
+          "includeAll": true,
+          "label": "Enterprises:",
+          "multi": true,
+          "name": "enterprises",
+          "options": [],
+          "query": "SELECT Enterprise.EnterpriseId AS __value,     Enterprise.Abbreviation AS __text FROM Enterprise",
+          "refresh": 1,
+          "regex": "",
+          "skipUrlSync": false,
+          "sort": 5,
+          "tagValuesQuery": "",
+          "tags": [],
+          "tagsQuery": "",
+          "type": "query",
+          "useTags": false
+        },
+        {
+          "allValue": null,
+          "current": {},
+          "datasource": "BreweryPi",
+          "definition": "SELECT Site.SiteId AS __value,     CONCAT(Enterprise.Abbreviation, \"_\", Site.Abbreviation)AS __text FROM Site     INNER JOIN Enterprise ON Site.EnterpriseId = Enterprise.EnterpriseId WHERE Enterprise.EnterpriseId IN ($enterprises)",
+          "hide": 0,
+          "includeAll": true,
+          "label": "Sites:",
+          "multi": true,
+          "name": "sites",
+          "options": [],
+          "query": "SELECT Site.SiteId AS __value,     CONCAT(Enterprise.Abbreviation, \"_\", Site.Abbreviation)AS __text FROM Site     INNER JOIN Enterprise ON Site.EnterpriseId = Enterprise.EnterpriseId WHERE Enterprise.EnterpriseId IN ($enterprises)",
+          "refresh": 1,
+          "regex": "",
+          "skipUrlSync": false,
+          "sort": 5,
+          "tagValuesQuery": "",
+          "tags": [],
+          "tagsQuery": "",
+          "type": "query",
+          "useTags": false
+        },
+        {
+          "allValue": null,
+          "current": {},
+          "datasource": "BreweryPi",
+          "definition": "SELECT ElementTemplate.ElementTemplateId AS __value,     CONCAT(Enterprise.Abbreviation, \"_\", Site.Abbreviation, \"_\", ElementTemplate.Name) AS __text FROM ElementTemplate     INNER JOIN Site ON ElementTemplate.SiteId = Site.SiteId     INNER JOIN Enterprise ON Site.EnterpriseId = Enterprise.EnterpriseId WHERE ElementTemplate.SiteId IN($sites)",
+          "hide": 0,
+          "includeAll": true,
+          "label": "Element Templates:",
+          "multi": true,
+          "name": "elementTemplates",
+          "options": [],
+          "query": "SELECT ElementTemplate.ElementTemplateId AS __value,     CONCAT(Enterprise.Abbreviation, \"_\", Site.Abbreviation, \"_\", ElementTemplate.Name) AS __text FROM ElementTemplate     INNER JOIN Site ON ElementTemplate.SiteId = Site.SiteId     INNER JOIN Enterprise ON Site.EnterpriseId = Enterprise.EnterpriseId WHERE ElementTemplate.SiteId IN($sites)",
+          "refresh": 1,
+          "regex": "",
+          "skipUrlSync": false,
+          "sort": 5,
+          "tagValuesQuery": "",
+          "tags": [],
+          "tagsQuery": "",
+          "type": "query",
+          "useTags": false
+        },
+        {
+          "allValue": null,
+          "current": {},
+          "datasource": "BreweryPi",
+          "definition": "SELECT EventFrameTemplate.EventFrameTemplateId AS __value,     CONCAT(Enterprise.Abbreviation, \"_\", Site.Abbreviation, \"_\", ElementTemplate.Name, \"_\", EventFrameTemplate.Name) AS __text FROM EventFrameTemplate     INNER JOIN ElementTemplate ON EventFrameTemplate.ElementTemplateId = ElementTemplate.ElementTemplateId     INNER JOIN Site ON ElementTemplate.SiteId = Site.SiteId     INNER JOIN Enterprise ON Site.EnterpriseId = Enterprise.EnterpriseId WHERE EventFrameTemplate.ElementTemplateId IN($elementTemplates)",
+          "hide": 0,
+          "includeAll": true,
+          "label": "Event Frame Templates:",
+          "multi": true,
+          "name": "eventFrameTemplates",
+          "options": [],
+          "query": "SELECT EventFrameTemplate.EventFrameTemplateId AS __value,     CONCAT(Enterprise.Abbreviation, \"_\", Site.Abbreviation, \"_\", ElementTemplate.Name, \"_\", EventFrameTemplate.Name) AS __text FROM EventFrameTemplate     INNER JOIN ElementTemplate ON EventFrameTemplate.ElementTemplateId = ElementTemplate.ElementTemplateId     INNER JOIN Site ON ElementTemplate.SiteId = Site.SiteId     INNER JOIN Enterprise ON Site.EnterpriseId = Enterprise.EnterpriseId WHERE EventFrameTemplate.ElementTemplateId IN($elementTemplates)",
+          "refresh": 1,
+          "regex": "",
+          "skipUrlSync": false,
+          "sort": 5,
+          "tagValuesQuery": "",
+          "tags": [],
+          "tagsQuery": "",
+          "type": "query",
+          "useTags": false
+        },
+        {
+          "allValue": null,
+          "current": {},
+          "datasource": "BreweryPi",
+          "definition": "SELECT DISTINCT EventFrameGroup.EventFrameGroupId AS __value,     EventFrameGroup.Name AS __text FROM EventFrameGroup     INNER JOIN EventFrameEventFrameGroup ON EventFrameGroup.EventFrameGroupId = EventFrameEventFrameGroup.EventFrameGroupId     INNER JOIN EventFrame ON EventFrameEventFrameGroup.EventFrameId = EventFrame.EventFrameId     INNER JOIN EventFrameTemplate ON EventFrame.EventFrameTemplateId = EventFrameTemplate.EventFrameTemplateId     INNER JOIN ElementTemplate ON EventFrameTemplate.ElementTemplateId = ElementTemplate.ElementTemplateId     INNER JOIN Site ON ElementTemplate.SiteId = Site.SiteId     INNER JOIN Enterprise ON Site.EnterpriseId = Enterprise.EnterpriseId WHERE Enterprise.EnterpriseId IN ($enterprises)     AND Site.SiteId IN ($sites)     AND ElementTemplate.ElementTemplateId IN ($elementTemplates)     AND EventFrameTemplate.EventFrameTemplateId IN ($eventFrameTemplates)",
+          "hide": 0,
+          "includeAll": false,
+          "label": "Event Frame Group:",
+          "multi": false,
+          "name": "eventFrameGroup",
+          "options": [],
+          "query": "SELECT DISTINCT EventFrameGroup.EventFrameGroupId AS __value,     EventFrameGroup.Name AS __text FROM EventFrameGroup     INNER JOIN EventFrameEventFrameGroup ON EventFrameGroup.EventFrameGroupId = EventFrameEventFrameGroup.EventFrameGroupId     INNER JOIN EventFrame ON EventFrameEventFrameGroup.EventFrameId = EventFrame.EventFrameId     INNER JOIN EventFrameTemplate ON EventFrame.EventFrameTemplateId = EventFrameTemplate.EventFrameTemplateId     INNER JOIN ElementTemplate ON EventFrameTemplate.ElementTemplateId = ElementTemplate.ElementTemplateId     INNER JOIN Site ON ElementTemplate.SiteId = Site.SiteId     INNER JOIN Enterprise ON Site.EnterpriseId = Enterprise.EnterpriseId WHERE Enterprise.EnterpriseId IN ($enterprises)     AND Site.SiteId IN ($sites)     AND ElementTemplate.ElementTemplateId IN ($elementTemplates)     AND EventFrameTemplate.EventFrameTemplateId IN ($eventFrameTemplates)",
+          "refresh": 1,
+          "regex": "",
+          "skipUrlSync": false,
+          "sort": 5,
+          "tagValuesQuery": "",
+          "tags": [],
+          "tagsQuery": "",
+          "type": "query",
+          "useTags": false
+        },
+        {
+          "allValue": null,
+          "current": {},
+          "datasource": "BreweryPi",
+          "definition": "SELECT EventFrame.EventFrameId AS __value,     CONCAT(Enterprise.Abbreviation, \"_\", Site.Abbreviation, \"_\", ElementTemplate.Name, \"_\", EventFrameTemplate.Name, \"_\", Element.Name, \"_\", EventFrame.Name) AS __text FROM EventFrame     INNER JOIN Element ON EventFrame.ElementId = Element.ElementId     INNER JOIN EventFrameEventFrameGroup ON EventFrame.EventFrameId = EventFrameEventFrameGroup.EventFrameId     INNER JOIN EventFrameTemplate ON EventFrame.EventFrameTemplateId = EventFrameTemplate.EventFrameTemplateId     INNER JOIN ElementTemplate ON Element.ElementTemplateId = ElementTemplate.ElementTemplateId         AND EventFrameTemplate.ElementTemplateId = ElementTemplate.ElementTemplateId     INNER JOIN Site ON ElementTemplate.SiteId = Site.SiteId     INNER JOIN Enterprise ON Site.EnterpriseId = Enterprise.EnterpriseId WHERE Enterprise.EnterpriseId IN ($enterprises)     AND Site.SiteId IN ($sites)     AND ElementTemplate.ElementTemplateId IN ($elementTemplates)     AND EventFrameTemplate.EventFrameTemplateId IN ($eventFrameTemplates)     AND EventFrameEventFrameGroup.EventFrameGroupId = $eventFrameGroup",
+          "hide": 0,
+          "includeAll": true,
+          "label": "Event Frames:",
+          "multi": true,
+          "name": "eventFrames",
+          "options": [],
+          "query": "SELECT EventFrame.EventFrameId AS __value,     CONCAT(Enterprise.Abbreviation, \"_\", Site.Abbreviation, \"_\", ElementTemplate.Name, \"_\", EventFrameTemplate.Name, \"_\", Element.Name, \"_\", EventFrame.Name) AS __text FROM EventFrame     INNER JOIN Element ON EventFrame.ElementId = Element.ElementId     INNER JOIN EventFrameEventFrameGroup ON EventFrame.EventFrameId = EventFrameEventFrameGroup.EventFrameId     INNER JOIN EventFrameTemplate ON EventFrame.EventFrameTemplateId = EventFrameTemplate.EventFrameTemplateId     INNER JOIN ElementTemplate ON Element.ElementTemplateId = ElementTemplate.ElementTemplateId         AND EventFrameTemplate.ElementTemplateId = ElementTemplate.ElementTemplateId     INNER JOIN Site ON ElementTemplate.SiteId = Site.SiteId     INNER JOIN Enterprise ON Site.EnterpriseId = Enterprise.EnterpriseId WHERE Enterprise.EnterpriseId IN ($enterprises)     AND Site.SiteId IN ($sites)     AND ElementTemplate.ElementTemplateId IN ($elementTemplates)     AND EventFrameTemplate.EventFrameTemplateId IN ($eventFrameTemplates)     AND EventFrameEventFrameGroup.EventFrameGroupId = $eventFrameGroup",
+          "refresh": 1,
+          "regex": "",
+          "skipUrlSync": false,
+          "sort": 5,
+          "tagValuesQuery": "",
+          "tags": [],
+          "tagsQuery": "",
+          "type": "query",
+          "useTags": false
+        },
+        {
+          "allValue": null,
+          "current": {},
+          "datasource": "BreweryPi",
+          "definition": "SELECT CONCAT_WS(',', $eventFrames)",
+          "hide": 2,
+          "includeAll": false,
+          "label": null,
+          "multi": false,
+          "name": "eventFramesString",
+          "options": [],
+          "query": "SELECT CONCAT_WS(',', $eventFrames)",
+          "refresh": 1,
+          "regex": "",
+          "skipUrlSync": false,
+          "sort": 0,
+          "tagValuesQuery": "",
+          "tags": [],
+          "tagsQuery": "",
+          "type": "query",
+          "useTags": false
+        },
+        {
+          "allValue": null,
+          "current": {},
+          "datasource": "BreweryPi",
+          "definition": "SELECT DISTINCT EventFrameAttributeTemplate.Name FROM EventFrameAttributeTemplate     INNER JOIN EventFrameTemplate ON EventFrameAttributeTemplate.EventFrameTemplateId = EventFrameTemplate.EventFrameTemplateId     INNER JOIN EventFrame ON EventFrameTemplate.EventFrameTemplateId = EventFrame.EventFrameTemplateId WHERE EventFrame.EventFrameId IN ($eventFrames)",
+          "hide": 0,
+          "includeAll": true,
+          "label": "Event Frame Attribute Templates",
+          "multi": true,
+          "name": "eventFrameAttributeTemplates",
+          "options": [],
+          "query": "SELECT DISTINCT EventFrameAttributeTemplate.Name FROM EventFrameAttributeTemplate     INNER JOIN EventFrameTemplate ON EventFrameAttributeTemplate.EventFrameTemplateId = EventFrameTemplate.EventFrameTemplateId     INNER JOIN EventFrame ON EventFrameTemplate.EventFrameTemplateId = EventFrame.EventFrameTemplateId WHERE EventFrame.EventFrameId IN ($eventFrames)",
+          "refresh": 1,
+          "regex": "",
+          "skipUrlSync": false,
+          "sort": 5,
+          "tagValuesQuery": "",
+          "tags": [],
+          "tagsQuery": "",
+          "type": "query",
+          "useTags": false
+        },
+        {
+          "allValue": null,
+          "current": {},
+          "datasource": "BreweryPi",
+          "definition": "",
+          "hide": 2,
+          "includeAll": false,
+          "label": null,
+          "multi": false,
+          "name": "eventFrameAttributeTemplatesString",
+          "options": [],
+          "query": "SELECT CONCAT_WS(',', $eventFrameAttributeTemplates)",
+          "refresh": 1,
+          "regex": "",
+          "skipUrlSync": false,
+          "sort": 0,
+          "tagValuesQuery": "",
+          "tags": [],
+          "tagsQuery": "",
+          "type": "query",
+          "useTags": false
+        }
+      ]
+    },
+    "time": {
+      "from": "2018-06-29T18:07:04.442Z",
+      "to": "2018-06-29T18:17:04.442Z"
+    },
+    "timepicker": {
+      "hidden": true,
+      "refresh_intervals": [
+        "5s",
+        "10s",
+        "30s",
+        "1m",
+        "5m",
+        "15m",
+        "30m",
+        "1h",
+        "2h",
+        "1d"
+      ],
+      "time_options": [
+        "5m",
+        "15m",
+        "1h",
+        "6h",
+        "12h",
+        "24h",
+        "2d",
+        "7d",
+        "30d"
+      ]
+    },
+    "timezone": "",
+    "title": "Event Frame Group Summary",
+    "uid": "EventFrameGroupSummary"
+}

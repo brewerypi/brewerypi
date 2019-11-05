@@ -5,7 +5,7 @@
 
 {% block navbar %}
 <div class = "navbar navbar-inverse" role = "navigation">
-    <div class = "container">
+    <div class = "container-fluid">
         <div class = "navbar-header">
             <button type = "button" class = "navbar-toggle" data-toggle = "collapse" data-target = ".navbar-collapse">
                 <span class = "sr-only">Toggle navigation</span>
@@ -49,6 +49,7 @@
                 <li class = "dropdown"><a href = "#" class = "dropdown-toggle" data-toggle = "dropdown">Event Frames <span class = "caret"></span></a>
                     <ul class = "dropdown-menu">
                         <li><a href = "{{ url_for("eventFrames.selectEventFrame") }}">Event Frames</a></li>
+                        <li><a href = "{{ url_for("eventFrameGroups.listEventFrameGroups") }}">Groups</a></li>
                         {% if current_user.isAdministrator() %}
                         <li><a href = "{{ url_for("eventFrameAttributes.exportEventFrameAttributes") }}">Export</a></li>
                         <li><a href = "{{ url_for("eventFrameAttributes.importEventFrameAttributes") }}">Import</a></li>
@@ -107,7 +108,7 @@
 {% endblock %}
 
 {% block content %}
-<div class = "container">
+<div class = "container-fluid">
     <div id = "divFlashedMessages">
         {% for category, message in get_flashed_messages(with_categories = true) %}
             {% if category == "message" %}

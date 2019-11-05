@@ -133,6 +133,64 @@ def dashboard(eventFrameId):
 			TagValue.Timestamp >= eventFrame.StartTimestamp)
 	return render_template("eventFrames/dashboard.html", eventFrame = eventFrame, eventFrameAttributes = eventFrameAttributes, tagValues = tagValues)
 
+@eventFrames.route("/eventFrames/overlay/days", methods = ["GET", "POST"])
+@login_required
+@permissionRequired(Permission.DATA_ENTRY)
+def days():
+	data = request.get_json(force = True)
+	eventFrameIds = ""
+	for item in data:
+		if eventFrameIds != "":
+			eventFrameIds = eventFrameIds + ", "
+		eventFrameIds = eventFrameIds +  item["EventFrameId"]
+
+	query = """
+	SELECT CEILING(IF(EventFrame.EndTimestamp IS NULL,
+		(UNIX_TIMESTAMP(TagValue.Timestamp) - UNIX_TIMESTAMP(EventFrame.StartTimestamp)) / 86400,
+		(UNIX_TIMESTAMP(EventFrame.EndTimestamp) - UNIX_TIMESTAMP(EventFrame.StartTimestamp)) / 86400)) AS Days
+	FROM EventFrame
+		INNER JOIN Element ON EventFrame.ElementId = Element.ElementId
+		INNER JOIN EventFrameTemplate ON EventFrame.EventFrameTemplateId = EventFrameTemplate.EventFrameTemplateId
+		INNER JOIN EventFrameAttributeTemplate ON EventFrameTemplate.EventFrameTemplateId = EventFrameAttributeTemplate.EventFrameTemplateId
+		LEFT JOIN EventFrameAttribute ON EventFrameAttributeTemplate.EventFrameAttributeTemplateId = EventFrameAttribute.EventFrameAttributeTemplateId AND
+			Element.ElementId = EventFrameAttribute.ElementId
+		INNER JOIN
+		(
+			SELECT EventFrame.EventFrameId AS EventFrameId,
+				EventFrameAttributeTemplate.Name AS EventFrameAttributeTemplateName,
+				MAX(TagValue.Timestamp) AS Timestamp
+			FROM EventFrame
+				INNER JOIN Element ON EventFrame.ElementId = Element.ElementId
+				INNER JOIN EventFrameTemplate ON EventFrame.EventFrameTemplateId = EventFrameTemplate.EventFrameTemplateId
+				INNER JOIN EventFrameAttributeTemplate ON EventFrameTemplate.EventFrameTemplateId = EventFrameAttributeTemplate.EventFrameTemplateId
+				LEFT JOIN EventFrameAttribute ON EventFrameAttributeTemplate.EventFrameAttributeTemplateId = EventFrameAttribute.EventFrameAttributeTemplateId AND
+					Element.ElementId = EventFrameAttribute.ElementId
+				LEFT JOIN Tag ON EventFrameAttribute.TagId = Tag.TagId
+				LEFT JOIN TagValue ON Tag.TagId = TagValue.TagId AND
+					CASE
+						WHEN EventFrame.EndTimestamp IS NULL THEN
+							(TagValue.Timestamp >= EventFrame.StartTimestamp)
+						ELSE
+							(TagValue.Timestamp >= EventFrame.StartTimestamp AND TagValue.Timestamp <= EventFrame.EndTimestamp)
+					END
+			WHERE EventFrame.EventFrameId IN ({})
+			GROUP BY EventFrameId,
+				EventFrameAttributeTemplateName
+		) CurrentEventFrameAttributeValue ON EventFrame.EventFrameId = CurrentEventFrameAttributeValue.EventFrameId AND
+			EventFrameAttributeTemplate.Name = CurrentEventFrameAttributeValue.EventFrameAttributeTemplateName
+		LEFT JOIN Tag ON EventFrameAttribute.TagId = Tag.TagId
+		LEFT JOIN TagValue ON Tag.TagId = TagValue.TagId AND
+			TagValue.Timestamp = CurrentEventFrameAttributeValue.Timestamp
+		LEFT JOIN Lookup ON Tag.LookupId = Lookup.LookupId
+		LEFT JOIN LookupValue ON Lookup.LookupId = LookupValue.LookupId AND
+			TagValue.Value = LookupValue.Value
+	WHERE EventFrame.EventFrameId IN ({})
+	ORDER BY Days DESC
+	LIMIT 1
+	""".format(eventFrameIds, eventFrameIds)
+	days = db.session.execute(query).fetchone()["Days"]
+	return jsonify({"days": days})
+
 @eventFrames.route("/eventFrames/delete/<int:eventFrameId>", methods = ["GET", "POST"])
 @login_required
 @permissionRequired(Permission.DATA_ENTRY)
@@ -237,25 +295,10 @@ def editEventFrame(eventFrameId):
 @login_required
 @permissionRequired(Permission.DATA_ENTRY)
 def endEventFrame(eventFrameId):
-	rootEventFrame = EventFrame.query.get_or_404(eventFrameId)
-	endTimestamp = datetime.utcnow()
-	for dictionary in rootEventFrame.lineage([], 0):
-		eventFrame = dictionary["eventFrame"]
-		if eventFrame.EndTimestamp is None:
-			eventFrame.EndTimestamp = endTimestamp
-			eventFrame.UserId = current_user.get_id()
-			for eventFrameAttributeTemplate in eventFrame.EventFrameTemplate.EventFrameAttributeTemplates:
-				if eventFrameAttributeTemplate.DefaultEndValue is not None:
-					eventFrameAttribute = EventFrameAttribute.query.filter(EventFrameAttribute.ElementId == eventFrame.origin().ElementId,
-						EventFrameAttribute.EventFrameAttributeTemplateId == eventFrameAttributeTemplate.EventFrameAttributeTemplateId).one_or_none()
-					if eventFrameAttribute is not None:
-						tagValue = TagValue(TagId = eventFrameAttribute.TagId, Timestamp = endTimestamp, UserId = current_user.get_id(),
-							Value = eventFrameAttributeTemplate.DefaultEndValue)
-						db.session.add(tagValue)
-
+	eventFrame = EventFrame.query.get_or_404(eventFrameId)
+	eventFrame.end()
 	db.session.commit()
-	flash('You have successfully ended "{}" for event frame "{}".'.format(rootEventFrame.EventFrameTemplate.Name, rootEventFrame.Name),
-		"alert alert-success")
+	flash('You have successfully ended "{}" for event frame "{}".'.format(eventFrame.EventFrameTemplate.Name, eventFrame.Name), "alert alert-success")
 	return redirect(request.referrer)
 
 @eventFrames.route("/eventFrames/overlayBuilder/<int:eventFrameTemplateId>", methods = ["GET", "POST"])
@@ -283,63 +326,16 @@ def overlayBuilder(eventFrameTemplateId):
 	return render_template("eventFrames/overlayBuilder.html", eventFrameAttributeTemplates = eventFrameAttributeTemplates,
 		eventFrameTemplate = eventFrameTemplate, form = form)
 
-@eventFrames.route("/eventFrames/overlay/days", methods = ["GET", "POST"])
+@eventFrames.route("/eventFrames/restartEventFrame/<int:eventFrameId>", methods = ["GET", "POST"])
 @login_required
 @permissionRequired(Permission.DATA_ENTRY)
-def days():
-	data = request.get_json(force = True)
-	eventFrameIds = ""
-	for item in data:
-		if eventFrameIds != "":
-			eventFrameIds = eventFrameIds + ", "
-		eventFrameIds = eventFrameIds +  item["EventFrameId"]
-
-	query = """
-	SELECT CEILING(IF(EventFrame.EndTimestamp IS NULL,
-		(UNIX_TIMESTAMP(TagValue.Timestamp) - UNIX_TIMESTAMP(EventFrame.StartTimestamp)) / 86400,
-		(UNIX_TIMESTAMP(EventFrame.EndTimestamp) - UNIX_TIMESTAMP(EventFrame.StartTimestamp)) / 86400)) AS Days
-	FROM EventFrame
-		INNER JOIN Element ON EventFrame.ElementId = Element.ElementId
-		INNER JOIN EventFrameTemplate ON EventFrame.EventFrameTemplateId = EventFrameTemplate.EventFrameTemplateId
-		INNER JOIN EventFrameAttributeTemplate ON EventFrameTemplate.EventFrameTemplateId = EventFrameAttributeTemplate.EventFrameTemplateId
-		LEFT JOIN EventFrameAttribute ON EventFrameAttributeTemplate.EventFrameAttributeTemplateId = EventFrameAttribute.EventFrameAttributeTemplateId AND
-			Element.ElementId = EventFrameAttribute.ElementId
-		INNER JOIN
-		(
-			SELECT EventFrame.EventFrameId AS EventFrameId,
-				EventFrameAttributeTemplate.Name AS EventFrameAttributeTemplateName,
-				MAX(TagValue.Timestamp) AS Timestamp
-			FROM EventFrame
-				INNER JOIN Element ON EventFrame.ElementId = Element.ElementId
-				INNER JOIN EventFrameTemplate ON EventFrame.EventFrameTemplateId = EventFrameTemplate.EventFrameTemplateId
-				INNER JOIN EventFrameAttributeTemplate ON EventFrameTemplate.EventFrameTemplateId = EventFrameAttributeTemplate.EventFrameTemplateId
-				LEFT JOIN EventFrameAttribute ON EventFrameAttributeTemplate.EventFrameAttributeTemplateId = EventFrameAttribute.EventFrameAttributeTemplateId AND
-					Element.ElementId = EventFrameAttribute.ElementId
-				LEFT JOIN Tag ON EventFrameAttribute.TagId = Tag.TagId
-				LEFT JOIN TagValue ON Tag.TagId = TagValue.TagId AND
-					CASE
-						WHEN EventFrame.EndTimestamp IS NULL THEN
-							(TagValue.Timestamp >= EventFrame.StartTimestamp)
-						ELSE
-							(TagValue.Timestamp >= EventFrame.StartTimestamp AND TagValue.Timestamp <= EventFrame.EndTimestamp)
-					END
-			WHERE EventFrame.EventFrameId IN ({})
-			GROUP BY EventFrameId,
-				EventFrameAttributeTemplateName
-		) CurrentEventFrameAttributeValue ON EventFrame.EventFrameId = CurrentEventFrameAttributeValue.EventFrameId AND
-			EventFrameAttributeTemplate.Name = CurrentEventFrameAttributeValue.EventFrameAttributeTemplateName
-		LEFT JOIN Tag ON EventFrameAttribute.TagId = Tag.TagId
-		LEFT JOIN TagValue ON Tag.TagId = TagValue.TagId AND
-			TagValue.Timestamp = CurrentEventFrameAttributeValue.Timestamp
-		LEFT JOIN Lookup ON Tag.LookupId = Lookup.LookupId
-		LEFT JOIN LookupValue ON Lookup.LookupId = LookupValue.LookupId AND
-			TagValue.Value = LookupValue.Value
-	WHERE EventFrame.EventFrameId IN ({})
-	ORDER BY Days DESC
-	LIMIT 1
-	""".format(eventFrameIds, eventFrameIds)
-	days = db.session.execute(query).fetchone()["Days"]
-	return jsonify({"days": days})
+def restartEventFrame(eventFrameId):
+	eventFrame = EventFrame.query.get_or_404(eventFrameId)
+	eventFrame.restart()
+	db.session.commit()
+	flash('You have successfully restarted "{}" event frame "{}".'.format(eventFrame.EventFrameTemplate.Name, eventFrame.Name),
+		"alert alert-success")
+	return redirect(request.referrer)
 
 @eventFrames.route("/eventFrames/select", methods = ["GET", "POST"]) # Default.
 @eventFrames.route("/eventFrames/select/<string:selectedClass>", methods = ["GET", "POST"]) # Root.

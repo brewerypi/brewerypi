@@ -384,7 +384,7 @@ Event Frames
                     { "orderable": false },     // Select button.
                     { "orderable": false },     // Grafana button.
                     {% if childrenClass == "EventFrame" %}
-                    { "orderable": false },     // Message button.
+                        { "orderable": false }, // Message button.
                     {% endif %}
                     {% if childrenClass == "Enterprise" or childrenClass == "Site" or childrenClass == "ElementTemplate" %}
                         null,
