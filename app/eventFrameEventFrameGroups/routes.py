@@ -21,7 +21,7 @@ def add(type, eventFrameGroupId):
 			eventFrameEventFrameGroup = EventFrameEventFrameGroup(EventFrameGroupId = eventFrameGroupId, EventFrameId = eventFrame.EventFrameId)
 			db.session.add(eventFrameEventFrameGroup)
 			count = count + 1
-		elif type == "existingActive":
+		elif type == "active":
 			eventFrameEventFrameGroup = EventFrameEventFrameGroup(EventFrameGroupId = eventFrameGroupId, EventFrameId = item["eventFrameId"])
 			db.session.add(eventFrameEventFrameGroup)
 			count = count + 1

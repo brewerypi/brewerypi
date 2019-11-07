@@ -171,18 +171,16 @@ Event Frame Group Add Active Event Frames
 
                 selectedActiveEventFramesTable.rows("tr:visible").nodes().to$().each(function ()
                 {
-                    var elementId = $(this).attr("data-elementId")
-                    var eventFrameTemplateId = $(this).attr("data-eventFrameTemplateId")
+                    var eventFrameId = $(this).attr("data-eventFrameId")
                     var row = {}
-                        row["elementId"] = elementId
-                        row["eventFrameTemplateId"] = eventFrameTemplateId
+                        row["eventFrameId"] = eventFrameId
                         rows.push(row)
                 })
 
                 $.ajax(
                 {
                     type : "POST",
-                    url : "/eventFrameEventFrameGroups/add/new/{{ eventFrameGroup.EventFrameGroupId }}",
+                    url : "/eventFrameEventFrameGroups/add/active/{{ eventFrameGroup.EventFrameGroupId }}",
                     data : JSON.stringify(rows)
                 }).done(function(response)
                 {
