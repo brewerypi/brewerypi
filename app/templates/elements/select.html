@@ -46,7 +46,7 @@ Data Entry - Elements
     <h1>Elements <small>{{ pageHeaderSubText }}</small></h1>
 </div>
 <div>
-    {% if childrenClass == "Element" and current_user.isAdministrator() %}
+    {% if childrenClass == "Element" %}
         {% if current_user.isAdministrator() %}
             <a class = "btn btn-default" title = "Add" href = "{{ url_for("elements.addElement", elementTemplateId = parent.id()) }}" role = "button">
                 <span class = "glyphicon glyphicon-plus"></span></a>
