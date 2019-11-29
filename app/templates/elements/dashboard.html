@@ -1,121 +1,123 @@
 {% extends "base.html" %}
 
-{% import "bootstrap/wtf.html" as wtf %}
-
-{% block title %}
-{{ element.Name }} Dashboard
-{% endblock %}
+{% block title %}{{ element.Name }} Dashboard{% endblock %}
 
 {% block page_content %}
-<div>
-    <ol class = "breadcrumb">
-        <li><a href = "{{ url_for("elements.selectElement", selectedClass = "Root", selectedId = None) }}"><span class = "glyphicon glyphicon-home"></span></a>
+    <div>
+        <ol class = "breadcrumb">
+            <li><a href = "{{ url_for("elements.selectElement", selectedClass = "Root", selectedId = None) }}"><span class = "glyphicon glyphicon-home"></span>
+                </a></li>
+            <li><a href = "{{ url_for("elements.selectElement", selectedClass = "Enterprise",
+                selectedId = element.ElementTemplate.Site.Enterprise.EnterpriseId) }}">{{ element.ElementTemplate.Site.Enterprise.Name }}</a></li>
+            <li><a href = "{{ url_for("elements.selectElement", selectedClass = "Site",
+                selectedId = element.ElementTemplate.Site.SiteId) }}">{{ element.ElementTemplate.Site.Name }}</a></li>
+            <li><a href = "{{ url_for("elements.selectElement", selectedClass = "ElementTemplate",
+                selectedId = element.ElementTemplate.ElementTemplateId) }}">{{ element.ElementTemplate.Name }}</a></li>
+            <li class = "active">
+                <a title = "Previous" href = '{{ url_for("elements.dashboard", elementId = element.previous().id()) }}'>
+                    <span class = "glyphicon glyphicon-arrow-left"></span></a>
+                <a title = "Next" href = '{{ url_for("elements.dashboard", elementId = element.next().id()) }}'>
+                    <span class = "glyphicon glyphicon-arrow-right"></span></a>    
+                {{ element.Name }}
             </li>
-        <li><a href = "{{ url_for("elements.selectElement", selectedClass = "Enterprise",
-            selectedId = element.ElementTemplate.Site.Enterprise.EnterpriseId) }}">{{ element.ElementTemplate.Site.Enterprise.Name }}</a></li>
-        <li><a href = "{{ url_for("elements.selectElement", selectedClass = "Site",
-            selectedId = element.ElementTemplate.Site.SiteId) }}">{{ element.ElementTemplate.Site.Name }}</a></li>
-        <li><a href = "{{ url_for("elements.selectElement", selectedClass = "ElementTemplate",
-            selectedId = element.ElementTemplate.ElementTemplateId) }}">{{ element.ElementTemplate.Name }}</a></li>
-        <li class = "active">{{ element.Name }}</li>
-    </ol>
-</div>
-<div class = "page-header">
-    <h1>{{ element.Name }} <small>Attributes</small></h1>
-</div>
-<div>
-    <a class = "btn btn-default" title = "Grafana" href = "{{ "ElementValuesGraph" | grafanaUrl({"elementId": element.ElementId}) }}" target = "_blank">
-        <span class = "glyphicon glyphicon-stats"></span></a>
-    <br><br>
-    <table id = "attributesTable" class = "table table-hover" style = "display:none">
-        <thead>
-            <tr>
-                <th></th>
-                <th>Name</th>
-                <th>Last Timestamp</th>
-                <th>Last Value</th>
-                <th>Unit</th>
-                <th>New Value</th>
-                <th>New Timestamp</th>
-                <th><button class = "btn btn-default" id = "buttonAttributesSaveAll" title = "Save All"><span class = "glyphicon glyphicon-floppy-disk"></span>
-                    </button></th>
-                <th></th>
-                <th></th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for elementAttribute in elementAttributes %}
+        </ol>
+    </div>
+    <div class = "page-header">
+        <h1>{{ element.Name }} <small>Attributes</small></h1>
+    </div>
+    <div>
+        <a class = "btn btn-default" title = "Grafana" href = "{{ "ElementValuesGraph" | grafanaUrl({"elementId": element.ElementId}) }}" target = "_blank">
+            <span class = "glyphicon glyphicon-stats"></span></a>
+        <br><br>
+        <table id = "attributesTable" class = "table table-hover" style = "display:none">
+            <thead>
                 <tr>
-                    <td><a class = "btn btn-default" title = "Select" href = "{{ url_for("tagValues.listTagValues", 
-                        elementAttributeId = elementAttribute.ElementAttributeId) }}"><span class = "glyphicon glyphicon-list"></span></a></td>
-                    <td>{{ elementAttribute.ElementAttributeTemplate.Name }}</td>
-                    {% if elementAttribute.Tag.TagValues[0] %}
-                        {% set firstTagValue = elementAttribute.Tag.TagValues | sort(attribute = "Timestamp", reverse = True) | first %}
-                        <td id = "tdLastTimestamp{{ elementAttribute.Tag.TagId }}">{{ moment(firstTagValue.Timestamp).format("YYYY-MM-DD HH:mm:ss") }}</td>
-                        {% if elementAttribute.Tag.LookupId %}
-                            <td id = "tdLastValue{{ elementAttribute.Tag.TagId }}">{{ elementAttribute.Tag.Lookup.LookupValues | 
-                                    selectattr("Value", "equalto", firstTagValue.Value) | map(attribute = "Name") | list | first }}          
-                            <td>{{ elementAttribute.Tag.Lookup.Name }}</td>
-                        {% else %}
-                            <td id = "tdLastValue{{ elementAttribute.Tag.TagId }}">{{ firstTagValue.Value }}</td>                    
-                            <td>{{ firstTagValue.Tag.UnitOfMeasurement.Abbreviation }}</td>
-                        {% endif %}
-                    {% else %}
-                        <td id = "tdLastTimestamp{{ elementAttribute.Tag.TagId }}"></td>
-                        <td id = "tdLastValue{{ elementAttribute.Tag.TagId }}"></td>
-                        <td></td>
-                    {% endif %}
-                    <td>
-                        <div class = "form-group" id = "divNewValue{{ elementAttribute.Tag.TagId }}">
-                            {% if elementAttribute.Tag.LookupId %}
-                                <select class = "form-control" id = "inputOrSelectNewValue{{ elementAttribute.Tag.TagId }}">
-                                    <option value = "-1"></option>
-                                    {% for lookupValue in elementAttribute.Tag.Lookup.LookupValues %}
-                                        {% if lookupValue.Selectable %}
-                                            <option value = "{{ lookupValue.Value }}">{{ lookupValue.Name}}</option>
-                                        {% endif %}
-                                    {% endfor %}
-                                </select>
-                                <p class = "help-block" id = "pNewValue{{ elementAttribute.Tag.TagId }}"></p>
-                            {% else %}
-                                <input class = "form-control" id = "inputOrSelectNewValue{{ elementAttribute.Tag.TagId }}" value = "">
-                                <p class = "help-block" id = "pNewValue{{ elementAttribute.Tag.TagId }}"></p>
-                            {% endif %}
-                        </div>
-                    </td>
-                    <td>
-                        <div class = "form-group" id = "divNewTimestamp{{ elementAttribute.Tag.TagId }}">
-                            <input class = "form-control" id = "inputNewTimestamp{{ elementAttribute.Tag.TagId }}" value = "">
-                            <p class = "help-block" id = "pNewTimestamp{{ elementAttribute.Tag.TagId }}"></p>
-                        </div>
-                    </td>
-                    <td></td>
-                    {% if elementAttribute.Tag.TagValues[0] %}
-                        {% if firstTagValue.TagValueNotes[0] %}
-                            {% set noteButtonClass = "btn btn-default has-note" %}
-                        {% else %}
-                            {% set noteButtonClass = "btn btn-default" %}
-                        {% endif %}
-                        <td><a class = "{{ noteButtonClass }}" title = "Last Value Notes" href = "{{ url_for("tagValueNotes.listTagValueNotes", 
-                                tagValueId = firstTagValue.TagValueId, elementAttributeId = elementAttribute.ElementAttributeId) }}">
-                                <span class = "glyphicon glyphicon-comment"></span></a></td>
-                        <td><a class = "btn btn-default" title = "Edit Last Value"
-                            href = "{{ url_for("tagValues.editTagValue", tagValueId = firstTagValue.TagValueId,
-                            elementAttributeId = elementAttribute.ElementAttributeId) }}"><span class = "glyphicon glyphicon-edit"></span></a></td>
-                        <td><a class = "btn btn-default" title = "Delete Last Value"
-                            href = "{{ url_for("tagValues.deleteTagValue", tagValueId = firstTagValue.TagValueId) }}">
-                            <span class = "glyphicon glyphicon-trash"></span></a></td>
-                    {% else %}
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                    {% endif %}
+                    <th></th>
+                    <th>Name</th>
+                    <th>Last Timestamp</th>
+                    <th>Last Value</th>
+                    <th>Unit</th>
+                    <th>New Value</th>
+                    <th>New Timestamp</th>
+                    <th><button class = "btn btn-default" id = "buttonSave" title = "Save All"><span class = "glyphicon glyphicon-floppy-disk"></span>
+                        </button></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
                 </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</div>
+            </thead>
+            <tbody>
+                {% for elementAttribute in elementAttributes %}
+                    <tr>
+                        <td><a class = "btn btn-default" title = "Select" href = "{{ url_for("tagValues.listTagValues", 
+                            elementAttributeId = elementAttribute.ElementAttributeId) }}"><span class = "glyphicon glyphicon-list"></span></a></td>
+                        <td>{{ elementAttribute.ElementAttributeTemplate.Name }}</td>
+                        {% if elementAttribute.Tag.TagValues[0] %}
+                            {% set firstTagValue = elementAttribute.Tag.TagValues | sort(attribute = "Timestamp", reverse = True) | first %}
+                            <td id = "tdLastTimestamp{{ elementAttribute.Tag.TagId }}">{{ moment(firstTagValue.Timestamp).format("YYYY-MM-DD HH:mm:ss") }}</td>
+                            {% if elementAttribute.Tag.LookupId %}
+                                <td id = "tdLastValue{{ elementAttribute.Tag.TagId }}">{{ elementAttribute.Tag.Lookup.LookupValues | 
+                                        selectattr("Value", "equalto", firstTagValue.Value) | map(attribute = "Name") | list | first }}          
+                                <td>{{ elementAttribute.Tag.Lookup.Name }}</td>
+                            {% else %}
+                                <td id = "tdLastValue{{ elementAttribute.Tag.TagId }}">{{ firstTagValue.Value }}</td>                    
+                                <td>{{ firstTagValue.Tag.UnitOfMeasurement.Abbreviation }}</td>
+                            {% endif %}
+                        {% else %}
+                            <td id = "tdLastTimestamp{{ elementAttribute.Tag.TagId }}"></td>
+                            <td id = "tdLastValue{{ elementAttribute.Tag.TagId }}"></td>
+                            <td></td>
+                        {% endif %}
+                        <td>
+                            <div class = "form-group" id = "divNewValue{{ elementAttribute.Tag.TagId }}">
+                                {% if elementAttribute.Tag.LookupId %}
+                                    <select class = "form-control" id = "inputOrSelectNewValue{{ elementAttribute.Tag.TagId }}">
+                                        <option value = "-1"></option>
+                                        {% for lookupValue in elementAttribute.Tag.Lookup.LookupValues %}
+                                            {% if lookupValue.Selectable %}
+                                                <option value = "{{ lookupValue.Value }}">{{ lookupValue.Name}}</option>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </select>
+                                    <p class = "help-block" id = "pNewValue{{ elementAttribute.Tag.TagId }}"></p>
+                                {% else %}
+                                    <input class = "form-control" id = "inputOrSelectNewValue{{ elementAttribute.Tag.TagId }}" value = "">
+                                    <p class = "help-block" id = "pNewValue{{ elementAttribute.Tag.TagId }}"></p>
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td>
+                            <div class = "form-group" id = "divNewTimestamp{{ elementAttribute.Tag.TagId }}">
+                                <input class = "form-control" id = "inputNewTimestamp{{ elementAttribute.Tag.TagId }}" value = "">
+                                <p class = "help-block" id = "pNewTimestamp{{ elementAttribute.Tag.TagId }}"></p>
+                            </div>
+                        </td>
+                        <td></td>
+                        {% if elementAttribute.Tag.TagValues[0] %}
+                            {% if firstTagValue.TagValueNotes[0] %}
+                                {% set noteButtonClass = "btn btn-default has-note" %}
+                            {% else %}
+                                {% set noteButtonClass = "btn btn-default" %}
+                            {% endif %}
+                            <td><a class = "{{ noteButtonClass }}" title = "Last Value Notes" href = "{{ url_for("tagValueNotes.listTagValueNotes", 
+                                    tagValueId = firstTagValue.TagValueId, elementAttributeId = elementAttribute.ElementAttributeId) }}">
+                                    <span class = "glyphicon glyphicon-comment"></span></a></td>
+                            <td><a class = "btn btn-default" title = "Edit Last Value"
+                                href = "{{ url_for("tagValues.editTagValue", tagValueId = firstTagValue.TagValueId,
+                                elementAttributeId = elementAttribute.ElementAttributeId) }}"><span class = "glyphicon glyphicon-edit"></span></a></td>
+                            <td><a class = "btn btn-default" title = "Delete Last Value"
+                                href = "{{ url_for("tagValues.deleteTagValue", tagValueId = firstTagValue.TagValueId) }}">
+                                <span class = "glyphicon glyphicon-trash"></span></a></td>
+                        {% else %}
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        {% endif %}
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 {% endblock %}
 
 {% block scripts %}
@@ -123,29 +125,36 @@
     <link rel = "stylesheet" type = "text/css" href = {{ url_for("static", filename = "css/datatables.min.css") }}/>
     <link rel = "stylesheet" type = "text/css" href = {{ url_for("static", filename = "css/styles.css") }}/>
     <script type = "text/javascript" src = {{ url_for("static", filename = "js/datatables.min.js") }}></script>
+    {% block setTabIndex %}
+        <script>
+            function setTabIndex()
+            {
+                var tabIndex = 1
+                $('ol.breadcrumb a[title="Next"],[id^=inputOrSelectNewValue]').each(function()
+                {
+                    $(this).attr("tabindex", tabIndex)
+                    tabIndex = tabIndex + 1
+                })
+
+                $("#buttonSave").attr("tabindex", tabIndex)
+                tabIndex = tabIndex + 1
+                $('ol.breadcrumb a[title="Previous"]').attr("tabindex", tabIndex)
+                tabIndex = tabIndex + 1
+                $($("ol.breadcrumb > li:not(.active) > a").get().reverse()).each(function()       
+                {
+                    $(this).attr("tabindex", tabIndex)
+                    tabIndex = tabIndex + 1
+                })
+                $('ol.breadcrumb a[title="Next"]').focus()
+            }
+        </script>
+    {% endblock %}
     <script>
         $(document).ready(function()
         {
-            // Update the focus and tabindex upon an order event.
-            var setTabIndex = function(type)
-            {
-                var tabIndex = 1
-                $("[id^=divNewValue]").each(function()
-                {
-                    var id = $(this).attr("id").split("divNewValue")[1]
-                    $("#inputOrSelectNewValue" + id).attr("tabindex", tabIndex)
-                    if (tabIndex == 1)
-                    {
-                        $("#inputOrSelectNewValue" + id).focus()
-                    }
-
-                    tabIndex = tabIndex + 1
-                })
-                $("#buttonAttributesSaveAll").attr("tabindex", tabIndex)
-            }
-
             var attributesTable = $("#attributesTable").on("draw.dt", function()
             {
+                // Update the focus and tabindex upon an order event.
                 setTabIndex()
             }).DataTable
             ({
@@ -177,9 +186,8 @@
             })
 
             $("#attributesTable").attr("style", "width:100%")
-            $("input[tabindex = '1']").focus()
 
-            $("#buttonAttributesSaveAll").on("click", function()
+            $("#buttonSave").on("click", function()
             {
                 var error = false
                 var rows = []
@@ -274,7 +282,7 @@
             {
                 if (event.which == 13)
                 {
-                    $("#buttonAttributesSaveAll").focus()
+                    $("#buttonSave").focus()
                 }
             })
 

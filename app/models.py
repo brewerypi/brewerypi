@@ -47,6 +47,14 @@ class Area(db.Model):
 	def id(self):
 		return self.AreaId
 
+	def next(self):
+		areas = Area.query.filter_by(SiteId = self.SiteId).order_by(Area.Name).all()
+		return next(areas, self)
+
+	def previous(self):
+		areas = Area.query.filter_by(SiteId = self.SiteId).order_by(Area.Name).all()
+		return previous(areas, self)
+
 class Element(db.Model):
 	__tablename__ = "Element"
 	__table_args__ = \
@@ -88,6 +96,22 @@ class Element(db.Model):
 	def isManaged(self):
 		return True if self.TagAreaId is not None else False
 
+	def next(self, isManaged = False):
+		if isManaged is True:
+			elements = Element.query.filter_by(TagAreaId = self.TagAreaId, ElementTemplateId = self.ElementTemplateId).order_by(Element.Name).all()
+		else:
+			elements = Element.query.filter_by(ElementTemplateId = self.ElementTemplateId).order_by(Element.Name).all()
+
+		return next(elements, self)
+
+	def previous(self, isManaged = False):
+		if isManaged is True:
+			elements = Element.query.filter_by(TagAreaId = self.TagAreaId, ElementTemplateId = self.ElementTemplateId).order_by(Element.Name).all()
+		else:
+			elements = Element.query.filter_by(ElementTemplateId = self.ElementTemplateId).order_by(Element.Name).all()
+
+		return previous(elements, self)
+
 class ElementAttribute(db.Model):
 	__tablename__ = "ElementAttribute"
 	__table_args__ = \
@@ -106,6 +130,16 @@ class ElementAttribute(db.Model):
 	
 	def id(self):
 		return self.ElementAttributeId
+
+	def next(self):
+		elementAttributes = ElementAttribute.query.join(ElementAttributeTemplate).filter(ElementAttribute.ElementId == self.ElementId). \
+			order_by(ElementAttributeTemplate.Name).all()
+		return next(elementAttributes, self)
+
+	def previous(self):
+		elementAttributes = ElementAttribute.query.join(ElementAttributeTemplate).filter(ElementAttribute.ElementId == self.ElementId). \
+			order_by(ElementAttributeTemplate.Name).all()
+		return previous(elementAttributes, self)
 
 class ElementAttributeTemplate(db.Model):
 	__tablename__ = "ElementAttributeTemplate"
@@ -175,6 +209,14 @@ class ElementTemplate(db.Model):
 	def id(self):
 		return self.ElementTemplateId
 
+	def next(self):
+		elementTemplates = ElementTemplate.query.filter_by(SiteId = self.SiteId).order_by(ElementTemplate.Name).all()
+		return next(elementTemplates, self)
+
+	def previous(self):
+		elementTemplates = ElementTemplate.query.filter_by(SiteId = self.SiteId).order_by(ElementTemplate.Name).all()
+		return previous(elementTemplates, self)
+
 class Enterprise(db.Model):
 	__tablename__ = "Enterprise"
 	__table_args__ = \
@@ -207,6 +249,14 @@ class Enterprise(db.Model):
 
 	def id(self):
 		return self.EnterpriseId
+
+	def next(self):
+		enterprises = Enterprise.query.order_by(Enterprise.Name).all()
+		return next(enterprises, self)
+
+	def previous(self):
+		enterprises = Enterprise.query.order_by(Enterprise.Name).all()
+		return previous(enterprises, self)
 
 class EventFrame(db.Model):
 	__tablename__ = "EventFrame"
@@ -269,11 +319,61 @@ class EventFrame(db.Model):
 		if level == 0:
 			return linealDescent
 
+	def next(self, months):
+		if months is None:
+			# Active event frames only.
+			if self.ParentEventFrameId is None:
+				eventFrames = EventFrame.query.filter(EventFrame.EventFrameTemplateId == self.EventFrameTemplateId, EventFrame.EndTimestamp == None).all()
+			else:
+				eventFrames = EventFrame.query.filter(EventFrame.ParentEventFrameId == self.ParentEventFrameId).all()
+		elif months == 0:
+			# All event frames.
+			if self.ParentEventFrameId is None:
+				eventFrames = EventFrame.query.filter_by(EventFrameTemplateId = self.EventFrameTemplateId).all()
+			else:
+				eventFrames = EventFrame.query.filter_by(ParentEventFrameId = self.ParentEventFrameId).all()
+		else:
+			fromTimestamp = datetime.utcnow() - relativedelta(months = months)
+			toTimestamp = datetime.utcnow()
+			if self.ParentEventFrameId is None:
+				eventFrames = EventFrame.query.filter(EventFrame.EventFrameTemplateId == self.EventFrameTemplateId, EventFrame.StartTimestamp >= fromTimestamp,
+					EventFrame.StartTimestamp <= toTimestamp).all()
+			else:
+				eventFrames = EventFrame.query.filter(EventFrame.ParentEventFrameId == self.ParentEventFrameId, EventFrame.StartTimestamp >= fromTimestamp,
+					EventFrame.StartTimestamp <= toTimestamp).all()
+
+		return next(eventFrames, self)
+
 	def origin(self):
 		if self.ParentEventFrameId == None:
 			return self
 		else:
 			return self.ParentEventFrame.origin()
+
+	def previous(self, months):
+		if months is None:
+			# Active event frames only.
+			if self.ParentEventFrameId is None:
+				eventFrames = EventFrame.query.filter(EventFrame.EventFrameTemplateId == self.EventFrameTemplateId, EventFrame.EndTimestamp == None).all()
+			else:
+				eventFrames = EventFrame.query.filter(EventFrame.ParentEventFrameId == self.ParentEventFrameId).all()
+		elif months == 0:
+			# All event frames.
+			if self.ParentEventFrameId is None:
+				eventFrames = EventFrame.query.filter_by(EventFrameTemplateId = self.EventFrameTemplateId).all()
+			else:
+				eventFrames = EventFrame.query.filter_by(ParentEventFrameId = self.ParentEventFrameId).all()
+		else:
+			fromTimestamp = datetime.utcnow() - relativedelta(months = months)
+			toTimestamp = datetime.utcnow()
+			if self.ParentEventFrameId is None:
+				eventFrames = EventFrame.query.filter(EventFrame.EventFrameTemplateId == self.EventFrameTemplateId, EventFrame.StartTimestamp >= fromTimestamp,
+					EventFrame.StartTimestamp <= toTimestamp).all()
+			else:
+				eventFrames = EventFrame.query.filter(EventFrame.ParentEventFrameId == self.ParentEventFrameId, EventFrame.StartTimestamp >= fromTimestamp,
+					EventFrame.StartTimestamp <= toTimestamp).all()
+
+		return previous(eventFrames, self)
 
 class EventFrameAttribute(db.Model):
 	__tablename__ = "EventFrameAttribute"
@@ -296,6 +396,18 @@ class EventFrameAttribute(db.Model):
 
 	def id(self):
 		return self.EventFrameAttributeId
+
+	def next(self):
+		eventFrameAttributes = EventFrameAttribute.query.join(EventFrameAttributeTemplate).filter(EventFrameAttribute.ElementId == self.ElementId,
+			EventFrameAttributeTemplate.EventFrameTemplateId == self.EventFrameAttributeTemplate.EventFrameTemplateId). \
+			order_by(EventFrameAttributeTemplate.Name).all()
+		return next(eventFrameAttributes, self)
+
+	def previous(self):
+		eventFrameAttributes = EventFrameAttribute.query.join(EventFrameAttributeTemplate).filter(EventFrameAttribute.ElementId == self.ElementId,
+			EventFrameAttributeTemplate.EventFrameTemplateId == self.EventFrameAttributeTemplate.EventFrameTemplateId). \
+			order_by(EventFrameAttributeTemplate.Name).all()
+		return previous(eventFrameAttributes, self)
 
 class EventFrameAttributeTemplate(db.Model):
 	__tablename__ = "EventFrameAttributeTemplate"
@@ -424,11 +536,21 @@ class EventFrameTemplate(db.Model):
 		if level == 0:
 			return linealDescent
 
+	def next(self):
+		eventFrameTemplates = EventFrameTemplate.query.filter_by(ElementTemplateId = self.ElementTemplateId,
+			ParentEventFrameTemplateId = self.ParentEventFrameTemplateId).order_by(EventFrameTemplate.Name).all()
+		return next(eventFrameTemplates, self)
+
 	def origin(self):
 		if self.ParentEventFrameTemplateId == None:
 			return self
 		else:
 			return self.ParentEventFrameTemplate.origin()	
+
+	def previous(self):
+		eventFrameTemplates = EventFrameTemplate.query.filter_by(ElementTemplateId = self.ElementTemplateId,
+			ParentEventFrameTemplateId = self.ParentEventFrameTemplateId).order_by(EventFrameTemplate.Name).all()
+		return previous(eventFrameTemplates, self)
 
 class Lookup(db.Model):
 	__tablename__ = "Lookup"
@@ -467,7 +589,15 @@ class Lookup(db.Model):
 		elif db.session.query(func.count(Tag.TagId)).filter_by(LookupId = self.LookupId).scalar() > 0:
 			return True
 		else:
-			return False		
+			return False
+
+	def next(self):
+		lookups = Lookup.query.filter_by(EnterpriseId = self.EnterpriseId).order_by(Lookup.Name).all()
+		return next(lookups, self)
+
+	def previous(self):
+		lookups = Lookup.query.filter_by(EnterpriseId = self.EnterpriseId).order_by(Lookup.Name).all()
+		return previous(lookups, self)
 
 class LookupValue(db.Model):
 	__tablename__ = "LookupValue"
@@ -508,6 +638,14 @@ class LookupValue(db.Model):
 			return True
 		else:
 			return False
+
+	def next(self):
+		lookupValues = LookupValue.query.filter_by(LookupId = self.LookupId).order_by(LookupValue.Name).all()
+		return next(lookupValues, self)
+
+	def previous(self):
+		lookupValues = LookupValue.query.filter_by(LookupId = self.LookupId).order_by(LookupValue.Name).all()
+		return previous(lookupValues, self)
 
 class Message(db.Model):
 	__tablename__ = "Message"
@@ -630,6 +768,14 @@ class Site(db.Model):
 
 	def id(self):
 		return self.SiteId
+	
+	def next(self):
+		sites = Site.query.filter_by(EnterpriseId = self.EnterpriseId).order_by(Site.Name).all()
+		return next(sites, self)
+
+	def previous(self):
+		sites = Site.query.filter_by(EnterpriseId = self.EnterpriseId).order_by(Site.Name).all()
+		return previous(sites, self)
 
 class Tag(db.Model):
 	__tablename__ = "Tag"
@@ -685,6 +831,14 @@ class Tag(db.Model):
 		else:
 			return False
 
+	def next(self):
+		tags = Tag.query.filter_by(AreaId = self.AreaId).order_by(Tag.Name).all()
+		return next(tags, self)
+
+	def previous(self):
+		tags = Tag.query.filter_by(AreaId = self.AreaId).order_by(Tag.Name).all()
+		return previous(tags, self)
+
 class TagValue(db.Model):
 	__tablename__ = "TagValue"
 	__table_args__ = \
@@ -713,6 +867,32 @@ class TagValue(db.Model):
 
 	def id(self):
 		return self.TagValueId
+
+	def next(self, eventFrameId = None):
+		if eventFrameId is None:
+			tagValues = TagValue.query.filter_by(TagId = self.TagId).order_by(TagValue.Timestamp.desc()).all()
+		else:
+			eventFrame = EventFrame.query.get_or_404(eventFrameId)
+			if eventFrame.EndTimestamp is None:
+				tagValues = TagValue.query.filter(TagValue.Timestamp >= eventFrame.StartTimestamp, TagValue.TagId == self.TagId).all()
+			else:
+				tagValues = TagValue.query.filter(TagValue.Timestamp <= eventFrame.EndTimestamp, TagValue.Timestamp >= eventFrame.StartTimestamp,
+					TagValue.TagId == self.TagId).all()
+
+		return next(tagValues, self)
+
+	def previous(self, eventFrameId = None):
+		if eventFrameId is None:
+			tagValues = TagValue.query.filter_by(TagId = self.TagId).order_by(TagValue.Timestamp.desc()).all()
+		else:
+			eventFrame = EventFrame.query.get_or_404(eventFrameId)
+			if eventFrame.EndTimestamp is None:
+				tagValues = TagValue.query.filter(TagValue.Timestamp >= eventFrame.StartTimestamp, TagValue.TagId == self.TagId).all()
+			else:
+				tagValues = TagValue.query.filter(TagValue.Timestamp <= eventFrame.EndTimestamp, TagValue.Timestamp >= eventFrame.StartTimestamp,
+					TagValue.TagId == self.TagId).all()
+		
+		return previous(tagValues, self)
 
 class TagValueNote(db.Model):
 	__tablename__ = "TagValueNote"
@@ -844,3 +1024,15 @@ class User(UserMixin, db.Model):
 @loginManager.user_loader
 def loadUser(id):
 	return User.query.get(int(id))
+
+def next(list, object):
+	if list.index(object) + 1 == len(list):
+		return list[0]
+	else:
+		return list[list.index(object) + 1]
+
+def previous(list, object):
+	if list.index(object) - 1 == -1:
+		return list[len(list) - 1]
+	else:
+		return list[list.index(object) - 1]

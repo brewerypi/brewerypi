@@ -1,196 +1,224 @@
 {% extends "base.html" %}
 
-{% import "bootstrap/wtf.html" as wtf %}
-
-{% block title %}
-Data Entry - Elements
-{% endblock %}
+{% block title %}Elements{% endblock %}
 
 {% block page_content %}
-<div>
-    <ol class = "breadcrumb">
-        {% if childrenClass == "Enterprise" %}
-            <li class = "active"><span class = "glyphicon glyphicon-home"></span></li>
-            {% set pageHeaderSubText = "Enterprises" %}
-        {% elif childrenClass == "Site" %}
-            <li><a href = "{{ url_for("elements.selectElement", selectedClass = "Root") }}"><span class = "glyphicon glyphicon-home"></span></a></li>
-            <li class = "active">{{ parent.Name }}</li>
-            {% set pageHeaderSubText = "Sites" %}
-        <!-- "and parent" checks for systems that have not been configured with a site yet. -->
-        {% elif childrenClass == "ElementTemplate" and parent %}
-            <li><a href = "{{ url_for("elements.selectElement", selectedClass = "Root") }}"><span class = "glyphicon glyphicon-home"></span></a></li>
-            <li><a href = "{{ url_for("elements.selectElement", selectedClass = "Enterprise",
-                selectedId = parent.Enterprise.id()) }}">{{ parent.Enterprise.Name }}</a></li>
-            <li class = "active">{{ parent.Name }}</li>
-            {% set pageHeaderSubText = "Element Templates" %}
-        {% elif childrenClass == "ElementAttributeTemplate" %}
-            <li><a href = "{{ url_for("elements.selectElement", selectedClass = "Root") }}"><span class = "glyphicon glyphicon-home"></span></a></li>
-            <li><a href = "{{ url_for("elements.selectElement", selectedClass = "Enterprise",
-                selectedId = parent.Site.Enterprise.id()) }}">{{ parent.Site.Enterprise.Name }}</a></li>
-            <li><a href = "{{ url_for("elements.selectElement", selectedClass = "Site",
-                selectedId = parent.Site.id()) }}">{{ parent.Site.Name }}</a></li>
-            <li class = "active">{{ parent.Name }}</li>
-            {% set pageHeaderSubText = "Element Attribute Templates" %}
-        {% elif childrenClass == "Element" %}
-            <li><a href = "{{ url_for("elements.selectElement", selectedClass = "Root") }}"><span class = "glyphicon glyphicon-home"></span></a></li>
-            <li><a href = "{{ url_for("elements.selectElement", selectedClass = "Enterprise",
-                selectedId = parent.Site.Enterprise.id()) }}">{{ parent.Site.Enterprise.Name }}</a></li>
-            <li><a href = "{{ url_for("elements.selectElement", selectedClass = "Site",
-                selectedId = parent.Site.id()) }}">{{ parent.Site.Name }}</a></li>
-            <li class = "active">{{ parent.Name }}</li>
-            {% set pageHeaderSubText = "" %}
-        {% endif %}
-    </ol>
-</div>
-<div class = "page-header">
-    <h1>Elements <small>{{ pageHeaderSubText }}</small></h1>
-</div>
-<div>
-    {% if childrenClass == "Element" %}
-        {% if current_user.isAdministrator() %}
-            <a class = "btn btn-default" title = "Add" href = "{{ url_for("elements.addElement", elementTemplateId = parent.id()) }}" role = "button">
-                <span class = "glyphicon glyphicon-plus"></span></a>
-        {% endif %}
-        <a class = "btn btn-default" title = "Grafana" href = "{{ "ElementSummary" | grafanaUrl({"elementTemplateId": parent.id()}) }}" target = "_blank">
-            <span class = "glyphicon glyphicon-stats"></span></a>
-        <br><br>
-        Toggle Column:
-        <button type = "button" class = "btn btn-primary btn-xs" id = "buttonHideAllColumns">Hide All</button>
-        {% for elementAttributeTemplate in elementAttributeTemplates %}
-            {% set dataColumnIndex = loop.index + 9 %}
-            <button type = "button" class = "btn btn-primary btn-xs" data-columnIndex = "{{ dataColumnIndex }}"
-                id = "buttonToggleColumn{{ elementAttributeTemplate.Name }}">{{ elementAttributeTemplate.Name }}</button>
-        {% endfor %}
-        <button type = "button" class = "btn btn-primary btn-xs" id = "buttonShowAllColumns">Show All</button>
-        <br><br>
-    {% elif childrenClass == "ElementAttributeTemplate" and current_user.isAdministrator() %}
-        <a class = "btn btn-default" title = "Add Element Attribute Template" href = "{{ url_for("elementAttributeTemplates.addElementAttributeTemplate",
-            elementTemplateId = parent.id()) }}" role = "button"><span class = "glyphicon glyphicon-plus"></span></a>
-        <a class = "btn btn-default" title = "Add Element Attribute Lookup Template" href = "{{ url_for("elementAttributeTemplates.addElementAttributeTemplate",
-            elementTemplateId = parent.id(), lookup = True) }}" role = "button"><span class = "glyphicon glyphicon-plus"></span> Lookup</a>
-        <br><br>
-    {% elif childrenClass == "ElementTemplate" %}
-        {% if current_user.isAdministrator() %}
-            <a class = "btn btn-default" title = "Add" href = "{{ url_for("elementTemplates.addElementTemplate", siteId = parent.id()) }}"
+    <div>
+        <ol class = "breadcrumb">
+            {% if childrenClass == "Enterprise" %}
+                <li class = "active"><span class = "glyphicon glyphicon-home"></span></li>
+                {% set pageHeaderSubText = "Enterprises" %}
+            {% elif childrenClass == "Site" %}
+                <li><a href = '{{ url_for("elements.selectElement", selectedClass = "Root") }}'><span class = "glyphicon glyphicon-home"></span></a></li>
+                <li class = "active">
+                    <a title = "Previous" href = '{{ url_for("elements.selectElement", selectedClass = "Enterprise", selectedId = parent.previous().id()) }}'>
+                        <span class = "glyphicon glyphicon-arrow-left"></span></a>
+                    <a title = "Next" href = '{{ url_for("elements.selectElement", selectedClass = "Enterprise", selectedId = parent.next().id()) }}'>
+                        <span class = "glyphicon glyphicon-arrow-right"></span></a>
+                    {{ parent.Name }}
+                </li>
+                {% set pageHeaderSubText = "Sites" %}
+            <!-- "and parent" checks for systems that have not been configured with a site yet. -->
+            {% elif childrenClass == "ElementTemplate" and parent %}
+                <li><a href = '{{ url_for("elements.selectElement", selectedClass = "Root") }}'><span class = "glyphicon glyphicon-home"></span></a></li>
+                <li><a href = '{{ url_for("elements.selectElement", selectedClass = "Enterprise",
+                    selectedId = parent.Enterprise.id()) }}'>{{ parent.Enterprise.Name }}</a></li>
+                <li class = "active">
+                    <a title = "Previous" href = '{{ url_for("elements.selectElement", selectedClass = "Site", selectedId = parent.previous().id()) }}'>
+                        <span class = "glyphicon glyphicon-arrow-left"></span></a>
+                    <a title = "Next" href = '{{ url_for("elements.selectElement", selectedClass = "Site", selectedId = parent.next().id()) }}'>
+                        <span class = "glyphicon glyphicon-arrow-right"></span></a>
+                    {{ parent.Name }}
+                </li>
+                {% set pageHeaderSubText = "Element Templates" %}
+            {% elif childrenClass == "ElementAttributeTemplate" %}
+                <li><a href = '{{ url_for("elements.selectElement", selectedClass = "Root") }}'><span class = "glyphicon glyphicon-home"></span></a></li>
+                <li><a href = '{{ url_for("elements.selectElement", selectedClass = "Enterprise",
+                    selectedId = parent.Site.Enterprise.id()) }}'>{{ parent.Site.Enterprise.Name }}</a></li>
+                <li><a href = '{{ url_for("elements.selectElement", selectedClass = "Site",
+                    selectedId = parent.Site.id()) }}'>{{ parent.Site.Name }}</a></li>
+                <li class = "active">
+                    <a title = "Previous" href = '{{ url_for("elements.selectElement", selectedClass = "ElementAttributeTemplate",
+                        selectedId = parent.previous().id()) }}'><span class = "glyphicon glyphicon-arrow-left"></span></a>
+                    <a title = "Next" href = '{{ url_for("elements.selectElement", selectedClass = "ElementAttributeTemplate",
+                        selectedId = parent.next().id()) }}'><span class = "glyphicon glyphicon-arrow-right"></span></a>
+                    {{ parent.Name }}
+                </li>
+                {% set pageHeaderSubText = "Element Attribute Templates" %}
+            {% elif childrenClass == "Element" %}
+                <li><a href = '{{ url_for("elements.selectElement", selectedClass = "Root") }}'><span class = "glyphicon glyphicon-home"></span></a></li>
+                <li><a href = '{{ url_for("elements.selectElement", selectedClass = "Enterprise",
+                    selectedId = parent.Site.Enterprise.id()) }}'>{{ parent.Site.Enterprise.Name }}</a></li>
+                <li><a href = '{{ url_for("elements.selectElement", selectedClass = "Site",
+                    selectedId = parent.Site.id()) }}'>{{ parent.Site.Name }}</a></li>
+                <li class = "active">
+                    <a title = "Previous" href = '{{ url_for("elements.selectElement", selectedClass = "ElementTemplate",
+                        selectedId = parent.previous().id()) }}'><span class = "glyphicon glyphicon-arrow-left"></span></a>
+                    <a title = "Next" href = '{{ url_for("elements.selectElement", selectedClass = "ElementTemplate",
+                        selectedId = parent.next().id()) }}'><span class = "glyphicon glyphicon-arrow-right"></span></a>
+                    {{ parent.Name }}
+                </li>
+                {% set pageHeaderSubText = "" %}
+            {% endif %}
+        </ol>
+    </div>
+    <div class = "page-header">
+        <h1>Elements <small>{{ pageHeaderSubText }}</small></h1>
+    </div>
+    <div>
+        {% if childrenClass == "Element" %}
+            {% if current_user.isAdministrator() %}
+                <a class = "btn btn-default" title = "Add" href = '{{ url_for("elements.addElement", elementTemplateId = parent.id()) }}' role = "button">
+                    <span class = "glyphicon glyphicon-plus"></span></a>
+            {% endif %}
+            <a class = "btn btn-default" title = "Grafana" href = '{{ "ElementSummary" | grafanaUrl({"elementTemplateId": parent.id()}) }}' target = "_blank">
+                <span class = "glyphicon glyphicon-stats"></span></a>
+            <br><br>
+            Toggle Column:
+            <button type = "button" class = "btn btn-primary btn-xs" id = "buttonHideAllColumns">Hide All</button>
+            {% for elementAttributeTemplate in elementAttributeTemplates %}
+                {% set dataColumnIndex = loop.index + 9 %}
+                <button type = "button" class = "btn btn-primary btn-xs" data-columnIndex = "{{ dataColumnIndex }}"
+                    id = "buttonToggleColumn{{ elementAttributeTemplate.Name }}">{{ elementAttributeTemplate.Name }}</button>
+            {% endfor %}
+            <button type = "button" class = "btn btn-primary btn-xs" id = "buttonShowAllColumns">Show All</button>
+            <br><br>
+        {% elif childrenClass == "ElementAttributeTemplate" and current_user.isAdministrator() %}
+            <a class = "btn btn-default" title = "Add Element Attribute Template"
+                href = '{{ url_for("elementAttributeTemplates.addElementAttributeTemplate", elementTemplateId = parent.id()) }}'
                 role = "button"><span class = "glyphicon glyphicon-plus"></span></a>
+            <a class = "btn btn-default" title = "Add Element Attribute Lookup Template"
+                href = '{{ url_for("elementAttributeTemplates.addElementAttributeTemplate", elementTemplateId = parent.id(), lookup = True) }}'
+                role = "button"><span class = "glyphicon glyphicon-plus"></span> Lookup</a>
+            <br><br>
+        {% elif childrenClass == "ElementTemplate" %}
+            {% if current_user.isAdministrator() %}
+                <a class = "btn btn-default" title = "Add" href = '{{ url_for("elementTemplates.addElementTemplate", siteId = parent.id()) }}'
+                    role = "button"><span class = "glyphicon glyphicon-plus"></span></a>
+            {% endif %}
+            <a class = "btn btn-default" title = "Grafana" href = '{{ "ElementSummary" | grafanaUrl({"siteId": parent.id()}) }}' target = "_blank">
+                <span class = "glyphicon glyphicon-stats"></span></a>
+            <br><br>
         {% endif %}
-        <a class = "btn btn-default" title = "Grafana" href = "{{ "ElementSummary" | grafanaUrl({"siteId": parent.id()}) }}" target = "_blank">
-            <span class = "glyphicon glyphicon-stats"></span></a>
-        <br><br>
-    {% endif %}
-</div>
-<div>
-    <table id = "table" class = "table table-hover" style = "display:none">
-        <thead>
-            <tr>
-                <th></th>
-                <th></th>
-                <th>Name</th>
-                <th>Description</th>
-                {% if childrenClass == "Element" %}
-                    <th>Tags Managed</th>
-                    <th>Managed Area</th>
-                {% elif childrenClass == "ElementAttributeTemplate" %}
-                    <th>Lookup</th>
-                    <th>Unit</th>
-                {% endif %}
-                <th></th>
-                <th></th>
-                <th></th>
-                <th></th>
-                {% if childrenClass == "Element" %}
-                    {% for elementAttributeTemplate in elementAttributeTemplates %}
-                        <th>{{ elementAttributeTemplate.Name }}</th>
-                    {% endfor %}
-                {% endif %}
-            </tr>
-        </thead>
-        <tbody>
-            {% if children %}
-                {% for child in children %}
-                    <tr>
-                        {% if childrenClass == "Element" %}
-                            <td><a class = "btn btn-default" title = "Select" href = "{{ url_for("elements.dashboard",
-                                elementId = child.ElementId) }}"><span class = "glyphicon glyphicon-list"></span></a></td>
-                            <td><a class = "btn btn-default" title = "Grafana" href = "{{ "ElementValuesGraph" | grafanaUrl({"elementId": child.ElementId}) }}"
-                                target = "_blank"><span class = "glyphicon glyphicon-stats"></span></a></td>
-                        {% elif childrenClass == "ElementAttributeTemplate" %}
-                            <td></td>
-                            <td></td>
-                        {% else %}
-                            <td><a class = "btn btn-default" title = "Select" href = "{{ url_for("elements.selectElement",
-                                selectedClass = child.__class__.__name__, selectedId = child.id()) }}"><span class = "glyphicon glyphicon-list"></span></a></td>
-                            <td></td>
-                        {% endif %}
-                        <td>{{ child.Name }}</td>
-                        <td>{{ child.Description }}</td>
-                        {% if childrenClass == "ElementTemplate" %}
-                            <td></td>
-                            {% if current_user.isAdministrator() %}
-                                <td><a class = "btn btn-default" title = "Configure" href = "{{ url_for("elements.selectElement",
-                                    selectedClass = "ElementAttributeTemplate", selectedId = child.id()) }}"><span class = "glyphicon glyphicon-wrench"></span>
-                                    </a></td>
-                                <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("elementTemplates.editElementTemplate",
-                                    elementTemplateId = child.id()) }}"><span class = "glyphicon glyphicon-edit"></span></a></td>
-                                <td><a class = "btn btn-default" title = "Delete" href = "{{ url_for("elementTemplates.deleteElementTemplate",
-                                    elementTemplateId = child.id()) }}", data-type = "element template", data-name = "{{ child.Name }}"">
-                                    <span class = "glyphicon glyphicon-trash"></span></a></td>
+    </div>
+    <div>
+        <table id = "table" class = "table table-hover" style = "display:none">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th></th>
+                    <th>Name</th>
+                    <th>Description</th>
+                    {% if childrenClass == "Element" %}
+                        <th>Tags Managed</th>
+                        <th>Managed Area</th>
+                    {% elif childrenClass == "ElementAttributeTemplate" %}
+                        <th>Lookup</th>
+                        <th>Unit</th>
+                    {% endif %}
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    {% if childrenClass == "Element" %}
+                        {% for elementAttributeTemplate in elementAttributeTemplates %}
+                            <th>{{ elementAttributeTemplate.Name }}</th>
+                        {% endfor %}
+                    {% endif %}
+                </tr>
+            </thead>
+            <tbody>
+                {% if children %}
+                    {% for child in children %}
+                        <tr>
+                            {% if childrenClass == "Element" %}
+                                <td><a class = "btn btn-default" title = "Select" href = '{{ url_for("elements.dashboard",
+                                    elementId = child.ElementId) }}'><span class = "glyphicon glyphicon-list"></span></a></td>
+                                <td><a class = "btn btn-default" title = "Grafana"
+                                    href = '{{ "ElementValuesGraph" | grafanaUrl({"elementId": child.ElementId}) }}' target = "_blank">
+                                    <span class = "glyphicon glyphicon-stats"></span></a></td>
+                            {% elif childrenClass == "ElementAttributeTemplate" %}
+                                <td></td>
+                                <td></td>
                             {% else %}
-                                <td></td>
-                                <td></td>
+                                <td><a class = "btn btn-default" title = "Select" href = '{{ url_for("elements.selectElement",
+                                    selectedClass = child.__class__.__name__, selectedId = child.id()) }}'><span class = "glyphicon glyphicon-list"></span></a>
+                                    </td>
                                 <td></td>
                             {% endif %}
-                        {% elif childrenClass == "Element" %}
-                            <td>{{ child.TagAreaId is not none | yesNo() }}</td>
-                            <td>{{ child.AreaName }}</td>
-                            {% if current_user.isAdministrator() %}
-                                {% if child.TagAreaId is none %}
-                                    <td><a class = "btn btn-default" title = "Associate Attributes with Tags"
-                                        href = "{{ url_for("elementAttributes.listElementAttributes", elementId = child.ElementId) }}">
-                                        <span class = "glyphicon glyphicon-link"></span></a></td>
-                                    <td><a class = "btn btn-default" title = "Copy" href = "{{ url_for("elements.copyElement", elementId = child.ElementId) }}">
-                                        <span class = "glyphicon glyphicon-copy"></span></a></td>
+                            <td>{{ child.Name }}</td>
+                            <td>{{ child.Description }}</td>
+                            {% if childrenClass == "ElementTemplate" %}
+                                <td></td>
+                                {% if current_user.isAdministrator() %}
+                                    <td><a class = "btn btn-default" title = "Configure" href = '{{ url_for("elements.selectElement",
+                                        selectedClass = "ElementAttributeTemplate", selectedId = child.id()) }}'><span class = "glyphicon glyphicon-wrench">                                            
+                                        </span></a></td>
+                                    <td><a class = "btn btn-default" title = "Edit" href = '{{ url_for("elementTemplates.editElementTemplate",
+                                        elementTemplateId = child.id()) }}'><span class = "glyphicon glyphicon-edit"></span></a></td>
+                                    <td><a class = "btn btn-default" title = "Delete" href = '{{ url_for("elementTemplates.deleteElementTemplate",
+                                        elementTemplateId = child.id()) }}', data-type = "element template", data-name = "{{ child.Name }}">
+                                        <span class = "glyphicon glyphicon-trash"></span></a></td>
                                 {% else %}
                                     <td></td>
                                     <td></td>
+                                    <td></td>
                                 {% endif %}
-                                <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("elements.editElement", elementId = child.ElementId) }}">
-                                    <span class = "glyphicon glyphicon-edit"></span></a></td>
-                                <td><a class = "btn btn-default" title = "Delete" href = "{{ url_for("elements.deleteElement", elementId = child.ElementId) }}",
-                                    data-type = "element", data-name = "{{ child.Name }}"><span class = "glyphicon glyphicon-trash"></span></a></td>
+                            {% elif childrenClass == "Element" %}
+                                <td>{{ child.TagAreaId is not none | yesNo() }}</td>
+                                <td>{{ child.AreaName }}</td>
+                                {% if current_user.isAdministrator() %}
+                                    {% if child.TagAreaId is none %}
+                                        <td><a class = "btn btn-default" title = "Associate Attributes with Tags"
+                                            href = '{{ url_for("elementAttributes.listElementAttributes", elementId = child.ElementId) }}'>
+                                            <span class = "glyphicon glyphicon-link"></span></a></td>
+                                        <td><a class = "btn btn-default" title = "Copy"
+                                            href = '{{ url_for("elements.copyElement", elementId = child.ElementId) }}'>
+                                            <span class = "glyphicon glyphicon-copy"></span></a></td>
+                                    {% else %}
+                                        <td></td>
+                                        <td></td>
+                                    {% endif %}
+                                    <td><a class = "btn btn-default" title = "Edit" href = '{{ url_for("elements.editElement",
+                                        elementId = child.ElementId) }}'><span class = "glyphicon glyphicon-edit"></span></a></td>
+                                    <td><a class = "btn btn-default" title = "Delete" href = '{{ url_for("elements.deleteElement",
+                                        elementId = child.ElementId) }}', data-type = "element", data-name = "{{ child.Name }}">
+                                        <span class = "glyphicon glyphicon-trash"></span></a></td>
+                                {% else %}
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                {% endif %}
+                                {% for elementAttributeTemplate in elementAttributeTemplates %}
+                                    <td>{{ child[elementAttributeTemplate.Name] }}</td>
+                                {% endfor %}
+                            {% elif childrenClass == "ElementAttributeTemplate" %}
+                                <td>{{ "" if child.LookupId is none else child.Lookup.Name }}</td>
+                                <td>{{ "" if child.UnitOfMeasurementId is none else child.UnitOfMeasurement.Abbreviation }}</td>
+                                <td></td>
+                                <td></td>
+                                {% if current_user.isAdministrator() %}
+                                    <td><a class = "btn btn-default" title = "Edit"
+                                        href = '{{ url_for("elementAttributeTemplates.editElementAttributeTemplate",
+                                        elementAttributeTemplateId = child.id()) }}'><span class = "glyphicon glyphicon-edit"></span></a></td>
+                                    <td><a class = "btn btn-default" title = "Delete"
+                                        href = '{{ url_for("elementAttributeTemplates.deleteElementAttributeTemplate",
+                                        elementAttributeTemplateId = child.id()) }}', data-type = "element attribute template", data-name = "{{ child.Name }}">
+                                        <span class = "glyphicon glyphicon-trash"></span></a></td>
+                                {% endif %}
                             {% else %}
                                 <td></td>
                                 <td></td>
                                 <td></td>
                                 <td></td>
                             {% endif %}
-                            {% for elementAttributeTemplate in elementAttributeTemplates %}
-                                <td>{{ child[elementAttributeTemplate.Name] }}</td>
-                            {% endfor %}
-                        {% elif childrenClass == "ElementAttributeTemplate" %}
-                            <td>{{ "" if child.LookupId is none else child.Lookup.Name }}</td>
-                            <td>{{ "" if child.UnitOfMeasurementId is none else child.UnitOfMeasurement.Abbreviation }}</td>
-                            <td></td>
-                            <td></td>
-                            {% if current_user.isAdministrator() %}
-                                <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("elementAttributeTemplates.editElementAttributeTemplate",
-                                    elementAttributeTemplateId = child.id()) }}"><span class = "glyphicon glyphicon-edit"></span></a></td>
-                                <td><a class = "btn btn-default" title = "Delete" href = "{{ url_for("elementAttributeTemplates.deleteElementAttributeTemplate",
-                                    elementAttributeTemplateId = child.id()) }}", data-type = "element attribute template", data-name = "{{ child.Name }}">
-                                    <span class = "glyphicon glyphicon-trash"></span></a></td>
-                            {% endif %}
-                        {% else %}
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                        {% endif %}
-                    </tr>
-                {% endfor %}
-            {% endif %}
-        </tbody>
-    </table>
-</div>
+                        </tr>
+                    {% endfor %}
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
 {% endblock %}
 
 {% block scripts %}
@@ -198,6 +226,9 @@ Data Entry - Elements
     <link rel = "stylesheet" type = "text/css" href = {{ url_for("static", filename = "css/datatables.min.css") }}/> 
     <link rel = "stylesheet" type = "text/css" href = {{ url_for("static", filename = "css/styles.css") }}/>
     <script type = "text/javascript" src = {{ url_for("static", filename = "js/datatables.min.js") }}></script>
+    {% block setTabIndex %}
+        {{ super() }}
+    {% endblock %}
     <script>
         $(document).ready(function()
         {
@@ -330,6 +361,11 @@ Data Entry - Elements
 
             // Clear any left over filtering from state saving.
             table.search("").columns().search("").draw()
+            table.on("draw.dt", function()
+            {
+                setTabIndex()
+            })
+            setTabIndex()
         })
     </script>
 {% endblock %}
