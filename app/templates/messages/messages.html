@@ -1,54 +1,58 @@
 {% extends "base.html" %}
 
-{% block title %}
-Messages
-{% endblock %}
+{% block title %}Messages{% endblock %}
 
 {% block page_content %}
-<div>
-    <ol class = "breadcrumb">
-        <li class = "active"><span class = "glyphicon glyphicon-home"></span></li>
-    </ol>
-</div>
-<div class = "page-header">
-    <h1>Messages <small></small></h1>
-</div>
-<div>
-    <a class = "btn btn-default" title = "Add" href = "{{ url_for("messages.addMessage") }}" role = "button">
-        <span class = "glyphicon glyphicon-plus"></span></a>
-    <br><br>
-    <table id = "messagesTable" class = "table table-hover" style = "display:none">
-        <thead>
-            <tr>
-                <th>From</th>
-                <th>Timestamp</th>
-                <th>Message</th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for message in messages %}
-            <tr>
-                <td>{{ message.Sender.Name }}</td>
-                <td>{{ moment(message.Timestamp).format("YYYY-MM-DD HH:mm:ss") }}</td>
-                <td>{{ message.Body | message}}</td>
-                <td><a class = "btn btn-default" title = "Delete" href = "{{ url_for("messages.deleteMessage", messageId = message.MessageId) }}">
-                    <span class = "glyphicon glyphicon-trash"></span></a></td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</div>
+    <div>
+        <ol class = "breadcrumb">
+            <li class = "active"><span class = "glyphicon glyphicon-home"></span></li>
+        </ol>
+    </div>
+    <div class = "page-header">
+        <h1>Messages <small></small></h1>
+    </div>
+    <div>
+        <a class = "btn btn-default" title = "Add" href = '{{ url_for("messages.addMessage") }}' role = "button">
+            <span class = "glyphicon glyphicon-plus"></span></a>
+        <br><br>
+        <table id = "messagesTable" class = "table table-hover" style = "display:none">
+            <thead>
+                <tr>
+                    <th>From</th>
+                    <th>Timestamp</th>
+                    <th>Message</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for message in messages %}
+                <tr>
+                    <td>{{ message.Sender.Name }}</td>
+                    <td>{{ moment(message.Timestamp).format("YYYY-MM-DD HH:mm:ss") }}</td>
+                    <td>{{ message.Body | message}}</td>
+                    <td><a class = "btn btn-default" title = "Delete" href = '{{ url_for("messages.deleteMessage", messageId = message.MessageId) }}'>
+                        <span class = "glyphicon glyphicon-trash"></span></a></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 {% endblock %}
 
 {% block scripts %}
     {{ super() }}
     <link rel = "stylesheet" type = "text/css" href = {{ url_for("static", filename = "css/datatables.min.css") }}/> 
     <script type = "text/javascript" src = {{ url_for("static", filename = "js/datatables.min.js") }}></script>
+    {% block setTabIndex %}
+        {{ super() }}
+    {% endblock %}
     <script>
         $(document).ready(function()
         {
-            $("#messagesTable").DataTable
+            $("#messagesTable").on("draw.dt", function()
+            {
+                setTabIndex()
+            }).DataTable
             ({
                 "order":
                 [

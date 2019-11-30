@@ -1,6 +1,6 @@
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
-from flask import current_app, flash, jsonify, redirect, render_template, request, url_for
+from flask import current_app, flash, jsonify, redirect, render_template, request, session, url_for
 from flask_login import current_user, login_required
 from . import eventFrames
 from . forms import EventFrameForm, EventFrameOverlayForm
@@ -380,11 +380,14 @@ def selectEventFrame(selectedClass = None, selectedId = None, months = None, sel
 		parent = EventFrameTemplate.query.get_or_404(selectedId)
 		if months is None:
 			# Active event frames only.
+			session["eventFrameMonths"] = None
 			children = EventFrame.query.filter(EventFrame.EventFrameTemplateId == selectedId, EventFrame.EndTimestamp == None)
 		elif months == 0:
 			# All event frames.
+			session["eventFrameMonths"] = 0
 			children = EventFrame.query.filter_by(EventFrameTemplateId = selectedId)
 		else:
+			session["eventFrameMonths"] = months
 			fromTimestamp = datetime.utcnow() - relativedelta(months = months)
 			toTimestamp = datetime.utcnow()
 			children = EventFrame.query.filter(EventFrame.EventFrameTemplateId == selectedId, EventFrame.StartTimestamp >= fromTimestamp,
