@@ -145,6 +145,7 @@
                     $(this).attr("tabindex", tabIndex)
                     tabIndex = tabIndex + 1
                 })
+                
                 $('ol.breadcrumb a[title="Next"]').focus()
             }
         </script>
@@ -154,7 +155,6 @@
         {
             var attributesTable = $("#attributesTable").on("draw.dt", function()
             {
-                // Update the focus and tabindex upon an order event.
                 setTabIndex()
             }).DataTable
             ({

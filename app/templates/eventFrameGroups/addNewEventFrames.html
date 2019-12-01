@@ -1,88 +1,86 @@
 {% extends "base.html" %}
 
-{% block title %}
-Event Frame Group Add New Event Frames
-{% endblock %}
+{% block title %}Event Frame Group Add New Event Frames{% endblock %}
 
 {% block page_content %}
-<div>
-    <ol class = "breadcrumb">
-        <li><a href = '{{ url_for("eventFrameGroups.listEventFrameGroups") }}'><span class = "glyphicon glyphicon-home"></span></a></li>
-        <li><a href = '{{ url_for("eventFrameGroups.dashboard", eventFrameGroupId = eventFrameGroup.EventFrameGroupId) }}'>{{ eventFrameGroup.Name }}            
-            </a></li>
-    </ol>
-</div>
-<div class = "page-header">
-    <h1>Event Frame Group <small>{{ eventFrameGroup.Name }}</small></h1>
-</div>
-<div class = "page-header">
-    <h1>
-        <small>Selected New Event Frames</small>
-        <button class = "btn btn-default" id = "buttonSave" title = "Save"><span class = "glyphicon glyphicon-floppy-disk"></span></button>
-    </h1>
-</div>
-<div>
-    <table id = "selectedNewEventFramesTable" class = "table table-hover" style = "display: none">
-        <thead>
-            <tr>
-                <th>Enterprise</th>
-                <th>Site</th>
-                <th>Element Template</th>
-                <th>Event Frame Template</th>
-                <th>Element</th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for eventFrameTemplate in eventFrameTemplates %}
-                {% for element in eventFrameTemplate.ElementTemplate.Elements %}
-                    <tr data-elementId = "{{ element.ElementId }}" data-eventFrameTemplateId = "{{ eventFrameTemplate.EventFrameTemplateId }}"
-                        style = "display: none">
-                        <td>{{ eventFrameTemplate.ElementTemplate.Site.Enterprise.Name }}</td>
-                        <td>{{ eventFrameTemplate.ElementTemplate.Site.Name }}</td>
-                        <td>{{ eventFrameTemplate.ElementTemplate.Name }}</td>
-                        <td>{{ eventFrameTemplate.Name }}</td>
-                        <td>{{ element.Name }}</td>
-                        <td><button class = "btn btn-default" id = "buttonRemove {{ loop.index }}" title = "Remove"><span class = "glyphicon glyphicon-minus">                            
-                            </span></button></td>
-                    </tr>
+    <div>
+        <ol class = "breadcrumb">
+            <li><a href = '{{ url_for("eventFrameGroups.listEventFrameGroups") }}'><span class = "glyphicon glyphicon-home"></span></a></li>
+            <li><a href = '{{ url_for("eventFrameGroups.dashboard", eventFrameGroupId = eventFrameGroup.EventFrameGroupId) }}'>{{ eventFrameGroup.Name }}            
+                </a></li>
+        </ol>
+    </div>
+    <div class = "page-header">
+        <h1>Event Frame Group <small>{{ eventFrameGroup.Name }}</small></h1>
+    </div>
+    <div class = "page-header">
+        <h1>
+            <small>Selected New Event Frames</small>
+            <button class = "btn btn-default" id = "buttonSave" title = "Save"><span class = "glyphicon glyphicon-floppy-disk"></span></button>
+        </h1>
+    </div>
+    <div>
+        <table id = "selectedNewEventFramesTable" class = "table table-hover" style = "display: none">
+            <thead>
+                <tr>
+                    <th>Enterprise</th>
+                    <th>Site</th>
+                    <th>Element Template</th>
+                    <th>Event Frame Template</th>
+                    <th>Element</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for eventFrameTemplate in eventFrameTemplates %}
+                    {% for element in eventFrameTemplate.ElementTemplate.Elements %}
+                        <tr data-elementId = "{{ element.ElementId }}" data-eventFrameTemplateId = "{{ eventFrameTemplate.EventFrameTemplateId }}"
+                            style = "display: none">
+                            <td>{{ eventFrameTemplate.ElementTemplate.Site.Enterprise.Name }}</td>
+                            <td>{{ eventFrameTemplate.ElementTemplate.Site.Name }}</td>
+                            <td>{{ eventFrameTemplate.ElementTemplate.Name }}</td>
+                            <td>{{ eventFrameTemplate.Name }}</td>
+                            <td>{{ element.Name }}</td>
+                            <td><button class = "btn btn-default" id = "buttonRemove {{ loop.index }}" title = "Remove"><span class = "glyphicon glyphicon-minus">                            
+                                </span></button></td>
+                        </tr>
+                    {% endfor %}
                 {% endfor %}
-            {% endfor %}
-        </tbody>
-    </table>
-</div>
-<div class = "page-header">
-    <h1><small>Available New Event Frames</small></h1>
-</div>
-<div>
-    <table id = "availableNewEventFramesTable" class = "table table-hover" style = "display:none">
-        <thead>
-            <tr>                
-                <th>Enterprise</th>
-                <th>Site</th>
-                <th>Element Template</th>
-                <th>Event Frame Template</th>
-                <th>Element</th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for eventFrameTemplate in eventFrameTemplates %}
-                {% for element in eventFrameTemplate.ElementTemplate.Elements %}
-                    <tr data-elementId = "{{ element.ElementId }}" data-eventFrameTemplateId = "{{ eventFrameTemplate.EventFrameTemplateId }}">
-                        <td>{{ eventFrameTemplate.ElementTemplate.Site.Enterprise.Name }}</td>
-                        <td>{{ eventFrameTemplate.ElementTemplate.Site.Name }}</td>
-                        <td>{{ eventFrameTemplate.ElementTemplate.Name }}</td>
-                        <td>{{ eventFrameTemplate.Name }}</td>
-                        <td>{{ element.Name }}</td>
-                        <td><button class = "btn btn-default" id = "buttonAdd {{ loop.index }}" title = "Add"><span class = "glyphicon glyphicon-plus"></span>
-                            </button></td>
-                    </tr>
+            </tbody>
+        </table>
+    </div>
+    <div class = "page-header">
+        <h1><small>Available New Event Frames</small></h1>
+    </div>
+    <div>
+        <table id = "availableNewEventFramesTable" class = "table table-hover" style = "display:none">
+            <thead>
+                <tr>                
+                    <th>Enterprise</th>
+                    <th>Site</th>
+                    <th>Element Template</th>
+                    <th>Event Frame Template</th>
+                    <th>Element</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for eventFrameTemplate in eventFrameTemplates %}
+                    {% for element in eventFrameTemplate.ElementTemplate.Elements %}
+                        <tr data-elementId = "{{ element.ElementId }}" data-eventFrameTemplateId = "{{ eventFrameTemplate.EventFrameTemplateId }}">
+                            <td>{{ eventFrameTemplate.ElementTemplate.Site.Enterprise.Name }}</td>
+                            <td>{{ eventFrameTemplate.ElementTemplate.Site.Name }}</td>
+                            <td>{{ eventFrameTemplate.ElementTemplate.Name }}</td>
+                            <td>{{ eventFrameTemplate.Name }}</td>
+                            <td>{{ element.Name }}</td>
+                            <td><button class = "btn btn-default" id = "buttonAdd {{ loop.index }}" title = "Add"><span class = "glyphicon glyphicon-plus">
+                                </span></button></td>
+                        </tr>
+                    {% endfor %}
                 {% endfor %}
-            {% endfor %}
-        </tbody>
-    </table>
-</div>
+            </tbody>
+        </table>
+    </div>
 {% endblock %}
 
 {% block scripts %}
@@ -90,6 +88,37 @@ Event Frame Group Add New Event Frames
     <link rel = "stylesheet" type = "text/css" href = {{ url_for("static", filename = "css/datatables.min.css") }}/>
     <link rel = "stylesheet" type = "text/css" href = {{ url_for("static", filename = "css/styles.css") }}/>
     <script type = "text/javascript" src = {{ url_for("static", filename = "js/datatables.min.js") }}></script>
+    {% block setTabIndex %}
+        <script>
+            function setTabIndex()
+            {
+                var tabIndex = 1
+                $('ol.breadcrumb a[title="Next"],[id^=inputOrSelectNewValue]').each(function()
+                {
+                    $(this).attr("tabindex", tabIndex)
+                    tabIndex = tabIndex + 1
+                })
+
+                $('#availableNewEventFramesTable button[title="Add"]').each(function ()
+                {
+                    $(this).attr("tabindex", tabIndex)
+                    tabIndex = tabIndex + 1
+                })
+
+                $("#buttonSave").attr("tabindex", tabIndex)
+                tabIndex = tabIndex + 1
+                $('ol.breadcrumb a[title="Previous"]').attr("tabindex", tabIndex)
+                tabIndex = tabIndex + 1
+                $($("ol.breadcrumb > li:not(.active) > a").get().reverse()).each(function()       
+                {
+                    $(this).attr("tabindex", tabIndex)
+                    tabIndex = tabIndex + 1
+                })
+                
+                $('ol.breadcrumb a[title="Next"]').focus()
+            }
+        </script>
+    {% endblock %}
     <script>
         $(document).ready(function()
         {
@@ -196,7 +225,16 @@ Event Frame Group Add New Event Frames
 
             // Clear any left over filtering from state saving.
             selectedNewEventFramesTable.search("").columns().search("").draw()
+            selectedNewEventFramesTable.on("draw.dt", function()
+            {
+                setTabIndex()
+            })
             availableNewEventFramesTable.search("").columns().search("").draw()
+            availableNewEventFramesTable.on("draw.dt", function()
+            {
+                setTabIndex()
+            })
+            setTabIndex()
         })
     </script>
 {% endblock %}

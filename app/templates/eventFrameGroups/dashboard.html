@@ -1,128 +1,130 @@
 {% extends "base.html" %}
 
-{% import "bootstrap/wtf.html" as wtf %}
-
-{% block title %}
-Event Frame Group
-{% endblock %}
+{% block title %}Event Frame Group{% endblock %}
 
 {% block page_content %}
-<div>
-    <ol class = "breadcrumb">
-        <li><a href = "{{ url_for("eventFrameGroups.listEventFrameGroups") }}"><span class = "glyphicon glyphicon-home"></span></a></li>
-        <li class = "active">{{ eventFrameGroup.Name }}</li>
-    </ol>
-</div>
-<div class = "page-header">
-    <h1>Event Frame Group <small>{{ eventFrameGroup.Name }}</small></h1>
-</div>
-<div>
-    Event Frame Templates:
-    {% for eventFrameTemplate in eventFrameTemplates %}
-        {% if eventFrameTemplate == displayEventFrameTemplate %}
-            {% set class = "btn btn-primary btn-xs active" %}
-        {% else %}
-            {% set class = "btn btn-primary btn-xs" %}
+    <div>
+        <ol class = "breadcrumb">
+            <li><a href = '{{ url_for("eventFrameGroups.listEventFrameGroups") }}'><span class = "glyphicon glyphicon-home"></span></a></li>
+            <li class = "active">
+                <a title = "Previous" href = '{{ url_for("eventFrameGroups.dashboard", eventFrameGroupId = eventFrameGroup.previous().id()) }}'>
+                        <span class = "glyphicon glyphicon-arrow-left"></span></a>
+                <a title = "Next" href = '{{ url_for("eventFrameGroups.dashboard", eventFrameGroupId = eventFrameGroup.next().id()) }}'>
+                    <span class = "glyphicon glyphicon-arrow-right"></span></a>    
+                {{ eventFrameGroup.Name }}
+            </li>
+        </ol>
+    </div>
+    <div class = "page-header">
+        <h1>Event Frame Group <small>{{ eventFrameGroup.Name }}</small></h1>
+    </div>
+    <div>
+        Event Frame Templates:
+        {% for eventFrameTemplate in eventFrameTemplates %}
+            {% if eventFrameTemplate == displayEventFrameTemplate %}
+                {% set class = "btn btn-primary btn-xs active" %}
+            {% else %}
+                {% set class = "btn btn-primary btn-xs" %}
+            {% endif %}
+            <a class = "{{ class }}" href = '{{ url_for("eventFrameGroups.dashboard", eventFrameGroupId = eventFrameGroup.EventFrameGroupId,
+                displayEventFrameTemplateId = eventFrameTemplate.EventFrameTemplateId) }}' role = "button">
+                {{ eventFrameTemplate.ElementTemplate.Site.Enterprise.Abbreviation + "_" +
+                eventFrameTemplate.ElementTemplate.Site.Abbreviation + "_" + eventFrameTemplate.ElementTemplate.Name + "_" + eventFrameTemplate.Name }}</a>
+        {% endfor %}
+    </div>
+    <br>
+    <div>
+        <a class = "btn btn-default" title = "Add New Event Frames" href = '{{ url_for("eventFrameGroups.addNewEventFrames",
+            eventFrameGroupId = eventFrameGroup.EventFrameGroupId) }}' role = "button"><span class = "glyphicon glyphicon-plus"></span> New</a>
+        <a class = "btn btn-default" title = "Add Active Event Frames" href = '{{ url_for("eventFrameGroups.addActiveEventFrames",
+            eventFrameGroupId = eventFrameGroup.EventFrameGroupId) }}' role = "button"><span class = "glyphicon glyphicon-plus"></span> Active</a>
+        {% if displayEventFrameTemplate is not none %}
+            <a class = "btn btn-default" title = "End All {{ displayEventFrameTemplate.Name }} Event Frames"
+                href = '{{ url_for("eventFrameGroups.endEventFrames", eventFrameGroupId = eventFrameGroup.EventFrameGroupId,
+                eventFrameTemplateId = displayEventFrameTemplate.EventFrameTemplateId) }}' role = "button"><span class = "glyphicon glyphicon-stop"></span></a>
+            <a class = "btn btn-default" title = "Restart All {{ displayEventFrameTemplate.Name }} Event Frames"
+                href = '{{ url_for("eventFrameGroups.restartEventFrames", eventFrameGroupId = eventFrameGroup.EventFrameGroupId,
+                eventFrameTemplateId = displayEventFrameTemplate.EventFrameTemplateId) }}' role = "button"><span class = "glyphicon glyphicon-play"></span></a>
+            <a class = "btn btn-default" title = "Grafana"
+                href = '{{ "EventFrameGroupSummary" | grafanaUrl({"enterpriseId": displayEventFrameTemplate.ElementTemplate.Site.Enterprise.EnterpriseId,
+                "siteId": displayEventFrameTemplate.ElementTemplate.Site.SiteId,
+                "elementTemplateId": displayEventFrameTemplate.ElementTemplate.ElementTemplateId,
+                "eventFrameTemplateId": displayEventFrameTemplate.EventFrameTemplateId,
+                "eventFrameGroupId": eventFrameGroup.EventFrameGroupId}) }}'
+                target = "_blank"><span class = "glyphicon glyphicon-stats"></span></a>
         {% endif %}
-        <a class = "{{ class }}" href = "{{ url_for("eventFrameGroups.dashboard", eventFrameGroupId = eventFrameGroup.EventFrameGroupId,
-            displayEventFrameTemplateId = eventFrameTemplate.EventFrameTemplateId) }}" role = "button">
-            {{ eventFrameTemplate.ElementTemplate.Site.Enterprise.Abbreviation + "_" +
-            eventFrameTemplate.ElementTemplate.Site.Abbreviation + "_" + eventFrameTemplate.ElementTemplate.Name + "_" + eventFrameTemplate.Name }}</a>
-    {% endfor %}
-</div>
-<br>
-<div>
-    <a class = "btn btn-default" title = "Add New Event Frames" href = '{{ url_for("eventFrameGroups.addNewEventFrames",
-        eventFrameGroupId = eventFrameGroup.EventFrameGroupId) }}' role = "button"><span class = "glyphicon glyphicon-plus"></span> New</a>
-    <a class = "btn btn-default" title = "Add Active Event Frames" href = '{{ url_for("eventFrameGroups.addActiveEventFrames",
-        eventFrameGroupId = eventFrameGroup.EventFrameGroupId) }}' role = "button"><span class = "glyphicon glyphicon-plus"></span> Active</a>
-    {% if displayEventFrameTemplate is not none %}
-        <a class = "btn btn-default" title = "End All {{ displayEventFrameTemplate.Name }} Event Frames"
-            href = '{{ url_for("eventFrameGroups.endEventFrames", eventFrameGroupId = eventFrameGroup.EventFrameGroupId,
-            eventFrameTemplateId = displayEventFrameTemplate.EventFrameTemplateId) }}' role = "button"><span class = "glyphicon glyphicon-stop"></span></a>
-        <a class = "btn btn-default" title = "Restart All {{ displayEventFrameTemplate.Name }} Event Frames"
-            href = '{{ url_for("eventFrameGroups.restartEventFrames", eventFrameGroupId = eventFrameGroup.EventFrameGroupId,
-            eventFrameTemplateId = displayEventFrameTemplate.EventFrameTemplateId) }}' role = "button"><span class = "glyphicon glyphicon-play"></span></a>
-        <a class = "btn btn-default" title = "Grafana"
-            href = '{{ "EventFrameGroupSummary" | grafanaUrl({"enterpriseId": displayEventFrameTemplate.ElementTemplate.Site.Enterprise.EnterpriseId,
-            "siteId": displayEventFrameTemplate.ElementTemplate.Site.SiteId,
-            "elementTemplateId": displayEventFrameTemplate.ElementTemplate.ElementTemplateId,
-            "eventFrameTemplateId": displayEventFrameTemplate.EventFrameTemplateId,
-            "eventFrameGroupId": eventFrameGroup.EventFrameGroupId}) }}'
-            target = "_blank"><span class = "glyphicon glyphicon-stats"></span></a>
-    {% endif %}
-</div>
-<br>
-<div>
-    <table id = "table" class = "table table-hover" style = "display:none">
-        <thead>
-            <tr>
-                <th></th>
-                <th>Name</th>
-                <th>Element</th>
-                {% for eventFrameAttributeTemplate in displayEventFrameTemplate.EventFrameAttributeTemplates %}
-                    <th>{{ eventFrameAttributeTemplate.Name }}</th>
+    </div>
+    <br>
+    <div>
+        <table id = "table" class = "table table-hover" style = "display:none">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>Name</th>
+                    <th>Element</th>
+                    {% for eventFrameAttributeTemplate in displayEventFrameTemplate.EventFrameAttributeTemplates %}
+                        <th>{{ eventFrameAttributeTemplate.Name }}</th>
+                    {% endfor %}
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th><button class = "btn btn-default" id = "buttonSave" title = "Save All"><span class = "glyphicon glyphicon-floppy-disk"></span>
+                        </button></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for eventFrame in eventFrames %}
+                    {% if eventFrame.EventFrameTemplate == displayEventFrameTemplate %}
+                        <tr>
+                            <td><a class = "btn btn-default" title = "Select" href = '{{ url_for("eventFrames.dashboard",
+                                eventFrameId = eventFrame.EventFrameId) }}' target = "_blank"><span class = "glyphicon glyphicon-list"></span></a></td>
+                            <td>{{ eventFrame.Name }}</td>
+                            <td>{{ eventFrame.Element.Name }}</td>
+                            {% for eventFrameAttributeTemplate in displayEventFrameTemplate.EventFrameAttributeTemplates %}
+                                {% set tagId = eventFrameAttributeTemplate.EventFrameAttributes.filter_by(ElementId = eventFrame.ElementId) |
+                                    map(attribute = "TagId") | first%}
+                                {% set disabled = "" if eventFrame.EndTimestamp is none else "disabled" %}
+                                <td>
+                                    <div class = "form-group" id = "divNewValue{{ tagId }}">
+                                        {% if eventFrameAttributeTemplate.LookupId is none %}
+                                            <input class = "form-control" id = "inputOrSelectNewValue{{ tagId }}" value = "" {{ disabled }}>
+                                            <p class = "help-block" id = "pNewValue{{ tagId }}"></p>
+                                        {% else %}
+                                            <select class = "form-control" id = "inputOrSelectNewValue{{ tagId }}" {{ disabled }}>
+                                                <option value = "-1"></option>
+                                                {% for lookupValue in eventFrameAttributeTemplate.Lookup.LookupValues %}
+                                                    {% if lookupValue.Selectable %}
+                                                        <option value = "{{ lookupValue.Value }}">{{ lookupValue.Name}}</option>
+                                                    {% endif %}
+                                                {% endfor %}
+                                            </select>
+                                            <p class = "help-block" id = "pNewValue{{ tagId }}"></p>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            {% endfor %}
+                            <td><a class = "btn btn-default" title = "Remove" href = '{{ url_for("eventFrameEventFrameGroups.delete",
+                                eventFrameGroupId = eventFrameGroup.EventFrameGroupId, eventFrameId = eventFrame.EventFrameId) }}'
+                                data-eventFrameName = "{{ eventFrame.Name }}"><span class = "glyphicon glyphicon-minus"></span></a></td>
+                            {% if eventFrame.EndTimestamp is none %}
+                                <td><a class = "btn btn-default" title = "End"
+                                    href = '{{ url_for("eventFrames.endEventFrame", eventFrameId = eventFrame.EventFrameId) }}'>
+                                    <span class = "glyphicon glyphicon-stop"></span></a></td>
+                            {% else %}
+                                <td><a class = "btn btn-default" title = "Restart"
+                                    href = '{{ url_for("eventFrames.restartEventFrame", eventFrameId = eventFrame.EventFrameId) }}'>
+                                    <span class = "glyphicon glyphicon-play"></span></a></td>
+                            {% endif %}
+                            <td><a class = "btn btn-default" title = "Delete"
+                                href = '{{ url_for("eventFrames.deleteEventFrame", eventFrameId = eventFrame.EventFrameId) }}',
+                                data-eventFrameName = "{{ eventFrame.Name }}"><span class = "glyphicon glyphicon-trash"></span></a></td>
+                            <td></td>
+                        </tr>
+                    {% endif %}
                 {% endfor %}
-                <th></th>
-                <th></th>
-                <th></th>
-                <th><button class = "btn btn-default" id = "buttonSave" title = "Save All"><span class = "glyphicon glyphicon-floppy-disk"></span>
-                    </button></th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for eventFrame in eventFrames %}
-                {% if eventFrame.EventFrameTemplate == displayEventFrameTemplate %}
-                    <tr>
-                        <td><a class = "btn btn-default" title = "Select" href = '{{ url_for("eventFrames.dashboard",
-                            eventFrameId = eventFrame.EventFrameId) }}' target = "_blank"><span class = "glyphicon glyphicon-list"></span></a></td>
-                        <td>{{ eventFrame.Name }}</td>
-                        <td>{{ eventFrame.Element.Name }}</td>
-                        {% for eventFrameAttributeTemplate in displayEventFrameTemplate.EventFrameAttributeTemplates %}
-                            {% set tagId = eventFrameAttributeTemplate.EventFrameAttributes.filter_by(ElementId = eventFrame.ElementId) |
-                                map(attribute = "TagId") | first%}
-                            {% set disabled = "" if eventFrame.EndTimestamp is none else "disabled" %}
-                            <td>
-                                <div class = "form-group" id = "divNewValue{{ tagId }}">
-                                    {% if eventFrameAttributeTemplate.LookupId is none %}
-                                        <input class = "form-control" id = "inputOrSelectNewValue{{ tagId }}" value = "" {{ disabled }}>
-                                        <p class = "help-block" id = "pNewValue{{ tagId }}"></p>
-                                    {% else %}
-                                        <select class = "form-control" id = "inputOrSelectNewValue{{ tagId }}" {{ disabled }}>
-                                            <option value = "-1"></option>
-                                            {% for lookupValue in eventFrameAttributeTemplate.Lookup.LookupValues %}
-                                                {% if lookupValue.Selectable %}
-                                                    <option value = "{{ lookupValue.Value }}">{{ lookupValue.Name}}</option>
-                                                {% endif %}
-                                            {% endfor %}
-                                        </select>
-                                        <p class = "help-block" id = "pNewValue{{ tagId }}"></p>
-                                    {% endif %}
-                                </div>
-                            </td>
-                        {% endfor %}
-                        <td><a class = "btn btn-default" title = "Remove" href = '{{ url_for("eventFrameEventFrameGroups.delete",
-                            eventFrameGroupId = eventFrameGroup.EventFrameGroupId, eventFrameId = eventFrame.EventFrameId) }}'
-                            data-eventFrameName = "{{ eventFrame.Name }}"><span class = "glyphicon glyphicon-minus"></span></a></td>
-                        {% if eventFrame.EndTimestamp is none %}
-                            <td><a class = "btn btn-default" title = "End"
-                                href = '{{ url_for("eventFrames.endEventFrame", eventFrameId = eventFrame.EventFrameId) }}'>
-                                <span class = "glyphicon glyphicon-stop"></span></a></td>
-                        {% else %}
-                            <td><a class = "btn btn-default" title = "Restart"
-                                href = '{{ url_for("eventFrames.restartEventFrame", eventFrameId = eventFrame.EventFrameId) }}'>
-                                <span class = "glyphicon glyphicon-play"></span></a></td>
-                        {% endif %}
-                        <td><a class = "btn btn-default" title = "Delete"
-                            href = '{{ url_for("eventFrames.deleteEventFrame", eventFrameId = eventFrame.EventFrameId) }}',
-                            data-eventFrameName = "{{ eventFrame.Name }}"><span class = "glyphicon glyphicon-trash"></span></a></td>
-                        <td></td>
-                    </tr>
-                {% endif %}
-            {% endfor %}
-        </tbody>
-    </table>
-</div>
+            </tbody>
+        </table>
+    </div>
 {% endblock %}
 
 {% block scripts %}
@@ -130,25 +132,34 @@ Event Frame Group
     <link rel = "stylesheet" type = "text/css" href = {{ url_for("static", filename = "css/datatables.min.css") }}/> 
     <link rel = "stylesheet" type = "text/css" href = {{ url_for("static", filename = "css/styles.css") }}/>
     <script type = "text/javascript" src = {{ url_for("static", filename = "js/datatables.min.js") }}></script>
-    <script>
-        $(document).ready(function()
-        {
-            // Update the focus and tabindex upon an order event.
+    {% block setTabIndex %}
+        <script>
             var setTabIndex = function(type)
             {
                 var tabIndex = 1
-                $("[id^=inputOrSelectNewValue]").each(function() {
+                $('ol.breadcrumb a[title="Next"],[id^=inputOrSelectNewValue]').each(function()
+                {
                     $(this).attr("tabindex", tabIndex)
-                    if (tabIndex == 1)
-                    {
-                        $(this).focus()
-                    }
-
                     tabIndex = tabIndex + 1
                 })
-                $("#buttonSave").attr("tabindex", tabIndex)
-            }
 
+                $("#buttonSave").attr("tabindex", tabIndex)
+                tabIndex = tabIndex + 1
+                $('ol.breadcrumb a[title="Previous"]').attr("tabindex", tabIndex)
+                tabIndex = tabIndex + 1
+                $($("ol.breadcrumb > li:not(.active) > a").get().reverse()).each(function()       
+                {
+                    $(this).attr("tabindex", tabIndex)
+                    tabIndex = tabIndex + 1
+                })
+
+                $('ol.breadcrumb a[title="Next"]').focus()
+            }
+        </script>
+    {% endblock %}
+    <script>
+        $(document).ready(function()
+        {
             var table = $("#table").on("draw.dt", function()
             {
                 setTabIndex()
@@ -182,7 +193,6 @@ Event Frame Group
             })
 
             $("#table").attr("style", "width:100%")
-            $("input[tabindex = '1']").focus()
     
             $("a[title='Delete']").on("click", function ()
             {

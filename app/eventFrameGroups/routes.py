@@ -36,7 +36,7 @@ def add():
 def addActiveEventFrames(eventFrameGroupId):
 	eventFrameGroup = EventFrameGroup.query.get_or_404(eventFrameGroupId)
 	eventFrames = EventFrame.query.filter(EventFrame.EventFrameId.notin_([(eventFrameEventFrameGroup.EventFrameId) for eventFrameEventFrameGroup in
-		eventFrameGroup.EventFrameEventFrameGroups]), EventFrame.EndTimestamp == None)
+		eventFrameGroup.EventFrameEventFrameGroups]), EventFrame.EndTimestamp == None, EventFrame.ParentEventFrameId == None)
 	return render_template("eventFrameGroups/addActiveEventFrames.html", eventFrameGroup = eventFrameGroup, eventFrames = eventFrames)
 
 @eventFrameGroups.route("/eventFrameGroups/addNewEventFrames/<int:eventFrameGroupId>", methods = ["GET", "POST"])

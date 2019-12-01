@@ -1,73 +1,77 @@
 {% extends "base.html" %}
 
-{% block title %}
-Event Frame Groups
-{% endblock %}
+{% block title %}Event Frame Groups{% endblock %}
 
 {% block page_content %}
-<div>
-    <ol class = "breadcrumb">
-        <li class = "active"><span class = "glyphicon glyphicon-home"></span></li>
-    </ol>
-</div>
-<div class = "page-header">
-    <h1>Event Frame Groups <small></small></h1>
-</div>
-<div>
-    <a class = "btn btn-default" title = "Add" href = "{{ url_for("eventFrameGroups.add") }}" role = "button">
-        <span class = "glyphicon glyphicon-plus"></span></a>
-    <br><br>
-    <table id = "eventFrameGroupsTable" class = "table table-hover" style = "display:none">
-        <thead>
-            <tr>
-                <th></th>
-                <th></th>
-                <th>Name</th>
-                <th></th>
-                <th></th>
-                <th></th>
-                <th></th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for eventFrameGroup in eventFrameGroups %}
-            <tr>
-                <td><a class = "btn btn-default" title = "Select" href = '{{ url_for("eventFrameGroups.dashboard",
-                    eventFrameGroupId = eventFrameGroup.EventFrameGroupId) }}'><span class = "glyphicon glyphicon-list"></span></a></td>
-                <td><a class = "btn btn-default" title = "Grafana"
-                    href = '{{ "EventFrameGroupSummary" | grafanaUrl({"eventFrameGroupId": eventFrameGroup.EventFrameGroupId}) }}' target = "_blank">
-                    <span class = "glyphicon glyphicon-stats"></span></a></td>
-                <td>{{ eventFrameGroup.Name }}</td>
-                <td><a class = "btn btn-default" title = "End All Event Frames in Group"
-                    href = '{{ url_for("eventFrameGroups.endEventFrames", eventFrameGroupId = eventFrameGroup.EventFrameGroupId) }}'
-                    role = "button"><span class = "glyphicon glyphicon-stop"></span></a></td>
-                <td><a class = "btn btn-default" title = "Restart All Event Frames in Group"
-                    href = '{{ url_for("eventFrameGroups.restartEventFrames", eventFrameGroupId = eventFrameGroup.EventFrameGroupId) }}'
-                    role = "button"><span class = "glyphicon glyphicon-play"></span></a></td>
-                <td><a class = "btn btn-default" title = "Edit" href = '{{ url_for("eventFrameGroups.edit",
-                    eventFrameGroupId = eventFrameGroup.EventFrameGroupId) }}'><span class = "glyphicon glyphicon-edit"></span></a></td>
-                <td><a class = "btn btn-default" title = "Delete Group" href = '{{ url_for("eventFrameGroups.delete", 
-                    eventFrameGroupId = eventFrameGroup.EventFrameGroupId, all = false) }}' data-eventFrameGroupName = "{{ eventFrameGroup.Name }}">
-                    <span class = "glyphicon glyphicon-trash"></span> Group</a></td>
-                <td><a class = "btn btn-default" title = "Delete All" href = '{{ url_for("eventFrameGroups.delete", 
-                    eventFrameGroupId = eventFrameGroup.EventFrameGroupId, all = true) }}' data-eventFrameGroupName = "{{ eventFrameGroup.Name }}">
-                    <span class = "glyphicon glyphicon-trash"></span> All</a></td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</div>
+    <div>
+        <ol class = "breadcrumb">
+            <li class = "active"><span class = "glyphicon glyphicon-home"></span></li>
+        </ol>
+    </div>
+    <div class = "page-header">
+        <h1>Event Frame Groups <small></small></h1>
+    </div>
+    <div>
+        <a class = "btn btn-default" title = "Add" href = '{{ url_for("eventFrameGroups.add") }}' role = "button">
+            <span class = "glyphicon glyphicon-plus"></span></a>
+        <br><br>
+        <table id = "eventFrameGroupsTable" class = "table table-hover" style = "display:none">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th></th>
+                    <th>Name</th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for eventFrameGroup in eventFrameGroups %}
+                <tr>
+                    <td><a class = "btn btn-default" title = "Select" href = '{{ url_for("eventFrameGroups.dashboard",
+                        eventFrameGroupId = eventFrameGroup.EventFrameGroupId) }}'><span class = "glyphicon glyphicon-list"></span></a></td>
+                    <td><a class = "btn btn-default" title = "Grafana"
+                        href = '{{ "EventFrameGroupSummary" | grafanaUrl({"eventFrameGroupId": eventFrameGroup.EventFrameGroupId}) }}' target = "_blank">
+                        <span class = "glyphicon glyphicon-stats"></span></a></td>
+                    <td>{{ eventFrameGroup.Name }}</td>
+                    <td><a class = "btn btn-default" title = "End All Event Frames in Group"
+                        href = '{{ url_for("eventFrameGroups.endEventFrames", eventFrameGroupId = eventFrameGroup.EventFrameGroupId) }}'
+                        role = "button"><span class = "glyphicon glyphicon-stop"></span></a></td>
+                    <td><a class = "btn btn-default" title = "Restart All Event Frames in Group"
+                        href = '{{ url_for("eventFrameGroups.restartEventFrames", eventFrameGroupId = eventFrameGroup.EventFrameGroupId) }}'
+                        role = "button"><span class = "glyphicon glyphicon-play"></span></a></td>
+                    <td><a class = "btn btn-default" title = "Edit" href = '{{ url_for("eventFrameGroups.edit",
+                        eventFrameGroupId = eventFrameGroup.EventFrameGroupId) }}'><span class = "glyphicon glyphicon-edit"></span></a></td>
+                    <td><a class = "btn btn-default" title = "Delete Group" href = '{{ url_for("eventFrameGroups.delete", 
+                        eventFrameGroupId = eventFrameGroup.EventFrameGroupId, all = false) }}' data-eventFrameGroupName = "{{ eventFrameGroup.Name }}">
+                        <span class = "glyphicon glyphicon-trash"></span> Group</a></td>
+                    <td><a class = "btn btn-default" title = "Delete All" href = '{{ url_for("eventFrameGroups.delete", 
+                        eventFrameGroupId = eventFrameGroup.EventFrameGroupId, all = true) }}' data-eventFrameGroupName = "{{ eventFrameGroup.Name }}">
+                        <span class = "glyphicon glyphicon-trash"></span> All</a></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 {% endblock %}
 
 {% block scripts %}
     {{ super() }}
     <link rel = "stylesheet" type = "text/css" href = {{ url_for("static", filename = "css/datatables.min.css") }}/> 
     <script type = "text/javascript" src = {{ url_for("static", filename = "js/datatables.min.js") }}></script>
+    {% block setTabIndex %}
+        {{ super() }}
+    {% endblock %}
     <script>
         $(document).ready(function()
         {
-            $("#eventFrameGroupsTable").DataTable
+            $("#eventFrameGroupsTable").on("draw.dt", function()
+            {
+                setTabIndex()
+            }).DataTable
             ({
                 "order":
                 [

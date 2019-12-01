@@ -1,5 +1,6 @@
 import json
 from datetime import datetime
+from dateutil.relativedelta import relativedelta
 from flask_login import AnonymousUserMixin, current_user, UserMixin
 from sqlalchemy import func, Index, PrimaryKeyConstraint, UniqueConstraint
 from sqlalchemy.dialects.mysql import DOUBLE
@@ -508,13 +509,22 @@ class EventFrameGroup(db.Model):
 	EventFrameEventFrameGroups = db.relationship("EventFrameEventFrameGroup", backref = "EventFrameGroup", lazy = "dynamic")
 
 	def id(self):
-		return self.EventFrameEventFrameGroupId
+		return self.EventFrameGroupId
 
 	def delete(self):
 		for eventFrameEventFrameGroup in self.EventFrameEventFrameGroups:
 			eventFrameEventFrameGroup.delete()
 
 		db.session.delete(self)
+
+	def next(self):
+		return next(self.nextAndPreviousList(), self)
+	
+	def nextAndPreviousList(self):
+		return EventFrameGroup.query.order_by(EventFrameGroup.Name).all()
+
+	def previous(self):
+		return previous(self.nextAndPreviousList(), self)
 
 class EventFrameNote(db.Model):
 	__tablename__ = "EventFrameNote"
