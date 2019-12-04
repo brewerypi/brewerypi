@@ -241,9 +241,16 @@
         <h1>Notes <small>{{ eventFrame.origin().Element.Name }}</small></h1>
     </div>
     <div>
-        <a class = "btn btn-default" id = "aAddEventFrameNote" title = "Add"
-            href = '{{ url_for("eventFrameNotes.addEventFrameNote", eventFrameId = eventFrame.EventFrameId) }}' role = "button">
-            <span class = "glyphicon glyphicon-plus"></span></a>
+        {% if eventFrameEventFrameGroup is none %}
+            <a class = "btn btn-default" id = "aAddEventFrameNote" title = "Add"
+                href = '{{ url_for("eventFrameNotes.addEventFrameNote", eventFrameId = eventFrame.EventFrameId) }}' role = "button">
+                <span class = "glyphicon glyphicon-plus"></span></a>
+        {% else %}
+            <a class = "btn btn-default" id = "aAddEventFrameNote" title = "Add"
+                href = '{{ url_for("eventFrameNotes.addEventFrameNote", eventFrameId = eventFrame.EventFrameId,
+                eventFrameGroupId = eventFrameEventFrameGroup.EventFrameGroupId) }}' role = "button">
+                <span class = "glyphicon glyphicon-plus"></span></a>
+        {% endif %}
         <br><br>
         <table id = "eventFrameNotesTable" class = "table table-hover" style = "display:none">
             <thead>
@@ -261,9 +268,16 @@
                         <td>{{ moment(eventFrameNote.Note.Timestamp).format("YYYY-MM-DD HH:mm:ss") }}</td>
                         <td>{{ eventFrameNote.Note.User.Name }}</td>
                         <td>{{ eventFrameNote.Note.Note }}</td>
-                        <td><a class = "btn btn-default" title = "Edit" href = '{{ url_for("eventFrameNotes.editEventFrameNote",
-                            eventFrameId = eventFrame.EventFrameId, noteId = eventFrameNote.NoteId) }}'><span class = "glyphicon glyphicon-edit"></span>
-                            </a></td>
+                        {% if eventFrameEventFrameGroup is none %}
+                            <td><a class = "btn btn-default" title = "Edit" href = '{{ url_for("eventFrameNotes.editEventFrameNote",
+                                eventFrameId = eventFrame.EventFrameId, noteId = eventFrameNote.NoteId) }}'><span class = "glyphicon glyphicon-edit"></span>
+                                </a></td>
+                        {% else %}
+                            <td><a class = "btn btn-default" title = "Edit" href = '{{ url_for("eventFrameNotes.editEventFrameNote",
+                                eventFrameId = eventFrame.EventFrameId, noteId = eventFrameNote.NoteId,
+                                eventFrameGroupId = eventFrameEventFrameGroup.EventFrameGroupId) }}'><span class = "glyphicon glyphicon-edit"></span>
+                                </a></td>
+                        {% endif %}
                         <td><a class = "btn btn-default" title = "Delete" href = '{{ url_for("eventFrameNotes.deleteEventFrameNote",
                             noteId = eventFrameNote.NoteId, eventFrameId = eventFrameNote.EventFrameId) }}'><span class = "glyphicon glyphicon-trash"></span>
                             </a></td>
