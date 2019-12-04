@@ -5,49 +5,72 @@
 {% block page_content %}
     <div>
         <ol class = "breadcrumb">
-            <li><a href = '{{ url_for("eventFrames.selectEventFrame", selectedClass = "Root") }}'><span class = "glyphicon glyphicon-home"></span></a></li>
-            <li><a href = '{{ url_for("eventFrames.selectEventFrame", selectedClass = "Enterprise",
-                selectedId = eventFrame.origin().EventFrameTemplate.ElementTemplate.Site.Enterprise.id()) }}'>
-                {{ eventFrame.origin().EventFrameTemplate.ElementTemplate.Site.Enterprise.Name }}</a></li>
-            <li><a href = '{{ url_for("eventFrames.selectEventFrame", selectedClass = "Site",
-                selectedId = eventFrame.origin().EventFrameTemplate.ElementTemplate.Site.id()) }}'>
-                {{ eventFrame.origin().EventFrameTemplate.ElementTemplate.Site.Name }}</a></li>
-            <li><a href = '{{ url_for("eventFrames.selectEventFrame", selectedClass = "ElementTemplate",
-                selectedId = eventFrame.origin().EventFrameTemplate.ElementTemplate.id()) }}'>
-                {{ eventFrame.origin().EventFrameTemplate.ElementTemplate.Name }}</a></li>
-            <li><a href = '{{ url_for("eventFrames.selectEventFrame", selectedClass = "EventFrameTemplate",
-                selectedId = eventFrame.origin().EventFrameTemplate.EventFrameTemplateId) }}'>{{ eventFrame.origin().EventFrameTemplate.Name }}</a></li>
+            {% if eventFrameEventFrameGroup is none %}
+                <li><a href = '{{ url_for("eventFrames.selectEventFrame", selectedClass = "Root") }}'><span class = "glyphicon glyphicon-home"></span></a></li>
+                <li><a href = '{{ url_for("eventFrames.selectEventFrame", selectedClass = "Enterprise",
+                    selectedId = eventFrame.origin().EventFrameTemplate.ElementTemplate.Site.Enterprise.id()) }}'>
+                    {{ eventFrame.origin().EventFrameTemplate.ElementTemplate.Site.Enterprise.Name }}</a></li>
+                <li><a href = '{{ url_for("eventFrames.selectEventFrame", selectedClass = "Site",
+                    selectedId = eventFrame.origin().EventFrameTemplate.ElementTemplate.Site.id()) }}'>
+                    {{ eventFrame.origin().EventFrameTemplate.ElementTemplate.Site.Name }}</a></li>
+                <li><a href = '{{ url_for("eventFrames.selectEventFrame", selectedClass = "ElementTemplate",
+                    selectedId = eventFrame.origin().EventFrameTemplate.ElementTemplate.id()) }}'>
+                    {{ eventFrame.origin().EventFrameTemplate.ElementTemplate.Name }}</a></li>
+                <li><a href = '{{ url_for("eventFrames.selectEventFrame", selectedClass = "EventFrameTemplate",
+                    selectedId = eventFrame.origin().EventFrameTemplate.EventFrameTemplateId) }}'>{{ eventFrame.origin().EventFrameTemplate.Name }}</a></li>
+            {% else %}
+                <li><a href = '{{ url_for("eventFrameGroups.listEventFrameGroups") }}'><span class = "glyphicon glyphicon-home"></span></a></li>
+                <li><a href = '{{ url_for("eventFrameGroups.dashboard", eventFrameGroupId = eventFrameEventFrameGroup.EventFrameGroupId) }}'>
+                    {{ eventFrameEventFrameGroup.EventFrameGroup.Name }}</a></li>
+            {% endif %}
             {% set eventFrames = eventFrame.ancestors([]) %}
             {% do eventFrames.append(eventFrame) %}
             {% for eventFrame in eventFrames %}
                 {% if loop.last %}
-                    {% if eventFrame.ParentEventFrameId == None %}
-                        <li class = "active">
+                    <li class = "active">
+                        {% if eventFrameEventFrameGroup is none %}
                             <a title = "Previous" href = '{{ url_for("eventFrames.dashboard",
-                                eventFrameId = eventFrame.previous(session["eventFrameMonths"]).id()) }}'><span class = "glyphicon glyphicon-arrow-left"></span>
-                                </a>
+                                eventFrameId = eventFrame.previous(session["eventFrameMonths"]).EventFrameId) }}'>
+                                <span class = "glyphicon glyphicon-arrow-left"></span></a>
                             <a title = "Next" href = '{{ url_for("eventFrames.dashboard",
-                                eventFrameId = eventFrame.next(session["eventFrameMonths"]).id()) }}'><span class = "glyphicon glyphicon-arrow-right"></span>
-                                </a>                    
+                                eventFrameId = eventFrame.next(session["eventFrameMonths"]).EventFrameId) }}'>
+                                <span class = "glyphicon glyphicon-arrow-right"></span></a>                    
+                        {% else %}
+                            {% if eventFrame.ParentEventFrameId is none %}
+                                {% set previousEventFrameId = eventFrameEventFrameGroup.previous().EventFrameId %}
+                                {% set nextEventFrameId = eventFrameEventFrameGroup.next().EventFrameId %}
+                            {% else %}
+                                {% set previousEventFrameId = eventFrame.previous(session["eventFrameMonths"]).EventFrameId %}
+                                {% set nextEventFrameId = eventFrame.next(session["eventFrameMonths"]).EventFrameId %}
+                            {% endif %}
+                            <a title = "Previous" href = '{{ url_for("eventFrames.dashboard", eventFrameId = previousEventFrameId,
+                                eventFrameGroupId = eventFrameEventFrameGroup.EventFrameGroupId) }}'><span class = "glyphicon glyphicon-arrow-left"></span></a>
+                            <a title = "Next" href = '{{ url_for("eventFrames.dashboard", eventFrameId = nextEventFrameId,
+                                eventFrameGroupId = eventFrameEventFrameGroup.EventFrameGroupId) }}'><span class = "glyphicon glyphicon-arrow-right"></span></a>                    
+                        {% endif %}                        
+                        {% if eventFrame.ParentEventFrameId is none %}
                             {{ eventFrame.Name }}
-                        </li>
-                    {% else %}
-                        <li class = "active">
-                            <a title = "Previous" href = '{{ url_for("eventFrames.dashboard",
-                                eventFrameId = eventFrame.previous(session["eventFrameMonths"]).id()) }}'><span class = "glyphicon glyphicon-arrow-left"></span>
-                                </a>
-                            <a title = "Next" href = '{{ url_for("eventFrames.dashboard",
-                                eventFrameId = eventFrame.next(session["eventFrameMonths"]).id()) }}'><span class = "glyphicon glyphicon-arrow-right"></span>
-                                </a>                    
+                        {% else %}
                             {{ eventFrame.EventFrameTemplate.Name }}&nbsp;&nbsp;/&nbsp;&nbsp;{{ eventFrame.Name }}
-                        </li>
-                    {% endif %}
+                        {% endif %}
+                    </li>
                 {% else %}
-                    {% if eventFrame.ParentEventFrameId == None %}
-                        <li><a href = '{{ url_for("eventFrames.dashboard", eventFrameId = eventFrame.EventFrameId) }}'>{{ eventFrame.Name }}</a></li>
+                    {% if eventFrame.ParentEventFrameId is none %}
+                        {% if eventFrameEventFrameGroup is none %}
+                            <li><a href = '{{ url_for("eventFrames.dashboard", eventFrameId = eventFrame.EventFrameId) }}'>{{ eventFrame.Name }}</a></li>
+                        {% else %}
+                            <li><a href = '{{ url_for("eventFrames.dashboard", eventFrameId = eventFrame.EventFrameId,
+                                eventFrameGroupId = eventFrameEventFrameGroup.EventFrameGroupId) }}'>{{ eventFrame.Name }}</a></li>
+                        {% endif %}
                     {% else %}
-                        <li><a href = '{{ url_for("eventFrames.dashboard", eventFrameId = eventFrame.EventFrameId) }}'>
-                            {{ eventFrame.EventFrameTemplate.Name }}&nbsp;&nbsp;/&nbsp;&nbsp;{{ eventFrame.Name }}</a></li>
+                        {% if eventFrameEventFrameGroup is none %}
+                            <li><a href = '{{ url_for("eventFrames.dashboard", eventFrameId = eventFrame.EventFrameId) }}'>
+                                {{ eventFrame.EventFrameTemplate.Name }}&nbsp;&nbsp;/&nbsp;&nbsp;{{ eventFrame.Name }}</a></li>
+                        {% else %}
+                            <li><a href = '{{ url_for("eventFrames.dashboard", eventFrameId = eventFrame.EventFrameId,
+                                eventFrameGroupId = eventFrameEventFrameGroup.EventFrameGroupId) }}'>
+                                {{ eventFrame.EventFrameTemplate.Name }}&nbsp;&nbsp;/&nbsp;&nbsp;{{ eventFrame.Name }}</a></li>
+                        {% endif %}
                     {% endif %}
                 {% endif %}
             {% endfor %}
@@ -79,8 +102,14 @@
                 <tbody>
                     {% for eventFrame in eventFrame.EventFrames %}
                         <tr>
-                            <td><a class = "btn btn-default" title = "Select" href = '{{ url_for("eventFrames.dashboard",
-                                eventFrameId = eventFrame.EventFrameId,) }}'><span class = "glyphicon glyphicon-list"></span></a></td>
+                            {% if eventFrameEventFrameGroup is none %}
+                                <td><a class = "btn btn-default" title = "Select" href = '{{ url_for("eventFrames.dashboard",
+                                    eventFrameId = eventFrame.EventFrameId) }}'><span class = "glyphicon glyphicon-list"></span></a></td>
+                            {% else %}
+                                <td><a class = "btn btn-default" title = "Select" href = '{{ url_for("eventFrames.dashboard",
+                                    eventFrameId = eventFrame.EventFrameId, eventFrameGroupId = eventFrameEventFrameGroup.EventFrameGroupId) }}'>
+                                    <span class = "glyphicon glyphicon-list"></span></a></td>
+                            {% endif %}
                             <td>{{ eventFrame.EventFrameTemplate.Name }}</td>
                             <td>{{ eventFrame.Name }}</td>
                             <td>{{ eventFrame.User.Name }}</td>
@@ -90,7 +119,7 @@
                             {% else %}
                                 <td></td>
                             {% endif %}
-                            {% if eventFrame.EndTimestamp == None %}
+                            {% if eventFrame.EndTimestamp is none %}
                                 <td><a class = "btn btn-default" title = "End" href = '{{ url_for("eventFrames.endEventFrame",
                                     eventFrameId = eventFrame.EventFrameId) }}'><span class = "glyphicon glyphicon-stop"></span></a></td>
                             {% else %}
@@ -213,7 +242,7 @@
     </div>
     <div>
         <a class = "btn btn-default" id = "aAddEventFrameNote" title = "Add"
-            href = '{{ url_for("eventFrameNotes.addEventFrameNote", eventFrameId = eventFrame.id()) }}' role = "button">
+            href = '{{ url_for("eventFrameNotes.addEventFrameNote", eventFrameId = eventFrame.EventFrameId) }}' role = "button">
             <span class = "glyphicon glyphicon-plus"></span></a>
         <br><br>
         <table id = "eventFrameNotesTable" class = "table table-hover" style = "display:none">

@@ -7,8 +7,8 @@ from . forms import EventFrameForm, EventFrameOverlayForm
 from . helpers import currentEventFrameAttributeValues
 from .. import db
 from .. decorators import permissionRequired
-from .. models import Element, ElementTemplate, Enterprise, EventFrame, EventFrameAttribute, EventFrameAttributeTemplate, EventFrameTemplate, Lookup, \
-	LookupValue, Permission, Site, Tag, TagValue
+from .. models import Element, ElementTemplate, Enterprise, EventFrame, EventFrameAttribute, EventFrameAttributeTemplate, EventFrameEventFrameGroup, \
+	EventFrameTemplate, Lookup, LookupValue, Permission, Site, Tag, TagValue
 
 modelName = "Event Frame"
 
@@ -110,14 +110,20 @@ def addEventFrame(eventFrameTemplateId = None, parentEventFrameId = None):
 	return render_template("eventFrames/addEdit.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
 
 @eventFrames.route("/eventFrames/dashboard/<int:eventFrameId>", methods = ["GET", "POST"])
+@eventFrames.route("/eventFrames/dashboard/<int:eventFrameId>/<int:eventFrameGroupId>", methods = ["GET", "POST"])
 @login_required
 @permissionRequired(Permission.DATA_ENTRY)
-def dashboard(eventFrameId):
+def dashboard(eventFrameId, eventFrameGroupId = None):
 	eventFrame = EventFrame.query.get_or_404(eventFrameId)
 	if eventFrame.ElementId:
 		elementId = eventFrame.ElementId
 	else:
 		elementId = eventFrame.origin().ElementId
+	
+	if eventFrameGroupId is None:
+		eventFrameEventFrameGroup = None
+	else:
+		eventFrameEventFrameGroup = EventFrameEventFrameGroup.query.filter_by(EventFrameGroupId = eventFrameGroupId, EventFrameId = eventFrame.origin().EventFrameId).one_or_none()
 
 	eventFrameAttributes = EventFrameAttribute.query.join(EventFrameAttributeTemplate, EventFrameTemplate). \
 		filter(EventFrameAttribute.ElementId == elementId, EventFrameTemplate.EventFrameTemplateId == eventFrame.EventFrameTemplate.EventFrameTemplateId)
@@ -131,7 +137,8 @@ def dashboard(eventFrameId):
 	else:
 		tagValues = TagValue.query.join(Tag, EventFrameAttribute).filter(EventFrameAttribute.EventFrameAttributeId.in_(eventFrameAttributeIds),
 			TagValue.Timestamp >= eventFrame.StartTimestamp)
-	return render_template("eventFrames/dashboard.html", eventFrame = eventFrame, eventFrameAttributes = eventFrameAttributes, tagValues = tagValues)
+	return render_template("eventFrames/dashboard.html", eventFrame = eventFrame, eventFrameEventFrameGroup = eventFrameEventFrameGroup,
+		eventFrameAttributes = eventFrameAttributes, tagValues = tagValues)
 
 @eventFrames.route("/eventFrames/overlay/days", methods = ["GET", "POST"])
 @login_required

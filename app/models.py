@@ -472,6 +472,16 @@ class EventFrameEventFrameGroup(db.Model):
 	def id(self):
 		return self.EventFrameEventFrameGroupId
 
+	def next(self):
+		return next(self.nextAndPreviousList(), self)
+	
+	def nextAndPreviousList(self):
+		return EventFrameEventFrameGroup.query.join(EventFrame).filter(EventFrameEventFrameGroup.EventFrameGroupId == self.EventFrameGroupId,
+			EventFrame.EventFrameTemplateId == self.EventFrame.EventFrameTemplateId).order_by(EventFrame.Name).all()
+
+	def previous(self):
+		return previous(self.nextAndPreviousList(), self)
+
 class EventFrameGroup(db.Model):
 	__tablename__ = "EventFrameGroup"
 	__table_args__ = \
