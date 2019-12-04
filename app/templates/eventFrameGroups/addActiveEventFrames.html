@@ -106,8 +106,6 @@
 
                 $("#buttonSave").attr("tabindex", tabIndex)
                 tabIndex = tabIndex + 1
-                $('ol.breadcrumb a[title="Previous"]').attr("tabindex", tabIndex)
-                tabIndex = tabIndex + 1
                 $($("ol.breadcrumb > li:not(.active) > a").get().reverse()).each(function()       
                 {
                     $(this).attr("tabindex", tabIndex)
