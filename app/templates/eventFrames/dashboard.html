@@ -40,8 +40,8 @@
                                 {% set previousEventFrameId = eventFrameEventFrameGroup.previous().EventFrameId %}
                                 {% set nextEventFrameId = eventFrameEventFrameGroup.next().EventFrameId %}
                             {% else %}
-                                {% set previousEventFrameId = eventFrame.previous(session["eventFrameMonths"]).EventFrameId %}
-                                {% set nextEventFrameId = eventFrame.next(session["eventFrameMonths"]).EventFrameId %}
+                                {% set previousEventFrameId = eventFrame.previous(none).EventFrameId %}
+                                {% set nextEventFrameId = eventFrame.next(none).EventFrameId %}
                             {% endif %}
                             <a title = "Previous" href = '{{ url_for("eventFrames.dashboard", eventFrameId = previousEventFrameId,
                                 eventFrameGroupId = eventFrameEventFrameGroup.EventFrameGroupId) }}'><span class = "glyphicon glyphicon-arrow-left"></span></a>
