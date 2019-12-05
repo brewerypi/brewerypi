@@ -165,8 +165,15 @@
             <tbody>
                 {% for eventFrameAttribute in eventFrameAttributes %}
                     <tr id = "trEventFrame", startTimestamp = "{{ eventFrame.StartTimestamp }}", endTimestamp = "{{ eventFrame.EndTimestamp }}">
-                        <td><a class = "btn btn-default" title = "Select" href = '{{ url_for("tagValues.listTagValues", eventFrameId = eventFrame.EventFrameId,
-                            eventFrameAttributeId = eventFrameAttribute.EventFrameAttributeId) }}'><span class = "glyphicon glyphicon-list"></span></a></td>
+                        {% if eventFrameEventFrameGroup is none %}
+                            <td><a class = "btn btn-default" title = "Select" href = '{{ url_for("tagValues.listTagValues",
+                                eventFrameId = eventFrame.EventFrameId, eventFrameAttributeId = eventFrameAttribute.EventFrameAttributeId) }}'>
+                                <span class = "glyphicon glyphicon-list"></span></a></td>
+                        {% else %}
+                            <td><a class = "btn btn-default" title = "Select" href = '{{ url_for("tagValues.listTagValues",
+                                eventFrameId = eventFrame.EventFrameId, eventFrameAttributeId = eventFrameAttribute.EventFrameAttributeId,
+                                eventFrameGroupId = eventFrameEventFrameGroup.EventFrameGroupId) }}'><span class = "glyphicon glyphicon-list"></span></a></td>
+                        {% endif %}
                         <td>{{ eventFrameAttribute.EventFrameAttributeTemplate.Name }}</td>
                         {% if tagValues.filter_by(TagId = eventFrameAttribute.TagId).count() > 0 %}
                             {% set firstTagValue = tagValues.filter_by(TagId = eventFrameAttribute.TagId ) | sort(attribute = "Timestamp", reverse = True) |
@@ -221,9 +228,18 @@
                                     tagValueId = firstTagValue.TagValueId, eventFrameId = eventFrame.EventFrameId,
                                     eventFrameAttributeId = eventFrameAttribute.EventFrameAttributeId) }}'><span class = "glyphicon glyphicon-comment"></span>
                                     </a></td>
-                            <td><a class = "btn btn-default" title = "Edit Last Value"
-                                href = '{{ url_for("tagValues.editTagValue", tagValueId = firstTagValue.TagValueId, eventFrameId = eventFrame.EventFrameId,
-                                eventFrameAttributeId = eventFrameAttribute.EventFrameAttributeId) }}'><span class = "glyphicon glyphicon-edit"></span></a></td>
+                            {% if eventFrameEventFrameGroup is none %}
+                                <td><a class = "btn btn-default" title = "Edit Last Value" href = '{{ url_for("tagValues.editTagValue",
+                                    tagValueId = firstTagValue.TagValueId, eventFrameId = eventFrame.EventFrameId,
+                                    eventFrameAttributeId = eventFrameAttribute.EventFrameAttributeId) }}'><span class = "glyphicon glyphicon-edit"></span>
+                                    </a></td>
+                            {% else %}
+                                <td><a class = "btn btn-default" title = "Edit Last Value" href = '{{ url_for("tagValues.editTagValue",
+                                    tagValueId = firstTagValue.TagValueId, eventFrameId = eventFrame.EventFrameId,
+                                    eventFrameAttributeId = eventFrameAttribute.EventFrameAttributeId,
+                                    eventFrameGroupId = eventFrameEventFrameGroup.EventFrameGroupId) }}'><span class = "glyphicon glyphicon-edit"></span>
+                                    </a></td>
+                            {% endif %}
                             <td><a class = "btn btn-default" title = "Delete Last Value"
                                 href = '{{ url_for("tagValues.deleteTagValue", tagValueId = firstTagValue.TagValueId) }}'>
                                 <span class = "glyphicon glyphicon-trash"></span></a></td>

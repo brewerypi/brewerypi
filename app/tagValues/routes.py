@@ -7,7 +7,7 @@ from . import tagValues
 from . forms import TagValueForm
 from .. import db
 from .. decorators import permissionRequired
-from .. models import Area, ElementAttribute, Enterprise, EventFrame, EventFrameAttribute, Lookup, LookupValue, Permission, Site, Tag, TagValue
+from .. models import Area, ElementAttribute, Enterprise, EventFrame, EventFrameAttribute, EventFrameGroup, Lookup, LookupValue, Permission, Site, Tag, TagValue
 
 modelName = "Tag Value"
 
@@ -16,12 +16,14 @@ modelName = "Tag Value"
 @tagValues.route("/tagValues/elementAttribute/<int:elementAttributeId>", methods = ["GET", "POST"])
 @tagValues.route("/tagValues/elementAttribute/<int:elementAttributeId>/<int:months>", methods = ["GET", "POST"])
 @tagValues.route("/tagValues/eventFrameAttribute/<int:eventFrameId>/<int:eventFrameAttributeId>", methods = ["GET", "POST"])
+@tagValues.route("/tagValues/eventFrameAttribute/<int:eventFrameId>/<int:eventFrameAttributeId>/<int:eventFrameGroupId>", methods = ["GET", "POST"])
 @login_required
 @permissionRequired(Permission.DATA_ENTRY)
-def listTagValues(tagId = None, months = None, elementAttributeId = None, eventFrameId = None, eventFrameAttributeId = None):
+def listTagValues(tagId = None, months = None, elementAttributeId = None, eventFrameId = None, eventFrameAttributeId = None, eventFrameGroupId = None):
 	elementAttribute = None
 	eventFrame = None
 	eventFrameAttribute = None
+	eventFrameGroup = None
 	if elementAttributeId:
 		elementAttribute = ElementAttribute.query.get_or_404(elementAttributeId)
 		tag = Tag.query.get_or_404(elementAttribute.TagId)
@@ -29,6 +31,8 @@ def listTagValues(tagId = None, months = None, elementAttributeId = None, eventF
 		eventFrame = EventFrame.query.get_or_404(eventFrameId)
 		eventFrameAttribute = EventFrameAttribute.query.get_or_404(eventFrameAttributeId)
 		tag = Tag.query.get_or_404(eventFrameAttribute.TagId)
+		if eventFrameGroupId:
+			eventFrameGroup = EventFrameGroup.query.get_or_404(eventFrameGroupId)
 	else:
 		tag = Tag.query.get_or_404(tagId)
 
@@ -65,7 +69,7 @@ def listTagValues(tagId = None, months = None, elementAttributeId = None, eventF
 				tagValues = TagValue.query.filter(TagValue.TagId == tag.TagId, TagValue.Timestamp >= fromTimestamp, TagValue.Timestamp <= toTimestamp)
 
 	return render_template("tagValues/tagValues.html", elementAttribute = elementAttribute, eventFrame = eventFrame, eventFrameAttribute = eventFrameAttribute,
-		months = months, tag = tag, tagValues = tagValues)
+		eventFrameGroup = eventFrameGroup, months = months, tag = tag, tagValues = tagValues)
 
 @tagValues.route("/tagValues/addMultiple", methods = ["GET", "POST"])
 @login_required
@@ -91,9 +95,10 @@ def addMultiple():
 @tagValues.route("/tagValues/add/<int:tagId>", methods = ["GET", "POST"])
 @tagValues.route("/tagValues/add/elementAttribute/<int:elementAttributeId>", methods = ["GET", "POST"])
 @tagValues.route("/tagValues/add/eventFrameAttribute/<int:eventFrameId>/<int:eventFrameAttributeId>", methods = ["GET", "POST"])
+@tagValues.route("/tagValues/add/eventFrameAttribute/<int:eventFrameId>/<int:eventFrameAttributeId>/<int:eventFrameGroupId>", methods = ["GET", "POST"])
 @login_required
 @permissionRequired(Permission.DATA_ENTRY)
-def addTagValue(tagId = None, elementAttributeId = None, eventFrameId = None, eventFrameAttributeId = None):
+def addTagValue(tagId = None, elementAttributeId = None, eventFrameId = None, eventFrameAttributeId = None, eventFrameGroupId = None):
 	operation = "Add"
 	if elementAttributeId:
 		elementAttribute = ElementAttribute.query.get_or_404(elementAttributeId)
@@ -132,39 +137,56 @@ def addTagValue(tagId = None, elementAttributeId = None, eventFrameId = None, ev
 		form.requestReferrer.data = request.referrer
 
 	if elementAttributeId:
-		breadcrumbs = [{"url" : url_for("tags.selectTag", selectedClass = "Root"), "text" : "<span class = \"glyphicon glyphicon-home\"></span>"},
-			{"url" : url_for("elements.selectElement", selectedClass = "Enterprise",
+		breadcrumbs = [{"url": url_for("tags.selectTag", selectedClass = "Root"), "text": "<span class = \"glyphicon glyphicon-home\"></span>"},
+			{"url": url_for("elements.selectElement", selectedClass = "Enterprise",
 				selectedId = elementAttribute.Element.ElementTemplate.Site.Enterprise.EnterpriseId),
-				"text" : elementAttribute.Element.ElementTemplate.Site.Enterprise.Name},
-			{"url" : url_for("elements.selectElement", selectedClass = "Site",
-				selectedId = elementAttribute.Element.ElementTemplate.Site.SiteId), "text" : elementAttribute.Element.ElementTemplate.Site.Name},
-			{"url" : url_for("elements.selectElement", selectedClass = "ElementTemplate",
-				selectedId = elementAttribute.Element.ElementTemplate.ElementTemplateId), "text" : elementAttribute.Element.ElementTemplate.Name},
-			{"url" : url_for("elements.dashboard", elementId = elementAttribute.Element.ElementId), "text" : elementAttribute.Element.Name},
-			{"url" : url_for("tagValues.listTagValues", tagId = tag.TagId, elementAttributeId = elementAttribute.ElementAttributeId),
-				"text" : elementAttribute.ElementAttributeTemplate.Name}]
+				"text": elementAttribute.Element.ElementTemplate.Site.Enterprise.Name},
+			{"url": url_for("elements.selectElement", selectedClass = "Site",
+				selectedId = elementAttribute.Element.ElementTemplate.Site.SiteId), "text": elementAttribute.Element.ElementTemplate.Site.Name},
+			{"url": url_for("elements.selectElement", selectedClass = "ElementTemplate",
+				selectedId = elementAttribute.Element.ElementTemplate.ElementTemplateId), "text": elementAttribute.Element.ElementTemplate.Name},
+			{"url": url_for("elements.dashboard", elementId = elementAttribute.Element.ElementId), "text": elementAttribute.Element.Name},
+			{"url": url_for("tagValues.listTagValues", tagId = tag.TagId, elementAttributeId = elementAttribute.ElementAttributeId),
+				"text": elementAttribute.ElementAttributeTemplate.Name}]
+	elif eventFrameGroupId:
+		eventFrame = EventFrame.query.get_or_404(eventFrameId)
+		eventFrameGroup = EventFrameGroup.query.get_or_404(eventFrameGroupId)
+		breadcrumbs = [{"url": url_for("eventFrameGroups.listEventFrameGroups"), "text": "<span class = \"glyphicon glyphicon-home\"></span>"},
+			{"url": url_for("eventFrameGroups.dashboard", eventFrameGroupId = eventFrameGroup.EventFrameGroupId), "text": eventFrameGroup.Name},
+			{"url": url_for("eventFrames.dashboard", eventFrameId = eventFrame.origin().EventFrameId,
+				eventFrameGroupId = eventFrameGroup.EventFrameGroupId), "text": eventFrame.origin().Name}]
+		eventFrames = eventFrame.ancestors([])
+		eventFrames.append(eventFrame)
+		for eventFrame in eventFrames:
+			if eventFrame.ParentEventFrameId is not None:
+				breadcrumbs.append({"url": url_for("eventFrames.dashboard", eventFrameId = eventFrame.EventFrameId,
+					eventFrameGroupId = eventFrameGroup.EventFrameGroupId),
+					"text": "{} / {}".format(eventFrame.EventFrameTemplate.Name, eventFrame.Name)})
+
+		breadcrumbs.append({"url": url_for("tagValues.listTagValues", eventFrameId = eventFrame.EventFrameId, eventFrameAttributeId = eventFrameAttributeId,
+			eventFrameGroupId = eventFrameGroup.EventFrameGroupId), "text": eventFrameAttribute.EventFrameAttributeTemplate.Name})
 	elif eventFrameId:
 		eventFrame = EventFrame.query.get_or_404(eventFrameId)
-		breadcrumbs = [{"url" : url_for("tags.selectTag", selectedClass = "Root"), "text" : "<span class = \"glyphicon glyphicon-home\"></span>"},
-			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Enterprise",
+		breadcrumbs = [{"url": url_for("eventFrameGroups.listEventFrameGroups"), "text": "<span class = \"glyphicon glyphicon-home\"></span>"},
+			{"url": url_for("eventFrames.selectEventFrame", selectedClass = "Enterprise",
 				selectedId = eventFrame.Element.ElementTemplate.Site.Enterprise.EnterpriseId),
-				"text" : eventFrame.Element.ElementTemplate.Site.Enterprise.Name},
-			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Site", selectedId = eventFrame.Element.ElementTemplate.Site.SiteId),
-				"text" : eventFrame.Element.ElementTemplate.Site.Name},
-			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "ElementTemplate",
-				selectedId = eventFrame.Element.ElementTemplate.ElementTemplateId), "text" : eventFrame.Element.ElementTemplate.Name},
-			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "EventFrameTemplate",
-				selectedId = eventFrame.EventFrameTemplate.EventFrameTemplateId), "text" : eventFrame.EventFrameTemplate.Name},
-			{"url" : url_for("eventFrames.dashboard", eventFrameId = eventFrame.EventFrameId), "text" : eventFrame.Name},
-			{"url" : url_for("tagValues.listTagValues", eventFrameId = eventFrame.EventFrameId, eventFrameAttributeId = eventFrameAttributeId), 
-				"text" : eventFrameAttribute.EventFrameAttributeTemplate.Name}]
+				"text": eventFrame.Element.ElementTemplate.Site.Enterprise.Name},
+			{"url": url_for("eventFrames.selectEventFrame", selectedClass = "Site", selectedId = eventFrame.Element.ElementTemplate.Site.SiteId),
+				"text": eventFrame.Element.ElementTemplate.Site.Name},
+			{"url": url_for("eventFrames.selectEventFrame", selectedClass = "ElementTemplate",
+				selectedId = eventFrame.Element.ElementTemplate.ElementTemplateId), "text": eventFrame.Element.ElementTemplate.Name},
+			{"url": url_for("eventFrames.selectEventFrame", selectedClass = "EventFrameTemplate",
+				selectedId = eventFrame.EventFrameTemplate.EventFrameTemplateId), "text": eventFrame.EventFrameTemplate.Name},
+			{"url": url_for("eventFrames.dashboard", eventFrameId = eventFrame.EventFrameId), "text": eventFrame.Name},
+			{"url": url_for("tagValues.listTagValues", eventFrameId = eventFrame.EventFrameId, eventFrameAttributeId = eventFrameAttributeId), 
+				"text": eventFrameAttribute.EventFrameAttributeTemplate.Name}]
 	else:
-		breadcrumbs = [{"url" : url_for("tags.selectTag", selectedClass = "Root"), "text" : "<span class = \"glyphicon glyphicon-home\"></span>"},
-			{"url" : url_for("tags.selectTag", selectedClass = "Enterprise", selectedId = tag.Area.Site.Enterprise.EnterpriseId),
-				"text" : tag.Area.Site.Enterprise.Name},
-			{"url" : url_for("tags.selectTag", selectedClass = "Site", selectedId = tag.Area.Site.SiteId), "text" : tag.Area.Site.Name},
-			{"url" : url_for("tags.selectTag", selectedClass = "Area", selectedId = tag.Area.AreaId), "text" : tag.Area.Name},
-			{"url" : url_for("tagValues.listTagValues", tagId = tag.TagId), "text" : tag.Name}]
+		breadcrumbs = [{"url": url_for("tags.selectTag", selectedClass = "Root"), "text": "<span class = \"glyphicon glyphicon-home\"></span>"},
+			{"url": url_for("tags.selectTag", selectedClass = "Enterprise", selectedId = tag.Area.Site.Enterprise.EnterpriseId),
+				"text": tag.Area.Site.Enterprise.Name},
+			{"url": url_for("tags.selectTag", selectedClass = "Site", selectedId = tag.Area.Site.SiteId), "text": tag.Area.Site.Name},
+			{"url": url_for("tags.selectTag", selectedClass = "Area", selectedId = tag.Area.AreaId), "text": tag.Area.Name},
+			{"url": url_for("tagValues.listTagValues", tagId = tag.TagId), "text": tag.Name}]
 
 	return render_template("addEditWithTimestamp.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
 
@@ -181,9 +203,10 @@ def deleteTagValue(tagValueId):
 @tagValues.route("/tagValues/edit/<int:tagValueId>", methods = ["GET", "POST"])
 @tagValues.route("/tagValues/edit/<int:tagValueId>/<int:elementAttributeId>", methods = ["GET", "POST"])
 @tagValues.route("/tagValues/edit/<int:tagValueId>/<int:eventFrameId>/<int:eventFrameAttributeId>", methods = ["GET", "POST"])
+@tagValues.route("/tagValues/edit/<int:tagValueId>/<int:eventFrameId>/<int:eventFrameAttributeId>/<int:eventFrameGroupId>", methods = ["GET", "POST"])
 @login_required
 @permissionRequired(Permission.DATA_ENTRY)
-def editTagValue(tagValueId, elementAttributeId = None, eventFrameId = None, eventFrameAttributeId = None):
+def editTagValue(tagValueId, elementAttributeId = None, eventFrameId = None, eventFrameAttributeId = None, eventFrameGroupId = None):
 	operation = "Edit"
 	tagValue = TagValue.query.get_or_404(tagValueId)
 	tag = Tag.query.get_or_404(tagValue.TagId)
@@ -226,42 +249,61 @@ def editTagValue(tagValueId, elementAttributeId = None, eventFrameId = None, eve
 
 	if elementAttributeId:
 		elementAttribute = ElementAttribute.query.get_or_404(elementAttributeId)
-		breadcrumbs = [{"url" : url_for("tags.selectTag", selectedClass = "Root"), "text" : "<span class = \"glyphicon glyphicon-home\"></span>"},
-			{"url" : url_for("elements.selectElement", selectedClass = "Enterprise",
+		breadcrumbs = [{"url": url_for("tags.selectTag", selectedClass = "Root"), "text": "<span class = \"glyphicon glyphicon-home\"></span>"},
+			{"url": url_for("elements.selectElement", selectedClass = "Enterprise",
 				selectedId = elementAttribute.Element.ElementTemplate.Site.Enterprise.EnterpriseId),
-				"text" : elementAttribute.Element.ElementTemplate.Site.Enterprise.Name},
-			{"url" : url_for("elements.selectElement", selectedClass = "Site",
-				selectedId = elementAttribute.Element.ElementTemplate.Site.SiteId), "text" : elementAttribute.Element.ElementTemplate.Site.Name},
-			{"url" : url_for("elements.selectElement", selectedClass = "ElementTemplate",
-				selectedId = elementAttribute.Element.ElementTemplate.ElementTemplateId), "text" : elementAttribute.Element.ElementTemplate.Name},
-			{"url" : url_for("elements.dashboard", elementId = elementAttribute.Element.ElementId), "text" : elementAttribute.Element.Name},
-			{"url" : url_for("tagValues.listTagValues", elementAttributeId = elementAttribute.ElementAttributeId),
-				"text" : elementAttribute.ElementAttributeTemplate.Name},
-			{"url" : None, "text" : tagValue.Timestamp, "type" : "timestamp"}]
+				"text": elementAttribute.Element.ElementTemplate.Site.Enterprise.Name},
+			{"url": url_for("elements.selectElement", selectedClass = "Site",
+				selectedId = elementAttribute.Element.ElementTemplate.Site.SiteId), "text": elementAttribute.Element.ElementTemplate.Site.Name},
+			{"url": url_for("elements.selectElement", selectedClass = "ElementTemplate",
+				selectedId = elementAttribute.Element.ElementTemplate.ElementTemplateId), "text": elementAttribute.Element.ElementTemplate.Name},
+			{"url": url_for("elements.dashboard", elementId = elementAttribute.Element.ElementId), "text": elementAttribute.Element.Name},
+			{"url": url_for("tagValues.listTagValues", elementAttributeId = elementAttribute.ElementAttributeId),
+				"text": elementAttribute.ElementAttributeTemplate.Name},
+			{"url": None, "text": tagValue.Timestamp, "type" : "timestamp"}]
+	elif eventFrameGroupId:
+		eventFrame = EventFrame.query.get_or_404(eventFrameId)
+		eventFrameGroup = EventFrameGroup.query.get_or_404(eventFrameGroupId)
+		eventFrameAttribute = EventFrameAttribute.query.get_or_404(eventFrameAttributeId)
+		breadcrumbs = [{"url": url_for("eventFrameGroups.listEventFrameGroups"), "text": "<span class = \"glyphicon glyphicon-home\"></span>"},
+			{"url": url_for("eventFrameGroups.dashboard", eventFrameGroupId = eventFrameGroup.EventFrameGroupId), "text": eventFrameGroup.Name},
+			{"url": url_for("eventFrames.dashboard", eventFrameId = eventFrame.origin().EventFrameId,
+				eventFrameGroupId = eventFrameGroup.EventFrameGroupId), "text": eventFrame.origin().Name}]
+		eventFrames = eventFrame.ancestors([])
+		eventFrames.append(eventFrame)
+		for eventFrame in eventFrames:
+			if eventFrame.ParentEventFrameId is not None:
+				breadcrumbs.append({"url": url_for("eventFrames.dashboard", eventFrameId = eventFrame.EventFrameId,
+					eventFrameGroupId = eventFrameGroup.EventFrameGroupId),
+					"text": "{} / {}".format(eventFrame.EventFrameTemplate.Name, eventFrame.Name)})
+
+		breadcrumbs.append({"url": url_for("tagValues.listTagValues", eventFrameId = eventFrame.EventFrameId, eventFrameAttributeId = eventFrameAttributeId,
+			eventFrameGroupId = eventFrameGroup.EventFrameGroupId), "text": eventFrameAttribute.EventFrameAttributeTemplate.Name})
+		breadcrumbs.append({"url": None, "text": tagValue.Timestamp})
 	elif eventFrameId:
 		eventFrame = EventFrame.query.get_or_404(eventFrameId)
 		eventFrameAttribute = EventFrameAttribute.query.get_or_404(eventFrameAttributeId)
-		breadcrumbs = [{"url" : url_for("tags.selectTag", selectedClass = "Root"), "text" : "<span class = \"glyphicon glyphicon-home\"></span>"},
-			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Enterprise",
+		breadcrumbs = [{"url": url_for("tags.selectTag", selectedClass = "Root"), "text": "<span class = \"glyphicon glyphicon-home\"></span>"},
+			{"url": url_for("eventFrames.selectEventFrame", selectedClass = "Enterprise",
 				selectedId = eventFrame.Element.ElementTemplate.Site.Enterprise.EnterpriseId),
-				"text" : eventFrame.Element.ElementTemplate.Site.Enterprise.Name},
-			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Site", selectedId = eventFrame.Element.ElementTemplate.Site.SiteId),
-				"text" : eventFrame.Element.ElementTemplate.Site.Name},
-			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "ElementTemplate",
-				selectedId = eventFrame.Element.ElementTemplate.ElementTemplateId), "text" : eventFrame.Element.ElementTemplate.Name},
-			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "EventFrameTemplate",
-				selectedId = eventFrame.EventFrameTemplate.EventFrameTemplateId), "text" : eventFrame.EventFrameTemplate.Name},
-			{"url" : url_for("eventFrames.dashboard", eventFrameId = eventFrame.EventFrameId), "text" : eventFrame.Name},
-			{"url" : url_for("tagValues.listTagValues", eventFrameId = eventFrame.EventFrameId,
-				eventFrameAttributeId = eventFrameAttribute.EventFrameAttributeId), "text" : eventFrameAttribute.EventFrameAttributeTemplate.Name},
-			{"url" : None, "text" : tagValue.Timestamp}]
+				"text": eventFrame.Element.ElementTemplate.Site.Enterprise.Name},
+			{"url": url_for("eventFrames.selectEventFrame", selectedClass = "Site", selectedId = eventFrame.Element.ElementTemplate.Site.SiteId),
+				"text": eventFrame.Element.ElementTemplate.Site.Name},
+			{"url": url_for("eventFrames.selectEventFrame", selectedClass = "ElementTemplate",
+				selectedId = eventFrame.Element.ElementTemplate.ElementTemplateId), "text": eventFrame.Element.ElementTemplate.Name},
+			{"url": url_for("eventFrames.selectEventFrame", selectedClass = "EventFrameTemplate",
+				selectedId = eventFrame.EventFrameTemplate.EventFrameTemplateId), "text": eventFrame.EventFrameTemplate.Name},
+			{"url": url_for("eventFrames.dashboard", eventFrameId = eventFrame.EventFrameId), "text": eventFrame.Name},
+			{"url": url_for("tagValues.listTagValues", eventFrameId = eventFrame.EventFrameId,
+				eventFrameAttributeId = eventFrameAttribute.EventFrameAttributeId), "text": eventFrameAttribute.EventFrameAttributeTemplate.Name},
+			{"url": None, "text": tagValue.Timestamp}]
 	else:
-		breadcrumbs = [{"url" : url_for("tags.selectTag", selectedClass = "Root"), "text" : "<span class = \"glyphicon glyphicon-home\"></span>"},
-			{"url" : url_for("tags.selectTag", selectedClass = "Enterprise", selectedId = tag.Area.Site.Enterprise.EnterpriseId),
-				"text" : tag.Area.Site.Enterprise.Name},
-			{"url" : url_for("tags.selectTag", selectedClass = "Site", selectedId = tag.Area.Site.SiteId), "text" : tag.Area.Site.Name},
-			{"url" : url_for("tags.selectTag", selectedClass = "Area", selectedId = tag.Area.AreaId), "text" : tag.Area.Name},
-			{"url" : url_for("tagValues.listTagValues", tagId = tag.TagId), "text" : tag.Name},
-			{"url" : None, "text" : tagValue.Timestamp, "type" : "timestamp"}]
+		breadcrumbs = [{"url": url_for("tags.selectTag", selectedClass = "Root"), "text": "<span class = \"glyphicon glyphicon-home\"></span>"},
+			{"url": url_for("tags.selectTag", selectedClass = "Enterprise", selectedId = tag.Area.Site.Enterprise.EnterpriseId),
+				"text": tag.Area.Site.Enterprise.Name},
+			{"url": url_for("tags.selectTag", selectedClass = "Site", selectedId = tag.Area.Site.SiteId), "text": tag.Area.Site.Name},
+			{"url": url_for("tags.selectTag", selectedClass = "Area", selectedId = tag.Area.AreaId), "text": tag.Area.Name},
+			{"url": url_for("tagValues.listTagValues", tagId = tag.TagId), "text": tag.Name},
+			{"url": None, "text": tagValue.Timestamp, "type" : "timestamp"}]
 
 	return render_template("addEditWithTimestamp.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)

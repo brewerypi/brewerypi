@@ -23,6 +23,31 @@
                         <span class = "glyphicon glyphicon-arrow-right"></span></a>
                     {{ elementAttribute.ElementAttributeTemplate.Name }}
                 </li>
+            {% elif eventFrameGroup %}
+                <li><a href = '{{ url_for("eventFrameGroups.listEventFrameGroups") }}'><span class = "glyphicon glyphicon-home"></span></a></li>
+                <li><a href = '{{ url_for("eventFrameGroups.dashboard", eventFrameGroupId = eventFrameGroup.EventFrameGroupId) }}'>
+                        {{ eventFrameGroup.Name }}</a></li>    
+                {% set eventFrames = eventFrame.ancestors([]) %}
+                {% do eventFrames.append(eventFrame) %}
+                {% for eventFrame in eventFrames %}
+                    <li><a href = '{{ url_for("eventFrames.dashboard", eventFrameId = eventFrame.EventFrameId,
+                        eventFrameGroupId = eventFrameGroup.EventFrameGroupId) }}'>
+                        {% if eventFrame.ParentEventFrameId == None %}
+                            {{ eventFrame.Name }}
+                        {% else %}
+                            {{ eventFrame.EventFrameTemplate.Name }}&nbsp;&nbsp;/&nbsp;&nbsp;{{ eventFrame.Name }}
+                        {% endif %}
+                    </a></li>
+                {% endfor %}
+                <li class = "active">
+                    <a title = "Previous" href = '{{ url_for("tagValues.listTagValues", eventFrameId = eventFrame.EventFrameId,
+                        eventFrameAttributeId = eventFrameAttribute.previous().id(), eventFrameGroupId = eventFrameGroup.EventFrameGroupId) }}'>
+                        <span class = "glyphicon glyphicon-arrow-left"></span></a>
+                    <a title = "Next" href = '{{ url_for("tagValues.listTagValues", eventFrameId = eventFrame.EventFrameId,
+                        eventFrameAttributeId = eventFrameAttribute.next().id(), eventFrameGroupId = eventFrameGroup.EventFrameGroupId) }}'>
+                        <span class = "glyphicon glyphicon-arrow-right"></span></a>
+                    {{ eventFrameAttribute.EventFrameAttributeTemplate.Name }}
+                </li>
             {% elif eventFrame %}
                 <li><a href = '{{ url_for("eventFrames.selectEventFrame", selectedClass = "Root") }}'><span class = "glyphicon glyphicon-home"></span></a></li>
                 <li><a href = '{{ url_for("eventFrames.selectEventFrame", selectedClass = "Enterprise",
@@ -118,6 +143,10 @@
         {% if elementAttribute %}
             <a class = "btn btn-default" title = "Add" href = '{{ url_for("tagValues.addTagValue", elementAttributeId = elementAttribute.ElementAttributeId) }}'
                 role = "button"><span class = "glyphicon glyphicon-plus"></span></a>
+        {% elif eventFrameGroup %}
+            <a class = "btn btn-default" title = "Add" href = '{{ url_for("tagValues.addTagValue", eventFrameId = eventFrame.EventFrameId,
+                eventFrameAttributeId = eventFrameAttribute.EventFrameAttributeId, eventFrameGroupId = eventFrameGroup.EventFrameGroupId) }}' role = "button">
+                <span class = "glyphicon glyphicon-plus"></span></a>
         {% elif eventFrame %}
             <a class = "btn btn-default" title = "Add" href = '{{ url_for("tagValues.addTagValue", eventFrameId = eventFrame.EventFrameId,
                 eventFrameAttributeId = eventFrameAttribute.EventFrameAttributeId) }}' role = "button"><span class = "glyphicon glyphicon-plus"></span></a>
