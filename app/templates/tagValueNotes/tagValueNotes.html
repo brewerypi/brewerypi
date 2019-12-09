@@ -19,10 +19,40 @@
                 <li><a href = '{{ url_for("tagValues.listTagValues", elementAttributeId = elementAttribute.ElementAttributeId) }}'>
                     {{ elementAttribute.ElementAttributeTemplate.Name }}</a></li>
                 <li class = "active">
-                    <a title = "Previous" href = '{{ url_for("tagValueNotes.listTagValueNotes", tagValueId = tagValue.previous().id(),
+                    <a title = "Previous" href = '{{ url_for("tagValueNotes.listTagValueNotes", tagValueId = tagValue.previous().TagValueId,
                         elementAttributeId = elementAttribute.ElementAttributeId) }}'><span class = "glyphicon glyphicon-arrow-left"></span></a>
-                    <a title = "Next" href = '{{ url_for("tagValueNotes.listTagValueNotes", tagValueId = tagValue.next().id(),
+                    <a title = "Next" href = '{{ url_for("tagValueNotes.listTagValueNotes", tagValueId = tagValue.next().TagValueId,
                         elementAttributeId = elementAttribute.ElementAttributeId) }}'><span class = "glyphicon glyphicon-arrow-right"></span></a>
+                    {{ moment(tagValue.Timestamp).format("YYYY-MM-DD HH:mm:ss") }}
+                </li>
+            {% elif eventFrameGroup %}
+                <li><a href = '{{ url_for("eventFrameGroups.listEventFrameGroups") }}'><span class = "glyphicon glyphicon-home"></span></a></li>
+                <li><a href = '{{ url_for("eventFrameGroups.dashboard", eventFrameGroupId = eventFrameGroup.EventFrameGroupId) }}'>
+                        {{ eventFrameGroup.Name }}</a></li>    
+                {% set eventFrames = eventFrame.ancestors([]) %}
+                {% do eventFrames.append(eventFrame) %}
+                {% for eventFrame in eventFrames %}
+                    <li><a href = '{{ url_for("eventFrames.dashboard", eventFrameId = eventFrame.EventFrameId,
+                        eventFrameGroupId = eventFrameGroup.EventFrameGroupId) }}'>
+                        {% if eventFrame.ParentEventFrameId == None %}
+                            {{ eventFrame.Name }}
+                        {% else %}
+                            {{ eventFrame.EventFrameTemplate.Name }}&nbsp;&nbsp;/&nbsp;&nbsp;{{ eventFrame.Name }}
+                        {% endif %}
+                    </a></li>
+                {% endfor %}
+                <li><a href = '{{ url_for("tagValues.listTagValues", eventFrameId = eventFrame.EventFrameId,
+                    eventFrameAttributeId = eventFrameAttribute.EventFrameAttributeId, eventFrameGroupId = eventFrameGroup.EventFrameGroupId) }}'>
+                    {{ eventFrameAttribute.EventFrameAttributeTemplate.Name }}</a></li>
+                <li class = "active">
+                    <a title = "Previous" href = '{{ url_for("tagValueNotes.listTagValueNotes",
+                        tagValueId = tagValue.previous(eventFrame.EventFrameId).TagValueId, eventFrameId = eventFrame.EventFrameId,
+                        eventFrameAttributeId = eventFrameAttribute.EventFrameAttributeId, eventFrameGroupId = eventFrameGroup.EventFrameGroupId) }}'>
+                        <span class = "glyphicon glyphicon-arrow-left"></span></a>
+                    <a title = "Next" href = '{{ url_for("tagValueNotes.listTagValueNotes",
+                        tagValueId = tagValue.next(eventFrame.EventFrameId).TagValueId, eventFrameId = eventFrame.EventFrameId,
+                        eventFrameAttributeId = eventFrameAttribute.EventFrameAttributeId, eventFrameGroupId = eventFrameGroup.EventFrameGroupId) }}'>
+                        <span class = "glyphicon glyphicon-arrow-right"></span></a>
                     {{ moment(tagValue.Timestamp).format("YYYY-MM-DD HH:mm:ss") }}
                 </li>
             {% elif eventFrame %}
@@ -40,12 +70,12 @@
                 <li><a href = '{{ url_for("tagValues.listTagValues", eventFrameId = eventFrame.EventFrameId,
                     eventFrameAttributeId = eventFrameAttribute.EventFrameAttributeId) }}'>{{ eventFrameAttribute.EventFrameAttributeTemplate.Name }}</a></li>
                 <li class = "active">
-                    <a title = "Previous" href = '{{ url_for("tagValueNotes.listTagValueNotes", tagValueId = tagValue.previous(eventFrame.EventFrameId).id(),
-                        eventFrameId = eventFrame.EventFrameId, eventFrameAttributeId = eventFrameAttribute.EventFrameAttributeId) }}'>
-                        <span class = "glyphicon glyphicon-arrow-left"></span></a>
-                    <a title = "Next" href = '{{ url_for("tagValueNotes.listTagValueNotes", tagValueId = tagValue.next(eventFrame.EventFrameId).id(),
-                        eventFrameId = eventFrame.EventFrameId, eventFrameAttributeId = eventFrameAttribute.EventFrameAttributeId) }}'>
-                        <span class = "glyphicon glyphicon-arrow-right"></span></a>
+                    <a title = "Previous" href = '{{ url_for("tagValueNotes.listTagValueNotes",
+                        tagValueId = tagValue.previous(eventFrame.EventFrameId).TagValueId, eventFrameId = eventFrame.EventFrameId,
+                        eventFrameAttributeId = eventFrameAttribute.EventFrameAttributeId) }}'><span class = "glyphicon glyphicon-arrow-left"></span></a>
+                    <a title = "Next" href = '{{ url_for("tagValueNotes.listTagValueNotes",
+                        tagValueId = tagValue.next(eventFrame.EventFrameId).TagValueId, eventFrameId = eventFrame.EventFrameId,
+                        eventFrameAttributeId = eventFrameAttribute.EventFrameAttributeId) }}'><span class = "glyphicon glyphicon-arrow-right"></span></a>
                     {{ moment(tagValue.Timestamp).format("YYYY-MM-DD HH:mm:ss") }}
                 </li>
             {% else %}
@@ -58,9 +88,9 @@
                     </a></li>
                 <li><a href = '{{ url_for("tagValues.listTagValues", tagId = tagValue.Tag.TagId) }}'>{{ tagValue.Tag.Name }}</a></li>
                 <li class = "active">
-                    <a title = "Previous" href = '{{ url_for("tagValueNotes.listTagValueNotes", tagValueId = tagValue.previous().id()) }}'>
+                    <a title = "Previous" href = '{{ url_for("tagValueNotes.listTagValueNotes", tagValueId = tagValue.previous().TagValueId) }}'>
                         <span class = "glyphicon glyphicon-arrow-left"></span></a>
-                    <a title = "Next" href = '{{ url_for("tagValueNotes.listTagValueNotes", tagValueId = tagValue.next().id()) }}'>
+                    <a title = "Next" href = '{{ url_for("tagValueNotes.listTagValueNotes", tagValueId = tagValue.next().TagValueId) }}'>
                         <span class = "glyphicon glyphicon-arrow-right"></span></a>            
                     {{ moment(tagValue.Timestamp).format("YYYY-MM-DD HH:mm:ss") }}
                 </li>
@@ -74,6 +104,11 @@
         {% if elementAttribute %}
             <a class = "btn btn-default" title = "Add" href = '{{ url_for("tagValueNotes.addTagValueNote", tagValueId = tagValue.TagValueId,
                 elementAttributeId = elementAttribute.ElementAttributeId) }}' role = "button"><span class = "glyphicon glyphicon-plus"></span></a>
+            <br><br>
+        {% elif eventFrameGroup %}
+            <a class = "btn btn-default" title = "Add" href = '{{ url_for("tagValueNotes.addTagValueNote", tagValueId = tagValue.TagValueId,
+                eventFrameId = eventFrame.EventFrameId, eventFrameAttributeId = eventFrameAttribute.EventFrameAttributeId,
+                eventFrameGroupId = eventFrameGroup.EventFrameGroupId) }}' role = "button"><span class = "glyphicon glyphicon-plus"></span></a>
             <br><br>
         {% elif eventFrame %}
             <a class = "btn btn-default" title = "Add" href = '{{ url_for("tagValueNotes.addTagValueNote", tagValueId = tagValue.TagValueId,
@@ -105,6 +140,11 @@
                             <td><a class = "btn btn-default" title = "Edit" href = '{{ url_for("tagValueNotes.editTagValueNote",
                                 noteId = tagValueNote.NoteId, tagValueId = tagValueNote.TagValueId,
                                 elementAttributeId = elementAttribute.ElementAttributeId) }}'><span class = "glyphicon glyphicon-edit"></span></a></td>
+                        {% elif eventFrameGroup %}
+                            <td><a class = "btn btn-default" title = "Edit" href = '{{ url_for("tagValueNotes.editTagValueNote",
+                                noteId = tagValueNote.NoteId, tagValueId = tagValueNote.TagValueId, eventFrameId = eventFrame.EventFrameId,
+                                eventFrameAttributeId = eventFrameAttribute.EventFrameAttributeId, eventFrameGroupId = eventFrameGroup.EventFrameGroupId) }}'>
+                                <span class = "glyphicon glyphicon-edit"></span></a></td>
                         {% elif eventFrame %}
                             <td><a class = "btn btn-default" title = "Edit" href = '{{ url_for("tagValueNotes.editTagValueNote",
                                 noteId = tagValueNote.NoteId, tagValueId = tagValueNote.TagValueId, eventFrameId = eventFrame.EventFrameId,

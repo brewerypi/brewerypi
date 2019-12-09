@@ -210,6 +210,11 @@
                             <td><a class = "{{ noteButtonClass }}" title = "Notes" href = '{{ url_for("tagValueNotes.listTagValueNotes", 
                                 tagValueId = tagValue.TagValueId, elementAttributeId = elementAttribute.ElementAttributeId) }}'>
                                 <span class = "glyphicon glyphicon-comment"></span></a></td>
+                        {% elif eventFrameGroup %}
+                            <td><a class = "{{ noteButtonClass }}" title = "Notes" href = '{{ url_for("tagValueNotes.listTagValueNotes", 
+                                tagValueId = tagValue.TagValueId, eventFrameId = eventFrame.EventFrameId,
+                                eventFrameAttributeId = eventFrameAttribute.EventFrameAttributeId, eventFrameGroupId = eventFrameGroup.EventFrameGroupId) }}'>
+                                <span class = "glyphicon glyphicon-comment"></span></a></td>
                         {% elif eventFrame %}
                             <td><a class = "{{ noteButtonClass }}" title = "Notes" href = '{{ url_for("tagValueNotes.listTagValueNotes", 
                                 tagValueId = tagValue.TagValueId, eventFrameId = eventFrame.EventFrameId,
