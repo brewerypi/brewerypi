@@ -346,24 +346,25 @@ class EventFrame(db.Model):
 		if months is None:
 			# Active event frames only.
 			if self.ParentEventFrameId is None:
-				return EventFrame.query.filter(EventFrame.EventFrameTemplateId == self.EventFrameTemplateId, EventFrame.EndTimestamp == None).all()
+				return EventFrame.query.filter(EventFrame.EventFrameTemplateId == self.EventFrameTemplateId, EventFrame.EndTimestamp == None). \
+					order_by(EventFrame.StartTimestamp.desc()).all()
 			else:
-				return EventFrame.query.filter(EventFrame.ParentEventFrameId == self.ParentEventFrameId).all()
+				return EventFrame.query.filter(EventFrame.ParentEventFrameId == self.ParentEventFrameId).order_by(EventFrame.StartTimestamp.desc()).all()
 		elif months == 0:
 			# All event frames.
 			if self.ParentEventFrameId is None:
-				return EventFrame.query.filter_by(EventFrameTemplateId = self.EventFrameTemplateId).all()
+				return EventFrame.query.filter_by(EventFrameTemplateId = self.EventFrameTemplateId).order_by(EventFrame.StartTimestamp.desc()).all()
 			else:
-				return EventFrame.query.filter_by(ParentEventFrameId = self.ParentEventFrameId).all()
+				return EventFrame.query.filter_by(ParentEventFrameId = self.ParentEventFrameId).order_by(EventFrame.StartTimestamp.desc()).all()
 		else:
 			fromTimestamp = datetime.utcnow() - relativedelta(months = months)
 			toTimestamp = datetime.utcnow()
 			if self.ParentEventFrameId is None:
 				return EventFrame.query.filter(EventFrame.EventFrameTemplateId == self.EventFrameTemplateId, EventFrame.StartTimestamp >= fromTimestamp,
-					EventFrame.StartTimestamp <= toTimestamp).all()
+					EventFrame.StartTimestamp <= toTimestamp).order_by(EventFrame.StartTimestamp.desc()).all()
 			else:
 				return EventFrame.query.filter(EventFrame.ParentEventFrameId == self.ParentEventFrameId, EventFrame.StartTimestamp >= fromTimestamp,
-					EventFrame.StartTimestamp <= toTimestamp).all()
+					EventFrame.StartTimestamp <= toTimestamp).order_by(EventFrame.StartTimestamp.desc()).all()
 
 	def origin(self):
 		if self.ParentEventFrameId == None:
