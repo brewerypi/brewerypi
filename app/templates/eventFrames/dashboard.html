@@ -81,17 +81,14 @@
             <h1>Child Event Frames <small>{{ eventFrame.origin().Element.Name }}</small></h1>
         </div>
         <div>
-            {% if eventFrame.ParentEventFrameId is none %}
+            {% if eventFrameEventFrameGroup is none %}
+                <a class = "btn btn-default" id = "aAddChildEventFrame" title = "Add"
+                    href = '{{ url_for("eventFrames.addEventFrame", parentEventFrameId = eventFrame.EventFrameId) }}' role = "button">
+                    <span class = "glyphicon glyphicon-plus"></span></a>
             {% else %}
-                {% if eventFrameEventFrameGroup is none %}
-                    <a class = "btn btn-default" id = "aAddChildEventFrame" title = "Add"
-                        href = '{{ url_for("eventFrames.addEventFrame", parentEventFrameId = eventFrame.EventFrameId) }}' role = "button">
-                        <span class = "glyphicon glyphicon-plus"></span></a>
-                {% else %}
-                    <a class = "btn btn-default" id = "aAddChildEventFrame" title = "Add"
-                        href = '{{ url_for("eventFrames.addEventFrame", parentEventFrameId = eventFrame.EventFrameId,
-                        eventFrameGroupId = eventFrameEventFrameGroup.EventFrameGroupId) }}' role = "button"><span class = "glyphicon glyphicon-plus"></span></a>
-                {% endif %}
+                <a class = "btn btn-default" id = "aAddChildEventFrame" title = "Add"
+                    href = '{{ url_for("eventFrames.addEventFrame", parentEventFrameId = eventFrame.EventFrameId,
+                    eventFrameGroupId = eventFrameEventFrameGroup.EventFrameGroupId) }}' role = "button"><span class = "glyphicon glyphicon-plus"></span></a>
             {% endif %}
             <br><br>
             <table id = "childEventFramesTable" class = "table table-hover" style = "display:none">
