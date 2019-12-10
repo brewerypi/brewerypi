@@ -68,6 +68,7 @@
                     <th></th>
                     <th></th>
                     <th></th>
+                    <th></th>
                     <th><button class = "btn btn-default" id = "buttonSave" title = "Save All"><span class = "glyphicon glyphicon-floppy-disk"></span>
                         </button></th>
                 </tr>
@@ -116,6 +117,9 @@
                                     href = '{{ url_for("eventFrames.restartEventFrame", eventFrameId = eventFrame.EventFrameId) }}'>
                                     <span class = "glyphicon glyphicon-play"></span></a></td>
                             {% endif %}
+                            <td><a class = "btn btn-default" title = "Edit" href = '{{ url_for("eventFrames.editEventFrame",
+                                eventFrameId = eventFrame.EventFrameId, eventFrameGroupId = eventFrameGroup.EventFrameGroupId) }}'>
+                                <span class = "glyphicon glyphicon-edit"></span></a></td>
                             <td><a class = "btn btn-default" title = "Delete"
                                 href = '{{ url_for("eventFrames.deleteEventFrame", eventFrameId = eventFrame.EventFrameId) }}',
                                 data-eventFrameName = "{{ eventFrame.Name }}"><span class = "glyphicon glyphicon-trash"></span></a></td>
@@ -183,6 +187,7 @@
                     {% endfor %}
                     { "orderable": false }, // Remove button.
                     { "orderable": false }, // End button.
+                    { "orderable": false }, // Edit button.
                     { "orderable": false }, // Delete button.
                     { "orderable": false }  // Save button.
                 ],

@@ -74,19 +74,18 @@ def addEventFrame(eventFrameTemplateId = None, parentEventFrameId = None, eventF
 
 	if parentEventFrameId is None:
 		form.eventFrameTemplateId.data = eventFrameTemplateId
-		if eventFrameGroup is None:
-			breadcrumbs = [{"url": url_for("eventFrames.selectEventFrame", selectedClass = "Root"),
-				"text": "<span class = \"glyphicon glyphicon-home\"></span>"},
-				{"url": url_for("eventFrames.selectEventFrame", selectedClass = "Enterprise",
-					selectedId = eventFrameTemplate.ElementTemplate.Site.Enterprise.EnterpriseId),
-					"text": eventFrameTemplate.ElementTemplate.Site.Enterprise.Name},
-				{"url": url_for("eventFrames.selectEventFrame", selectedClass = "Site", selectedId = eventFrameTemplate.ElementTemplate.Site.SiteId),
-					"text": eventFrameTemplate.ElementTemplate.Site.Name},
-				{"url": url_for("eventFrames.selectEventFrame", selectedClass = "ElementTemplate",
-					selectedId = eventFrameTemplate.ElementTemplate.ElementTemplateId),
-					"text": eventFrameTemplate.ElementTemplate.Name},
-				{"url": url_for("eventFrames.selectEventFrame", selectedClass = "EventFrameTemplate", selectedId = eventFrameTemplate.EventFrameTemplateId),
-					"text": eventFrameTemplate.Name}]	
+		breadcrumbs = [{"url": url_for("eventFrames.selectEventFrame", selectedClass = "Root"),
+			"text": "<span class = \"glyphicon glyphicon-home\"></span>"},
+			{"url": url_for("eventFrames.selectEventFrame", selectedClass = "Enterprise",
+				selectedId = eventFrameTemplate.ElementTemplate.Site.Enterprise.EnterpriseId),
+				"text": eventFrameTemplate.ElementTemplate.Site.Enterprise.Name},
+			{"url": url_for("eventFrames.selectEventFrame", selectedClass = "Site", selectedId = eventFrameTemplate.ElementTemplate.Site.SiteId),
+				"text": eventFrameTemplate.ElementTemplate.Site.Name},
+			{"url": url_for("eventFrames.selectEventFrame", selectedClass = "ElementTemplate",
+				selectedId = eventFrameTemplate.ElementTemplate.ElementTemplateId),
+				"text": eventFrameTemplate.ElementTemplate.Name},
+			{"url": url_for("eventFrames.selectEventFrame", selectedClass = "EventFrameTemplate", selectedId = eventFrameTemplate.EventFrameTemplateId),
+				"text": eventFrameTemplate.Name}]	
 	else:
 		form.parentEventFrameId.data = parentEventFrameId
 		if eventFrameGroup is None:
@@ -105,18 +104,19 @@ def addEventFrame(eventFrameTemplateId = None, parentEventFrameId = None, eventF
 					selectedId = parentEventFrame.origin().EventFrameTemplate.EventFrameTemplateId),
 					"text": parentEventFrame.origin().EventFrameTemplate.Name}]
 			for eventFrameAncestor in parentEventFrame.ancestors([]):
-				if eventFrameAncestor.ParentEventFrameId:
-					text = "{} / {}".format(eventFrameAncestor.EventFrameTemplate.Name, eventFrameAncestor.Name)
-				else:
+				if eventFrameAncestor.ParentEventFrameId is None:
 					text = eventFrameAncestor.Name
+				else:
+					text = "{} / {}".format(eventFrameAncestor.EventFrameTemplate.Name, eventFrameAncestor.Name)
+
 				breadcrumbs.append({"url": url_for("eventFrames.dashboard", eventFrameId = eventFrameAncestor.EventFrameId), "text": text})
 
 			if parentEventFrame.ParentEventFrameId is None:
-				breadcrumbs.append({"url": url_for("eventFrames.dashboard", eventFrameId = parentEventFrame.EventFrameId),
-					"text": parentEventFrame.Name})
+				text = parentEventFrame.Name
 			else:
-				breadcrumbs.append({"url": url_for("eventFrames.dashboard", eventFrameId = parentEventFrame.EventFrameId),
-					"text": "{} / {}".format(parentEventFrame.EventFrameTemplate.Name, parentEventFrame.Name)})
+				text = "{} / {}".format(parentEventFrame.EventFrameTemplate.Name, parentEventFrame.Name)
+
+			breadcrumbs.append({"url": url_for("eventFrames.dashboard", eventFrameId = parentEventFrame.EventFrameId), "text": text})
 		else:
 			breadcrumbs = [{"url": url_for("eventFrameGroups.listEventFrameGroups"), "text": "<span class = \"glyphicon glyphicon-home\"></span>"},
 				{"url": url_for("eventFrameGroups.dashboard", eventFrameGroupId = eventFrameGroup.EventFrameGroupId), "text": eventFrameGroup.Name}]
@@ -241,29 +241,26 @@ def deleteEventFrame(eventFrameId):
 	return redirect(request.referrer)
 
 @eventFrames.route("/eventFrames/edit/<int:eventFrameId>", methods = ["GET", "POST"])
+@eventFrames.route("/eventFrames/edit/<int:eventFrameId>/<int:eventFrameGroupId>", methods = ["GET", "POST"])
 @login_required
 @permissionRequired(Permission.DATA_ENTRY)
-def editEventFrame(eventFrameId):
+def editEventFrame(eventFrameId, eventFrameGroupId = None):
 	operation = "Edit"
 	eventFrame = EventFrame.query.get_or_404(eventFrameId)
 	form = EventFrameForm(obj = eventFrame)
-	if eventFrame.ParentEventFrameId:
-		del form.element
-		form.eventFrameTemplate.query = EventFrameTemplate.query. \
-			filter(EventFrameTemplate.ParentEventFrameTemplateId == eventFrame.ParentEventFrame.EventFrameTemplateId).order_by(EventFrameTemplate.Name)
-	else:
-		del form.eventFrameTemplate
+	del form.eventFrameTemplate
+	if eventFrame.ParentEventFrameId is None:
 		form.element.query = Element.query.join(ElementTemplate).filter(ElementTemplate.ElementTemplateId == eventFrame.EventFrameTemplate.ElementTemplateId). \
 			order_by(Element.Name)
+	else:
+		del form.element
 
 	# Edit an existing event frame.
 	if form.validate_on_submit():
 		if eventFrame.ParentEventFrameId:
-			eventFrame.EventFrameTemplate = form.eventFrameTemplate.data
 			eventFrame.ParentEventFrameId = form.parentEventFrameId.data
 		else:
 			eventFrame.Element = form.element.data
-			eventFrame.EventFrameTemplateId = form.eventFrameTemplateId.data
 
 		if form.endUtcTimestamp.data == "":
 			eventFrame.EndTimestamp = None
@@ -278,48 +275,78 @@ def editEventFrame(eventFrameId):
 		return redirect(form.requestReferrer.data)
 
 	# Present a form to edit an existing event frame.
-	if eventFrame.ParentEventFrameId:
-		form.eventFrameTemplate.data = eventFrame.EventFrameTemplate
-		form.parentEventFrameId.data = eventFrame.ParentEventFrameId
-		breadcrumbs = [{"url": url_for("eventFrames.selectEventFrame", selectedClass = "Root"), "text": "<span class = \"glyphicon glyphicon-home\"></span>"},
-			{"url": url_for("eventFrames.selectEventFrame", selectedClass = "Enterprise",
-				selectedId = eventFrame.origin().Element.ElementTemplate.Site.Enterprise.EnterpriseId),
-				"text": eventFrame.origin().Element.ElementTemplate.Site.Enterprise.Name},
-			{"url": url_for("eventFrames.selectEventFrame", selectedClass = "Site",
-				selectedId = eventFrame.origin().Element.ElementTemplate.Site.SiteId),
-				"text": eventFrame.origin().Element.ElementTemplate.Site.Name},
-			{"url": url_for("eventFrames.selectEventFrame", selectedClass = "ElementTemplate",
-				selectedId = eventFrame.origin().Element.ElementTemplate.ElementTemplateId),
-				"text": eventFrame.origin().Element.ElementTemplate.Name},
-			{"url": url_for("eventFrames.selectEventFrame", selectedClass = "EventFrameTemplate",
-				selectedId = eventFrame.origin().EventFrameTemplate.EventFrameTemplateId),
-				"text": eventFrame.origin().EventFrameTemplate.Name}]
-		for eventFrameAncestor in eventFrame.ancestors([]):
-			if eventFrameAncestor.ParentEventFrameId:
-				text = eventFrameAncestor.EventFrameTemplate.Name + "&nbsp;&nbsp;/&nbsp;&nbsp;" + eventFrameAncestor.Name
-			else:
-				text = eventFrameAncestor.Name
-			breadcrumbs.append({"url": url_for("eventFrames.dashboard", eventFrameId = eventFrameAncestor.EventFrameId), "text": text})
-
-		if eventFrame.ParentEventFrameId:
-			text = eventFrame.EventFrameTemplate.Name + "&nbsp;&nbsp;/&nbsp;&nbsp;" + eventFrame.Name
-		else:
-			text = eventFrame.Name
-		breadcrumbs.append({"url": None, "text": text})
+	if eventFrameGroupId is None:
+		eventFrameGroup = None
 	else:
+		eventFrameGroup = EventFrameGroup.query.get_or_404(eventFrameGroupId)
+
+	if eventFrame.ParentEventFrameId is None:
 		form.element.data = eventFrame.Element
-		form.eventFrameTemplateId.data = eventFrame.EventFrameTemplateId
-		breadcrumbs = [{"url": url_for("eventFrames.selectEventFrame", selectedClass = "Root"), "text": "<span class = \"glyphicon glyphicon-home\"></span>"},
-			{"url": url_for("eventFrames.selectEventFrame", selectedClass = "Enterprise",
-				selectedId = eventFrame.EventFrameTemplate.ElementTemplate.Site.Enterprise.EnterpriseId),
-				"text": eventFrame.EventFrameTemplate.ElementTemplate.Site.Enterprise.Name},
-			{"url": url_for("eventFrames.selectEventFrame", selectedClass = "Site", selectedId = eventFrame.EventFrameTemplate.ElementTemplate.Site.SiteId),
-				"text": eventFrame.EventFrameTemplate.ElementTemplate.Site.Name},
-			{"url": url_for("eventFrames.selectEventFrame", selectedClass = "ElementTemplate",
-				selectedId = eventFrame.EventFrameTemplate.ElementTemplate.ElementTemplateId), "text": eventFrame.EventFrameTemplate.ElementTemplate.Name},
-			{"url": url_for("eventFrames.selectEventFrame", selectedClass = "EventFrameTemplate",
-				selectedId = eventFrame.EventFrameTemplate.EventFrameTemplateId), "text": eventFrame.EventFrameTemplate.Name},
-			{"url": None, "text": eventFrame.Name}]	
+		if eventFrameGroup is None:
+			breadcrumbs = [{"url": url_for("eventFrames.selectEventFrame", selectedClass = "Root"),
+				"text": "<span class = \"glyphicon glyphicon-home\"></span>"},
+				{"url": url_for("eventFrames.selectEventFrame", selectedClass = "Enterprise",
+					selectedId = eventFrame.EventFrameTemplate.ElementTemplate.Site.Enterprise.EnterpriseId),
+					"text": eventFrame.EventFrameTemplate.ElementTemplate.Site.Enterprise.Name},
+				{"url": url_for("eventFrames.selectEventFrame", selectedClass = "Site", selectedId = eventFrame.EventFrameTemplate.ElementTemplate.Site.SiteId),
+					"text": eventFrame.EventFrameTemplate.ElementTemplate.Site.Name},
+				{"url": url_for("eventFrames.selectEventFrame", selectedClass = "ElementTemplate",
+					selectedId = eventFrame.EventFrameTemplate.ElementTemplate.ElementTemplateId), "text": eventFrame.EventFrameTemplate.ElementTemplate.Name},
+				{"url": url_for("eventFrames.selectEventFrame", selectedClass = "EventFrameTemplate",
+					selectedId = eventFrame.EventFrameTemplate.EventFrameTemplateId), "text": eventFrame.EventFrameTemplate.Name},
+				{"url": None, "text": eventFrame.Name}]
+		else:
+			breadcrumbs = [{"url": url_for("eventFrameGroups.listEventFrameGroups"), "text": "<span class = \"glyphicon glyphicon-home\"></span>"},
+				{"url": url_for("eventFrameGroups.dashboard", eventFrameGroupId = eventFrameGroup.EventFrameGroupId), "text": eventFrameGroup.Name},
+				{"url": None, "text": eventFrame.Name}]
+	else:
+		form.parentEventFrameId.data = eventFrame.ParentEventFrameId
+		if eventFrameGroup is None:
+			breadcrumbs = [{"url": url_for("eventFrames.selectEventFrame", selectedClass = "Root"),
+				"text": "<span class = \"glyphicon glyphicon-home\"></span>"},
+				{"url": url_for("eventFrames.selectEventFrame", selectedClass = "Enterprise",
+					selectedId = eventFrame.origin().Element.ElementTemplate.Site.Enterprise.EnterpriseId),
+					"text": eventFrame.origin().Element.ElementTemplate.Site.Enterprise.Name},
+				{"url": url_for("eventFrames.selectEventFrame", selectedClass = "Site",
+					selectedId = eventFrame.origin().Element.ElementTemplate.Site.SiteId),
+					"text": eventFrame.origin().Element.ElementTemplate.Site.Name},
+				{"url": url_for("eventFrames.selectEventFrame", selectedClass = "ElementTemplate",
+					selectedId = eventFrame.origin().Element.ElementTemplate.ElementTemplateId),
+					"text": eventFrame.origin().Element.ElementTemplate.Name},
+				{"url": url_for("eventFrames.selectEventFrame", selectedClass = "EventFrameTemplate",
+					selectedId = eventFrame.origin().EventFrameTemplate.EventFrameTemplateId),
+					"text": eventFrame.origin().EventFrameTemplate.Name}]
+			for eventFrameAncestor in eventFrame.ancestors([]):
+				if eventFrameAncestor.ParentEventFrameId is None:
+					text = eventFrameAncestor.Name
+				else:
+					text = "{} / {}".format(eventFrameAncestor.EventFrameTemplate.Name, eventFrameAncestor.Name)
+
+				breadcrumbs.append({"url": url_for("eventFrames.dashboard", eventFrameId = eventFrameAncestor.EventFrameId), "text": text})
+
+			if eventFrame.ParentEventFrameId is None:
+				text = eventFrame.Name
+			else:
+				text = "{} / {}".format(eventFrame.EventFrameTemplate.Name, eventFrame.Name)
+
+			breadcrumbs.append({"url": None, "text": text})
+		else:
+			breadcrumbs = [{"url": url_for("eventFrameGroups.listEventFrameGroups"), "text": "<span class = \"glyphicon glyphicon-home\"></span>"},
+				{"url": url_for("eventFrameGroups.dashboard", eventFrameGroupId = eventFrameGroup.EventFrameGroupId), "text": eventFrameGroup.Name}]
+			for eventFrameAncestor in eventFrame.ancestors([]):
+				if eventFrameAncestor.ParentEventFrameId:
+					text = "{} / {}".format(eventFrameAncestor.EventFrameTemplate.Name, eventFrameAncestor.Name)
+				else:
+					text = eventFrameAncestor.Name
+				breadcrumbs.append({"url": url_for("eventFrames.dashboard", eventFrameId = eventFrameAncestor.EventFrameId,
+					eventFrameGroupId = eventFrameGroup.EventFrameGroupId), "text": text})
+
+			if eventFrame.ParentEventFrameId:
+				text = "{} / {}".format(eventFrame.EventFrameTemplate.Name, eventFrame.Name)
+			else:
+				text = eventFrame.Name
+
+			breadcrumbs.append({"url": None, "text": text})
 
 	form.eventFrameId.data = eventFrame.EventFrameId
 	form.endTimestamp.data = eventFrame.EndTimestamp

@@ -131,8 +131,14 @@
                             {% else %}
                                 <td></td>
                             {% endif %}
-                            <td><a class = "btn btn-default" title = "Edit" href = '{{ url_for("eventFrames.editEventFrame",
-                                eventFrameId = eventFrame.EventFrameId) }}'><span class = "glyphicon glyphicon-edit"></span></a></td>
+                            {% if eventFrameEventFrameGroup is none %}
+                                <td><a class = "btn btn-default" title = "Edit" href = '{{ url_for("eventFrames.editEventFrame",
+                                    eventFrameId = eventFrame.EventFrameId) }}'><span class = "glyphicon glyphicon-edit"></span></a></td>
+                            {% else %}
+                                <td><a class = "btn btn-default" title = "Edit" href = '{{ url_for("eventFrames.editEventFrame",
+                                    eventFrameId = eventFrame.EventFrameId, eventFrameGroupId = eventFrameEventFrameGroup.EventFrameGroupId) }}'>
+                                    <span class = "glyphicon glyphicon-edit"></span></a></td>
+                            {% endif %}
                             <td><a class = "btn btn-default" title = "Delete" href = '{{ url_for("eventFrames.deleteEventFrame",
                                 eventFrameId = eventFrame.EventFrameId) }}'><span class = "glyphicon glyphicon-trash"></span></a></td>
                     </tr>
