@@ -82,7 +82,7 @@
                                 <span class = "glyphicon glyphicon-list"></span></a></td>
                             <td>{{ eventFrame.Name }}</td>
                             <td>{{ eventFrame.Element.Name }}</td>
-                            {% for eventFrameAttributeTemplate in displayEventFrameTemplate.EventFrameAttributeTemplates %}
+                            {% for eventFrameAttributeTemplate in displayEventFrameTemplate.EventFrameAttributeTemplates | sort(attribute = "Name") %}
                                 {% set tagId = eventFrameAttributeTemplate.EventFrameAttributes.filter_by(ElementId = eventFrame.ElementId) |
                                     map(attribute = "TagId") | first%}
                                 {% set disabled = "" if eventFrame.EndTimestamp is none else "disabled" %}
