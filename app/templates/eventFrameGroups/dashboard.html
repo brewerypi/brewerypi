@@ -62,7 +62,7 @@
                     <th></th>
                     <th>Name</th>
                     <th>Element</th>
-                    {% for eventFrameAttributeTemplate in displayEventFrameTemplate.EventFrameAttributeTemplates %}
+                    {% for eventFrameAttributeTemplate in displayEventFrameTemplate.EventFrameAttributeTemplates | sort(attribute = "Name") %}
                         <th>{{ eventFrameAttributeTemplate.Name }}</th>
                     {% endfor %}
                     <th></th>
@@ -182,7 +182,7 @@
                     { "orderable": false }, // Select button.
                     null,
                     null,
-                    {% for eventFrameAttributeTemplate in displayEventFrameTemplate.EventFrameAttributeTemplates %}
+                    {% for eventFrameAttributeTemplate in displayEventFrameTemplate.EventFrameAttributeTemplates | sort(attribute = "Name") %}
                         { "orderable": false },
                     {% endfor %}
                     { "orderable": false }, // Remove button.
