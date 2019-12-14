@@ -98,7 +98,7 @@
                     tabIndex = tabIndex + 1
                 })
 
-                $('#availableNewEventFramesTable button[title="Add"]').each(function ()
+                $('#availableActiveEventFramesTable button[title="Add"]').each(function ()
                 {
                     $(this).attr("tabindex", tabIndex)
                     tabIndex = tabIndex + 1
@@ -222,12 +222,12 @@
 
             // Clear any left over filtering from state saving.
             selectedActiveEventFramesTable.search("").columns().search("").draw()
-            selectedNewEventFramesTable.on("draw.dt", function()
+            selectedActiveEventFramesTable.on("draw.dt", function()
             {
                 setTabIndex()
             })
             availableActiveEventFramesTable.search("").columns().search("").draw()
-            availableNewEventFramesTable.on("draw.dt", function()
+            availableActiveEventFramesTable.on("draw.dt", function()
             {
                 setTabIndex()
             })
