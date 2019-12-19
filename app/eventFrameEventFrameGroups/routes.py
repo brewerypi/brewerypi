@@ -14,10 +14,12 @@ def add(type, eventFrameGroupId):
 	count = 0
 	for item in data:
 		if type == "new":
+			startTimestamp = datetime.utcnow()
 			eventFrame = EventFrame(ElementId = item["elementId"], EventFrameTemplateId = item["eventFrameTemplateId"],
-				Name = int(datetime.utcnow().timestamp()), StartTimestamp = datetime.utcnow(), UserId = current_user.get_id())
+				Name = int(datetime.utcnow().timestamp()), StartTimestamp = startTimestamp, UserId = current_user.get_id())
 			db.session.add(eventFrame)
 			db.session.commit()
+			eventFrame.addDefaultAttributeTemplateValues(startTimestamp)
 			eventFrameEventFrameGroup = EventFrameEventFrameGroup(EventFrameGroupId = eventFrameGroupId, EventFrameId = eventFrame.EventFrameId)
 			db.session.add(eventFrameEventFrameGroup)
 			count = count + 1

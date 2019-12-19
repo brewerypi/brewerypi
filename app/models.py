@@ -284,6 +284,16 @@ class EventFrame(db.Model):
 	def __repr__(self):
 		return "<EventFrame: {}>".format(self.Name)
 
+	def addDefaultAttributeTemplateValues(self, timestamp):
+		for eventFrameAttributeTemplate in self.EventFrameTemplate.EventFrameAttributeTemplates:
+			if eventFrameAttributeTemplate.DefaultStartValue is not None:
+				eventFrameAttribute = EventFrameAttribute.query.filter(EventFrameAttribute.ElementId == self.origin().ElementId,
+					EventFrameAttribute.EventFrameAttributeTemplateId == eventFrameAttributeTemplate.EventFrameAttributeTemplateId).one_or_none()
+				if eventFrameAttribute is not None:
+					tagValue = TagValue(TagId = eventFrameAttribute.TagId, Timestamp = timestamp, UserId = current_user.get_id(),
+						Value = eventFrameAttributeTemplate.DefaultStartValue)
+					db.session.add(tagValue)
+
 	def ancestors(self, ancestors):
 		if self.ParentEventFrameId == None:
 			return ancestors
