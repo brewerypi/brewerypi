@@ -346,8 +346,6 @@
                     $(this).attr("tabindex", tabIndex)
                     tabIndex = tabIndex + 1
                 })
-                
-                $('ol.breadcrumb a[title="Next"]').focus()
             }
         </script>
     {% endblock %}
@@ -570,6 +568,8 @@
                     $("#inputNewTimestamp" + id).val(timestamp.format("YYYY-MM-DD HH:mm:ss"))
                 }
             })
+
+            $('ol.breadcrumb a[title="Next"]').focus()
         })
     </script>
 {% endblock %}
