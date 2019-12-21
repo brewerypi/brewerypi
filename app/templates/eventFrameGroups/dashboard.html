@@ -217,6 +217,7 @@
             $("#buttonSave").on("click", function()
             {
                 var error = false
+                var tagIds = []
                 var rows = []
 
                 // Loop through the new input or select values and check for validation errors.
@@ -249,14 +250,24 @@
                     }
                     else
                     {
-                        $("#divNewValue" + id).removeClass("has-error")
-                        $("#pNewValue" + id).html("")
-                        var row = {}
-                        row["tagId"] = id
-                        row["type"] = "input"
-                        row["value"] = newValue
-                        row["timestamp"] = moment().utc().format("YYYY-MM-DD HH:mm:ss")
-                        rows.push(row)
+                        if (tagIds.indexOf(id) == -1)
+                        {
+                            tagIds.push(id)
+                            $("#divNewValue" + id).removeClass("has-error")
+                            $("#pNewValue" + id).html("")
+                            var row = {}
+                            row["tagId"] = id
+                            row["type"] = "input"
+                            row["value"] = newValue
+                            row["timestamp"] = moment().utc().format("YYYY-MM-DD HH:mm:ss")
+                            rows.push(row)
+                        }
+                        else
+                        {
+                            error = true
+                            $(this).parent().addClass("has-error")
+                            $(this).parent().children("p").html("Multiple values")
+                        }
                     }
                 })
 
