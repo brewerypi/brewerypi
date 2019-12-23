@@ -166,6 +166,7 @@
                         <th></th>
                         <th></th>
                         <th></th>
+                        <th></th>
                     {% elif childrenClass == "EventFrame" %}
                         <th>Element</th>
                         <th>User</th>
@@ -225,7 +226,10 @@
                                     <td><a class = "btn btn-default" title = "Configure" href = '{{ url_for("eventFrames.selectEventFrame",
                                         selectedClass = "EventFrameTemplate", selectedId = child.id(), selectedOperation = "configure") }}'>
                                         <span class = "glyphicon glyphicon-wrench"></span></a></td>
+                                    <td><a class = "btn btn-default" title = "Copy" href = '{{ url_for("eventFrameTemplates.copy",
+                                        fromEventFrameTemplateId = child.id()) }}'><span class = "glyphicon glyphicon-copy"></span></a></td>
                                 {% else %}
+                                    <td></td>
                                     <td></td>
                                 {% endif %}
                                 <td><a class = "btn btn-default" title = "Overlay Builder" href = '{{ url_for("eventFrames.overlayBuilder",
@@ -425,6 +429,7 @@
                         null,
                         null,
                         { "orderable": false }, // Associate button.
+                        { "orderable": false }, // Copy button.
                         { "orderable": false }, // Overlay button.
                         { "orderable": false }, // Edit button.
                         { "orderable": false }  // Delete button.
