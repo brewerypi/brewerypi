@@ -85,7 +85,7 @@
                             {% for eventFrameAttributeTemplate in displayEventFrameTemplate.EventFrameAttributeTemplates | sort(attribute = "Name") %}
                                 {% set tagId = eventFrameAttributeTemplate.EventFrameAttributes.filter_by(ElementId = eventFrame.ElementId) |
                                     map(attribute = "TagId") | first%}
-                                {% set disabled = "" if eventFrame.EndTimestamp is none else "disabled" %}
+                                {% set disabled = "" if eventFrame.EndTimestamp is none and tagId is defined else "disabled" %}
                                 <td>
                                     <div class = "form-group" id = "divNewValue{{ tagId }}">
                                         {% if eventFrameAttributeTemplate.LookupId is none %}
