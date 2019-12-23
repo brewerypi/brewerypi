@@ -1,10 +1,10 @@
 from flask import flash, redirect, render_template, request, url_for
 from flask_login import login_required
 from . import eventFrameTemplates
-from . forms import EventFrameTemplateForm
+from . forms import CopyEventFrameTemplateForm, EventFrameTemplateForm
 from .. import db
 from .. decorators import adminRequired
-from .. models import ElementTemplate, EventFrameAttributeTemplate, EventFrameTemplate, Site, Enterprise
+from .. models import ElementTemplate, Enterprise, EventFrameAttribute, EventFrameAttributeTemplate, EventFrameTemplate, Site
 
 modelName = "Event Frame Template"
 
@@ -81,6 +81,68 @@ def addEventFrameTemplate(elementTemplateId = None, parentEventFrameTemplateId =
 			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "ElementTemplate", selectedId = elementTemplate.ElementTemplateId),
 				"text" : elementTemplate.Name}]
 
+	if form.requestReferrer.data is None:
+		form.requestReferrer.data = request.referrer
+
+	return render_template("addEdit.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
+
+@eventFrameTemplates.route("/eventFrameTemplates/copy/<int:fromEventFrameTemplateId>", methods = ["GET", "POST"])
+@login_required
+@adminRequired
+def copy(fromEventFrameTemplateId):
+	operation = "Copy"
+	form = CopyEventFrameTemplateForm()
+	fromEventFrameTemplate = EventFrameTemplate.query.get_or_404(fromEventFrameTemplateId)
+	form.toElementTemplate.choices = [(elementTemplate.ElementTemplateId,
+		"{}_{}_{}".format(elementTemplate.Site.Enterprise.Abbreviation, elementTemplate.Site.Abbreviation, elementTemplate.Name)) for elementTemplate in
+		ElementTemplate.query.join(Site, Enterprise). \
+		filter(ElementTemplate.ElementTemplateId != fromEventFrameTemplate.ElementTemplate.ElementTemplateId). \
+		order_by(Enterprise.Abbreviation, Site.Abbreviation, ElementTemplate.Name)]
+
+	if form.validate_on_submit():
+		toEventFrameTemplate = None
+		toParentEventFrameTemplate = None
+		previousLevel = None
+		for linealDescent in fromEventFrameTemplate.lineage([], 0):
+			fromEventFrameTemplate = linealDescent["eventFrameTemplate"]
+			fromEventFrameTemplateLevel = linealDescent["level"]
+			if fromEventFrameTemplateLevel == 0:
+				toEventFrameTemplate = EventFrameTemplate(Description = fromEventFrameTemplate.Description, ElementTemplateId = form.toElementTemplate.data,
+					Name = fromEventFrameTemplate.Name, Order = fromEventFrameTemplate.Order, ParentEventFrameTemplate = None)
+			else:
+				if previousLevel != fromEventFrameTemplateLevel:
+					toParentEventFrameTemplate = toEventFrameTemplate
+
+				toEventFrameTemplate = EventFrameTemplate(Description = fromEventFrameTemplate.Description, ElementTemplateId = None,
+					Name = fromEventFrameTemplate.Name, Order = fromEventFrameTemplate.Order, ParentEventFrameTemplate = toParentEventFrameTemplate)
+
+			db.session.add(toEventFrameTemplate)
+			db.session.commit()
+			for fromEventFrameAttributeTemplate in fromEventFrameTemplate.EventFrameAttributeTemplates:
+				toEventFrameAttributeTemplate = EventFrameAttributeTemplate(Description = fromEventFrameAttributeTemplate.Description,
+					DefaultEndValue = fromEventFrameAttributeTemplate.DefaultEndValue, DefaultStartValue = fromEventFrameAttributeTemplate.DefaultStartValue,
+					EventFrameTemplate = toEventFrameTemplate, LookupId = fromEventFrameAttributeTemplate.LookupId,
+					Name = fromEventFrameAttributeTemplate.Name, UnitOfMeasurementId = fromEventFrameAttributeTemplate.UnitOfMeasurementId)
+				db.session.add(toEventFrameAttributeTemplate)
+				db.session.commit()
+				toEventFrameAttributeTemplate.postAddHousekeeping(toEventFrameTemplate)
+
+			previousLevel = fromEventFrameTemplateLevel
+
+		return redirect(form.requestReferrer.data)
+
+	# Present a form to copy an event frame template.
+	form.name.data = fromEventFrameTemplate.Name
+	form.description.data = fromEventFrameTemplate.Description
+	breadcrumbs = [{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Root"), "text" : "<span class = \"glyphicon glyphicon-home\"></span>"},
+		{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Enterprise",
+			selectedId = fromEventFrameTemplate.ElementTemplate.Site.Enterprise.EnterpriseId),
+			"text" : fromEventFrameTemplate.ElementTemplate.Site.Enterprise.Name},
+		{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Site",
+			selectedId = fromEventFrameTemplate.ElementTemplate.Site.SiteId), "text" : fromEventFrameTemplate.ElementTemplate.Site.Name},
+		{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "ElementTemplate",
+			selectedId = fromEventFrameTemplate.ElementTemplate.ElementTemplateId), "text" : fromEventFrameTemplate.ElementTemplate.Name},
+		{"url" : None, "text" : fromEventFrameTemplate.Name}]
 	if form.requestReferrer.data is None:
 		form.requestReferrer.data = request.referrer
 

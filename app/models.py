@@ -465,6 +465,63 @@ class EventFrameAttributeTemplate(db.Model):
 			path += "\{}".format(ancestor.Name)
 		return  "{}\{}".format(path, self.EventFrameTemplate.Name)
 
+	def postAddHousekeeping(self, eventFrameTemplate):
+		for element in eventFrameTemplate.origin().ElementTemplate.Elements:
+			if element.isManaged():
+				# Tag management.
+				area = Area.query.get_or_404(element.TagAreaId)
+				tagName = "{}_{}".format(element.Name, self.Name.replace(" ", ""))
+				tag = Tag.query.filter_by(AreaId = area.AreaId, Name = tagName).one_or_none()
+				if tag is None:
+					# Tag doesn't exist, so create it.
+					tag = Tag(AreaId = area.AreaId, Description = "", LookupId = self.LookupId, Name = tagName,
+						UnitOfMeasurementId = self.UnitOfMeasurementId)
+					db.session.add(tag)
+				else:
+					# Tag exists, so update LookupId and UnitOfMeasurementId just in case.
+					tag.LookupId = self.LookupId
+					tag.UnitOfMeasurementId = self.UnitOfMeasurementId
+
+				db.session.commit()
+
+				# Event Frame attribute management.
+				eventFrameAttribute = EventFrameAttribute(ElementId = element.ElementId,
+					EventFrameAttributeTemplateId = self.EventFrameAttributeTemplateId, TagId = tag.TagId)
+				db.session.add(eventFrameAttribute)
+				db.session.commit()
+
+		db.session.commit()
+
+		# # Element attribute template management.
+		# # Check for an element attribute template from the same element template with the same event frame attribute template name.
+		elementAttributeTemplate = ElementAttributeTemplate.query.filter_by(ElementTemplateId = self.EventFrameTemplate.origin().ElementTemplateId,
+			Name = self.Name).one_or_none()
+		if elementAttributeTemplate is not None:
+			# Element attribute template exists, so update Description, LookupId and UnitOfMeasurementId just in case.
+			elementAttributeTemplate.Description = self.Description
+			elementAttributeTemplate.LookupId = self.LookupId
+			elementAttributeTemplate.UnitOfMeasurementId = self.UnitOfMeasurementId
+			db.session.commit()
+
+		# Event frame attribute template management.
+		# Loop through all event frame template hierarchies checking for an event frame attribute template with the same event frame attribute template name.
+		for topLevelEventFrameTemplate in self.EventFrameTemplate.origin().ElementTemplate.EventFrameTemplates:
+			for eventFrameTemplate in topLevelEventFrameTemplate.lineage([], 0):
+				# Skip the event frame template that is currently being added to.
+				if eventFrameTemplate["eventFrameTemplate"].EventFrameTemplateId != self.EventFrameTemplate.EventFrameTemplateId:
+					newEventFrameAttributeTemplate = EventFrameAttributeTemplate.query. \
+						filter_by(EventFrameTemplateId = eventFrameTemplate["eventFrameTemplate"].EventFrameTemplateId, Name = self.Name).one_or_none()
+					if newEventFrameAttributeTemplate is not None:
+					# New event frame attribute template exists, so update DefaultEndValue, DefaultStartValue, Description, LookupId and UnitOfMeasurementId
+					# just in case.
+						newEventFrameAttributeTemplate.DefaultEndValue = self.DefaultEndValue
+						newEventFrameAttributeTemplate.DefaultStartValue = self.DefaultStartValue
+						newEventFrameAttributeTemplate.Description = self.Description
+						newEventFrameAttributeTemplate.LookupId = self.LookupId
+						newEventFrameAttributeTemplate.UnitOfMeasurementId = self.UnitOfMeasurementId
+
+		db.session.commit()
+
 class EventFrameEventFrameGroup(db.Model):
 	__tablename__ = "EventFrameEventFrameGroup"
 	__table_args__ = \
