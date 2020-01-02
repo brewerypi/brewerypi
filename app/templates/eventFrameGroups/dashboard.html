@@ -33,31 +33,34 @@
         {% endfor %}
     </div>
     <br>
-    <div>
-        Toggle View:
-        {% if eventFrameTemplateView is none %}
-            {% set activeEventFrameTemplateViewId = none %}
-            {% set class = "btn btn-primary btn-xs active" %}
-        {% else %}
-            {% set activeEventFrameTemplateViewId = eventFrameTemplateView.EventFrameTemplateViewId %}
-            {% set class = "btn btn-primary btn-xs" %}
-        {% endif %}
-        <a type = "button" class = "{{ class }}" title = "All" 
-            href = '{{ url_for("eventFrameGroups.dashboard", eventFrameGroupId = eventFrameGroup.EventFrameGroupId,
-            displayEventFrameTemplateId = displayEventFrameTemplate.EventFrameTemplateId, eventFrameTemplateViewId = 0) }}' role = "button">All</a>
-        {% for eventFrameTemplateView in displayEventFrameTemplate.EventFrameTemplateViews %}
-            {% if eventFrameTemplateView.EventFrameTemplateViewId ==  activeEventFrameTemplateViewId %}
-                {% set class = "btn btn-primary btn-xs active" %}
-            {% else %}
-                {% set class = "btn btn-primary btn-xs" %}
+        <div>
+            Toggle View:
+            {% if displayEventFrameTemplate is not none %}
+                {% if eventFrameTemplateView is none %}
+                    {% set activeEventFrameTemplateViewId = none %}
+                    {% set class = "btn btn-primary btn-xs active" %}
+                {% else %}
+                    {% set activeEventFrameTemplateViewId = eventFrameTemplateView.EventFrameTemplateViewId %}
+                    {% set class = "btn btn-primary btn-xs" %}
+                {% endif %}
+                <a type = "button" class = "{{ class }}" title = "All" 
+                    href = '{{ url_for("eventFrameGroups.dashboard", eventFrameGroupId = eventFrameGroup.EventFrameGroupId,
+                    displayEventFrameTemplateId = displayEventFrameTemplate.EventFrameTemplateId, eventFrameTemplateViewId = 0) }}' role = "button">All</a>
+                {% for eventFrameTemplateView in displayEventFrameTemplate.EventFrameTemplateViews %}
+                    {% if eventFrameTemplateView.EventFrameTemplateViewId ==  activeEventFrameTemplateViewId %}
+                        {% set class = "btn btn-primary btn-xs active" %}
+                    {% else %}
+                        {% set class = "btn btn-primary btn-xs" %}
+                    {% endif %}
+                    <a type = "button" class = "{{ class }}" title = "eventFrameTemplateView.Name View" 
+                        href = '{{ url_for("eventFrameGroups.dashboard", eventFrameGroupId = eventFrameGroup.EventFrameGroupId,
+                            displayEventFrameTemplateId = displayEventFrameTemplate.EventFrameTemplateId,
+                            eventFrameTemplateViewId = eventFrameTemplateView.EventFrameTemplateViewId) }}' role = "button">
+                            {{ eventFrameTemplateView.Name }}</a>
+                {% endfor %}
             {% endif %}
-            <a type = "button" class = "{{ class }}" title = "eventFrameTemplateView.Name View" 
-                href = '{{ url_for("eventFrameGroups.dashboard", eventFrameGroupId = eventFrameGroup.EventFrameGroupId,
-                    displayEventFrameTemplateId = displayEventFrameTemplate.EventFrameTemplateId,
-                    eventFrameTemplateViewId = eventFrameTemplateView.EventFrameTemplateViewId) }}'' role = "button">{{ eventFrameTemplateView.Name }}</a>
-        {% endfor %}
-        <br><br>   
-    </div>
+            <br><br>   
+        </div>
     <div>
         <a class = "btn btn-default" title = "Add New Event Frames" href = '{{ url_for("eventFrameGroups.addNewEventFrames",
             eventFrameGroupId = eventFrameGroup.EventFrameGroupId) }}' role = "button"><span class = "glyphicon glyphicon-plus"></span> New</a>
@@ -87,9 +90,11 @@
                     <th></th>
                     <th>Name</th>
                     <th>Element</th>
-                    {% for eventFrameAttributeTemplate in eventFrameAttributeTemplates | sort(attribute = "Name") %}
-                        <th>{{ eventFrameAttributeTemplate.Name }}</th>
-                    {% endfor %}
+                    {% if displayEventFrameTemplate is not none %}
+                        {% for eventFrameAttributeTemplate in eventFrameAttributeTemplates | sort(attribute = "Name") %}
+                            <th>{{ eventFrameAttributeTemplate.Name }}</th>
+                        {% endfor %}
+                    {% endif %}
                     <th></th>
                     <th></th>
                     <th></th>
@@ -106,30 +111,32 @@
                                 eventFrameId = eventFrame.EventFrameId, eventFrameGroupId = eventFrameGroup.EventFrameGroupId) }}'>
                                 <span class = "glyphicon glyphicon-list"></span></a></td>
                             <td>{{ eventFrame.Name }}</td>
-                            <td>{{ eventFrame.Element.Name }}</td>
-                            {% for eventFrameAttributeTemplate in eventFrameAttributeTemplates | sort(attribute = "Name") %}
-                                {% set tagId = eventFrameAttributeTemplate.EventFrameAttributes.filter_by(ElementId = eventFrame.ElementId) |
-                                    map(attribute = "TagId") | first%}
-                                {% set disabled = "" if eventFrame.EndTimestamp is none and tagId is defined else "disabled" %}
-                                <td>
-                                    <div class = "form-group" id = "divNewValue{{ tagId }}">
-                                        {% if eventFrameAttributeTemplate.LookupId is none %}
-                                            <input class = "form-control" id = "inputOrSelectNewValue{{ tagId }}" value = "" {{ disabled }}>
-                                            <p class = "help-block" id = "pNewValue{{ tagId }}"></p>
-                                        {% else %}
-                                            <select class = "form-control" id = "inputOrSelectNewValue{{ tagId }}" {{ disabled }}>
-                                                <option value = "-1"></option>
-                                                {% for lookupValue in eventFrameAttributeTemplate.Lookup.LookupValues %}
-                                                    {% if lookupValue.Selectable %}
-                                                        <option value = "{{ lookupValue.Value }}">{{ lookupValue.Name}}</option>
-                                                    {% endif %}
-                                                {% endfor %}
-                                            </select>
-                                            <p class = "help-block" id = "pNewValue{{ tagId }}"></p>
-                                        {% endif %}
-                                    </div>
-                                </td>
-                            {% endfor %}
+                            <td>{{ eventFrame.Element.Name }}</td> 
+                            {% if displayEventFrameTemplate is not none %}
+                                {% for eventFrameAttributeTemplate in eventFrameAttributeTemplates | sort(attribute = "Name") %}
+                                    {% set tagId = eventFrameAttributeTemplate.EventFrameAttributes.filter_by(ElementId = eventFrame.ElementId) |
+                                        map(attribute = "TagId") | first%}
+                                    {% set disabled = "" if eventFrame.EndTimestamp is none and tagId is defined else "disabled" %}
+                                    <td>
+                                        <div class = "form-group" id = "divNewValue{{ tagId }}">
+                                            {% if eventFrameAttributeTemplate.LookupId is none %}
+                                                <input class = "form-control" id = "inputOrSelectNewValue{{ tagId }}" value = "" {{ disabled }}>
+                                                <p class = "help-block" id = "pNewValue{{ tagId }}"></p>
+                                            {% else %}
+                                                <select class = "form-control" id = "inputOrSelectNewValue{{ tagId }}" {{ disabled }}>
+                                                    <option value = "-1"></option>
+                                                    {% for lookupValue in eventFrameAttributeTemplate.Lookup.LookupValues %}
+                                                        {% if lookupValue.Selectable %}
+                                                            <option value = "{{ lookupValue.Value }}">{{ lookupValue.Name}}</option>
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                </select>
+                                                <p class = "help-block" id = "pNewValue{{ tagId }}"></p>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                {% endfor %}
+                            {% endif %}
                             <td><a class = "btn btn-default" title = "Remove" href = '{{ url_for("eventFrameEventFrameGroups.delete",
                                 eventFrameGroupId = eventFrameGroup.EventFrameGroupId, eventFrameId = eventFrame.EventFrameId) }}'
                                 data-eventFrameName = "{{ eventFrame.Name }}"><span class = "glyphicon glyphicon-minus"></span></a></td>
@@ -205,9 +212,11 @@
                     { "orderable": false }, // Select button.
                     null,
                     null,
-                    {% for eventFrameAttributeTemplate in eventFrameAttributeTemplates | sort(attribute = "Name") %}
-                        { "orderable": false },
-                    {% endfor %}
+                    {% if displayEventFrameTemplate is not none %}
+                        {% for eventFrameAttributeTemplate in eventFrameAttributeTemplates | sort(attribute = "Name") %}
+                            { "orderable": false },
+                        {% endfor %}
+                    {% endif %}
                     { "orderable": false }, // Remove button.
                     { "orderable": false }, // End button.
                     { "orderable": false }, // Edit button.

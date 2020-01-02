@@ -59,28 +59,34 @@ def dashboard(eventFrameGroupId, displayEventFrameTemplateId = None, eventFrameT
 	eventFrames = EventFrame.query.filter(EventFrame.EventFrameId. \
 		in_([eventFrameEventFrameGroup.EventFrameId for eventFrameEventFrameGroup in eventFrameGroup.EventFrameEventFrameGroups]))
 	eventFrameTemplates = EventFrameTemplate.query.join(ElementTemplate, Site, Enterprise).filter(EventFrameTemplate.EventFrameTemplateId. \
-		in_([(eventFrame.EventFrameTemplateId) for eventFrame in eventFrames])).order_by(Enterprise.Name, Site.Name, ElementTemplate.Name,
+		in_([eventFrame.EventFrameTemplateId for eventFrame in eventFrames])).order_by(Enterprise.Name, Site.Name, ElementTemplate.Name,
 		EventFrameTemplate.Name)
 	if displayEventFrameTemplateId is None:
 		displayEventFrameTemplate = eventFrameTemplates.first()
 	else:
 		displayEventFrameTemplate = EventFrameTemplate.query.get_or_404(displayEventFrameTemplateId)
 
-	defaultEventFrameTemplateView = EventFrameTemplateView.query.filter_by(EventFrameTemplateId = displayEventFrameTemplate.EventFrameTemplateId,
-		Default = True).one_or_none()
-	if eventFrameTemplateViewId is None:
-		if defaultEventFrameTemplateView is None:
+	if displayEventFrameTemplate is None:
+		eventFrameTemplateView = None
+		eventFrameAttributeTemplates = None
+	else:
+		if eventFrameTemplateViewId is None:
+			defaultEventFrameTemplateView = EventFrameTemplateView.query.filter_by(EventFrameTemplateId = displayEventFrameTemplate.EventFrameTemplateId,
+				Default = True).one_or_none()
+			if defaultEventFrameTemplateView is None:
+				eventFrameTemplateView = None
+				eventFrameAttributeTemplates = displayEventFrameTemplate.EventFrameAttributeTemplates
+			else:
+				eventFrameTemplateView = defaultEventFrameTemplateView
+				eventFrameAttributeTemplates = [eventFrameAttributeTemplateEventFrameTemplateView.EventFrameAttributeTemplate for \
+					eventFrameAttributeTemplateEventFrameTemplateView in defaultEventFrameTemplateView.EventFrameAttributeTemplateEventFrameTemplateViews]
+		elif eventFrameTemplateViewId == 0:
 			eventFrameTemplateView = None
 			eventFrameAttributeTemplates = displayEventFrameTemplate.EventFrameAttributeTemplates
 		else:
-			eventFrameTemplateView = defaultEventFrameTemplateView
-			eventFrameAttributeTemplates = [eventFrameAttributeTemplateEventFrameTemplateView.EventFrameAttributeTemplate for eventFrameAttributeTemplateEventFrameTemplateView in defaultEventFrameTemplateView.EventFrameAttributeTemplateEventFrameTemplateViews]
-	elif eventFrameTemplateViewId == 0:
-		eventFrameTemplateView = None
-		eventFrameAttributeTemplates = displayEventFrameTemplate.EventFrameAttributeTemplates
-	else:
-		eventFrameTemplateView = EventFrameTemplateView.query.get_or_404(eventFrameTemplateViewId)
-		eventFrameAttributeTemplates = [eventFrameAttributeTemplateEventFrameTemplateView.EventFrameAttributeTemplate for eventFrameAttributeTemplateEventFrameTemplateView in eventFrameTemplateView.EventFrameAttributeTemplateEventFrameTemplateViews]
+			eventFrameTemplateView = EventFrameTemplateView.query.get_or_404(eventFrameTemplateViewId)
+			eventFrameAttributeTemplates = [eventFrameAttributeTemplateEventFrameTemplateView.EventFrameAttributeTemplate for \
+				eventFrameAttributeTemplateEventFrameTemplateView in eventFrameTemplateView.EventFrameAttributeTemplateEventFrameTemplateViews]
 
 	eventFrames = eventFrames.filter_by(EventFrameTemplate = displayEventFrameTemplate)
 	return render_template("eventFrameGroups/dashboard.html", displayEventFrameTemplate = displayEventFrameTemplate, 
