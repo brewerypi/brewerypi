@@ -32,20 +32,6 @@
                 </tr>
             </thead>
             <tbody>
-                {% for eventFrameTemplate in eventFrameTemplates %}
-                    {% for element in eventFrameTemplate.ElementTemplate.Elements %}
-                        <tr data-elementId = "{{ element.ElementId }}" data-eventFrameTemplateId = "{{ eventFrameTemplate.EventFrameTemplateId }}"
-                            style = "display: none">
-                            <td>{{ eventFrameTemplate.ElementTemplate.Site.Enterprise.Name }}</td>
-                            <td>{{ eventFrameTemplate.ElementTemplate.Site.Name }}</td>
-                            <td>{{ eventFrameTemplate.ElementTemplate.Name }}</td>
-                            <td>{{ eventFrameTemplate.Name }}</td>
-                            <td>{{ element.Name }}</td>
-                            <td><button class = "btn btn-default" id = "buttonRemove {{ loop.index }}" title = "Remove"><span class = "glyphicon glyphicon-minus">                            
-                                </span></button></td>
-                        </tr>
-                    {% endfor %}
-                {% endfor %}
             </tbody>
         </table>
     </div>
@@ -73,8 +59,7 @@
                             <td>{{ eventFrameTemplate.ElementTemplate.Name }}</td>
                             <td>{{ eventFrameTemplate.Name }}</td>
                             <td>{{ element.Name }}</td>
-                            <td><button class = "btn btn-default" id = "buttonAdd {{ loop.index }}" title = "Add"><span class = "glyphicon glyphicon-plus">
-                                </span></button></td>
+                            <td><button class = "btn btn-default" title = "Add"><span class = "glyphicon glyphicon-plus"></span></button></td>
                         </tr>
                     {% endfor %}
                 {% endfor %}
@@ -171,22 +156,28 @@
             $("#availableNewEventFramesTable").attr("style", "width:100%")
             $("#selectedNewEventFramesTable").attr("style", "width:100%")
 
-            $("[id^=buttonAdd]").on("click", function()
+            $("#availableNewEventFramesTable tbody").on("click", "tr td button", function()
             {
                 var elementId = $(this).parent().parent().attr("data-elementId")
                 var eventFrameTemplateId = $(this).parent().parent().attr("data-eventFrameTemplateId")
-                $("#availableNewEventFramesTable tr[data-elementId=" + elementId + "][data-eventFrameTemplateId=" + eventFrameTemplateId + "]").hide()
-                $("#selectedNewEventFramesTable tr[data-elementId=" + elementId + "][data-eventFrameTemplateId=" + eventFrameTemplateId + "]").show()
+                rowToMove = availableNewEventFramesTable.row($(this).parent().parent())
+                var movedRow = selectedNewEventFramesTable.row.add(rowToMove.data()).draw().node()
+                $(movedRow).find("span").removeClass("glyphicon glyphicon-plus").addClass("glyphicon glyphicon-minus")
+                $(movedRow).attr("data-elementId", elementId)
+                $(movedRow).attr("data-eventFrameTemplateId", eventFrameTemplateId)
+                rowToMove.remove().draw()
             })
 
-            $("[id^=buttonRemove]").on("click", function()
+            $("#selectedNewEventFramesTable tbody").on("click", "tr td button", function()
             {
-                // Clear any filtering on the available table for user clarity.
-                availableNewEventFramesTable.search("").columns().search("").draw()
                 var elementId = $(this).parent().parent().attr("data-elementId")
                 var eventFrameTemplateId = $(this).parent().parent().attr("data-eventFrameTemplateId")
-                $("#availableNewEventFramesTable tr[data-elementId=" + elementId + "][data-eventFrameTemplateId=" + eventFrameTemplateId + "]").show()
-                $("#selectedNewEventFramesTable tr[data-elementId=" + elementId + "][data-eventFrameTemplateId=" + eventFrameTemplateId + "]").hide()
+                rowToMove = selectedNewEventFramesTable.row($(this).parent().parent())
+                var movedRow = availableNewEventFramesTable.row.add(rowToMove.data()).draw().node()
+                $(movedRow).find("span").removeClass("glyphicon glyphicon-minus").addClass("glyphicon glyphicon-plus")
+                $(movedRow).attr("data-elementId", elementId)
+                $(movedRow).attr("data-eventFrameTemplateId", eventFrameTemplateId)
+                rowToMove.remove().draw()
             })
 
             $("#buttonSave").on("click", function()
