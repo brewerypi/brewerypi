@@ -33,18 +33,6 @@
                 </tr>
             </thead>
             <tbody>
-                {% for eventFrame in eventFrames %}
-                    <tr data-eventFrameId = "{{ eventFrame.EventFrameId }}" style = "display: none">
-                        <td>{{ eventFrame.EventFrameTemplate.ElementTemplate.Site.Enterprise.Name }}</td>
-                        <td>{{ eventFrame.EventFrameTemplate.ElementTemplate.Site.Name }}</td>
-                        <td>{{ eventFrame.EventFrameTemplate.ElementTemplate.Name }}</td>
-                        <td>{{ eventFrame.EventFrameTemplate.Name }}</td>
-                        <td>{{ eventFrame.Element.Name }}</td>
-                        <td>{{ eventFrame.Name }}</td>
-                        <td><button class = "btn btn-default" id = "buttonRemove {{ loop.index }}" title = "Remove"><span class = "glyphicon glyphicon-minus">
-                            </span></button></td>
-                    </tr>
-                {% endfor %}
             </tbody>
         </table>
     </div>
@@ -73,8 +61,7 @@
                         <td>{{ eventFrame.EventFrameTemplate.Name }}</td>
                         <td>{{ eventFrame.Element.Name }}</td>
                         <td>{{ eventFrame.Name }}</td>
-                        <td><button class = "btn btn-default" id = "buttonAdd {{ loop.index }}" title = "Add"><span class = "glyphicon glyphicon-plus"></span>
-                            </button></td>
+                        <td><button class = "btn btn-default" title = "Add"><span class = "glyphicon glyphicon-plus"></span></button></td>
                     </tr>
                 {% endfor %}
             </tbody>
@@ -174,20 +161,24 @@
             $("#availableActiveEventFramesTable").attr("style", "width:100%")
             $("#selectedActiveEventFramesTable").attr("style", "width:100%")
 
-            $("[id^=buttonAdd]").on("click", function()
+            $("#availableActiveEventFramesTable tbody").on("click", "tr td button", function()
             {
                 var eventFrameId = $(this).parent().parent().attr("data-eventFrameId")
-                $("#availableActiveEventFramesTable tr[data-eventFrameId=" + eventFrameId + "]").hide()
-                $("#selectedActiveEventFramesTable tr[data-eventFrameId=" + eventFrameId + "]").show()
+                rowToMove = availableActiveEventFramesTable.row($(this).parent().parent())
+                var movedRow = selectedActiveEventFramesTable.row.add(rowToMove.data()).draw("full-hold").node()
+                $(movedRow).find("span").removeClass("glyphicon glyphicon-plus").addClass("glyphicon glyphicon-minus")
+                $(movedRow).attr("data-eventFrameId", eventFrameId)
+                rowToMove.remove().draw("full-hold")
             })
 
-            $("[id^=buttonRemove]").on("click", function()
+            $("#selectedActiveEventFramesTable tbody").on("click", "tr td button", function()
             {
-                // Clear any filtering on the available table for user clarity.
-                availableActiveEventFramesTable.search("").columns().search("").draw()
                 var eventFrameId = $(this).parent().parent().attr("data-eventFrameId")
-                $("#availableActiveEventFramesTable tr[data-eventFrameId=" + eventFrameId + "]").show()
-                $("#selectedActiveEventFramesTable tr[data-eventFrameId=" + eventFrameId + "]").hide()
+                rowToMove = selectedActiveEventFramesTable.row($(this).parent().parent())
+                var movedRow = availableActiveEventFramesTable.row.add(rowToMove.data()).draw("full-hold").node()
+                $(movedRow).find("span").removeClass("glyphicon glyphicon-minus").addClass("glyphicon glyphicon-plus")
+                $(movedRow).attr("data-eventFrameId", eventFrameId)
+                rowToMove.remove().draw("full-hold")
             })
 
             $("#buttonSave").on("click", function()
