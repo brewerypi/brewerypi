@@ -29,7 +29,8 @@ def add(eventFrameTemplateId):
 		db.session.add(eventFrameTemplateView)
 		db.session.commit()
 		flash('You have successfully added the new event frame template view "{}".'.format(eventFrameTemplateView.Name), "alert alert-success")
-		return redirect(form.requestReferrer.data)
+		return redirect(url_for("eventFrameTemplateViews.eventFrameAttributeTemplates",
+			eventFrameTemplateViewId = eventFrameTemplateView.EventFrameTemplateViewId))
 
 	# Present a form to add a new event frame template view.
 	form.eventFrameTemplateId.data = eventFrameTemplateId
