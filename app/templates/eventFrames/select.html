@@ -11,10 +11,10 @@
             {% elif childrenClass == "Site" %}
                 <li><a href = '{{ url_for("eventFrames.selectEventFrame", selectedClass = "Root") }}'><span class = "glyphicon glyphicon-home"></span></a></li>
                 <li class = "active">
-                    <a title = "Previous" href = '{{ url_for("eventFrames.selectEventFrame", selectedClass = "Enterprise", selectedId = parent.previous().id()) }}'>
-                        <span class = "glyphicon glyphicon-arrow-left"></span></a>
-                    <a title = "Next" href = '{{ url_for("eventFrames.selectEventFrame", selectedClass = "Enterprise", selectedId = parent.next().id()) }}'>
-                        <span class = "glyphicon glyphicon-arrow-right"></span></a>    
+                    <a title = "Previous" href = '{{ url_for("eventFrames.selectEventFrame", selectedClass = "Enterprise",
+                        selectedId = parent.previous().id()) }}'><span class = "glyphicon glyphicon-arrow-left"></span></a>
+                    <a title = "Next" href = '{{ url_for("eventFrames.selectEventFrame", selectedClass = "Enterprise",
+                        selectedId = parent.next().id()) }}'><span class = "glyphicon glyphicon-arrow-right"></span></a>    
                     {{ parent.Name }}
                 </li>
                 {% set pageHeaderSubText = "Sites" %}
@@ -348,6 +348,55 @@
                 </tbody>
             </table>
         </div>
+        <div class = "page-header">
+            <h1>Event Frames <small>Event Frame Template Views</small></h1>
+        </div>
+        <div>
+            <a class = "btn btn-default" title = "Add Event Frame Template View"
+                href = '{{ url_for("eventFrameTemplateViews.add", eventFrameTemplateId = parent.EventFrameTemplateId) }}' role = "button">
+                <span class = "glyphicon glyphicon-plus"></span></a>
+            <br><br>
+            <table id = "eventFrameTemplateViewsTable" class = "table table-hover" style = "display:none">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>Name</th>
+                        <th>Description</th>
+                        <th>Default</th>
+                        <th></th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for eventFrameTemplateView in parent.EventFrameTemplateViews %}
+                    <tr>
+                        {% if current_user.isAdministrator() %}
+                            <td><a class = "btn btn-default" title = "Select" href = '{{ url_for("eventFrameTemplateViews.eventFrameAttributeTemplates",
+                                eventFrameTemplateViewId = eventFrameTemplateView.EventFrameTemplateViewId) }}'><span class = "glyphicon glyphicon-list">
+                                </span></a></td>
+                        {% else %}
+                            <td></td>
+                        {% endif %}
+                        <td>{{ eventFrameTemplateView.Name }}</td>
+                        <td>{{ eventFrameTemplateView.Description }}</td>
+                        <td>{{ eventFrameTemplateView.Default | yesNo }}</td>
+                        {% if current_user.isAdministrator() %}
+                            <td><a class = "btn btn-default" title = "Edit" href = '{{ url_for("eventFrameTemplateViews.edit",
+                                eventFrameTemplateViewId = eventFrameTemplateView.EventFrameTemplateViewId) }}'>
+                                <span class = "glyphicon glyphicon-edit"></span></a></td>
+                            <td><a class = "btn btn-default" title = "Delete" href = '{{ url_for("eventFrameTemplateViews.delete",
+                                eventFrameTemplateViewId = eventFrameTemplateView.EventFrameTemplateViewId) }}',
+                                data-type = "event frame template view", data-name = "{{ eventFrameTemplateView.Name }}">
+                                <span class = "glyphicon glyphicon-trash"></span></a></td>
+                        {% else %}
+                            <td></td>
+                            <td></td>
+                        {% endif %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     {% endif %}
 {% endblock %}
 
@@ -461,7 +510,7 @@
                 "fixedHeader": true
             })
 
-            $('#eventFrameAttributeTemplatesTable').DataTable
+            var eventFrameAttributeTemplatesTable = $('#eventFrameAttributeTemplatesTable').DataTable
             ({
                 "order":
                 [
@@ -483,8 +532,29 @@
                 "pageLength": 25
             })
 
+            var eventFrameTemplateViewsTable = $('#eventFrameTemplateViewsTable').DataTable
+            ({
+                "order":
+                [
+                    [1, 'asc']              // Name.
+                ],
+                "columns":
+                [
+                    { "orderable": false }, // Select button.
+                    null,
+                    null,
+                    null,
+                    { "orderable": false }, // Edit button.
+                    { "orderable": false }  // Delete button.
+                ],
+                "stateSave": true,
+                "stateDuration": 0,
+                "pageLength": 25
+            })
+
             $("#table").attr("style", "width:100%")
             $("#eventFrameAttributeTemplatesTable").attr("style", "width:100%")
+            $("#eventFrameTemplateViewsTable").attr("style", "width:100%")
             $("#divLoading").attr("style", "display:none")
 
             $("a[title='Delete']").on("click", function ()
@@ -555,6 +625,8 @@
 
             // Clear any left over filtering from state saving.
             table.search("").columns().search("").draw()
+            eventFrameAttributeTemplatesTable.search("").columns().search("").draw()
+            eventFrameTemplateViewsTable.search("").columns().search("").draw()
             table.on("draw.dt", function()
             {
                 checkForNotifications()

@@ -7,8 +7,9 @@ from . forms import EventFrameForm, EventFrameOverlayForm
 from . helpers import currentEventFrameAttributeValues
 from .. import db
 from .. decorators import permissionRequired
-from .. models import Element, ElementTemplate, Enterprise, EventFrame, EventFrameAttribute, EventFrameAttributeTemplate, EventFrameEventFrameGroup, \
-	EventFrameGroup, EventFrameTemplate, Lookup, LookupValue, Permission, Site, Tag, TagValue
+from .. models import Element, ElementTemplate, Enterprise, EventFrame, EventFrameAttribute, EventFrameAttributeTemplate, \
+	EventFrameAttributeTemplateEventFrameTemplateView, EventFrameEventFrameGroup, EventFrameGroup, EventFrameTemplate, EventFrameTemplateView, \
+	Lookup, LookupValue, Permission, Site, Tag, TagValue
 
 modelName = "Event Frame"
 
@@ -131,10 +132,13 @@ def addEventFrame(eventFrameTemplateId = None, parentEventFrameId = None, eventF
 	return render_template("eventFrames/addEdit.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
 
 @eventFrames.route("/eventFrames/dashboard/<int:eventFrameId>", methods = ["GET", "POST"])
+@eventFrames.route("/eventFrames/dashboard/<int:eventFrameId>/<int:eventFrameTemplateView>/<int:eventFrameTemplateViewId>", methods = ["GET", "POST"])
 @eventFrames.route("/eventFrames/dashboard/<int:eventFrameId>/<int:eventFrameGroupId>", methods = ["GET", "POST"])
+@eventFrames.route("/eventFrames/dashboard/<int:eventFrameId>/<int:eventFrameGroupId>/<int:eventFrameTemplateView>/<int:eventFrameTemplateViewId>",
+	methods = ["GET", "POST"])
 @login_required
 @permissionRequired(Permission.DATA_ENTRY)
-def dashboard(eventFrameId, eventFrameGroupId = None):
+def dashboard(eventFrameId, eventFrameGroupId = None, eventFrameTemplateView = None, eventFrameTemplateViewId = None):
 	eventFrame = EventFrame.query.get_or_404(eventFrameId)
 	if eventFrame.ElementId:
 		elementId = eventFrame.ElementId
@@ -144,10 +148,34 @@ def dashboard(eventFrameId, eventFrameGroupId = None):
 	if eventFrameGroupId is None:
 		eventFrameEventFrameGroup = None
 	else:
-		eventFrameEventFrameGroup = EventFrameEventFrameGroup.query.filter_by(EventFrameGroupId = eventFrameGroupId, EventFrameId = eventFrame.origin().EventFrameId).one_or_none()
+		eventFrameEventFrameGroup = EventFrameEventFrameGroup.query.filter_by(EventFrameGroupId = eventFrameGroupId,
+			EventFrameId = eventFrame.origin().EventFrameId).one_or_none()
 
-	eventFrameAttributes = EventFrameAttribute.query.join(EventFrameAttributeTemplate, EventFrameTemplate). \
-		filter(EventFrameAttribute.ElementId == elementId, EventFrameTemplate.EventFrameTemplateId == eventFrame.EventFrameTemplate.EventFrameTemplateId)
+	if eventFrameTemplateViewId is None:
+		defaultEventFrameTemplateView = EventFrameTemplateView.query.filter_by(EventFrameTemplateId = eventFrame.EventFrameTemplateId,
+			Default = True).one_or_none()
+		if defaultEventFrameTemplateView is None:
+			eventFrameTemplateView = None
+			eventFrameAttributes = EventFrameAttribute.query.join(EventFrameAttributeTemplate, EventFrameTemplate). \
+				filter(EventFrameAttribute.ElementId == elementId,
+				EventFrameTemplate.EventFrameTemplateId == eventFrame.EventFrameTemplate.EventFrameTemplateId)
+		else:
+			eventFrameTemplateView = defaultEventFrameTemplateView
+			eventFrameAttributes = EventFrameAttribute.query.join(EventFrameAttributeTemplate, EventFrameTemplate,
+				EventFrameAttributeTemplateEventFrameTemplateView).filter(EventFrameAttribute.ElementId == elementId,
+				EventFrameTemplate.EventFrameTemplateId == eventFrame.EventFrameTemplate.EventFrameTemplateId,
+				EventFrameAttributeTemplateEventFrameTemplateView.EventFrameTemplateViewId == defaultEventFrameTemplateView.EventFrameTemplateViewId)
+	elif  eventFrameTemplateViewId == 0:
+		eventFrameTemplateView = None
+		eventFrameAttributes = EventFrameAttribute.query.join(EventFrameAttributeTemplate, EventFrameTemplate). \
+			filter(EventFrameAttribute.ElementId == elementId, EventFrameTemplate.EventFrameTemplateId == eventFrame.EventFrameTemplate.EventFrameTemplateId)
+	else:
+		eventFrameTemplateView = EventFrameTemplateView.query.get_or_404(eventFrameTemplateViewId)
+		eventFrameAttributes = EventFrameAttribute.query.join(EventFrameAttributeTemplate, EventFrameTemplate,
+			EventFrameAttributeTemplateEventFrameTemplateView).filter(EventFrameAttribute.ElementId == elementId,
+			EventFrameTemplate.EventFrameTemplateId == eventFrame.EventFrameTemplate.EventFrameTemplateId,
+			EventFrameAttributeTemplateEventFrameTemplateView.EventFrameTemplateViewId == eventFrameTemplateViewId)
+
 	eventFrameAttributeIds = []
 	for eventFrameAttribute in eventFrameAttributes:
 		eventFrameAttributeIds.append(eventFrameAttribute.EventFrameAttributeId)
@@ -159,7 +187,7 @@ def dashboard(eventFrameId, eventFrameGroupId = None):
 		tagValues = TagValue.query.join(Tag, EventFrameAttribute).filter(EventFrameAttribute.EventFrameAttributeId.in_(eventFrameAttributeIds),
 			TagValue.Timestamp >= eventFrame.StartTimestamp)
 	return render_template("eventFrames/dashboard.html", eventFrame = eventFrame, eventFrameEventFrameGroup = eventFrameEventFrameGroup,
-		eventFrameAttributes = eventFrameAttributes, tagValues = tagValues)
+		eventFrameAttributes = eventFrameAttributes, eventFrameTemplateView = eventFrameTemplateView, tagValues = tagValues)
 
 @eventFrames.route("/eventFrames/overlay/days", methods = ["GET", "POST"])
 @login_required

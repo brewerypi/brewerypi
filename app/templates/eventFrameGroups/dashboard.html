@@ -34,6 +34,31 @@
     </div>
     <br>
     <div>
+        Toggle View:
+        {% if eventFrameTemplateView is none %}
+            {% set activeEventFrameTemplateViewId = none %}
+            {% set class = "btn btn-primary btn-xs active" %}
+        {% else %}
+            {% set activeEventFrameTemplateViewId = eventFrameTemplateView.EventFrameTemplateViewId %}
+            {% set class = "btn btn-primary btn-xs" %}
+        {% endif %}
+        <a type = "button" class = "{{ class }}" title = "All" 
+            href = '{{ url_for("eventFrameGroups.dashboard", eventFrameGroupId = eventFrameGroup.EventFrameGroupId,
+            displayEventFrameTemplateId = displayEventFrameTemplate.EventFrameTemplateId, eventFrameTemplateViewId = 0) }}' role = "button">All</a>
+        {% for eventFrameTemplateView in displayEventFrameTemplate.EventFrameTemplateViews %}
+            {% if eventFrameTemplateView.EventFrameTemplateViewId ==  activeEventFrameTemplateViewId %}
+                {% set class = "btn btn-primary btn-xs active" %}
+            {% else %}
+                {% set class = "btn btn-primary btn-xs" %}
+            {% endif %}
+            <a type = "button" class = "{{ class }}" title = "eventFrameTemplateView.Name View" 
+                href = '{{ url_for("eventFrameGroups.dashboard", eventFrameGroupId = eventFrameGroup.EventFrameGroupId,
+                    displayEventFrameTemplateId = displayEventFrameTemplate.EventFrameTemplateId,
+                    eventFrameTemplateViewId = eventFrameTemplateView.EventFrameTemplateViewId) }}'' role = "button">{{ eventFrameTemplateView.Name }}</a>
+        {% endfor %}
+        <br><br>   
+    </div>
+    <div>
         <a class = "btn btn-default" title = "Add New Event Frames" href = '{{ url_for("eventFrameGroups.addNewEventFrames",
             eventFrameGroupId = eventFrameGroup.EventFrameGroupId) }}' role = "button"><span class = "glyphicon glyphicon-plus"></span> New</a>
         <a class = "btn btn-default" title = "Add Active Event Frames" href = '{{ url_for("eventFrameGroups.addActiveEventFrames",
@@ -62,7 +87,7 @@
                     <th></th>
                     <th>Name</th>
                     <th>Element</th>
-                    {% for eventFrameAttributeTemplate in displayEventFrameTemplate.EventFrameAttributeTemplates | sort(attribute = "Name") %}
+                    {% for eventFrameAttributeTemplate in eventFrameAttributeTemplates | sort(attribute = "Name") %}
                         <th>{{ eventFrameAttributeTemplate.Name }}</th>
                     {% endfor %}
                     <th></th>
@@ -82,7 +107,7 @@
                                 <span class = "glyphicon glyphicon-list"></span></a></td>
                             <td>{{ eventFrame.Name }}</td>
                             <td>{{ eventFrame.Element.Name }}</td>
-                            {% for eventFrameAttributeTemplate in displayEventFrameTemplate.EventFrameAttributeTemplates | sort(attribute = "Name") %}
+                            {% for eventFrameAttributeTemplate in eventFrameAttributeTemplates | sort(attribute = "Name") %}
                                 {% set tagId = eventFrameAttributeTemplate.EventFrameAttributes.filter_by(ElementId = eventFrame.ElementId) |
                                     map(attribute = "TagId") | first%}
                                 {% set disabled = "" if eventFrame.EndTimestamp is none and tagId is defined else "disabled" %}
@@ -180,7 +205,7 @@
                     { "orderable": false }, // Select button.
                     null,
                     null,
-                    {% for eventFrameAttributeTemplate in displayEventFrameTemplate.EventFrameAttributeTemplates | sort(attribute = "Name") %}
+                    {% for eventFrameAttributeTemplate in eventFrameAttributeTemplates | sort(attribute = "Name") %}
                         { "orderable": false },
                     {% endfor %}
                     { "orderable": false }, // Remove button.

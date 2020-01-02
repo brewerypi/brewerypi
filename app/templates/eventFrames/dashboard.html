@@ -157,6 +157,43 @@
                 <span class = "glyphicon glyphicon-stats"></span></a>
         {% endif %}
         <br><br>
+        <div>
+            Toggle View:
+            {% if eventFrameTemplateView is none %}
+                {% set activeEventFrameTemplateViewId = none %}
+                {% set class = "btn btn-primary btn-xs active" %}
+            {% else %}
+                {% set activeEventFrameTemplateViewId = eventFrameTemplateView.EventFrameTemplateViewId %}
+                {% set class = "btn btn-primary btn-xs" %}
+            {% endif %}
+            {% if eventFrameEventFrameGroup is none %}
+                {% set href = url_for("eventFrames.dashboard", eventFrameId = eventFrame.EventFrameId, eventFrameTemplateView = true,
+                    eventFrameTemplateViewId = 0) %}
+            {% else %}
+                {% set href = url_for("eventFrames.dashboard", eventFrameId = eventFrame.EventFrameId,
+                    eventFrameGroupId = eventFrameEventFrameGroup.EventFrameGroupId, eventFrameTemplateView = true, eventFrameTemplateViewId = 0) %}
+            {% endif %}
+            <a type = "button" class = "{{ class }}" title = "All" 
+                href = '{{ href }}' role = "button">All</a>
+            {% for eventFrameTemplateView in eventFrame.EventFrameTemplate.EventFrameTemplateViews %}
+                {% if eventFrameTemplateView.EventFrameTemplateViewId ==  activeEventFrameTemplateViewId %}
+                    {% set class = "btn btn-primary btn-xs active" %}
+                {% else %}
+                    {% set class = "btn btn-primary btn-xs" %}
+                {% endif %}
+                {% if eventFrameEventFrameGroup is none %}
+                    {% set href = url_for("eventFrames.dashboard", eventFrameId = eventFrame.EventFrameId, eventFrameTemplateView = true,
+                        eventFrameTemplateViewId = eventFrameTemplateView.EventFrameTemplateViewId) %}
+                {% else %}
+                    {% set href = url_for("eventFrames.dashboard", eventFrameId = eventFrame.EventFrameId,
+                        eventFrameGroupId = eventFrameEventFrameGroup.EventFrameGroupId, eventFrameTemplateView = true,
+                        eventFrameTemplateViewId = eventFrameTemplateView.EventFrameTemplateViewId) %}
+                {% endif %}
+                <a type = "button" class = "{{ class }}" title = "eventFrameTemplateView.Name View" href = '{{ href }}' role = "button">
+                    {{ eventFrameTemplateView.Name }}</a>
+            {% endfor %}
+            <br><br>    
+        </div>
         <table id = "attributesTable" class = "table table-hover" style = "display:none">
             <thead>
                 <tr>

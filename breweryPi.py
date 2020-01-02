@@ -4,8 +4,8 @@ from flask_migrate import Migrate, upgrade
 from sqlalchemy import create_engine
 from app import create_app, db
 from app.models import Area, Element, ElementAttribute, ElementAttributeTemplate, ElementTemplate, Enterprise, EventFrame, EventFrameAttribute, \
-	EventFrameAttributeTemplate, EventFrameEventFrameGroup, EventFrameGroup, EventFrameNote, EventFrameTemplate, Lookup, LookupValue, Message, Note, Role, \
-	Site, Tag, TagValue, TagValueNote, UnitOfMeasurement, User
+	EventFrameAttributeTemplate, EventFrameAttributeTemplateEventFrameTemplateView, EventFrameEventFrameGroup, EventFrameGroup, EventFrameNote, \
+	EventFrameTemplate, EventFrameTemplateView, Lookup, LookupValue, Message, Note, Role, Site, Tag, TagValue, TagValueNote, UnitOfMeasurement, User
 
 app = create_app()
 migrate = Migrate(app, db, directory = "db/migrations")
@@ -14,9 +14,11 @@ migrate = Migrate(app, db, directory = "db/migrations")
 def make_shell_context():
 	return dict(app = app, db = db, Area = Area, Element = Element, ElementAttribute = ElementAttribute, ElementAttributeTemplate = ElementAttributeTemplate, 
 		ElementTemplate = ElementTemplate, Enterprise = Enterprise, EventFrame = EventFrame, EventFrameAttribute = EventFrameAttribute, 
-		EventFrameAttributeTemplate = EventFrameAttributeTemplate, EventFrameEventFrameGroup = EventFrameEventFrameGroup, EventFrameGroup = EventFrameGroup,
-		EventFrameNote = EventFrameNote, EventFrameTemplate = EventFrameTemplate, Lookup = Lookup, LookupValue = LookupValue, Message = Message, Note = Note,
-		Role = Role, Site = Site, Tag = Tag, TagValue = TagValue, TagValueNote = TagValueNote, UnitOfMeasurement = UnitOfMeasurement, User = User)
+		EventFrameAttributeTemplate = EventFrameAttributeTemplate,
+		EventFrameAttributeTemplateEventFrameTemplateView = EventFrameAttributeTemplateEventFrameTemplateView,
+		EventFrameEventFrameGroup = EventFrameEventFrameGroup, EventFrameGroup = EventFrameGroup, EventFrameNote = EventFrameNote,
+		EventFrameTemplate = EventFrameTemplate, EventFrameTemplateView = EventFrameTemplateView, Lookup = Lookup, LookupValue = LookupValue, Message = Message,
+		Note = Note, Role = Role, Site = Site, Tag = Tag, TagValue = TagValue, TagValueNote = TagValueNote, UnitOfMeasurement = UnitOfMeasurement, User = User)
 
 @app.cli.command()
 @click.option("--admin", is_flag = True)
