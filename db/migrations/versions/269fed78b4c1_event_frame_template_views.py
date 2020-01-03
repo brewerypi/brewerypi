@@ -1,8 +1,8 @@
-"""Event Frame Template Views.
+"""Event frame template views.
 
-Revision ID: 8a8c98940433
-Revises: 693d24be14f4
-Create Date: 2020-01-02 12:41:15.349317
+Revision ID: 269fed78b4c1
+Revises: 9b71da09fc0b
+Create Date: 2020-01-03 01:43:07.677439
 
 """
 from alembic import op
@@ -10,8 +10,8 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '8a8c98940433'
-down_revision = '693d24be14f4'
+revision = '269fed78b4c1'
+down_revision = '9b71da09fc0b'
 branch_labels = None
 depends_on = None
 
