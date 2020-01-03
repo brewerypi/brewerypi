@@ -96,7 +96,6 @@ def copy(fromEventFrameTemplateId):
 	form.toElementTemplate.choices = [(elementTemplate.ElementTemplateId,
 		"{}_{}_{}".format(elementTemplate.Site.Enterprise.Abbreviation, elementTemplate.Site.Abbreviation, elementTemplate.Name)) for elementTemplate in
 		ElementTemplate.query.join(Site, Enterprise). \
-		filter(ElementTemplate.ElementTemplateId != fromEventFrameTemplate.ElementTemplate.ElementTemplateId). \
 		order_by(Enterprise.Abbreviation, Site.Abbreviation, ElementTemplate.Name)]
 
 	if form.validate_on_submit():
@@ -108,7 +107,7 @@ def copy(fromEventFrameTemplateId):
 			fromEventFrameTemplateLevel = linealDescent["level"]
 			if fromEventFrameTemplateLevel == 0:
 				toEventFrameTemplate = EventFrameTemplate(Description = fromEventFrameTemplate.Description, ElementTemplateId = form.toElementTemplate.data,
-					Name = fromEventFrameTemplate.Name, Order = fromEventFrameTemplate.Order, ParentEventFrameTemplate = None)
+					Name = form.name.data, Order = fromEventFrameTemplate.Order, ParentEventFrameTemplate = None)
 			else:
 				if previousLevel != fromEventFrameTemplateLevel:
 					toParentEventFrameTemplate = toEventFrameTemplate
