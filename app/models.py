@@ -3,7 +3,7 @@ from datetime import datetime
 from dateutil.relativedelta import relativedelta
 from flask_login import AnonymousUserMixin, current_user, UserMixin
 from sqlalchemy import func, Index, PrimaryKeyConstraint, UniqueConstraint
-from sqlalchemy.dialects.mysql import DOUBLE
+from sqlalchemy.dialects.mysql import DATETIME, DOUBLE
 from time import time
 from werkzeug.security import generate_password_hash, check_password_hash
 from app import db
@@ -268,12 +268,12 @@ class EventFrame(db.Model):
 
 	EventFrameId = db.Column(db.Integer, primary_key = True)
 	ElementId = db.Column(db.Integer, db.ForeignKey("Element.ElementId", name = "FK__Element$Have$EventFrame"), nullable = True)
-	EndTimestamp = db.Column(db.DateTime, nullable = True)
+	EndTimestamp = db.Column(DATETIME(fsp = 6), nullable = True)
 	EventFrameTemplateId = db.Column(db.Integer, db.ForeignKey("EventFrameTemplate.EventFrameTemplateId", name = "FK__EventFrameTemplate$Have$EventFrame"), \
 		nullable = False)
 	Name = db.Column(db.String(45), nullable = False)
 	ParentEventFrameId = db.Column(db.Integer, db.ForeignKey("EventFrame.EventFrameId", name = "FK__EventFrame$CanHave$EventFrame"), nullable = True)
-	StartTimestamp = db.Column(db.DateTime, nullable = False)
+	StartTimestamp = db.Column(DATETIME(fsp = 6), nullable = False)
 	UserId = db.Column(db.Integer, db.ForeignKey("User.UserId", name = "FK__User$AddOrEdit$EventFrame"), nullable = False)
 
 	ParentEventFrame = db.relationship("EventFrame", remote_side = [EventFrameId])
@@ -793,7 +793,7 @@ class Message(db.Model):
 	Body = db.Column(db.Text, nullable = False)
 	RecipientId = db.Column(db.Integer, db.ForeignKey("User.UserId", name = "FK__User$Receive$Message"), nullable = False)
 	SenderId = db.Column(db.Integer, db.ForeignKey("User.UserId", name = "FK__User$Send$Message"), nullable = False)
-	Timestamp = db.Column(db.DateTime, nullable = False, default = datetime.utcnow)
+	Timestamp = db.Column(DATETIME(fsp = 6), nullable = False, default = datetime.utcnow)
 
 	def __repr__(self):
 		return "<Message: {}>".format(self.Body)
@@ -813,7 +813,7 @@ class Note(db.Model):
 
 	NoteId = db.Column(db.Integer, primary_key = True)
 	Note = db.Column(db.Text, nullable = False)
-	Timestamp = db.Column(db.DateTime, nullable = False)
+	Timestamp = db.Column(DATETIME(fsp = 6), nullable = False)
 	UserId = db.Column(db.Integer, db.ForeignKey("User.UserId", name = "FK__User$AddOrEdit$Note"), nullable = False)
 	
 	TagValueNotes = db.relationship("TagValueNote", backref = "Note", lazy = "dynamic")
@@ -986,7 +986,7 @@ class TagValue(db.Model):
 
 	TagValueId = db.Column(db.Integer, primary_key = True)
 	TagId = db.Column(db.Integer, db.ForeignKey("Tag.TagId", name = "FK__Tag$Have$TagValue"), nullable = False)
-	Timestamp = db.Column(db.DateTime, nullable = False)
+	Timestamp = db.Column(DATETIME(fsp = 6), nullable = False)
 	UserId = db.Column(db.Integer, db.ForeignKey("User.UserId", name = "FK__User$AddOrEdit$TagValue"), nullable = False)
 	Value = db.Column(db.Float, nullable = False)
 
@@ -1084,7 +1084,7 @@ class User(UserMixin, db.Model):
 
 	UserId = db.Column(db.Integer, primary_key = True)
 	Enabled = db.Column(db.Boolean, nullable = False)
-	LastMessageReadTimestamp = db.Column(db.DateTime)
+	LastMessageReadTimestamp = db.Column(DATETIME(fsp = 6), nullable = True)
 	Name = db.Column(db.String(45), nullable = False)
 	PasswordHash = db.Column(db.String(128))
 	RoleId = db.Column(db.Integer, db.ForeignKey("Role.RoleId", name = "FK__Role$Have$User"), nullable = False)
