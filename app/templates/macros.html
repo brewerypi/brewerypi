@@ -1,21 +1,21 @@
 {% macro breadcrumb(breadcrumbs) %}
-<div>
-    <ol class = "breadcrumb">
-    {% for breadcrumb in breadcrumbs %}
-        {% if breadcrumb["url"] == None %}
-            {% if breadcrumb["type"] == "timestamp" %}
-                <li class = "active">{{ moment(breadcrumb["text"]).format("YYYY-MM-DD HH:mm:ss") }}</li>
+    <div>
+        <ol class = "breadcrumb">
+        {% for breadcrumb in breadcrumbs %}
+            {% if breadcrumb["url"] == None %}
+                {% if breadcrumb["type"] == "timestamp" %}
+                    <li class = "active">{{ moment(breadcrumb["text"]).format("YYYY-MM-DD HH:mm:ss") }}</li>
+                {% else %}
+                    <li class = "active">{{ breadcrumb["text"] | safe }}</li>
+                {% endif %}
             {% else %}
-                <li class = "active">{{ breadcrumb["text"] | safe }}</li>
+                {% if breadcrumb["type"] == "timestamp" %}
+                    <li><a href = '{{ breadcrumb["url"] }}'>{{ moment(breadcrumb["text"]).format("YYYY-MM-DD HH:mm:ss") }}</a></li>
+                {% else %}
+                    <li><a href = '{{ breadcrumb["url"] }}'>{{ breadcrumb["text"] | safe }}</a></li>
+                {% endif %}
             {% endif %}
-        {% else %}
-            {% if breadcrumb["type"] == "timestamp" %}
-                <li><a href = "{{ breadcrumb["url"] }}">{{ moment(breadcrumb["text"]).format("YYYY-MM-DD HH:mm:ss") }}</a></li>
-            {% else %}
-                <li><a href = "{{ breadcrumb["url"] }}">{{ breadcrumb["text"] | safe }}</a></li>
-            {% endif %}
-        {% endif %}
-    {% endfor %}
-    </ol>
-</div>
+        {% endfor %}
+        </ol>
+    </div>
 {% endmacro %}}

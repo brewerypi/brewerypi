@@ -1,66 +1,76 @@
 {% extends "base.html" %}
 
-{% block title %}
-Users
-{% endblock %}
+{% block title %}Users{% endblock %}
 
 {% block page_content %}
-<div>
-    <ol class = "breadcrumb">
-        <li class = "active"><span class = "glyphicon glyphicon-home"></span></li>
-    </ol>
-</div>
-<div class = "page-header">
-    <h1>Users <small></small></h1>
-</div>
-<div>
-    <a class = "btn btn-default" title = "Add" href = "{{ url_for("users.addUser") }}" role = "button">
-        <span class = "glyphicon glyphicon-plus"></span></a>
-    <br><br>
-    <table id = "usersTable" class = "table table-hover" style = "display:none">
-        <thead>
-            <tr>
-                <th>Name</th>
-                <th>Role</th>
-                <th>Enabled</th>
-                <th></th>
-                <th></th>
-                <th></th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for user in users %}
-            <tr>
-                <td>{{ user.Name }}</td>
-                <td>{{ user.Role.Name }}</td>
-                <td>{{ user.Enabled | yesNo }}</td>
-                <td><a class = "btn btn-default" title = "Change Password" href = "{{ url_for("users.changePassword", userId = user.UserId) }}">
-                    <span class = "glyphicon glyphicon-lock"></span></a></td>
-                {% if user.Name != "pi" %}
-                <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("users.editUser", userId = user.UserId) }}">
-                    <span class = "glyphicon glyphicon-edit"></span></a></td>
-                <td><a class = "btn btn-default" title = "Delete" href = "{{ url_for("users.deleteUser", 
-                    userId = user.UserId) }}"><span class = "glyphicon glyphicon-trash"></span></a></td>
-                {% else %}
-                <td></td>
-                <td></td>
-                {% endif %}
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</div>
+    <div>
+        <ol class = "breadcrumb">
+            <li class = "active"><span class = "glyphicon glyphicon-home"></span></li>
+        </ol>
+    </div>
+    <div class = "page-header">
+        <h1>Users <small></small></h1>
+    </div>
+    <div>
+        <a class = "btn btn-default" title = "Add" href = '{{ url_for("users.addUser") }}' role = "button">
+            <span class = "glyphicon glyphicon-plus"></span></a>
+        <br><br>
+        <table id = "usersTable" class = "table table-hover" style = "display:none">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Role</th>
+                    <th>Enabled</th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr>
+                    <td>{{ user.Name }}</td>
+                    <td>{{ user.Role.Name }}</td>
+                    <td>{{ user.Enabled | yesNo }}</td>
+                    <td><a class = "btn btn-default" title = "Change Password" href = '{{ url_for("users.changePassword", userId = user.UserId) }}'>
+                        <span class = "glyphicon glyphicon-lock"></span></a></td>
+                    {% if user.Name != "pi" %}
+                    <td><a class = "btn btn-default" title = "Edit" href = '{{ url_for("users.editUser", userId = user.UserId) }}'>
+                        <span class = "glyphicon glyphicon-edit"></span></a></td>
+                    <td><a class = "btn btn-default" title = "Delete" href = '{{ url_for("users.deleteUser", 
+                        userId = user.UserId) }}'><span class = "glyphicon glyphicon-trash"></span></a></td>
+                    {% else %}
+                    <td></td>
+                    <td></td>
+                    {% endif %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 {% endblock %}
 
 {% block scripts %}
     {{ super() }}
     <link rel = "stylesheet" type = "text/css" href = {{ url_for("static", filename = "css/datatables.min.css") }}/> 
     <script type = "text/javascript" src = {{ url_for("static", filename = "js/datatables.min.js") }}></script>
+    {% block setTabIndex %}
+        <script>
+            function setTabIndex()
+            {
+                var tabIndex = 1
+                $('a[title="Add"]').attr("tabindex", tabIndex)
+            }
+        </script>
+    {% endblock %}
     <script>
         $(document).ready(function()
         {
-            $("#usersTable").DataTable
+            $("#usersTable").on("draw.dt", function()
+            {
+                setTabIndex()
+            }).DataTable
             ({
                 "order":
                 [

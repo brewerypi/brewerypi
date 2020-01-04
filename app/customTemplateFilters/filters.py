@@ -99,6 +99,20 @@ def grafanaUrl(uid, parameters = None):
                 "&var-eventFrame={}".format(parameters["eventFrameId"]) + \
                 "&var-eventFrameAttributeTemplates=All" + \
                 "&var-lookups=All"
+    elif uid == "EventFrameGroupSummary":
+        if "enterpriseId" in parameters:
+            # Subset of event frames in event frame group.
+            return current_app.config["GRAFANA_BASE_URI"] + \
+                "/d/EventFrameGroupSummary/event-frame-group-summary?orgId=1" + \
+                "&var-enterprises={}".format(parameters["enterpriseId"]) + \
+                "&var-sites={}".format(parameters["siteId"]) + \
+                "&var-elementTemplates={}".format(parameters["elementTemplateId"]) + \
+                "&var-eventFrameTemplates={}".format(parameters["eventFrameTemplateId"]) + \
+                "&var-eventFrameGroup={}".format(parameters["eventFrameGroupId"])
+        else:
+            return current_app.config["GRAFANA_BASE_URI"] + \
+                "/d/EventFrameGroupSummary/event-frame-group-summary?orgId=1" + \
+                "&var-eventFrameGroup={}".format(parameters["eventFrameGroupId"])
     elif uid == "TagValuesGraph":
         return current_app.config["GRAFANA_BASE_URI"] + \
             "/d/TagValuesGraph/tag-values-graph?orgId=1" + \

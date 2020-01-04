@@ -12,4 +12,10 @@ def index():
 			tagName = tag.name
 			break
 
-	return render_template("main/index.html", tagName = tagName)
+	if tagName == "":
+		branch = repository.active_branch
+		version = branch.name
+	else:
+		version = tagName
+
+	return render_template("main/index.html", version = version)

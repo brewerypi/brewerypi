@@ -1,0 +1,227 @@
+{% extends "base.html" %}
+
+{% block title %}Event Frame Group Add New Event Frames{% endblock %}
+
+{% block page_content %}
+    <div>
+        <ol class = "breadcrumb">
+            <li><a href = '{{ url_for("eventFrameGroups.listEventFrameGroups") }}'><span class = "glyphicon glyphicon-home"></span></a></li>
+            <li><a href = '{{ url_for("eventFrameGroups.dashboard", eventFrameGroupId = eventFrameGroup.EventFrameGroupId) }}'>{{ eventFrameGroup.Name }}            
+                </a></li>
+        </ol>
+    </div>
+    <div class = "page-header">
+        <h1>Event Frame Group <small>{{ eventFrameGroup.Name }}</small></h1>
+    </div>
+    <div class = "page-header">
+        <h1>
+            <small>Selected New Event Frames</small>
+            <button class = "btn btn-default" id = "buttonSave" title = "Save"><span class = "glyphicon glyphicon-floppy-disk"></span></button>
+        </h1>
+    </div>
+    <div>
+        <table id = "selectedNewEventFramesTable" class = "table table-hover" style = "display: none">
+            <thead>
+                <tr>
+                    <th>Enterprise</th>
+                    <th>Site</th>
+                    <th>Element Template</th>
+                    <th>Event Frame Template</th>
+                    <th>Element</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+    <div class = "page-header">
+        <h1><small>Available New Event Frames</small></h1>
+    </div>
+    <div>
+        <table id = "availableNewEventFramesTable" class = "table table-hover" style = "display:none">
+            <thead>
+                <tr>                
+                    <th>Enterprise</th>
+                    <th>Site</th>
+                    <th>Element Template</th>
+                    <th>Event Frame Template</th>
+                    <th>Element</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for eventFrameTemplate in eventFrameTemplates %}
+                    {% for element in eventFrameTemplate.ElementTemplate.Elements %}
+                        <tr data-elementId = "{{ element.ElementId }}" data-eventFrameTemplateId = "{{ eventFrameTemplate.EventFrameTemplateId }}">
+                            <td>{{ eventFrameTemplate.ElementTemplate.Site.Enterprise.Name }}</td>
+                            <td>{{ eventFrameTemplate.ElementTemplate.Site.Name }}</td>
+                            <td>{{ eventFrameTemplate.ElementTemplate.Name }}</td>
+                            <td>{{ eventFrameTemplate.Name }}</td>
+                            <td>{{ element.Name }}</td>
+                            <td><button class = "btn btn-default" title = "Add"><span class = "glyphicon glyphicon-plus"></span></button></td>
+                        </tr>
+                    {% endfor %}
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <link rel = "stylesheet" type = "text/css" href = {{ url_for("static", filename = "css/datatables.min.css") }}/>
+    <link rel = "stylesheet" type = "text/css" href = {{ url_for("static", filename = "css/styles.css") }}/>
+    <script type = "text/javascript" src = {{ url_for("static", filename = "js/datatables.min.js") }}></script>
+    {% block setTabIndex %}
+        <script>
+            function setTabIndex()
+            {
+                var tabIndex = 1
+                $('ol.breadcrumb a[title="Next"],[id^=inputOrSelectNewValue]').each(function()
+                {
+                    $(this).attr("tabindex", tabIndex)
+                    tabIndex = tabIndex + 1
+                })
+
+                $('#availableNewEventFramesTable button[title="Add"]').each(function ()
+                {
+                    $(this).attr("tabindex", tabIndex)
+                    tabIndex = tabIndex + 1
+                })
+
+                $("#buttonSave").attr("tabindex", tabIndex)
+                tabIndex = tabIndex + 1
+                $($("ol.breadcrumb > li:not(.active) > a").get().reverse()).each(function()       
+                {
+                    $(this).attr("tabindex", tabIndex)
+                    tabIndex = tabIndex + 1
+                })
+            }
+        </script>
+    {% endblock %}
+    <script>
+        $(document).ready(function()
+        {
+            var selectedNewEventFramesTable = $("#selectedNewEventFramesTable").DataTable
+            ({
+                "order":
+                [
+                    [0, "asc"],             // Enterprise.
+                    [1, "asc"],             // Site.
+                    [2, "asc"],             // Element Template.
+                    [3, "asc"],             // Event Frame Template.
+                    [4, "asc"]              // Element.
+                ],
+                "columns":
+                [
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    { "orderable": false }  // Remove button.
+                ],
+                "stateSave": true,
+                "stateDuration": 0,
+                "pageLength": 100,
+                "bInfo": false
+            })
+
+            var availableNewEventFramesTable = $("#availableNewEventFramesTable").DataTable
+            ({
+                "order":
+                [
+                    [0, "asc"],             // Enterprise.
+                    [1, "asc"],             // Site.
+                    [2, "asc"],             // Element Template.
+                    [3, "asc"],             // Event Frame Template.
+                    [4, "asc"]              // Element.
+                ],
+                "columns":
+                [
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    { "orderable": false }  // Add button.
+                ],
+                "stateSave": true,
+                "stateDuration": 0,
+                "pageLength": 100,
+                "bInfo": false
+            })
+
+            $("#availableNewEventFramesTable").attr("style", "width:100%")
+            $("#selectedNewEventFramesTable").attr("style", "width:100%")
+
+            $("#availableNewEventFramesTable tbody").on("click", "tr td button", function()
+            {
+                var elementId = $(this).parent().parent().attr("data-elementId")
+                var eventFrameTemplateId = $(this).parent().parent().attr("data-eventFrameTemplateId")
+                rowToMove = availableNewEventFramesTable.row($(this).parent().parent())
+                var movedRow = selectedNewEventFramesTable.row.add(rowToMove.data()).draw("full-hold").node()
+                $(movedRow).find("span").removeClass("glyphicon glyphicon-plus").addClass("glyphicon glyphicon-minus")
+                $(movedRow).attr("data-elementId", elementId)
+                $(movedRow).attr("data-eventFrameTemplateId", eventFrameTemplateId)
+                rowToMove.remove().draw("full-hold")
+            })
+
+            $("#selectedNewEventFramesTable tbody").on("click", "tr td button", function()
+            {
+                var elementId = $(this).parent().parent().attr("data-elementId")
+                var eventFrameTemplateId = $(this).parent().parent().attr("data-eventFrameTemplateId")
+                rowToMove = selectedNewEventFramesTable.row($(this).parent().parent())
+                var movedRow = availableNewEventFramesTable.row.add(rowToMove.data()).draw("full-hold").node()
+                $(movedRow).find("span").removeClass("glyphicon glyphicon-minus").addClass("glyphicon glyphicon-plus")
+                $(movedRow).attr("data-elementId", elementId)
+                $(movedRow).attr("data-eventFrameTemplateId", eventFrameTemplateId)
+                rowToMove.remove().draw("full-hold")
+            })
+
+            $("#buttonSave").on("click", function()
+            {
+                var rows = []
+
+                selectedNewEventFramesTable.rows("tr:visible").nodes().to$().each(function ()
+                {
+                    var elementId = $(this).attr("data-elementId")
+                    var eventFrameTemplateId = $(this).attr("data-eventFrameTemplateId")
+                    var row = {}
+                        row["elementId"] = elementId
+                        row["eventFrameTemplateId"] = eventFrameTemplateId
+                        rows.push(row)
+                })
+
+                $.ajax(
+                {
+                    type : "POST",
+                    url : "/eventFrameEventFrameGroups/add/new/{{ eventFrameGroup.EventFrameGroupId }}",
+                    data : JSON.stringify(rows)
+                }).done(function(response)
+                {
+                    window.location.href = '{{ url_for("eventFrameGroups.dashboard", eventFrameGroupId = eventFrameGroup.EventFrameGroupId) }}'
+                }).fail(function()
+                {
+                    $(".alert").remove()
+                    $("#divFlashedMessages").append("<div class = \"alert alert-danger\"><button type = \"button\" class = \"close\" " +
+                        "data-dismiss = \"alert\">&times;</button>The attempt to add one or more event frames failed.</div>")                        
+                })
+            })
+
+            // Clear any left over filtering from state saving.
+            selectedNewEventFramesTable.search("").columns().search("").draw()
+            selectedNewEventFramesTable.on("draw.dt", function()
+            {
+                setTabIndex()
+            })
+            availableNewEventFramesTable.search("").columns().search("").draw()
+            availableNewEventFramesTable.on("draw.dt", function()
+            {
+                setTabIndex()
+            })
+            setTabIndex()
+        })
+    </script>
+{% endblock %}
