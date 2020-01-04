@@ -63,7 +63,7 @@
   "editable": false,
   "gnetId": null,
   "graphTooltip": 0,
-  "iteration": 1560308323085,
+  "iteration": 1578170201940,
   "links": [],
   "panels": [
     {
@@ -74,6 +74,7 @@
       "datasource": "BreweryPi",
       "decimals": null,
       "fill": 0,
+      "fillGradient": 0,
       "gridPos": {
         "h": 12,
         "w": 24,
@@ -98,6 +99,9 @@
       "linewidth": 1,
       "links": [],
       "nullPointMode": "null",
+      "options": {
+        "dataLinks": []
+      },
       "paceLength": 10,
       "percentage": false,
       "pointradius": 1,
@@ -191,6 +195,7 @@
       },
       "id": 3,
       "links": [],
+      "options": {},
       "pageSize": null,
       "scroll": true,
       "showHeader": true,
@@ -256,7 +261,7 @@
     }
   ],
   "refresh": false,
-  "schemaVersion": 18,
+  "schemaVersion": 20,
   "style": "dark",
   "tags": [],
   "templating": {

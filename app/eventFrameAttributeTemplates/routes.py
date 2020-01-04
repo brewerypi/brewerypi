@@ -52,58 +52,7 @@ def addEventFrameAttributeTemplate(eventFrameTemplateId, lookup = False):
 
 		db.session.add(eventFrameAttributeTemplate)
 		db.session.commit()
-		for element in eventFrameTemplate.origin().ElementTemplate.Elements:
-			if element.isManaged():
-				# Tag management.
-				area = Area.query.get_or_404(element.TagAreaId)
-				tagName = "{}_{}".format(element.Name, eventFrameAttributeTemplate.Name.replace(" ", ""))
-				tag = Tag.query.filter_by(AreaId = area.AreaId, Name = tagName).one_or_none()
-				if tag is None:
-					# Tag doesn't exist, so create it.
-					tag = Tag(AreaId = area.AreaId, Description = "", LookupId = eventFrameAttributeTemplate.LookupId, Name = tagName,
-						UnitOfMeasurementId = eventFrameAttributeTemplate.UnitOfMeasurementId)
-					db.session.add(tag)
-				else:
-					# Tag exists, so update LookupId and UnitOfMeasurementId just in case.
-					tag.LookupId = eventFrameAttributeTemplate.LookupId
-					tag.UnitOfMeasurementId = eventFrameAttributeTemplate.UnitOfMeasurementId
-
-				db.session.commit()
-
-				# Event Frame attribute management.
-				eventFrameAttribute = EventFrameAttribute(ElementId = element.ElementId,
-					EventFrameAttributeTemplateId = eventFrameAttributeTemplate.EventFrameAttributeTemplateId, TagId = tag.TagId)
-				db.session.add(eventFrameAttribute)
-				db.session.commit()
-
-		db.session.commit()
-
-		# Element attribute template management.
-		# Check for an element attribute template from the same element template with the same event frame attribute template name.
-		elementAttributeTemplate = ElementAttributeTemplate.query. \
-			filter_by(ElementTemplateId = eventFrameAttributeTemplate.EventFrameTemplate.origin().ElementTemplateId,
-			Name = eventFrameAttributeTemplate.Name).one_or_none()
-		if elementAttributeTemplate is not None:
-			# Element attribute template exists, so update LookupId and UnitOfMeasurementId just in case.
-			elementAttributeTemplate.LookupId = eventFrameAttributeTemplate.LookupId
-			elementAttributeTemplate.UnitOfMeasurementId = eventFrameAttributeTemplate.UnitOfMeasurementId
-			db.session.commit()
-
-		# Event frame attribute template management.
-		# Loop through all event frame template hierarchies checking for an event frame attribute template with the same event frame attribute template name.
-		for topLevelEventFrameTemplate in eventFrameAttributeTemplate.EventFrameTemplate.origin().ElementTemplate.EventFrameTemplates:
-			for eventFrameTemplate in topLevelEventFrameTemplate.lineage([], 0):
-				# Skip the event frame template that is currently being added to.
-				if eventFrameTemplate["eventFrameTemplate"].EventFrameTemplateId != eventFrameAttributeTemplate.EventFrameTemplate.EventFrameTemplateId:
-					newEventFrameAttributeTemplate = EventFrameAttributeTemplate.query. \
-						filter_by(EventFrameTemplateId = eventFrameTemplate["eventFrameTemplate"].EventFrameTemplateId,
-						Name = eventFrameAttributeTemplate.Name).one_or_none()
-					if newEventFrameAttributeTemplate is not None:
-					# New event frame attribute template exists, so update LookupId and UnitOfMeasurementId just in case.
-						newEventFrameAttributeTemplate.lookupId = eventFrameAttributeTemplate.LookupId
-						newEventFrameAttributeTemplate.UnitOfMeasurementId = eventFrameAttributeTemplate.UnitOfMeasurementId
-
-		db.session.commit()
+		eventFrameAttributeTemplate.postAddHousekeeping(eventFrameTemplate)
 		flash('You have successfully added the new event frame attribute template "{}" to the event frame template "{}".'. \
 			format(eventFrameAttributeTemplate.Name, eventFrameAttributeTemplate.EventFrameTemplate.Name), "alert alert-success")
 		return redirect(form.requestReferrer.data)
@@ -287,12 +236,20 @@ def editEventFrameAttributeTemplate(eventFrameAttributeTemplateId):
 						filter_by(EventFrameTemplateId = eventFrameTemplate["eventFrameTemplate"].EventFrameTemplateId,
 						Name = oldEventFrameAttributeTemplateName).one_or_none()
 					if newEventFrameAttributeTemplate is not None:
-						# New event frame attribute template exists, so update LookupId and UnitOfMeasurementId just in case.
+						# New event frame attribute template exists, so update DefaultEndValue, DefaultStartValue, Description, LookupId and
+						# UnitOfMeasurementId just in case.
+						newEventFrameAttributeTemplate.DefaultEndValue = eventFrameAttributeTemplate.DefaultEndValue
+						newEventFrameAttributeTemplate.DefaultStartValue = eventFrameAttributeTemplate.DefaultStartValue
+						newEventFrameAttributeTemplate.Description = eventFrameAttributeTemplate.Description
 						newEventFrameAttributeTemplate.LookupId = eventFrameAttributeTemplate.LookupId
 						newEventFrameAttributeTemplate.UnitOfMeasurementId = eventFrameAttributeTemplate.UnitOfMeasurementId
 						db.session.commit()
 					elif oldEventFrameAttributeTemplate is not None:
-						# Old event frame attribute template exists, so update LookupId, Name and UnitOfMeasurementId just in case.
+						# Old event frame attribute template exists, so update DefaultEndValue, DefaultStartValue, Description, LookupId, Name and
+						# UnitOfMeasurementId just in case.
+						oldEventFrameAttributeTemplate.DefaultEndValue = eventFrameAttributeTemplate.DefaultEndValue
+						oldEventFrameAttributeTemplate.DefaultStartValue = eventFrameAttributeTemplate.DefaultStartValue
+						oldEventFrameAttributeTemplate.Description = eventFrameAttributeTemplate.Description
 						oldEventFrameAttributeTemplate.LookupId = eventFrameAttributeTemplate.LookupId
 						oldEventFrameAttributeTemplate.Name = eventFrameAttributeTemplate.Name
 						oldEventFrameAttributeTemplate.UnitOfMeasurementId = eventFrameAttributeTemplate.UnitOfMeasurementId

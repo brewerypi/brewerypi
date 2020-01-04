@@ -1,73 +1,77 @@
 {% extends "base.html" %}
 
-{% block title %}
-Element Attributes
-{% endblock %}
+{% block title %}Element Attributes{% endblock %}
 
 {% block page_content %}
-<div>
-    <ol class = "breadcrumb">
-        <li><a href = "{{ url_for("elements.selectElement", selectedClass = "Root", selectedId = None) }}"><span class = "glyphicon glyphicon-home"></span></a>
+    <div>
+        <ol class = "breadcrumb">
+            <li><a href = "{{ url_for("elements.selectElement", selectedClass = "Root", selectedId = None) }}"><span class = "glyphicon glyphicon-home"></span>
+                </a></li>
+            <li><a href = "{{ url_for("elements.selectElement", selectedClass = "Enterprise",
+                selectedId = element.ElementTemplate.Site.Enterprise.EnterpriseId) }}">{{ element.ElementTemplate.Site.Enterprise.Name }}</a></li>
+            <li><a href = "{{ url_for("elements.selectElement", selectedClass = "Site",
+                selectedId = element.ElementTemplate.Site.SiteId) }}">{{ element.ElementTemplate.Site.Name }}</a></li>
+            <li><a href = "{{ url_for("elements.selectElement", selectedClass = "ElementTemplate",
+                selectedId = element.ElementTemplate.ElementTemplateId) }}">{{ element.ElementTemplate.Name }}</a></li>
+            <li class = "active">
+                <a title = "Previous" href = '{{ url_for("elementAttributes.listElementAttributes", elementId = element.previous(True).id()) }}'>
+                    <span class = "glyphicon glyphicon-arrow-left"></span></a>
+                <a title = "Next" href = '{{ url_for("elementAttributes.listElementAttributes", elementId = element.next(True).id()) }}'>
+                    <span class = "glyphicon glyphicon-arrow-right"></span></a>    
+                {{ element.Name }}
             </li>
-        <li><a href = "{{ url_for("elements.selectElement", selectedClass = "Enterprise",
-            selectedId = element.ElementTemplate.Site.Enterprise.EnterpriseId) }}">{{ element.ElementTemplate.Site.Enterprise.Name }}</a></li>
-        <li><a href = "{{ url_for("elements.selectElement", selectedClass = "Site",
-            selectedId = element.ElementTemplate.Site.SiteId) }}">{{ element.ElementTemplate.Site.Name }}</a></li>
-        <li><a href = "{{ url_for("elements.selectElement", selectedClass = "ElementTemplate",
-            selectedId = element.ElementTemplate.ElementTemplateId) }}">{{ element.ElementTemplate.Name }}</a></li>
-        <li class = "active">{{ element.Name }}</a></li>
-    </ol>
-</div>
-<div class = "page-header">
-    <h1>Element Attributes <small></small></h1>
-</div>
-<div>
-    <table id = "elementAttributesTable" class = "table table-hover" style = "display:none">
-        <thead>
-            <tr>
-                <th>Element Attribute Template</th>
-                <th>Tag</th>
-                <th><button class = "btn btn-default" id = "buttonAttributesSaveAll" title = "Save All"><span class="glyphicon glyphicon-floppy-disk"></span>
-                    </button></th>
-            </tr>
-            <tr>
-                <th></th>
-                <th><input id = "inputTagFilter" type = "text" placeholder = "Filter Tags"></th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for elementAttributeTemplate in elementAttributeTemplates %}
-                {% set elementAttributes = elementAttributeTemplate.ElementAttributes.
-                    filter_by(ElementAttributeTemplateId = elementAttributeTemplate.ElementAttributeTemplateId, ElementId = element.ElementId) %}
-                {% if elementAttributes.count() > 0 %}
-                    {% set elementAttribute = elementAttributes | first %}
-                {% else %}
-                    {% set elementAttribute = None %}
-                {% endif %}
+        </ol>
+    </div>
+    <div class = "page-header">
+        <h1>Element Attributes <small></small></h1>
+    </div>
+    <div>
+        <table id = "elementAttributesTable" class = "table table-hover" style = "display:none">
+            <thead>
                 <tr>
-                <td>{{ elementAttributeTemplate.Name }}</td>
-                <td>
-                    <div class = "form-group">
-                        <select class = "form-control" id = "selectUpdatedValue{{ elementAttributeTemplate.ElementAttributeTemplateId }}">
-                            <option value = "-1"></option>
-                            {% for tag in tags %}
-                                {% if elementAttribute.TagId == tag.TagId %}
-                                    {% set selected = "selected" %}
-                                {% else %}
-                                    {% set selected = "" %}
-                                {% endif %}
-                                <option value = "{{ tag.TagId }}" {{ selected }}>{{ tag.fullAbbreviatedPathName() }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                </td>
-                <td></td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</div>
+                    <th>Element Attribute Template</th>
+                    <th>Tag</th>
+                    <th><button class = "btn btn-default" id = "buttonSave" title = "Save All"><span class="glyphicon glyphicon-floppy-disk"></span>
+                        </button></th>
+                </tr>
+                <tr>
+                    <th></th>
+                    <th><input id = "inputTagFilter" type = "text" placeholder = "Filter Tags"></th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for elementAttributeTemplate in elementAttributeTemplates %}
+                    {% set elementAttributes = elementAttributeTemplate.ElementAttributes.
+                        filter_by(ElementAttributeTemplateId = elementAttributeTemplate.ElementAttributeTemplateId, ElementId = element.ElementId) %}
+                    {% if elementAttributes.count() > 0 %}
+                        {% set elementAttribute = elementAttributes | first %}
+                    {% else %}
+                        {% set elementAttribute = None %}
+                    {% endif %}
+                    <tr>
+                    <td>{{ elementAttributeTemplate.Name }}</td>
+                    <td>
+                        <div class = "form-group">
+                            <select class = "form-control" id = "selectUpdatedValue{{ elementAttributeTemplate.ElementAttributeTemplateId }}">
+                                <option value = "-1"></option>
+                                {% for tag in tags %}
+                                    {% if elementAttribute.TagId == tag.TagId %}
+                                        {% set selected = "selected" %}
+                                    {% else %}
+                                        {% set selected = "" %}
+                                    {% endif %}
+                                    <option value = "{{ tag.TagId }}" {{ selected }}>{{ tag.fullAbbreviatedPathName() }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </td>
+                    <td></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 {% endblock %}
 
 {% block scripts %}
@@ -75,10 +79,37 @@ Element Attributes
     <link rel = "stylesheet" type = "text/css" href = {{ url_for("static", filename = "css/datatables.min.css") }}/> 
     <link rel = "stylesheet" type = "text/css" href = {{ url_for("static", filename = "css/styles.css") }}/>
     <script type = "text/javascript" src = {{ url_for("static", filename = "js/datatables.min.js") }}></script>
+    {% block setTabIndex %}
+        <script>
+            function setTabIndex()
+            {
+                var tabIndex = 1
+                $('ol.breadcrumb a[title="Next"]').attr("tabindex", tabIndex)
+                tabIndex = tabIndex + 1
+                $("#inputTagFilter").attr("tabindex", tabIndex)
+                tabIndex = tabIndex + 1
+                $("#elementAttributesTable select").each(function() {
+                    $(this).attr("tabindex", tabIndex)
+                    tabIndex = tabIndex + 1
+                })
+
+                $("#buttonSave").attr("tabindex", tabIndex)
+                tabIndex = tabIndex + 1
+                $($("ol.breadcrumb > li:not(.active) > a").get().reverse()).each(function()       
+                {
+                    $(this).attr("tabindex", tabIndex)
+                    tabIndex = tabIndex + 1
+                })                
+            }
+        </script>
+    {% endblock %}
     <script>
         $(document).ready(function()
         {
-            var elementAttributesTable = $("#elementAttributesTable").DataTable
+            var elementAttributesTable = $("#elementAttributesTable").on("draw.dt", function()
+            {
+                setTabIndex()
+            }).DataTable
             ({
                 "order":
                 [
@@ -99,7 +130,7 @@ Element Attributes
 
             $("#elementAttributesTable").attr("style", "width:100%")
 
-            $("#buttonAttributesSaveAll").on("click", function()
+            $("#buttonSave").on("click", function()
             {
                 var rows = []
                 // Loop through the select values.
@@ -136,7 +167,7 @@ Element Attributes
             {
                 if (event.which == 13)
                 {
-                    $("#buttonAttributesSaveAll").focus()
+                    $("#buttonSave").focus()
                 }
             })
 
@@ -156,6 +187,8 @@ Element Attributes
                     }
                 })
             })
+
+            $('ol.breadcrumb a[title="Next"]').focus()
         })
     </script>
 {% endblock %}

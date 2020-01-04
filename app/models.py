@@ -1,8 +1,9 @@
 import json
 from datetime import datetime
-from flask_login import AnonymousUserMixin, UserMixin
+from dateutil.relativedelta import relativedelta
+from flask_login import AnonymousUserMixin, current_user, UserMixin
 from sqlalchemy import func, Index, PrimaryKeyConstraint, UniqueConstraint
-from sqlalchemy.dialects.mysql import DOUBLE
+from sqlalchemy.dialects.mysql import DATETIME, DOUBLE
 from time import time
 from werkzeug.security import generate_password_hash, check_password_hash
 from app import db
@@ -47,6 +48,15 @@ class Area(db.Model):
 	def id(self):
 		return self.AreaId
 
+	def next(self):
+		return next(self.nextAndPreviousList(), self)
+
+	def nextAndPreviousList(self):
+		return Area.query.filter_by(SiteId = self.SiteId).order_by(Area.Name).all()
+
+	def previous(self):
+		return previous(self.nextAndPreviousList(), self)
+
 class Element(db.Model):
 	__tablename__ = "Element"
 	__table_args__ = \
@@ -88,6 +98,18 @@ class Element(db.Model):
 	def isManaged(self):
 		return True if self.TagAreaId is not None else False
 
+	def next(self, isManaged = False):
+		return next(self.nextAndPreviousList(isManaged), self)
+
+	def nextAndPreviousList(self, isManaged):
+		if isManaged is True:
+			return Element.query.filter_by(TagAreaId = self.TagAreaId, ElementTemplateId = self.ElementTemplateId).order_by(Element.Name).all()
+		else:
+			return Element.query.filter_by(ElementTemplateId = self.ElementTemplateId).order_by(Element.Name).all()
+
+	def previous(self, isManaged = False):
+		return previous(self.nextAndPreviousList(isManaged), self)
+
 class ElementAttribute(db.Model):
 	__tablename__ = "ElementAttribute"
 	__table_args__ = \
@@ -106,6 +128,16 @@ class ElementAttribute(db.Model):
 	
 	def id(self):
 		return self.ElementAttributeId
+
+	def next(self):
+		return next(self.nextAndPreviousList(), self)
+	
+	def nextAndPreviousList(self):
+		return ElementAttribute.query.join(ElementAttributeTemplate).filter(ElementAttribute.ElementId == self.ElementId). \
+			order_by(ElementAttributeTemplate.Name).all()
+
+	def previous(self):
+		return previous(self.nextAndPreviousList(), self)
 
 class ElementAttributeTemplate(db.Model):
 	__tablename__ = "ElementAttributeTemplate"
@@ -175,6 +207,15 @@ class ElementTemplate(db.Model):
 	def id(self):
 		return self.ElementTemplateId
 
+	def next(self):
+		return next(self.nextAndPreviousList(), self)
+	
+	def nextAndPreviousList(self):
+		return ElementTemplate.query.filter_by(SiteId = self.SiteId).order_by(ElementTemplate.Name).all()
+
+	def previous(self):
+		return previous(self.nextAndPreviousList(), self)
+
 class Enterprise(db.Model):
 	__tablename__ = "Enterprise"
 	__table_args__ = \
@@ -208,6 +249,15 @@ class Enterprise(db.Model):
 	def id(self):
 		return self.EnterpriseId
 
+	def next(self):
+		return next(self.nextAndPreviousList(), self)
+	
+	def nextAndPreviousList(self):
+		return Enterprise.query.order_by(Enterprise.Name).all()
+
+	def previous(self):
+		return previous(self.nextAndPreviousList(), self)
+
 class EventFrame(db.Model):
 	__tablename__ = "EventFrame"
 	__table_args__ = \
@@ -218,20 +268,31 @@ class EventFrame(db.Model):
 
 	EventFrameId = db.Column(db.Integer, primary_key = True)
 	ElementId = db.Column(db.Integer, db.ForeignKey("Element.ElementId", name = "FK__Element$Have$EventFrame"), nullable = True)
-	EndTimestamp = db.Column(db.DateTime, nullable = True)
+	EndTimestamp = db.Column(DATETIME(fsp = 6), nullable = True)
 	EventFrameTemplateId = db.Column(db.Integer, db.ForeignKey("EventFrameTemplate.EventFrameTemplateId", name = "FK__EventFrameTemplate$Have$EventFrame"), \
 		nullable = False)
 	Name = db.Column(db.String(45), nullable = False)
 	ParentEventFrameId = db.Column(db.Integer, db.ForeignKey("EventFrame.EventFrameId", name = "FK__EventFrame$CanHave$EventFrame"), nullable = True)
-	StartTimestamp = db.Column(db.DateTime, nullable = False)
+	StartTimestamp = db.Column(DATETIME(fsp = 6), nullable = False)
 	UserId = db.Column(db.Integer, db.ForeignKey("User.UserId", name = "FK__User$AddOrEdit$EventFrame"), nullable = False)
 
 	ParentEventFrame = db.relationship("EventFrame", remote_side = [EventFrameId])
+	EventFrameEventFrameGroups = db.relationship("EventFrameEventFrameGroup", backref = "EventFrame", lazy = "dynamic")
 	EventFrames = db.relationship("EventFrame", remote_side = [ParentEventFrameId])
 	EventFrameNotes = db.relationship("EventFrameNote", backref = "EventFrame", lazy = "dynamic")
 
 	def __repr__(self):
 		return "<EventFrame: {}>".format(self.Name)
+
+	def addDefaultAttributeTemplateValues(self, timestamp):
+		for eventFrameAttributeTemplate in self.EventFrameTemplate.EventFrameAttributeTemplates:
+			if eventFrameAttributeTemplate.DefaultStartValue is not None:
+				eventFrameAttribute = EventFrameAttribute.query.filter(EventFrameAttribute.ElementId == self.origin().ElementId,
+					EventFrameAttribute.EventFrameAttributeTemplateId == eventFrameAttributeTemplate.EventFrameAttributeTemplateId).one_or_none()
+				if eventFrameAttribute is not None:
+					tagValue = TagValue(TagId = eventFrameAttribute.TagId, Timestamp = timestamp, UserId = current_user.get_id(),
+						Value = eventFrameAttributeTemplate.DefaultStartValue)
+					db.session.add(tagValue)
 
 	def ancestors(self, ancestors):
 		if self.ParentEventFrameId == None:
@@ -241,6 +302,9 @@ class EventFrame(db.Model):
 			return self.ParentEventFrame.ancestors(ancestors)
 
 	def delete(self):
+		for eventFrameEventFrameGroup in self.EventFrameEventFrameGroups:
+			eventFrameEventFrameGroup.delete()
+
 		eventFrameNotes = self.EventFrameNotes
 		for eventFrameNote in eventFrameNotes:
 			eventFrameNote.delete()
@@ -250,6 +314,22 @@ class EventFrame(db.Model):
 			childEventFrame.delete()
 
 		db.session.delete(self)
+
+	def end(self):
+		endTimestamp = datetime.utcnow()
+		for dictionary in self.lineage([], 0):
+			eventFrame = dictionary["eventFrame"]
+			if eventFrame.EndTimestamp is None:
+				eventFrame.EndTimestamp = endTimestamp
+				eventFrame.UserId = current_user.get_id()
+				for eventFrameAttributeTemplate in eventFrame.EventFrameTemplate.EventFrameAttributeTemplates:
+					if eventFrameAttributeTemplate.DefaultEndValue is not None:
+						eventFrameAttribute = EventFrameAttribute.query.filter(EventFrameAttribute.ElementId == eventFrame.origin().ElementId,
+							EventFrameAttribute.EventFrameAttributeTemplateId == eventFrameAttributeTemplate.EventFrameAttributeTemplateId).one_or_none()
+						if eventFrameAttribute is not None:
+							tagValue = TagValue(TagId = eventFrameAttribute.TagId, Timestamp = endTimestamp, UserId = current_user.get_id(),
+								Value = eventFrameAttributeTemplate.DefaultEndValue)
+							db.session.add(tagValue)
 
 	def hasDescendants(self):
 		if self.EventFrames:
@@ -269,11 +349,49 @@ class EventFrame(db.Model):
 		if level == 0:
 			return linealDescent
 
+	def next(self, months):
+		return next(self.nextAndPreviousList(months), self)
+
+	def nextAndPreviousList(self, months):
+		if months is None:
+			# Active event frames only.
+			if self.ParentEventFrameId is None:
+				return EventFrame.query.filter(EventFrame.EventFrameTemplateId == self.EventFrameTemplateId, EventFrame.EndTimestamp == None). \
+					order_by(EventFrame.StartTimestamp.desc()).all()
+			else:
+				return EventFrame.query.filter(EventFrame.ParentEventFrameId == self.ParentEventFrameId).order_by(EventFrame.StartTimestamp.desc()).all()
+		elif months == 0:
+			# All event frames.
+			if self.ParentEventFrameId is None:
+				return EventFrame.query.filter_by(EventFrameTemplateId = self.EventFrameTemplateId).order_by(EventFrame.StartTimestamp.desc()).all()
+			else:
+				return EventFrame.query.filter_by(ParentEventFrameId = self.ParentEventFrameId).order_by(EventFrame.StartTimestamp.desc()).all()
+		else:
+			fromTimestamp = datetime.utcnow() - relativedelta(months = months)
+			toTimestamp = datetime.utcnow()
+			if self.ParentEventFrameId is None:
+				return EventFrame.query.filter(EventFrame.EventFrameTemplateId == self.EventFrameTemplateId, EventFrame.StartTimestamp >= fromTimestamp,
+					EventFrame.StartTimestamp <= toTimestamp).order_by(EventFrame.StartTimestamp.desc()).all()
+			else:
+				return EventFrame.query.filter(EventFrame.ParentEventFrameId == self.ParentEventFrameId, EventFrame.StartTimestamp >= fromTimestamp,
+					EventFrame.StartTimestamp <= toTimestamp).order_by(EventFrame.StartTimestamp.desc()).all()
+
 	def origin(self):
 		if self.ParentEventFrameId == None:
 			return self
 		else:
 			return self.ParentEventFrame.origin()
+
+	def previous(self, months):
+		return previous(self.nextAndPreviousList(months), self)
+
+	def restart(self):
+		endTimestamp = datetime.utcnow()
+		for dictionary in self.lineage([], 0):
+			eventFrame = dictionary["eventFrame"]
+			if eventFrame.EndTimestamp is not None:
+				eventFrame.EndTimestamp = None
+				eventFrame.UserId = current_user.get_id()
 
 class EventFrameAttribute(db.Model):
 	__tablename__ = "EventFrameAttribute"
@@ -296,6 +414,17 @@ class EventFrameAttribute(db.Model):
 
 	def id(self):
 		return self.EventFrameAttributeId
+
+	def next(self):
+		return next(self.nextAndPreviousList(), self)
+
+	def nextAndPreviousList(self):
+		return EventFrameAttribute.query.join(EventFrameAttributeTemplate).filter(EventFrameAttribute.ElementId == self.ElementId,
+			EventFrameAttributeTemplate.EventFrameTemplateId == self.EventFrameAttributeTemplate.EventFrameTemplateId). \
+			order_by(EventFrameAttributeTemplate.Name).all()
+
+	def previous(self):
+		return previous(self.nextAndPreviousList(), self)
 
 class EventFrameAttributeTemplate(db.Model):
 	__tablename__ = "EventFrameAttributeTemplate"
@@ -335,6 +464,122 @@ class EventFrameAttributeTemplate(db.Model):
 		for ancestor in self.EventFrameTemplate.ancestors([]):
 			path += "\{}".format(ancestor.Name)
 		return  "{}\{}".format(path, self.EventFrameTemplate.Name)
+
+	def postAddHousekeeping(self, eventFrameTemplate):
+		for element in eventFrameTemplate.origin().ElementTemplate.Elements:
+			if element.isManaged():
+				# Tag management.
+				area = Area.query.get_or_404(element.TagAreaId)
+				tagName = "{}_{}".format(element.Name, self.Name.replace(" ", ""))
+				tag = Tag.query.filter_by(AreaId = area.AreaId, Name = tagName).one_or_none()
+				if tag is None:
+					# Tag doesn't exist, so create it.
+					tag = Tag(AreaId = area.AreaId, Description = "", LookupId = self.LookupId, Name = tagName,
+						UnitOfMeasurementId = self.UnitOfMeasurementId)
+					db.session.add(tag)
+				else:
+					# Tag exists, so update LookupId and UnitOfMeasurementId just in case.
+					tag.LookupId = self.LookupId
+					tag.UnitOfMeasurementId = self.UnitOfMeasurementId
+
+				db.session.commit()
+
+				# Event Frame attribute management.
+				eventFrameAttribute = EventFrameAttribute(ElementId = element.ElementId,
+					EventFrameAttributeTemplateId = self.EventFrameAttributeTemplateId, TagId = tag.TagId)
+				db.session.add(eventFrameAttribute)
+				db.session.commit()
+
+		db.session.commit()
+
+		# # Element attribute template management.
+		# # Check for an element attribute template from the same element template with the same event frame attribute template name.
+		elementAttributeTemplate = ElementAttributeTemplate.query.filter_by(ElementTemplateId = self.EventFrameTemplate.origin().ElementTemplateId,
+			Name = self.Name).one_or_none()
+		if elementAttributeTemplate is not None:
+			# Element attribute template exists, so update Description, LookupId and UnitOfMeasurementId just in case.
+			elementAttributeTemplate.Description = self.Description
+			elementAttributeTemplate.LookupId = self.LookupId
+			elementAttributeTemplate.UnitOfMeasurementId = self.UnitOfMeasurementId
+			db.session.commit()
+
+		# Event frame attribute template management.
+		# Loop through all event frame template hierarchies checking for an event frame attribute template with the same event frame attribute template name.
+		for topLevelEventFrameTemplate in self.EventFrameTemplate.origin().ElementTemplate.EventFrameTemplates:
+			for eventFrameTemplate in topLevelEventFrameTemplate.lineage([], 0):
+				# Skip the event frame template that is currently being added to.
+				if eventFrameTemplate["eventFrameTemplate"].EventFrameTemplateId != self.EventFrameTemplate.EventFrameTemplateId:
+					newEventFrameAttributeTemplate = EventFrameAttributeTemplate.query. \
+						filter_by(EventFrameTemplateId = eventFrameTemplate["eventFrameTemplate"].EventFrameTemplateId, Name = self.Name).one_or_none()
+					if newEventFrameAttributeTemplate is not None:
+					# New event frame attribute template exists, so update DefaultEndValue, DefaultStartValue, Description, LookupId and UnitOfMeasurementId
+					# just in case.
+						newEventFrameAttributeTemplate.DefaultEndValue = self.DefaultEndValue
+						newEventFrameAttributeTemplate.DefaultStartValue = self.DefaultStartValue
+						newEventFrameAttributeTemplate.Description = self.Description
+						newEventFrameAttributeTemplate.LookupId = self.LookupId
+						newEventFrameAttributeTemplate.UnitOfMeasurementId = self.UnitOfMeasurementId
+
+		db.session.commit()
+
+class EventFrameEventFrameGroup(db.Model):
+	__tablename__ = "EventFrameEventFrameGroup"
+	__table_args__ = \
+	(
+		UniqueConstraint("EventFrameGroupId", "EventFrameId", name = "AK__EventFrameGroupId__EventFrameId"),
+	)
+
+	EventFrameEventFrameGroupId = db.Column(db.Integer, primary_key = True)
+	EventFrameGroupId = db.Column(db.Integer, db.ForeignKey("EventFrameGroup.EventFrameGroupId", name = "FK__EventFrameGroup$Have$EventFrameEventFrameGroup"),
+		nullable = False)
+	EventFrameId = db.Column(db.Integer, db.ForeignKey("EventFrame.EventFrameId", name = "FK__EventFrame$Have$EventFrameEventFrameGroup"), nullable = False)
+
+	def delete(self):
+		db.session.delete(self)
+
+	def id(self):
+		return self.EventFrameEventFrameGroupId
+
+	def next(self):
+		return next(self.nextAndPreviousList(), self)
+	
+	def nextAndPreviousList(self):
+		return EventFrameEventFrameGroup.query.join(EventFrame).filter(EventFrameEventFrameGroup.EventFrameGroupId == self.EventFrameGroupId,
+			EventFrame.EventFrameTemplateId == self.EventFrame.EventFrameTemplateId).order_by(EventFrame.Name).all()
+
+	def previous(self):
+		return previous(self.nextAndPreviousList(), self)
+
+class EventFrameGroup(db.Model):
+	__tablename__ = "EventFrameGroup"
+	__table_args__ = \
+	(
+		UniqueConstraint("Name", name = "AK__Name"),
+		Index("IX__Name", "Name"),
+	)
+
+	EventFrameGroupId = db.Column(db.Integer, primary_key = True)
+	Name = db.Column(db.String(45), nullable = False)
+
+	EventFrameEventFrameGroups = db.relationship("EventFrameEventFrameGroup", backref = "EventFrameGroup", lazy = "dynamic")
+
+	def id(self):
+		return self.EventFrameGroupId
+
+	def delete(self):
+		for eventFrameEventFrameGroup in self.EventFrameEventFrameGroups:
+			eventFrameEventFrameGroup.delete()
+
+		db.session.delete(self)
+
+	def next(self):
+		return next(self.nextAndPreviousList(), self)
+	
+	def nextAndPreviousList(self):
+		return EventFrameGroup.query.order_by(EventFrameGroup.Name).all()
+
+	def previous(self):
+		return previous(self.nextAndPreviousList(), self)
 
 class EventFrameNote(db.Model):
 	__tablename__ = "EventFrameNote"
@@ -424,11 +669,21 @@ class EventFrameTemplate(db.Model):
 		if level == 0:
 			return linealDescent
 
+	def next(self):
+		return next(self.nextAndPreviousList(), self)
+
+	def nextAndPreviousList(self):
+		return EventFrameTemplate.query.filter_by(ElementTemplateId = self.ElementTemplateId,
+			ParentEventFrameTemplateId = self.ParentEventFrameTemplateId).order_by(EventFrameTemplate.Name).all()
+
 	def origin(self):
 		if self.ParentEventFrameTemplateId == None:
 			return self
 		else:
 			return self.ParentEventFrameTemplate.origin()	
+
+	def previous(self):
+		return previous(self.nextAndPreviousList(), self)
 
 class Lookup(db.Model):
 	__tablename__ = "Lookup"
@@ -467,7 +722,16 @@ class Lookup(db.Model):
 		elif db.session.query(func.count(Tag.TagId)).filter_by(LookupId = self.LookupId).scalar() > 0:
 			return True
 		else:
-			return False		
+			return False
+
+	def next(self):
+		return next(self.nextAndPreviousList(), self)
+	
+	def nextAndPreviousList(self):
+		return Lookup.query.filter_by(EnterpriseId = self.EnterpriseId).order_by(Lookup.Name).all()
+
+	def previous(self):
+		return previous(self.nextAndPreviousList(), self)
 
 class LookupValue(db.Model):
 	__tablename__ = "LookupValue"
@@ -509,6 +773,15 @@ class LookupValue(db.Model):
 		else:
 			return False
 
+	def next(self):
+		return next(self.nextAndPreviousList(), self)
+
+	def nextAndPreviousList(self):
+		return LookupValue.query.filter_by(LookupId = self.LookupId).order_by(LookupValue.Name).all()
+
+	def previous(self):
+		return previous(self.nextAndPreviousList(), self)
+
 class Message(db.Model):
 	__tablename__ = "Message"
 	__table_args__ = \
@@ -520,7 +793,7 @@ class Message(db.Model):
 	Body = db.Column(db.Text, nullable = False)
 	RecipientId = db.Column(db.Integer, db.ForeignKey("User.UserId", name = "FK__User$Receive$Message"), nullable = False)
 	SenderId = db.Column(db.Integer, db.ForeignKey("User.UserId", name = "FK__User$Send$Message"), nullable = False)
-	Timestamp = db.Column(db.DateTime, nullable = False, default = datetime.utcnow)
+	Timestamp = db.Column(DATETIME(fsp = 6), nullable = False, default = datetime.utcnow)
 
 	def __repr__(self):
 		return "<Message: {}>".format(self.Body)
@@ -540,7 +813,7 @@ class Note(db.Model):
 
 	NoteId = db.Column(db.Integer, primary_key = True)
 	Note = db.Column(db.Text, nullable = False)
-	Timestamp = db.Column(db.DateTime, nullable = False)
+	Timestamp = db.Column(DATETIME(fsp = 6), nullable = False)
 	UserId = db.Column(db.Integer, db.ForeignKey("User.UserId", name = "FK__User$AddOrEdit$Note"), nullable = False)
 	
 	TagValueNotes = db.relationship("TagValueNote", backref = "Note", lazy = "dynamic")
@@ -630,6 +903,15 @@ class Site(db.Model):
 
 	def id(self):
 		return self.SiteId
+	
+	def next(self):
+		return next(self.nextAndPreviousList(), self)
+
+	def nextAndPreviousList(self):
+		return Site.query.filter_by(EnterpriseId = self.EnterpriseId).order_by(Site.Name).all()
+
+	def previous(self):
+		return previous(self.nextAndPreviousList(), self)
 
 class Tag(db.Model):
 	__tablename__ = "Tag"
@@ -685,6 +967,15 @@ class Tag(db.Model):
 		else:
 			return False
 
+	def next(self):
+		return next(self.nextAndPreviousList(), self)
+
+	def nextAndPreviousList(self):
+		return Tag.query.filter_by(AreaId = self.AreaId).order_by(Tag.Name).all()
+
+	def previous(self):
+		return previous(self.nextAndPreviousList(), self)
+
 class TagValue(db.Model):
 	__tablename__ = "TagValue"
 	__table_args__ = \
@@ -695,7 +986,7 @@ class TagValue(db.Model):
 
 	TagValueId = db.Column(db.Integer, primary_key = True)
 	TagId = db.Column(db.Integer, db.ForeignKey("Tag.TagId", name = "FK__Tag$Have$TagValue"), nullable = False)
-	Timestamp = db.Column(db.DateTime, nullable = False)
+	Timestamp = db.Column(DATETIME(fsp = 6), nullable = False)
 	UserId = db.Column(db.Integer, db.ForeignKey("User.UserId", name = "FK__User$AddOrEdit$TagValue"), nullable = False)
 	Value = db.Column(db.Float, nullable = False)
 
@@ -713,6 +1004,24 @@ class TagValue(db.Model):
 
 	def id(self):
 		return self.TagValueId
+
+	def next(self, eventFrameId = None):
+		return next(self.nextAndPreviousList(eventFrameId), self)
+
+	def nextAndPreviousList(self, eventFrameId):
+		if eventFrameId is None:
+			return TagValue.query.filter_by(TagId = self.TagId).order_by(TagValue.Timestamp.desc()).all()
+		else:
+			eventFrame = EventFrame.query.get_or_404(eventFrameId)
+			if eventFrame.EndTimestamp is None:
+				return TagValue.query.filter(TagValue.Timestamp >= eventFrame.StartTimestamp, TagValue.TagId == self.TagId).all()
+			else:
+				return TagValue.query.filter(TagValue.Timestamp <= eventFrame.EndTimestamp, TagValue.Timestamp >= eventFrame.StartTimestamp,
+					TagValue.TagId == self.TagId).all()
+
+
+	def previous(self, eventFrameId = None):
+		return previous(self.nextAndPreviousList(eventFrameId), self)
 
 class TagValueNote(db.Model):
 	__tablename__ = "TagValueNote"
@@ -775,7 +1084,7 @@ class User(UserMixin, db.Model):
 
 	UserId = db.Column(db.Integer, primary_key = True)
 	Enabled = db.Column(db.Boolean, nullable = False)
-	LastMessageReadTimestamp = db.Column(db.DateTime)
+	LastMessageReadTimestamp = db.Column(DATETIME(fsp = 6), nullable = True)
 	Name = db.Column(db.String(45), nullable = False)
 	PasswordHash = db.Column(db.String(128))
 	RoleId = db.Column(db.Integer, db.ForeignKey("Role.RoleId", name = "FK__Role$Have$User"), nullable = False)
@@ -844,3 +1153,15 @@ class User(UserMixin, db.Model):
 @loginManager.user_loader
 def loadUser(id):
 	return User.query.get(int(id))
+
+def next(list, object):
+	if list.index(object) + 1 == len(list):
+		return list[0]
+	else:
+		return list[list.index(object) + 1]
+
+def previous(list, object):
+	if list.index(object) - 1 == -1:
+		return list[len(list) - 1]
+	else:
+		return list[list.index(object) - 1]

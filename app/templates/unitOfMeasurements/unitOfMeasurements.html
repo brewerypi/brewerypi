@@ -1,59 +1,69 @@
 {% extends "base.html" %}
 
-{% block title %}
-Units of Measurment
-{% endblock %}
+{% block title %}Units of Measurment{% endblock %}
 
 {% block page_content %}
-<div>
-    <ol class = "breadcrumb">
-        <li class = "active"><span class = "glyphicon glyphicon-home"></span></li>
-    </ol>
-</div>
-<div class = "page-header">
-    <h1>Units of Measurement <small></small></h1>
-</div>
-<div>
-    <a class = "btn btn-default" title = "Add" href = "{{ url_for("unitOfMeasurements.addUnitOfMeasurement") }}" role = "button">
-        <span class = "glyphicon glyphicon-plus"></span></a>
-    <a class = "btn btn-default" title = "Add Default Units of Measurements" href = "{{ url_for("unitOfMeasurements.addDefaultUnitsOfMeasurements") }}"
-        role = "button"><span class = "glyphicon glyphicon-plus"></span> Defaults</a>
-    <br><br>
-</div>
-<div>
-    <table id = "unitOfMeasurementsTable" class = "table table-hover" style = "display:none">
-        <thead>
-            <tr>
-                <th>Name</th>
-                <th>Abbreviation</th>
-                <th></th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for unitOfMeasurement in unitOfMeasurements %}
-            <tr>
-                <td>{{ unitOfMeasurement.Name }}</td>
-                <td>{{ unitOfMeasurement.Abbreviation }}</td>
-                <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("unitOfMeasurements.editUnitOfMeasurement",
-                    unitOfMeasurementId = unitOfMeasurement.UnitOfMeasurementId) }}"><span class = "glyphicon glyphicon-edit"></span></a></td>
-                <td><a class = "btn btn-default" title = "Delete" href = "{{ url_for("unitOfMeasurements.deleteUnitOfMeasurement",
-                    unitOfMeasurementId = unitOfMeasurement.UnitOfMeasurementId) }}"><span class = "glyphicon glyphicon-trash"></span></a></td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</div>
+    <div>
+        <ol class = "breadcrumb">
+            <li class = "active"><span class = "glyphicon glyphicon-home"></span></li>
+        </ol>
+    </div>
+    <div class = "page-header">
+        <h1>Units of Measurement <small></small></h1>
+    </div>
+    <div>
+        <a class = "btn btn-default" title = "Add" href = '{{ url_for("unitOfMeasurements.addUnitOfMeasurement") }}' role = "button">
+            <span class = "glyphicon glyphicon-plus"></span></a>
+        <a class = "btn btn-default" title = "Add Default Units of Measurements" href = '{{ url_for("unitOfMeasurements.addDefaultUnitsOfMeasurements") }}'
+            role = "button"><span class = "glyphicon glyphicon-plus"></span> Defaults</a>
+        <br><br>
+    </div>
+    <div>
+        <table id = "unitOfMeasurementsTable" class = "table table-hover" style = "display:none">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Abbreviation</th>
+                    <th></th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for unitOfMeasurement in unitOfMeasurements %}
+                <tr>
+                    <td>{{ unitOfMeasurement.Name }}</td>
+                    <td>{{ unitOfMeasurement.Abbreviation }}</td>
+                    <td><a class = "btn btn-default" title = "Edit" href = '{{ url_for("unitOfMeasurements.editUnitOfMeasurement",
+                        unitOfMeasurementId = unitOfMeasurement.UnitOfMeasurementId) }}'><span class = "glyphicon glyphicon-edit"></span></a></td>
+                    <td><a class = "btn btn-default" title = "Delete" href = '{{ url_for("unitOfMeasurements.deleteUnitOfMeasurement",
+                        unitOfMeasurementId = unitOfMeasurement.UnitOfMeasurementId) }}'><span class = "glyphicon glyphicon-trash"></span></a></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 {% endblock %}
 
 {% block scripts %}
     {{ super() }}
     <link rel = "stylesheet" type = "text/css" href = {{ url_for("static", filename = "css/datatables.min.css") }}/> 
     <script type = "text/javascript" src = {{ url_for("static", filename = "js/datatables.min.js") }}></script>
+    {% block setTabIndex %}
+        <script>
+            function setTabIndex()
+            {
+                var tabIndex = 1
+                $('a[title="Add"]').attr("tabindex", tabIndex)
+            }
+        </script>
+    {% endblock %}
     <script>
         $(document).ready(function()
         {
-            $("#unitOfMeasurementsTable").DataTable
+            $("#unitOfMeasurementsTable").on("draw.dt", function()
+            {
+                setTabIndex()
+            }).DataTable
             ({
                 "order":
                 [

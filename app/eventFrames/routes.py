@@ -1,22 +1,23 @@
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
-from flask import current_app, flash, jsonify, redirect, render_template, request, url_for
+from flask import current_app, flash, jsonify, redirect, render_template, request, session, url_for
 from flask_login import current_user, login_required
 from . import eventFrames
 from . forms import EventFrameForm, EventFrameOverlayForm
 from . helpers import currentEventFrameAttributeValues
 from .. import db
 from .. decorators import permissionRequired
-from .. models import Element, ElementTemplate, Enterprise, EventFrame, EventFrameAttribute, EventFrameAttributeTemplate, EventFrameTemplate, Lookup, \
-	LookupValue, Permission, Site, Tag, TagValue
+from .. models import Element, ElementTemplate, Enterprise, EventFrame, EventFrameAttribute, EventFrameAttributeTemplate, EventFrameEventFrameGroup, \
+	EventFrameGroup, EventFrameTemplate, Lookup, LookupValue, Permission, Site, Tag, TagValue
 
 modelName = "Event Frame"
 
 @eventFrames.route("/eventFrames/add/<int:eventFrameTemplateId>", methods = ["GET", "POST"])
 @eventFrames.route("/eventFrames/add/child/<int:parentEventFrameId>", methods = ["GET", "POST"])
+@eventFrames.route("/eventFrames/add/child/<int:parentEventFrameId>/<int:eventFrameGroupId>", methods = ["GET", "POST"])
 @login_required
 @permissionRequired(Permission.DATA_ENTRY)
-def addEventFrame(eventFrameTemplateId = None, parentEventFrameId = None):
+def addEventFrame(eventFrameTemplateId = None, parentEventFrameId = None, eventFrameGroupId = None):
 	operation = "Add"
 	form = EventFrameForm()
 	if parentEventFrameId:
@@ -46,78 +47,104 @@ def addEventFrame(eventFrameTemplateId = None, parentEventFrameId = None):
 
 		db.session.add(eventFrame)
 		db.session.commit()
-		count = 0
-		for eventFrameAttributeTemplate in eventFrame.EventFrameTemplate.EventFrameAttributeTemplates:
-			if eventFrameAttributeTemplate.DefaultStartValue is not None:
-				eventFrameAttribute = EventFrameAttribute.query.filter(EventFrameAttribute.ElementId == eventFrame.origin().ElementId,
-					EventFrameAttribute.EventFrameAttributeTemplateId == eventFrameAttributeTemplate.EventFrameAttributeTemplateId).one_or_none()
-				if eventFrameAttribute is not None:
-					tagValue = TagValue(TagId = eventFrameAttribute.TagId, Timestamp = form.startUtcTimestamp.data, UserId = current_user.get_id(),
-						Value = eventFrameAttributeTemplate.DefaultStartValue)
-					db.session.add(tagValue)
-					count = count + 1
-
-		if count > 0:
-			db.session.commit()
+		eventFrame.addDefaultAttributeTemplateValues(form.startUtcTimestamp.data)
+		db.session.commit()
 
 		flash("You have successfully added a new Event Frame.", "alert alert-success")
 		return redirect(form.requestReferrer.data)
 
 	if form.requestReferrer.data is None:
 		form.requestReferrer.data = request.referrer
-
-	if parentEventFrameId:
-		form.parentEventFrameId.data = parentEventFrameId
-		breadcrumbs = [{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Root"), "text" : "<span class = \"glyphicon glyphicon-home\"></span>"},
-			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Enterprise",
-				selectedId = parentEventFrame.origin().Element.ElementTemplate.Site.Enterprise.EnterpriseId),
-				"text" : parentEventFrame.origin().Element.ElementTemplate.Site.Enterprise.Name},
-			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Site",
-				selectedId = parentEventFrame.origin().Element.ElementTemplate.Site.SiteId),
-				"text" : parentEventFrame.origin().Element.ElementTemplate.Site.Name},
-			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "ElementTemplate",
-				selectedId = parentEventFrame.origin().Element.ElementTemplate.ElementTemplateId),
-				"text" : parentEventFrame.origin().Element.ElementTemplate.Name},
-			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "EventFrameTemplate",
-				selectedId = parentEventFrame.origin().EventFrameTemplate.EventFrameTemplateId),
-				"text" : parentEventFrame.origin().EventFrameTemplate.Name}]
-		for eventFrameAncestor in parentEventFrame.ancestors([]):
-			if eventFrameAncestor.ParentEventFrameId:
-				text = eventFrameAncestor.EventFrameTemplate.Name + "&nbsp;&nbsp;/&nbsp;&nbsp;" + eventFrameAncestor.Name
-			else:
-				text = eventFrameAncestor.Name
-			breadcrumbs.append({"url" : url_for("eventFrames.dashboard", eventFrameId = eventFrameAncestor.EventFrameId), "text" : text})
-
-		if parentEventFrame.ParentEventFrameId:
-			text = parentEventFrame.EventFrameTemplate.Name + "&nbsp;&nbsp;/&nbsp;&nbsp;" + parentEventFrame.Name
-		else:
-			text = parentEventFrame.Name
-		breadcrumbs.append({"url" : url_for("eventFrames.dashboard", eventFrameId = parentEventFrame.EventFrameId), "text" : text})
+	
+	if eventFrameGroupId is None:
+		eventFrameGroup = None
 	else:
+		eventFrameGroup = EventFrameGroup.query.get_or_404(eventFrameGroupId)
+
+	if parentEventFrameId is None:
 		form.eventFrameTemplateId.data = eventFrameTemplateId
-		breadcrumbs = [{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Root"), "text" : "<span class = \"glyphicon glyphicon-home\"></span>"},
-			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Enterprise",
+		breadcrumbs = [{"url": url_for("eventFrames.selectEventFrame", selectedClass = "Root"),
+			"text": "<span class = \"glyphicon glyphicon-home\"></span>"},
+			{"url": url_for("eventFrames.selectEventFrame", selectedClass = "Enterprise",
 				selectedId = eventFrameTemplate.ElementTemplate.Site.Enterprise.EnterpriseId),
-				"text" : eventFrameTemplate.ElementTemplate.Site.Enterprise.Name},
-			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Site", selectedId = eventFrameTemplate.ElementTemplate.Site.SiteId),
-				"text" : eventFrameTemplate.ElementTemplate.Site.Name},
-			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "ElementTemplate",
+				"text": eventFrameTemplate.ElementTemplate.Site.Enterprise.Name},
+			{"url": url_for("eventFrames.selectEventFrame", selectedClass = "Site", selectedId = eventFrameTemplate.ElementTemplate.Site.SiteId),
+				"text": eventFrameTemplate.ElementTemplate.Site.Name},
+			{"url": url_for("eventFrames.selectEventFrame", selectedClass = "ElementTemplate",
 				selectedId = eventFrameTemplate.ElementTemplate.ElementTemplateId),
-				"text" : eventFrameTemplate.ElementTemplate.Name},
-			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "EventFrameTemplate", selectedId = eventFrameTemplate.EventFrameTemplateId),
-				"text" : eventFrameTemplate.Name}]	
+				"text": eventFrameTemplate.ElementTemplate.Name},
+			{"url": url_for("eventFrames.selectEventFrame", selectedClass = "EventFrameTemplate", selectedId = eventFrameTemplate.EventFrameTemplateId),
+				"text": eventFrameTemplate.Name}]	
+	else:
+		form.parentEventFrameId.data = parentEventFrameId
+		if eventFrameGroup is None:
+			breadcrumbs = [{"url": url_for("eventFrames.selectEventFrame", selectedClass = "Root"),
+				"text": "<span class = \"glyphicon glyphicon-home\"></span>"},
+				{"url": url_for("eventFrames.selectEventFrame", selectedClass = "Enterprise",
+					selectedId = parentEventFrame.origin().Element.ElementTemplate.Site.Enterprise.EnterpriseId),
+					"text": parentEventFrame.origin().Element.ElementTemplate.Site.Enterprise.Name},
+				{"url": url_for("eventFrames.selectEventFrame", selectedClass = "Site",
+					selectedId = parentEventFrame.origin().Element.ElementTemplate.Site.SiteId),
+					"text": parentEventFrame.origin().Element.ElementTemplate.Site.Name},
+				{"url": url_for("eventFrames.selectEventFrame", selectedClass = "ElementTemplate",
+					selectedId = parentEventFrame.origin().Element.ElementTemplate.ElementTemplateId),
+					"text": parentEventFrame.origin().Element.ElementTemplate.Name},
+				{"url": url_for("eventFrames.selectEventFrame", selectedClass = "EventFrameTemplate",
+					selectedId = parentEventFrame.origin().EventFrameTemplate.EventFrameTemplateId),
+					"text": parentEventFrame.origin().EventFrameTemplate.Name}]
+			for eventFrameAncestor in parentEventFrame.ancestors([]):
+				if eventFrameAncestor.ParentEventFrameId is None:
+					text = eventFrameAncestor.Name
+				else:
+					text = "{} / {}".format(eventFrameAncestor.EventFrameTemplate.Name, eventFrameAncestor.Name)
+
+				breadcrumbs.append({"url": url_for("eventFrames.dashboard", eventFrameId = eventFrameAncestor.EventFrameId), "text": text})
+
+			if parentEventFrame.ParentEventFrameId is None:
+				text = parentEventFrame.Name
+			else:
+				text = "{} / {}".format(parentEventFrame.EventFrameTemplate.Name, parentEventFrame.Name)
+
+			breadcrumbs.append({"url": url_for("eventFrames.dashboard", eventFrameId = parentEventFrame.EventFrameId), "text": text})
+		else:
+			breadcrumbs = [{"url": url_for("eventFrameGroups.listEventFrameGroups"), "text": "<span class = \"glyphicon glyphicon-home\"></span>"},
+				{"url": url_for("eventFrameGroups.dashboard", eventFrameGroupId = eventFrameGroup.EventFrameGroupId), "text": eventFrameGroup.Name}]
+			for eventFrameAncestor in parentEventFrame.ancestors([]):
+				if eventFrameAncestor.ParentEventFrameId is not None:
+					breadcrumbs.append({"url": url_for("eventFrames.dashboard", eventFrameId = eventFrameAncestor.EventFrameId,
+						eventFrameGroupId = eventFrameGroup.EventFrameGroupId),
+						"text": "{} / {}".format(eventFrameAncestor.EventFrameTemplate.Name, eventFrameAncestor.Name)})
+				else:
+					breadcrumbs.append({"url": url_for("eventFrames.dashboard", eventFrameId = eventFrameAncestor.EventFrameId,
+						eventFrameGroupId = eventFrameGroup.EventFrameGroupId),
+						"text": eventFrameAncestor.Name})
+
+			if parentEventFrame.ParentEventFrameId is None:
+				breadcrumbs.append({"url": url_for("eventFrames.dashboard", eventFrameId = parentEventFrame.EventFrameId,
+					eventFrameGroupId = eventFrameGroup.EventFrameGroupId),
+					"text": parentEventFrame.Name})
+			else:
+				breadcrumbs.append({"url": url_for("eventFrames.dashboard", eventFrameId = parentEventFrame.EventFrameId,
+					eventFrameGroupId = eventFrameGroup.EventFrameGroupId),
+					"text": "{} / {}".format(parentEventFrame.EventFrameTemplate.Name, parentEventFrame.Name)})
 
 	return render_template("eventFrames/addEdit.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
 
 @eventFrames.route("/eventFrames/dashboard/<int:eventFrameId>", methods = ["GET", "POST"])
+@eventFrames.route("/eventFrames/dashboard/<int:eventFrameId>/<int:eventFrameGroupId>", methods = ["GET", "POST"])
 @login_required
 @permissionRequired(Permission.DATA_ENTRY)
-def dashboard(eventFrameId):
+def dashboard(eventFrameId, eventFrameGroupId = None):
 	eventFrame = EventFrame.query.get_or_404(eventFrameId)
 	if eventFrame.ElementId:
 		elementId = eventFrame.ElementId
 	else:
 		elementId = eventFrame.origin().ElementId
+	
+	if eventFrameGroupId is None:
+		eventFrameEventFrameGroup = None
+	else:
+		eventFrameEventFrameGroup = EventFrameEventFrameGroup.query.filter_by(EventFrameGroupId = eventFrameGroupId, EventFrameId = eventFrame.origin().EventFrameId).one_or_none()
 
 	eventFrameAttributes = EventFrameAttribute.query.join(EventFrameAttributeTemplate, EventFrameTemplate). \
 		filter(EventFrameAttribute.ElementId == elementId, EventFrameTemplate.EventFrameTemplateId == eventFrame.EventFrameTemplate.EventFrameTemplateId)
@@ -131,157 +158,8 @@ def dashboard(eventFrameId):
 	else:
 		tagValues = TagValue.query.join(Tag, EventFrameAttribute).filter(EventFrameAttribute.EventFrameAttributeId.in_(eventFrameAttributeIds),
 			TagValue.Timestamp >= eventFrame.StartTimestamp)
-	return render_template("eventFrames/dashboard.html", eventFrame = eventFrame, eventFrameAttributes = eventFrameAttributes, tagValues = tagValues)
-
-@eventFrames.route("/eventFrames/delete/<int:eventFrameId>", methods = ["GET", "POST"])
-@login_required
-@permissionRequired(Permission.DATA_ENTRY)
-def deleteEventFrame(eventFrameId):
-	eventFrame = EventFrame.query.get_or_404(eventFrameId)
-	eventFrame.delete()
-	db.session.commit()
-	flash("You have successfully deleted the event frame.", "alert alert-success")
-	return redirect(request.referrer)
-
-@eventFrames.route("/eventFrames/edit/<int:eventFrameId>", methods = ["GET", "POST"])
-@login_required
-@permissionRequired(Permission.DATA_ENTRY)
-def editEventFrame(eventFrameId):
-	operation = "Edit"
-	eventFrame = EventFrame.query.get_or_404(eventFrameId)
-	form = EventFrameForm(obj = eventFrame)
-	if eventFrame.ParentEventFrameId:
-		del form.element
-		form.eventFrameTemplate.query = EventFrameTemplate.query. \
-			filter(EventFrameTemplate.ParentEventFrameTemplateId == eventFrame.ParentEventFrame.EventFrameTemplateId).order_by(EventFrameTemplate.Name)
-	else:
-		del form.eventFrameTemplate
-		form.element.query = Element.query.join(ElementTemplate).filter(ElementTemplate.ElementTemplateId == eventFrame.EventFrameTemplate.ElementTemplateId). \
-			order_by(Element.Name)
-
-	# Edit an existing event frame.
-	if form.validate_on_submit():
-		if eventFrame.ParentEventFrameId:
-			eventFrame.EventFrameTemplate = form.eventFrameTemplate.data
-			eventFrame.ParentEventFrameId = form.parentEventFrameId.data
-		else:
-			eventFrame.Element = form.element.data
-			eventFrame.EventFrameTemplateId = form.eventFrameTemplateId.data
-
-		if form.endUtcTimestamp.data == "":
-			eventFrame.EndTimestamp = None
-		else:
-			eventFrame.EndTimestamp = form.endUtcTimestamp.data
-
-		eventFrame.Name = form.name.data
-		eventFrame.StartTimestamp = form.startUtcTimestamp.data
-		eventFrame.UserId = current_user.get_id()
-		db.session.commit()
-		flash("You have successfully edited the Event Frame.", "alert alert-success")
-		return redirect(form.requestReferrer.data)
-
-	# Present a form to edit an existing event frame.
-	if eventFrame.ParentEventFrameId:
-		form.eventFrameTemplate.data = eventFrame.EventFrameTemplate
-		form.parentEventFrameId.data = eventFrame.ParentEventFrameId
-		breadcrumbs = [{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Root"), "text" : "<span class = \"glyphicon glyphicon-home\"></span>"},
-			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Enterprise",
-				selectedId = eventFrame.origin().Element.ElementTemplate.Site.Enterprise.EnterpriseId),
-				"text" : eventFrame.origin().Element.ElementTemplate.Site.Enterprise.Name},
-			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Site",
-				selectedId = eventFrame.origin().Element.ElementTemplate.Site.SiteId),
-				"text" : eventFrame.origin().Element.ElementTemplate.Site.Name},
-			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "ElementTemplate",
-				selectedId = eventFrame.origin().Element.ElementTemplate.ElementTemplateId),
-				"text" : eventFrame.origin().Element.ElementTemplate.Name},
-			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "EventFrameTemplate",
-				selectedId = eventFrame.origin().EventFrameTemplate.EventFrameTemplateId),
-				"text" : eventFrame.origin().EventFrameTemplate.Name}]
-		for eventFrameAncestor in eventFrame.ancestors([]):
-			if eventFrameAncestor.ParentEventFrameId:
-				text = eventFrameAncestor.EventFrameTemplate.Name + "&nbsp;&nbsp;/&nbsp;&nbsp;" + eventFrameAncestor.Name
-			else:
-				text = eventFrameAncestor.Name
-			breadcrumbs.append({"url" : url_for("eventFrames.dashboard", eventFrameId = eventFrameAncestor.EventFrameId), "text" : text})
-
-		if eventFrame.ParentEventFrameId:
-			text = eventFrame.EventFrameTemplate.Name + "&nbsp;&nbsp;/&nbsp;&nbsp;" + eventFrame.Name
-		else:
-			text = eventFrame.Name
-		breadcrumbs.append({"url" : None, "text" : text})
-	else:
-		form.element.data = eventFrame.Element
-		form.eventFrameTemplateId.data = eventFrame.EventFrameTemplateId
-		breadcrumbs = [{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Root"), "text" : "<span class = \"glyphicon glyphicon-home\"></span>"},
-			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Enterprise",
-				selectedId = eventFrame.EventFrameTemplate.ElementTemplate.Site.Enterprise.EnterpriseId),
-				"text" : eventFrame.EventFrameTemplate.ElementTemplate.Site.Enterprise.Name},
-			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Site", selectedId = eventFrame.EventFrameTemplate.ElementTemplate.Site.SiteId),
-				"text" : eventFrame.EventFrameTemplate.ElementTemplate.Site.Name},
-			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "ElementTemplate",
-				selectedId = eventFrame.EventFrameTemplate.ElementTemplate.ElementTemplateId), "text" : eventFrame.EventFrameTemplate.ElementTemplate.Name},
-			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "EventFrameTemplate",
-				selectedId = eventFrame.EventFrameTemplate.EventFrameTemplateId), "text" : eventFrame.EventFrameTemplate.Name},
-			{"url" : None, "text" : eventFrame.Name}]	
-
-	form.eventFrameId.data = eventFrame.EventFrameId
-	form.endTimestamp.data = eventFrame.EndTimestamp
-	form.name.data = eventFrame.Name
-	form.startTimestamp.data = eventFrame.StartTimestamp
-	if form.requestReferrer.data is None:
-		form.requestReferrer.data = request.referrer
-
-	return render_template("eventFrames/addEdit.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
-
-@eventFrames.route("/eventFrames/endEventFrame/<int:eventFrameId>", methods = ["GET", "POST"])
-@login_required
-@permissionRequired(Permission.DATA_ENTRY)
-def endEventFrame(eventFrameId):
-	rootEventFrame = EventFrame.query.get_or_404(eventFrameId)
-	endTimestamp = datetime.utcnow()
-	for dictionary in rootEventFrame.lineage([], 0):
-		eventFrame = dictionary["eventFrame"]
-		if eventFrame.EndTimestamp is None:
-			eventFrame.EndTimestamp = endTimestamp
-			eventFrame.UserId = current_user.get_id()
-			for eventFrameAttributeTemplate in eventFrame.EventFrameTemplate.EventFrameAttributeTemplates:
-				if eventFrameAttributeTemplate.DefaultEndValue is not None:
-					eventFrameAttribute = EventFrameAttribute.query.filter(EventFrameAttribute.ElementId == eventFrame.origin().ElementId,
-						EventFrameAttribute.EventFrameAttributeTemplateId == eventFrameAttributeTemplate.EventFrameAttributeTemplateId).one_or_none()
-					if eventFrameAttribute is not None:
-						tagValue = TagValue(TagId = eventFrameAttribute.TagId, Timestamp = endTimestamp, UserId = current_user.get_id(),
-							Value = eventFrameAttributeTemplate.DefaultEndValue)
-						db.session.add(tagValue)
-
-	db.session.commit()
-	flash('You have successfully ended "{}" for event frame "{}".'.format(rootEventFrame.EventFrameTemplate.Name, rootEventFrame.Name),
-		"alert alert-success")
-	return redirect(request.referrer)
-
-@eventFrames.route("/eventFrames/overlayBuilder/<int:eventFrameTemplateId>", methods = ["GET", "POST"])
-@login_required
-@permissionRequired(Permission.DATA_ENTRY)
-def overlayBuilder(eventFrameTemplateId):
-	eventFrameTemplate = EventFrameTemplate.query.get_or_404(eventFrameTemplateId)
-	eventFrameAttributeTemplates = EventFrameAttributeTemplate.query.filter_by(EventFrameTemplateId = eventFrameTemplateId)
-	form = EventFrameOverlayForm()
-
-	if form.validate_on_submit():
-		startTimestamp = datetime.strptime(request.form.get("startUtcTimestamp"), "%Y-%m-%d %H:%M:%S")
-		if request.form.get("endUtcTimestamp") == "":
-			endTimestamp = datetime.utcnow()
-		else:
-			endTimestamp = datetime.strptime(endUtcTimestamp, "%Y-%m-%d %H:%M:%S")
-
-		eventFrames = EventFrame.query.filter(EventFrame.EventFrameTemplateId == eventFrameTemplateId, EventFrame.StartTimestamp >= startTimestamp,
-			EventFrame.StartTimestamp <= endTimestamp)
-		eventFrames = currentEventFrameAttributeValues(eventFrames, eventFrameTemplateId)
-		return render_template("eventFrames/overlayBuilder.html", endTimestamp = endTimestamp, eventFrames = eventFrames,
-			eventFrameAttributeTemplates = eventFrameAttributeTemplates, eventFrameTemplate = eventFrameTemplate,
-			grafanaBaseUri = current_app.config["GRAFANA_BASE_URI"], startTimestamp = startTimestamp)
-
-	return render_template("eventFrames/overlayBuilder.html", eventFrameAttributeTemplates = eventFrameAttributeTemplates,
-		eventFrameTemplate = eventFrameTemplate, form = form)
+	return render_template("eventFrames/dashboard.html", eventFrame = eventFrame, eventFrameEventFrameGroup = eventFrameEventFrameGroup,
+		eventFrameAttributes = eventFrameAttributes, tagValues = tagValues)
 
 @eventFrames.route("/eventFrames/overlay/days", methods = ["GET", "POST"])
 @login_required
@@ -341,6 +219,179 @@ def days():
 	days = db.session.execute(query).fetchone()["Days"]
 	return jsonify({"days": days})
 
+@eventFrames.route("/eventFrames/delete/<int:eventFrameId>", methods = ["GET", "POST"])
+@login_required
+@permissionRequired(Permission.DATA_ENTRY)
+def deleteEventFrame(eventFrameId):
+	eventFrame = EventFrame.query.get_or_404(eventFrameId)
+	eventFrame.delete()
+	db.session.commit()
+	flash("You have successfully deleted the event frame.", "alert alert-success")
+	return redirect(request.referrer)
+
+@eventFrames.route("/eventFrames/edit/<int:eventFrameId>", methods = ["GET", "POST"])
+@eventFrames.route("/eventFrames/edit/<int:eventFrameId>/<int:eventFrameGroupId>", methods = ["GET", "POST"])
+@login_required
+@permissionRequired(Permission.DATA_ENTRY)
+def editEventFrame(eventFrameId, eventFrameGroupId = None):
+	operation = "Edit"
+	eventFrame = EventFrame.query.get_or_404(eventFrameId)
+	form = EventFrameForm(obj = eventFrame)
+	del form.eventFrameTemplate
+	if eventFrame.ParentEventFrameId is None:
+		form.element.query = Element.query.join(ElementTemplate).filter(ElementTemplate.ElementTemplateId == eventFrame.EventFrameTemplate.ElementTemplateId). \
+			order_by(Element.Name)
+	else:
+		del form.element
+
+	# Edit an existing event frame.
+	if form.validate_on_submit():
+		if eventFrame.ParentEventFrameId:
+			eventFrame.ParentEventFrameId = form.parentEventFrameId.data
+		else:
+			eventFrame.Element = form.element.data
+
+		if form.endUtcTimestamp.data == "":
+			eventFrame.EndTimestamp = None
+		else:
+			eventFrame.EndTimestamp = form.endUtcTimestamp.data
+
+		eventFrame.Name = form.name.data
+		eventFrame.StartTimestamp = form.startUtcTimestamp.data
+		eventFrame.UserId = current_user.get_id()
+		db.session.commit()
+		flash("You have successfully edited the Event Frame.", "alert alert-success")
+		return redirect(form.requestReferrer.data)
+
+	# Present a form to edit an existing event frame.
+	if eventFrameGroupId is None:
+		eventFrameGroup = None
+	else:
+		eventFrameGroup = EventFrameGroup.query.get_or_404(eventFrameGroupId)
+
+	if eventFrame.ParentEventFrameId is None:
+		form.element.data = eventFrame.Element
+		if eventFrameGroup is None:
+			breadcrumbs = [{"url": url_for("eventFrames.selectEventFrame", selectedClass = "Root"),
+				"text": "<span class = \"glyphicon glyphicon-home\"></span>"},
+				{"url": url_for("eventFrames.selectEventFrame", selectedClass = "Enterprise",
+					selectedId = eventFrame.EventFrameTemplate.ElementTemplate.Site.Enterprise.EnterpriseId),
+					"text": eventFrame.EventFrameTemplate.ElementTemplate.Site.Enterprise.Name},
+				{"url": url_for("eventFrames.selectEventFrame", selectedClass = "Site", selectedId = eventFrame.EventFrameTemplate.ElementTemplate.Site.SiteId),
+					"text": eventFrame.EventFrameTemplate.ElementTemplate.Site.Name},
+				{"url": url_for("eventFrames.selectEventFrame", selectedClass = "ElementTemplate",
+					selectedId = eventFrame.EventFrameTemplate.ElementTemplate.ElementTemplateId), "text": eventFrame.EventFrameTemplate.ElementTemplate.Name},
+				{"url": url_for("eventFrames.selectEventFrame", selectedClass = "EventFrameTemplate",
+					selectedId = eventFrame.EventFrameTemplate.EventFrameTemplateId), "text": eventFrame.EventFrameTemplate.Name},
+				{"url": None, "text": eventFrame.Name}]
+		else:
+			breadcrumbs = [{"url": url_for("eventFrameGroups.listEventFrameGroups"), "text": "<span class = \"glyphicon glyphicon-home\"></span>"},
+				{"url": url_for("eventFrameGroups.dashboard", eventFrameGroupId = eventFrameGroup.EventFrameGroupId), "text": eventFrameGroup.Name},
+				{"url": None, "text": eventFrame.Name}]
+	else:
+		form.parentEventFrameId.data = eventFrame.ParentEventFrameId
+		if eventFrameGroup is None:
+			breadcrumbs = [{"url": url_for("eventFrames.selectEventFrame", selectedClass = "Root"),
+				"text": "<span class = \"glyphicon glyphicon-home\"></span>"},
+				{"url": url_for("eventFrames.selectEventFrame", selectedClass = "Enterprise",
+					selectedId = eventFrame.origin().Element.ElementTemplate.Site.Enterprise.EnterpriseId),
+					"text": eventFrame.origin().Element.ElementTemplate.Site.Enterprise.Name},
+				{"url": url_for("eventFrames.selectEventFrame", selectedClass = "Site",
+					selectedId = eventFrame.origin().Element.ElementTemplate.Site.SiteId),
+					"text": eventFrame.origin().Element.ElementTemplate.Site.Name},
+				{"url": url_for("eventFrames.selectEventFrame", selectedClass = "ElementTemplate",
+					selectedId = eventFrame.origin().Element.ElementTemplate.ElementTemplateId),
+					"text": eventFrame.origin().Element.ElementTemplate.Name},
+				{"url": url_for("eventFrames.selectEventFrame", selectedClass = "EventFrameTemplate",
+					selectedId = eventFrame.origin().EventFrameTemplate.EventFrameTemplateId),
+					"text": eventFrame.origin().EventFrameTemplate.Name}]
+			for eventFrameAncestor in eventFrame.ancestors([]):
+				if eventFrameAncestor.ParentEventFrameId is None:
+					text = eventFrameAncestor.Name
+				else:
+					text = "{} / {}".format(eventFrameAncestor.EventFrameTemplate.Name, eventFrameAncestor.Name)
+
+				breadcrumbs.append({"url": url_for("eventFrames.dashboard", eventFrameId = eventFrameAncestor.EventFrameId), "text": text})
+
+			if eventFrame.ParentEventFrameId is None:
+				text = eventFrame.Name
+			else:
+				text = "{} / {}".format(eventFrame.EventFrameTemplate.Name, eventFrame.Name)
+
+			breadcrumbs.append({"url": None, "text": text})
+		else:
+			breadcrumbs = [{"url": url_for("eventFrameGroups.listEventFrameGroups"), "text": "<span class = \"glyphicon glyphicon-home\"></span>"},
+				{"url": url_for("eventFrameGroups.dashboard", eventFrameGroupId = eventFrameGroup.EventFrameGroupId), "text": eventFrameGroup.Name}]
+			for eventFrameAncestor in eventFrame.ancestors([]):
+				if eventFrameAncestor.ParentEventFrameId:
+					text = "{} / {}".format(eventFrameAncestor.EventFrameTemplate.Name, eventFrameAncestor.Name)
+				else:
+					text = eventFrameAncestor.Name
+				breadcrumbs.append({"url": url_for("eventFrames.dashboard", eventFrameId = eventFrameAncestor.EventFrameId,
+					eventFrameGroupId = eventFrameGroup.EventFrameGroupId), "text": text})
+
+			if eventFrame.ParentEventFrameId:
+				text = "{} / {}".format(eventFrame.EventFrameTemplate.Name, eventFrame.Name)
+			else:
+				text = eventFrame.Name
+
+			breadcrumbs.append({"url": None, "text": text})
+
+	form.eventFrameId.data = eventFrame.EventFrameId
+	form.endTimestamp.data = eventFrame.EndTimestamp
+	form.name.data = eventFrame.Name
+	form.startTimestamp.data = eventFrame.StartTimestamp
+	if form.requestReferrer.data is None:
+		form.requestReferrer.data = request.referrer
+
+	return render_template("eventFrames/addEdit.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
+
+@eventFrames.route("/eventFrames/endEventFrame/<int:eventFrameId>", methods = ["GET", "POST"])
+@login_required
+@permissionRequired(Permission.DATA_ENTRY)
+def endEventFrame(eventFrameId):
+	eventFrame = EventFrame.query.get_or_404(eventFrameId)
+	eventFrame.end()
+	db.session.commit()
+	flash('You have successfully ended "{}" for event frame "{}".'.format(eventFrame.EventFrameTemplate.Name, eventFrame.Name), "alert alert-success")
+	return redirect(request.referrer)
+
+@eventFrames.route("/eventFrames/overlayBuilder/<int:eventFrameTemplateId>", methods = ["GET", "POST"])
+@login_required
+@permissionRequired(Permission.DATA_ENTRY)
+def overlayBuilder(eventFrameTemplateId):
+	eventFrameTemplate = EventFrameTemplate.query.get_or_404(eventFrameTemplateId)
+	eventFrameAttributeTemplates = EventFrameAttributeTemplate.query.filter_by(EventFrameTemplateId = eventFrameTemplateId)
+	form = EventFrameOverlayForm()
+
+	if form.validate_on_submit():
+		startTimestamp = datetime.strptime(request.form.get("startUtcTimestamp"), "%Y-%m-%d %H:%M:%S")
+		if request.form.get("endUtcTimestamp") == "":
+			endTimestamp = datetime.utcnow()
+		else:
+			endTimestamp = datetime.strptime(endUtcTimestamp, "%Y-%m-%d %H:%M:%S")
+
+		eventFrames = EventFrame.query.filter(EventFrame.EventFrameTemplateId == eventFrameTemplateId, EventFrame.StartTimestamp >= startTimestamp,
+			EventFrame.StartTimestamp <= endTimestamp)
+		eventFrames = currentEventFrameAttributeValues(eventFrames, eventFrameTemplateId)
+		return render_template("eventFrames/overlayBuilder.html", endTimestamp = endTimestamp, eventFrames = eventFrames,
+			eventFrameAttributeTemplates = eventFrameAttributeTemplates, eventFrameTemplate = eventFrameTemplate,
+			grafanaBaseUri = current_app.config["GRAFANA_BASE_URI"], startTimestamp = startTimestamp)
+
+	return render_template("eventFrames/overlayBuilder.html", eventFrameAttributeTemplates = eventFrameAttributeTemplates,
+		eventFrameTemplate = eventFrameTemplate, form = form)
+
+@eventFrames.route("/eventFrames/restartEventFrame/<int:eventFrameId>", methods = ["GET", "POST"])
+@login_required
+@permissionRequired(Permission.DATA_ENTRY)
+def restartEventFrame(eventFrameId):
+	eventFrame = EventFrame.query.get_or_404(eventFrameId)
+	eventFrame.restart()
+	db.session.commit()
+	flash('You have successfully restarted "{}" event frame "{}".'.format(eventFrame.EventFrameTemplate.Name, eventFrame.Name),
+		"alert alert-success")
+	return redirect(request.referrer)
+
 @eventFrames.route("/eventFrames/select", methods = ["GET", "POST"]) # Default.
 @eventFrames.route("/eventFrames/select/<string:selectedClass>", methods = ["GET", "POST"]) # Root.
 @eventFrames.route("/eventFrames/select/<string:selectedClass>/<int:selectedId>", methods = ["GET", "POST"])
@@ -384,11 +435,14 @@ def selectEventFrame(selectedClass = None, selectedId = None, months = None, sel
 		parent = EventFrameTemplate.query.get_or_404(selectedId)
 		if months is None:
 			# Active event frames only.
+			session["eventFrameMonths"] = None
 			children = EventFrame.query.filter(EventFrame.EventFrameTemplateId == selectedId, EventFrame.EndTimestamp == None)
 		elif months == 0:
 			# All event frames.
+			session["eventFrameMonths"] = 0
 			children = EventFrame.query.filter_by(EventFrameTemplateId = selectedId)
 		else:
+			session["eventFrameMonths"] = months
 			fromTimestamp = datetime.utcnow() - relativedelta(months = months)
 			toTimestamp = datetime.utcnow()
 			children = EventFrame.query.filter(EventFrame.EventFrameTemplateId == selectedId, EventFrame.StartTimestamp >= fromTimestamp,
