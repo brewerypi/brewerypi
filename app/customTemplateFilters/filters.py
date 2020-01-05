@@ -78,8 +78,8 @@ def grafanaUrl(uid, parameters = None):
                 one()[0] + 1
             return current_app.config["GRAFANA_BASE_URI"] + \
                 "/d/EventFramesGraph/event-frames-graph?orgId=1" + \
-                "&from={}000".format(startTimestamp) + \
-                "&to={}000".format(endTimestamp) + \
+                "&from={}000".format(int(startTimestamp)) + \
+                "&to={}000".format(int(endTimestamp)) + \
                 "&var-enterprise={}".format(eventFrame.EventFrameTemplate.ElementTemplate.Site.Enterprise.EnterpriseId) + \
                 "&var-site={}".format(eventFrame.EventFrameTemplate.ElementTemplate.Site.SiteId) + \
                 "&var-elementTemplate={}".format(eventFrame.EventFrameTemplate.ElementTemplate.ElementTemplateId) + \
@@ -90,7 +90,7 @@ def grafanaUrl(uid, parameters = None):
         else:
             return current_app.config["GRAFANA_BASE_URI"] + \
                 "/d/EventFramesGraph/event-frames-graph?orgId=1" + \
-                "&from={}000".format(startTimestamp) + \
+                "&from={}000".format(int(startTimestamp)) + \
                 "&to=now" + \
                 "&var-enterprise={}".format(eventFrame.EventFrameTemplate.ElementTemplate.Site.Enterprise.EnterpriseId) + \
                 "&var-site={}".format(eventFrame.EventFrameTemplate.ElementTemplate.Site.SiteId) + \
