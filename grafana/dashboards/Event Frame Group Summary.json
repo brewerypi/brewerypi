@@ -15,8 +15,7 @@
     "editable": true,
     "gnetId": null,
     "graphTooltip": 0,
-    "id": 11,
-    "iteration": 1572664659893,
+  "iteration": 1578170068968,
     "links": [],
     "panels": [
       {
@@ -100,7 +99,7 @@
       }
     ],
     "refresh": false,
-    "schemaVersion": 18,
+  "schemaVersion": 20,
     "style": "dark",
     "tags": [],
     "templating": {
