@@ -95,6 +95,7 @@
                 <thead>
                     <tr>
                         <th></th>
+                        <th></th>
                         <th>Template</th>
                         <th>Name</th>
                         <th>User</th>
@@ -108,13 +109,23 @@
                 <tbody>
                     {% for eventFrame in eventFrame.EventFrames %}
                         <tr>
+                            {% if eventFrame.EventFrameNotes.all() | count == 0 %}
+                                {% set noteButtonClass = "btn btn-default" %}
+                            {% else %}
+                                {% set noteButtonClass = "btn btn-default  has-note" %}
+                            {% endif %}
                             {% if eventFrameEventFrameGroup is none %}
                                 <td><a class = "btn btn-default" title = "Select" href = '{{ url_for("eventFrames.dashboard",
                                     eventFrameId = eventFrame.EventFrameId) }}'><span class = "glyphicon glyphicon-list"></span></a></td>
+                                <td><a class = "{{ noteButtonClass }}" title = "Notes" href = '{{ url_for("eventFrames.dashboard",
+                                    eventFrameId = eventFrame.EventFrameId) }}#Notes'><span class = "glyphicon glyphicon-comment"></span></a></td>
                             {% else %}
                                 <td><a class = "btn btn-default" title = "Select" href = '{{ url_for("eventFrames.dashboard",
                                     eventFrameId = eventFrame.EventFrameId, eventFrameGroupId = eventFrameEventFrameGroup.EventFrameGroupId) }}'>
                                     <span class = "glyphicon glyphicon-list"></span></a></td>
+                                <td><a class = "{{ noteButtonClass }}" title = "Notes" href = '{{ url_for("eventFrames.dashboard",
+                                    eventFrameId = eventFrame.EventFrameId, eventFrameGroupId = eventFrameEventFrameGroup.EventFrameGroupId) }}#Notes'>
+                                    <span class = "glyphicon glyphicon-comment"></span></a></td>
                             {% endif %}
                             <td>{{ eventFrame.EventFrameTemplate.Name }}</td>
                             <td>{{ eventFrame.Name }}</td>
@@ -271,7 +282,7 @@
         </table>
     </div>
     <div class = "page-header">
-        <h1>Notes <small>{{ eventFrame.origin().Element.Name }}</small></h1>
+        <h1 id = "Notes">Notes <small>{{ eventFrame.origin().Element.Name }}</small></h1>
     </div>
     <div>
         {% if eventFrameEventFrameGroup is none %}
@@ -356,11 +367,12 @@
             ({
                 "order":
                 [
-                    [3, "desc"],            // Start timestamp.
+                    [5, "desc"],            // Start timestamp.
                 ],
                 "columns":
                 [
                     { "orderable": false }, // Select button.
+                    { "orderable": false }, // Notes button.
                     null,
                     null,
                     null,
