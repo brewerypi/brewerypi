@@ -26,7 +26,8 @@ def currentEventFrameAttributeValues(eventFrames, eventFrameTemplateId):
         Element.TagAreaId AS ElementTagAreaId,
         User.Name AS UserName,
         EventFrame.StartTimestamp,
-        EventFrame.EndTimestamp {}
+        EventFrame.EndTimestamp,
+        (SELECT COUNT(*) FROM EventFrameNote WHERE EventFrameNote.EventFrameId = EventFrame.EventFrameId) AS EventFrameNotesCount{}
     FROM EventFrame
         INNER JOIN Element ON EventFrame.ElementId = Element.ElementId
         INNER JOIN User ON EventFrame.UserId = User.UserId
