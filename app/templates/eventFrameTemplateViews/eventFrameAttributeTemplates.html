@@ -41,55 +41,30 @@
         </h1>
     </div>
     <div>
-        <table id = "selectedEventFrameAttributeTemplatesTable" class = "table table-hover" style = "display:none">
+        <table id = "table" class = "table table-hover" style = "display:none">
             <thead>
                 <tr>
+                    <th>Order</th>
+                    <th>Include?</th>
                     <th>Name</th>
-                    <th></th>
                 </tr>
             </thead>
             <tbody>
-                {% for eventFrameAttributeTemplate in eventFrameTemplateView.EventFrameTemplate.EventFrameAttributeTemplates %}
-                    {% set selectedEventFrameAttributeTemplateIds = eventFrameTemplateView.EventFrameAttributeTemplateEventFrameTemplateViews |
-                        selectattr("EventFrameAttributeTemplateId") | map(attribute = "EventFrameAttributeTemplateId") | list %}
-                    {% if eventFrameAttributeTemplate.EventFrameAttributeTemplateId is in selectedEventFrameAttributeTemplateIds %}
-                        {% set display = "" %}
-                    {% else %}
-                        {% set display = "none" %}
-                    {% endif %}
-                    <tr data-eventFrameAttributeTemplateId = "{{ eventFrameAttributeTemplate.EventFrameAttributeTemplateId }}" style = "display: {{ display }}">
-                        <td>{{ eventFrameAttributeTemplate.Name }}</td>
-                        <td><button class = "btn btn-default" id = "buttonRemove {{ loop.index }}" title = "Remove"><span class = "glyphicon glyphicon-minus">                            
-                            </span></button></td>
+                {% set namespace = namespace(numberOfincludedEventFrameAttributeTemplates = 0) %}
+                {% for eventFrameAttributeTemplateEventFrameTemplateView in eventFrameTemplateView.EventFrameAttributeTemplateEventFrameTemplateViews | 
+                    sort(attribute = "Order") %}
+                    <tr data-eventFrameAttributeTemplateId = "{{ eventFrameAttributeTemplateEventFrameTemplateView.EventFrameAttributeTemplateId }}">
+                        <td>{{ loop.index }}</td>
+                        <td><input type = "checkbox" checked></td>
+                        <td>{{ eventFrameAttributeTemplateEventFrameTemplateView.EventFrameAttributeTemplate.Name }}</td>
                     </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-    <div class = "page-header">
-        <h1><small>Available Event Frame Attribute Templates</small></h1>
-    </div>
-    <div>
-        <table id = "availableEventFrameAttributeTemplatesTable" class = "table table-hover" style = "display:none">
-            <thead>
-                <tr>                
-                    <th>Name</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for eventFrameAttributeTemplate in eventFrameTemplateView.EventFrameTemplate.EventFrameAttributeTemplates %}
-                    {% set selectedEventFrameAttributeTemplateIds = eventFrameTemplateView.EventFrameAttributeTemplateEventFrameTemplateViews |
-                        selectattr("EventFrameAttributeTemplateId") | map(attribute = "EventFrameAttributeTemplateId") | list %}
-                    {% if eventFrameAttributeTemplate.EventFrameAttributeTemplateId is in selectedEventFrameAttributeTemplateIds %}
-                        {% set display = "none" %}
-                    {% else %}
-                        {% set display = "" %}
-                    {% endif %}
-                    <tr data-eventFrameAttributeTemplateId = "{{ eventFrameAttributeTemplate.EventFrameAttributeTemplateId }}" style = "display: {{ display }}">
+                    {% set namespace.numberOfincludedEventFrameAttributeTemplates = namespace.numberOfincludedEventFrameAttributeTemplates + 1 %}
+                    {% endfor %}
+                {% for eventFrameAttributeTemplate in excludedEventFrameAttributeTemplates | sort(attribute = "Name") %}
+                    <tr data-eventFrameAttributeTemplateId = "{{ eventFrameAttributeTemplate.EventFrameAttributeTemplateId }}">
+                        <td>{{ loop.index + namespace.numberOfincludedEventFrameAttributeTemplates }}</td>
+                        <td><input type = "checkbox"></td>
                         <td>{{ eventFrameAttributeTemplate.Name }}</td>
-                        <td><button class = "btn btn-default" id = "buttonAdd {{ loop.index }}" title = "Add"><span class = "glyphicon glyphicon-plus">
-                            </span></button></td>
                     </tr>
                 {% endfor %}
             </tbody>
@@ -103,104 +78,36 @@
     <link rel = "stylesheet" type = "text/css" href = {{ url_for("static", filename = "css/styles.css") }}/>
     <script type = "text/javascript" src = {{ url_for("static", filename = "js/datatables.min.js") }}></script>
     {% block setTabIndex %}
-        <script>
-            function setTabIndex()
-            {
-                var tabIndex = 1
-                $('ol.breadcrumb a[title="Next"],[id^=inputOrSelectNewValue]').each(function()
-                {
-                    $(this).attr("tabindex", tabIndex)
-                    tabIndex = tabIndex + 1
-                })
-
-                $('#availableEventFrameAttributeTemplatesTable button[title="Add"]').each(function ()
-                {
-                    $(this).attr("tabindex", tabIndex)
-                    tabIndex = tabIndex + 1
-                })
-
-                $("#buttonSave").attr("tabindex", tabIndex)
-                tabIndex = tabIndex + 1
-                $($("ol.breadcrumb > li:not(.active) > a").get().reverse()).each(function()       
-                {
-                    $(this).attr("tabindex", tabIndex)
-                    tabIndex = tabIndex + 1
-                })
-            }
-        </script>
+        {{ super() }}
     {% endblock %}
     <script>
         $(document).ready(function()
         {
-            var selectedEventFrameAttributeTemplatesTable = $("#selectedEventFrameAttributeTemplatesTable").on("draw.dt", function()
+            var table = $("#table").on("draw.dt", function()
             {
                 setTabIndex()
             }).DataTable
             ({
-                "order":
-                [
-                    [0, "asc"]                                      // Event Frame Attribute Template.
-                ],
-                "columns":
-                [
-                    null,
-                    { "orderable": false }  // Remove button.
-                ],
-                "stateSave": true,
-                "stateDuration": 0,
                 "pageLength": 25,
-                "orderCellsTop": true,
-                "fixedHeader": true
-            })
-
-            var availableEventFrameAttributeTemplatesTable = $("#availableEventFrameAttributeTemplatesTable").on("draw.dt", function()
-            {
-                setTabIndex()
-            }).DataTable
-            ({
-                "order":
+                "rowReorder": true,
+                columnDefs:
                 [
-                    [0, "asc"]                                      // Event Frame Attribute Template.
-                ],
-                "columns":
-                [
-                    null,
-                    { "orderable": false }  // Remove button.
-                ],
-                "stateSave": true,
-                "stateDuration": 0,
-                "pageLength": 25,
-                "orderCellsTop": true,
-                "fixedHeader": true
+                    {orderable: true, className: "reorder", targets: 0},
+                    {orderable: false, targets: "_all"}
+                ]
             })
 
-            $("#selectedEventFrameAttributeTemplatesTable").attr("style", "width:100%")
-            $("#availableEventFrameAttributeTemplatesTable").attr("style", "width:100%")
+            $("#table").attr("style", "width:100%")
 
-            $("[id^=buttonAdd]").on("click", function()
-            {
-                var eventFrameAttributeTemplateId = $(this).parent().parent().attr("data-eventFrameAttributeTemplateId")
-                $("#availableEventFrameAttributeTemplatesTable tr[data-eventFrameAttributeTemplateId=" + eventFrameAttributeTemplateId + "]").hide()
-                $("#selectedEventFrameAttributeTemplatesTable tr[data-eventFrameAttributeTemplateId=" + eventFrameAttributeTemplateId + "]").show()
-            })
-
-            $("[id^=buttonRemove]").on("click", function()
-            {
-                // Clear any filtering on the available table for user clarity.
-                availableEventFrameAttributeTemplatesTable.search("").columns().search("").draw()
-                var eventFrameAttributeTemplateId = $(this).parent().parent().attr("data-eventFrameAttributeTemplateId")
-                $("#availableEventFrameAttributeTemplatesTable tr[data-eventFrameAttributeTemplateId=" + eventFrameAttributeTemplateId + "]").show()
-                $("#selectedEventFrameAttributeTemplatesTable tr[data-eventFrameAttributeTemplateId=" + eventFrameAttributeTemplateId + "]").hide()
-            })
-            
             $("#buttonSave").on("click", function()
             {
-                var eventFrameAttributeTemplateIds = []
+                var eventFrameAttributeTemplateIds = {}
 
-                selectedEventFrameAttributeTemplatesTable.rows("tr:visible").nodes().to$().each(function ()
+                $("input:checked", table.nodes().to$()).each(function()
                 {
-                    var eventFrameAttributeTemplateId = $(this).attr("data-eventFrameAttributeTemplateId")
-                    eventFrameAttributeTemplateIds.push(eventFrameAttributeTemplateId)
+                    var eventFrameAttributeTemplateId = $(this).parents("tr").attr("data-eventFrameAttributeTemplateId")
+                    var order = $(this).parents("tr").find("td:first").text()
+                    eventFrameAttributeTemplateIds[eventFrameAttributeTemplateId] = order
                 })
 
                 $.ajax(
@@ -210,8 +117,7 @@
                     data : JSON.stringify(eventFrameAttributeTemplateIds)
                 }).done(function(response)
                 {
-                    window.location.href = '{{ url_for("eventFrames.selectEventFrame", selectedClass = "EventFrameTemplate",
-                        selectedId = eventFrameTemplateView.EventFrameTemplateId, selectedOperation = "configure") }}'
+                    location.reload(true)
                 }).fail(function()
                 {
                     $(".alert").remove()
@@ -221,17 +127,11 @@
             })
 
             // Clear any left over filtering from state saving.
-            selectedEventFrameAttributeTemplatesTable.search("").columns().search("").draw()
-            selectedEventFrameAttributeTemplatesTable.on("draw.dt", function()
+            table.search("").columns().search("").draw()
+            table.on("draw.dt", function()
             {
                 setTabIndex()
             })
-            availableEventFrameAttributeTemplatesTable.search("").columns().search("").draw()
-            availableEventFrameAttributeTemplatesTable.on("draw.dt", function()
-            {
-                setTabIndex()
-            })
-            setTabIndex()
         })
     </script>
 {% endblock %}

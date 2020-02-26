@@ -4,7 +4,7 @@ from . import eventFrameTemplateViews
 from . forms import EventFrameTemplateViewForm
 from .. import db
 from .. decorators import adminRequired
-from .. models import EventFrameTemplate, EventFrameTemplateView, EventFrameAttributeTemplateEventFrameTemplateView
+from .. models import EventFrameAttributeTemplate, EventFrameTemplate, EventFrameTemplateView, EventFrameAttributeTemplateEventFrameTemplateView
 
 modelName = "Event Frame Template View"
 
@@ -155,33 +155,20 @@ def edit(eventFrameTemplateViewId):
 @adminRequired
 def editEventFrameAttributeTemplates(eventFrameTemplateViewId):
 	eventFrameTemplateView = EventFrameTemplateView.query.get_or_404(eventFrameTemplateViewId)
-	incomingEventFrameAttributeTemplateIds = request.get_json(force = True)
-	count = 0
+	incomingEventFrameAttributeTemplates = request.get_json(force = True)
+	for eventFrameAttributeTemplateEventFrameTemplateView in eventFrameTemplateView.EventFrameAttributeTemplateEventFrameTemplateViews:
+		eventFrameAttributeTemplateEventFrameTemplateView.delete()
+	
+	db.session.commit()
+	for incomingEventFrameAttributeTemplateId in incomingEventFrameAttributeTemplates:
+		eventFrameAttributeTemplateEventFrameTemplateView = \
+			EventFrameAttributeTemplateEventFrameTemplateView(EventFrameAttributeTemplateId = incomingEventFrameAttributeTemplateId,
+			EventFrameTemplateViewId = eventFrameTemplateViewId, Order = incomingEventFrameAttributeTemplates[incomingEventFrameAttributeTemplateId])
+		db.session.add(eventFrameAttributeTemplateEventFrameTemplateView)
 
-	existingEventFrameAttributeTemplateIds = [str(eventFrameAttributeTemplateEventFrameTemplateView.EventFrameAttributeTemplateId) for \
-		eventFrameAttributeTemplateEventFrameTemplateView in eventFrameTemplateView.EventFrameAttributeTemplateEventFrameTemplateViews]
-	for existingEventFrameAttributeTemplateId in existingEventFrameAttributeTemplateIds:
-		if existingEventFrameAttributeTemplateId not in incomingEventFrameAttributeTemplateIds:
-			eventFrameAttributeTemplateEventFrameTemplateView = EventFrameAttributeTemplateEventFrameTemplateView.query. \
-				filter_by(EventFrameAttributeTemplateId = existingEventFrameAttributeTemplateId, EventFrameTemplateViewId = eventFrameTemplateViewId).one()
-			db.session.delete(eventFrameAttributeTemplateEventFrameTemplateView)
-			count = count + 1
-
-	for incomingEventFrameAttributeTemplateId in incomingEventFrameAttributeTemplateIds:
-		if incomingEventFrameAttributeTemplateId not in existingEventFrameAttributeTemplateIds:
-			eventFrameAttributeTemplateEventFrameTemplateView = \
-				EventFrameAttributeTemplateEventFrameTemplateView(EventFrameAttributeTemplateId = incomingEventFrameAttributeTemplateId,
-				EventFrameTemplateViewId = eventFrameTemplateViewId)
-			db.session.add(eventFrameAttributeTemplateEventFrameTemplateView)
-			count = count + 1
-
-	if count > 0:
-		db.session.commit()
-		message = 'You have successfully updated the event frame template view "{}".'.format(eventFrameTemplateView.Name)
-		flash(message, "alert alert-success")
-	else:
-		message = "Nothing changed to save."
-		flash(message, "alert alert-warning")
+	db.session.commit()
+	message = 'You have successfully updated the event frame template view "{}".'.format(eventFrameTemplateView.Name)
+	flash(message, "alert alert-success")
 	return jsonify({"response": message})
 
 @eventFrameTemplateViews.route("/eventFrameTemplateViews/eventFrameAttributeTemplates/<int:eventFrameTemplateViewId>", methods = ["GET", "POST"])
@@ -189,4 +176,14 @@ def editEventFrameAttributeTemplates(eventFrameTemplateViewId):
 @adminRequired
 def eventFrameAttributeTemplates(eventFrameTemplateViewId):
 	eventFrameTemplateView = EventFrameTemplateView.query.get_or_404(eventFrameTemplateViewId)
-	return render_template("eventFrameTemplateViews/eventFrameAttributeTemplates.html", eventFrameTemplateView = eventFrameTemplateView)
+	allEventFrameAttributeTemplatesIds = [eventFrameAttributeTemplate.EventFrameAttributeTemplateId
+		for eventFrameAttributeTemplate in eventFrameTemplateView.EventFrameTemplate.EventFrameAttributeTemplates]
+
+	includedEventFrameAttributeTemplateIds = [eventFrameAttributeTemplateEventFrameTemplateView.EventFrameAttributeTemplateId
+		for eventFrameAttributeTemplateEventFrameTemplateView in eventFrameTemplateView.EventFrameAttributeTemplateEventFrameTemplateViews]
+
+	excludedEventFrameAttributeTemplateIds = list(set(allEventFrameAttributeTemplatesIds) - set(includedEventFrameAttributeTemplateIds))
+	excludedEventFrameAttributeTemplates = EventFrameAttributeTemplate.query. \
+		filter(EventFrameAttributeTemplate.EventFrameAttributeTemplateId.in_(excludedEventFrameAttributeTemplateIds))
+	return render_template("eventFrameTemplateViews/eventFrameAttributeTemplates.html", eventFrameTemplateView = eventFrameTemplateView,
+		excludedEventFrameAttributeTemplates = excludedEventFrameAttributeTemplates)

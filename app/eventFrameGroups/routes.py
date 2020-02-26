@@ -4,8 +4,8 @@ from . import eventFrameGroups
 from . forms import EventFrameGroupForm
 from .. import db
 from .. decorators import permissionRequired
-from .. models import ElementTemplate, Enterprise, EventFrame, EventFrameEventFrameGroup, EventFrameGroup, EventFrameTemplate, EventFrameTemplateView, \
-	Permission, Site
+from .. models import ElementTemplate, Enterprise, EventFrame, EventFrameAttributeTemplate, EventFrameAttributeTemplateEventFrameTemplateView, EventFrameEventFrameGroup, EventFrameGroup, \
+	EventFrameTemplate, EventFrameTemplateView, Permission, Site
 
 modelName = "Event Frame Group"
 
@@ -75,18 +75,20 @@ def dashboard(eventFrameGroupId, displayEventFrameTemplateId = None, eventFrameT
 				Default = True).one_or_none()
 			if defaultEventFrameTemplateView is None:
 				eventFrameTemplateView = None
-				eventFrameAttributeTemplates = displayEventFrameTemplate.EventFrameAttributeTemplates
+				eventFrameAttributeTemplates = displayEventFrameTemplate.EventFrameAttributeTemplates.order_by(EventFrameAttributeTemplate.Name)
 			else:
 				eventFrameTemplateView = defaultEventFrameTemplateView
-				eventFrameAttributeTemplates = [eventFrameAttributeTemplateEventFrameTemplateView.EventFrameAttributeTemplate for \
-					eventFrameAttributeTemplateEventFrameTemplateView in defaultEventFrameTemplateView.EventFrameAttributeTemplateEventFrameTemplateViews]
+				eventFrameAttributeTemplates = [eventFrameAttributeTemplateEventFrameTemplateView.EventFrameAttributeTemplate for
+					eventFrameAttributeTemplateEventFrameTemplateView in defaultEventFrameTemplateView.EventFrameAttributeTemplateEventFrameTemplateViews. \
+					order_by(EventFrameAttributeTemplateEventFrameTemplateView.Order)]
 		elif eventFrameTemplateViewId == 0:
 			eventFrameTemplateView = None
-			eventFrameAttributeTemplates = displayEventFrameTemplate.EventFrameAttributeTemplates
+			eventFrameAttributeTemplates = displayEventFrameTemplate.EventFrameAttributeTemplates.order_by(EventFrameAttributeTemplate.Name)
 		else:
 			eventFrameTemplateView = EventFrameTemplateView.query.get_or_404(eventFrameTemplateViewId)
 			eventFrameAttributeTemplates = [eventFrameAttributeTemplateEventFrameTemplateView.EventFrameAttributeTemplate for \
-				eventFrameAttributeTemplateEventFrameTemplateView in eventFrameTemplateView.EventFrameAttributeTemplateEventFrameTemplateViews]
+				eventFrameAttributeTemplateEventFrameTemplateView in eventFrameTemplateView.EventFrameAttributeTemplateEventFrameTemplateViews. \
+				order_by(EventFrameAttributeTemplateEventFrameTemplateView.Order)]
 
 	eventFrames = eventFrames.filter_by(EventFrameTemplate = displayEventFrameTemplate)
 	return render_template("eventFrameGroups/dashboard.html", displayEventFrameTemplate = displayEventFrameTemplate, 

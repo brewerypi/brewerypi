@@ -531,6 +531,7 @@ class EventFrameAttributeTemplateEventFrameTemplateView(db.Model):
 	__table_args__ = \
 	(
 		UniqueConstraint("EventFrameAttributeTemplateId", "EventFrameTemplateViewId", name = "AK__EventFrameAttributeTemplateId__EventFrameTemplateViewId"),
+		UniqueConstraint("EventFrameTemplateViewId", "Order", name = "AK__EventFrameTemplateViewId__Order"),
 	)
 
 	EventFrameAttributeTemplateEventFrameTemplateViewId = db.Column(db.Integer, primary_key = True)
@@ -538,6 +539,7 @@ class EventFrameAttributeTemplateEventFrameTemplateView(db.Model):
 		name = "FK__EFAT$Have$EventFrameAttributeTemplateEventFrameTemplateView"), nullable = False)
 	EventFrameTemplateViewId = db.Column(db.Integer, db.ForeignKey("EventFrameTemplateView.EventFrameTemplateViewId",
 		name = "FK__EFTV$Have$EventFrameAttributeTemplateEventFrameTemplateView"), nullable = False)
+	Order = db.Column(db.Integer, nullable = False)
 
 	def delete(self):
 		db.session.delete(self)

@@ -422,10 +422,6 @@
                     header: true,
                     footer: false
                 },
-                "order":
-                [
-                    [1, "asc"]              // Attribute.
-                ],
                 "columns":
                 [
                     { "orderable": false }, // Attribute values button.
@@ -440,8 +436,6 @@
                     { "orderable": false }, // Edit attribute value button.
                     { "orderable": false }  // Delete attribute value button.
                 ],
-                "stateSave": true,
-                "stateDuration": 0,
                 "pageLength": 25
             })
 
@@ -466,6 +460,7 @@
 
             $("#childEventFramesTable").attr("style", "width:100%")
             $("#attributesTable").attr("style", "width:100%")
+            attributesTable.draw()
             $("#eventFrameNotesTable").attr("style", "width:100%")
 
             $("#buttonSave").on("click", function()

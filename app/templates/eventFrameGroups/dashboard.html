@@ -91,7 +91,7 @@
                     <th>Name</th>
                     <th>Element</th>
                     {% if displayEventFrameTemplate is not none %}
-                        {% for eventFrameAttributeTemplate in eventFrameAttributeTemplates | sort(attribute = "Name") %}
+                        {% for eventFrameAttributeTemplate in eventFrameAttributeTemplates %}
                             <th>{{ eventFrameAttributeTemplate.Name }}</th>
                         {% endfor %}
                     {% endif %}
@@ -113,7 +113,7 @@
                             <td>{{ eventFrame.Name }}</td>
                             <td>{{ eventFrame.Element.Name }}</td> 
                             {% if displayEventFrameTemplate is not none %}
-                                {% for eventFrameAttributeTemplate in eventFrameAttributeTemplates | sort(attribute = "Name") %}
+                                {% for eventFrameAttributeTemplate in eventFrameAttributeTemplates %}
                                     {% set tagId = eventFrameAttributeTemplate.EventFrameAttributes.filter_by(ElementId = eventFrame.ElementId) |
                                         map(attribute = "TagId") | first%}
                                     {% set disabled = "" if eventFrame.EndTimestamp is none and tagId is defined else "disabled" %}
@@ -202,18 +202,13 @@
                     header: true,
                     footer: false
                 },
-                "order":
-                [
-                    [1, "asc"],             // Name.
-                    [2, "asc"]              // Element.
-                ],
                 "columns":
                 [
                     { "orderable": false }, // Select button.
                     null,
                     null,
                     {% if displayEventFrameTemplate is not none %}
-                        {% for eventFrameAttributeTemplate in eventFrameAttributeTemplates | sort(attribute = "Name") %}
+                        {% for eventFrameAttributeTemplate in eventFrameAttributeTemplates %}
                             { "orderable": false },
                         {% endfor %}
                     {% endif %}
@@ -223,13 +218,11 @@
                     { "orderable": false }, // Delete button.
                     { "orderable": false }  // Save button.
                 ],
-                "stateSave": true,
-                "stateDuration": 0,
                 "pageLength": 25
             })
 
             $("#table").attr("style", "width:100%")
-    
+            table.draw()
             $("a[title='Delete']").on("click", function ()
             {
                 var eventFrameName = $(this).attr("data-eventFrameName")
