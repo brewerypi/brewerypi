@@ -512,10 +512,7 @@ class EventFrameAttributeTemplate(db.Model):
 					newEventFrameAttributeTemplate = EventFrameAttributeTemplate.query. \
 						filter_by(EventFrameTemplateId = eventFrameTemplate["eventFrameTemplate"].EventFrameTemplateId, Name = self.Name).one_or_none()
 					if newEventFrameAttributeTemplate is not None:
-					# New event frame attribute template exists, so update DefaultEndValue, DefaultStartValue, Description, LookupId and UnitOfMeasurementId
-					# just in case.
-						newEventFrameAttributeTemplate.DefaultEndValue = self.DefaultEndValue
-						newEventFrameAttributeTemplate.DefaultStartValue = self.DefaultStartValue
+					# New event frame attribute template exists, so update Description, LookupId and UnitOfMeasurementId just in case.
 						newEventFrameAttributeTemplate.Description = self.Description
 						newEventFrameAttributeTemplate.LookupId = self.LookupId
 						newEventFrameAttributeTemplate.UnitOfMeasurementId = self.UnitOfMeasurementId

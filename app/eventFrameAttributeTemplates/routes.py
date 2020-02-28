@@ -236,19 +236,13 @@ def editEventFrameAttributeTemplate(eventFrameAttributeTemplateId):
 						filter_by(EventFrameTemplateId = eventFrameTemplate["eventFrameTemplate"].EventFrameTemplateId,
 						Name = oldEventFrameAttributeTemplateName).one_or_none()
 					if newEventFrameAttributeTemplate is not None:
-						# New event frame attribute template exists, so update DefaultEndValue, DefaultStartValue, Description, LookupId and
-						# UnitOfMeasurementId just in case.
-						newEventFrameAttributeTemplate.DefaultEndValue = eventFrameAttributeTemplate.DefaultEndValue
-						newEventFrameAttributeTemplate.DefaultStartValue = eventFrameAttributeTemplate.DefaultStartValue
+						# New event frame attribute template exists, so update Description, LookupId and UnitOfMeasurementId just in case.
 						newEventFrameAttributeTemplate.Description = eventFrameAttributeTemplate.Description
 						newEventFrameAttributeTemplate.LookupId = eventFrameAttributeTemplate.LookupId
 						newEventFrameAttributeTemplate.UnitOfMeasurementId = eventFrameAttributeTemplate.UnitOfMeasurementId
 						db.session.commit()
 					elif oldEventFrameAttributeTemplate is not None:
-						# Old event frame attribute template exists, so update DefaultEndValue, DefaultStartValue, Description, LookupId, Name and
-						# UnitOfMeasurementId just in case.
-						oldEventFrameAttributeTemplate.DefaultEndValue = eventFrameAttributeTemplate.DefaultEndValue
-						oldEventFrameAttributeTemplate.DefaultStartValue = eventFrameAttributeTemplate.DefaultStartValue
+						# Old event frame attribute template exists, so update Description, LookupId, Name and UnitOfMeasurementId just in case.
 						oldEventFrameAttributeTemplate.Description = eventFrameAttributeTemplate.Description
 						oldEventFrameAttributeTemplate.LookupId = eventFrameAttributeTemplate.LookupId
 						oldEventFrameAttributeTemplate.Name = eventFrameAttributeTemplate.Name
