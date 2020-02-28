@@ -323,7 +323,7 @@
 
 {% block scripts %}
     {{ super() }}
-    <link rel = "stylesheet" type = "text/css" href = {{ url_for("static", filename = "css/datatables.min.css") }}/> 
+    <link rel = "stylesheet" type = "text/css" href = {{ url_for("static", filename = "css/datatables.min.css") }}/> 
     <link rel = "stylesheet" type = "text/css" href = {{ url_for("static", filename = "css/styles.css") }}/>
     <script type = "text/javascript" src = {{ url_for("static", filename = "js/datatables.min.js") }}></script>
     {% block setTabIndex %}
@@ -431,7 +431,7 @@
             $("#attributesTable").attr("style", "width:100%")
             $("#eventFrameNotesTable").attr("style", "width:100%")
 
-            $("#buttonSave").on("click", function()
+            $("#buttonSave").on("click", function()
             {
                 var error = false
                 var rows = []
@@ -541,7 +541,7 @@
                             "data-dismiss = \"alert\">&times;</button>The attempt to save one or more new element attribute values failed.</div>")                        
                     })
                 }
-            })
+            })
 
             // Enter key call save all.
             $(document).keypress(function(event)

@@ -69,3 +69,4 @@ def currentEventFrameAttributeValues(eventFrames, eventFrameTemplateId):
     """.format(dynamicColumns, eventFrameIds, eventFrameIds)
     eventFrames = db.session.execute(query).fetchall()
     return eventFrames
+    
