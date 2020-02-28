@@ -402,7 +402,7 @@
 
 {% block scripts %}
     {{ super() }}
-    <link rel = "stylesheet" type = "text/css" href = {{ url_for("static", filename = "css/datatables.min.css") }}/> 
+    <link rel = "stylesheet" type = "text/css" href = {{ url_for("static", filename = "css/datatables.min.css") }}/> 
     <script type = "text/javascript" src = {{ url_for("static", filename = "js/datatables.min.js") }}></script>
     {% block setTabIndex %}
         {{ super() }}
