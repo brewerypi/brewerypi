@@ -26,8 +26,7 @@ def currentEventFrameAttributeValues(eventFrames, eventFrameTemplateId):
         Element.TagAreaId AS ElementTagAreaId,
         User.Name AS UserName,
         EventFrame.StartTimestamp,
-        EventFrame.EndTimestamp,
-        (SELECT COUNT(*) FROM EventFrameNote WHERE EventFrameNote.EventFrameId = EventFrame.EventFrameId) AS EventFrameNotesCount{}
+        EventFrame.EndTimestamp {}
     FROM EventFrame
         INNER JOIN Element ON EventFrame.ElementId = Element.ElementId
         INNER JOIN User ON EventFrame.UserId = User.UserId
@@ -70,3 +69,4 @@ def currentEventFrameAttributeValues(eventFrames, eventFrameTemplateId):
     """.format(dynamicColumns, eventFrameIds, eventFrameIds)
     eventFrames = db.session.execute(query).fetchall()
     return eventFrames
+    

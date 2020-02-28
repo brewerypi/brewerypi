@@ -156,7 +156,6 @@
                     <th></th>
                     {% if childrenClass == "EventFrame" %}
                         <th></th>
-                        <th></th>
                     {% endif %}
                     <th>Name</th>
                     {% if childrenClass == "Enterprise" or childrenClass == "Site" or childrenClass == "ElementTemplate" %}
@@ -203,13 +202,6 @@
                                 <td><a class = "btn btn-default" title = "Grafana"
                                     href = '{{ "EventFramesGraph" | grafanaUrl({"eventFrameId": child.EventFrameId}) }}'
                                     target = "_blank"><span class = "glyphicon glyphicon-stats"></span></a></td>
-                                {% if child.EventFrameNotesCount == 0 %}
-                                    {% set noteButtonClass = "btn btn-default" %}
-                                {% else %}
-                                    {% set noteButtonClass = "btn btn-default  has-note" %}
-                                {% endif %}
-                                <td><a class = "{{ noteButtonClass }}" title = "Notes" href = '{{ url_for("eventFrames.dashboard",
-                                    eventFrameId = child.EventFrameId) }}#Notes'><span class = "glyphicon glyphicon-comment"></span></a></td>
                                 <td><a class = "btn btn-default" title = "Send Message"
                                     href = '{{ url_for("messages.addMessage", eventFrameId = child.EventFrameId) }}'>
                                     <span class = "glyphicon glyphicon-envelope"></span></a></td>
@@ -361,8 +353,7 @@
 
 {% block scripts %}
     {{ super() }}
-    <link rel = "stylesheet" type = "text/css" href = {{ url_for("static", filename = "css/datatables.min.css") }}/> 
-    <link rel = "stylesheet" type = "text/css" href = {{ url_for("static", filename = "css/styles.css") }}/>
+    <link rel = "stylesheet" type = "text/css" href = {{ url_for("static", filename = "css/datatables.min.css") }}/> 
     <script type = "text/javascript" src = {{ url_for("static", filename = "js/datatables.min.js") }}></script>
     {% block setTabIndex %}
         {{ super() }}
@@ -421,7 +412,7 @@
                     {% elif childrenClass == "EventFrameTemplate" %}
                         [2, "asc"]              // Name.
                     {% elif childrenClass == "EventFrame" %}
-                        [7, "desc"]             // Start timestamp.
+                        [6, "desc"]             // Start timestamp.
                     {% endif %}
                 ],
                 "columns":
@@ -429,7 +420,6 @@
                     { "orderable": false },     // Select button.
                     { "orderable": false },     // Grafana button.
                     {% if childrenClass == "EventFrame" %}
-                        { "orderable": false }, // Notes button.
                         { "orderable": false }, // Message button.
                     {% endif %}
                     {% if childrenClass == "Enterprise" or childrenClass == "Site" or childrenClass == "ElementTemplate" %}
