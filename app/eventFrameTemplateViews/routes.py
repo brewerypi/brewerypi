@@ -1,3 +1,4 @@
+import json
 from flask import flash, jsonify, redirect, render_template, request, url_for
 from flask_login import login_required
 from . import eventFrameTemplateViews
@@ -155,10 +156,13 @@ def edit(eventFrameTemplateViewId):
 @adminRequired
 def editEventFrameAttributeTemplates(eventFrameTemplateViewId):
 	eventFrameTemplateView = EventFrameTemplateView.query.get_or_404(eventFrameTemplateViewId)
-	incomingEventFrameAttributeTemplates = request.get_json(force = True)
+	data = request.get_json(force = True)
+	dictionary = data[0]
+	incomingEventFrameAttributeTemplates = data[1]
+	eventFrameTemplateView.Dictionary = dictionary
 	for eventFrameAttributeTemplateEventFrameTemplateView in eventFrameTemplateView.EventFrameAttributeTemplateEventFrameTemplateViews:
 		eventFrameAttributeTemplateEventFrameTemplateView.delete()
-	
+
 	db.session.commit()
 	for incomingEventFrameAttributeTemplateId in incomingEventFrameAttributeTemplates:
 		eventFrameAttributeTemplateEventFrameTemplateView = \
@@ -185,5 +189,5 @@ def eventFrameAttributeTemplates(eventFrameTemplateViewId):
 	excludedEventFrameAttributeTemplateIds = list(set(allEventFrameAttributeTemplatesIds) - set(includedEventFrameAttributeTemplateIds))
 	excludedEventFrameAttributeTemplates = EventFrameAttributeTemplate.query. \
 		filter(EventFrameAttributeTemplate.EventFrameAttributeTemplateId.in_(excludedEventFrameAttributeTemplateIds))
-	return render_template("eventFrameTemplateViews/eventFrameAttributeTemplates.html", eventFrameTemplateView = eventFrameTemplateView,
-		excludedEventFrameAttributeTemplates = excludedEventFrameAttributeTemplates)
+	return render_template("eventFrameTemplateViews/eventFrameAttributeTemplates.html", dictionary = eventFrameTemplateView.dictionary(),
+		eventFrameTemplateView = eventFrameTemplateView, excludedEventFrameAttributeTemplates = excludedEventFrameAttributeTemplates)

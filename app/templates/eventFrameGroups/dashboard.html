@@ -204,20 +204,46 @@
                 },
                 "columns":
                 [
-                    { "orderable": false }, // Select button.
-                    null,
-                    null,
+                    { "orderable": false },         // Select button.
+                    null,                           // Event frame name.
+                    null,                           // Element name.
                     {% if displayEventFrameTemplate is not none %}
+                        {% set namespace = namespace(numberOfEventFrameAttributeTemplates = 0) %}
                         {% for eventFrameAttributeTemplate in eventFrameAttributeTemplates %}
-                            { "orderable": false },
+                            { "orderable": false }, // Event frame attribute name.
+                            {% set namespace.numberOfEventFrameAttributeTemplates = namespace.numberOfEventFrameAttributeTemplates + 1 %}
                         {% endfor %}
                     {% endif %}
-                    { "orderable": false }, // Remove button.
-                    { "orderable": false }, // End button.
-                    { "orderable": false }, // Edit button.
-                    { "orderable": false }, // Delete button.
-                    { "orderable": false }  // Save button.
+                    { "orderable": false },         // Remove button.
+                    { "orderable": false },         // End button.
+                    { "orderable": false },         // Edit button.
+                    { "orderable": false },         // Delete button.
+                    { "orderable": false }          // Save button.
                 ],
+                {% if eventFrameTemplateView is not none %}
+                    "columnDefs":
+                    [
+                        {% if eventFrameTemplateView.dictionary()["showSelectButton"] == "False" %}
+                            {"visible": false, "targets": 0},
+                        {% endif %}
+
+                        {% if eventFrameTemplateView.dictionary()["showRemoveButton"] == "False" %}
+                            {"visible": false, "targets": {{ namespace.numberOfEventFrameAttributeTemplates }} + 3},
+                        {% endif %}
+
+                        {% if eventFrameTemplateView.dictionary()["showStopButton"] == "False" %}
+                            {"visible": false, "targets": {{ namespace.numberOfEventFrameAttributeTemplates }} + 4},
+                        {% endif %}
+
+                        {% if eventFrameTemplateView.dictionary()["showEditButton"] == "False" %}
+                            {"visible": false, "targets": {{ namespace.numberOfEventFrameAttributeTemplates }} + 5},
+                        {% endif %}
+
+                        {% if eventFrameTemplateView.dictionary()["showDeleteButton"] == "False" %}
+                            {"visible": false, "targets": {{ namespace.numberOfEventFrameAttributeTemplates }} + 6},
+                        {% endif %}
+                    ],
+                {% endif %}
                 "pageLength": 25
             })
 

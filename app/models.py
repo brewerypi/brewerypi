@@ -3,7 +3,7 @@ from datetime import datetime
 from dateutil.relativedelta import relativedelta
 from flask_login import AnonymousUserMixin, current_user, UserMixin
 from sqlalchemy import func, Index, PrimaryKeyConstraint, UniqueConstraint
-from sqlalchemy.dialects.mysql import DATETIME, DOUBLE
+from sqlalchemy.dialects.mysql import DATETIME, DOUBLE, LONGTEXT
 from time import time
 from werkzeug.security import generate_password_hash, check_password_hash
 from app import db
@@ -722,17 +722,24 @@ class EventFrameTemplateView(db.Model):
 	)
 
 	EventFrameTemplateViewId = db.Column(db.Integer, primary_key = True)
+	Dictionary = db.Column(LONGTEXT, nullable = True)
 	Default = db.Column(db.Boolean, nullable = False)
 	Description = db.Column(db.String(255), nullable = True)
 	EventFrameTemplateId = db.Column(db.Integer, db.ForeignKey("EventFrameTemplate.EventFrameTemplateId",
 		name = "FK__EventFrameTemplate$Have$EventFrameTemplateView"), nullable = False)
 	Name = db.Column(db.String(45), nullable = False)
-	
+
 	EventFrameAttributeTemplateEventFrameTemplateViews = db.relationship("EventFrameAttributeTemplateEventFrameTemplateView",
 		backref = "EventFrameTemplateView", lazy = "dynamic")
 
 	def __repr__(self):
 		return "<EventFrameTemplateView: {}>".format(self.Name)
+
+	def dictionary(self):
+		if self.Dictionary is None or self.Dictionary == "":
+			return {}
+		else:
+			return json.loads(self.Dictionary.replace("'", '"').replace("True", '"True"').replace("False", '"False"'))
 
 	def delete(self):
 		for eventFrameAttributeTemplateEventFrameTemplateView in self.EventFrameAttributeTemplateEventFrameTemplateViews:

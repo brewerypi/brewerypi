@@ -425,17 +425,49 @@
                 "columns":
                 [
                     { "orderable": false }, // Attribute values button.
-                    null,
-                    null,
-                    null,
+                    null,                   // Attribute value name.
+                    null,                   // Last timestamp.
+                    null,                   // Last value.
                     { "orderable": false }, // Unit.
                     { "orderable": false }, // New value.
                     { "orderable": false }, // New timestamp.
                     { "orderable": false }, // Save all button.
-                    { "orderable": false }, // List attribute value notes button.
+                    { "orderable": false }, // Notes button.
                     { "orderable": false }, // Edit attribute value button.
                     { "orderable": false }  // Delete attribute value button.
                 ],
+                {% if eventFrameTemplateView is not none %}
+                    "columnDefs":
+                    [
+                        {% if eventFrameTemplateView.dictionary()["showSelectButton"] == "False" %}
+                            {"visible": false, "targets": 0},
+                        {% endif %}
+
+                        {% if eventFrameTemplateView.dictionary()["showLastTimestamp"] == "False" %}
+                            {"visible": false, "targets": 2},
+                        {% endif %}
+
+                        {% if eventFrameTemplateView.dictionary()["showLastValue"] == "False" %}
+                            {"visible": false, "targets": 3},
+                        {% endif %}
+
+                        {% if eventFrameTemplateView.dictionary()["showUnit"] == "False" %}
+                            {"visible": false, "targets": 4},
+                        {% endif %}
+
+                        {% if eventFrameTemplateView.dictionary()["showNoteButton"] == "False" %}
+                            {"visible": false, "targets": 8},
+                        {% endif %}
+
+                        {% if eventFrameTemplateView.dictionary()["showEditButton"] == "False" %}
+                            {"visible": false, "targets": 9},
+                        {% endif %}
+
+                        {% if eventFrameTemplateView.dictionary()["showDeleteButton"] == "False" %}
+                            {"visible": false, "targets": 10},
+                        {% endif %}
+                    ],
+                {% endif %}
                 "pageLength": 25
             })
 
