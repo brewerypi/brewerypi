@@ -227,6 +227,14 @@
                             {"visible": false, "targets": 0},
                         {% endif %}
 
+                        {% if eventFrameTemplateView.dictionary()["showEventFrameName"] == "False" %}
+                            {"visible": false, "targets": 1},
+                        {% endif %}
+
+                        {% if eventFrameTemplateView.dictionary()["showElementName"] == "False" %}
+                            {"visible": false, "targets": 2},
+                        {% endif %}
+
                         {% if eventFrameTemplateView.dictionary()["showRemoveButton"] == "False" %}
                             {"visible": false, "targets": {{ namespace.numberOfEventFrameAttributeTemplates }} + 3},
                         {% endif %}
