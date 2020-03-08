@@ -1,7 +1,6 @@
 {% extends "base.html" %}
-
+{% set namespace = namespace(numberOfDefaultColumnsElements = 10) %}
 {% block title %}Elements{% endblock %}
-
 {% block page_content %}
     <div>
         <ol class = "breadcrumb">
@@ -77,9 +76,9 @@
             Toggle Column:
             <button type = "button" class = "btn btn-primary btn-xs" id = "buttonHideAllColumns">Hide All</button>
             {% for elementAttributeTemplate in elementAttributeTemplates %}
-                {% set dataColumnIndex = loop.index + 9 %}
-                <button type = "button" class = "btn btn-primary btn-xs" data-columnIndex = "{{ dataColumnIndex }}"
-                    id = "buttonToggleColumn{{ elementAttributeTemplate.Name }}">{{ elementAttributeTemplate.Name }}</button>
+                {% set dataColumnIndex = loop.index0 + namespace.numberOfDefaultColumnsElements %}
+                <label><button type = "button" class = "btn btn-primary btn-xs" data-columnIndex = "{{ dataColumnIndex }}"
+                    id = "buttonToggleColumn{{ elementAttributeTemplate.Name }}">{{ elementAttributeTemplate.Name }}</button></label>
             {% endfor %}
             <button type = "button" class = "btn btn-primary btn-xs" id = "buttonShowAllColumns">Show All</button>
             <br><br>
@@ -284,6 +283,14 @@
                         {% endfor %}
                     {% endif %}
                 ],
+                "columnDefs":
+                [
+                    {% if childrenClass == "Element" %}
+                        {% for elementAttributeTemplate in elementAttributeTemplates %}
+                            {"visible": false, "targets": {{ loop.index0 + namespace.numberOfDefaultColumnsElements }}},
+                        {% endfor %}
+                    {% endif %}
+                ],
                 "stateSave": true,
                 "stateDuration": 0,
                 "pageLength": 25,
@@ -307,7 +314,7 @@
             {
                 table.columns().every(function ()
                 {
-                    if (this.index() > 9)
+                    if (this.index() > {{ namespace.numberOfDefaultColumnsElements - 1 }})
                     {
                         this.visible(false)
                         $(".btn.btn-primary.btn-xs[data-columnIndex = " + this.index() + "]").removeClass("active")
@@ -319,7 +326,7 @@
             {
                 table.columns().every(function ()
                 {
-                    if (this.index() > 9)
+                    if (this.index() > {{ namespace.numberOfDefaultColumnsElements - 1 }})
                     {
                         this.visible(true)
                         $(".btn.btn-primary.btn-xs[data-columnIndex = " + this.index() + "]").addClass("active")
