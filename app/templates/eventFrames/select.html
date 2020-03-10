@@ -136,7 +136,6 @@ Event Frames
                     <th>Description</th>
                 {% elif childrenClass == "EventFrameTemplate" %}
                     <th>Description</th>
-                    <th>Source Event Frame Template</th>
                     <th></th>
                     <th></th>
                     <th></th>
@@ -157,7 +156,6 @@ Event Frames
                 {% elif childrenClass == "DescendantEventFrameTemplate" %}
                     <th>Description</th>
                     <th>Order</th>
-                    <th>Source Event Frame Template</th>
                     <th></th>
                     <th></th>
                     <th></th>
@@ -197,7 +195,6 @@ Event Frames
                         {% elif childrenClass == "EventFrameTemplate" %}
                             <td>{{ child.Name }}</td>
                             <td>{{ child.Description }}</td>
-                            <td>{{ child.SourceEventFrameTemplate.Name }}</td>
                             {% if current_user.isAdministrator() %}
                                 <td><a class = "btn btn-default" title = "Configure" href = "{{ url_for("eventFrames.selectEventFrame",
                                     selectedClass = "EventFrameTemplate", selectedId = child.id(), selectedOperation = "configure") }}">
@@ -259,7 +256,6 @@ Event Frames
                             <td>{{ child.Name }}</td>
                             <td>{{ child.Description }}</td>
                             <td>{{ child.Order }}</td>
-                            <td>{{ child.SourceEventFrameTemplate.Name }}</td>
                             <td><a class = "btn btn-default" title = "Edit" href = "{{ url_for("eventFrameTemplates.editEventFrameTemplate",
                                 eventFrameTemplateId = child.id()) }}"><span class = "glyphicon glyphicon-edit"></span></a></td>
                             <td><a class = "btn btn-default" title = "Delete" href = "{{ url_for("eventFrameTemplates.deleteEventFrameTemplate",
@@ -382,7 +378,6 @@ Event Frames
                     {% elif childrenClass == "EventFrameTemplate" %}
                         null,
                         null,
-                        null,
                         { "orderable": false }, // Associate button.
                         { "orderable": false }, // Overlay button.
                         { "orderable": false }, // Edit button.
@@ -402,7 +397,6 @@ Event Frames
                             null,
                         {% endfor %}
                     {% elif childrenClass == "DescendantEventFrameTemplate" %}
-                        null,
                         null,
                         null,
                         null,

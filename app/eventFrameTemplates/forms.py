@@ -1,7 +1,6 @@
 from flask_wtf import FlaskForm
-from wtforms import HiddenField, StringField, IntegerField, SubmitField, ValidationError
-from wtforms.ext.sqlalchemy.fields import QuerySelectField
-from wtforms.validators import Length, Required
+from wtforms import HiddenField, IntegerField, StringField, SubmitField, ValidationError
+from wtforms.validators import Length, Required, Optional
 from .. models import EventFrameTemplate
 
 class EventFrameTemplateForm(FlaskForm):
@@ -9,7 +8,6 @@ class EventFrameTemplateForm(FlaskForm):
 	name = StringField("Name", validators = [Required(), Length(1, 45)])
 	order = IntegerField("Order", validators = [Required()])
 	description = StringField("Description", validators = [Length(0, 255)])
-	sourceEventFrameTemplate = QuerySelectField("Source Event Frame Template", allow_blank = True, get_label = "Name")
 	eventFrameTemplateId = HiddenField()
 	elementTemplateId = HiddenField()
 	parentEventFrameTemplateId = HiddenField()
@@ -32,9 +30,9 @@ class EventFrameTemplateForm(FlaskForm):
 				if int(self.eventFrameTemplateId.data) != eventFrameTemplate.EventFrameTemplateId:
 					# Trying to change the name of an eventFrameTemplate to a name that already exists.
 					validationError = True
-			
+					
 		if validationError:
-			raise ValidationError('The name "{}" already exists.'.format(field.data))
+			raise ValidationError('The name "{}" already exists with the selected Source Event Frame Template.'.format(field.data))
 
 	def validate_order(self, field):
 		validationError = False

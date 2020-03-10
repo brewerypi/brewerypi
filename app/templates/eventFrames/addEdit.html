@@ -5,11 +5,11 @@
     <script>
         function populateSourceEventFrameList()
         {
-            var eventFrameTemplateId = $("#eventFrameTemplate").val()
+            var sourceEventFrameTemplateId = $("#sourceEventFrameTemplate").val()
             $.ajax(
             {
                 type : "POST",
-                url : "/eventFrames/getSourceEventFrames/" + eventFrameTemplateId
+                url : "/eventFrames/getSourceEventFrames/" + sourceEventFrameTemplateId
             }).done(function(sourceEventFrames)
             {
                 var selectSourceEventFrame = $("#sourceEventFrame")
@@ -75,7 +75,7 @@
                 }
             })
 
-            $("#eventFrameTemplate").on("change", function()
+            $("#sourceEventFrameTemplate").on("change", function()
             {
                 populateSourceEventFrameList()
             })

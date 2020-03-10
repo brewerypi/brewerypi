@@ -263,6 +263,21 @@ class EventFrame(db.Model):
 	def id(self):
 		return self.EventFrameId
 
+	def qualifiedName(self):
+		ancestors = self.ancestors([])
+		ancestry = ""
+		for ancestor in ancestors:
+			ancestry = "{}_{}".format(ancestry, ancestor.Name) if ancestry else "{}".format(ancestor.Name)
+		
+		elementTemplate = self.origin().EventFrameTemplate.ElementTemplate
+		if ancestry:
+			qualifiedName = "{}_{}_{}_{}_{}".format(elementTemplate.Site.Enterprise.Abbreviation, elementTemplate.Site.Abbreviation, 
+				self.origin().Element.Name, ancestry, self.Name)
+		else:
+			qualifiedName = "{}_{}_{}_{}".format(elementTemplate.Site.Enterprise.Abbreviation, elementTemplate.Site.Abbreviation, self.Element.Name, self.Name)
+
+		return qualifiedName
+
 	def origin(self):
 		if self.ParentEventFrameId == None:
 			return self
@@ -362,17 +377,12 @@ class EventFrameTemplate(db.Model):
 	Order = db.Column(db.Integer, nullable = False)
 	ParentEventFrameTemplateId = db.Column(db.Integer, db.ForeignKey("EventFrameTemplate.EventFrameTemplateId",
 		name = "FK__EventFrameTemplate$CanHave$ParentEventFrameTemplate"), nullable = True)
-	SourceEventFrameTemplateId = db.Column(db.Integer, db.ForeignKey("EventFrameTemplate.EventFrameTemplateId",
-		name = "FK__EventFrameTemplate$CanHave$SourceEventFrameTemplate"), nullable = True)
 
 	EventFrameAttributeTemplates = db.relationship("EventFrameAttributeTemplate", backref = "EventFrameTemplate", lazy = "dynamic")
 	EventFrames = db.relationship("EventFrame", backref = "EventFrameTemplate", lazy = "dynamic")
 	ParentEventFrameTemplate = db.relationship("EventFrameTemplate", foreign_keys = [ParentEventFrameTemplateId], remote_side = [EventFrameTemplateId])
 	ChildEventFrameTemplates = db.relationship("EventFrameTemplate", foreign_keys = [ParentEventFrameTemplateId], remote_side = [ParentEventFrameTemplateId])
-	SourceEventFrameTemplate = db.relationship("EventFrameTemplate", foreign_keys = [SourceEventFrameTemplateId], remote_side = [EventFrameTemplateId])
-	DestinationEventFrameTemplates = db.relationship("EventFrameTemplate", foreign_keys = [SourceEventFrameTemplateId], \
-		remote_side = [SourceEventFrameTemplateId])
-
+	
 	def __repr__(self):
 		return "<EventFrameTemplate: {}>".format(self.Name)
 
@@ -397,6 +407,20 @@ class EventFrameTemplate(db.Model):
 			eventFrame.delete()
 
 		db.session.delete(self)
+
+	def qualifiedName(self):
+		ancestors = self.ancestors([])
+		ancestry = ""
+		for ancestor in ancestors:
+			ancestry = "{}_{}".format(ancestry, ancestor.Name) if ancestry else "{}".format(ancestor.Name)
+		
+		elementTemplate = self.origin().ElementTemplate
+		if ancestry:
+			qualifiedName = "{}_{}_{}_{}_{}".format(elementTemplate.Site.Enterprise.Abbreviation, elementTemplate.Site.Abbreviation, elementTemplate.Name, ancestry, self.Name)
+		else:
+			qualifiedName = "{}_{}_{}_{}".format(elementTemplate.Site.Enterprise.Abbreviation, elementTemplate.Site.Abbreviation, elementTemplate.Name, self.Name)
+
+		return qualifiedName
 
 	def lineage(self, linealDescent, level):
 		linealDescent.append({"eventFrameTemplate" : self, "level" : level})
