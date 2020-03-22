@@ -168,7 +168,7 @@ def dashboard(eventFrameId, eventFrameGroupId = None, eventFrameTemplateView = N
 				EventFrameAttributeTemplateEventFrameTemplateView.EventFrameTemplateViewId == defaultEventFrameTemplateView.EventFrameTemplateViewId). \
 				order_by(EventFrameAttributeTemplateEventFrameTemplateView.Order)
 	elif  eventFrameTemplateViewId == 0:
-		eventFrameTemplateView = None
+		eventFrameTemplateView = EventFrameTemplateView(EventFrameTemplateViewId = 0, Name = "All")
 		eventFrameAttributes = EventFrameAttribute.query.join(EventFrameAttributeTemplate, EventFrameTemplate). \
 			filter(EventFrameAttribute.ElementId == elementId, EventFrameTemplate.EventFrameTemplateId == eventFrame.EventFrameTemplate.EventFrameTemplateId). \
 			order_by(EventFrameAttributeTemplate.Name)

@@ -1,7 +1,6 @@
 {% extends "base.html" %}
-
+{% set namespace = namespace(numberOfDefaultColumnsForEventFrames = 12) %}
 {% block title %}Event Frames{% endblock %}
-
 {% block page_content %}
     <div>
         <ol class = "breadcrumb">
@@ -137,9 +136,9 @@
             Toggle Column:
             <button type = "button" class = "btn btn-primary btn-xs" id = "buttonHideAllColumns">Hide All</button>
             {% for eventFrameAttributeTemplate in eventFrameAttributeTemplates %}
-                {% set dataColumnIndex = loop.index + 11 %}
-                <button type = "button" class = "btn btn-primary btn-xs" data-columnIndex = "{{ dataColumnIndex }}"
-                    id = "buttonToggleColumn{{ eventFrameAttributeTemplate.Name }}">{{ eventFrameAttributeTemplate.Name }}</button>
+                {% set dataColumnIndex = loop.index0 + namespace.numberOfDefaultColumnsForEventFrames %}
+                <label><button type = "button" class = "btn btn-primary btn-xs" data-columnIndex = "{{ dataColumnIndex }}"
+                    id = "buttonToggleColumn{{ eventFrameAttributeTemplate.Name }}">{{ eventFrameAttributeTemplate.Name }}</button></label>
             {% endfor %}
             <button type = "button" class = "btn btn-primary btn-xs" id = "buttonShowAllColumns">Show All</button>
             <br><br>    
@@ -503,6 +502,14 @@
                         { "orderable": false }  // Delete button.
                     {% endif %}
                 ],
+                "columnDefs":
+                [
+                    {% if childrenClass == "EventFrame" %}
+                        {% for eventFrameAttributeTemplate in eventFrameAttributeTemplates %}
+                            {"visible": false, "targets": {{ loop.index0 + namespace.numberOfDefaultColumnsForEventFrames }}},
+                        {% endfor %}
+                    {% endif %}
+                ],
                 "stateSave": true,
                 "stateDuration": 0,
                 "pageLength": 25,
@@ -571,7 +578,7 @@
             {
                 table.columns().every(function ()
                 {
-                    if (this.index() > 11)
+                    if (this.index() > {{ namespace.numberOfDefaultColumnsForEventFrames -1 }})
                     {
                         this.visible(false)
                         $(".btn.btn-primary.btn-xs[data-columnIndex = " + this.index() + "]").removeClass("active")
@@ -583,7 +590,7 @@
             {
                 table.columns().every(function ()
                 {
-                    if (this.index() > 11)
+                    if (this.index() > {{ namespace.numberOfDefaultColumnsForEventFrames -1 }})
                     {
                         this.visible(true)
                         $(".btn.btn-primary.btn-xs[data-columnIndex = " + this.index() + "]").addClass("active")

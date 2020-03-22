@@ -29,12 +29,23 @@
                 {% if loop.last %}
                     <li class = "active">
                         {% if eventFrameEventFrameGroup is none %}
-                            <a title = "Previous" href = '{{ url_for("eventFrames.dashboard",
-                                eventFrameId = eventFrame.previous(session["eventFrameMonths"]).EventFrameId) }}'>
-                                <span class = "glyphicon glyphicon-arrow-left"></span></a>
-                            <a title = "Next" href = '{{ url_for("eventFrames.dashboard",
-                                eventFrameId = eventFrame.next(session["eventFrameMonths"]).EventFrameId) }}'>
-                                <span class = "glyphicon glyphicon-arrow-right"></span></a>                    
+                            {% if eventFrameTemplateView is none %}
+                                <a title = "Previous" href = '{{ url_for("eventFrames.dashboard",
+                                    eventFrameId = eventFrame.previous(session["eventFrameMonths"]).EventFrameId) }}'>
+                                    <span class = "glyphicon glyphicon-arrow-left"></span></a>
+                                <a title = "Next" href = '{{ url_for("eventFrames.dashboard",
+                                    eventFrameId = eventFrame.next(session["eventFrameMonths"]).EventFrameId) }}'>
+                                    <span class = "glyphicon glyphicon-arrow-right"></span></a>
+                            {% else %}
+                                <a title = "Previous" href = '{{ url_for("eventFrames.dashboard",
+                                    eventFrameId = eventFrame.previous(session["eventFrameMonths"]).EventFrameId, eventFrameTemplateView = true,
+                                    eventFrameTemplateViewId = eventFrameTemplateView.EventFrameTemplateViewId) }}'>
+                                    <span class = "glyphicon glyphicon-arrow-left"></span></a>
+                                <a title = "Next" href = '{{ url_for("eventFrames.dashboard",
+                                    eventFrameId = eventFrame.next(session["eventFrameMonths"]).EventFrameId, eventFrameTemplateView = true,
+                                    eventFrameTemplateViewId = eventFrameTemplateView.EventFrameTemplateViewId) }}'>
+                                    <span class = "glyphicon glyphicon-arrow-right"></span></a>
+                            {% endif %}
                         {% else %}
                             {% if eventFrame.ParentEventFrameId is none %}
                                 {% set previousEventFrameId = eventFrameEventFrameGroup.previous().EventFrameId %}
@@ -159,7 +170,7 @@
         <br><br>
         <div>
             Toggle View:
-            {% if eventFrameTemplateView is none %}
+            {% if eventFrameTemplateView is none or eventFrameTemplateView.EventFrameTemplateViewId == 0 %}
                 {% set activeEventFrameTemplateViewId = none %}
                 {% set class = "btn btn-primary btn-xs active" %}
             {% else %}
@@ -175,7 +186,7 @@
             {% endif %}
             <a type = "button" class = "{{ class }}" title = "All" 
                 href = '{{ href }}' role = "button">All</a>
-            {% for eventFrameTemplateView in eventFrame.EventFrameTemplate.EventFrameTemplateViews %}
+            {% for eventFrameTemplateView in eventFrame.EventFrameTemplate.EventFrameTemplateViews | sort(attribute = "Name") %}
                 {% if eventFrameTemplateView.EventFrameTemplateViewId ==  activeEventFrameTemplateViewId %}
                     {% set class = "btn btn-primary btn-xs active" %}
                 {% else %}

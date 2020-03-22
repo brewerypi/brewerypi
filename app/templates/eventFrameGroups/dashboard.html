@@ -46,7 +46,7 @@
                 <a type = "button" class = "{{ class }}" title = "All" 
                     href = '{{ url_for("eventFrameGroups.dashboard", eventFrameGroupId = eventFrameGroup.EventFrameGroupId,
                     displayEventFrameTemplateId = displayEventFrameTemplate.EventFrameTemplateId, eventFrameTemplateViewId = 0) }}' role = "button">All</a>
-                {% for eventFrameTemplateView in displayEventFrameTemplate.EventFrameTemplateViews %}
+                {% for eventFrameTemplateView in displayEventFrameTemplate.EventFrameTemplateViews | sort(attribute = "Name") %}
                     {% if eventFrameTemplateView.EventFrameTemplateViewId ==  activeEventFrameTemplateViewId %}
                         {% set class = "btn btn-primary btn-xs active" %}
                     {% else %}
@@ -225,6 +225,14 @@
                     [
                         {% if eventFrameTemplateView.dictionary()["showSelectButton"] == "False" %}
                             {"visible": false, "targets": 0},
+                        {% endif %}
+
+                        {% if eventFrameTemplateView.dictionary()["showEventFrameName"] == "False" %}
+                            {"visible": false, "targets": 1},
+                        {% endif %}
+
+                        {% if eventFrameTemplateView.dictionary()["showElementName"] == "False" %}
+                            {"visible": false, "targets": 2},
                         {% endif %}
 
                         {% if eventFrameTemplateView.dictionary()["showRemoveButton"] == "False" %}

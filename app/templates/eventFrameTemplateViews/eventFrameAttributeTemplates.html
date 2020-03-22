@@ -41,29 +41,37 @@
             <small>Display Options</small>
         </h1>
     </div>
-    <div class = "checkbox">
-        <label><input id = "inputSelectButton" type = "checkbox"
-            {{ "checked" if dictionary["showSelectButton"] == "True" or "showSelectButton" not in dictionary }}>Select Button&nbsp;&nbsp;</label>
-        <label><input id = "inputStartTimestamp" type = "checkbox"
-            {{ "checked" if dictionary["showStartTimestamp"] == "True" or "showStartTimestamp" not in dictionary }}>Start Timestamp&nbsp;&nbsp;</label>
-        <label><input id = "inputEndTimestamp" type = "checkbox"
-            {{ "checked" if dictionary["showEndTimestamp"] == "True" or "showEndTimestamp" not in dictionary }}>End Timestamp&nbsp;&nbsp;</label>
-        <label><input id = "inputLastTimestamp" type = "checkbox"
-            {{ "checked" if dictionary["showLastTimestamp"] == "True" or "showLastTimestamp" not in dictionary }}>Last Timestamp&nbsp;&nbsp;</label>
-        <label><input id = "inputLastValue" type = "checkbox"
-            {{ "checked" if dictionary["showLastValue"] == "True" or "showLastValue" not in dictionary }}>Last Value&nbsp;&nbsp;</label>
-        <label><input id = "inputUnit" type = "checkbox"
-            {{ "checked" if dictionary["showUnit"] == "True" or "showUnit" not in dictionary }}>Unit&nbsp;&nbsp;</label>
-        <label><input id = "inputNoteButton" type = "checkbox"
-            {{ "checked" if dictionary["showNoteButton"] == "True" or "showNoteButton" not in dictionary }}>Note Button&nbsp;&nbsp;</label>
-        <label><input id = "inputRemoveButton" type = "checkbox"
-            {{ "checked" if dictionary["showRemoveButton"] == "True" or "showRemoveButton" not in dictionary }}>Remove Button&nbsp;&nbsp;</label>
-        <label><input id = "inputStopButton" type = "checkbox"
-            {{ "checked" if dictionary["showStopButton"] == "True" or "showStopButton" not in dictionary }}>Stop Button&nbsp;&nbsp;</label>
-        <label><input id = "inputEditButton" type = "checkbox"
-            {{ "checked" if dictionary["showEditButton"] == "True" or "showEditButton" not in dictionary }}>Edit Button&nbsp;&nbsp;</label>
-        <label><input id = "inputDeleteButton" type = "checkbox"
-            {{ "checked" if dictionary["showDeleteButton"] == "True" or "showDeleteButton" not in dictionary }}>Delete Button&nbsp;&nbsp;</label>
+    <div>
+        <label class = "checkbox-inline"><input type = "checkbox" id = "inputEventFrameName"
+            {{ "checked" if dictionary["showEventFrameName"] == "True" or "showEventFrameName" not in dictionary }}>Event Frame Name
+        </label>
+        <label class = "checkbox-inline"><input type = "checkbox" id = "inputElementName"
+            {{ "checked" if dictionary["showElementName"] == "True" or "showElementName" not in dictionary }}>Element Name
+        </label>
+    </div>
+    <div>
+        <label class = "checkbox-inline"><input id = "inputSelectButton" type = "checkbox"
+            {{ "checked" if dictionary["showSelectButton"] == "True" or "showSelectButton" not in dictionary }}>Select Button</label>
+        <label class = "checkbox-inline"><input id = "inputStartTimestamp" type = "checkbox"
+            {{ "checked" if dictionary["showStartTimestamp"] == "True" or "showStartTimestamp" not in dictionary }}>Start Timestamp</label>
+        <label class = "checkbox-inline"><input id = "inputEndTimestamp" type = "checkbox"
+            {{ "checked" if dictionary["showEndTimestamp"] == "True" or "showEndTimestamp" not in dictionary }}>End Timestamp</label>
+        <label class = "checkbox-inline"><input id = "inputLastTimestamp" type = "checkbox"
+            {{ "checked" if dictionary["showLastTimestamp"] == "True" or "showLastTimestamp" not in dictionary }}>Last Timestamp</label>
+        <label class = "checkbox-inline"><input id = "inputLastValue" type = "checkbox"
+            {{ "checked" if dictionary["showLastValue"] == "True" or "showLastValue" not in dictionary }}>Last Value</label>
+        <label class = "checkbox-inline"><input id = "inputUnit" type = "checkbox"
+            {{ "checked" if dictionary["showUnit"] == "True" or "showUnit" not in dictionary }}>Unit</label>
+        <label class = "checkbox-inline"><input id = "inputNoteButton" type = "checkbox"
+            {{ "checked" if dictionary["showNoteButton"] == "True" or "showNoteButton" not in dictionary }}>Note Button</label>
+        <label class = "checkbox-inline"><input id = "inputRemoveButton" type = "checkbox"
+            {{ "checked" if dictionary["showRemoveButton"] == "True" or "showRemoveButton" not in dictionary }}>Remove Button</label>
+        <label class = "checkbox-inline"><input id = "inputStopButton" type = "checkbox"
+            {{ "checked" if dictionary["showStopButton"] == "True" or "showStopButton" not in dictionary }}>Stop Button</label>
+        <label class = "checkbox-inline"><input id = "inputEditButton" type = "checkbox"
+            {{ "checked" if dictionary["showEditButton"] == "True" or "showEditButton" not in dictionary }}>Edit Button</label>
+        <label class = "checkbox-inline"><input id = "inputDeleteButton" type = "checkbox"
+            {{ "checked" if dictionary["showDeleteButton"] == "True" or "showDeleteButton" not in dictionary }}>Delete Button</label>
     </div>
     <div>
         <h1>
@@ -130,9 +138,27 @@
 
             $("#table").attr("style", "width:100%")
 
+            $("#inputEventFrameName").on("click", function()
+            {
+                if ($(this).is(":checked") == false)
+                {
+                    $("#inputElementName").prop("checked", true)
+                }
+            })
+
+            $("#inputElementName").on("click", function()
+            {
+                if ($(this).is(":checked") == false)
+                {
+                    $("#inputEventFrameName").prop("checked", true)
+                }
+            })
+
             $("#buttonSave").on("click", function()
             {
                 var dictionary = {}
+                var showEventFrameName = $("#inputEventFrameName").is(":checked")
+                var showElementName = $("#inputElementName").is(":checked")
                 var showSelectButton = $("#inputSelectButton").is(":checked")
                 var showStartTimestamp = $("#inputStartTimestamp").is(":checked")
                 var showEndTimestamp = $("#inputEndTimestamp").is(":checked")
@@ -145,6 +171,16 @@
                 var showEditButton = $("#inputEditButton").is(":checked")
                 var showDeleteButton = $("#inputDeleteButton").is(":checked")
                 var eventFrameAttributeTemplateIds = {}
+
+                if (showEventFrameName == false)
+                {
+                    dictionary["showEventFrameName"] = false
+                }
+
+                if (showElementName == false)
+                {
+                    dictionary["showElementName"] = false
+                }
 
                 if (showSelectButton == false)
                 {
