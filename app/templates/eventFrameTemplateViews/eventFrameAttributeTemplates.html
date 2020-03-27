@@ -1,0 +1,271 @@
+{% extends "base.html" %}
+
+{% block title %}Event Frame Template View{% endblock %}
+
+{% block page_content %}
+    <div>
+        <ol class = "breadcrumb">
+            {% set origin = eventFrameTemplateView.EventFrameTemplate.origin() %}
+            <li><a href = '{{ url_for("eventFrames.selectEventFrame", selectedClass = "Root") }}'><span class = "glyphicon glyphicon-home"></span></a></li>
+            <li><a href = '{{ url_for("eventFrames.selectEventFrame", selectedClass = "Enterprise",
+                selectedId = origin.ElementTemplate.Site.Enterprise.id()) }}'>{{ origin.ElementTemplate.Site.Enterprise.Name }}</a></li>
+            <li><a href = '{{ url_for("eventFrames.selectEventFrame", selectedClass = "Site",
+                selectedId = origin.ElementTemplate.Site.id()) }}'>{{ origin.ElementTemplate.Site.Name }}</a></li>
+            <li><a href = '{{ url_for("eventFrames.selectEventFrame", selectedClass = "ElementTemplate",
+                selectedId = origin.ElementTemplate.id()) }}'>{{ origin.ElementTemplate.Name }}</a></li>
+            {% for ancestor in eventFrameTemplateView.EventFrameTemplate.ancestors([]) %}
+                <li><a href = '{{ url_for("eventFrames.selectEventFrame", selectedClass = "EventFrameTemplate", selectedId = ancestor.id(),
+                    selectedOperation = "configure") }}'>{{ ancestor.Name }}</a></li>
+            {% endfor %}
+            <li><a href = '{{ url_for("eventFrames.selectEventFrame", selectedClass = "EventFrameTemplate",
+                selectedId = eventFrameTemplateView.EventFrameTemplate.EventFrameTemplateId, selectedOperation = "configure") }}'>
+                {{ eventFrameTemplateView.EventFrameTemplate.Name }}</a></li>
+            <li class = "active">
+                <a title = "Previous" href = '{{ url_for("eventFrameTemplateViews.eventFrameAttributeTemplates",
+                    eventFrameTemplateViewId = eventFrameTemplateView.previous().EventFrameTemplateViewId) }}'>
+                    <span class = "glyphicon glyphicon-arrow-left"></span></a>
+                <a title = "Next" href = '{{ url_for("eventFrameTemplateViews.eventFrameAttributeTemplates",
+                    eventFrameTemplateViewId = eventFrameTemplateView.next().EventFrameTemplateViewId) }}'>
+                    <span class = "glyphicon glyphicon-arrow-right"></span></a>    
+                {{ eventFrameTemplateView.Name }}
+            </li>
+        </ol>
+    </div>
+    <div class = "page-header">
+        <h1>Event Frame Template View
+            <button class = "btn btn-default" id = "buttonSave" title = "Save"><span class = "glyphicon glyphicon-floppy-disk"></span></button>
+        </h1>
+    </div>
+    <div>
+        <h1>
+            <small>Display Options</small>
+        </h1>
+    </div>
+    <div>
+        <label class = "checkbox-inline"><input type = "checkbox" id = "inputEventFrameName"
+            {{ "checked" if dictionary["showEventFrameName"] == "True" or "showEventFrameName" not in dictionary }}>Event Frame Name
+        </label>
+        <label class = "checkbox-inline"><input type = "checkbox" id = "inputElementName"
+            {{ "checked" if dictionary["showElementName"] == "True" or "showElementName" not in dictionary }}>Element Name
+        </label>
+    </div>
+    <div>
+        <label class = "checkbox-inline"><input id = "inputSelectButton" type = "checkbox"
+            {{ "checked" if dictionary["showSelectButton"] == "True" or "showSelectButton" not in dictionary }}>Select Button</label>
+        <label class = "checkbox-inline"><input id = "inputStartTimestamp" type = "checkbox"
+            {{ "checked" if dictionary["showStartTimestamp"] == "True" or "showStartTimestamp" not in dictionary }}>Start Timestamp</label>
+        <label class = "checkbox-inline"><input id = "inputEndTimestamp" type = "checkbox"
+            {{ "checked" if dictionary["showEndTimestamp"] == "True" or "showEndTimestamp" not in dictionary }}>End Timestamp</label>
+        <label class = "checkbox-inline"><input id = "inputLastTimestamp" type = "checkbox"
+            {{ "checked" if dictionary["showLastTimestamp"] == "True" or "showLastTimestamp" not in dictionary }}>Last Timestamp</label>
+        <label class = "checkbox-inline"><input id = "inputLastValue" type = "checkbox"
+            {{ "checked" if dictionary["showLastValue"] == "True" or "showLastValue" not in dictionary }}>Last Value</label>
+        <label class = "checkbox-inline"><input id = "inputUnit" type = "checkbox"
+            {{ "checked" if dictionary["showUnit"] == "True" or "showUnit" not in dictionary }}>Unit</label>
+        <label class = "checkbox-inline"><input id = "inputNoteButton" type = "checkbox"
+            {{ "checked" if dictionary["showNoteButton"] == "True" or "showNoteButton" not in dictionary }}>Note Button</label>
+        <label class = "checkbox-inline"><input id = "inputRemoveButton" type = "checkbox"
+            {{ "checked" if dictionary["showRemoveButton"] == "True" or "showRemoveButton" not in dictionary }}>Remove Button</label>
+        <label class = "checkbox-inline"><input id = "inputStopButton" type = "checkbox"
+            {{ "checked" if dictionary["showStopButton"] == "True" or "showStopButton" not in dictionary }}>Stop Button</label>
+        <label class = "checkbox-inline"><input id = "inputEditButton" type = "checkbox"
+            {{ "checked" if dictionary["showEditButton"] == "True" or "showEditButton" not in dictionary }}>Edit Button</label>
+        <label class = "checkbox-inline"><input id = "inputDeleteButton" type = "checkbox"
+            {{ "checked" if dictionary["showDeleteButton"] == "True" or "showDeleteButton" not in dictionary }}>Delete Button</label>
+    </div>
+    <div>
+        <h1>
+            <small>Event Frame Attribute Templates</small>
+        </h1>
+    </div>
+    <div>
+        <table id = "table" class = "table table-hover" style = "display:none">
+            <thead>
+                <tr>
+                    <th>Order</th>
+                    <th>Include?</th>
+                    <th>Name</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% set namespace = namespace(numberOfincludedEventFrameAttributeTemplates = 0) %}
+                {% for eventFrameAttributeTemplateEventFrameTemplateView in eventFrameTemplateView.EventFrameAttributeTemplateEventFrameTemplateViews | 
+                    sort(attribute = "Order") %}
+                    <tr data-eventFrameAttributeTemplateId = "{{ eventFrameAttributeTemplateEventFrameTemplateView.EventFrameAttributeTemplateId }}">
+                        <td>{{ loop.index }}</td>
+                        <td><input type = "checkbox" checked></td>
+                        <td>{{ eventFrameAttributeTemplateEventFrameTemplateView.EventFrameAttributeTemplate.Name }}</td>
+                    </tr>
+                    {% set namespace.numberOfincludedEventFrameAttributeTemplates = namespace.numberOfincludedEventFrameAttributeTemplates + 1 %}
+                    {% endfor %}
+                {% for eventFrameAttributeTemplate in excludedEventFrameAttributeTemplates | sort(attribute = "Name") %}
+                    <tr data-eventFrameAttributeTemplateId = "{{ eventFrameAttributeTemplate.EventFrameAttributeTemplateId }}">
+                        <td>{{ loop.index + namespace.numberOfincludedEventFrameAttributeTemplates }}</td>
+                        <td><input type = "checkbox"></td>
+                        <td>{{ eventFrameAttributeTemplate.Name }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <link rel = "stylesheet" type = "text/css" href = {{ url_for("static", filename = "css/datatables.min.css") }}/> 
+    <link rel = "stylesheet" type = "text/css" href = {{ url_for("static", filename = "css/styles.css") }}/>
+    <script type = "text/javascript" src = {{ url_for("static", filename = "js/datatables.min.js") }}></script>
+    {% block setTabIndex %}
+        {{ super() }}
+    {% endblock %}
+    <script>
+        $(document).ready(function()
+        {
+            var table = $("#table").on("draw.dt", function()
+            {
+                setTabIndex()
+            }).DataTable
+            ({
+                "pageLength": 25,
+                "rowReorder": true,
+                "searching": false,
+                columnDefs:
+                [
+                    {orderable: true, className: "reorder", targets: 0},
+                    {orderable: false, targets: "_all"}
+                ]
+            })
+
+            $("#table").attr("style", "width:100%")
+
+            $("#inputEventFrameName").on("click", function()
+            {
+                if ($(this).is(":checked") == false)
+                {
+                    $("#inputElementName").prop("checked", true)
+                }
+            })
+
+            $("#inputElementName").on("click", function()
+            {
+                if ($(this).is(":checked") == false)
+                {
+                    $("#inputEventFrameName").prop("checked", true)
+                }
+            })
+
+            $("#buttonSave").on("click", function()
+            {
+                var dictionary = {}
+                var showEventFrameName = $("#inputEventFrameName").is(":checked")
+                var showElementName = $("#inputElementName").is(":checked")
+                var showSelectButton = $("#inputSelectButton").is(":checked")
+                var showStartTimestamp = $("#inputStartTimestamp").is(":checked")
+                var showEndTimestamp = $("#inputEndTimestamp").is(":checked")
+                var showLastTimestamp = $("#inputLastTimestamp").is(":checked")
+                var showLastValue = $("#inputLastValue").is(":checked")
+                var showUnit = $("#inputUnit").is(":checked")
+                var showNoteButton = $("#inputNoteButton").is(":checked")
+                var showRemoveButton = $("#inputRemoveButton").is(":checked")
+                var showStopButton = $("#inputStopButton").is(":checked")
+                var showEditButton = $("#inputEditButton").is(":checked")
+                var showDeleteButton = $("#inputDeleteButton").is(":checked")
+                var eventFrameAttributeTemplateIds = {}
+
+                if (showEventFrameName == false)
+                {
+                    dictionary["showEventFrameName"] = false
+                }
+
+                if (showElementName == false)
+                {
+                    dictionary["showElementName"] = false
+                }
+
+                if (showSelectButton == false)
+                {
+                    dictionary["showSelectButton"] = false
+                }
+
+                if (showStartTimestamp == false)
+                {
+                    dictionary["showStartTimestamp"] = false
+                }
+
+                if (showEndTimestamp == false)
+                {
+                    dictionary["showEndTimestamp"] = false
+                }
+
+                if (showLastTimestamp == false)
+                {
+                    dictionary["showLastTimestamp"] = false
+                }
+
+                if (showLastValue == false)
+                {
+                    dictionary["showLastValue"] = false
+                }
+
+                if (showUnit == false)
+                {
+                    dictionary["showUnit"] = false
+                }
+
+                if (showNoteButton == false)
+                {
+                    dictionary["showNoteButton"] = false
+                }
+
+                if (showRemoveButton == false)
+                {
+                    dictionary["showRemoveButton"] = false
+                }
+
+                if (showStopButton == false)
+                {
+                    dictionary["showStopButton"] = false
+                }
+
+                if (showEditButton == false)
+                {
+                    dictionary["showEditButton"] = false
+                }
+
+                if (showDeleteButton == false)
+                {
+                    dictionary["showDeleteButton"] = false
+                }
+
+                $("input:checked", table.nodes().to$()).each(function()
+                {
+                    var eventFrameAttributeTemplateId = $(this).parents("tr").attr("data-eventFrameAttributeTemplateId")
+                    var order = $(this).parents("tr").find("td:first").text()
+                    eventFrameAttributeTemplateIds[eventFrameAttributeTemplateId] = order
+                })
+
+                $.ajax(
+                {
+                    type : "POST",
+                    url : "/eventFrameTemplateViews/editEventFrameAttributeTemplates/{{ eventFrameTemplateView.EventFrameTemplateViewId }}",
+                    data : JSON.stringify([dictionary, eventFrameAttributeTemplateIds])
+                }).done(function(response)
+                {
+                    location.reload(true)
+                }).fail(function()
+                {
+                    $(".alert").remove()
+                    $("#divFlashedMessages").append("<div class = \"alert alert-danger\"><button type = \"button\" class = \"close\" " +
+                        "data-dismiss = \"alert\">&times;</button>The attempt to modify the event frame template failed.</div>")                        
+                })
+            })
+
+            // Clear any left over filtering from state saving.
+            table.search("").columns().search("").draw()
+            table.on("draw.dt", function()
+            {
+                setTabIndex()
+            })
+        })
+    </script>
+{% endblock %}

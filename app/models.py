@@ -3,7 +3,7 @@ from datetime import datetime
 from dateutil.relativedelta import relativedelta
 from flask_login import AnonymousUserMixin, current_user, UserMixin
 from sqlalchemy import func, Index, PrimaryKeyConstraint, UniqueConstraint
-from sqlalchemy.dialects.mysql import DATETIME, DOUBLE
+from sqlalchemy.dialects.mysql import DATETIME, DOUBLE, LONGTEXT
 from time import time
 from werkzeug.security import generate_password_hash, check_password_hash
 from app import db
@@ -445,14 +445,18 @@ class EventFrameAttributeTemplate(db.Model):
 		name = "FK__UnitOfMeasurement$CanBeUsedIn$EventFrameAttributeTemplate"), nullable = True)
 
 	EventFrameAttributes = db.relationship("EventFrameAttribute", backref = "EventFrameAttributeTemplate", lazy = "dynamic")
+	EventFrameAttributeTemplateEventFrameTemplateViews = db.relationship("EventFrameAttributeTemplateEventFrameTemplateView",
+		backref = "EventFrameAttributeTemplate", lazy = "dynamic")
 
 	def __repr__(self):
 		return "<EventFrameAttributeTemplate: {}>".format(self.Name)
 
 	def delete(self):
-		eventFrameAttributes = self.EventFrameAttributes
-		for eventFrameAttribute in eventFrameAttributes:
+		for eventFrameAttribute in self.EventFrameAttributes:
 			eventFrameAttribute.delete()
+
+		for eventFrameAttributeTemplateEventFrameTemplateView in self.EventFrameAttributeTemplateEventFrameTemplateViews:
+			eventFrameAttributeTemplateEventFrameTemplateView.delete()
 
 		db.session.delete(self)
 
@@ -518,6 +522,27 @@ class EventFrameAttributeTemplate(db.Model):
 						newEventFrameAttributeTemplate.UnitOfMeasurementId = self.UnitOfMeasurementId
 
 		db.session.commit()
+
+class EventFrameAttributeTemplateEventFrameTemplateView(db.Model):
+	__tablename__ = "EventFrameAttributeTemplateEventFrameTemplateView"
+	__table_args__ = \
+	(
+		UniqueConstraint("EventFrameAttributeTemplateId", "EventFrameTemplateViewId", name = "AK__EventFrameAttributeTemplateId__EventFrameTemplateViewId"),
+		UniqueConstraint("EventFrameTemplateViewId", "Order", name = "AK__EventFrameTemplateViewId__Order"),
+	)
+
+	EventFrameAttributeTemplateEventFrameTemplateViewId = db.Column(db.Integer, primary_key = True)
+	EventFrameAttributeTemplateId = db.Column(db.Integer, db.ForeignKey("EventFrameAttributeTemplate.EventFrameAttributeTemplateId",
+		name = "FK__EFAT$Have$EventFrameAttributeTemplateEventFrameTemplateView"), nullable = False)
+	EventFrameTemplateViewId = db.Column(db.Integer, db.ForeignKey("EventFrameTemplateView.EventFrameTemplateViewId",
+		name = "FK__EFTV$Have$EventFrameAttributeTemplateEventFrameTemplateView"), nullable = False)
+	Order = db.Column(db.Integer, nullable = False)
+
+	def delete(self):
+		db.session.delete(self)
+
+	def id(self):
+		return self.EventFrameAttributeTemplateEventFrameTemplateViewId
 
 class EventFrameEventFrameGroup(db.Model):
 	__tablename__ = "EventFrameEventFrameGroup"
@@ -614,6 +639,7 @@ class EventFrameTemplate(db.Model):
 	EventFrameAttributeTemplates = db.relationship("EventFrameAttributeTemplate", backref = "EventFrameTemplate", lazy = "dynamic")
 	EventFrames = db.relationship("EventFrame", backref = "EventFrameTemplate", lazy = "dynamic")
 	EventFrameTemplates = db.relationship("EventFrameTemplate", remote_side = [ParentEventFrameTemplateId])
+	EventFrameTemplateViews = db.relationship("EventFrameTemplateView", backref = "EventFrameTemplate", lazy = "dynamic")
 	ParentEventFrameTemplate = db.relationship("EventFrameTemplate", remote_side = [EventFrameTemplateId])
 
 	def __repr__(self):
@@ -630,6 +656,9 @@ class EventFrameTemplate(db.Model):
 		childEventFrameTemplates = self.EventFrameTemplates
 		for childEventFrameTemplate in childEventFrameTemplates:
 			childEventFrameTemplate.delete()
+
+		for eventFrameTemplateView in self.EventFrameTemplateViews:
+			eventFrameTemplateView.delete()
 
 		eventFrameAttributeTemplates = self.EventFrameAttributeTemplates
 		for eventFrameAttributeTemplate in eventFrameAttributeTemplates:
@@ -678,6 +707,51 @@ class EventFrameTemplate(db.Model):
 			return self
 		else:
 			return self.ParentEventFrameTemplate.origin()	
+
+	def previous(self):
+		return previous(self.nextAndPreviousList(), self)
+
+class EventFrameTemplateView(db.Model):
+	__tablename__ = "EventFrameTemplateView"
+	__table_args__ = \
+	(
+		UniqueConstraint("EventFrameTemplateId", "Name", name = "AK__EventFrameTemplateId_Name"),
+	)
+
+	EventFrameTemplateViewId = db.Column(db.Integer, primary_key = True)
+	Dictionary = db.Column(LONGTEXT, nullable = True)
+	Default = db.Column(db.Boolean, nullable = False)
+	Description = db.Column(db.String(255), nullable = True)
+	EventFrameTemplateId = db.Column(db.Integer, db.ForeignKey("EventFrameTemplate.EventFrameTemplateId",
+		name = "FK__EventFrameTemplate$Have$EventFrameTemplateView"), nullable = False)
+	Name = db.Column(db.String(45), nullable = False)
+
+	EventFrameAttributeTemplateEventFrameTemplateViews = db.relationship("EventFrameAttributeTemplateEventFrameTemplateView",
+		backref = "EventFrameTemplateView", lazy = "dynamic")
+
+	def __repr__(self):
+		return "<EventFrameTemplateView: {}>".format(self.Name)
+
+	def dictionary(self):
+		if self.Dictionary is None or self.Dictionary == "":
+			return {}
+		else:
+			return json.loads(self.Dictionary.replace("'", '"').replace("True", '"True"').replace("False", '"False"'))
+
+	def delete(self):
+		for eventFrameAttributeTemplateEventFrameTemplateView in self.EventFrameAttributeTemplateEventFrameTemplateViews:
+			eventFrameAttributeTemplateEventFrameTemplateView.delete()
+
+		db.session.delete(self)
+
+	def id(self):
+		return self.EventFrameTemplateViewId
+
+	def next(self):
+		return next(self.nextAndPreviousList(), self)
+
+	def nextAndPreviousList(self):
+		return EventFrameTemplateView.query.filter_by(EventFrameTemplateId = self.EventFrameTemplateId).order_by(EventFrameTemplateView.Name).all()
 
 	def previous(self):
 		return previous(self.nextAndPreviousList(), self)
