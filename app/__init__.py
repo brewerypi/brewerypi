@@ -66,6 +66,9 @@ def create_app(configClass = Config):
 	from . eventFrameTemplates import eventFrameTemplates as eventFrameTemplatesBlueprint
 	app.register_blueprint(eventFrameTemplatesBlueprint)
 
+	from . eventFrameTemplateViews import eventFrameTemplateViews as eventFrameTemplateViewsBlueprint
+	app.register_blueprint(eventFrameTemplateViewsBlueprint)
+
 	from . lookups import lookups as lookupsBlueprint
 	app.register_blueprint(lookupsBlueprint)
 

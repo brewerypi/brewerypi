@@ -4,7 +4,8 @@ from . import eventFrameGroups
 from . forms import EventFrameGroupForm
 from .. import db
 from .. decorators import permissionRequired
-from .. models import ElementTemplate, Enterprise, EventFrame, EventFrameEventFrameGroup, EventFrameGroup, EventFrameTemplate, Permission, Site
+from .. models import ElementTemplate, Enterprise, EventFrame, EventFrameAttributeTemplate, EventFrameAttributeTemplateEventFrameTemplateView, EventFrameEventFrameGroup, EventFrameGroup, \
+	EventFrameTemplate, EventFrameTemplateView, Permission, Site
 
 modelName = "Event Frame Group"
 
@@ -49,23 +50,50 @@ def addNewEventFrames(eventFrameGroupId):
 
 @eventFrameGroups.route("/eventFrameGroups/dashboard/<int:eventFrameGroupId>", methods = ["GET", "POST"])
 @eventFrameGroups.route("/eventFrameGroups/dashboard/<int:eventFrameGroupId>/<int:displayEventFrameTemplateId>", methods = ["GET", "POST"])
+@eventFrameGroups.route("/eventFrameGroups/dashboard/<int:eventFrameGroupId>/<int:displayEventFrameTemplateId>/<int:eventFrameTemplateViewId>",
+	methods = ["GET", "POST"])
 @login_required
 @permissionRequired(Permission.DATA_ENTRY)
-def dashboard(eventFrameGroupId, displayEventFrameTemplateId = None):
+def dashboard(eventFrameGroupId, displayEventFrameTemplateId = None, eventFrameTemplateViewId = None):
 	eventFrameGroup = EventFrameGroup.query.get_or_404(eventFrameGroupId)
 	eventFrames = EventFrame.query.filter(EventFrame.EventFrameId. \
-		in_([(eventFrameEventFrameGroup.EventFrameId) for eventFrameEventFrameGroup in eventFrameGroup.EventFrameEventFrameGroups]))
+		in_([eventFrameEventFrameGroup.EventFrameId for eventFrameEventFrameGroup in eventFrameGroup.EventFrameEventFrameGroups]))
 	eventFrameTemplates = EventFrameTemplate.query.join(ElementTemplate, Site, Enterprise).filter(EventFrameTemplate.EventFrameTemplateId. \
-		in_([(eventFrame.EventFrameTemplateId) for eventFrame in eventFrames])).order_by(Enterprise.Name, Site.Name, ElementTemplate.Name,
+		in_([eventFrame.EventFrameTemplateId for eventFrame in eventFrames])).order_by(Enterprise.Name, Site.Name, ElementTemplate.Name,
 		EventFrameTemplate.Name)
 	if displayEventFrameTemplateId is None:
 		displayEventFrameTemplate = eventFrameTemplates.first()
 	else:
 		displayEventFrameTemplate = EventFrameTemplate.query.get_or_404(displayEventFrameTemplateId)
 
+	if displayEventFrameTemplate is None:
+		eventFrameTemplateView = None
+		eventFrameAttributeTemplates = None
+	else:
+		if eventFrameTemplateViewId is None:
+			defaultEventFrameTemplateView = EventFrameTemplateView.query.filter_by(EventFrameTemplateId = displayEventFrameTemplate.EventFrameTemplateId,
+				Default = True).one_or_none()
+			if defaultEventFrameTemplateView is None:
+				eventFrameTemplateView = None
+				eventFrameAttributeTemplates = displayEventFrameTemplate.EventFrameAttributeTemplates.order_by(EventFrameAttributeTemplate.Name)
+			else:
+				eventFrameTemplateView = defaultEventFrameTemplateView
+				eventFrameAttributeTemplates = [eventFrameAttributeTemplateEventFrameTemplateView.EventFrameAttributeTemplate for
+					eventFrameAttributeTemplateEventFrameTemplateView in defaultEventFrameTemplateView.EventFrameAttributeTemplateEventFrameTemplateViews. \
+					order_by(EventFrameAttributeTemplateEventFrameTemplateView.Order)]
+		elif eventFrameTemplateViewId == 0:
+			eventFrameTemplateView = None
+			eventFrameAttributeTemplates = displayEventFrameTemplate.EventFrameAttributeTemplates.order_by(EventFrameAttributeTemplate.Name)
+		else:
+			eventFrameTemplateView = EventFrameTemplateView.query.get_or_404(eventFrameTemplateViewId)
+			eventFrameAttributeTemplates = [eventFrameAttributeTemplateEventFrameTemplateView.EventFrameAttributeTemplate for \
+				eventFrameAttributeTemplateEventFrameTemplateView in eventFrameTemplateView.EventFrameAttributeTemplateEventFrameTemplateViews. \
+				order_by(EventFrameAttributeTemplateEventFrameTemplateView.Order)]
+
 	eventFrames = eventFrames.filter_by(EventFrameTemplate = displayEventFrameTemplate)
-	return render_template("eventFrameGroups/dashboard.html", displayEventFrameTemplate = displayEventFrameTemplate, eventFrames = eventFrames,
-		eventFrameGroup = eventFrameGroup, eventFrameTemplates = eventFrameTemplates)
+	return render_template("eventFrameGroups/dashboard.html", displayEventFrameTemplate = displayEventFrameTemplate, 
+		eventFrameAttributeTemplates = eventFrameAttributeTemplates, eventFrames = eventFrames, eventFrameGroup = eventFrameGroup,
+		eventFrameTemplates = eventFrameTemplates, eventFrameTemplateView = eventFrameTemplateView)
 
 @eventFrameGroups.route("/eventFrameGroups/delete/<int:eventFrameGroupId>/<int:all>", methods = ["GET", "POST"])
 @login_required
