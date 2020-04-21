@@ -12,7 +12,7 @@ loginManager.session_protection = "basic"
 loginManager.login_view = "authentications.login"
 moment = Moment()
 
-def create_app(configClass = Config):
+def createApp(configClass = Config):
 	app = Flask(__name__)
 	app.config.from_object(configClass)
 
