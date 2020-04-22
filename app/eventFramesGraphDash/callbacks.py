@@ -1,0 +1,2 @@
+def registerCallbacks(dashApp):
+    pass

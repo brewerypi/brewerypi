@@ -1,6 +1,8 @@
+import dash
 from flask import Flask
+from flask.helpers import get_root_path
 from flask_bootstrap import Bootstrap
-from flask_login import LoginManager
+from flask_login import LoginManager, login_required
 from flask_moment import Moment
 from flask_sqlalchemy import SQLAlchemy
 from config import Config
@@ -16,6 +18,35 @@ def createApp(configClass = Config):
 	app = Flask(__name__)
 	app.config.from_object(configClass)
 
+	from app.activeEventFramesSummaryDash.layout import layout as activeEventFramesSummaryDashLayout
+	from app.activeEventFramesSummaryDash.callbacks import registerCallbacks as activeEventFramesSummaryDashCallbacks
+	registerDashApp(app, "activeEventFramesSummaryDash", activeEventFramesSummaryDashLayout, activeEventFramesSummaryDashCallbacks,
+		"Active Event Frames Summary Dash")
+
+	from app.elementSummaryDash.layout import layout as elementSummaryDashLayout
+	from app.elementSummaryDash.callbacks import registerCallbacks as elementSummaryDashCallbacks
+	registerDashApp(app, "elementSummaryDash", elementSummaryDashLayout, elementSummaryDashCallbacks, "Element Summary Dash")
+
+	from app.elementValuesGraphDash.layout import layout as elementValuesGraphDashLayout
+	from app.elementValuesGraphDash.callbacks import registerCallbacks as elementValuesGraphDashCallbacks
+	registerDashApp(app, "elementValuesGraphDash", elementValuesGraphDashLayout, elementValuesGraphDashCallbacks, "Element Values Graph Dash")
+
+	from app.eventFrameGroupSummaryDash.layout import layout as eventFrameGroupSummaryDashLayout
+	from app.eventFrameGroupSummaryDash.callbacks import registerCallbacks as eventFrameGroupSummaryDashCallbacks
+	registerDashApp(app, "eventFrameGroupSummaryDash", eventFrameGroupSummaryDashLayout, eventFrameGroupSummaryDashCallbacks, "Event Frame Group Summary Dash")
+
+	from app.eventFramesGraphDash.layout import layout as eventFramesGraphDashLayout
+	from app.eventFramesGraphDash.callbacks import registerCallbacks as eventFramesGraphDashCallbacks
+	registerDashApp(app, "eventFramesGraphDash", eventFramesGraphDashLayout, eventFramesGraphDashCallbacks, "Event Frames Graph Dash")
+
+	from app.eventFramesOverlayDash.layout import layout as eventFramesOverlayDashLayout
+	from app.eventFramesOverlayDash.callbacks import registerCallbacks as eventFramesOverlayDashCallbacks
+	registerDashApp(app, "eventFramesOverlayDash", eventFramesOverlayDashLayout, eventFramesOverlayDashCallbacks, "Event Frames Overlay Dash")
+
+	from app.tagValuesGraphDash.layout import layout as tagValuesGraphDashLayout
+	from app.tagValuesGraphDash.callbacks import registerCallbacks as tagValuesGraphDashCallbacks
+	registerDashApp(app, "tagValuesGraphDash", tagValuesGraphDashLayout, tagValuesGraphDashCallbacks, "Tag Values Graph Dash")
+
 	boostrap.init_app(app)
 	db.init_app(app)
 	loginManager.init_app(app)
@@ -29,6 +60,9 @@ def createApp(configClass = Config):
 
 	from . customTemplateFilters import customTemplateFilters as customTemplateFiltersBlueprint
 	app.register_blueprint(customTemplateFiltersBlueprint)
+
+	from . dash import dash as dashBlueprint
+	app.register_blueprint(dashBlueprint)
 
 	from . elements import elements as elementsBlueprint
 	app.register_blueprint(elementsBlueprint)
@@ -109,3 +143,22 @@ def createApp(configClass = Config):
 	app.register_blueprint(usersBlueprint)
 
 	return app
+
+def registerDashApp(app, urlBasePathname, layout, registerCallbacks, title):
+	dashApp = dash.Dash \
+	(
+		__name__,
+		assets_folder = "{}/{}/assets/".format(get_root_path(__name__), urlBasePathname),
+		server = app,
+		url_base_pathname = "/{}/".format(urlBasePathname)
+	)
+
+	dashApp.layout = layout
+	dashApp.title = title
+	registerCallbacks(dashApp)
+	protectDashviews(dashApp)
+
+def protectDashviews(dashApp):
+	for viewFunction in dashApp.server.view_functions:
+		if viewFunction.startswith(dashApp.config.url_base_pathname):
+			dashApp.server.view_functions[viewFunction] = login_required(dashApp.server.view_functions[viewFunction])
