@@ -7,8 +7,8 @@ from urllib.parse import parse_qs, urlparse
 from app.models import Area, Enterprise, LookupValue, Site, Tag, TagValue, TagValueNote
 
 def registerCallbacks(dashApp):
-    @dashApp.callback([Output(component_id = "inputFromTimestamp", component_property = "value"),
-        Output(component_id = "inputToTimestamp", component_property = "value"),
+    @dashApp.callback([Output(component_id = "fromTimestampInput", component_property = "value"),
+        Output(component_id = "toTimestampInput", component_property = "value"),
         Output(component_id = "enterprisesDropdown", component_property = "options")],
         [Input(component_id = "url", component_property = "href")])
     def initialize(urlHref):
@@ -108,24 +108,24 @@ def registerCallbacks(dashApp):
             return list(set([tagsDropdownOption["value"] for tagsDropdownOption in tagsDropdownOptions]) & set(tagsDropdownSelectedValues))
 
     @dashApp.callback(Output(component_id = "graph", component_property = "figure"),
-        [Input(component_id = "inputFromTimestamp", component_property = "value"),
-        Input(component_id = "inputToTimestamp", component_property = "value"),
+        [Input(component_id = "fromTimestampInput", component_property = "value"),
+        Input(component_id = "toTimestampInput", component_property = "value"),
         Input(component_id = "tagsDropdown", component_property = "value"),
         Input(component_id = "url", component_property = "href")])
-    def graphFigure(inputFromTimestampValue, inputToTimestampValue, tagsDropdownValues, urlHref):
-        if inputFromTimestampValue is None or inputToTimestampValue is None or tagsDropdownValues is None:
+    def graphFigure(fromTimestampInputValue, toTimestampInputValue, tagsDropdownValues, urlHref):
+        if fromTimestampInputValue is None or toTimestampInputValue is None or tagsDropdownValues is None:
             raise PreventUpdate
         else:
             data = []
-            if inputFromTimestampValue!= "" and inputToTimestampValue != "" and tagsDropdownValues is not None:
+            if fromTimestampInputValue!= "" and toTimestampInputValue != "" and tagsDropdownValues is not None:
                 queryString = parse_qs(urlparse(urlHref).query)
                 if "localTimezone" in queryString:
                     localTimezone = pytz.timezone(queryString["localTimezone"][0])
                 else:
                     localTimezone = pytz.utc
 
-                fromTimestampLocal = localTimezone.localize(datetime.strptime(inputFromTimestampValue, "%Y-%m-%dT%H:%M:%S"))
-                toTimestampLocal = localTimezone.localize(datetime.strptime(inputToTimestampValue, "%Y-%m-%dT%H:%M:%S"))
+                fromTimestampLocal = localTimezone.localize(datetime.strptime(fromTimestampInputValue, "%Y-%m-%dT%H:%M:%S"))
+                toTimestampLocal = localTimezone.localize(datetime.strptime(toTimestampInputValue, "%Y-%m-%dT%H:%M:%S"))
                 fromTimestampUtc = fromTimestampLocal.astimezone(pytz.utc)
                 toTimestampUtc = toTimestampLocal.astimezone(pytz.utc)
 
