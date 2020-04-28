@@ -149,6 +149,8 @@ def registerDashApp(app, urlBasePathname, layout, registerCallbacks, title):
 	(
 		__name__,
 		assets_folder = "{}/{}/assets/".format(get_root_path(__name__), urlBasePathname),
+		external_stylesheets = ["/static/bootstrap/css/bootstrap.min.css"],
+		external_scripts = ["/static/bootstrap/jquery.min.js", "/static/bootstrap/js/bootstrap.min.js"],
 		server = app,
 		url_base_pathname = "/{}/".format(urlBasePathname)
 	)
