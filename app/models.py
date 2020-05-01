@@ -393,6 +393,17 @@ class EventFrame(db.Model):
 				eventFrame.EndTimestamp = None
 				eventFrame.UserId = current_user.get_id()
 
+	def tagValues(self):
+		eventFrameAttributeTemplateIds = [eventFrameAttributeTemplate.EventFrameAttributeTemplateId
+			for eventFrameAttributeTemplate in self.EventFrameTemplate.EventFrameAttributeTemplates]
+
+		eventFrameAttributes = EventFrameAttribute.query.filter(EventFrameAttribute.ElementId == self.ElementId,
+			EventFrameAttribute.EventFrameAttributeTemplateId.in_(eventFrameAttributeTemplateIds))
+		tagIds = [eventFrameAttribute.TagId for eventFrameAttribute in eventFrameAttributes]
+		tagValues = TagValue.query.filter(TagValue.TagId.in_(tagIds), TagValue.Timestamp >= self.StartTimestamp,
+			TagValue.Timestamp <= self.EndTimestamp)
+		return tagValues
+
 class EventFrameAttribute(db.Model):
 	__tablename__ = "EventFrameAttribute"
 	__table_args__ = \
