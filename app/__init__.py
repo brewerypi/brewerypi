@@ -35,9 +35,9 @@ def createApp(configClass = Config):
 	from app.eventFrameGroupSummaryDash.callbacks import registerCallbacks as eventFrameGroupSummaryDashCallbacks
 	registerDashApp(app, "eventFrameGroupSummaryDash", eventFrameGroupSummaryDashLayout, eventFrameGroupSummaryDashCallbacks, "Event Frame Group Summary Dash")
 
-	from app.eventFramesGraphDash.layout import layout as eventFramesGraphDashLayout
-	from app.eventFramesGraphDash.callbacks import registerCallbacks as eventFramesGraphDashCallbacks
-	registerDashApp(app, "eventFramesGraphDash", eventFramesGraphDashLayout, eventFramesGraphDashCallbacks, "Event Frames Graph Dash")
+	from app.eventFrameGraphDash.layout import layout as eventFrameGraphDashLayout
+	from app.eventFrameGraphDash.callbacks import registerCallbacks as eventFrameGraphDashCallbacks
+	registerDashApp(app, "eventFrameGraphDash", eventFrameGraphDashLayout, eventFrameGraphDashCallbacks, "Event Frame Graph Dash")
 
 	from app.eventFramesOverlayDash.layout import layout as eventFramesOverlayDashLayout
 	from app.eventFramesOverlayDash.callbacks import registerCallbacks as eventFramesOverlayDashCallbacks

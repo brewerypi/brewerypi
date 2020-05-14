@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+
+{% block title %}Event Frame Graph Dash{% endblock %}
+
+{% block page_content %}
+    <div class = "embed-responsive embed-responsive-16by9">
+        <iframe class = "embed-responsive-item" src = '{{ url_for("/eventFrameGraphDash/") }}'></iframe>
+    </div>
+{% endblock %}

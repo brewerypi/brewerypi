@@ -22,10 +22,10 @@ def elementValuesGraph():
 def eventFrameGroupSummary():
 	return render_template("eventFrameGroupSummaryDash/eventFrameGroupSummaryDash.html")
 
-@dash.route("/dash/eventFramesGraph", methods = ["GET", "POST"])
+@dash.route("/dash/eventFrameGraph", methods = ["GET", "POST"])
 @login_required
-def eventFramesGraph():
-	return render_template("eventFramesGraphDash/eventFramesGraphDash.html")
+def eventFrameGraph():
+	return render_template("eventFrameGraphDash/eventFrameGraphDash.html")
 
 @dash.route("/dash/eventFramesOverlay", methods = ["GET", "POST"])
 @login_required

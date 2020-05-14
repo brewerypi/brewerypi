@@ -5,7 +5,7 @@ layout = html.Div(children =
 [
     dcc.Location(id = "url"),
     dcc.Interval(id = "interval", n_intervals = 0, disabled = True),
-    html.Div(className = "page-header", children = [html.H1("Event Frames Graph")]),
+    html.Div(className = "page-header", children = [html.H1("Event Frame Graph")]),
     html.Div(children =
     [
         dcc.Dropdown(id = "enterpriseDropdown", placeholder = "Select Enterprise", multi = False),
