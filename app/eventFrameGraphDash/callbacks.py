@@ -68,7 +68,7 @@ def registerCallbacks(dashApp):
         Input(component_id = "eventFrameTemplateViewDropdown", component_property = "value")])
     def graphFigure(eventFrameDropdownValue, eventFrameTemplateViewDropdownValue):
         if eventFrameDropdownValue is None:
-            raise PreventUpdate
+            return {"data": []}
 
         eventFrame = EventFrame.query.get(eventFrameDropdownValue)
         data = []
