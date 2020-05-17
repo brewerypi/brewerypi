@@ -8,14 +8,6 @@ layout = html.Div(children =
     html.Div(className = "page-header", children = [html.H1("Tag Values Graph")]),
     html.Div(children =
     [
-        dcc.Dropdown(id = "enterpriseDropdown", placeholder = "Select Enterprise(s)", multi = True),
-        dcc.Dropdown(id = "siteDropdown", placeholder = "Select Site(s)", multi = True),
-        dcc.Dropdown(id = "areaDropdown", placeholder = "Select Area(s)", multi = True),
-        dcc.Dropdown(id = "tagDropdown", placeholder = "Select Tag(s)", multi = True)
-    ]),
-    html.Br(),
-    html.Div(children =
-    [
         "From: ", 
         dcc.Input(id = "fromTimestampInput", type = "datetime-local"),
         " to: ",
@@ -44,6 +36,14 @@ layout = html.Div(children =
                 ])
             ])
         ])
+    ]),
+    html.Br(),
+    html.Div(children =
+    [
+        dcc.Dropdown(id = "enterpriseDropdown", placeholder = "Select Enterprise(s)", multi = True),
+        dcc.Dropdown(id = "siteDropdown", placeholder = "Select Site(s)", multi = True),
+        dcc.Dropdown(id = "areaDropdown", placeholder = "Select Area(s)", multi = True),
+        dcc.Dropdown(id = "tagDropdown", placeholder = "Select Tag(s)", multi = True)
     ]),
     dcc.Graph(id = "graph")
 ])
