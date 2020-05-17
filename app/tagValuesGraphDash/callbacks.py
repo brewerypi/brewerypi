@@ -50,9 +50,9 @@ def registerCallbacks(dashApp):
             if enterpriseDropdownOptions:
                 queryString = parse_qs(urlparse(urlHref).query)
                 if "enterpriseId" in queryString:
-                    for urlHrefEnterpriseId in map(int, queryString["enterpriseId"]):
-                        if len(list(filter(lambda enterprise: enterprise["value"] == urlHrefEnterpriseId, enterpriseDropdownOptions))) > 0:
-                            enterpriseDropdownValues.append(urlHrefEnterpriseId)
+                    for enterpriseId in map(int, queryString["enterpriseId"]):
+                        if len(list(filter(lambda enterprise: enterprise["value"] == enterpriseId, enterpriseDropdownOptions))) > 0:
+                            enterpriseDropdownValues.append(enterpriseId)
 
         return enterpriseDropdownValues
 
@@ -76,10 +76,9 @@ def registerCallbacks(dashApp):
             if siteDropdownOptions:
                 queryString = parse_qs(urlparse(urlHref).query)
                 if "siteId" in queryString:
-                    urlHrefSiteId = int(queryString["siteId"][0])
-                    for urlHrefSiteId in map(int, queryString["siteId"]):
-                        if len(list(filter(lambda site: site["value"] == urlHrefSiteId, siteDropdownOptions))) > 0:
-                            siteDropdownValues.append(urlHrefSiteId)
+                    for siteId in map(int, queryString["siteId"]):
+                        if len(list(filter(lambda site: site["value"] == siteId, siteDropdownOptions))) > 0:
+                            siteDropdownValues.append(siteId)
 
         return siteDropdownValues
 
@@ -104,10 +103,9 @@ def registerCallbacks(dashApp):
             if areaDropdownOptions:
                 queryString = parse_qs(urlparse(urlHref).query)
                 if "areaId" in queryString:
-                    urlHrefAreaId = int(queryString["areaId"][0])
-                    for urlHrefAreaId in map(int, queryString["areaId"]):
-                        if len(list(filter(lambda area: area["value"] == urlHrefAreaId, areaDropdownOptions))) > 0:
-                            areaDropdownValues.append(urlHrefAreaId)
+                    for areaId in map(int, queryString["areaId"]):
+                        if len(list(filter(lambda area: area["value"] == areaId, areaDropdownOptions))) > 0:
+                            areaDropdownValues.append(areaId)
 
         return areaDropdownValues
 
@@ -132,10 +130,9 @@ def registerCallbacks(dashApp):
             if tagDropdownOptions:
                 queryString = parse_qs(urlparse(urlHref).query)
                 if "tagId" in queryString:
-                    urlHrefTagId = int(queryString["tagId"][0])
-                    for urlHrefTagId in map(int, queryString["tagId"]):
-                        if len(list(filter(lambda tag: tag["value"] == urlHrefTagId, tagDropdownOptions))) > 0:
-                            tagDropdownValues.append(urlHrefTagId)
+                    for tagId in map(int, queryString["tagId"]):
+                        if len(list(filter(lambda tag: tag["value"] == tagId, tagDropdownOptions))) > 0:
+                            tagDropdownValues.append(tagId)
 
         return tagDropdownValues
 

@@ -19,9 +19,9 @@ def registerCallbacks(dashApp):
             if enterpriseDropdownOptions:
                 queryString = parse_qs(urlparse(urlHref).query)
                 if "enterpriseId" in queryString:
-                    urlHrefEnterpriseId = int(queryString["enterpriseId"][0])                
-                    if len(list(filter(lambda enterprise: enterprise["value"] == urlHrefEnterpriseId, enterpriseDropdownOptions))) > 0:
-                        enterpriseDropdownValue = urlHrefEnterpriseId
+                    enterpriseId = int(queryString["enterpriseId"][0])                
+                    if len(list(filter(lambda enterprise: enterprise["value"] == enterpriseId, enterpriseDropdownOptions))) > 0:
+                        enterpriseDropdownValue = enterpriseId
 
         return enterpriseDropdownValue
 
@@ -40,9 +40,9 @@ def registerCallbacks(dashApp):
             if siteDropdownOptions:
                 queryString = parse_qs(urlparse(urlHref).query)
                 if "siteId" in queryString:
-                    urlHrefSiteId = int(queryString["siteId"][0])                
-                    if len(list(filter(lambda site: site["value"] == urlHrefSiteId, siteDropdownOptions))) > 0:
-                        siteDropdownValue = urlHrefSiteId
+                    siteId = int(queryString["siteId"][0])                
+                    if len(list(filter(lambda site: site["value"] == siteId, siteDropdownOptions))) > 0:
+                        siteDropdownValue = siteId
 
         return siteDropdownValue
 
@@ -61,9 +61,9 @@ def registerCallbacks(dashApp):
             if elementTemplateDropdownOptions:
                 queryString = parse_qs(urlparse(urlHref).query)
                 if "elementTemplateId" in queryString:
-                    urlHrefElementTemplateId = int(queryString["elementTemplateId"][0])                
-                    if len(list(filter(lambda elementTemplate: elementTemplate["value"] == urlHrefElementTemplateId, elementTemplateDropdownOptions))) > 0:
-                        elementTemplateDropdownValue = urlHrefElementTemplateId
+                    elementTemplateId = int(queryString["elementTemplateId"][0])                
+                    if len(list(filter(lambda elementTemplate: elementTemplate["value"] == elementTemplateId, elementTemplateDropdownOptions))) > 0:
+                        elementTemplateDropdownValue = elementTemplateId
 
         return elementTemplateDropdownValue
 
@@ -82,10 +82,10 @@ def registerCallbacks(dashApp):
             if eventFrameTemplateDropdownOptions:
                 queryString = parse_qs(urlparse(urlHref).query)
                 if "eventFrameTemplateId" in queryString:
-                    urlHrefEventFrameTemplateId = int(queryString["eventFrameTemplateId"][0])                
-                    if len(list(filter(lambda eventFrameTemplate: eventFrameTemplate["value"] == urlHrefEventFrameTemplateId,
+                    eventFrameTemplateId = int(queryString["eventFrameTemplateId"][0])                
+                    if len(list(filter(lambda eventFrameTemplate: eventFrameTemplate["value"] == eventFrameTemplateId,
                         eventFrameTemplateDropdownOptions))) > 0:
-                        eventFrameTemplateDropdownValue = urlHrefEventFrameTemplateId
+                        eventFrameTemplateDropdownValue = eventFrameTemplateId
 
         return eventFrameTemplateDropdownValue
 
@@ -104,9 +104,9 @@ def registerCallbacks(dashApp):
             if eventFrameDropdownOptions:
                 queryString = parse_qs(urlparse(urlHref).query)
                 if "eventFrameId" in queryString:
-                    urlHrefEventFrameId = int(queryString["eventFrameId"][0])                
-                    if len(list(filter(lambda eventFrame: eventFrame["value"] == urlHrefEventFrameId, eventFrameDropdownOptions))) > 0:
-                        eventFrameDropdownValue = urlHrefEventFrameId
+                    eventFrameId = int(queryString["eventFrameId"][0])                
+                    if len(list(filter(lambda eventFrame: eventFrame["value"] == eventFrameId, eventFrameDropdownOptions))) > 0:
+                        eventFrameDropdownValue = eventFrameId
 
         return eventFrameDropdownValue
 
