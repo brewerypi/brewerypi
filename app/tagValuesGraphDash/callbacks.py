@@ -9,11 +9,6 @@ from urllib.parse import parse_qs, urlparse
 from app.models import Area, Enterprise, LookupValue, Site, Tag, TagValue, TagValueNote
 
 def registerCallbacks(dashApp):
-    @dashApp.callback(Output(component_id = "enterpriseDropdown", component_property = "options"),
-        [Input(component_id = "url", component_property = "href")])
-    def enterpriseDropDownOptions(urlHref):
-        return [{"label": enterprise.Name, "value": enterprise.EnterpriseId} for enterprise in Enterprise.query.order_by(Enterprise.Name).all()]
-
     @dashApp.callback(Output(component_id = "fromTimestampInput", component_property = "value"),
         [Input(component_id = "url", component_property = "href")])
     def fromTimestampValue(urlHref):
@@ -40,6 +35,11 @@ def registerCallbacks(dashApp):
         utcNow = pytz.utc.localize(datetime.utcnow())
         localNow = utcNow.astimezone(localTimezone)
         return localNow.strftime("%Y-%m-%dT%H:%M:%S")
+
+    @dashApp.callback(Output(component_id = "enterpriseDropdown", component_property = "options"),
+        [Input(component_id = "url", component_property = "href")])
+    def enterpriseDropDownOptions(urlHref):
+        return [{"label": enterprise.Name, "value": enterprise.EnterpriseId} for enterprise in Enterprise.query.order_by(Enterprise.Name).all()]
 
     @dashApp.callback(Output(component_id = "enterpriseDropdown", component_property = "value"),
         [Input(component_id = "enterpriseDropdown", component_property = "options"),
