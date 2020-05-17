@@ -1,10 +1,40 @@
 import dash
+import pytz
 from dash.dependencies import Input, Output, State
 from dash.exceptions import PreventUpdate
+from datetime import datetime
+from dateutil.relativedelta import relativedelta
 from urllib.parse import parse_qs, urlparse
 from app.models import ElementTemplate, Enterprise, EventFrame, EventFrameTemplate, EventFrameTemplateView, Site
 
 def registerCallbacks(dashApp):
+    @dashApp.callback(Output(component_id = "fromTimestampInput", component_property = "value"),
+        [Input(component_id = "url", component_property = "href")])
+    def fromTimestampValue(urlHref):
+        queryString = parse_qs(urlparse(urlHref).query)
+        if "localTimezone" in queryString:
+            localTimezone = pytz.timezone(queryString["localTimezone"][0])
+        else:
+            localTimezone = pytz.utc
+
+        utcNow = pytz.utc.localize(datetime.utcnow())
+        localNow = utcNow.astimezone(localTimezone)
+        return (localNow - relativedelta(months = 3)).strftime("%Y-%m-%dT%H:%M:%S")
+
+    @dashApp.callback(Output(component_id = "toTimestampInput", component_property = "value"),
+        [Input(component_id = "url", component_property = "href"),
+        Input(component_id = "interval", component_property = "n_intervals")])
+    def toTimestampValues(urlHref, intervalNIntervals):
+        queryString = parse_qs(urlparse(urlHref).query)
+        if "localTimezone" in queryString:
+            localTimezone = pytz.timezone(queryString["localTimezone"][0])
+        else:
+            localTimezone = pytz.utc
+
+        utcNow = pytz.utc.localize(datetime.utcnow())
+        localNow = utcNow.astimezone(localTimezone)
+        return localNow.strftime("%Y-%m-%dT%H:%M:%S")
+
     @dashApp.callback(Output(component_id = "enterpriseDropdown", component_property = "options"),
         [Input(component_id = "url", component_property = "href")])
     def enterpriseDropDownOptions(urlHref):
