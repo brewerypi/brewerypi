@@ -1,3 +1,4 @@
+import dash
 from dash.dependencies import Input, Output, State
 from dash.exceptions import PreventUpdate
 from urllib.parse import parse_qs, urlparse
@@ -13,42 +14,101 @@ def registerCallbacks(dashApp):
         [Input(component_id = "enterpriseDropdown", component_property = "options"),
         Input(component_id = "url", component_property = "href")])
     def enterpriseDropdownValue(enterpriseDropdownOptions, urlHref):
-        if enterpriseDropdownOptions is None:
-            raise PreventUpdate
-        else:
-            queryString = parse_qs(urlparse(urlHref).query)
-            if "enterpriseId" in queryString:
-                return int(queryString["enterpriseId"][0])
-            else:
-                return enterpriseDropdownOptions[0]["value"]
+        enterpriseDropdownValue = None
+        if len(list(filter(lambda property: property["prop_id"] == "url.href", dash.callback_context.triggered))) > 0:
+            if enterpriseDropdownOptions:
+                queryString = parse_qs(urlparse(urlHref).query)
+                if "enterpriseId" in queryString:
+                    urlHrefEnterpriseId = int(queryString["enterpriseId"][0])                
+                    if len(list(filter(lambda enterprise: enterprise["value"] == urlHrefEnterpriseId, enterpriseDropdownOptions))) > 0:
+                        enterpriseDropdownValue = urlHrefEnterpriseId
 
-    @dashApp.callback([Output(component_id = "siteDropdown", component_property = "options"),
-        Output(component_id = "siteDropdown", component_property = "value")],
+        return enterpriseDropdownValue
+
+    @dashApp.callback(Output(component_id = "siteDropdown", component_property = "options"),
         [Input(component_id = "enterpriseDropdown", component_property = "value")])
     def siteDropdownOptions(enterpriseDropdownValue):
-        return [[{"label": site.Name, "value": site.SiteId} for site in Site.query.filter_by(EnterpriseId = enterpriseDropdownValue). \
-            order_by(Site.Name).all()], None]
+        return [{"label": site.Name, "value": site.SiteId} for site in Site.query.filter_by(EnterpriseId = enterpriseDropdownValue). \
+            order_by(Site.Name).all()]
 
-    @dashApp.callback([Output(component_id = "elementTemplateDropdown", component_property = "options"),
-        Output(component_id = "elementTemplateDropdown", component_property = "value")],
+    @dashApp.callback(Output(component_id = "siteDropdown", component_property = "value"),
+        [Input(component_id = "siteDropdown", component_property = "options"),
+        Input(component_id = "url", component_property = "href")])
+    def siteDropdownValue(siteDropdownOptions, urlHref):
+        siteDropdownValue = None
+        if len(list(filter(lambda property: property["prop_id"] == "url.href", dash.callback_context.triggered))) > 0:
+            if siteDropdownOptions:
+                queryString = parse_qs(urlparse(urlHref).query)
+                if "siteId" in queryString:
+                    urlHrefSiteId = int(queryString["siteId"][0])                
+                    if len(list(filter(lambda site: site["value"] == urlHrefSiteId, siteDropdownOptions))) > 0:
+                        siteDropdownValue = urlHrefSiteId
+
+        return siteDropdownValue
+
+    @dashApp.callback(Output(component_id = "elementTemplateDropdown", component_property = "options"),
         [Input(component_id = "siteDropdown", component_property = "value")])
     def elementTemplateDropdownOptions(siteDropdownValue):
-        return [[{"label": elementTemplate.Name, "value": elementTemplate.ElementTemplateId} for elementTemplate in ElementTemplate.query. \
-            filter_by(SiteId = siteDropdownValue).order_by(ElementTemplate.Name).all()], None]
+        return [{"label": elementTemplate.Name, "value": elementTemplate.ElementTemplateId} for elementTemplate in ElementTemplate.query. \
+            filter_by(SiteId = siteDropdownValue).order_by(ElementTemplate.Name).all()]
 
-    @dashApp.callback([Output(component_id = "eventFrameTemplateDropdown", component_property = "options"),
-        Output(component_id = "eventFrameTemplateDropdown", component_property = "value")],
+    @dashApp.callback(Output(component_id = "elementTemplateDropdown", component_property = "value"),
+        [Input(component_id = "elementTemplateDropdown", component_property = "options"),
+        Input(component_id = "url", component_property = "href")])
+    def elementTemplateDropdownValue(elementTemplateDropdownOptions, urlHref):
+        elementTemplateDropdownValue = None
+        if len(list(filter(lambda property: property["prop_id"] == "url.href", dash.callback_context.triggered))) > 0:
+            if elementTemplateDropdownOptions:
+                queryString = parse_qs(urlparse(urlHref).query)
+                if "elementTemplateId" in queryString:
+                    urlHrefElementTemplateId = int(queryString["elementTemplateId"][0])                
+                    if len(list(filter(lambda elementTemplate: elementTemplate["value"] == urlHrefElementTemplateId, elementTemplateDropdownOptions))) > 0:
+                        elementTemplateDropdownValue = urlHrefElementTemplateId
+
+        return elementTemplateDropdownValue
+
+    @dashApp.callback(Output(component_id = "eventFrameTemplateDropdown", component_property = "options"),
         [Input(component_id = "elementTemplateDropdown", component_property = "value")])
     def eventFrameTemplateDropdownOptions(elementTemplateDropdownValue):
-        return [[{"label": eventFrameTemplate.Name, "value": eventFrameTemplate.EventFrameTemplateId} for eventFrameTemplate in EventFrameTemplate.query. \
-            filter_by(ElementTemplateId = elementTemplateDropdownValue).order_by(EventFrameTemplate.Name).all()], None]
+        return [{"label": eventFrameTemplate.Name, "value": eventFrameTemplate.EventFrameTemplateId} for eventFrameTemplate in EventFrameTemplate.query. \
+            filter_by(ElementTemplateId = elementTemplateDropdownValue).order_by(EventFrameTemplate.Name).all()]
 
-    @dashApp.callback([Output(component_id = "eventFrameDropdown", component_property = "options"),
-        Output(component_id = "eventFrameDropdown", component_property = "value")],
+    @dashApp.callback(Output(component_id = "eventFrameTemplateDropdown", component_property = "value"),
+        [Input(component_id = "eventFrameTemplateDropdown", component_property = "options"),
+        Input(component_id = "url", component_property = "href")])
+    def eventFrameTemplateDropdownValue(eventFrameTemplateDropdownOptions, urlHref):
+        eventFrameTemplateDropdownValue = None
+        if len(list(filter(lambda property: property["prop_id"] == "url.href", dash.callback_context.triggered))) > 0:
+            if eventFrameTemplateDropdownOptions:
+                queryString = parse_qs(urlparse(urlHref).query)
+                if "eventFrameTemplateId" in queryString:
+                    urlHrefEventFrameTemplateId = int(queryString["eventFrameTemplateId"][0])                
+                    if len(list(filter(lambda eventFrameTemplate: eventFrameTemplate["value"] == urlHrefEventFrameTemplateId,
+                        eventFrameTemplateDropdownOptions))) > 0:
+                        eventFrameTemplateDropdownValue = urlHrefEventFrameTemplateId
+
+        return eventFrameTemplateDropdownValue
+
+    @dashApp.callback(Output(component_id = "eventFrameDropdown", component_property = "options"),
         [Input(component_id = "eventFrameTemplateDropdown", component_property = "value")])
     def eventFrameDropdownOptions(eventFrameTemplateDropdownValue):
-        return [[{"label": eventFrame.Name, "value": eventFrame.EventFrameId} for eventFrame in EventFrame.query. \
-            filter_by(EventFrameTemplateId = eventFrameTemplateDropdownValue).order_by(EventFrame.StartTimestamp.desc()).all()], None]
+        return [{"label": eventFrame.Name, "value": eventFrame.EventFrameId} for eventFrame in EventFrame.query. \
+            filter_by(EventFrameTemplateId = eventFrameTemplateDropdownValue).order_by(EventFrame.StartTimestamp.desc()).all()]
+
+    @dashApp.callback(Output(component_id = "eventFrameDropdown", component_property = "value"),
+        [Input(component_id = "eventFrameDropdown", component_property = "options"),
+        Input(component_id = "url", component_property = "href")])
+    def eventFrameDropdownValue(eventFrameDropdownOptions, urlHref):
+        eventFrameDropdownValue = None
+        if len(list(filter(lambda property: property["prop_id"] == "url.href", dash.callback_context.triggered))) > 0:
+            if eventFrameDropdownOptions:
+                queryString = parse_qs(urlparse(urlHref).query)
+                if "eventFrameId" in queryString:
+                    urlHrefEventFrameId = int(queryString["eventFrameId"][0])                
+                    if len(list(filter(lambda eventFrame: eventFrame["value"] == urlHrefEventFrameId, eventFrameDropdownOptions))) > 0:
+                        eventFrameDropdownValue = urlHrefEventFrameId
+
+        return eventFrameDropdownValue
 
     @dashApp.callback([Output(component_id = "eventFrameTemplateViewDropdown", component_property = "options"),
         Output(component_id = "eventFrameTemplateViewDropdown", component_property = "value")],
