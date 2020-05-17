@@ -9,9 +9,9 @@ from urllib.parse import parse_qs, urlparse
 from app.models import Area, Enterprise, LookupValue, Site, Tag, TagValue, TagValueNote
 
 def registerCallbacks(dashApp):
-    @dashApp.callback(Output(component_id = "enterprisesDropdown", component_property = "options"),
+    @dashApp.callback(Output(component_id = "enterpriseDropdown", component_property = "options"),
         [Input(component_id = "url", component_property = "href")])
-    def enterprisesDropDownOptions(urlHref):
+    def enterpriseDropDownOptions(urlHref):
         return [{"label": enterprise.Name, "value": enterprise.EnterpriseId} for enterprise in Enterprise.query.order_by(Enterprise.Name).all()]
 
     @dashApp.callback(Output(component_id = "fromTimestampInput", component_property = "value"),
@@ -41,103 +41,103 @@ def registerCallbacks(dashApp):
         localNow = utcNow.astimezone(localTimezone)
         return localNow.strftime("%Y-%m-%dT%H:%M:%S")
 
-    @dashApp.callback(Output(component_id = "enterprisesDropdown", component_property = "value"),
-        [Input(component_id = "enterprisesDropdown", component_property = "options"),
+    @dashApp.callback(Output(component_id = "enterpriseDropdown", component_property = "value"),
+        [Input(component_id = "enterpriseDropdown", component_property = "options"),
         Input(component_id = "url", component_property = "href")])
-    def enterprisesDropdownValue(enterprisesDropdownOptions, urlHref):
-        if enterprisesDropdownOptions is None:
+    def enterpriseDropdownValue(enterpriseDropdownOptions, urlHref):
+        if enterpriseDropdownOptions is None:
             raise PreventUpdate
         else:
             queryString = parse_qs(urlparse(urlHref).query)
             if "enterpriseId" in queryString:
                 return [int(queryString["enterpriseId"][0])]
             else:
-                return [enterprisesDropdownOptions[0]["value"]]
+                return [enterpriseDropdownOptions[0]["value"]]
 
-    @dashApp.callback(Output(component_id = "sitesDropdown", component_property = "options"),
-        [Input(component_id = "enterprisesDropdown", component_property = "value")])
-    def sitesDropdownOptions(enterprisesDropdownValues):
-        if enterprisesDropdownValues is None:
+    @dashApp.callback(Output(component_id = "siteDropdown", component_property = "options"),
+        [Input(component_id = "enterpriseDropdown", component_property = "value")])
+    def siteDropdownOptions(enterpriseDropdownValues):
+        if enterpriseDropdownValues is None:
             raise PreventUpdate
         else:
             return [{"label": "{}_{}".format(site.Enterprise.Abbreviation, site.Name), "value": site.SiteId} for site in 
-                Site.query.join(Enterprise).filter(Site.EnterpriseId.in_(enterprisesDropdownValues)).order_by(Enterprise.Abbreviation, Site.Name).all()]
+                Site.query.join(Enterprise).filter(Site.EnterpriseId.in_(enterpriseDropdownValues)).order_by(Enterprise.Abbreviation, Site.Name).all()]
 
-    @dashApp.callback(Output(component_id = "sitesDropdown", component_property = "value"),
-        [Input(component_id = "sitesDropdown", component_property = "options"),
+    @dashApp.callback(Output(component_id = "siteDropdown", component_property = "value"),
+        [Input(component_id = "siteDropdown", component_property = "options"),
         Input(component_id = "url", component_property = "href")],
-        [State(component_id = "sitesDropdown", component_property = "value")])
-    def sitesDropdownValue(sitesDropdownOptions, urlHref, sitesDropdownSelectedValues):
-        if sitesDropdownSelectedValues is None:
+        [State(component_id = "siteDropdown", component_property = "value")])
+    def siteDropdownValue(siteDropdownOptions, urlHref, siteDropdownSelectedValues):
+        if siteDropdownSelectedValues is None:
             queryString = parse_qs(urlparse(urlHref).query)
             if "siteId" in queryString:
                 return [int(queryString["siteId"][0])]
             else:
                 raise PreventUpdate
         else:
-            return list(set([sitesDropdownOption["value"] for sitesDropdownOption in sitesDropdownOptions]) & set(sitesDropdownSelectedValues))
+            return list(set([siteDropdownOption["value"] for siteDropdownOption in siteDropdownOptions]) & set(siteDropdownSelectedValues))
 
-    @dashApp.callback(Output(component_id = "areasDropdown", component_property = "options"),
-        [Input(component_id = "sitesDropdown", component_property = "value")])
-    def areasDropdownOptions(sitesDropdownValues):
-        if sitesDropdownValues is None:
+    @dashApp.callback(Output(component_id = "areaDropdown", component_property = "options"),
+        [Input(component_id = "siteDropdown", component_property = "value")])
+    def areaDropdownOptions(siteDropdownValues):
+        if siteDropdownValues is None:
             raise PreventUpdate
         else:
             return [{"label": "{}_{}_{}".format(area.Site.Enterprise.Abbreviation, area.Site.Abbreviation, area.Name), "value": area.AreaId} for area in 
-                Area.query.join(Site, Enterprise).filter(Area.SiteId.in_(sitesDropdownValues)). \
+                Area.query.join(Site, Enterprise).filter(Area.SiteId.in_(siteDropdownValues)). \
                 order_by(Enterprise.Abbreviation, Site.Abbreviation, Area.Name).all()]
 
-    @dashApp.callback(Output(component_id = "areasDropdown", component_property = "value"),
-        [Input(component_id = "areasDropdown", component_property = "options"),
+    @dashApp.callback(Output(component_id = "areaDropdown", component_property = "value"),
+        [Input(component_id = "areaDropdown", component_property = "options"),
         Input(component_id = "url", component_property = "href")],
-        [State(component_id = "areasDropdown", component_property = "value")])
-    def areasDropdownValue(areasDropdownOptions, urlHref, areasDropdownSelectedValues):
-        if areasDropdownSelectedValues is None:
+        [State(component_id = "areaDropdown", component_property = "value")])
+    def areaDropdownValue(areaDropdownOptions, urlHref, areaDropdownSelectedValues):
+        if areaDropdownSelectedValues is None:
             queryString = parse_qs(urlparse(urlHref).query)
             if "areaId" in queryString:
                 return [int(queryString["areaId"][0])]
             else:
                 raise PreventUpdate
         else:
-            return list(set([areasDropdownOption["value"] for areasDropdownOption in areasDropdownOptions]) & set(areasDropdownSelectedValues))
+            return list(set([areaDropdownOption["value"] for areaDropdownOption in areaDropdownOptions]) & set(areaDropdownSelectedValues))
 
-    @dashApp.callback(Output(component_id = "tagsDropdown", component_property = "options"),
-        [Input(component_id = "areasDropdown", component_property = "value")])
-    def tagsDropdownOptions(areasDropdownValues):
-        if areasDropdownValues is None:
+    @dashApp.callback(Output(component_id = "tagDropdown", component_property = "options"),
+        [Input(component_id = "areaDropdown", component_property = "value")])
+    def tagDropdownOptions(areaDropdownValues):
+        if areaDropdownValues is None:
             raise PreventUpdate
         else:
             return [{"label": "{}_{}_{}_{}".format(tag.Area.Site.Enterprise.Abbreviation, tag.Area.Site.Abbreviation, tag.Area.Abbreviation, tag.Name),
-                "value": tag.TagId} for tag in Tag.query.join(Area, Site, Enterprise).filter(Tag.AreaId.in_(areasDropdownValues)).\
+                "value": tag.TagId} for tag in Tag.query.join(Area, Site, Enterprise).filter(Tag.AreaId.in_(areaDropdownValues)).\
                 order_by(Enterprise.Abbreviation, Site.Abbreviation, Area.Abbreviation, Tag.Name).all()]
 
-    @dashApp.callback(Output(component_id = "tagsDropdown", component_property = "value"),
-        [Input(component_id = "tagsDropdown", component_property = "options"),
+    @dashApp.callback(Output(component_id = "tagDropdown", component_property = "value"),
+        [Input(component_id = "tagDropdown", component_property = "options"),
         Input(component_id = "url", component_property = "href")],
-        [State(component_id = "tagsDropdown", component_property = "value")])
-    def tagsDropdownValue(tagsDropdownOptions, urlHref, tagsDropdownSelectedValues):
-        if tagsDropdownSelectedValues is None:
+        [State(component_id = "tagDropdown", component_property = "value")])
+    def tagDropdownValue(tagDropdownOptions, urlHref, tagDropdownSelectedValues):
+        if tagDropdownSelectedValues is None:
             queryString = parse_qs(urlparse(urlHref).query)
             if "tagId" in queryString:
                 return [int(queryString["tagId"][0])]
             else:
                 raise PreventUpdate
         else:
-            return list(set([tagsDropdownOption["value"] for tagsDropdownOption in tagsDropdownOptions]) & set(tagsDropdownSelectedValues))
+            return list(set([tagDropdownOption["value"] for tagDropdownOption in tagDropdownOptions]) & set(tagDropdownSelectedValues))
 
     @dashApp.callback(Output(component_id = "graph", component_property = "figure"),
         [Input(component_id = "fromTimestampInput", component_property = "value"),
         Input(component_id = "toTimestampInput", component_property = "value"),
-        Input(component_id = "tagsDropdown", component_property = "value"),
+        Input(component_id = "tagDropdown", component_property = "value"),
         Input(component_id = "url", component_property = "href"),
         Input(component_id = "interval", component_property = "n_intervals"),
         Input(component_id = "refreshButton", component_property = "n_clicks")])
-    def graphFigure(fromTimestampInputValue, toTimestampInputValue, tagsDropdownValues, urlHref, intervalNIntervals, refreshButtonNClicks):
-        if fromTimestampInputValue is None or toTimestampInputValue is None or tagsDropdownValues is None:
+    def graphFigure(fromTimestampInputValue, toTimestampInputValue, tagDropdownValues, urlHref, intervalNIntervals, refreshButtonNClicks):
+        if fromTimestampInputValue is None or toTimestampInputValue is None or tagDropdownValues is None:
             raise PreventUpdate
         else:
             data = []
-            if fromTimestampInputValue!= "" and toTimestampInputValue != "" and tagsDropdownValues is not None:
+            if fromTimestampInputValue!= "" and toTimestampInputValue != "" and tagDropdownValues is not None:
                 queryString = parse_qs(urlparse(urlHref).query)
                 if "localTimezone" in queryString:
                     localTimezone = pytz.timezone(queryString["localTimezone"][0])
@@ -149,7 +149,7 @@ def registerCallbacks(dashApp):
                 fromTimestampUtc = fromTimestampLocal.astimezone(pytz.utc)
                 toTimestampUtc = toTimestampLocal.astimezone(pytz.utc)
 
-                for tagId in tagsDropdownValues:
+                for tagId in tagDropdownValues:
                     tag = Tag.query.get(tagId)
                     tagValues = TagValue.query.filter(TagValue.TagId == tag.TagId, TagValue.Timestamp >= fromTimestampUtc, TagValue.Timestamp <= toTimestampUtc)
                     tagValueNotes = TagValueNote.query.join(TagValue).filter(TagValue.TagId == tagId, TagValue.Timestamp >= fromTimestampUtc,

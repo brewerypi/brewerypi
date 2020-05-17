@@ -8,10 +8,10 @@ layout = html.Div(children =
     html.Div(className = "page-header", children = [html.H1("Tag Values Graph")]),
     html.Div(children =
     [
-        dcc.Dropdown(id = "enterprisesDropdown", placeholder = "Select Enterprise(s)", multi = True),
-        dcc.Dropdown(id = "sitesDropdown", placeholder = "Select Site(s)", multi = True),
-        dcc.Dropdown(id = "areasDropdown", placeholder = "Select Area(s)", multi = True),
-        dcc.Dropdown(id = "tagsDropdown", placeholder = "Select Tag(s)", multi = True)
+        dcc.Dropdown(id = "enterpriseDropdown", placeholder = "Select Enterprise(s)", multi = True),
+        dcc.Dropdown(id = "siteDropdown", placeholder = "Select Site(s)", multi = True),
+        dcc.Dropdown(id = "areaDropdown", placeholder = "Select Area(s)", multi = True),
+        dcc.Dropdown(id = "tagDropdown", placeholder = "Select Tag(s)", multi = True)
     ]),
     html.Br(),
     html.Div(children =
