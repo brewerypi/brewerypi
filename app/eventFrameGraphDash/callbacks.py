@@ -5,7 +5,7 @@ from dash.exceptions import PreventUpdate
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 from urllib.parse import parse_qs, urlparse
-from app.models import ElementTemplate, Enterprise, EventFrame, EventFrameTemplate, EventFrameTemplateView, Site
+from app.models import ElementTemplate, Enterprise, EventFrame, EventFrameTemplate, EventFrameTemplateView, LookupValue, Site
 
 def registerCallbacks(dashApp):
     @dashApp.callback(Output(component_id = "fromTimestampInput", component_property = "value"),
@@ -19,7 +19,14 @@ def registerCallbacks(dashApp):
 
         utcNow = pytz.utc.localize(datetime.utcnow())
         localNow = utcNow.astimezone(localTimezone)
-        return (localNow - relativedelta(months = 3)).strftime("%Y-%m-%dT%H:%M:%S")
+        timestamp = (localNow - relativedelta(months = 3)).strftime("%Y-%m-%dT%H:%M")
+        if "eventFrameId" in queryString:
+            eventFrameId = int(queryString["eventFrameId"][0])
+            eventFrame = EventFrame.query.get(eventFrameId)
+            if eventFrame is not None:
+                timestamp = eventFrame.StartTimestamp.strftime("%Y-%m-%dT%H:%M")
+
+        return timestamp
 
     @dashApp.callback(Output(component_id = "toTimestampInput", component_property = "value"),
         [Input(component_id = "url", component_property = "href"),
@@ -33,7 +40,14 @@ def registerCallbacks(dashApp):
 
         utcNow = pytz.utc.localize(datetime.utcnow())
         localNow = utcNow.astimezone(localTimezone)
-        return localNow.strftime("%Y-%m-%dT%H:%M:%S")
+        timestamp = localNow.strftime("%Y-%m-%dT%H:%M")
+        if "eventFrameId" in queryString:
+            eventFrameId = int(queryString["eventFrameId"][0])
+            eventFrame = EventFrame.query.get(eventFrameId)
+            if eventFrame is not None:
+                timestamp = (eventFrame.EndTimestamp + relativedelta(minutes = 1)).strftime("%Y-%m-%dT%H:%M")
+
+        return timestamp
 
     @dashApp.callback(Output(component_id = "enterpriseDropdown", component_property = "options"),
         [Input(component_id = "url", component_property = "href")])
@@ -120,10 +134,28 @@ def registerCallbacks(dashApp):
         return eventFrameTemplateDropdownValue
 
     @dashApp.callback(Output(component_id = "eventFrameDropdown", component_property = "options"),
-        [Input(component_id = "eventFrameTemplateDropdown", component_property = "value")])
-    def eventFrameDropdownOptions(eventFrameTemplateDropdownValue):
+        [Input(component_id = "eventFrameTemplateDropdown", component_property = "value"),
+        Input(component_id = "fromTimestampInput", component_property = "value"),
+        Input(component_id = "toTimestampInput", component_property = "value"),
+        Input(component_id = "url", component_property = "href")])
+    def eventFrameDropdownOptions(eventFrameTemplateDropdownValue, fromTimestampInputValue, toTimestampInputValue, urlHref):
+        if fromTimestampInputValue == "" or toTimestampInputValue == "":
+            raise PreventUpdate
+
+        queryString = parse_qs(urlparse(urlHref).query)
+        if "localTimezone" in queryString:
+            localTimezone = pytz.timezone(queryString["localTimezone"][0])
+        else:
+            localTimezone = pytz.utc
+
+        fromTimestampLocal = localTimezone.localize(datetime.strptime(fromTimestampInputValue, "%Y-%m-%dT%H:%M"))
+        toTimestampLocal = localTimezone.localize(datetime.strptime(toTimestampInputValue, "%Y-%m-%dT%H:%M"))
+        fromTimestampUtc = fromTimestampLocal.astimezone(pytz.utc)
+        toTimestampUtc = toTimestampLocal.astimezone(pytz.utc)
+
         return [{"label": eventFrame.Name, "value": eventFrame.EventFrameId} for eventFrame in EventFrame.query. \
-            filter_by(EventFrameTemplateId = eventFrameTemplateDropdownValue).order_by(EventFrame.StartTimestamp.desc()).all()]
+            filter(EventFrame.EventFrameTemplateId == eventFrameTemplateDropdownValue, EventFrame.StartTimestamp >= fromTimestampUtc,
+            EventFrame.EndTimestamp <= toTimestampUtc).order_by(EventFrame.StartTimestamp.desc()).all()]
 
     @dashApp.callback(Output(component_id = "eventFrameDropdown", component_property = "value"),
         [Input(component_id = "eventFrameDropdown", component_property = "options"),
@@ -154,27 +186,58 @@ def registerCallbacks(dashApp):
         return [eventFrameTemplateViews, -1]
 
     @dashApp.callback(Output(component_id = "graph", component_property = "figure"),
-        [Input(component_id = "eventFrameDropdown", component_property = "value"),
-        Input(component_id = "eventFrameTemplateViewDropdown", component_property = "value")])
-    def graphFigure(eventFrameDropdownValue, eventFrameTemplateViewDropdownValue):
+        [Input(component_id = "fromTimestampInput", component_property = "value"),
+        Input(component_id = "toTimestampInput", component_property = "value"),
+        Input(component_id = "eventFrameDropdown", component_property = "value"),
+        Input(component_id = "eventFrameTemplateViewDropdown", component_property = "value"),
+        Input(component_id = "url", component_property = "href"),
+        Input(component_id = "interval", component_property = "n_intervals"),
+        Input(component_id = "refreshButton", component_property = "n_clicks")])
+    def graphFigure(fromTimestampInputValue, toTimestampInputValue, eventFrameDropdownValue, eventFrameTemplateViewDropdownValue, urlHref, intervalNIntervals, refreshButtonNClicks):
         if eventFrameDropdownValue is None:
             return {"data": []}
 
+        if fromTimestampInputValue == "" or toTimestampInputValue == "":
+            raise PreventUpdate
+
         eventFrame = EventFrame.query.get(eventFrameDropdownValue)
         data = []
-        for tagValue in eventFrame.attributeValues(eventFrameTemplateViewDropdownValue):
+        queryString = parse_qs(urlparse(urlHref).query)
+        if "localTimezone" in queryString:
+            localTimezone = pytz.timezone(queryString["localTimezone"][0])
+        else:
+            localTimezone = pytz.utc
+
+        fromTimestampLocal = localTimezone.localize(datetime.strptime(fromTimestampInputValue, "%Y-%m-%dT%H:%M"))
+        toTimestampLocal = localTimezone.localize(datetime.strptime(toTimestampInputValue, "%Y-%m-%dT%H:%M"))
+        fromTimestampUtc = fromTimestampLocal.astimezone(pytz.utc)
+        toTimestampUtc = toTimestampLocal.astimezone(pytz.utc)
+
+        for attributeValue in eventFrame.attributeValues(eventFrameTemplateViewDropdownValue):
             # Search for tag name dict in list of dicts.
-            tags = list(filter(lambda tag: tag["name"] == tagValue.Tag.Name, data))
+            tags = list(filter(lambda tag: tag["name"] == attributeValue.Tag.Name, data))
             if len(tags) == 0:
                 # Tag name dict doesn't exist so append it to the list of dicts.
-                data.append(dict(x = [tagValue.Timestamp],
-                    y = [tagValue.Value],
-                    name = tagValue.Tag.Name,
-                    mode = "lines+markers"))
+                if attributeValue.Tag.LookupId is None:
+                    data.append(dict(x = [pytz.utc.localize(attributeValue.Timestamp).astimezone(localTimezone)],
+                        y = [attributeValue.Value],
+                        text = [attributeValue.Tag.UnitOfMeasurement.Abbreviation],
+                        name = attributeValue.Tag.Name,
+                        mode = "lines+markers"))
+                else:
+                    data.append(dict(x = [pytz.utc.localize(attributeValue.Timestamp).astimezone(localTimezone)],
+                        y = [attributeValue.Value],
+                        text = [LookupValue.query.filter_by(LookupId = attributeValue.Tag.LookupId, Value = attributeValue.Value).one().Name],
+                        name = attributeValue.Tag.Name,
+                        mode = "lines+markers"))
             else:
                 # Tag name dict already exists so append to x and y.
                 seriesDict = tags[0]
-                seriesDict["x"].append(tagValue.Timestamp)
-                seriesDict["y"].append(tagValue.Value)
+                seriesDict["x"].append(pytz.utc.localize(attributeValue.Timestamp).astimezone(localTimezone))
+                seriesDict["y"].append(attributeValue.Value)
+                if attributeValue.Tag.LookupId is None:
+                    seriesDict["text"].append(attributeValue.Tag.UnitOfMeasurement.Abbreviation)
+                else:
+                    seriesDict["text"].append(LookupValue.query.filter_by(LookupId = attributeValue.Tag.LookupId, Value = attributeValue.Value).one().Name)
 
         return {"data": data}

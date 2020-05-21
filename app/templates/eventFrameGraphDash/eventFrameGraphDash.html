@@ -4,6 +4,18 @@
 
 {% block page_content %}
     <div class = "embed-responsive embed-responsive-16by9">
-        <iframe class = "embed-responsive-item" src = '{{ url_for("/eventFrameGraphDash/") }}'></iframe>
+        <iframe id = "iframe" class = "embed-responsive-item"></iframe>
     </div>
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <script type = "text/javascript" src = {{ url_for("static", filename = "js/moment.min.js") }}></script>
+    <script type = "text/javascript" src = {{ url_for("static", filename = "js/moment-timezone-with-data.min.js") }}></script>
+    <script>
+        $(document).ready(function()
+        {
+            $("#iframe").attr("src", '{{ url_for("/eventFrameGraphDash/") }}' + "?localTimezone=" + moment.tz.guess(true))
+        })
+    </script>
 {% endblock %}
