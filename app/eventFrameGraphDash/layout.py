@@ -12,11 +12,10 @@ layout = html.Div(children =
         dcc.Input(id = "fromTimestampInput", type = "datetime-local"),
         " to: ",
         dcc.Input(id = "toTimestampInput", type = "datetime-local"),
-        html.Button(id  = "refreshButton", children = [html.Span(className = "glyphicon glyphicon-refresh")]),
+        html.Button(id = "refreshButton", children = [html.Span(className = "glyphicon glyphicon-refresh")]),
         html.Div(className = "btn-group", role = "group", children =
         [
-            html.Div(className = "btn-group", role = "group",
-            children =
+            html.Div(className = "btn-group", role = "group", children =
             [
                 html.Button(id = "refreshRateButton", className = "btn btn-default dropdown-toggle btn-sm", **{"data-toggle": "dropdown",
                     "aria-haspopup": "true", "aria-expanded": "false"}, children = ["Off ", html.Span(className = "caret")]),
