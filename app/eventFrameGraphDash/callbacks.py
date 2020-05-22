@@ -4,6 +4,7 @@ from dash.dependencies import Input, Output, State
 from dash.exceptions import PreventUpdate
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
+from sqlalchemy import or_
 from urllib.parse import parse_qs, urlparse
 from app.models import ElementTemplate, Enterprise, EventFrame, EventFrameTemplate, EventFrameTemplateView, LookupValue, Site
 
@@ -155,7 +156,7 @@ def registerCallbacks(dashApp):
 
         return [{"label": eventFrame.Name, "value": eventFrame.EventFrameId} for eventFrame in EventFrame.query. \
             filter(EventFrame.EventFrameTemplateId == eventFrameTemplateDropdownValue, EventFrame.StartTimestamp >= fromTimestampUtc,
-            EventFrame.EndTimestamp <= toTimestampUtc).order_by(EventFrame.StartTimestamp.desc()).all()]
+            or_(EventFrame.EndTimestamp <= toTimestampUtc, EventFrame.EndTimestamp == None)).order_by(EventFrame.StartTimestamp.desc()).all()]
 
     @dashApp.callback(Output(component_id = "eventFrameDropdown", component_property = "value"),
         [Input(component_id = "eventFrameDropdown", component_property = "options"),
