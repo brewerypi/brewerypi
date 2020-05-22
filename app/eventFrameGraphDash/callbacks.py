@@ -241,4 +241,12 @@ def registerCallbacks(dashApp):
                 else:
                     seriesDict["text"].append(LookupValue.query.filter_by(LookupId = attributeValue.Tag.LookupId, Value = attributeValue.Value).one().Name)
 
-        return {"data": data}
+        eventFrameStartTimestamp = pytz.utc.localize(eventFrame.StartTimestamp).astimezone(localTimezone)
+        shapes = [dict(type = "line", yref = "paper", y0 = 0, y1 = 1, x0 = eventFrameStartTimestamp, x1 = eventFrameStartTimestamp, line =
+            dict(width = 1, dash = "dot"))]
+        if eventFrame.EndTimestamp is not None:
+            eventFrameEndTimestamp = pytz.utc.localize(eventFrame.EndTimestamp).astimezone(localTimezone)
+            shapes.append(dict(type = "line", yref = "paper", y0 = 0, y1 = 1, x0 = eventFrameEndTimestamp, x1 = eventFrameEndTimestamp,
+                line = dict(width = 1, dash = "dot")))
+
+        return {"data": data, "layout": {"shapes": shapes}}
