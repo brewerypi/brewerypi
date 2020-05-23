@@ -160,18 +160,24 @@ def registerCallbacks(dashApp):
 
     @dashApp.callback(Output(component_id = "eventFrameDropdown", component_property = "value"),
         [Input(component_id = "eventFrameDropdown", component_property = "options"),
-        Input(component_id = "url", component_property = "href")])
-    def eventFrameDropdownValue(eventFrameDropdownOptions, urlHref):
-        eventFrameDropdownValue = None
+        Input(component_id = "url", component_property = "href")],
+        [State(component_id = "eventFrameDropdown", component_property = "value")])
+    def eventFrameDropdownValue(eventFrameDropdownOptions, urlHref, eventFrameDropdownValue):
+        # eventFrameDropdownValue = None
         if len(list(filter(lambda property: property["prop_id"] == "url.href", dash.callback_context.triggered))) > 0:
+            # url href input fired.
             if eventFrameDropdownOptions:
                 queryString = parse_qs(urlparse(urlHref).query)
                 if "eventFrameId" in queryString:
                     eventFrameId = int(queryString["eventFrameId"][0])                
                     if len(list(filter(lambda eventFrame: eventFrame["value"] == eventFrameId, eventFrameDropdownOptions))) > 0:
-                        eventFrameDropdownValue = eventFrameId
+                        return eventFrameId
+        else:
+            # eventFrameDropdown options input fired.
+            if len(list(filter(lambda eventFrame: eventFrame["value"] == eventFrameDropdownValue, eventFrameDropdownOptions))) > 0:
+                raise PreventUpdate
 
-        return eventFrameDropdownValue
+        return None
 
     @dashApp.callback([Output(component_id = "eventFrameTemplateViewDropdown", component_property = "options"),
         Output(component_id = "eventFrameTemplateViewDropdown", component_property = "value")],
