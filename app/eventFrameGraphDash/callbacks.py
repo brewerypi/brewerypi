@@ -63,6 +63,18 @@ def registerCallbacks(dashApp):
 
         return timestamp
 
+    @dashApp.callback(Output(component_id = "collapseExpandButton", component_property = "children"),
+        [Input(component_id = "collapseExpandButton", component_property = "n_clicks")],
+        [State(component_id = "collapseExpandButton", component_property = "children")])
+    def collapseExpandButtonChildren(collapseExpandButtonNClicks, collapseExpandButtonChildren):
+        if collapseExpandButtonNClicks == 0:
+            raise PreventUpdate
+        else:
+            if collapseExpandButtonChildren == ["Collapse"]:
+                return ["Expand"]
+            else:
+                return ["Collapse"]
+
     @dashApp.callback(Output(component_id = "enterpriseDropdown", component_property = "options"),
         [Input(component_id = "url", component_property = "href")])
     def enterpriseDropDownOptions(urlHref):

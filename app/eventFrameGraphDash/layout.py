@@ -12,7 +12,7 @@ layout = html.Div(children =
         dcc.Input(id = "fromTimestampInput", type = "datetime-local"),
         " to: ",
         dcc.Input(id = "toTimestampInput", type = "datetime-local"),
-        html.Button(id = "refreshButton", children = [html.Span(className = "glyphicon glyphicon-refresh")]),
+        html.Button(id = "refreshButton", className = "btn btn-default btn-sm", children = [html.Span(className = "glyphicon glyphicon-refresh")]),
         html.Div(className = "btn-group", role = "group", children =
         [
             html.Div(className = "btn-group", role = "group", children =
@@ -37,14 +37,19 @@ layout = html.Div(children =
         ])
     ]),
     html.Br(),
-    html.Div(children =
+    html.Button(id = "collapseExpandButton", className = "btn btn-default btn-sm", type = "button", **{"data-toggle": "collapse", "data-target": "#dropdownDiv",
+        "aria-expanded": "true", "aria-controls": "dropdownDiv"}, n_clicks = 0, children = ["Collapse"]),
+    html.Div(id = "dropdownDiv", className = "collapse in", children =
     [
-        dcc.Dropdown(id = "enterpriseDropdown", placeholder = "Select Enterprise", multi = False),
-        dcc.Dropdown(id = "siteDropdown", placeholder = "Select Site", multi = False),
-        dcc.Dropdown(id = "elementTemplateDropdown", placeholder = "Select Element Template", multi = False),
-        dcc.Dropdown(id = "eventFrameTemplateDropdown", placeholder = "Select Event Frame Template", multi = False),
-        dcc.Dropdown(id = "eventFrameDropdown", placeholder = "Select Event Frame", multi = False),
-        dcc.Dropdown(id = "eventFrameTemplateViewDropdown", placeholder = "Select View", multi = False)
+        html.Div(className = "well well-sm", children =
+        [
+            dcc.Dropdown(id = "enterpriseDropdown", placeholder = "Select Enterprise", multi = False),
+            dcc.Dropdown(id = "siteDropdown", placeholder = "Select Site", multi = False),
+            dcc.Dropdown(id = "elementTemplateDropdown", placeholder = "Select Element Template", multi = False),
+            dcc.Dropdown(id = "eventFrameTemplateDropdown", placeholder = "Select Event Frame Template", multi = False),
+            dcc.Dropdown(id = "eventFrameDropdown", placeholder = "Select Event Frame", multi = False),
+            dcc.Dropdown(id = "eventFrameTemplateViewDropdown", placeholder = "Select View", multi = False)
+        ])
     ]),
     dcc.Graph(id = "graph")
 ])
