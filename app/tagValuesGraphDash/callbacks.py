@@ -20,7 +20,7 @@ def registerCallbacks(dashApp):
 
         utcNow = pytz.utc.localize(datetime.utcnow())
         localNow = utcNow.astimezone(localTimezone)
-        return (localNow - relativedelta(months = 3)).strftime("%Y-%m-%dT%H:%M:%S")
+        return (localNow - relativedelta(months = 3)).strftime("%Y-%m-%dT%H:%M")
 
     @dashApp.callback(Output(component_id = "toTimestampInput", component_property = "value"),
         [Input(component_id = "url", component_property = "href"),
@@ -34,7 +34,7 @@ def registerCallbacks(dashApp):
 
         utcNow = pytz.utc.localize(datetime.utcnow())
         localNow = utcNow.astimezone(localTimezone)
-        return localNow.strftime("%Y-%m-%dT%H:%M:%S")
+        return localNow.strftime("%Y-%m-%dT%H:%M")
 
     @dashApp.callback(Output(component_id = "collapseExpandButton", component_property = "children"),
         [Input(component_id = "collapseExpandButton", component_property = "n_clicks")],
@@ -167,8 +167,8 @@ def registerCallbacks(dashApp):
                 else:
                     localTimezone = pytz.utc
 
-                fromTimestampLocal = localTimezone.localize(datetime.strptime(fromTimestampInputValue, "%Y-%m-%dT%H:%M:%S"))
-                toTimestampLocal = localTimezone.localize(datetime.strptime(toTimestampInputValue, "%Y-%m-%dT%H:%M:%S"))
+                fromTimestampLocal = localTimezone.localize(datetime.strptime(fromTimestampInputValue, "%Y-%m-%dT%H:%M"))
+                toTimestampLocal = localTimezone.localize(datetime.strptime(toTimestampInputValue, "%Y-%m-%dT%H:%M"))
                 fromTimestampUtc = fromTimestampLocal.astimezone(pytz.utc)
                 toTimestampUtc = toTimestampLocal.astimezone(pytz.utc)
 
