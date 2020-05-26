@@ -7,7 +7,7 @@ from datetime import datetime
 from dateutil.relativedelta import relativedelta
 from sqlalchemy import or_
 from urllib.parse import parse_qs, urlparse
-from app.models import ElementTemplate, Enterprise, EventFrame, EventFrameTemplate, EventFrameTemplateView, LookupValue, Site
+from app.models import ElementTemplate, Enterprise, EventFrame, EventFrameNote, EventFrameTemplate, EventFrameTemplateView, LookupValue, Note, Site
 
 def registerCallbacks(dashApp):
     @dashApp.callback(Output(component_id = "fromTimestampInput", component_property = "value"),
@@ -216,7 +216,8 @@ def registerCallbacks(dashApp):
         eventFrameTemplateViews.insert(0, {"label": "All", "value": -1})
         return [eventFrameTemplateViews, -1]
 
-    @dashApp.callback(Output(component_id = "graph", component_property = "figure"),
+    @dashApp.callback([Output(component_id = "graph", component_property = "figure"),
+        Output(component_id = "table", component_property = "data")],
         [Input(component_id = "fromTimestampInput", component_property = "value"),
         Input(component_id = "toTimestampInput", component_property = "value"),
         Input(component_id = "eventFrameDropdown", component_property = "value"),
@@ -226,7 +227,7 @@ def registerCallbacks(dashApp):
         Input(component_id = "refreshButton", component_property = "n_clicks")])
     def graphFigure(fromTimestampInputValue, toTimestampInputValue, eventFrameDropdownValue, eventFrameTemplateViewDropdownValue, urlHref, intervalNIntervals, refreshButtonNClicks):
         if eventFrameDropdownValue is None:
-            return {"data": []}
+            return {"data": []}, []
 
         if fromTimestampInputValue == "" or toTimestampInputValue == "":
             raise PreventUpdate
@@ -279,7 +280,12 @@ def registerCallbacks(dashApp):
             shapes.append(dict(type = "line", yref = "paper", y0 = 0, y1 = 1, x0 = eventFrameEndTimestamp, x1 = eventFrameEndTimestamp,
                 line = dict(width = 1, dash = "dot")))
 
-        return {"data": data, "layout": {"shapes": shapes, "uirevision": "{}{}".format(fromTimestampInputValue, toTimestampInputValue)}}
+        notes = []
+        eventFrameNotes = Note.query.join(EventFrameNote).filter(EventFrameNote.EventFrameId == eventFrame.EventFrameId).order_by(Note.Timestamp)
+        for eventFrameNote in eventFrameNotes:
+            notes.append({"Timestamp": eventFrameNote.Timestamp.strftime("%Y-%m-%d %H:%M:%S"), "Note": eventFrameNote.Note})
+
+        return {"data": data, "layout": {"shapes": shapes, "uirevision": "{}{}".format(fromTimestampInputValue, toTimestampInputValue)}}, notes
 
     @dashApp.callback([Output(component_id = "refreshRateButton", component_property = "children"),
         Output(component_id = "interval", component_property = "interval"),
