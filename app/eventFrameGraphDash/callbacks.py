@@ -245,32 +245,32 @@ def registerCallbacks(dashApp):
         fromTimestampUtc = fromTimestampLocal.astimezone(pytz.utc)
         toTimestampUtc = toTimestampLocal.astimezone(pytz.utc)
 
-        for attributeValue in eventFrame.attributeValues(eventFrameTemplateViewDropdownValue):
+        for tagValue in eventFrame.tagValues(eventFrameTemplateViewDropdownValue):
             # Search for tag name dict in list of dicts.
-            tags = list(filter(lambda tag: tag["name"] == attributeValue.Tag.Name, data))
+            tags = list(filter(lambda tag: tag["name"] == tagValue.Tag.Name, data))
             if len(tags) == 0:
                 # Tag name dict doesn't exist so append it to the list of dicts.
-                if attributeValue.Tag.LookupId is None:
-                    data.append(dict(x = [pytz.utc.localize(attributeValue.Timestamp).astimezone(localTimezone)],
-                        y = [attributeValue.Value],
-                        text = [attributeValue.Tag.UnitOfMeasurement.Abbreviation],
-                        name = attributeValue.Tag.Name,
+                if tagValue.Tag.LookupId is None:
+                    data.append(dict(x = [pytz.utc.localize(tagValue.Timestamp).astimezone(localTimezone)],
+                        y = [tagValue.Value],
+                        text = [tagValue.Tag.UnitOfMeasurement.Abbreviation],
+                        name = tagValue.Tag.Name,
                         mode = "lines+markers"))
                 else:
-                    data.append(dict(x = [pytz.utc.localize(attributeValue.Timestamp).astimezone(localTimezone)],
-                        y = [attributeValue.Value],
-                        text = [LookupValue.query.filter_by(LookupId = attributeValue.Tag.LookupId, Value = attributeValue.Value).one().Name],
-                        name = attributeValue.Tag.Name,
+                    data.append(dict(x = [pytz.utc.localize(tagValue.Timestamp).astimezone(localTimezone)],
+                        y = [tagValue.Value],
+                        text = [LookupValue.query.filter_by(LookupId = tagValue.Tag.LookupId, Value = tagValue.Value).one().Name],
+                        name = tagValue.Tag.Name,
                         mode = "lines+markers"))
             else:
                 # Tag name dict already exists so append to x and y.
                 seriesDict = tags[0]
-                seriesDict["x"].append(pytz.utc.localize(attributeValue.Timestamp).astimezone(localTimezone))
-                seriesDict["y"].append(attributeValue.Value)
-                if attributeValue.Tag.LookupId is None:
-                    seriesDict["text"].append(attributeValue.Tag.UnitOfMeasurement.Abbreviation)
+                seriesDict["x"].append(pytz.utc.localize(tagValue.Timestamp).astimezone(localTimezone))
+                seriesDict["y"].append(tagValue.Value)
+                if tagValue.Tag.LookupId is None:
+                    seriesDict["text"].append(tagValue.Tag.UnitOfMeasurement.Abbreviation)
                 else:
-                    seriesDict["text"].append(LookupValue.query.filter_by(LookupId = attributeValue.Tag.LookupId, Value = attributeValue.Value).one().Name)
+                    seriesDict["text"].append(LookupValue.query.filter_by(LookupId = tagValue.Tag.LookupId, Value = tagValue.Value).one().Name)
 
         eventFrameStartTimestamp = pytz.utc.localize(eventFrame.StartTimestamp).astimezone(localTimezone)
         shapes = [dict(type = "line", yref = "paper", y0 = 0, y1 = 1, x0 = eventFrameStartTimestamp, x1 = eventFrameStartTimestamp, line =

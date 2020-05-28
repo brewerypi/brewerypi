@@ -301,7 +301,7 @@ class EventFrame(db.Model):
 			ancestors.insert(0, self.ParentEventFrame)
 			return self.ParentEventFrame.ancestors(ancestors)
 
-	def attributeValues(self, eventFrameTemplateViewId = None):
+	def tagValues(self, eventFrameTemplateViewId = None):
 		if eventFrameTemplateViewId is None or eventFrameTemplateViewId == -1:
 			eventFrameAttributeTemplateIds = [eventFrameAttributeTemplate.EventFrameAttributeTemplateId
 				for eventFrameAttributeTemplate in self.EventFrameTemplate.EventFrameAttributeTemplates]
