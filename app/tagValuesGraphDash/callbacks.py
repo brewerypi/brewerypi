@@ -175,9 +175,6 @@ def registerCallbacks(dashApp):
                 for tagId in tagDropdownValues:
                     tag = Tag.query.get(tagId)
                     tagValues = TagValue.query.filter(TagValue.TagId == tag.TagId, TagValue.Timestamp >= fromTimestampUtc, TagValue.Timestamp <= toTimestampUtc)
-                    tagValueNotes = TagValueNote.query.join(TagValue).filter(TagValue.TagId == tagId, TagValue.Timestamp >= fromTimestampUtc,
-                        TagValue.Timestamp <= toTimestampUtc).all()
-
                     if tag.LookupId is None:
                         data.append(dict(x = [pytz.utc.localize(tagValue.Timestamp).astimezone(localTimezone) for tagValue in tagValues],
                             y = [tagValue.Value for tagValue in tagValues],
@@ -191,13 +188,31 @@ def registerCallbacks(dashApp):
                             name = tag.Name,
                             mode = "lines+markers"))
 
-                    if len(tagValueNotes) > 0:
-                        data.append(dict(x = [pytz.utc.localize(tagValueNote.TagValue.Timestamp).astimezone(localTimezone) for tagValueNote in tagValueNotes],
-                            y = [tagValueNote.TagValue.Value for tagValueNote in tagValueNotes],
-                            text = ["{}: {}".format(pytz.utc.localize(tagValueNote.Note.Timestamp).astimezone(localTimezone), tagValueNote.Note.Note)
-                                for tagValueNote in tagValueNotes],
-                            name = "{} Notes".format(tag.Name),
-                            mode = "markers"))
+                    for tagValue in tagValues:
+                        if tagValue.TagValueNotes.count() > 0:
+                            tagValueNotes = ""
+                            for n, tagValueNote in enumerate(tagValue.TagValueNotes, start = 1):
+                                note = "{}: {}".format(pytz.utc.localize(tagValueNote.Note.Timestamp).astimezone(localTimezone), tagValueNote.Note.Note)
+                                if n != 1:
+                                    note = "<br>" + note
+                                
+                                tagValueNotes = tagValueNotes + note
+
+                            # Search for tag notes dict in list of dicts.
+                            listOfDictionaries = list(filter(lambda dictionary: dictionary["name"] == "{} Notes".format(tagValue.Tag.Name), data))
+                            if len(listOfDictionaries) == 0:
+                                # Tag notes dict doesn't exist so append it to the list of dicts.
+                                data.append(dict(x = [pytz.utc.localize(tagValue.Timestamp).astimezone(localTimezone)],
+                                    y = [tagValue.Value],
+                                    text = [tagValueNotes],
+                                    name = "{} Notes".format(tagValue.Tag.Name),
+                                    mode = "markers"))
+                            else:
+                                # Tag notes dict already exists so append to x, y and text.
+                                tagNotesDictionary = listOfDictionaries[0]
+                                tagNotesDictionary["x"].append(pytz.utc.localize(tagValue.Timestamp).astimezone(localTimezone))
+                                tagNotesDictionary["y"].append(tagValue.Value)
+                                tagNotesDictionary["text"].append(tagValueNotes)
 
             return {"data": data, "layout": {"uirevision": "{}{}".format(fromTimestampInputValue, toTimestampInputValue)}}
 
