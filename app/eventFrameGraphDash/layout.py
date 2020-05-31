@@ -1,22 +1,14 @@
 import dash_core_components as dcc
 import dash_html_components as html
 import dash_table
-from app.dashes.helpers import intervalLayout
+from app.dashes.helpers import timestampRangeLayout
 
 layout = html.Div(children =
 [
     dcc.Location(id = "url"),
     dcc.Interval(id = "interval", n_intervals = 0, disabled = True),
     html.Div(className = "page-header", children = [html.H1("Event Frame Graph")]),
-    html.Div(children =
-    [
-        "From: ", 
-        dcc.Input(id = "fromTimestampInput", type = "datetime-local"),
-        " to: ",
-        dcc.Input(id = "toTimestampInput", type = "datetime-local"),
-        html.Button(id = "refreshButton", className = "btn btn-default btn-sm", children = [html.Span(className = "glyphicon glyphicon-refresh")]),
-        intervalLayout()
-    ]),
+    timestampRangeLayout(True),
     html.Br(),
     html.Button(id = "collapseExpandButton", className = "btn btn-default btn-sm", type = "button", **{"data-toggle": "collapse", "data-target": "#dropdownDiv",
         "aria-expanded": "true", "aria-controls": "dropdownDiv"}, n_clicks = 0, children = ["Collapse"]),
@@ -32,7 +24,7 @@ layout = html.Div(children =
             dcc.Dropdown(id = "eventFrameTemplateViewDropdown", placeholder = "Select View", multi = False)
         ])
     ]),
-    dcc.Graph(id = "graph"),
+    html.Div(children = [dcc.Graph(id = "graph")]),
     html.Div(className = "page-header", children = [html.H2("Notes")]),
     html.Div(className = "well", children =
     [

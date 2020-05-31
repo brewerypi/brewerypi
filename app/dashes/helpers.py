@@ -1,27 +1,25 @@
 import dash
+import dash_core_components as dcc
 import dash_html_components as html
 
 def intervalLayout():
     return html.Div(className = "btn-group", role = "group", children =
     [
-        html.Div(className = "btn-group", role = "group", children =
+        html.Button(id = "refreshRateButton", className = "btn btn-default dropdown-toggle btn-sm", **{"data-toggle": "dropdown",
+            "aria-haspopup": "true", "aria-expanded": "false"}, children = ["Off ", html.Span(className = "caret")]),
+        html.Ul(className = "dropdown-menu", children =
         [
-            html.Button(id = "refreshRateButton", className = "btn btn-default dropdown-toggle btn-sm", **{"data-toggle": "dropdown",
-                "aria-haspopup": "true", "aria-expanded": "false"}, children = ["Off ", html.Span(className = "caret")]),
-            html.Ul(className = "dropdown-menu", children =
-            [
-                html.Li(id = "offLi", children = html.A("Off")),
-                html.Li(id = "fiveSecondLi", children = html.A("5s")),
-                html.Li(id = "tenSecondLi", children = html.A("10s")),
-                html.Li(id = "thirtySecondLi", children = html.A("30s")),
-                html.Li(id = "oneMinuteLi", children = html.A("1m")),
-                html.Li(id = "fiveMinuteLi", children = html.A("5m")),
-                html.Li(id = "fifthteenMinuteLi", children = html.A("15m")),
-                html.Li(id = "thirtyMinuteLi", children = html.A("30m")),
-                html.Li(id = "oneHourLi", children = html.A("1h")),
-                html.Li(id = "twoHourLi", children = html.A("2h")),
-                html.Li(id = "oneDayLi", children = html.A("1d"))
-            ])
+            html.Li(id = "offLi", children = html.A("Off")),
+            html.Li(id = "fiveSecondLi", children = html.A("5s")),
+            html.Li(id = "tenSecondLi", children = html.A("10s")),
+            html.Li(id = "thirtySecondLi", children = html.A("30s")),
+            html.Li(id = "oneMinuteLi", children = html.A("1m")),
+            html.Li(id = "fiveMinuteLi", children = html.A("5m")),
+            html.Li(id = "fifthteenMinuteLi", children = html.A("15m")),
+            html.Li(id = "thirtyMinuteLi", children = html.A("30m")),
+            html.Li(id = "oneHourLi", children = html.A("1h")),
+            html.Li(id = "twoHourLi", children = html.A("2h")),
+            html.Li(id = "oneDayLi", children = html.A("1d"))
         ])
     ])
 
@@ -77,3 +75,14 @@ def intervalCallback(offLiNClicks, fiveSecondLiNClicks, tenSecondLiNClicks, thir
         disabled = True
 
     return [refreshRateText + " ", html.Span(className = "caret")], refreshRateSeconds, disabled
+
+def timestampRangeLayout(includeInterval = None):
+    return html.Div(children =
+    [
+        "From: ", 
+        dcc.Input(id = "fromTimestampInput", type = "datetime-local"),
+        " to: ",
+        dcc.Input(id = "toTimestampInput", type = "datetime-local"),
+        html.Button(id = "refreshButton", className = "btn btn-default btn-sm", children = [html.Span(className = "glyphicon glyphicon-refresh")]),
+        intervalLayout() if includeInterval is True else None
+    ])
