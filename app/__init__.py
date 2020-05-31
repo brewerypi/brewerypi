@@ -61,8 +61,8 @@ def createApp(configClass = Config):
 	from . customTemplateFilters import customTemplateFilters as customTemplateFiltersBlueprint
 	app.register_blueprint(customTemplateFiltersBlueprint)
 
-	from . dash import dash as dashBlueprint
-	app.register_blueprint(dashBlueprint)
+	from . dashes import dashes as dashesBlueprint
+	app.register_blueprint(dashesBlueprint)
 
 	from . elements import elements as elementsBlueprint
 	app.register_blueprint(elementsBlueprint)

@@ -1,5 +1,5 @@
 from flask import Blueprint
 
-dash = Blueprint("dash", __name__)
+dashes = Blueprint("dashes", __name__)
 
 from . import routes
