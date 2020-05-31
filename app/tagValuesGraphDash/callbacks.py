@@ -76,14 +76,9 @@ def registerCallbacks(dashApp):
 
     @dashApp.callback(Output(component_id = "siteDropdown", component_property = "value"),
         [Input(component_id = "siteDropdown", component_property = "options"),
-        Input(component_id = "url", component_property = "href")],
-        [State(component_id = "siteDropdown", component_property = "value")])
-    def siteDropdownValue(siteDropdownOptions, urlHref, siteDropdownSelectedValues):
-        if siteDropdownSelectedValues is None:
-            siteDropdownValues = []
-        else:
-            siteDropdownValues = siteDropdownSelectedValues
-
+        Input(component_id = "url", component_property = "href")])
+    def siteDropdownValue(siteDropdownOptions, urlHref):
+        siteDropdownValues = []
         if len(list(filter(lambda property: property["prop_id"] == "url.href", dash.callback_context.triggered))) > 0:
             if siteDropdownOptions:
                 queryString = parse_qs(urlparse(urlHref).query)
@@ -103,14 +98,9 @@ def registerCallbacks(dashApp):
 
     @dashApp.callback(Output(component_id = "areaDropdown", component_property = "value"),
         [Input(component_id = "areaDropdown", component_property = "options"),
-        Input(component_id = "url", component_property = "href")],
-        [State(component_id = "areaDropdown", component_property = "value")])
-    def areaDropdownValue(areaDropdownOptions, urlHref, areaDropdownSelectedValues):
-        if areaDropdownSelectedValues is None:
-            areaDropdownValues = []
-        else:
-            areaDropdownValues = areaDropdownSelectedValues
-
+        Input(component_id = "url", component_property = "href")])
+    def areaDropdownValue(areaDropdownOptions, urlHref):
+        areaDropdownValues = []
         if len(list(filter(lambda property: property["prop_id"] == "url.href", dash.callback_context.triggered))) > 0:
             if areaDropdownOptions:
                 queryString = parse_qs(urlparse(urlHref).query)
@@ -130,14 +120,9 @@ def registerCallbacks(dashApp):
 
     @dashApp.callback(Output(component_id = "tagDropdown", component_property = "value"),
         [Input(component_id = "tagDropdown", component_property = "options"),
-        Input(component_id = "url", component_property = "href")],
-        [State(component_id = "tagDropdown", component_property = "value")])
-    def tagDropdownValue(tagDropdownOptions, urlHref, tagDropdownSelectedValues):
-        if tagDropdownSelectedValues is None:
-            tagDropdownValues = []
-        else:
-            tagDropdownValues = tagDropdownSelectedValues
-
+        Input(component_id = "url", component_property = "href")])
+    def tagDropdownValue(tagDropdownOptions, urlHref):
+        tagDropdownValues = []
         if len(list(filter(lambda property: property["prop_id"] == "url.href", dash.callback_context.triggered))) > 0:
             if tagDropdownOptions:
                 queryString = parse_qs(urlparse(urlHref).query)
