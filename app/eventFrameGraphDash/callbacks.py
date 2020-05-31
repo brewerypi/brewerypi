@@ -7,7 +7,7 @@ from dateutil.relativedelta import relativedelta
 from sqlalchemy import or_
 from urllib.parse import parse_qs, urlparse
 from app.models import ElementTemplate, Enterprise, EventFrame, EventFrameNote, EventFrameTemplate, EventFrameTemplateView, LookupValue, Note, Site
-from app.dashes import helpers
+from app.dashes.helpers import intervalCallback
 
 def registerCallbacks(dashApp):
     @dashApp.callback(Output(component_id = "fromTimestampInput", component_property = "value"),
@@ -326,4 +326,4 @@ def registerCallbacks(dashApp):
         Input(component_id = "twoHourLi", component_property = "n_clicks"),
         Input(component_id = "oneDayLi", component_property = "n_clicks")])
     def interval(*args, **kwargs):
-        return helpers.interval(*args, **kwargs)
+        return intervalCallback(*args, **kwargs)
