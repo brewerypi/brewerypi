@@ -86,18 +86,24 @@ def registerCallbacks(dashApp):
 
     @dashApp.callback(Output(component_id = "siteDropdown", component_property = "value"),
         [Input(component_id = "siteDropdown", component_property = "options"),
-        Input(component_id = "url", component_property = "href")])
-    def siteDropdownValue(siteDropdownOptions, urlHref):
-        siteDropdownValues = []
+        Input(component_id = "url", component_property = "href")],
+        [State(component_id = "siteDropdown", component_property = "value")])
+    def siteDropdownValue(siteDropdownOptions, urlHref, siteDropdownValues):
+        siteIds = []
         if len(list(filter(lambda property: property["prop_id"] == "url.href", dash.callback_context.triggered))) > 0:
             if siteDropdownOptions:
                 queryString = parse_qs(urlparse(urlHref).query)
                 if "siteId" in queryString:
                     for siteId in map(int, queryString["siteId"]):
                         if len(list(filter(lambda site: site["value"] == siteId, siteDropdownOptions))) > 0:
-                            siteDropdownValues.append(siteId)
+                            siteIds.append(siteId)
+        else:
+            if siteDropdownOptions:
+                for siteId in siteDropdownValues:
+                    if len(list(filter(lambda site: site["value"] == siteId, siteDropdownOptions))) > 0:
+                        siteIds.append(siteId)
 
-        return siteDropdownValues
+        return siteIds
 
     @dashApp.callback(Output(component_id = "areaDropdown", component_property = "options"),
         [Input(component_id = "siteDropdown", component_property = "value")])
@@ -108,18 +114,24 @@ def registerCallbacks(dashApp):
 
     @dashApp.callback(Output(component_id = "areaDropdown", component_property = "value"),
         [Input(component_id = "areaDropdown", component_property = "options"),
-        Input(component_id = "url", component_property = "href")])
-    def areaDropdownValue(areaDropdownOptions, urlHref):
-        areaDropdownValues = []
+        Input(component_id = "url", component_property = "href")],
+        [State(component_id = "areaDropdown", component_property = "value")])
+    def areaDropdownValue(areaDropdownOptions, urlHref, areaDropdownValues):
+        areaIds = []
         if len(list(filter(lambda property: property["prop_id"] == "url.href", dash.callback_context.triggered))) > 0:
             if areaDropdownOptions:
                 queryString = parse_qs(urlparse(urlHref).query)
                 if "areaId" in queryString:
                     for areaId in map(int, queryString["areaId"]):
                         if len(list(filter(lambda area: area["value"] == areaId, areaDropdownOptions))) > 0:
-                            areaDropdownValues.append(areaId)
+                            areaIds.append(areaId)
+        else:
+            if areaDropdownOptions:
+                for areaId in areaDropdownValues:
+                    if len(list(filter(lambda area: area["value"] == areaId, areaDropdownOptions))) > 0:
+                        areaIds.append(areaId)
 
-        return areaDropdownValues
+        return areaIds
 
     @dashApp.callback(Output(component_id = "tagDropdown", component_property = "options"),
         [Input(component_id = "areaDropdown", component_property = "value")])
@@ -130,18 +142,24 @@ def registerCallbacks(dashApp):
 
     @dashApp.callback(Output(component_id = "tagDropdown", component_property = "value"),
         [Input(component_id = "tagDropdown", component_property = "options"),
-        Input(component_id = "url", component_property = "href")])
-    def tagDropdownValue(tagDropdownOptions, urlHref):
-        tagDropdownValues = []
+        Input(component_id = "url", component_property = "href")],
+        [State(component_id = "tagDropdown", component_property = "value")])
+    def tagDropdownValue(tagDropdownOptions, urlHref, tagDropdownValues):
+        tagIds = []
         if len(list(filter(lambda property: property["prop_id"] == "url.href", dash.callback_context.triggered))) > 0:
             if tagDropdownOptions:
                 queryString = parse_qs(urlparse(urlHref).query)
                 if "tagId" in queryString:
                     for tagId in map(int, queryString["tagId"]):
                         if len(list(filter(lambda tag: tag["value"] == tagId, tagDropdownOptions))) > 0:
-                            tagDropdownValues.append(tagId)
+                            tagIds.append(tagId)
+        else:
+            if tagDropdownOptions:
+                for tagId in tagDropdownValues:
+                    if len(list(filter(lambda tag: tag["value"] == tagId, tagDropdownOptions))) > 0:
+                        tagIds.append(tagId)
 
-        return tagDropdownValues
+        return tagIds
 
     @dashApp.callback(Output(component_id = "graph", component_property = "figure"),
         [Input(component_id = "fromTimestampInput", component_property = "value"),
