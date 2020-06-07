@@ -7,53 +7,63 @@ from dateutil.relativedelta import relativedelta
 from sqlalchemy import or_
 from urllib.parse import parse_qs, urlparse
 from app.models import ElementTemplate, Enterprise, EventFrame, EventFrameNote, EventFrameTemplate, EventFrameTemplateView, LookupValue, Note, Site
-from app.dashes.helpers import intervalCallback
+from app.dashes import timestampRangeComponent
 
 def registerCallbacks(dashApp):
-    @dashApp.callback(Output(component_id = "fromTimestampInput", component_property = "value"),
-        [Input(component_id = "url", component_property = "href")])
-    def fromTimestampValue(urlHref):
-        queryString = parse_qs(urlparse(urlHref).query)
-        if "localTimezone" in queryString:
-            localTimezone = pytz.timezone(queryString["localTimezone"][0])
-        else:
-            localTimezone = pytz.utc
-
-        utcNow = pytz.utc.localize(datetime.utcnow())
-        localNow = utcNow.astimezone(localTimezone)
-        timestamp = (localNow - relativedelta(months = 3)).strftime("%Y-%m-%dT%H:%M")
-        if "eventFrameId" in queryString:
-            eventFrameId = int(queryString["eventFrameId"][0])
-            eventFrame = EventFrame.query.get(eventFrameId)
-            if eventFrame is not None:
-                timestamp = eventFrame.StartTimestamp.strftime("%Y-%m-%dT%H:%M")
-
-        return timestamp
-
-    @dashApp.callback(Output(component_id = "toTimestampInput", component_property = "value"),
+    @dashApp.callback([Output(component_id = "fromTimestampInput", component_property = "value"),
+        Output(component_id = "toTimestampInput", component_property = "value")],
         [Input(component_id = "url", component_property = "href"),
+        Input(component_id = "lastFiveMinutesLi", component_property = "n_clicks"),
+        Input(component_id = "lastFifthteenMinutesLi", component_property = "n_clicks"),
+        Input(component_id = "lastThirtyMinutesLi", component_property = "n_clicks"),
+        Input(component_id = "lastOneHourLi", component_property = "n_clicks"),
+        Input(component_id = "lastThreeHoursLi", component_property = "n_clicks"),
+        Input(component_id = "lastSixHoursLi", component_property = "n_clicks"),
+        Input(component_id = "lastTwelveHoursLi", component_property = "n_clicks"),
+        Input(component_id = "lastTwentyFourHoursLi", component_property = "n_clicks"),
+        Input(component_id = "lastTwoDaysLi", component_property = "n_clicks"),
+        Input(component_id = "lastSevenDaysLi", component_property = "n_clicks"),
+        Input(component_id = "lastThirtyDaysLi", component_property = "n_clicks"),
+        Input(component_id = "lastNinetyDaysLi", component_property = "n_clicks"),
+        Input(component_id = "lastSixMonthsLi", component_property = "n_clicks"),
+        Input(component_id = "lastOneYearLi", component_property = "n_clicks"),
+        Input(component_id = "lastTwoYearsLi", component_property = "n_clicks"),
+        Input(component_id = "lastFiveYearsLi", component_property = "n_clicks"),
+        Input(component_id = "yesterdayLi", component_property = "n_clicks"),
+        Input(component_id = "dayBeforeYesterdayLi", component_property = "n_clicks"),
+        Input(component_id = "thisDayLastWeekLi", component_property = "n_clicks"),
+        Input(component_id = "previousWeekLi", component_property = "n_clicks"),
+        Input(component_id = "previousMonthLi", component_property = "n_clicks"),
+        Input(component_id = "previousYearLi", component_property = "n_clicks"),
+        Input(component_id = "todayLi", component_property = "n_clicks"),
+        Input(component_id = "todaySoFarLi", component_property = "n_clicks"),
+        Input(component_id = "thisWeekLi", component_property = "n_clicks"),
+        Input(component_id = "thisWeekSoFarLi", component_property = "n_clicks"),
+        Input(component_id = "thisMonthLi", component_property = "n_clicks"),
+        Input(component_id = "thisMonthSoFarLi", component_property = "n_clicks"),
+        Input(component_id = "thisYearLi", component_property = "n_clicks"),
+        Input(component_id = "thisYearSoFarLi", component_property = "n_clicks"),
         Input(component_id = "interval", component_property = "n_intervals")],
-        [State(component_id = "eventFrameDropdown", component_property = "value")])
-    def toTimestampValues(urlHref, intervalNIntervals, eventFrameDropdownValue):
+        [State(component_id = "fromTimestampInput", component_property = "value"),
+        State(component_id = "eventFrameDropdown", component_property = "value")])
+    def fromTimestampInputValueToTimestampInputValue(*args, **kwargs):
+        timestamps = timestampRangeComponent.rangePickerCallback(*args[:-1], **kwargs)
+        fromTimestamp = timestamps[0]
+        toTimestamp = timestamps[1]
+        urlHref = args[0]
         queryString = parse_qs(urlparse(urlHref).query)
-        if "localTimezone" in queryString:
-            localTimezone = pytz.timezone(queryString["localTimezone"][0])
-        else:
-            localTimezone = pytz.utc
-
-        utcNow = pytz.utc.localize(datetime.utcnow())
-        localNow = utcNow.astimezone(localTimezone)
-        timestamp = localNow.strftime("%Y-%m-%dT%H:%M")
         if len(list(filter(lambda property: property["prop_id"] == "url.href", dash.callback_context.triggered))) > 0:
             # url href input fired.
             if "eventFrameId" in queryString:
                 eventFrameId = int(queryString["eventFrameId"][0])
                 eventFrame = EventFrame.query.get(eventFrameId)
                 if eventFrame is not None:
+                    fromTimestamp = eventFrame.StartTimestamp.strftime("%Y-%m-%dT%H:%M:%S")
                     if eventFrame.EndTimestamp is not None:
                         # A closed event frame exists so use the end timestamp.
-                        timestamp = (eventFrame.EndTimestamp + relativedelta(minutes = 1)).strftime("%Y-%m-%dT%H:%M")
-        else:
+                        toTimestamp = (eventFrame.EndTimestamp + relativedelta(minutes = 1)).strftime("%Y-%m-%dT%H:%M:%S")
+        elif len(list(filter(lambda property: property["prop_id"] == "interval.n_intervals", dash.callback_context.triggered))) > 0:
+            eventFrameDropdownValue = args[-1]
             # interval n_intervals input fired.
             if eventFrameDropdownValue is not None:
                 eventFrame = EventFrame.query.get(eventFrameDropdownValue)
@@ -61,7 +71,7 @@ def registerCallbacks(dashApp):
                     if eventFrame.EndTimestamp is not None:
                         raise PreventUpdate
 
-        return timestamp
+        return fromTimestamp, toTimestamp
 
     @dashApp.callback(Output(component_id = "collapseExpandButton", component_property = "children"),
         [Input(component_id = "collapseExpandButton", component_property = "n_clicks")],
@@ -174,8 +184,8 @@ def registerCallbacks(dashApp):
         else:
             localTimezone = pytz.utc
 
-        fromTimestampLocal = localTimezone.localize(datetime.strptime(fromTimestampInputValue, "%Y-%m-%dT%H:%M"))
-        toTimestampLocal = localTimezone.localize(datetime.strptime(toTimestampInputValue, "%Y-%m-%dT%H:%M"))
+        fromTimestampLocal = localTimezone.localize(datetime.strptime(fromTimestampInputValue, "%Y-%m-%dT%H:%M:%S"))
+        toTimestampLocal = localTimezone.localize(datetime.strptime(toTimestampInputValue, "%Y-%m-%dT%H:%M:%S"))
         fromTimestampUtc = fromTimestampLocal.astimezone(pytz.utc)
         toTimestampUtc = toTimestampLocal.astimezone(pytz.utc)
 
@@ -225,7 +235,8 @@ def registerCallbacks(dashApp):
         Input(component_id = "url", component_property = "href"),
         Input(component_id = "interval", component_property = "n_intervals"),
         Input(component_id = "refreshButton", component_property = "n_clicks")])
-    def graphFigure(fromTimestampInputValue, toTimestampInputValue, eventFrameDropdownValue, eventFrameTemplateViewDropdownValue, urlHref, intervalNIntervals, refreshButtonNClicks):
+    def graphFigure(fromTimestampInputValue, toTimestampInputValue, eventFrameDropdownValue, eventFrameTemplateViewDropdownValue, urlHref, intervalNIntervals,
+        refreshButtonNClicks):
         if eventFrameDropdownValue is None:
             return {"data": []}, []
 
@@ -240,8 +251,8 @@ def registerCallbacks(dashApp):
         else:
             localTimezone = pytz.utc
 
-        fromTimestampLocal = localTimezone.localize(datetime.strptime(fromTimestampInputValue, "%Y-%m-%dT%H:%M"))
-        toTimestampLocal = localTimezone.localize(datetime.strptime(toTimestampInputValue, "%Y-%m-%dT%H:%M"))
+        fromTimestampLocal = localTimezone.localize(datetime.strptime(fromTimestampInputValue, "%Y-%m-%dT%H:%M:%S"))
+        toTimestampLocal = localTimezone.localize(datetime.strptime(toTimestampInputValue, "%Y-%m-%dT%H:%M:%S"))
         fromTimestampUtc = fromTimestampLocal.astimezone(pytz.utc)
         toTimestampUtc = toTimestampLocal.astimezone(pytz.utc)
 
@@ -326,4 +337,4 @@ def registerCallbacks(dashApp):
         Input(component_id = "twoHourLi", component_property = "n_clicks"),
         Input(component_id = "oneDayLi", component_property = "n_clicks")])
     def interval(*args, **kwargs):
-        return intervalCallback(*args, **kwargs)
+        return timestampRangeComponent.intervalCallback(*args, **kwargs)

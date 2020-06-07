@@ -1,14 +1,14 @@
 import dash_core_components as dcc
 import dash_html_components as html
 import dash_table
-from app.dashes.helpers import timestampRangeLayout
+from app.dashes import timestampRangeComponent
 
 layout = html.Div(children =
 [
     dcc.Location(id = "url"),
     dcc.Interval(id = "interval", n_intervals = 0, disabled = True),
     html.Div(className = "page-header", children = [html.H1("Event Frame Graph")]),
-    timestampRangeLayout(True),
+    timestampRangeComponent.layout(),
     html.Br(),
     html.Button(id = "collapseExpandButton", className = "btn btn-default btn-sm", type = "button", **{"data-toggle": "collapse", "data-target": "#dropdownDiv",
         "aria-expanded": "true", "aria-controls": "dropdownDiv"}, n_clicks = 0, children = ["Collapse"]),
