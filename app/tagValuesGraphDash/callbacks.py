@@ -4,8 +4,8 @@ from dash.dependencies import Input, Output, State
 from dash.exceptions import PreventUpdate
 from datetime import datetime
 from urllib.parse import parse_qs, urlparse
-from app.models import Area, Enterprise, LookupValue, Site, Tag, TagValue
-from app.dashes import timestampRangeComponent
+from app.models import LookupValue, Tag, TagValue
+from app.dashes import dropdowns, timestampRangeComponent
 
 def registerCallbacks(dashApp):
     @dashApp.callback([Output(component_id = "fromTimestampInput", component_property = "value"),
@@ -43,8 +43,37 @@ def registerCallbacks(dashApp):
         Input(component_id = "thisYearSoFarLi", component_property = "n_clicks"),
         Input(component_id = "interval", component_property = "n_intervals")],
         [State(component_id = "fromTimestampInput", component_property = "value")])
-    def fromTimestampInputValueToTimestampInputValue(*args, **kwargs):
-        return timestampRangeComponent.rangePickerCallback(*args, **kwargs)
+    def fromTimestampInputValueToTimestampInputValue(urlHref, lastFiveMinutesLiNClicks, lastFifthteenMinutesLiNClicks, lastThirtyMinutesLiNClicks,
+            lastOneHourLiNClicks, lastThreeHoursLiNClicks, lastSixHoursLiNClicks, lastTwelveHoursLiNClicks, lastTwentyFourHoursLiNClicks, lastTwoDaysLiNClicks,
+            lastThirtyDaysLiNClicks, lastNinetyDaysLiNClicks, lastSixMonthsLiNClicks, lastOneYearLiNClicks, lastTwoYearsLiNClicks, lastFiveYearsLiNClicks,
+            yesterdayLiNClicks, lastSevenDaysLiNClicks, dayBeforeYesterdayLiNClicks, thisDayLastWeekLiNClicks, previousWeekLiNClicks, previousMonthLiNClicks,
+            previousYearLiNClicks, todayLiNClicks, todaySoFarLiNClicks, thisWeekLiNClicks, thisWeekSoFarLiNClicks, thisMonthLiNClicks, thisMonthSoFarLiNClicks,
+            thisYearLiNClicks, thisYearSoFarLiNClicks, intervalNIntervals, fromTimestampInputValue):
+        return timestampRangeComponent.rangePickerCallback(urlHref, lastFiveMinutesLiNClicks, lastFifthteenMinutesLiNClicks, lastThirtyMinutesLiNClicks,
+            lastOneHourLiNClicks, lastThreeHoursLiNClicks, lastSixHoursLiNClicks, lastTwelveHoursLiNClicks, lastTwentyFourHoursLiNClicks, lastTwoDaysLiNClicks,
+            lastThirtyDaysLiNClicks, lastNinetyDaysLiNClicks, lastSixMonthsLiNClicks, lastOneYearLiNClicks, lastTwoYearsLiNClicks, lastFiveYearsLiNClicks,
+            yesterdayLiNClicks, lastSevenDaysLiNClicks, dayBeforeYesterdayLiNClicks, thisDayLastWeekLiNClicks, previousWeekLiNClicks, previousMonthLiNClicks,
+            previousYearLiNClicks, todayLiNClicks, todaySoFarLiNClicks, thisWeekLiNClicks, thisWeekSoFarLiNClicks, thisMonthLiNClicks, thisMonthSoFarLiNClicks,
+            thisYearLiNClicks, thisYearSoFarLiNClicks, intervalNIntervals, fromTimestampInputValue)
+
+    @dashApp.callback([Output(component_id = "refreshRateButton", component_property = "children"),
+        Output(component_id = "interval", component_property = "interval"),
+        Output(component_id = "interval", component_property = "disabled")],
+        [Input(component_id = "offLi", component_property = "n_clicks"),
+        Input(component_id = "fiveSecondLi", component_property = "n_clicks"),
+        Input(component_id = "tenSecondLi", component_property = "n_clicks"),
+        Input(component_id = "thirtySecondLi", component_property = "n_clicks"),
+        Input(component_id = "oneMinuteLi", component_property = "n_clicks"),
+        Input(component_id = "fiveMinuteLi", component_property = "n_clicks"),
+        Input(component_id = "fifthteenMinuteLi", component_property = "n_clicks"),
+        Input(component_id = "thirtyMinuteLi", component_property = "n_clicks"),
+        Input(component_id = "oneHourLi", component_property = "n_clicks"),
+        Input(component_id = "twoHourLi", component_property = "n_clicks"),
+        Input(component_id = "oneDayLi", component_property = "n_clicks")])
+    def interval(offLiNClicks, fiveSecondLiNClicks, tenSecondLiNClicks, thirtySecondLiNClicks, oneMinuteLiNClicks, fiveMinuteLiNClicks,
+        fifthteenMinuteLiNClicks, thirtyMinuteLiNClicks, oneHourLiNClicks, twoHourLiNClicks, oneDayLiNClicks):
+        return timestampRangeComponent.intervalCallback(offLiNClicks, fiveSecondLiNClicks, tenSecondLiNClicks, thirtySecondLiNClicks, oneMinuteLiNClicks,
+            fiveMinuteLiNClicks, fifthteenMinuteLiNClicks, thirtyMinuteLiNClicks, oneHourLiNClicks, twoHourLiNClicks, oneDayLiNClicks)
 
     @dashApp.callback(Output(component_id = "collapseExpandButton", component_property = "children"),
         [Input(component_id = "collapseExpandButton", component_property = "n_clicks")],
@@ -61,105 +90,49 @@ def registerCallbacks(dashApp):
     @dashApp.callback(Output(component_id = "enterpriseDropdown", component_property = "options"),
         [Input(component_id = "url", component_property = "href")])
     def enterpriseDropDownOptions(urlHref):
-        return [{"label": enterprise.Name, "value": enterprise.EnterpriseId} for enterprise in Enterprise.query.order_by(Enterprise.Name).all()]
+        return dropdowns.enterpriseDropDownOptions(urlHref)
 
     @dashApp.callback(Output(component_id = "enterpriseDropdown", component_property = "value"),
         [Input(component_id = "enterpriseDropdown", component_property = "options"),
         Input(component_id = "url", component_property = "href")])
-    def enterpriseDropdownValue(enterpriseDropdownOptions, urlHref):
-        enterpriseDropdownValues = []
-        if len(list(filter(lambda property: property["prop_id"] == "url.href", dash.callback_context.triggered))) > 0:
-            if enterpriseDropdownOptions:
-                queryString = parse_qs(urlparse(urlHref).query)
-                if "enterpriseId" in queryString:
-                    for enterpriseId in map(int, queryString["enterpriseId"]):
-                        if len(list(filter(lambda enterprise: enterprise["value"] == enterpriseId, enterpriseDropdownOptions))) > 0:
-                            enterpriseDropdownValues.append(enterpriseId)
-
-        return enterpriseDropdownValues
+    def enterpriseDropdownValues(enterpriseDropdownOptions, urlHref):
+        return dropdowns.enterpriseDropdownValues(enterpriseDropdownOptions, urlHref)
 
     @dashApp.callback(Output(component_id = "siteDropdown", component_property = "options"),
         [Input(component_id = "enterpriseDropdown", component_property = "value")])
     def siteDropdownOptions(enterpriseDropdownValues):
-        return [{"label": "{}_{}".format(site.Enterprise.Abbreviation, site.Name), "value": site.SiteId} for site in 
-            Site.query.join(Enterprise).filter(Site.EnterpriseId.in_(enterpriseDropdownValues)).order_by(Enterprise.Abbreviation, Site.Name).all()]
+        return dropdowns.siteDropdownOptions(enterpriseDropdownValues)
 
     @dashApp.callback(Output(component_id = "siteDropdown", component_property = "value"),
         [Input(component_id = "siteDropdown", component_property = "options"),
         Input(component_id = "url", component_property = "href")],
         [State(component_id = "siteDropdown", component_property = "value")])
-    def siteDropdownValue(siteDropdownOptions, urlHref, siteDropdownValues):
-        siteIds = []
-        if len(list(filter(lambda property: property["prop_id"] == "url.href", dash.callback_context.triggered))) > 0:
-            if siteDropdownOptions:
-                queryString = parse_qs(urlparse(urlHref).query)
-                if "siteId" in queryString:
-                    for siteId in map(int, queryString["siteId"]):
-                        if len(list(filter(lambda site: site["value"] == siteId, siteDropdownOptions))) > 0:
-                            siteIds.append(siteId)
-        else:
-            if siteDropdownOptions:
-                for siteId in siteDropdownValues:
-                    if len(list(filter(lambda site: site["value"] == siteId, siteDropdownOptions))) > 0:
-                        siteIds.append(siteId)
-
-        return siteIds
+    def siteDropdownValues(siteDropdownOptions, urlHref, siteDropdownValues):
+        return dropdowns.siteDropdownValues(siteDropdownOptions, urlHref, siteDropdownValues)
 
     @dashApp.callback(Output(component_id = "areaDropdown", component_property = "options"),
         [Input(component_id = "siteDropdown", component_property = "value")])
     def areaDropdownOptions(siteDropdownValues):
-        return [{"label": "{}_{}_{}".format(area.Site.Enterprise.Abbreviation, area.Site.Abbreviation, area.Name), "value": area.AreaId} for area in 
-            Area.query.join(Site, Enterprise).filter(Area.SiteId.in_(siteDropdownValues)). \
-            order_by(Enterprise.Abbreviation, Site.Abbreviation, Area.Name).all()]
+        return dropdowns.areaDropdownOptions(siteDropdownValues)
 
     @dashApp.callback(Output(component_id = "areaDropdown", component_property = "value"),
         [Input(component_id = "areaDropdown", component_property = "options"),
         Input(component_id = "url", component_property = "href")],
         [State(component_id = "areaDropdown", component_property = "value")])
-    def areaDropdownValue(areaDropdownOptions, urlHref, areaDropdownValues):
-        areaIds = []
-        if len(list(filter(lambda property: property["prop_id"] == "url.href", dash.callback_context.triggered))) > 0:
-            if areaDropdownOptions:
-                queryString = parse_qs(urlparse(urlHref).query)
-                if "areaId" in queryString:
-                    for areaId in map(int, queryString["areaId"]):
-                        if len(list(filter(lambda area: area["value"] == areaId, areaDropdownOptions))) > 0:
-                            areaIds.append(areaId)
-        else:
-            if areaDropdownOptions:
-                for areaId in areaDropdownValues:
-                    if len(list(filter(lambda area: area["value"] == areaId, areaDropdownOptions))) > 0:
-                        areaIds.append(areaId)
-
-        return areaIds
+    def areaDropdownValues(areaDropdownOptions, urlHref, areaDropdownValues):
+        return dropdowns.areaDropdownValues(areaDropdownOptions, urlHref, areaDropdownValues)
 
     @dashApp.callback(Output(component_id = "tagDropdown", component_property = "options"),
         [Input(component_id = "areaDropdown", component_property = "value")])
     def tagDropdownOptions(areaDropdownValues):
-        return [{"label": "{}_{}_{}_{}".format(tag.Area.Site.Enterprise.Abbreviation, tag.Area.Site.Abbreviation, tag.Area.Abbreviation, tag.Name),
-            "value": tag.TagId} for tag in Tag.query.join(Area, Site, Enterprise).filter(Tag.AreaId.in_(areaDropdownValues)).\
-            order_by(Enterprise.Abbreviation, Site.Abbreviation, Area.Abbreviation, Tag.Name).all()]
+        return dropdowns.tagDropdownOptions(areaDropdownValues)
 
     @dashApp.callback(Output(component_id = "tagDropdown", component_property = "value"),
         [Input(component_id = "tagDropdown", component_property = "options"),
         Input(component_id = "url", component_property = "href")],
         [State(component_id = "tagDropdown", component_property = "value")])
-    def tagDropdownValue(tagDropdownOptions, urlHref, tagDropdownValues):
-        tagIds = []
-        if len(list(filter(lambda property: property["prop_id"] == "url.href", dash.callback_context.triggered))) > 0:
-            if tagDropdownOptions:
-                queryString = parse_qs(urlparse(urlHref).query)
-                if "tagId" in queryString:
-                    for tagId in map(int, queryString["tagId"]):
-                        if len(list(filter(lambda tag: tag["value"] == tagId, tagDropdownOptions))) > 0:
-                            tagIds.append(tagId)
-        else:
-            if tagDropdownOptions:
-                for tagId in tagDropdownValues:
-                    if len(list(filter(lambda tag: tag["value"] == tagId, tagDropdownOptions))) > 0:
-                        tagIds.append(tagId)
-
-        return tagIds
+    def tagDropdownValues(tagDropdownOptions, urlHref, tagDropdownValues):
+        return dropdowns.tagDropdownValues(tagDropdownOptions, urlHref, tagDropdownValues)
 
     @dashApp.callback(Output(component_id = "graph", component_property = "figure"),
         [Input(component_id = "fromTimestampInput", component_property = "value"),
@@ -228,20 +201,3 @@ def registerCallbacks(dashApp):
                                 tagNotesDictionary["text"].append(tagValueNotes)
 
             return {"data": data, "layout": {"uirevision": "{}{}".format(fromTimestampInputValue, toTimestampInputValue)}}
-
-    @dashApp.callback([Output(component_id = "refreshRateButton", component_property = "children"),
-        Output(component_id = "interval", component_property = "interval"),
-        Output(component_id = "interval", component_property = "disabled")],
-        [Input(component_id = "offLi", component_property = "n_clicks"),
-        Input(component_id = "fiveSecondLi", component_property = "n_clicks"),
-        Input(component_id = "tenSecondLi", component_property = "n_clicks"),
-        Input(component_id = "thirtySecondLi", component_property = "n_clicks"),
-        Input(component_id = "oneMinuteLi", component_property = "n_clicks"),
-        Input(component_id = "fiveMinuteLi", component_property = "n_clicks"),
-        Input(component_id = "fifthteenMinuteLi", component_property = "n_clicks"),
-        Input(component_id = "thirtyMinuteLi", component_property = "n_clicks"),
-        Input(component_id = "oneHourLi", component_property = "n_clicks"),
-        Input(component_id = "twoHourLi", component_property = "n_clicks"),
-        Input(component_id = "oneDayLi", component_property = "n_clicks")])
-    def interval(*args, **kwargs):
-        return timestampRangeComponent.intervalCallback(*args, **kwargs)

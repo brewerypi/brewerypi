@@ -1,6 +1,6 @@
 import dash_core_components as dcc
 import dash_html_components as html
-from app.dashes import timestampRangeComponent
+from app.dashes import dropdowns, timestampRangeComponent
 
 layout = html.Div(children =
 [
@@ -15,10 +15,10 @@ layout = html.Div(children =
     [
         html.Div(className = "well well-sm", children =
         [
-            dcc.Dropdown(id = "enterpriseDropdown", placeholder = "Select Enterprise(s)", multi = True),
-            dcc.Dropdown(id = "siteDropdown", placeholder = "Select Site(s)", multi = True),
-            dcc.Dropdown(id = "areaDropdown", placeholder = "Select Area(s)", multi = True),
-            dcc.Dropdown(id = "tagDropdown", placeholder = "Select Tag(s)", multi = True)
+            dropdowns.enterprisesLayout(),
+            dropdowns.sitesLayout(),
+            dropdowns.areasLayout(),
+            dropdowns.tagsLayout()
         ])
     ]),
     html.Div(children = [dcc.Graph(id = "graph")]),
