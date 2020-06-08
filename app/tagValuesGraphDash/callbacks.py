@@ -87,66 +87,66 @@ def registerCallbacks(dashApp):
             else:
                 return ["Collapse"]
 
-    @dashApp.callback(Output(component_id = "enterpriseDropdown", component_property = "options"),
+    @dashApp.callback(Output(component_id = "enterprisesDropdown", component_property = "options"),
         [Input(component_id = "url", component_property = "href")])
-    def enterpriseDropDownOptions(urlHref):
-        return dropdowns.enterpriseDropDownOptions(urlHref)
+    def enterprisesDropdownOptions(urlHref):
+        return dropdowns.enterprisesDropdownOptions(urlHref)
 
-    @dashApp.callback(Output(component_id = "enterpriseDropdown", component_property = "value"),
-        [Input(component_id = "enterpriseDropdown", component_property = "options"),
+    @dashApp.callback(Output(component_id = "enterprisesDropdown", component_property = "value"),
+        [Input(component_id = "enterprisesDropdown", component_property = "options"),
         Input(component_id = "url", component_property = "href")])
-    def enterpriseDropdownValues(enterpriseDropdownOptions, urlHref):
-        return dropdowns.enterpriseDropdownValues(enterpriseDropdownOptions, urlHref)
+    def enterprisesDropdownValues(enterprisesDropdownOptions, urlHref):
+        return dropdowns.enterprisesDropdownValues(enterprisesDropdownOptions, urlHref)
 
-    @dashApp.callback(Output(component_id = "siteDropdown", component_property = "options"),
-        [Input(component_id = "enterpriseDropdown", component_property = "value")])
-    def siteDropdownOptions(enterpriseDropdownValues):
-        return dropdowns.siteDropdownOptions(enterpriseDropdownValues)
+    @dashApp.callback(Output(component_id = "sitesDropdown", component_property = "options"),
+        [Input(component_id = "enterprisesDropdown", component_property = "value")])
+    def sitesDropdownOptions(enterprisesDropdownValues):
+        return dropdowns.sitesDropdownOptions(enterprisesDropdownValues)
 
-    @dashApp.callback(Output(component_id = "siteDropdown", component_property = "value"),
-        [Input(component_id = "siteDropdown", component_property = "options"),
+    @dashApp.callback(Output(component_id = "sitesDropdown", component_property = "value"),
+        [Input(component_id = "sitesDropdown", component_property = "options"),
         Input(component_id = "url", component_property = "href")],
-        [State(component_id = "siteDropdown", component_property = "value")])
-    def siteDropdownValues(siteDropdownOptions, urlHref, siteDropdownValues):
-        return dropdowns.siteDropdownValues(siteDropdownOptions, urlHref, siteDropdownValues)
+        [State(component_id = "sitesDropdown", component_property = "value")])
+    def sitesDropdownValues(sitesDropdownOptions, urlHref, sitesDropdownValues):
+        return dropdowns.sitesDropdownValues(sitesDropdownOptions, urlHref, sitesDropdownValues)
 
-    @dashApp.callback(Output(component_id = "areaDropdown", component_property = "options"),
-        [Input(component_id = "siteDropdown", component_property = "value")])
-    def areaDropdownOptions(siteDropdownValues):
-        return dropdowns.areaDropdownOptions(siteDropdownValues)
+    @dashApp.callback(Output(component_id = "areasDropdown", component_property = "options"),
+        [Input(component_id = "sitesDropdown", component_property = "value")])
+    def areasDropdownOptions(sitesDropdownValues):
+        return dropdowns.areasDropdownOptions(sitesDropdownValues)
 
-    @dashApp.callback(Output(component_id = "areaDropdown", component_property = "value"),
-        [Input(component_id = "areaDropdown", component_property = "options"),
+    @dashApp.callback(Output(component_id = "areasDropdown", component_property = "value"),
+        [Input(component_id = "areasDropdown", component_property = "options"),
         Input(component_id = "url", component_property = "href")],
-        [State(component_id = "areaDropdown", component_property = "value")])
-    def areaDropdownValues(areaDropdownOptions, urlHref, areaDropdownValues):
-        return dropdowns.areaDropdownValues(areaDropdownOptions, urlHref, areaDropdownValues)
+        [State(component_id = "areasDropdown", component_property = "value")])
+    def areasDropdownValues(areasDropdownOptions, urlHref, areasDropdownValues):
+        return dropdowns.areasDropdownValues(areasDropdownOptions, urlHref, areasDropdownValues)
 
-    @dashApp.callback(Output(component_id = "tagDropdown", component_property = "options"),
-        [Input(component_id = "areaDropdown", component_property = "value")])
-    def tagDropdownOptions(areaDropdownValues):
-        return dropdowns.tagDropdownOptions(areaDropdownValues)
+    @dashApp.callback(Output(component_id = "tagsDropdown", component_property = "options"),
+        [Input(component_id = "areasDropdown", component_property = "value")])
+    def tagsDropdownOptions(areasDropdownValues):
+        return dropdowns.tagsDropdownOptions(areasDropdownValues)
 
-    @dashApp.callback(Output(component_id = "tagDropdown", component_property = "value"),
-        [Input(component_id = "tagDropdown", component_property = "options"),
+    @dashApp.callback(Output(component_id = "tagsDropdown", component_property = "value"),
+        [Input(component_id = "tagsDropdown", component_property = "options"),
         Input(component_id = "url", component_property = "href")],
-        [State(component_id = "tagDropdown", component_property = "value")])
-    def tagDropdownValues(tagDropdownOptions, urlHref, tagDropdownValues):
-        return dropdowns.tagDropdownValues(tagDropdownOptions, urlHref, tagDropdownValues)
+        [State(component_id = "tagsDropdown", component_property = "value")])
+    def tagsDropdownValues(tagsDropdownOptions, urlHref, tagsDropdownValues):
+        return dropdowns.tagsDropdownValues(tagsDropdownOptions, urlHref, tagsDropdownValues)
 
     @dashApp.callback(Output(component_id = "graph", component_property = "figure"),
         [Input(component_id = "fromTimestampInput", component_property = "value"),
         Input(component_id = "toTimestampInput", component_property = "value"),
-        Input(component_id = "tagDropdown", component_property = "value"),
+        Input(component_id = "tagsDropdown", component_property = "value"),
         Input(component_id = "url", component_property = "href"),
         Input(component_id = "interval", component_property = "n_intervals"),
         Input(component_id = "refreshButton", component_property = "n_clicks")])
-    def graphFigure(fromTimestampInputValue, toTimestampInputValue, tagDropdownValues, urlHref, intervalNIntervals, refreshButtonNClicks):
-        if fromTimestampInputValue is None or toTimestampInputValue is None or tagDropdownValues is None:
+    def graphFigure(fromTimestampInputValue, toTimestampInputValue, tagsDropdownValues, urlHref, intervalNIntervals, refreshButtonNClicks):
+        if fromTimestampInputValue is None or toTimestampInputValue is None or tagsDropdownValues is None:
             raise PreventUpdate
         else:
             data = []
-            if fromTimestampInputValue!= "" and toTimestampInputValue != "" and tagDropdownValues is not None:
+            if fromTimestampInputValue!= "" and toTimestampInputValue != "" and tagsDropdownValues is not None:
                 queryString = parse_qs(urlparse(urlHref).query)
                 if "localTimezone" in queryString:
                     localTimezone = pytz.timezone(queryString["localTimezone"][0])
@@ -158,7 +158,7 @@ def registerCallbacks(dashApp):
                 fromTimestampUtc = fromTimestampLocal.astimezone(pytz.utc)
                 toTimestampUtc = toTimestampLocal.astimezone(pytz.utc)
 
-                for tagId in tagDropdownValues:
+                for tagId in tagsDropdownValues:
                     tag = Tag.query.get(tagId)
                     tagValues = TagValue.query.filter(TagValue.TagId == tag.TagId, TagValue.Timestamp >= fromTimestampUtc, TagValue.Timestamp <= toTimestampUtc)
                     if tag.LookupId is None:
