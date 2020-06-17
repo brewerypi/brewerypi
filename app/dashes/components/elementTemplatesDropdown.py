@@ -18,7 +18,7 @@ def valuesCallback(dashApp):
     @dashApp.callback(Output(component_id = "elementTemplatesDropdown", component_property = "value"),
         [Input(component_id = "elementTemplatesDropdown", component_property = "options"),
         Input(component_id = "url", component_property = "href")],
-        [State(component_id = "elementTemplatesDropdown", component_property = "values")])
+        [State(component_id = "elementTemplatesDropdown", component_property = "value")])
     def elementTemplatesDropdownValues(elementTemplatesDropdownOptions, urlHref, elementTemplatesDropdownValues):
         elementTemplateIds = []
         if len(list(filter(lambda property: property["prop_id"] == "url.href", dash.callback_context.triggered))) > 0:
