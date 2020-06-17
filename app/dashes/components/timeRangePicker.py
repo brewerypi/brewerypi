@@ -1,101 +1,54 @@
 import dash
 import pytz
-import sys
 import dash_core_components as dcc
 import dash_html_components as html
+from dash.dependencies import Input, Output, State
 from datetime import datetime
 from dateutil.relativedelta import calendar, relativedelta
 from urllib.parse import parse_qs, urlparse
+from app.models import EventFrame
+from . import refreshButton, refreshInterval
 
-def intervalCallback(offLiNClicks, fiveSecondLiNClicks, tenSecondLiNClicks, thirtySecondLiNClicks, oneMinuteLiNClicks, fiveMinuteLiNClicks,
-    fifthteenMinuteLiNClicks, thirtyMinuteLiNClicks, oneHourLiNClicks, twoHourLiNClicks, oneDayLiNClicks):
-    changedId = [property['prop_id'] for property in dash.callback_context.triggered][0]
-    if "offLi" in changedId:
-        refreshRateText = "Off"
-        refreshRateMilliseconds = sys.maxsize
-        disabled = True
-    elif "fiveSecondLi" in changedId:
-        refreshRateText = "5s"
-        refreshRateMilliseconds = 5 * 1000
-        disabled = False
-    elif "tenSecondLi" in changedId:
-        refreshRateText = "10s"
-        refreshRateMilliseconds = 10 * 1000
-        disabled = False
-    elif "thirtySecondLi" in changedId:
-        refreshRateText = "30s"
-        refreshRateMilliseconds = 30 * 1000
-        disabled = False
-    elif "oneMinuteLi" in changedId:
-        refreshRateText = "1m"
-        refreshRateMilliseconds = 60 * 1 * 1000
-        disabled = False
-    elif "fiveMinuteLi" in changedId:
-        refreshRateText = "5m"
-        refreshRateMilliseconds = 60 * 5 * 1000
-        disabled = False
-    elif "fifthteenMinuteLi" in changedId:
-        refreshRateText = "15m"
-        refreshRateMilliseconds = 60 * 15 * 1000
-        disabled = False
-    elif "thirtyMinuteLi" in changedId:
-        refreshRateText = "30m"
-        refreshRateMilliseconds = 60 * 30 * 1000
-        disabled = False
-    elif "oneHourLi" in changedId:
-        refreshRateText = "1h"
-        refreshRateMilliseconds = 60 * 60 * 1 * 1000
-        disabled = False
-    elif "twoHourLi" in changedId:
-        refreshRateText = "2h"
-        refreshRateMilliseconds = 60 * 60 * 2 * 1000
-        disabled = False
-    elif "oneDayLi" in changedId:
-        refreshRateText = "1d"
-        refreshRateMilliseconds = 60 * 60 * 24 * 1000
-        disabled = False
-    else:
-        refreshRateText = "Off"
-        refreshRateMilliseconds = sys.maxsize
-        disabled = True
+def callback(dashApp):
+    refreshInterval.callback(dashApp)
+    @dashApp.callback(quickTimeRangePickerCallbackOutputs(),
+        quickTimeRangePickerCallbackInputs(),
+        [State(component_id = "fromTimestampInput", component_property = "value")])
+    def callback(*args, **kwargs):
+        return fromToTimestamps(*args, **kwargs)
 
-    return [refreshRateText + " ", html.Span(className = "caret")], refreshRateMilliseconds, disabled
+def eventFrameCallback(dashApp):
+    refreshInterval.callback(dashApp)
+    @dashApp.callback(quickTimeRangePickerCallbackOutputs(),
+        quickTimeRangePickerCallbackInputs(),
+        [State(component_id = "fromTimestampInput", component_property = "value"),
+        State(component_id = "eventFrameDropdown", component_property = "value")])
+    def eventFrameCallback(urlHref, *args, **kwargs):
+        timestamps = fromToTimestamps(urlHref, *args[:-1], **kwargs)
+        fromTimestamp = timestamps[0]
+        toTimestamp = timestamps[1]
+        queryString = parse_qs(urlparse(urlHref).query)
+        if len(list(filter(lambda property: property["prop_id"] == "url.href", dash.callback_context.triggered))) > 0:
+            # url href input fired.
+            if "eventFrameId" in queryString:
+                eventFrameId = int(queryString["eventFrameId"][0])
+                eventFrame = EventFrame.query.get(eventFrameId)
+                if eventFrame is not None:
+                    fromTimestamp = eventFrame.StartTimestamp.strftime("%Y-%m-%dT%H:%M:%S")
+                    if eventFrame.EndTimestamp is not None:
+                        # A closed event frame exists so use the end timestamp.
+                        toTimestamp = (eventFrame.EndTimestamp + relativedelta(minutes = 1)).strftime("%Y-%m-%dT%H:%M:%S")
+        elif len(list(filter(lambda property: property["prop_id"] == "interval.n_intervals", dash.callback_context.triggered))) > 0:
+            # interval n_intervals input fired.
+            if eventFrameDropdownValue is not None:
+                eventFrame = EventFrame.query.get(eventFrameDropdownValue)
+                if eventFrame is not None:
+                    if eventFrame.EndTimestamp is not None:
+                        raise PreventUpdate
 
-def intervalLayout():
-    return html.Div(className = "btn-group", role = "group", children =
-    [
-        html.Button(id = "refreshRateButton", className = "btn btn-default dropdown-toggle btn-sm", **{"data-toggle": "dropdown",
-            "aria-haspopup": "true", "aria-expanded": "false"}, children = ["Off ", html.Span(className = "caret")], title = "Refresh Interval"),
-        html.Ul(className = "dropdown-menu", children =
-        [
-            html.Li(id = "offLi", children = html.A("Off")),
-            html.Li(id = "fiveSecondLi", children = html.A("5s")),
-            html.Li(id = "tenSecondLi", children = html.A("10s")),
-            html.Li(id = "thirtySecondLi", children = html.A("30s")),
-            html.Li(id = "oneMinuteLi", children = html.A("1m")),
-            html.Li(id = "fiveMinuteLi", children = html.A("5m")),
-            html.Li(id = "fifthteenMinuteLi", children = html.A("15m")),
-            html.Li(id = "thirtyMinuteLi", children = html.A("30m")),
-            html.Li(id = "oneHourLi", children = html.A("1h")),
-            html.Li(id = "twoHourLi", children = html.A("2h")),
-            html.Li(id = "oneDayLi", children = html.A("1d"))
-        ])
-    ])
+        return fromTimestamp, toTimestamp
 
-def layout():
-    return html.Div(children =
-    [
-        "From: ", 
-        dcc.Input(id = "fromTimestampInput", type = "datetime-local", step = "1"),
-        " to: ",
-        dcc.Input(id = "toTimestampInput", type = "datetime-local", step = "1"),
-        rangePickerLayout(),
-        html.Button(id = "refreshButton", className = "btn btn-default btn-sm", children = [html.Span(className = "glyphicon glyphicon-refresh")],
-            title = "Refresh"),
-        intervalLayout()
-    ])
-
-def rangePickerCallback(urlHref, lastFiveMinutesLiNClicks, lastFifthteenMinutesLiNClicks, lastThirtyMinutesLiNClicks, lastOneHourLiNClicks,
+def fromToTimestamps(urlHref, lastFiveMinutesLiNClicks, lastFifthteenMinutesLiNClicks, lastThirtyMinutesLiNClicks, lastOneHourLiNClicks,
     lastThreeHoursLiNClicks, lastSixHoursLiNClicks, lastTwelveHoursLiNClicks, lastTwentyFourHoursLiNClicks, lastTwoDaysLiNClicks, lastThirtyDaysLiNClicks,
     lastNinetyDaysLiNClicks, lastSixMonthsLiNClicks, lastOneYearLiNClicks, lastTwoYearsLiNClicks, lastFiveYearsLiNClicks, yesterdayLiNClicks,
     lastSevenDaysLiNClicks, dayBeforeYesterdayLiNClicks, thisDayLastWeekLiNClicks, previousWeekLiNClicks, previousMonthLiNClicks, previousYearLiNClicks,
@@ -197,7 +150,63 @@ def rangePickerCallback(urlHref, lastFiveMinutesLiNClicks, lastFifthteenMinutesL
 
     return fromTimestamp.strftime("%Y-%m-%dT%H:%M:%S"), toTimestamp.strftime("%Y-%m-%dT%H:%M:%S")
 
-def rangePickerLayout():
+def fromToTimestampsLayout():
+    return html.Div(className = "btn-group", role = "group", children =
+    [
+        "From: ", 
+        dcc.Input(id = "fromTimestampInput", type = "datetime-local", step = "1"),
+        " to: ",
+        dcc.Input(id = "toTimestampInput", type = "datetime-local", step = "1")
+    ])
+
+def layout():
+    return html.Div(children =
+    [
+        fromToTimestampsLayout(),
+        quickTimeRangePickerLayout(),
+        refreshButton.layout(),
+        refreshInterval.layout()
+    ])
+
+def quickTimeRangePickerCallbackInputs():
+    return [Input(component_id = "url", component_property = "href"),
+        Input(component_id = "lastFiveMinutesLi", component_property = "n_clicks"),
+        Input(component_id = "lastFifthteenMinutesLi", component_property = "n_clicks"),
+        Input(component_id = "lastThirtyMinutesLi", component_property = "n_clicks"),
+        Input(component_id = "lastOneHourLi", component_property = "n_clicks"),
+        Input(component_id = "lastThreeHoursLi", component_property = "n_clicks"),
+        Input(component_id = "lastSixHoursLi", component_property = "n_clicks"),
+        Input(component_id = "lastTwelveHoursLi", component_property = "n_clicks"),
+        Input(component_id = "lastTwentyFourHoursLi", component_property = "n_clicks"),
+        Input(component_id = "lastTwoDaysLi", component_property = "n_clicks"),
+        Input(component_id = "lastSevenDaysLi", component_property = "n_clicks"),
+        Input(component_id = "lastThirtyDaysLi", component_property = "n_clicks"),
+        Input(component_id = "lastNinetyDaysLi", component_property = "n_clicks"),
+        Input(component_id = "lastSixMonthsLi", component_property = "n_clicks"),
+        Input(component_id = "lastOneYearLi", component_property = "n_clicks"),
+        Input(component_id = "lastTwoYearsLi", component_property = "n_clicks"),
+        Input(component_id = "lastFiveYearsLi", component_property = "n_clicks"),
+        Input(component_id = "yesterdayLi", component_property = "n_clicks"),
+        Input(component_id = "dayBeforeYesterdayLi", component_property = "n_clicks"),
+        Input(component_id = "thisDayLastWeekLi", component_property = "n_clicks"),
+        Input(component_id = "previousWeekLi", component_property = "n_clicks"),
+        Input(component_id = "previousMonthLi", component_property = "n_clicks"),
+        Input(component_id = "previousYearLi", component_property = "n_clicks"),
+        Input(component_id = "todayLi", component_property = "n_clicks"),
+        Input(component_id = "todaySoFarLi", component_property = "n_clicks"),
+        Input(component_id = "thisWeekLi", component_property = "n_clicks"),
+        Input(component_id = "thisWeekSoFarLi", component_property = "n_clicks"),
+        Input(component_id = "thisMonthLi", component_property = "n_clicks"),
+        Input(component_id = "thisMonthSoFarLi", component_property = "n_clicks"),
+        Input(component_id = "thisYearLi", component_property = "n_clicks"),
+        Input(component_id = "thisYearSoFarLi", component_property = "n_clicks"),
+        Input(component_id = "interval", component_property = "n_intervals")]
+
+def quickTimeRangePickerCallbackOutputs():
+    return [Output(component_id = "fromTimestampInput", component_property = "value"),
+        Output(component_id = "toTimestampInput", component_property = "value")]
+
+def quickTimeRangePickerLayout():
     return html.Div(className = "btn-group", role = "group", children =
     [
         html.Button(id = "timestampRangePickerButton", className = "btn btn-default dropdown-toggle btn-sm", **{"data-toggle": "dropdown",

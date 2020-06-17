@@ -1,137 +1,22 @@
 import pytz
-from dash.dependencies import Input, Output, State
+from dash.dependencies import Input, Output
 from dash.exceptions import PreventUpdate
 from datetime import datetime
 from urllib.parse import parse_qs, urlparse
 from app.models import LookupValue, Tag, TagValue
-from app.dashes import dropdowns, timestampRangeComponent
+from app.dashes.components import areasDropdown, collapseExpandButton, enterprisesDropdown, sitesDropdown, tagsDropdown, timeRangePicker
 
 def registerCallbacks(dashApp):
-    @dashApp.callback([Output(component_id = "fromTimestampInput", component_property = "value"),
-        Output(component_id = "toTimestampInput", component_property = "value")],
-        [Input(component_id = "url", component_property = "href"),
-        Input(component_id = "lastFiveMinutesLi", component_property = "n_clicks"),
-        Input(component_id = "lastFifthteenMinutesLi", component_property = "n_clicks"),
-        Input(component_id = "lastThirtyMinutesLi", component_property = "n_clicks"),
-        Input(component_id = "lastOneHourLi", component_property = "n_clicks"),
-        Input(component_id = "lastThreeHoursLi", component_property = "n_clicks"),
-        Input(component_id = "lastSixHoursLi", component_property = "n_clicks"),
-        Input(component_id = "lastTwelveHoursLi", component_property = "n_clicks"),
-        Input(component_id = "lastTwentyFourHoursLi", component_property = "n_clicks"),
-        Input(component_id = "lastTwoDaysLi", component_property = "n_clicks"),
-        Input(component_id = "lastSevenDaysLi", component_property = "n_clicks"),
-        Input(component_id = "lastThirtyDaysLi", component_property = "n_clicks"),
-        Input(component_id = "lastNinetyDaysLi", component_property = "n_clicks"),
-        Input(component_id = "lastSixMonthsLi", component_property = "n_clicks"),
-        Input(component_id = "lastOneYearLi", component_property = "n_clicks"),
-        Input(component_id = "lastTwoYearsLi", component_property = "n_clicks"),
-        Input(component_id = "lastFiveYearsLi", component_property = "n_clicks"),
-        Input(component_id = "yesterdayLi", component_property = "n_clicks"),
-        Input(component_id = "dayBeforeYesterdayLi", component_property = "n_clicks"),
-        Input(component_id = "thisDayLastWeekLi", component_property = "n_clicks"),
-        Input(component_id = "previousWeekLi", component_property = "n_clicks"),
-        Input(component_id = "previousMonthLi", component_property = "n_clicks"),
-        Input(component_id = "previousYearLi", component_property = "n_clicks"),
-        Input(component_id = "todayLi", component_property = "n_clicks"),
-        Input(component_id = "todaySoFarLi", component_property = "n_clicks"),
-        Input(component_id = "thisWeekLi", component_property = "n_clicks"),
-        Input(component_id = "thisWeekSoFarLi", component_property = "n_clicks"),
-        Input(component_id = "thisMonthLi", component_property = "n_clicks"),
-        Input(component_id = "thisMonthSoFarLi", component_property = "n_clicks"),
-        Input(component_id = "thisYearLi", component_property = "n_clicks"),
-        Input(component_id = "thisYearSoFarLi", component_property = "n_clicks"),
-        Input(component_id = "interval", component_property = "n_intervals")],
-        [State(component_id = "fromTimestampInput", component_property = "value")])
-    def fromTimestampInputValueToTimestampInputValue(urlHref, lastFiveMinutesLiNClicks, lastFifthteenMinutesLiNClicks, lastThirtyMinutesLiNClicks,
-            lastOneHourLiNClicks, lastThreeHoursLiNClicks, lastSixHoursLiNClicks, lastTwelveHoursLiNClicks, lastTwentyFourHoursLiNClicks, lastTwoDaysLiNClicks,
-            lastThirtyDaysLiNClicks, lastNinetyDaysLiNClicks, lastSixMonthsLiNClicks, lastOneYearLiNClicks, lastTwoYearsLiNClicks, lastFiveYearsLiNClicks,
-            yesterdayLiNClicks, lastSevenDaysLiNClicks, dayBeforeYesterdayLiNClicks, thisDayLastWeekLiNClicks, previousWeekLiNClicks, previousMonthLiNClicks,
-            previousYearLiNClicks, todayLiNClicks, todaySoFarLiNClicks, thisWeekLiNClicks, thisWeekSoFarLiNClicks, thisMonthLiNClicks, thisMonthSoFarLiNClicks,
-            thisYearLiNClicks, thisYearSoFarLiNClicks, intervalNIntervals, fromTimestampInputValue):
-        return timestampRangeComponent.rangePickerCallback(urlHref, lastFiveMinutesLiNClicks, lastFifthteenMinutesLiNClicks, lastThirtyMinutesLiNClicks,
-            lastOneHourLiNClicks, lastThreeHoursLiNClicks, lastSixHoursLiNClicks, lastTwelveHoursLiNClicks, lastTwentyFourHoursLiNClicks, lastTwoDaysLiNClicks,
-            lastThirtyDaysLiNClicks, lastNinetyDaysLiNClicks, lastSixMonthsLiNClicks, lastOneYearLiNClicks, lastTwoYearsLiNClicks, lastFiveYearsLiNClicks,
-            yesterdayLiNClicks, lastSevenDaysLiNClicks, dayBeforeYesterdayLiNClicks, thisDayLastWeekLiNClicks, previousWeekLiNClicks, previousMonthLiNClicks,
-            previousYearLiNClicks, todayLiNClicks, todaySoFarLiNClicks, thisWeekLiNClicks, thisWeekSoFarLiNClicks, thisMonthLiNClicks, thisMonthSoFarLiNClicks,
-            thisYearLiNClicks, thisYearSoFarLiNClicks, intervalNIntervals, fromTimestampInputValue)
-
-    @dashApp.callback([Output(component_id = "refreshRateButton", component_property = "children"),
-        Output(component_id = "interval", component_property = "interval"),
-        Output(component_id = "interval", component_property = "disabled")],
-        [Input(component_id = "offLi", component_property = "n_clicks"),
-        Input(component_id = "fiveSecondLi", component_property = "n_clicks"),
-        Input(component_id = "tenSecondLi", component_property = "n_clicks"),
-        Input(component_id = "thirtySecondLi", component_property = "n_clicks"),
-        Input(component_id = "oneMinuteLi", component_property = "n_clicks"),
-        Input(component_id = "fiveMinuteLi", component_property = "n_clicks"),
-        Input(component_id = "fifthteenMinuteLi", component_property = "n_clicks"),
-        Input(component_id = "thirtyMinuteLi", component_property = "n_clicks"),
-        Input(component_id = "oneHourLi", component_property = "n_clicks"),
-        Input(component_id = "twoHourLi", component_property = "n_clicks"),
-        Input(component_id = "oneDayLi", component_property = "n_clicks")])
-    def interval(offLiNClicks, fiveSecondLiNClicks, tenSecondLiNClicks, thirtySecondLiNClicks, oneMinuteLiNClicks, fiveMinuteLiNClicks,
-        fifthteenMinuteLiNClicks, thirtyMinuteLiNClicks, oneHourLiNClicks, twoHourLiNClicks, oneDayLiNClicks):
-        return timestampRangeComponent.intervalCallback(offLiNClicks, fiveSecondLiNClicks, tenSecondLiNClicks, thirtySecondLiNClicks, oneMinuteLiNClicks,
-            fiveMinuteLiNClicks, fifthteenMinuteLiNClicks, thirtyMinuteLiNClicks, oneHourLiNClicks, twoHourLiNClicks, oneDayLiNClicks)
-
-    @dashApp.callback(Output(component_id = "collapseExpandButton", component_property = "children"),
-        [Input(component_id = "collapseExpandButton", component_property = "n_clicks")],
-        [State(component_id = "collapseExpandButton", component_property = "children")])
-    def collapseExpandButtonChildren(collapseExpandButtonNClicks, collapseExpandButtonChildren):
-        if collapseExpandButtonNClicks == 0:
-            raise PreventUpdate
-        else:
-            if collapseExpandButtonChildren == ["Collapse"]:
-                return ["Expand"]
-            else:
-                return ["Collapse"]
-
-    @dashApp.callback(Output(component_id = "enterprisesDropdown", component_property = "options"),
-        [Input(component_id = "url", component_property = "href")])
-    def enterprisesDropdownOptions(urlHref):
-        return dropdowns.enterprisesDropdownOptions(urlHref)
-
-    @dashApp.callback(Output(component_id = "enterprisesDropdown", component_property = "value"),
-        [Input(component_id = "enterprisesDropdown", component_property = "options"),
-        Input(component_id = "url", component_property = "href")])
-    def enterprisesDropdownValues(enterprisesDropdownOptions, urlHref):
-        return dropdowns.enterprisesDropdownValues(enterprisesDropdownOptions, urlHref)
-
-    @dashApp.callback(Output(component_id = "sitesDropdown", component_property = "options"),
-        [Input(component_id = "enterprisesDropdown", component_property = "value")])
-    def sitesDropdownOptions(enterprisesDropdownValues):
-        return dropdowns.sitesDropdownOptions(enterprisesDropdownValues)
-
-    @dashApp.callback(Output(component_id = "sitesDropdown", component_property = "value"),
-        [Input(component_id = "sitesDropdown", component_property = "options"),
-        Input(component_id = "url", component_property = "href")],
-        [State(component_id = "sitesDropdown", component_property = "value")])
-    def sitesDropdownValues(sitesDropdownOptions, urlHref, sitesDropdownValues):
-        return dropdowns.sitesDropdownValues(sitesDropdownOptions, urlHref, sitesDropdownValues)
-
-    @dashApp.callback(Output(component_id = "areasDropdown", component_property = "options"),
-        [Input(component_id = "sitesDropdown", component_property = "value")])
-    def areasDropdownOptions(sitesDropdownValues):
-        return dropdowns.areasDropdownOptions(sitesDropdownValues)
-
-    @dashApp.callback(Output(component_id = "areasDropdown", component_property = "value"),
-        [Input(component_id = "areasDropdown", component_property = "options"),
-        Input(component_id = "url", component_property = "href")],
-        [State(component_id = "areasDropdown", component_property = "value")])
-    def areasDropdownValues(areasDropdownOptions, urlHref, areasDropdownValues):
-        return dropdowns.areasDropdownValues(areasDropdownOptions, urlHref, areasDropdownValues)
-
-    @dashApp.callback(Output(component_id = "tagsDropdown", component_property = "options"),
-        [Input(component_id = "areasDropdown", component_property = "value")])
-    def tagsDropdownOptions(areasDropdownValues):
-        return dropdowns.tagsDropdownOptions(areasDropdownValues)
-
-    @dashApp.callback(Output(component_id = "tagsDropdown", component_property = "value"),
-        [Input(component_id = "tagsDropdown", component_property = "options"),
-        Input(component_id = "url", component_property = "href")],
-        [State(component_id = "tagsDropdown", component_property = "value")])
-    def tagsDropdownValues(tagsDropdownOptions, urlHref, tagsDropdownValues):
-        return dropdowns.tagsDropdownValues(tagsDropdownOptions, urlHref, tagsDropdownValues)
+    timeRangePicker.callback(dashApp)
+    collapseExpandButton.callback(dashApp)
+    enterprisesDropdown.optionsCallback(dashApp)
+    enterprisesDropdown.valuesCallback(dashApp)
+    sitesDropdown.optionsCallback(dashApp)
+    sitesDropdown.valuesCallback(dashApp)
+    areasDropdown.optionsCallback(dashApp)
+    areasDropdown.valuesCallback(dashApp)
+    tagsDropdown.optionsCallback(dashApp)
+    tagsDropdown.valuesCallback(dashApp)
 
     @dashApp.callback(Output(component_id = "graph", component_property = "figure"),
         [Input(component_id = "fromTimestampInput", component_property = "value"),

@@ -1,217 +1,26 @@
-import dash
 import pytz
-from dash.dependencies import Input, Output, State
+from dash.dependencies import Input, Output
 from dash.exceptions import PreventUpdate
 from datetime import datetime
-from dateutil.relativedelta import relativedelta
-from sqlalchemy import or_
 from urllib.parse import parse_qs, urlparse
 from app.models import EventFrame, EventFrameNote, EventFrameTemplateView, LookupValue, Note
-from app.dashes import dropdowns, timestampRangeComponent
+from app.dashes.components import collapseExpandButton, elementTemplateDropdown, enterpriseDropdown, eventFrameDropdown, eventFrameTemplateDropdown, \
+    eventFrameTemplateViewDropdown, siteDropdown, timeRangePicker
 
 def registerCallbacks(dashApp):
-    @dashApp.callback([Output(component_id = "fromTimestampInput", component_property = "value"),
-        Output(component_id = "toTimestampInput", component_property = "value")],
-        [Input(component_id = "url", component_property = "href"),
-        Input(component_id = "lastFiveMinutesLi", component_property = "n_clicks"),
-        Input(component_id = "lastFifthteenMinutesLi", component_property = "n_clicks"),
-        Input(component_id = "lastThirtyMinutesLi", component_property = "n_clicks"),
-        Input(component_id = "lastOneHourLi", component_property = "n_clicks"),
-        Input(component_id = "lastThreeHoursLi", component_property = "n_clicks"),
-        Input(component_id = "lastSixHoursLi", component_property = "n_clicks"),
-        Input(component_id = "lastTwelveHoursLi", component_property = "n_clicks"),
-        Input(component_id = "lastTwentyFourHoursLi", component_property = "n_clicks"),
-        Input(component_id = "lastTwoDaysLi", component_property = "n_clicks"),
-        Input(component_id = "lastSevenDaysLi", component_property = "n_clicks"),
-        Input(component_id = "lastThirtyDaysLi", component_property = "n_clicks"),
-        Input(component_id = "lastNinetyDaysLi", component_property = "n_clicks"),
-        Input(component_id = "lastSixMonthsLi", component_property = "n_clicks"),
-        Input(component_id = "lastOneYearLi", component_property = "n_clicks"),
-        Input(component_id = "lastTwoYearsLi", component_property = "n_clicks"),
-        Input(component_id = "lastFiveYearsLi", component_property = "n_clicks"),
-        Input(component_id = "yesterdayLi", component_property = "n_clicks"),
-        Input(component_id = "dayBeforeYesterdayLi", component_property = "n_clicks"),
-        Input(component_id = "thisDayLastWeekLi", component_property = "n_clicks"),
-        Input(component_id = "previousWeekLi", component_property = "n_clicks"),
-        Input(component_id = "previousMonthLi", component_property = "n_clicks"),
-        Input(component_id = "previousYearLi", component_property = "n_clicks"),
-        Input(component_id = "todayLi", component_property = "n_clicks"),
-        Input(component_id = "todaySoFarLi", component_property = "n_clicks"),
-        Input(component_id = "thisWeekLi", component_property = "n_clicks"),
-        Input(component_id = "thisWeekSoFarLi", component_property = "n_clicks"),
-        Input(component_id = "thisMonthLi", component_property = "n_clicks"),
-        Input(component_id = "thisMonthSoFarLi", component_property = "n_clicks"),
-        Input(component_id = "thisYearLi", component_property = "n_clicks"),
-        Input(component_id = "thisYearSoFarLi", component_property = "n_clicks"),
-        Input(component_id = "interval", component_property = "n_intervals")],
-        [State(component_id = "fromTimestampInput", component_property = "value"),
-        State(component_id = "eventFrameDropdown", component_property = "value")])
-    def fromTimestampInputValueToTimestampInputValue(urlHref, lastFiveMinutesLiNClicks, lastFifthteenMinutesLiNClicks, lastThirtyMinutesLiNClicks,
-            lastOneHourLiNClicks, lastThreeHoursLiNClicks, lastSixHoursLiNClicks, lastTwelveHoursLiNClicks, lastTwentyFourHoursLiNClicks, lastTwoDaysLiNClicks,
-            lastThirtyDaysLiNClicks, lastNinetyDaysLiNClicks, lastSixMonthsLiNClicks, lastOneYearLiNClicks, lastTwoYearsLiNClicks, lastFiveYearsLiNClicks,
-            yesterdayLiNClicks, lastSevenDaysLiNClicks, dayBeforeYesterdayLiNClicks, thisDayLastWeekLiNClicks, previousWeekLiNClicks, previousMonthLiNClicks,
-            previousYearLiNClicks, todayLiNClicks, todaySoFarLiNClicks, thisWeekLiNClicks, thisWeekSoFarLiNClicks, thisMonthLiNClicks, thisMonthSoFarLiNClicks,
-            thisYearLiNClicks, thisYearSoFarLiNClicks, intervalNIntervals, fromTimestampInputValue, eventFrameDropdownValue):
-        timestamps = timestampRangeComponent.rangePickerCallback(urlHref, lastFiveMinutesLiNClicks, lastFifthteenMinutesLiNClicks, lastThirtyMinutesLiNClicks,
-            lastOneHourLiNClicks, lastThreeHoursLiNClicks, lastSixHoursLiNClicks, lastTwelveHoursLiNClicks, lastTwentyFourHoursLiNClicks, lastTwoDaysLiNClicks,
-            lastThirtyDaysLiNClicks, lastNinetyDaysLiNClicks, lastSixMonthsLiNClicks, lastOneYearLiNClicks, lastTwoYearsLiNClicks, lastFiveYearsLiNClicks,
-            yesterdayLiNClicks, lastSevenDaysLiNClicks, dayBeforeYesterdayLiNClicks, thisDayLastWeekLiNClicks, previousWeekLiNClicks, previousMonthLiNClicks,
-            previousYearLiNClicks, todayLiNClicks, todaySoFarLiNClicks, thisWeekLiNClicks, thisWeekSoFarLiNClicks, thisMonthLiNClicks, thisMonthSoFarLiNClicks,
-            thisYearLiNClicks, thisYearSoFarLiNClicks, intervalNIntervals, fromTimestampInputValue)
-        fromTimestamp = timestamps[0]
-        toTimestamp = timestamps[1]
-        queryString = parse_qs(urlparse(urlHref).query)
-        if len(list(filter(lambda property: property["prop_id"] == "url.href", dash.callback_context.triggered))) > 0:
-            # url href input fired.
-            if "eventFrameId" in queryString:
-                eventFrameId = int(queryString["eventFrameId"][0])
-                eventFrame = EventFrame.query.get(eventFrameId)
-                if eventFrame is not None:
-                    fromTimestamp = eventFrame.StartTimestamp.strftime("%Y-%m-%dT%H:%M:%S")
-                    if eventFrame.EndTimestamp is not None:
-                        # A closed event frame exists so use the end timestamp.
-                        toTimestamp = (eventFrame.EndTimestamp + relativedelta(minutes = 1)).strftime("%Y-%m-%dT%H:%M:%S")
-        elif len(list(filter(lambda property: property["prop_id"] == "interval.n_intervals", dash.callback_context.triggered))) > 0:
-            # interval n_intervals input fired.
-            if eventFrameDropdownValue is not None:
-                eventFrame = EventFrame.query.get(eventFrameDropdownValue)
-                if eventFrame is not None:
-                    if eventFrame.EndTimestamp is not None:
-                        raise PreventUpdate
-
-        return fromTimestamp, toTimestamp
-
-    @dashApp.callback([Output(component_id = "refreshRateButton", component_property = "children"),
-        Output(component_id = "interval", component_property = "interval"),
-        Output(component_id = "interval", component_property = "disabled")],
-        [Input(component_id = "offLi", component_property = "n_clicks"),
-        Input(component_id = "fiveSecondLi", component_property = "n_clicks"),
-        Input(component_id = "tenSecondLi", component_property = "n_clicks"),
-        Input(component_id = "thirtySecondLi", component_property = "n_clicks"),
-        Input(component_id = "oneMinuteLi", component_property = "n_clicks"),
-        Input(component_id = "fiveMinuteLi", component_property = "n_clicks"),
-        Input(component_id = "fifthteenMinuteLi", component_property = "n_clicks"),
-        Input(component_id = "thirtyMinuteLi", component_property = "n_clicks"),
-        Input(component_id = "oneHourLi", component_property = "n_clicks"),
-        Input(component_id = "twoHourLi", component_property = "n_clicks"),
-        Input(component_id = "oneDayLi", component_property = "n_clicks")])
-    def interval(offLiNClicks, fiveSecondLiNClicks, tenSecondLiNClicks, thirtySecondLiNClicks, oneMinuteLiNClicks, fiveMinuteLiNClicks,
-        fifthteenMinuteLiNClicks, thirtyMinuteLiNClicks, oneHourLiNClicks, twoHourLiNClicks, oneDayLiNClicks):
-        return timestampRangeComponent.intervalCallback(offLiNClicks, fiveSecondLiNClicks, tenSecondLiNClicks, thirtySecondLiNClicks, oneMinuteLiNClicks,
-            fiveMinuteLiNClicks, fifthteenMinuteLiNClicks, thirtyMinuteLiNClicks, oneHourLiNClicks, twoHourLiNClicks, oneDayLiNClicks)
-
-    @dashApp.callback(Output(component_id = "collapseExpandButton", component_property = "children"),
-        [Input(component_id = "collapseExpandButton", component_property = "n_clicks")],
-        [State(component_id = "collapseExpandButton", component_property = "children")])
-    def collapseExpandButtonChildren(collapseExpandButtonNClicks, collapseExpandButtonChildren):
-        if collapseExpandButtonNClicks == 0:
-            raise PreventUpdate
-        else:
-            if collapseExpandButtonChildren == ["Collapse"]:
-                return ["Expand"]
-            else:
-                return ["Collapse"]
-
-    @dashApp.callback(Output(component_id = "enterpriseDropdown", component_property = "options"),
-        [Input(component_id = "url", component_property = "href")])
-    def enterpriseDropdownOptions(urlHref):
-        return dropdowns.enterpriseDropdownOptions(urlHref)
-
-    @dashApp.callback(Output(component_id = "enterpriseDropdown", component_property = "value"),
-        [Input(component_id = "enterpriseDropdown", component_property = "options"),
-        Input(component_id = "url", component_property = "href")])
-    def enterpriseDropdownValue(enterpriseDropdownOptions, urlHref):
-        return dropdowns.enterpriseDropdownValue(enterpriseDropdownOptions, urlHref)
-
-    @dashApp.callback(Output(component_id = "siteDropdown", component_property = "options"),
-        [Input(component_id = "enterpriseDropdown", component_property = "value")])
-    def siteDropdownOptions(enterpriseDropdownValue):
-        return dropdowns.siteDropdownOptions([enterpriseDropdownValue])
-
-    @dashApp.callback(Output(component_id = "siteDropdown", component_property = "value"),
-        [Input(component_id = "siteDropdown", component_property = "options"),
-        Input(component_id = "url", component_property = "href")])
-    def siteDropdownValue(sitesDropdownOptions, urlHref):
-        return dropdowns.siteDropdownValue(sitesDropdownOptions, urlHref)
-
-    @dashApp.callback(Output(component_id = "elementTemplateDropdown", component_property = "options"),
-        [Input(component_id = "siteDropdown", component_property = "value")])
-    def elementTemplateDropdownOptions(siteDropdownValue):
-        return dropdowns.elementTemplateDropdownOptions([siteDropdownValue])
-
-    @dashApp.callback(Output(component_id = "elementTemplateDropdown", component_property = "value"),
-        [Input(component_id = "elementTemplateDropdown", component_property = "options"),
-        Input(component_id = "url", component_property = "href")])
-    def elementTemplateDropdownValue(elementTemplateDropdownOptions, urlHref):
-        return dropdowns.elementTemplateDropdownValue(elementTemplateDropdownOptions, urlHref)
-
-    @dashApp.callback(Output(component_id = "eventFrameTemplateDropdown", component_property = "options"),
-        [Input(component_id = "elementTemplateDropdown", component_property = "value")])
-    def eventFrameTemplateDropdownOptions(elementTemplateDropdownValue):
-        return dropdowns.eventFrameTemplateDropdownOptions([elementTemplateDropdownValue])
-
-    @dashApp.callback(Output(component_id = "eventFrameTemplateDropdown", component_property = "value"),
-        [Input(component_id = "eventFrameTemplateDropdown", component_property = "options"),
-        Input(component_id = "url", component_property = "href")])
-    def eventFrameTemplateDropdownValue(eventFrameTemplateDropdownOptions, urlHref):
-        return dropdowns.eventFrameTemplateDropdownValue(eventFrameTemplateDropdownOptions, urlHref)
-
-    @dashApp.callback(Output(component_id = "eventFrameDropdown", component_property = "options"),
-        [Input(component_id = "eventFrameTemplateDropdown", component_property = "value"),
-        Input(component_id = "fromTimestampInput", component_property = "value"),
-        Input(component_id = "toTimestampInput", component_property = "value"),
-        Input(component_id = "url", component_property = "href")])
-    def eventFrameDropdownOptions(eventFrameTemplateDropdownValue, fromTimestampInputValue, toTimestampInputValue, urlHref):
-        if fromTimestampInputValue == "" or toTimestampInputValue == "":
-            raise PreventUpdate
-
-        queryString = parse_qs(urlparse(urlHref).query)
-        if "localTimezone" in queryString:
-            localTimezone = pytz.timezone(queryString["localTimezone"][0])
-        else:
-            localTimezone = pytz.utc
-
-        fromTimestampLocal = localTimezone.localize(datetime.strptime(fromTimestampInputValue, "%Y-%m-%dT%H:%M:%S"))
-        toTimestampLocal = localTimezone.localize(datetime.strptime(toTimestampInputValue, "%Y-%m-%dT%H:%M:%S"))
-        fromTimestampUtc = fromTimestampLocal.astimezone(pytz.utc)
-        toTimestampUtc = toTimestampLocal.astimezone(pytz.utc)
-
-        return [{"label": eventFrame.Name, "value": eventFrame.EventFrameId} for eventFrame in EventFrame.query. \
-            filter(EventFrame.EventFrameTemplateId == eventFrameTemplateDropdownValue, EventFrame.StartTimestamp >= fromTimestampUtc,
-            or_(EventFrame.EndTimestamp <= toTimestampUtc, EventFrame.EndTimestamp == None)).order_by(EventFrame.StartTimestamp.desc()).all()]
-
-    @dashApp.callback(Output(component_id = "eventFrameDropdown", component_property = "value"),
-        [Input(component_id = "eventFrameDropdown", component_property = "options"),
-        Input(component_id = "url", component_property = "href")],
-        [State(component_id = "eventFrameDropdown", component_property = "value")])
-    def eventFrameDropdownValue(eventFrameDropdownOptions, urlHref, eventFrameDropdownValue):
-        if len(list(filter(lambda property: property["prop_id"] == "url.href", dash.callback_context.triggered))) > 0:
-            # url href input fired.
-            if eventFrameDropdownOptions:
-                queryString = parse_qs(urlparse(urlHref).query)
-                if "eventFrameId" in queryString:
-                    eventFrameId = int(queryString["eventFrameId"][0])                
-                    if len(list(filter(lambda eventFrame: eventFrame["value"] == eventFrameId, eventFrameDropdownOptions))) > 0:
-                        return eventFrameId
-        else:
-            # eventFrameDropdown options input fired.
-            if len(list(filter(lambda eventFrame: eventFrame["value"] == eventFrameDropdownValue, eventFrameDropdownOptions))) > 0:
-                raise PreventUpdate
-
-        return None
-
-    @dashApp.callback([Output(component_id = "eventFrameTemplateViewDropdown", component_property = "options"),
-        Output(component_id = "eventFrameTemplateViewDropdown", component_property = "value")],
-        [Input(component_id = "eventFrameTemplateDropdown", component_property = "value")])
-    def eventFrameDropdownOptions(eventFrameTemplateDropdownValue):
-        if eventFrameTemplateDropdownValue is None:
-            return [[], None]
-
-        eventFrameTemplateViews = [{"label": eventFrameTemplateView.Name, "value": eventFrameTemplateView.EventFrameTemplateViewId}
-            for eventFrameTemplateView in EventFrameTemplateView.query.filter_by(EventFrameTemplateId = eventFrameTemplateDropdownValue). \
-                order_by(EventFrameTemplateView.Name).all()]
-        eventFrameTemplateViews.insert(0, {"label": "All", "value": -1})
-        return [eventFrameTemplateViews, -1]
+    timeRangePicker.eventFrameCallback(dashApp)
+    collapseExpandButton.callback(dashApp)
+    enterpriseDropdown.optionsCallback(dashApp)
+    enterpriseDropdown.valueCallback(dashApp)
+    siteDropdown.optionsCallback(dashApp)
+    siteDropdown.valueCallback(dashApp)
+    elementTemplateDropdown.optionsCallback(dashApp)
+    elementTemplateDropdown.valueCallback(dashApp)
+    eventFrameTemplateDropdown.optionsCallback(dashApp)
+    eventFrameTemplateDropdown.valueCallback(dashApp)
+    eventFrameDropdown.optionsCallback(dashApp)
+    eventFrameDropdown.valueCallback(dashApp)
+    eventFrameTemplateViewDropdown.registerOptionsValueCallback(dashApp)
 
     @dashApp.callback([Output(component_id = "graph", component_property = "figure"),
         Output(component_id = "table", component_property = "data")],
