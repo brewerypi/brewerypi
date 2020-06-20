@@ -1,11 +1,10 @@
-import dash
 import dash_core_components as dcc
 from dash.dependencies import Input, Output, State
 from urllib.parse import parse_qs, urlparse
 from app.models import ElementTemplate
 
 def layout():
-    return dcc.Dropdown(id = "elementTemplatesDropdown", placeholder = "Select Element Template(s)", multi = True)
+    return dcc.Dropdown(id = "elementTemplatesDropdown", placeholder = "Select Element Template(s)", multi = True, value = -1)
 
 def optionsCallback(dashApp):
     @dashApp.callback(Output(component_id = "elementTemplatesDropdown", component_property = "options"),
@@ -16,12 +15,12 @@ def optionsCallback(dashApp):
 
 def valuesCallback(dashApp):
     @dashApp.callback(Output(component_id = "elementTemplatesDropdown", component_property = "value"),
-        [Input(component_id = "elementTemplatesDropdown", component_property = "options"),
-        Input(component_id = "url", component_property = "href")],
-        [State(component_id = "elementTemplatesDropdown", component_property = "value")])
+        [Input(component_id = "elementTemplatesDropdown", component_property = "options")],
+        [State(component_id = "url", component_property = "href"),
+        State(component_id = "elementTemplatesDropdown", component_property = "value")])
     def elementTemplatesDropdownValues(elementTemplatesDropdownOptions, urlHref, elementTemplatesDropdownValues):
         elementTemplateIds = []
-        if len(list(filter(lambda property: property["prop_id"] == "url.href", dash.callback_context.triggered))) > 0:
+        if elementTemplatesDropdownValues == -1:
             if elementTemplatesDropdownOptions:
                 queryString = parse_qs(urlparse(urlHref).query)
                 if "elementTemplateId" in queryString:

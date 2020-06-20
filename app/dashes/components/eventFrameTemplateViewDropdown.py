@@ -1,4 +1,3 @@
-import dash
 import dash_core_components as dcc
 from dash.dependencies import Input, Output
 from urllib.parse import parse_qs, urlparse

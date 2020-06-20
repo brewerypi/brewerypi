@@ -1,11 +1,10 @@
-import dash
 import dash_core_components as dcc
 from dash.dependencies import Input, Output, State
 from urllib.parse import parse_qs, urlparse
 from app.models import Area, Enterprise, Site, Tag
 
 def layout():
-    return dcc.Dropdown(id = "tagsDropdown", placeholder = "Select Tag(s)", multi = True)
+    return dcc.Dropdown(id = "tagsDropdown", placeholder = "Select Tag(s)", multi = True, value = -1)
 
 def optionsCallback(dashApp):
     @dashApp.callback(Output(component_id = "tagsDropdown", component_property = "options"),
@@ -17,12 +16,12 @@ def optionsCallback(dashApp):
 
 def valuesCallback(dashApp):
     @dashApp.callback(Output(component_id = "tagsDropdown", component_property = "value"),
-        [Input(component_id = "tagsDropdown", component_property = "options"),
-        Input(component_id = "url", component_property = "href")],
-        [State(component_id = "tagsDropdown", component_property = "value")])
+        [Input(component_id = "tagsDropdown", component_property = "options")],
+        [State(component_id = "url", component_property = "href"),
+        State(component_id = "tagsDropdown", component_property = "value")])
     def tagsDropdownValues(tagsDropdownOptions, urlHref, tagsDropdownValues):
         tagIds = []
-        if len(list(filter(lambda property: property["prop_id"] == "url.href", dash.callback_context.triggered))) > 0:
+        if tagsDropdownValues == -1:
             if tagsDropdownOptions:
                 queryString = parse_qs(urlparse(urlHref).query)
                 if "tagId" in queryString:

@@ -1,11 +1,10 @@
-import dash
 import dash_core_components as dcc
-from dash.dependencies import Input, Output
+from dash.dependencies import Input, Output, State
 from urllib.parse import parse_qs, urlparse
 from app.models import Enterprise
 
 def layout():
-    return dcc.Dropdown(id = "enterpriseDropdown", placeholder = "Select Enterprise", multi = False)
+    return dcc.Dropdown(id = "enterpriseDropdown", placeholder = "Select Enterprise", multi = False, value = -1)
 
 def optionsCallback(dashApp):
     @dashApp.callback(Output(component_id = "enterpriseDropdown", component_property = "options"),
@@ -15,11 +14,12 @@ def optionsCallback(dashApp):
 
 def valueCallback(dashApp):
     @dashApp.callback(Output(component_id = "enterpriseDropdown", component_property = "value"),
-        [Input(component_id = "enterpriseDropdown", component_property = "options"),
-        Input(component_id = "url", component_property = "href")])
-    def enterpriseDropdownValue(enterpriseDropdownOptions, urlHref):
+        [Input(component_id = "enterpriseDropdown", component_property = "options")],
+        [State(component_id = "url", component_property = "href"),
+        State(component_id = "enterpriseDropdown", component_property = "value")])
+    def enterpriseDropdownValue(enterpriseDropdownOptions, urlHref, enterpriseDropdownValue):
         enterpriseId = None
-        if len(list(filter(lambda property: property["prop_id"] == "url.href", dash.callback_context.triggered))) > 0:
+        if enterpriseDropdownValue == -1:
             if enterpriseDropdownOptions:
                 queryString = parse_qs(urlparse(urlHref).query)
                 if "enterpriseId" in queryString:

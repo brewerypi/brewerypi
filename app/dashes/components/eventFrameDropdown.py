@@ -1,4 +1,3 @@
-import dash
 import pytz
 import dash_core_components as dcc
 from dash.dependencies import Input, Output, State
@@ -9,14 +8,14 @@ from urllib.parse import parse_qs, urlparse
 from app.models import EventFrame
 
 def layout():
-    return dcc.Dropdown(id = "eventFrameDropdown", placeholder = "Select Event Frame", multi = False)
+    return dcc.Dropdown(id = "eventFrameDropdown", placeholder = "Select Event Frame", multi = False, value = -1)
 
 def optionsCallback(dashApp):
     @dashApp.callback(Output(component_id = "eventFrameDropdown", component_property = "options"),
         [Input(component_id = "eventFrameTemplateDropdown", component_property = "value"),
         Input(component_id = "fromTimestampInput", component_property = "value"),
-        Input(component_id = "toTimestampInput", component_property = "value"),
-        Input(component_id = "url", component_property = "href")])
+        Input(component_id = "toTimestampInput", component_property = "value")],
+        [State(component_id = "url", component_property = "href")])
     def eventFrameDropdownOptions(eventFrameTemplateDropdownValue, fromTimestampInputValue, toTimestampInputValue, urlHref):
         if fromTimestampInputValue == "" or toTimestampInputValue == "":
             raise PreventUpdate
@@ -38,11 +37,11 @@ def optionsCallback(dashApp):
 
 def valueCallback(dashApp):
     @dashApp.callback(Output(component_id = "eventFrameDropdown", component_property = "value"),
-        [Input(component_id = "eventFrameDropdown", component_property = "options"),
-        Input(component_id = "url", component_property = "href")],
-        [State(component_id = "eventFrameDropdown", component_property = "value")])
+        [Input(component_id = "eventFrameDropdown", component_property = "options")],
+        [State(component_id = "url", component_property = "href"),
+        State(component_id = "eventFrameDropdown", component_property = "value")])
     def eventFrameDropdownValue(eventFrameDropdownOptions, urlHref, eventFrameDropdownValue):
-        if len(list(filter(lambda property: property["prop_id"] == "url.href", dash.callback_context.triggered))) > 0:
+        if eventFrameDropdownValue == -1:
             # url href input fired.
             if eventFrameDropdownOptions:
                 queryString = parse_qs(urlparse(urlHref).query)
