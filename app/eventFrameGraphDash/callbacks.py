@@ -4,12 +4,12 @@ from dash.exceptions import PreventUpdate
 from datetime import datetime
 from urllib.parse import parse_qs, urlparse
 from app.models import EventFrame, EventFrameNote, EventFrameTemplateView, LookupValue, Note
-from app.dashes.components import collapseExpandButton, elementTemplateDropdown, enterpriseDropdown, eventFrameDropdown, eventFrameTemplateDropdown, \
+from app.dashes.components import collapseExpand, elementTemplateDropdown, enterpriseDropdown, eventFrameDropdown, eventFrameTemplateDropdown, \
     eventFrameTemplateViewDropdown, siteDropdown, timeRangePicker
 
 def registerCallbacks(dashApp):
     timeRangePicker.eventFrameCallback(dashApp)
-    collapseExpandButton.callback(dashApp)
+    collapseExpand.callback(dashApp)
     enterpriseDropdown.optionsCallback(dashApp)
     enterpriseDropdown.valueCallback(dashApp)
     siteDropdown.optionsCallback(dashApp)

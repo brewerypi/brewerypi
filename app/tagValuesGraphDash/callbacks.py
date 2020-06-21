@@ -4,11 +4,11 @@ from dash.exceptions import PreventUpdate
 from datetime import datetime
 from urllib.parse import parse_qs, urlparse
 from app.models import LookupValue, Tag, TagValue
-from app.dashes.components import areasDropdown, collapseExpandButton, enterprisesDropdown, sitesDropdown, tagsDropdown, timeRangePicker
+from app.dashes.components import areasDropdown, collapseExpand, enterprisesDropdown, sitesDropdown, tagsDropdown, timeRangePicker
 
 def registerCallbacks(dashApp):
     timeRangePicker.callback(dashApp)
-    collapseExpandButton.callback(dashApp)
+    collapseExpand.callback(dashApp)
     enterprisesDropdown.optionsCallback(dashApp)
     enterprisesDropdown.valuesCallback(dashApp)
     sitesDropdown.optionsCallback(dashApp)
