@@ -18,34 +18,34 @@ def createApp(configClass = Config):
 	app = Flask(__name__)
 	app.config.from_object(configClass)
 
-	from app.activeEventFramesSummaryDash.layout import layout as activeEventFramesSummaryDashLayout
-	from app.activeEventFramesSummaryDash.callbacks import registerCallbacks as activeEventFramesSummaryDashCallbacks
-	registerDashApp(app, "activeEventFramesSummaryDash", activeEventFramesSummaryDashLayout, activeEventFramesSummaryDashCallbacks,
+	from app.dashes.activeEventFramesSummary.layout import layout as activeEventFramesSummaryLayout
+	from app.dashes.activeEventFramesSummary.callbacks import registerCallbacks as activeEventFramesSummaryCallbacks
+	registerDashApp(app, "activeEventFramesSummaryDash", activeEventFramesSummaryLayout, activeEventFramesSummaryCallbacks,
 		"Active Event Frames Summary Dash")
 
-	from app.elementSummaryDash.layout import layout as elementSummaryDashLayout
-	from app.elementSummaryDash.callbacks import registerCallbacks as elementSummaryDashCallbacks
-	registerDashApp(app, "elementSummaryDash", elementSummaryDashLayout, elementSummaryDashCallbacks, "Element Summary")
+	from app.dashes.elementSummary.layout import layout as elementSummaryLayout
+	from app.dashes.elementSummary.callbacks import registerCallbacks as elementSummaryCallbacks
+	registerDashApp(app, "elementSummaryDash", elementSummaryLayout, elementSummaryCallbacks, "Element Summary")
 
-	from app.elementValuesGraphDash.layout import layout as elementValuesGraphDashLayout
-	from app.elementValuesGraphDash.callbacks import registerCallbacks as elementValuesGraphDashCallbacks
-	registerDashApp(app, "elementValuesGraphDash", elementValuesGraphDashLayout, elementValuesGraphDashCallbacks, "Element Values Graph")
+	from app.dashes.elementValuesGraph.layout import layout as elementValuesGraphLayout
+	from app.dashes.elementValuesGraph.callbacks import registerCallbacks as elementValuesGraphCallbacks
+	registerDashApp(app, "elementValuesGraphDash", elementValuesGraphLayout, elementValuesGraphCallbacks, "Element Values Graph")
 
-	from app.eventFrameGroupSummaryDash.layout import layout as eventFrameGroupSummaryDashLayout
-	from app.eventFrameGroupSummaryDash.callbacks import registerCallbacks as eventFrameGroupSummaryDashCallbacks
-	registerDashApp(app, "eventFrameGroupSummaryDash", eventFrameGroupSummaryDashLayout, eventFrameGroupSummaryDashCallbacks, "Event Frame Group Summary")
+	from app.dashes.eventFrameGroupSummary.layout import layout as eventFrameGroupSummaryLayout
+	from app.dashes.eventFrameGroupSummary.callbacks import registerCallbacks as eventFrameGroupSummaryCallbacks
+	registerDashApp(app, "eventFrameGroupSummaryDash", eventFrameGroupSummaryLayout, eventFrameGroupSummaryCallbacks, "Event Frame Group Summary")
 
-	from app.eventFrameGraphDash.layout import layout as eventFrameGraphDashLayout
-	from app.eventFrameGraphDash.callbacks import registerCallbacks as eventFrameGraphDashCallbacks
-	registerDashApp(app, "eventFrameGraphDash", eventFrameGraphDashLayout, eventFrameGraphDashCallbacks, "Event Frame Graph")
+	from app.dashes.eventFrameGraph.layout import layout as eventFrameGraphLayout
+	from app.dashes.eventFrameGraph.callbacks import registerCallbacks as eventFrameGraphCallbacks
+	registerDashApp(app, "eventFrameGraphDash", eventFrameGraphLayout, eventFrameGraphCallbacks, "Event Frame Graph")
 
-	from app.eventFramesOverlayDash.layout import layout as eventFramesOverlayDashLayout
-	from app.eventFramesOverlayDash.callbacks import registerCallbacks as eventFramesOverlayDashCallbacks
-	registerDashApp(app, "eventFramesOverlayDash", eventFramesOverlayDashLayout, eventFramesOverlayDashCallbacks, "Event Frames Overlay")
+	from app.dashes.eventFramesOverlay.layout import layout as eventFramesOverlayLayout
+	from app.dashes.eventFramesOverlay.callbacks import registerCallbacks as eventFramesOverlayCallbacks
+	registerDashApp(app, "eventFramesOverlayDash", eventFramesOverlayLayout, eventFramesOverlayCallbacks, "Event Frames Overlay")
 
-	from app.tagValuesGraphDash.layout import layout as tagValuesGraphDashLayout
-	from app.tagValuesGraphDash.callbacks import registerCallbacks as tagValuesGraphDashCallbacks
-	registerDashApp(app, "tagValuesGraphDash", tagValuesGraphDashLayout, tagValuesGraphDashCallbacks, "Tag Values Graph")
+	from app.dashes.tagValuesGraph.layout import layout as tagValuesGraphLayout
+	from app.dashes.tagValuesGraph.callbacks import registerCallbacks as tagValuesGraphCallbacks
+	registerDashApp(app, "tagValuesGraphDash", tagValuesGraphLayout, tagValuesGraphCallbacks, "Tag Values Graph")
 
 	boostrap.init_app(app)
 	db.init_app(app)
