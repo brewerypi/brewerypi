@@ -18,7 +18,10 @@ layout = html.Div(children =
         elementTemplateDropdown.layout(),
         eventFrameTemplateDropdown.layout(),
         eventFrameDropdown.layout(),
-        eventFrameTemplateViewDropdown.layout()
+    ]),
+    html.Div(className = "row", children =
+    [
+        html.Div(className = "col-md-2", children = [eventFrameTemplateViewDropdown.layout()])
     ]),
     html.Div(children = [dcc.Graph(id = "graph")]),
     html.Div(className = "page-header", children = [html.H2("Notes")]),
