@@ -6,25 +6,29 @@ from app.dashes.components import collapseExpand, elementsDropdown, elementTempl
 
 layout = html.Div(children =
 [
+    html.Div(id = "loadingDiv", className = "text-center", children = [html.Img(src = "/static/images/loading.gif")]),
     dcc.Location(id = "url"),
     dcc.Interval(id = "interval", n_intervals = 0, disabled = True),
-    html.Div(className = "page-header", children = [html.H1("Element Summary")]),
-    html.Div(children =
+    html.Div(id = "dashDiv", style = {"display": "none"}, children =
     [
-        refreshButton.layout(),
-        refreshInterval.layout()
-    ]),
-    html.Br(),
-    collapseExpand.layout(
-    [
-        enterpriseDropdown.layout(),
-        siteDropdown.layout(),
-        elementTemplatesDropdown.layout(),
-        elementsDropdown.layout()
-    ]),
-    html.Div(className = "well", children =
-    [
-        dash_table.DataTable(id = "table", filter_action = "native", sort_action = "native", sort_mode = "multi",
-            style_cell = {"whiteSpace": "normal", "height": "auto", "textAlign": "left"})
+        html.Div(className = "page-header", children = [html.H1("Element Summary")]),
+        html.Div(children =
+        [
+            refreshButton.layout(),
+            refreshInterval.layout()
+        ]),
+        html.Br(),
+        collapseExpand.layout(
+        [
+            enterpriseDropdown.layout(),
+            siteDropdown.layout(),
+            elementTemplatesDropdown.layout(),
+            elementsDropdown.layout()
+        ]),
+        html.Div(className = "well", children =
+        [
+            dash_table.DataTable(id = "table", filter_action = "native", sort_action = "native", sort_mode = "multi",
+                style_cell = {"whiteSpace": "normal", "height": "auto", "textAlign": "left"})
+        ])
     ])
 ])

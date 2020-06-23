@@ -18,7 +18,9 @@ def registerCallbacks(dashApp):
     tagsDropdown.optionsCallback(dashApp)
     tagsDropdown.valuesCallback(dashApp)
 
-    @dashApp.callback(Output(component_id = "graph", component_property = "figure"),
+    @dashApp.callback([Output(component_id = "loadingDiv", component_property = "style"),
+        Output(component_id = "dashDiv", component_property = "style"),
+        Output(component_id = "graph", component_property = "figure")],
         [Input(component_id = "fromTimestampInput", component_property = "value"),
         Input(component_id = "toTimestampInput", component_property = "value"),
         Input(component_id = "tagsDropdown", component_property = "value"),
@@ -84,4 +86,5 @@ def registerCallbacks(dashApp):
                                 tagNotesDictionary["y"].append(tagValue.Value)
                                 tagNotesDictionary["text"].append(tagValueNotes)
 
-            return {"data": data, "layout": {"uirevision": "{}{}".format(fromTimestampInputValue, toTimestampInputValue)}}
+            return {"display": "none"}, {"display": "block"}, {"data": data, "layout": {"uirevision": "{}{}".format(fromTimestampInputValue,
+                toTimestampInputValue)}}

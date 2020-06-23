@@ -22,7 +22,9 @@ def registerCallbacks(dashApp):
     eventFrameDropdown.valueCallback(dashApp)
     eventFrameTemplateViewDropdown.registerOptionsValueCallback(dashApp)
 
-    @dashApp.callback([Output(component_id = "graph", component_property = "figure"),
+    @dashApp.callback([Output(component_id = "loadingDiv", component_property = "style"),
+        Output(component_id = "dashDiv", component_property = "style"),
+        Output(component_id = "graph", component_property = "figure"),
         Output(component_id = "table", component_property = "data")],
         [Input(component_id = "fromTimestampInput", component_property = "value"),
         Input(component_id = "toTimestampInput", component_property = "value"),
@@ -34,7 +36,7 @@ def registerCallbacks(dashApp):
     def graphFigure(fromTimestampInputValue, toTimestampInputValue, eventFrameDropdownValue, eventFrameTemplateViewDropdownValue, urlHref, intervalNIntervals,
         refreshButtonNClicks):
         if eventFrameDropdownValue is None:
-            return {"data": []}, []
+            return {"display": "none"}, {"display": "block"}, {"data": []}, []
 
         if fromTimestampInputValue == "" or toTimestampInputValue == "":
             raise PreventUpdate
@@ -116,4 +118,5 @@ def registerCallbacks(dashApp):
         for eventFrameNote in Note.query.join(EventFrameNote).filter(EventFrameNote.EventFrameId == eventFrame.EventFrameId).order_by(Note.Timestamp):
             eventFrameNotes.append({"Timestamp": eventFrameNote.Timestamp.strftime("%Y-%m-%d %H:%M:%S"), "Note": eventFrameNote.Note})
 
-        return {"data": data, "layout": {"shapes": shapes, "uirevision": "{}{}".format(fromTimestampInputValue, toTimestampInputValue)}}, eventFrameNotes
+        return {"display": "none"}, {"display": "block"}, {"data": data, "layout": {"shapes": shapes, "uirevision": "{}{}".format(fromTimestampInputValue,
+            toTimestampInputValue)}}, eventFrameNotes

@@ -17,7 +17,9 @@ def registerCallbacks(dashApp):
     elementsDropdown.optionsCallback(dashApp)
     elementsDropdown.valuesCallback(dashApp)
 
-    @dashApp.callback([Output(component_id = "table", component_property = "columns"),
+    @dashApp.callback([Output(component_id = "loadingDiv", component_property = "style"),
+        Output(component_id = "dashDiv", component_property = "style"),
+        Output(component_id = "table", component_property = "columns"),
         Output(component_id = "table", component_property = "data")],
         [Input(component_id = "elementsDropdown", component_property = "value"),
         Input(component_id = "interval", component_property = "n_intervals"),
@@ -29,4 +31,4 @@ def registerCallbacks(dashApp):
             elementIds = elementsDropdownValues
 
         df = pd.read_sql(elementAttributeValues(elementIds), db.session.bind)
-        return [{"name": column, "id": column, "hideable": True} for column in df.columns], df.to_dict("records")
+        return {"display": "none"}, {"display": "block"}, [{"name": column, "id": column, "hideable": True} for column in df.columns], df.to_dict("records")
