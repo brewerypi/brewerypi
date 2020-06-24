@@ -154,8 +154,8 @@
             <a class = "btn btn-default" title = "Add" href = '{{ url_for("tagValues.addTagValue", tagId = tag.TagId) }}' role = "button">
                 <span class = "glyphicon glyphicon-plus"></span></a>
         {% endif %}
-        <a class = "btn btn-default" title = "Grafana" href = '{{ "TagValuesGraph" | grafanaUrl({"tagId": tag.TagId}) }}' target = "_blank">
-            <span class = "glyphicon glyphicon-stats"></span></a>        <br><br>
+        <a class = "btn btn-default" title = "Dash" href = '{{ url_for("dashes.tagValuesGraph", tagId = tag.TagId) }}' target = "_blank">
+            <span class = "glyphicon glyphicon-stats"></span></a>
         <br><br>
         <div id = "divLoading" class = "text-center">
             <img src = '{{ url_for("static", filename = "images/loading.gif") }}'>

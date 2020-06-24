@@ -15,7 +15,13 @@
     <script>
         $(document).ready(function()
         {
-            $("#iframe").attr("src", '{{ url_for("/tagValuesGraphDash/") }}' + "?localTimezone=" + moment.tz.guess(true))
+            var parameters = ""
+            {% if tag is not none %}
+                parameters = "&enterpriseId=" + {{ tag.Area.Site.EnterpriseId }} + "&siteId=" + {{ tag.Area.SiteId }} + "&areaId=" + {{ tag.AreaId }} +
+                    "&tagId=" + {{ tag.TagId }} + "&collapseExpand=collapsed"
+            {% endif %}
+
+            $("#iframe").attr("src", '{{ url_for("/tagValuesGraphDash/") }}' + "?localTimezone=" + moment.tz.guess(true) + parameters) 
         })
     </script>
 {% endblock %}
