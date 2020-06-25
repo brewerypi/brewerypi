@@ -27,8 +27,8 @@ layout = html.Div(children =
         html.Div(className = "page-header", children = [html.H2("Notes")]),
         html.Div(className = "well", children =
         [
-            dash_table.DataTable(id = "table", sort_action = "native", columns = [{"name": "Timestamp", "id": "Timestamp"}, {"name": "Note", "id": "Note"}],
-                style_cell = {"whiteSpace": "normal", "height": "auto", "textAlign": "left"},
+            dash_table.DataTable(id = "table", cell_selectable = False, sort_action = "native", columns = [{"name": "Timestamp", "id": "Timestamp"},
+                {"name": "Note", "id": "Note"}], style_cell = {"whiteSpace": "normal", "height": "auto", "textAlign": "left"},
                 style_cell_conditional = [{"if": {"column_id": "Timestamp"}, "width": "200px"}])
         ])
     ])

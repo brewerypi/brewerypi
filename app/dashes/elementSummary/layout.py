@@ -26,7 +26,7 @@ layout = html.Div(children =
         ]),
         html.Div(className = "well", children =
         [
-            dash_table.DataTable(id = "table", filter_action = "native", sort_action = "native", sort_mode = "multi",
+            dash_table.DataTable(id = "table", cell_selectable = False, filter_action = "native", sort_action = "native", sort_mode = "multi",
                 style_cell = {"whiteSpace": "normal", "height": "auto", "textAlign": "left"})
         ])
     ])
