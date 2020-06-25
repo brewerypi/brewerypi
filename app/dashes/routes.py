@@ -1,6 +1,6 @@
 from flask import render_template
 from flask_login import login_required
-from app.models import ElementTemplate, Site, Tag
+from app.models import ElementAttribute, ElementTemplate, Site, Tag
 from . import dashes
 
 @dashes.route("/dashes/activeEventFramesSummary", methods = ["GET", "POST"])
@@ -42,8 +42,14 @@ def eventFramesOverlay():
 	return render_template("dashes/eventFramesOverlay/eventFramesOverlay.html")
 
 @dashes.route("/dashes/tagValuesGraph", methods = ["GET", "POST"])
-@dashes.route("/dashes/tagValuesGraph/<int:tagId>", methods = ["GET", "POST"])
+@dashes.route("/dashes/tagValuesGraph/elementAttribute/<int:elementAttributeId>", methods = ["GET", "POST"])
+@dashes.route("/dashes/tagValuesGraph/tag/<int:tagId>", methods = ["GET", "POST"])
 @login_required
-def tagValuesGraph(tagId = None):
-	tag = Tag.query.filter_by(TagId = tagId).one_or_none()
-	return render_template("dashes/tagValuesGraph/tagValuesGraph.html", tag = tag)
+def tagValuesGraph(elementAttributeId = None, tagId = None):
+	elementAttribute = None
+	tag = None
+	if elementAttributeId is not None:
+		elementAttribute = ElementAttribute.query.filter_by(ElementAttributeId = elementAttributeId).one_or_none()
+	elif tagId is not None:
+		tag = Tag.query.filter_by(TagId = tagId).one_or_none()
+	return render_template("dashes/tagValuesGraph/tagValuesGraph.html", elementAttribute = elementAttribute, tag = tag)

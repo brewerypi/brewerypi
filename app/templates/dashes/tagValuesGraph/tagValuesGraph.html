@@ -3,6 +3,50 @@
 {% block title %}Tag Values Graph{% endblock %}
 
 {% block page_content %}
+    {% if elementAttribute is not none or tag is not none %}
+        <div>
+            <ol class = "breadcrumb">
+                {% if elementAttribute is not none %}
+                    <li><a href = '{{ url_for("elements.selectElement", selectedClass = "Root") }}'><span class = "glyphicon glyphicon-home"></span></a></li>
+                    <li><a href = '{{ url_for("elements.selectElement", selectedClass = "Enterprise",
+                        selectedId = elementAttribute.Element.ElementTemplate.Site.Enterprise.EnterpriseId) }}'>
+                        {{ elementAttribute.Element.ElementTemplate.Site.Enterprise.Name }}</a></li>
+                    <li><a href = '{{ url_for("elements.selectElement", selectedClass = "Site",
+                        selectedId = elementAttribute.Element.ElementTemplate.Site.SiteId) }}'>{{ elementAttribute.Element.ElementTemplate.Site.Name }}</a></li>
+                    <li><a href = '{{ url_for("elements.selectElement", selectedClass = "ElementTemplate",
+                        selectedId = elementAttribute.Element.ElementTemplate.ElementTemplateId) }}'>{{ elementAttribute.Element.ElementTemplate.Name }}</a></li>
+                    <li><a href = '{{ url_for("elements.dashboard", elementId = elementAttribute.Element.ElementId) }}'>
+                        {{ elementAttribute.Element.Name }}</a></li>
+                    <li>
+                        <a title = "Previous" href = '{{ url_for("dashes.tagValuesGraph", elementAttributeId = elementAttribute.previous().id()) }}'>
+                            <span class = "glyphicon glyphicon-arrow-left"></span></a>
+                        <a title = "Next" href = '{{ url_for("dashes.tagValuesGraph", elementAttributeId = elementAttribute.next().id()) }}'>
+                            <span class = "glyphicon glyphicon-arrow-right"></span></a>
+                        <a title = "Next" href = '{{ url_for("tagValues.listTagValues", elementAttributeId = elementAttribute.ElementAttributeId) }}'>
+                            {{ elementAttribute.ElementAttributeTemplate.Name }}</a>
+                    </li>
+                    <li class = "active">Tag Values Graph</li>
+                {% elif tag is not none %}
+                    <li><a href = '{{ url_for("tags.selectTag", selectedClass = "Root") }}'><span class = "glyphicon glyphicon-home"></span></a></li>
+                    <li><a href = '{{ url_for("tags.selectTag", selectedClass = "Enterprise", selectedId = tag.Area.Site.Enterprise.EnterpriseId) }}'>
+                        {{ tag.Area.Site.Enterprise.Name }}</a></li>
+                    <li><a href = '{{ url_for("tags.selectTag", selectedClass = "Site", selectedId = tag.Area.Site.SiteId) }}'>{{ tag.Area.Site.Name }}</a></li>
+                    <li><a href = '{{ url_for("tags.selectTag", selectedClass = "Area", selectedId = tag.Area.AreaId) }}'>{{ tag.Area.Name }}</a></li>
+                    <li>
+                        <a title = "Previous" href = '{{ url_for("dashes.tagValuesGraph", tagId = tag.previous().id()) }}'>
+                            <span class = "glyphicon glyphicon-arrow-left"></span></a>
+                        <a title = "Next" href = '{{ url_for("dashes.tagValuesGraph", tagId = tag.next().id()) }}'>
+                            <span class = "glyphicon glyphicon-arrow-right"></span></a>
+                        <a href = '{{ url_for("tagValues.listTagValues", tagId = tag.TagId) }}'>{{ tag.Name }}</a>
+                    </li>
+                    <li class = "active">Tag Values Graph</li>
+                {% endif %}
+            </ol>
+        </div>
+    {% endif %}
+    <div class = "page-header">
+        <h1>Tag Values Graph <small></small></h1>
+    </div>
     <div class = "embed-responsive embed-responsive-4by3">
         <iframe id = "iframe" class = "embed-responsive-item"></iframe>
     </div>
@@ -16,7 +60,10 @@
         $(document).ready(function()
         {
             var parameters = ""
-            {% if tag is not none %}
+            {% if elementAttribute is not none %}
+                parameters = "&enterpriseId=" + {{ elementAttribute.Tag.Area.Site.EnterpriseId }} + "&siteId=" + {{ elementAttribute.Tag.Area.SiteId }} +
+                    "&areaId=" + {{ elementAttribute.Tag.AreaId }} + "&tagId=" + {{ elementAttribute.Tag.TagId }} + "&collapseExpand=collapsed"
+            {% elif tag is not none %}
                 parameters = "&enterpriseId=" + {{ tag.Area.Site.EnterpriseId }} + "&siteId=" + {{ tag.Area.SiteId }} + "&areaId=" + {{ tag.AreaId }} +
                     "&tagId=" + {{ tag.TagId }} + "&collapseExpand=collapsed"
             {% endif %}
