@@ -68,9 +68,7 @@
 
                 parameters = "&enterpriseId=" + {{ site.EnterpriseId }} + "&siteId=" + {{ site.SiteId }} + elementTemplateParameters +
                     elementParameters + "&collapseExpand=collapsed"
-            {% endif %}
-
-            {% if elementTemplate is not none %}
+            {% elif elementTemplate is not none %}
                 elementParameters = ""
                 {% for element in elementTemplate.Elements | sort(attribute = "Name") %}
                     elementParameters = elementParameters + "&elementId=" + {{ element.ElementId }}
