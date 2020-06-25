@@ -41,48 +41,48 @@ def callback(dashApp):
         Input(component_id = "oneDayLi", component_property = "n_clicks")])
     def callback(offLiNClicks, fiveSecondLiNClicks, tenSecondLiNClicks, thirtySecondLiNClicks, oneMinuteLiNClicks, fiveMinuteLiNClicks,
         fifthteenMinuteLiNClicks, thirtyMinuteLiNClicks, oneHourLiNClicks, twoHourLiNClicks, oneDayLiNClicks):
-        changedId = [property['prop_id'] for property in dash.callback_context.triggered][0]
-        if "offLi" in changedId:
+        componentId = dash.callback_context.triggered[0]["prop_id"].split(".")[0]
+        if componentId == "offLi":
             refreshRateText = "Off"
             refreshRateMilliseconds = sys.maxsize
             disabled = True
-        elif "fiveSecondLi" in changedId:
+        elif componentId == "fiveSecondLi":
             refreshRateText = "5s"
             refreshRateMilliseconds = 5 * 1000
             disabled = False
-        elif "tenSecondLi" in changedId:
+        elif componentId == "tenSecondLi":
             refreshRateText = "10s"
             refreshRateMilliseconds = 10 * 1000
             disabled = False
-        elif "thirtySecondLi" in changedId:
+        elif componentId == "thirtySecondLi":
             refreshRateText = "30s"
             refreshRateMilliseconds = 30 * 1000
             disabled = False
-        elif "oneMinuteLi" in changedId:
+        elif componentId == "oneMinuteLi":
             refreshRateText = "1m"
             refreshRateMilliseconds = 60 * 1 * 1000
             disabled = False
-        elif "fiveMinuteLi" in changedId:
+        elif componentId == "fiveMinuteLi":
             refreshRateText = "5m"
             refreshRateMilliseconds = 60 * 5 * 1000
             disabled = False
-        elif "fifthteenMinuteLi" in changedId:
+        elif componentId == "fifthteenMinuteLi":
             refreshRateText = "15m"
             refreshRateMilliseconds = 60 * 15 * 1000
             disabled = False
-        elif "thirtyMinuteLi" in changedId:
+        elif componentId == "thirtyMinuteLi":
             refreshRateText = "30m"
             refreshRateMilliseconds = 60 * 30 * 1000
             disabled = False
-        elif "oneHourLi" in changedId:
+        elif componentId == "oneHourLi":
             refreshRateText = "1h"
             refreshRateMilliseconds = 60 * 60 * 1 * 1000
             disabled = False
-        elif "twoHourLi" in changedId:
+        elif componentId == "twoHourLi":
             refreshRateText = "2h"
             refreshRateMilliseconds = 60 * 60 * 2 * 1000
             disabled = False
-        elif "oneDayLi" in changedId:
+        elif componentId == "oneDayLi":
             refreshRateText = "1d"
             refreshRateMilliseconds = 60 * 60 * 24 * 1000
             disabled = False

@@ -64,86 +64,86 @@ def fromToTimestamps(urlHref, lastFiveMinutesLiNClicks, lastFifthteenMinutesLiNC
     localNow = utcNow.astimezone(localTimezone)
     today = datetime(localNow.year, localNow.month, localNow.day, 0, 0, 0)
     toTimestamp = localNow
-    changedId = [property['prop_id'] for property in dash.callback_context.triggered][0]
-    if "lastFiveMinutesLi" in changedId:
+    componentId = dash.callback_context.triggered[0]["prop_id"].split(".")[0]
+    if componentId == "lastFiveMinutesLi":
         fromTimestamp = localNow - relativedelta(minutes = 5)
-    elif "lastFifthteenMinutesLi" in changedId:
+    elif componentId == "lastFifthteenMinutesLi":
         fromTimestamp = localNow - relativedelta(minutes = 15)
-    elif "lastThirtyMinutesLi" in changedId:
+    elif componentId == "lastThirtyMinutesLi":
         fromTimestamp = localNow - relativedelta(minutes = 30)
-    elif "lastOneHourLi" in changedId:
+    elif componentId == "lastOneHourLi":
         fromTimestamp = localNow - relativedelta(hours = 1)
-    elif "lastThreeHoursLi" in changedId:
+    elif componentId == "lastThreeHoursLi":
         fromTimestamp = localNow - relativedelta(hours = 3)
-    elif "lastSixHoursLi" in changedId:
+    elif componentId == "lastSixHoursLi":
         fromTimestamp = localNow - relativedelta(hours = 6)
-    elif "lastTwelveHoursLi" in changedId:
+    elif componentId == "lastTwelveHoursLi":
         fromTimestamp = localNow - relativedelta(hours = 12)
-    elif "lastTwentyFourHoursLi" in changedId:
+    elif componentId == "lastTwentyFourHoursLi":
         fromTimestamp = localNow - relativedelta(hours = 24)
-    elif "lastTwoDaysLi" in changedId:
+    elif componentId == "lastTwoDaysLi":
         fromTimestamp = localNow - relativedelta(days = 2)
-    elif "lastSevenDaysLi" in changedId:
+    elif componentId == "lastSevenDaysLi":
         fromTimestamp = localNow - relativedelta(days = 7)
-    elif "lastThirtyDaysLi" in changedId:
+    elif componentId == "lastThirtyDaysLi":
         fromTimestamp = localNow - relativedelta(days = 30)
-    elif "lastNinetyDaysLi" in changedId:
+    elif componentId == "lastNinetyDaysLi":
         fromTimestamp = localNow - relativedelta(days = 90)
-    elif "lastSixMonthsLi" in changedId:
+    elif componentId == "lastSixMonthsLi":
         fromTimestamp = localNow - relativedelta(months = 6)
-    elif "lastOneYearLi" in changedId:
+    elif componentId == "lastOneYearLi":
         fromTimestamp = localNow - relativedelta(years = 1)
-    elif "lastTwoYearsLi" in changedId:
+    elif componentId == "lastTwoYearsLi":
         fromTimestamp = localNow - relativedelta(years = 2)
-    elif "lastFiveYearsLi" in changedId:
+    elif componentId == "lastFiveYearsLi":
         fromTimestamp = localNow - relativedelta(years = 5)
-    elif "yesterdayLi" in changedId:
+    elif componentId == "yesterdayLi":
         fromTimestamp = today - relativedelta(days = 1)
         toTimestamp = today - relativedelta(seconds = 1)
-    elif "dayBeforeYesterdayLi" in changedId:
+    elif componentId == "dayBeforeYesterdayLi":
         fromTimestamp = today - relativedelta(days = 2)
         toTimestamp = today - relativedelta(days = 1) - relativedelta(seconds = 1)
-    elif "thisDayLastWeekLi" in changedId:
+    elif componentId == "thisDayLastWeekLi":
         fromTimestamp = today - relativedelta(weeks = 1)
         toTimestamp = today - relativedelta(days = 6) - relativedelta(seconds = 1)
-    elif "previousWeekLi" in changedId:
+    elif componentId == "previousWeekLi":
         oneWeekAgo = today - relativedelta(weeks = 1)
         twoWeeksAgo = today - relativedelta(weeks = 2)
         fromTimestamp = twoWeeksAgo + relativedelta(weekday = calendar.SUNDAY)
         toTimestamp = oneWeekAgo + relativedelta(weekday = calendar.SUNDAY) - relativedelta(seconds = 1)
-    elif "previousMonthLi" in changedId:
+    elif componentId == "previousMonthLi":
         oneMonthAgo = today - relativedelta(months = 1)
         fromTimestamp = datetime(oneMonthAgo.year, oneMonthAgo.month, 1, 0, 0, 0)
         toTimestamp = datetime(today.year, today.month, 1, 0, 0, 0) - relativedelta(seconds = 1)
-    elif "previousYearLi" in changedId:
+    elif componentId == "previousYearLi":
         oneYearAgo = today - relativedelta(years = 1)
         fromTimestamp = datetime(oneYearAgo.year, 1, 1, 0, 0, 0)
         toTimestamp = datetime(today.year, 1, 1, 0, 0, 0) - relativedelta(seconds = 1)
-    elif "todayLi" in changedId:
+    elif componentId == "todayLi":
         fromTimestamp = today
         toTimestamp = today + relativedelta(days = 1) - relativedelta(seconds = 1)
-    elif "todaySoFarLi" in changedId:
+    elif componentId == "todaySoFarLi":
         fromTimestamp = today
-    elif "thisWeekLi" in changedId:
+    elif componentId == "thisWeekLi":
         oneWeekAgo = today - relativedelta(weeks = 1)
         fromTimestamp = oneWeekAgo + relativedelta(weekday = calendar.SUNDAY)
         toTimestamp = today + relativedelta(weekday = calendar.SUNDAY) - relativedelta(seconds = 1)
-    elif "thisWeekSoFarLi" in changedId:
+    elif componentId == "thisWeekSoFarLi":
         oneWeekAgo = today - relativedelta(weeks = 1)
         fromTimestamp = oneWeekAgo + relativedelta(weekday = calendar.SUNDAY)
-    elif "thisMonthLi" in changedId:
+    elif componentId == "thisMonthLi":
         fromTimestamp = datetime(today.year, today.month, 1, 0, 0, 0)
         oneMonthAhead = today + relativedelta(months = 1)
         toTimestamp = datetime(oneMonthAhead.year, oneMonthAhead.month, 1, 0, 0, 0) - relativedelta(seconds = 1)
-    elif "thisMonthSoFarLi" in changedId:
+    elif componentId == "thisMonthSoFarLi":
         fromTimestamp = datetime(today.year, today.month, 1, 0, 0, 0)
-    elif "thisYearLi" in changedId:
+    elif componentId == "thisYearLi":
         fromTimestamp = datetime(today.year, 1, 1, 0, 0, 0)
         oneYearAhead = today + relativedelta(years = 1)
         toTimestamp = datetime(oneYearAhead.year, 1, 1, 0, 0, 0) - relativedelta(seconds = 1)
-    elif "thisYearSoFarLi" in changedId:
+    elif componentId == "thisYearSoFarLi":
         fromTimestamp = datetime(today.year, 1, 1, 0, 0, 0)
-    elif "interval" in changedId:
+    elif componentId == "interval":
         fromTimestamp = datetime.strptime(fromTimestampInputValue, "%Y-%m-%dT%H:%M:%S")
     else:
         fromTimestamp = (localNow - relativedelta(months = 3))
