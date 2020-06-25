@@ -19,7 +19,6 @@ def valuesCallback(dashApp):
         State(component_id = "enterprisesDropdown", component_property = "value")])
     def enterprisesDropdownValues(enterprisesDropdownOptions, urlHref, enterprisesDropdownValues):
         enterpriseIds = []
-        # if len(list(filter(lambda property: property["prop_id"] == "url.href", dash.callback_context.triggered))) > 0:
         if enterprisesDropdownValues == -1:
             if enterprisesDropdownOptions:
                 queryString = parse_qs(urlparse(urlHref).query)
