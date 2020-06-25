@@ -29,7 +29,7 @@
                     <a title = "Next" href = '{{ url_for("dashes.elementSummary", idClass = "ElementTemplate",
                         id = elementTemplate.next().id()) }}'><span class = "glyphicon glyphicon-arrow-right"></span></a>
                     <a href = '{{ url_for("elements.selectElement", selectedClass = "ElementTemplate",
-                        id = elementTemplate.id()) }}'>{{ elementTemplate.Name }}</a>
+                        selectedId = elementTemplate.id()) }}'>{{ elementTemplate.Name }}</a>
                 </li>
                 <li class = "active">Element Summary</li>
             {% endif %}
