@@ -15,7 +15,32 @@
     <script>
         $(document).ready(function()
         {
-            $("#iframe").attr("src", '{{ url_for("/elementSummaryDash/") }}' + "?localTimezone=" + moment.tz.guess(true))
+            var parameters = ""
+            {% if site is not none %}
+                elementTemplateParameters = ""
+                elementParameters = ""
+                {% for elementTemplate in site.ElementTemplates | sort(attribute = "Name") %}
+                    elementTemplateParameters = elementTemplateParameters + "&elementTemplateId=" + {{ elementTemplate.ElementTemplateId }}
+                    {% for element in elementTemplate.Elements | sort(attribute = "Name") %}
+                        elementParameters = elementParameters + "&elementId=" + {{ element.ElementId }}
+                    {% endfor %}
+                {% endfor %}
+
+                parameters = "&enterpriseId=" + {{ site.EnterpriseId }} + "&siteId=" + {{ site.SiteId }} + elementTemplateParameters +
+                    elementParameters + "&collapseExpand=collapsed"
+            {% endif %}
+
+            {% if elementTemplate is not none %}
+                elementParameters = ""
+                {% for element in elementTemplate.Elements | sort(attribute = "Name") %}
+                    elementParameters = elementParameters + "&elementId=" + {{ element.ElementId }}
+                {% endfor %}
+
+                parameters = "&enterpriseId=" + {{ elementTemplate.Site.EnterpriseId }} + "&siteId=" + {{ elementTemplate.SiteId }} + "&elementTemplateId="
+                    + {{ elementTemplate.ElementTemplateId }} + elementParameters + "&collapseExpand=collapsed"
+            {% endif %}
+
+            $("#iframe").attr("src", '{{ url_for("/elementSummaryDash/") }}' + "?localTimezone=" + moment.tz.guess(true) + parameters)
         })
     </script>
 {% endblock %}

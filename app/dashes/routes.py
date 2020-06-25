@@ -1,6 +1,6 @@
 from flask import render_template
 from flask_login import login_required
-from app.models import Tag
+from app.models import ElementTemplate, Site, Tag
 from . import dashes
 
 @dashes.route("/dashes/activeEventFramesSummary", methods = ["GET", "POST"])
@@ -9,9 +9,17 @@ def activeEventFramesSummary():
 	return render_template("dashes/activeEventFramesSummary/activeEventFramesSummary.html")
 
 @dashes.route("/dashes/elementSummary", methods = ["GET", "POST"])
+@dashes.route("/dashes/elementSummary/<string:idType>/<int:id>", methods = ["GET", "POST"])
 @login_required
-def elementSummary():
-	return render_template("dashes/elementSummary/elementSummary.html")
+def elementSummary(idType = None, id = None):
+	site = None,
+	elementTemplate = None
+	if idType == "site":
+		site = Site.query.filter_by(SiteId = id).one_or_none()
+	elif idType == "elementTemplate":
+		elementTemplate = ElementTemplate.query.filter_by(ElementTemplateId = id).one_or_none()
+
+	return render_template("dashes/elementSummary/elementSummary.html", elementTemplate = elementTemplate, site = site)
 
 @dashes.route("/dashes/elementValuesGraph", methods = ["GET", "POST"])
 @login_required

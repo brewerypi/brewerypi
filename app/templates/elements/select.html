@@ -70,8 +70,8 @@
                 <a class = "btn btn-default" title = "Add" href = '{{ url_for("elements.addElement", elementTemplateId = parent.id()) }}' role = "button">
                     <span class = "glyphicon glyphicon-plus"></span></a>
             {% endif %}
-            <a class = "btn btn-default" title = "Grafana" href = '{{ "ElementSummary" | grafanaUrl({"elementTemplateId": parent.id()}) }}' target = "_blank">
-                <span class = "glyphicon glyphicon-stats"></span></a>
+            <a class = "btn btn-default" title = "Dash" href = '{{ url_for("dashes.elementSummary", idType = "elementTemplate", id = parent.id()) }}'
+                target = "_blank"><span class = "glyphicon glyphicon-stats"></span></a>
             <br><br>
             Toggle Column:
             <button type = "button" class = "btn btn-primary btn-xs" id = "buttonHideAllColumns">Hide All</button>
@@ -95,7 +95,7 @@
                 <a class = "btn btn-default" title = "Add" href = '{{ url_for("elementTemplates.addElementTemplate", siteId = parent.id()) }}'
                     role = "button"><span class = "glyphicon glyphicon-plus"></span></a>
             {% endif %}
-            <a class = "btn btn-default" title = "Grafana" href = '{{ "ElementSummary" | grafanaUrl({"siteId": parent.id()}) }}' target = "_blank">
+            <a class = "btn btn-default" title = "Dash" href = '{{ url_for("dashes.elementSummary", idType = "site", id = parent.id()) }}' target = "_blank">
                 <span class = "glyphicon glyphicon-stats"></span></a>
             <br><br>
         {% endif %}
