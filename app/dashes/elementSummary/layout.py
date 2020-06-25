@@ -11,7 +11,6 @@ layout = html.Div(children =
     dcc.Interval(id = "interval", n_intervals = 0, disabled = True),
     html.Div(id = "dashDiv", style = {"display": "none"}, children =
     [
-        html.Div(className = "page-header", children = [html.H1("Element Summary")]),
         html.Div(children =
         [
             refreshButton.layout(),

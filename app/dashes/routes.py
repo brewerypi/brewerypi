@@ -9,14 +9,14 @@ def activeEventFramesSummary():
 	return render_template("dashes/activeEventFramesSummary/activeEventFramesSummary.html")
 
 @dashes.route("/dashes/elementSummary", methods = ["GET", "POST"])
-@dashes.route("/dashes/elementSummary/<string:idType>/<int:id>", methods = ["GET", "POST"])
+@dashes.route("/dashes/elementSummary/<string:idClass>/<int:id>", methods = ["GET", "POST"])
 @login_required
-def elementSummary(idType = None, id = None):
-	site = None,
+def elementSummary(idClass = None, id = None):
+	site = None
 	elementTemplate = None
-	if idType == "site":
+	if idClass == "Site":
 		site = Site.query.filter_by(SiteId = id).one_or_none()
-	elif idType == "elementTemplate":
+	elif idClass == "ElementTemplate":
 		elementTemplate = ElementTemplate.query.filter_by(ElementTemplateId = id).one_or_none()
 
 	return render_template("dashes/elementSummary/elementSummary.html", elementTemplate = elementTemplate, site = site)
