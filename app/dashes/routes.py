@@ -9,15 +9,16 @@ def activeEventFramesSummary():
 	return render_template("dashes/activeEventFramesSummary/activeEventFramesSummary.html")
 
 @dashes.route("/dashes/elementSummary", methods = ["GET", "POST"])
-@dashes.route("/dashes/elementSummary/<string:idClass>/<int:id>", methods = ["GET", "POST"])
+@dashes.route("/dashes/elementSummary/site/<int:siteId>", methods = ["GET", "POST"])
+@dashes.route("/dashes/elementSummary/elementTemplate/<int:elementTemplateId>", methods = ["GET", "POST"])
 @login_required
-def elementSummary(idClass = None, id = None):
+def elementSummary(siteId = None, elementTemplateId = None):
 	site = None
 	elementTemplate = None
-	if idClass == "Site":
-		site = Site.query.filter_by(SiteId = id).one_or_none()
-	elif idClass == "ElementTemplate":
-		elementTemplate = ElementTemplate.query.filter_by(ElementTemplateId = id).one_or_none()
+	if siteId is not None:
+		site = Site.query.filter_by(SiteId = siteId).one_or_none()
+	elif elementTemplateId is not None:
+		elementTemplate = ElementTemplate.query.filter_by(ElementTemplateId = elementTemplateId).one_or_none()
 
 	return render_template("dashes/elementSummary/elementSummary.html", elementTemplate = elementTemplate, site = site)
 

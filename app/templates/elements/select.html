@@ -70,7 +70,7 @@
                 <a class = "btn btn-default" title = "Add" href = '{{ url_for("elements.addElement", elementTemplateId = parent.id()) }}' role = "button">
                     <span class = "glyphicon glyphicon-plus"></span></a>
             {% endif %}
-            <a class = "btn btn-default" title = "Dash" href = '{{ url_for("dashes.elementSummary", idClass = "ElementTemplate", id = parent.id()) }}'>
+            <a class = "btn btn-default" title = "Dash" href = '{{ url_for("dashes.elementSummary", elementTemplateId = parent.id()) }}'>
                 <span class = "glyphicon glyphicon-stats"></span></a>
             <br><br>
             Toggle Column:
@@ -95,7 +95,7 @@
                 <a class = "btn btn-default" title = "Add" href = '{{ url_for("elementTemplates.addElementTemplate", siteId = parent.id()) }}'
                     role = "button"><span class = "glyphicon glyphicon-plus"></span></a>
             {% endif %}
-            <a class = "btn btn-default" title = "Dash" href = '{{ url_for("dashes.elementSummary", idClass = "Site", id = parent.id()) }}'>
+            <a class = "btn btn-default" title = "Dash" href = '{{ url_for("dashes.elementSummary", siteId = parent.id()) }}'>
                 <span class = "glyphicon glyphicon-stats"></span></a>
             <br><br>
         {% endif %}

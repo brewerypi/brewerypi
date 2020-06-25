@@ -11,9 +11,9 @@
                     <li><a href = '{{ url_for("elements.selectElement", selectedClass = "Enterprise",
                         selectedId = site.Enterprise.id()) }}'>{{ site.Enterprise.Name }}</a></li>
                     <li>
-                        <a title = "Previous" href = '{{ url_for("dashes.elementSummary", idClass = "site", id = site.previous().id()) }}'>
+                        <a title = "Previous" href = '{{ url_for("dashes.elementSummary", siteId = site.previous().id()) }}'>
                             <span class = "glyphicon glyphicon-arrow-left"></span></a>
-                        <a title = "Next" href = '{{ url_for("dashes.elementSummary", idClass = "site", id = site.next().id()) }}'>
+                        <a title = "Next" href = '{{ url_for("dashes.elementSummary", siteId = site.next().id()) }}'>
                             <span class = "glyphicon glyphicon-arrow-right"></span></a>
                         <a href = '{{ url_for("elements.selectElement", selectedClass = "Site", selectedId = site.id()) }}'>{{ site.Name }}</a>
                     </li>
@@ -25,10 +25,10 @@
                     <li><a href = '{{ url_for("elements.selectElement", selectedClass = "Site",
                         selectedId = elementTemplate.Site.id()) }}'>{{ elementTemplate.Site.Name }}</a></li>
                     <li>
-                        <a title = "Previous" href = '{{ url_for("dashes.elementSummary", idClass = "ElementTemplate",
-                            id = elementTemplate.previous().id()) }}'><span class = "glyphicon glyphicon-arrow-left"></span></a>
-                        <a title = "Next" href = '{{ url_for("dashes.elementSummary", idClass = "ElementTemplate",
-                            id = elementTemplate.next().id()) }}'><span class = "glyphicon glyphicon-arrow-right"></span></a>
+                        <a title = "Previous" href = '{{ url_for("dashes.elementSummary", elementTemplateId = elementTemplate.previous().id()) }}'>
+                            <span class = "glyphicon glyphicon-arrow-left"></span></a>
+                        <a title = "Next" href = '{{ url_for("dashes.elementSummary", elementTemplateId = elementTemplate.next().id()) }}'>
+                            <span class = "glyphicon glyphicon-arrow-right"></span></a>
                         <a href = '{{ url_for("elements.selectElement", selectedClass = "ElementTemplate",
                             selectedId = elementTemplate.id()) }}'>{{ elementTemplate.Name }}</a>
                     </li>
