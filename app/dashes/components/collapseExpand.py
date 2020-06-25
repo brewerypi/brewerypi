@@ -4,7 +4,7 @@ from dash.exceptions import PreventUpdate
 from urllib.parse import parse_qs, urlparse
 
 def layout(contents):
-    return html.Div(
+    return html.Div(id = "collapseExpandDiv", children =
     [
         html.Button(id = "collapseExpandButton", className = "btn btn-default btn-sm", type = "button", **{"data-toggle": "collapse",
             "data-target": "#dropdownDiv", "aria-expanded": "true", "aria-controls": "dropdownDiv"}, n_clicks = 0, children = ["Collapse"]),
@@ -15,7 +15,8 @@ def layout(contents):
     ])
 
 def callback(dashApp):
-    @dashApp.callback([Output(component_id = "collapseExpandButton", component_property = "children"),
+    @dashApp.callback([Output(component_id = "collapseExpandDiv", component_property = "style"),
+        Output(component_id = "collapseExpandButton", component_property = "children"),
         Output(component_id = "dropdownDiv", component_property = "className")],
         [Input(component_id = "url", component_property = "href"),
         Input(component_id = "collapseExpandButton", component_property = "n_clicks")],
@@ -27,13 +28,15 @@ def callback(dashApp):
             if "collapseExpand" in queryString:
                 collapseExpand = queryString["collapseExpand"][0]
                 if collapseExpand == "collapsed":
-                    return ["Expand"], "collapse"
+                    return {"display": "block"}, ["Expand"], "collapse"
                 elif collapseExpand == "expanded":
-                    return ["Collapse"], "collapse in"
+                    return {"display": "block"}, ["Collapse"], "collapse in"
+                elif collapseExpand == "hidden":
+                    return {"display": "none"}, ["Collapse"], "collapse in"
 
             raise PreventUpdate
         else:
             if collapseExpandButtonChildren == ["Collapse"]:
-                return ["Expand"], dropdownDivClassName
+                return {"display": "block"}, ["Expand"], dropdownDivClassName
             else:
-                return ["Collapse"], dropdownDivClassName
+                return {"display": "block"}, ["Collapse"], dropdownDivClassName

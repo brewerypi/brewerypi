@@ -62,7 +62,7 @@
             var parameters = ""
             {% if elementAttribute is not none %}
                 parameters = "&enterpriseId=" + {{ elementAttribute.Tag.Area.Site.EnterpriseId }} + "&siteId=" + {{ elementAttribute.Tag.Area.SiteId }} +
-                    "&areaId=" + {{ elementAttribute.Tag.AreaId }} + "&tagId=" + {{ elementAttribute.Tag.TagId }} + "&collapseExpand=collapsed"
+                    "&areaId=" + {{ elementAttribute.Tag.AreaId }} + "&tagId=" + {{ elementAttribute.Tag.TagId }} + "&collapseExpand=hidden"
             {% elif tag is not none %}
                 parameters = "&enterpriseId=" + {{ tag.Area.Site.EnterpriseId }} + "&siteId=" + {{ tag.Area.SiteId }} + "&areaId=" + {{ tag.AreaId }} +
                     "&tagId=" + {{ tag.TagId }} + "&collapseExpand=collapsed"
