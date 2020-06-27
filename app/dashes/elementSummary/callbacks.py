@@ -1,5 +1,5 @@
 import pandas as pd
-from dash.dependencies import Input, Output, State
+from dash.dependencies import Input, Output
 from dash.exceptions import PreventUpdate
 from app import db
 from app.dashes.components import collapseExpand, elementsDropdown, elementTemplatesDropdown, enterpriseDropdown, refreshInterval, siteDropdown
