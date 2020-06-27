@@ -34,10 +34,16 @@ def eventFrameCallback(dashApp):
                 eventFrameId = int(queryString["eventFrameId"][0])
                 eventFrame = EventFrame.query.get(eventFrameId)
                 if eventFrame is not None:
-                    fromTimestamp = eventFrame.StartTimestamp.strftime("%Y-%m-%dT%H:%M:%S")
+                    queryString = parse_qs(urlparse(urlHref).query)
+                    if "localTimezone" in queryString:
+                        localTimezone = pytz.timezone(queryString["localTimezone"][0])
+                    else:
+                        localTimezone = pytz.utc
+
+                    fromTimestamp = eventFrame.StartTimestamp.astimezone(localTimezone).strftime("%Y-%m-%dT%H:%M:%S")
                     if eventFrame.EndTimestamp is not None:
                         # A closed event frame exists so use the end timestamp.
-                        toTimestamp = (eventFrame.EndTimestamp + relativedelta(minutes = 1)).strftime("%Y-%m-%dT%H:%M:%S")
+                        toTimestamp = (eventFrame.EndTimestamp + relativedelta(minutes = 1)).astimezone(localTimezone).strftime("%Y-%m-%dT%H:%M:%S")
         elif len(list(filter(lambda property: property["prop_id"] == "interval.n_intervals", dash.callback_context.triggered))) > 0:
             # interval n_intervals input fired.
             if eventFrameDropdownValue is not None:
