@@ -3,6 +3,32 @@
 {% block title %}Event Frame Graph{% endblock %}
 
 {% block page_content %}
+    {% if eventFrame is not none %}
+        <div>
+            <ol class = "breadcrumb">
+                <li><a href = '{{ url_for("eventFrames.selectEventFrame", selectedClass = "Root") }}'><span class = "glyphicon glyphicon-home"></span></a></li>
+                <li><a href = '{{ url_for("eventFrames.selectEventFrame", selectedClass = "Enterprise",
+                    selectedId = eventFrame.EventFrameTemplate.ElementTemplate.Site.Enterprise.id()) }}'>
+                    {{ eventFrame.EventFrameTemplate.ElementTemplate.Site.Enterprise.Name }}</a></li>
+                <li><a href = '{{ url_for("eventFrames.selectEventFrame", selectedClass = "Site",
+                    selectedId = eventFrame.EventFrameTemplate.ElementTemplate.Site.id()) }}'>
+                    {{ eventFrame.EventFrameTemplate.ElementTemplate.Site.Name }}</a></li>
+                <li><a href = '{{ url_for("eventFrames.selectEventFrame", selectedClass = "ElementTemplate",
+                    selectedId = eventFrame.EventFrameTemplate.ElementTemplate.id()) }}'>{{ eventFrame.EventFrameTemplate.ElementTemplate.Name }}</a></li>
+                <li><a href = '{{ url_for("eventFrames.selectEventFrame", selectedClass = "EventFrameTemplate",
+                    selectedId = eventFrame.EventFrameTemplate.EventFrameTemplateId) }}'>{{ eventFrame.EventFrameTemplate.Name }}</a>
+                </li>
+                <li>
+                    <a title = "Previous" href = '{{ url_for("dashes.eventFrameGraph",
+                        eventFrameId = eventFrame.previous(session["eventFrameMonths"]).id()) }}'><span class = "glyphicon glyphicon-arrow-left"></span></a>
+                    <a title = "Next" href = '{{ url_for("dashes.eventFrameGraph",
+                        eventFrameId = eventFrame.next(session["eventFrameMonths"]).id()) }}'><span class = "glyphicon glyphicon-arrow-right"></span></a>    
+                    <a href = '{{ url_for("eventFrames.dashboard", eventFrameId = eventFrame.EventFrameId) }}'>{{ eventFrame.Name }}</a>
+                </li>
+                <li class = "active">Event Frame Graph</li>
+            </ol>
+        </div>
+    {% endif %}
     <div class = "embed-responsive embed-responsive-4by3">
         <iframe id = "iframe" class = "embed-responsive-item"></iframe>
     </div>
@@ -12,10 +38,24 @@
     {{ super() }}
     <script type = "text/javascript" src = {{ url_for("static", filename = "js/moment.min.js") }}></script>
     <script type = "text/javascript" src = {{ url_for("static", filename = "js/moment-timezone-with-data.min.js") }}></script>
+    {% block setTabIndex %}
+        {{ super() }}
+    {% endblock %}
     <script>
         $(document).ready(function()
         {
-            $("#iframe").attr("src", '{{ url_for("/eventFrameGraphDash/") }}' + "?localTimezone=" + moment.tz.guess(true))
+            var parameters = ""
+            {% if eventFrame is not none %}
+                parameters = "&enterpriseId=" + {{ eventFrame.EventFrameTemplate.ElementTemplate.Site.EnterpriseId }} +
+                    "&siteId=" + {{ eventFrame.EventFrameTemplate.ElementTemplate.SiteId }} +
+                    "&elementTemplateId=" + {{ eventFrame.EventFrameTemplate.ElementTemplateId }} +
+                    "&eventFrameTemplateId=" + {{ eventFrame.EventFrameTemplateId }} +
+                    "&eventFrameId=" + {{ eventFrame.EventFrameId }} + "&collapseExpand=hidden"
+            {% endif %}
+
+            $("#iframe").attr("src", '{{ url_for("/eventFrameGraphDash/") }}' + "?localTimezone=" + moment.tz.guess(true) + parameters)
+            setTabIndex()
+            $('ol.breadcrumb a[title="Next"]').focus()
         })
     </script>
 {% endblock %}

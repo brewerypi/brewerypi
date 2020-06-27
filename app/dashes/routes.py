@@ -1,6 +1,6 @@
 from flask import render_template
 from flask_login import login_required
-from app.models import ElementAttribute, ElementTemplate, Site, Tag
+from app.models import ElementAttribute, ElementTemplate, EventFrame, Site, Tag
 from . import dashes
 
 @dashes.route("/dashes/activeEventFramesSummary", methods = ["GET", "POST"])
@@ -33,9 +33,14 @@ def eventFrameGroupSummary():
 	return render_template("dashes/eventFrameGroupSummary/eventFrameGroupSummary.html")
 
 @dashes.route("/dashes/eventFrameGraph", methods = ["GET", "POST"])
+@dashes.route("/dashes/eventFrameGraph/<int:eventFrameId>", methods = ["GET", "POST"])
 @login_required
-def eventFrameGraph():
-	return render_template("dashes/eventFrameGraph/eventFrameGraph.html")
+def eventFrameGraph(eventFrameId = None):
+	eventFrame = None
+	if eventFrameId is not None:
+		eventFrame = EventFrame.query.filter_by(EventFrameId = eventFrameId).one_or_none()
+
+	return render_template("dashes/eventFrameGraph/eventFrameGraph.html", eventFrame = eventFrame)
 
 @dashes.route("/dashes/eventFramesOverlay", methods = ["GET", "POST"])
 @login_required
