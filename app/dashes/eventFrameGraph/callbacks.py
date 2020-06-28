@@ -116,7 +116,8 @@ def registerCallbacks(dashApp):
 
         eventFrameNotes = []
         for eventFrameNote in Note.query.join(EventFrameNote).filter(EventFrameNote.EventFrameId == eventFrame.EventFrameId).order_by(Note.Timestamp):
-            eventFrameNotes.append({"Timestamp": eventFrameNote.Timestamp.strftime("%Y-%m-%d %H:%M:%S"), "Note": eventFrameNote.Note})
+            eventFrameNotes.append({"Timestamp": pytz.utc.localize(eventFrameNote.Timestamp).astimezone(localTimezone).strftime("%Y-%m-%d %H:%M:%S"),
+                "Note": eventFrameNote.Note})
 
         return {"display": "none"}, {"display": "block"}, {"data": data, "layout": {"shapes": shapes, "uirevision": "{}{}".format(fromTimestampInputValue,
             toTimestampInputValue)}}, eventFrameNotes
