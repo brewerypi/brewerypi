@@ -1,12 +1,26 @@
 from flask import render_template
 from flask_login import login_required
-from app.models import ElementAttribute, ElementTemplate, EventFrame, Site, Tag
+from app.models import ElementAttribute, ElementTemplate, EventFrame, EventFrameTemplate, Site, Tag
 from . import dashes
 
 @dashes.route("/dashes/activeEventFramesSummary", methods = ["GET", "POST"])
+@dashes.route("/dashes/activeEventFramesSummary/site/<int:siteId>", methods = ["GET", "POST"])
+@dashes.route("/dashes/activeEventFramesSummary/elementTemplate/<int:elementTemplateId>", methods = ["GET", "POST"])
+@dashes.route("/dashes/activeEventFramesSummary/eventFrameTemplate/<int:eventFrameTemplateId>", methods = ["GET", "POST"])
 @login_required
-def activeEventFramesSummary():
-	return render_template("dashes/activeEventFramesSummary/activeEventFramesSummary.html")
+def activeEventFramesSummary(siteId = None, elementTemplateId = None, eventFrameTemplateId = None):
+	site = None
+	elementTemplate = None
+	eventFrameTemplate = None
+	if siteId is not None:
+		site = Site.query.filter_by(SiteId = siteId).one_or_none()
+	elif elementTemplateId is not None:
+		elementTemplate = ElementTemplate.query.filter_by(ElementTemplateId = elementTemplateId).one_or_none()
+	elif eventFrameTemplateId is not None:
+		eventFrameTemplate = EventFrameTemplate.query.filter_by(EventFrameTemplateId = eventFrameTemplateId).one_or_none()
+
+	return render_template("dashes/activeEventFramesSummary/activeEventFramesSummary.html", elementTemplate = elementTemplate,
+		eventFrameTemplate = eventFrameTemplate, site = site)
 
 @dashes.route("/dashes/elementSummary", methods = ["GET", "POST"])
 @dashes.route("/dashes/elementSummary/site/<int:siteId>", methods = ["GET", "POST"])
