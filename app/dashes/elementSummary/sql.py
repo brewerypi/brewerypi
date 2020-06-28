@@ -1,4 +1,3 @@
-from app import db
 from app.models import Element, ElementAttributeTemplate, ElementTemplate
 
 def elementAttributeValues(elementIds):
