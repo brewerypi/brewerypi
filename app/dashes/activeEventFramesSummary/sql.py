@@ -56,5 +56,6 @@ def activeEventFrameAttributeValues(eventFrameTemplateIds):
 		GROUP BY EventFrame.EventFrameId
         ORDER BY Template,
             Element
-    """.format(dynamicColumns, ",".join(str(eventFrameTemplateId) for eventFrameTemplateId in eventFrameTemplateIds), ",".join(str(eventFrameTemplateId) for eventFrameTemplateId in eventFrameTemplateIds))
+    """.format(dynamicColumns, ",".join(str(eventFrameTemplateId) for eventFrameTemplateId in eventFrameTemplateIds), ",".join(str(eventFrameTemplateId)
+		for eventFrameTemplateId in eventFrameTemplateIds))
     return query
