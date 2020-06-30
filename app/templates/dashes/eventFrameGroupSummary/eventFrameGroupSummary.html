@@ -3,10 +3,49 @@
 {% block title %}Event Frame Group Summary{% endblock %}
 
 {% block page_content %}
+    {% if eventFrameGroup is not none %}
+        <div>
+            <ol class = "breadcrumb">
+                <li><a href = '{{ url_for("eventFrameGroups.listEventFrameGroups") }}'><span class = "glyphicon glyphicon-home"></span></a></li>
+                <li>
+                    <a title = "Previous" href = '{{ url_for("dashes.eventFrameGroupSummary",
+                        eventFrameGroupId = eventFrameGroup.previous().EventFrameGroupId) }}'><span class = "glyphicon glyphicon-arrow-left"></span></a>
+                    <a title = "Next" href = '{{ url_for("dashes.eventFrameGroupSummary",
+                        eventFrameGroupId = eventFrameGroup.next().EventFrameGroupId) }}'><span class = "glyphicon glyphicon-arrow-right"></span></a>    
+                    <a title = "Previous" href = '{{ url_for("eventFrameGroups.dashboard", eventFrameGroupId = eventFrameGroup.EventFrameGroupId) }}'>
+                        {{ eventFrameGroup.Name }}</a>
+                <li class = "active">Event Frame Group Summary</li>
+                </li>
+            </ol>
+        </div>
+    {% endif %}
     <div class = "page-header">
         <h1>Event Frame Group Summary <small></small></h1>
     </div>
     <div class = "embed-responsive embed-responsive-4by3">
-        <iframe class = "embed-responsive-item" src = '{{ url_for("/eventFrameGroupSummaryDash/") }}'></iframe>
+        <iframe id = "iframe" class = "embed-responsive-item"></iframe>
     </div>
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <script type = "text/javascript" src = {{ url_for("static", filename = "js/moment.min.js") }}></script>
+    <script type = "text/javascript" src = {{ url_for("static", filename = "js/moment-timezone-with-data.min.js") }}></script>
+    {% block setTabIndex %}
+        {{ super() }}
+    {% endblock %}
+    <script>
+        $(document).ready(function()
+        {
+            var parameters = ""
+            {% if eventFrameGroup is not none %}
+                parameters = "&eventFrameGroupId=" + {{ eventFrameGroup.EventFrameGroupId }}
+            {% endif %}
+
+            $("#iframe").attr("src", '{{ url_for("/eventFrameGroupSummaryDash/") }}' + "?localTimezone=" + moment.tz.guess(true) + parameters +
+                "&collapseExpand=collapsed")
+            setTabIndex()
+            $('ol.breadcrumb a[title="Next"]').focus()
+        })
+    </script>
 {% endblock %}

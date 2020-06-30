@@ -73,13 +73,9 @@
             <a class = "btn btn-default" title = "Restart All {{ displayEventFrameTemplate.Name }} Event Frames"
                 href = '{{ url_for("eventFrameGroups.restartEventFrames", eventFrameGroupId = eventFrameGroup.EventFrameGroupId,
                 eventFrameTemplateId = displayEventFrameTemplate.EventFrameTemplateId) }}' role = "button"><span class = "glyphicon glyphicon-play"></span></a>
-            <a class = "btn btn-default" title = "Grafana"
-                href = '{{ "EventFrameGroupSummary" | grafanaUrl({"enterpriseId": displayEventFrameTemplate.ElementTemplate.Site.Enterprise.EnterpriseId,
-                "siteId": displayEventFrameTemplate.ElementTemplate.Site.SiteId,
-                "elementTemplateId": displayEventFrameTemplate.ElementTemplate.ElementTemplateId,
-                "eventFrameTemplateId": displayEventFrameTemplate.EventFrameTemplateId,
-                "eventFrameGroupId": eventFrameGroup.EventFrameGroupId}) }}'
-                target = "_blank"><span class = "glyphicon glyphicon-stats"></span></a>
+            <a class = "btn btn-default" title = "Dash"
+                href = '{{ url_for("dashes.eventFrameGroupSummary", eventFrameGroupId = eventFrameGroup.EventFrameGroupId) }}'>
+                <span class = "glyphicon glyphicon-stats"></span></a>
         {% endif %}
     </div>
     <br>
