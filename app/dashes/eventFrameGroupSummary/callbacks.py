@@ -35,6 +35,6 @@ def registerCallbacks(dashApp):
 
         df = pd.read_sql(eventFrameAttributeValues(eventFrameGroup.EventFrameGroupId), db.session.bind)
         df["Start"] = df["Start"].apply(lambda  timestamp: pytz.utc.localize(timestamp).astimezone(localTimezone).strftime("%Y-%m-%d %H:%M:%S"))
-        df["End"] = df["End"].apply(lambda  timestamp: pytz.utc.localize(timestamp).astimezone(localTimezone).strftime("%Y-%m-%d %H:%M:%S")
-            if timestamp is not pd.NaT else None)
+        df["End"] = df["End"].apply(lambda timestamp: pytz.utc.localize(timestamp).astimezone(localTimezone).strftime("%Y-%m-%d %H:%M:%S")
+            if timestamp is not pd.NaT and timestamp is not None else None)
         return {"display": "none"}, {"display": "block"}, [{"name": column, "id": column, "hideable": True} for column in df.columns], df.to_dict("records")
