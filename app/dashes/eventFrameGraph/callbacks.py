@@ -3,7 +3,7 @@ from dash.dependencies import Input, Output
 from dash.exceptions import PreventUpdate
 from datetime import datetime
 from urllib.parse import parse_qs, urlparse
-from app.models import EventFrame, EventFrameNote, EventFrameTemplateView, LookupValue, Note
+from app.models import EventFrame, EventFrameNote, LookupValue, Note
 from app.dashes.components import collapseExpand, elementTemplateDropdown, enterpriseDropdown, eventFrameDropdown, eventFrameTemplateDropdown, \
     eventFrameTemplateViewDropdown, siteDropdown, timeRangePicker
 
@@ -20,7 +20,8 @@ def registerCallbacks(dashApp):
     eventFrameTemplateDropdown.valueCallback(dashApp)
     eventFrameDropdown.optionsCallback(dashApp)
     eventFrameDropdown.valueCallback(dashApp)
-    eventFrameTemplateViewDropdown.registerOptionsValueCallback(dashApp)
+    eventFrameTemplateViewDropdown.optionsCallback(dashApp)
+    eventFrameTemplateViewDropdown.valueCallback(dashApp)
 
     @dashApp.callback([Output(component_id = "loadingDiv", component_property = "style"),
         Output(component_id = "dashDiv", component_property = "style"),
