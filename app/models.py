@@ -313,25 +313,6 @@ class EventFrame(db.Model):
 			ancestors.insert(0, self.ParentEventFrame)
 			return self.ParentEventFrame.ancestors(ancestors)
 
-	def tagValues(self, eventFrameTemplateViewId = None):
-		if eventFrameTemplateViewId is None or eventFrameTemplateViewId == -1:
-			eventFrameAttributeTemplateIds = [eventFrameAttributeTemplate.EventFrameAttributeTemplateId
-				for eventFrameAttributeTemplate in self.EventFrameTemplate.EventFrameAttributeTemplates]
-		else:
-			eventFrameTemplateView = EventFrameTemplateView.query.get(eventFrameTemplateViewId)
-			eventFrameAttributeTemplateIds = [eventFrameAttributeTemplateEventFrameTemplateView.EventFrameAttributeTemplateId
-				for eventFrameAttributeTemplateEventFrameTemplateView in eventFrameTemplateView.EventFrameAttributeTemplateEventFrameTemplateViews]
-
-		eventFrameAttributes = EventFrameAttribute.query.filter(EventFrameAttribute.ElementId == self.ElementId,
-			EventFrameAttribute.EventFrameAttributeTemplateId.in_(eventFrameAttributeTemplateIds))
-		tagIds = [eventFrameAttribute.TagId for eventFrameAttribute in eventFrameAttributes]
-		if self.EndTimestamp is None:
-			tagValues = TagValue.query.filter(TagValue.TagId.in_(tagIds), TagValue.Timestamp >= self.StartTimestamp)
-		else:
-			tagValues = TagValue.query.filter(TagValue.TagId.in_(tagIds), TagValue.Timestamp >= self.StartTimestamp,
-				TagValue.Timestamp <= self.EndTimestamp)
-		return tagValues
-
 	def delete(self):
 		for eventFrameEventFrameGroup in self.EventFrameEventFrameGroups:
 			eventFrameEventFrameGroup.delete()
@@ -345,6 +326,28 @@ class EventFrame(db.Model):
 			childEventFrame.delete()
 
 		db.session.delete(self)
+
+	def attributeValues(self, eventFrameTemplateViewId = None):
+		eventFrameAttributeValues = {}
+		if eventFrameTemplateViewId is None or eventFrameTemplateViewId == -1:
+			eventFrameAttributeTemplateIds = [eventFrameAttributeTemplate.EventFrameAttributeTemplateId
+				for eventFrameAttributeTemplate in self.EventFrameTemplate.EventFrameAttributeTemplates]
+		else:
+			eventFrameTemplateView = EventFrameTemplateView.query.get(eventFrameTemplateViewId)
+			eventFrameAttributeTemplateIds = [eventFrameAttributeTemplateEventFrameTemplateView.EventFrameAttributeTemplateId
+				for eventFrameAttributeTemplateEventFrameTemplateView in eventFrameTemplateView.EventFrameAttributeTemplateEventFrameTemplateViews]
+
+		eventFrameAttributes = EventFrameAttribute.query.filter(EventFrameAttribute.ElementId == self.ElementId,
+			EventFrameAttribute.EventFrameAttributeTemplateId.in_(eventFrameAttributeTemplateIds))
+		for eventFrameAttribute in eventFrameAttributes:
+			if self.EndTimestamp is None:
+				eventFrameAttributeValues[eventFrameAttribute.EventFrameAttributeTemplate.Name] = TagValue.query. \
+					filter(TagValue.TagId == eventFrameAttribute.TagId, TagValue.Timestamp >= self.StartTimestamp)
+			else:
+				eventFrameAttributeValues[eventFrameAttribute.EventFrameAttributeTemplate.Name] = TagValue.query. \
+					filter(TagValue.TagId == eventFrameAttribute.TagId, TagValue.Timestamp >= self.StartTimestamp, TagValue.Timestamp <= self.EndTimestamp)
+
+		return eventFrameAttributeValues
 
 	def end(self):
 		endTimestamp = datetime.utcnow()

@@ -55,70 +55,72 @@ def registerCallbacks(dashApp):
         fromTimestampUtc = fromTimestampLocal.astimezone(pytz.utc)
         toTimestampUtc = toTimestampLocal.astimezone(pytz.utc)
 
-        for tagValue in eventFrame.tagValues(eventFrameTemplateViewDropdownValue):
-            # Search for tag dict in list of dicts.
-            listOfDictionaries = list(filter(lambda dictionary: dictionary["name"] == tagValue.Tag.Name, data))
-            if len(listOfDictionaries) == 0:
-                # Tag dict doesn't exist so append it to the list of dicts.
-                if tagValue.Tag.LookupId is None:
-                    data.append(dict(x = [pytz.utc.localize(tagValue.Timestamp).astimezone(localTimezone)],
-                        y = [tagValue.Value],
-                        text = [tagValue.Tag.UnitOfMeasurement.Abbreviation],
-                        name = tagValue.Tag.Name,
-                        mode = "lines+markers"))
-                else:
-                    data.append(dict(x = [pytz.utc.localize(tagValue.Timestamp).astimezone(localTimezone)],
-                        y = [tagValue.Value],
-                        text = [LookupValue.query.filter_by(LookupId = tagValue.Tag.LookupId, Value = tagValue.Value).one().Name],
-                        name = tagValue.Tag.Name,
-                        mode = "lines+markers"))
-            else:
-                # Tag dict already exists so append to x, y and text.
-                tagDictionary = listOfDictionaries[0]
-                tagDictionary["x"].append(pytz.utc.localize(tagValue.Timestamp).astimezone(localTimezone))
-                tagDictionary["y"].append(tagValue.Value)
-                if tagValue.Tag.LookupId is None:
-                    tagDictionary["text"].append(tagValue.Tag.UnitOfMeasurement.Abbreviation)
-                else:
-                    tagDictionary["text"].append(LookupValue.query.filter_by(LookupId = tagValue.Tag.LookupId, Value = tagValue.Value).one().Name)
-
-            if tagValue.TagValueNotes.count() > 0:
-                tagValueNotes = ""
-                for n, tagValueNote in enumerate(tagValue.TagValueNotes, start = 1):
-                    note = "{}: {}".format(pytz.utc.localize(tagValueNote.Note.Timestamp).astimezone(localTimezone), tagValueNote.Note.Note)
-                    if n != 1:
-                        note = "<br>" + note
-                    
-                    tagValueNotes = tagValueNotes + note
-
-                # Search for tag notes dict in list of dicts.
-                listOfDictionaries = list(filter(lambda dictionary: dictionary["name"] == "{} Notes".format(tagValue.Tag.Name), data))
+        for eventFrameAttributeTemplateName, tagValues in eventFrame.attributeValues(eventFrameTemplateViewDropdownValue).items():
+            seriesName = eventFrameAttributeTemplateName
+            for tagValue in tagValues:
+                # Search for tag dict in list of dicts.
+                listOfDictionaries = list(filter(lambda dictionary: dictionary["name"] == eventFrameAttributeTemplateName, data))
                 if len(listOfDictionaries) == 0:
-                    # Tag notes dict doesn't exist so append it to the list of dicts.
-                    data.append(dict(x = [pytz.utc.localize(tagValue.Timestamp).astimezone(localTimezone)],
-                        y = [tagValue.Value],
-                        text = [tagValueNotes],
-                        name = "{} Notes".format(tagValue.Tag.Name),
-                        mode = "markers"))
+                    # Tag dict doesn't exist so append it to the list of dicts.
+                    if tagValue.Tag.LookupId is None:
+                        data.append(dict(x = [pytz.utc.localize(tagValue.Timestamp).astimezone(localTimezone)],
+                            y = [tagValue.Value],
+                            text = [tagValue.Tag.UnitOfMeasurement.Abbreviation],
+                            name = eventFrameAttributeTemplateName,
+                            mode = "lines+markers"))
+                    else:
+                        data.append(dict(x = [pytz.utc.localize(tagValue.Timestamp).astimezone(localTimezone)],
+                            y = [tagValue.Value],
+                            text = [LookupValue.query.filter_by(LookupId = tagValue.Tag.LookupId, Value = tagValue.Value).one().Name],
+                            name = eventFrameAttributeTemplateName,
+                            mode = "lines+markers"))
                 else:
-                    # Tag notes dict already exists so append to x, y and text.
-                    tagNotesDictionary = listOfDictionaries[0]
-                    tagNotesDictionary["x"].append(pytz.utc.localize(tagValue.Timestamp).astimezone(localTimezone))
-                    tagNotesDictionary["y"].append(tagValue.Value)
-                    tagNotesDictionary["text"].append(tagValueNotes)
+                    # Tag dict already exists so append to x, y and text.
+                    tagDictionary = listOfDictionaries[0]
+                    tagDictionary["x"].append(pytz.utc.localize(tagValue.Timestamp).astimezone(localTimezone))
+                    tagDictionary["y"].append(tagValue.Value)
+                    if tagValue.Tag.LookupId is None:
+                        tagDictionary["text"].append(tagValue.Tag.UnitOfMeasurement.Abbreviation)
+                    else:
+                        tagDictionary["text"].append(LookupValue.query.filter_by(LookupId = tagValue.Tag.LookupId, Value = tagValue.Value).one().Name)
 
-        eventFrameStartTimestamp = pytz.utc.localize(eventFrame.StartTimestamp).astimezone(localTimezone)
-        shapes = [dict(type = "line", yref = "paper", y0 = 0, y1 = 1, x0 = eventFrameStartTimestamp, x1 = eventFrameStartTimestamp, line =
-            dict(width = 1, dash = "dot"))]
-        if eventFrame.EndTimestamp is not None:
-            eventFrameEndTimestamp = pytz.utc.localize(eventFrame.EndTimestamp).astimezone(localTimezone)
-            shapes.append(dict(type = "line", yref = "paper", y0 = 0, y1 = 1, x0 = eventFrameEndTimestamp, x1 = eventFrameEndTimestamp,
-                line = dict(width = 1, dash = "dot")))
+                if tagValue.TagValueNotes.count() > 0:
+                    tagValueNotes = ""
+                    for n, tagValueNote in enumerate(tagValue.TagValueNotes, start = 1):
+                        note = "{}: {}".format(pytz.utc.localize(tagValueNote.Note.Timestamp).astimezone(localTimezone), tagValueNote.Note.Note)
+                        if n != 1:
+                            note = "<br>" + note
+                        
+                        tagValueNotes = tagValueNotes + note
 
-        eventFrameNotes = []
-        for eventFrameNote in Note.query.join(EventFrameNote).filter(EventFrameNote.EventFrameId == eventFrame.EventFrameId).order_by(Note.Timestamp):
-            eventFrameNotes.append({"Timestamp": pytz.utc.localize(eventFrameNote.Timestamp).astimezone(localTimezone).strftime("%Y-%m-%d %H:%M:%S"),
-                "Note": eventFrameNote.Note})
+                    # Search for tag notes dict in list of dicts.
+                    listOfDictionaries = list(filter(lambda dictionary: dictionary["name"] == "{} Notes".format(eventFrameAttributeTemplateName), data))
+                    if len(listOfDictionaries) == 0:
+                        # Tag notes dict doesn't exist so append it to the list of dicts.
+                        data.append(dict(x = [pytz.utc.localize(tagValue.Timestamp).astimezone(localTimezone)],
+                            y = [tagValue.Value],
+                            text = [tagValueNotes],
+                            name = "{} Notes".format(eventFrameAttributeTemplateName),
+                            mode = "markers"))
+                    else:
+                        # Tag notes dict already exists so append to x, y and text.
+                        tagNotesDictionary = listOfDictionaries[0]
+                        tagNotesDictionary["x"].append(pytz.utc.localize(tagValue.Timestamp).astimezone(localTimezone))
+                        tagNotesDictionary["y"].append(tagValue.Value)
+                        tagNotesDictionary["text"].append(tagValueNotes)
+
+            eventFrameStartTimestamp = pytz.utc.localize(eventFrame.StartTimestamp).astimezone(localTimezone)
+            shapes = [dict(type = "line", yref = "paper", y0 = 0, y1 = 1, x0 = eventFrameStartTimestamp, x1 = eventFrameStartTimestamp, line =
+                dict(width = 1, dash = "dot"))]
+            if eventFrame.EndTimestamp is not None:
+                eventFrameEndTimestamp = pytz.utc.localize(eventFrame.EndTimestamp).astimezone(localTimezone)
+                shapes.append(dict(type = "line", yref = "paper", y0 = 0, y1 = 1, x0 = eventFrameEndTimestamp, x1 = eventFrameEndTimestamp,
+                    line = dict(width = 1, dash = "dot")))
+
+            eventFrameNotes = []
+            for eventFrameNote in Note.query.join(EventFrameNote).filter(EventFrameNote.EventFrameId == eventFrame.EventFrameId).order_by(Note.Timestamp):
+                eventFrameNotes.append({"Timestamp": pytz.utc.localize(eventFrameNote.Timestamp).astimezone(localTimezone).strftime("%Y-%m-%d %H:%M:%S"),
+                    "Note": eventFrameNote.Note})
 
         return {"display": "none"}, {"display": "block"}, {"data": data, "layout": {"shapes": shapes, "uirevision": "{}{}".format(fromTimestampInputValue,
             toTimestampInputValue)}}, eventFrameNotes
