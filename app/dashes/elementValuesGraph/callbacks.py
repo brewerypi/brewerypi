@@ -46,8 +46,8 @@ def registerCallbacks(dashApp):
 
         for element in elements:
             elementAttributeValues = element.elementAttributeValues(fromTimestampUtc, toTimestampUtc)
-            for elementAttributeValueName, tagValues in elementAttributeValues.items():
-                seriesName = "{}_{}".format(element.Name, elementAttributeValueName)
+            for elementAttributeTemplateName, tagValues in elementAttributeValues.items():
+                seriesName = "{}_{}".format(element.Name, elementAttributeTemplateName)
                 for tagValue in tagValues:
                     # Search for tag dict in list of dicts.
                     listOfDictionaries = list(filter(lambda dictionary: dictionary["name"] == seriesName, data))
