@@ -110,6 +110,18 @@ class Element(db.Model):
 	def previous(self, isManaged = False):
 		return previous(self.nextAndPreviousList(isManaged), self)
 
+	def elementAttributeValues(self, startTimestamp, endTimestamp):
+		elementAttributeValues = {}
+		elementAttributeTemplateIds = [elementAttributeTemplate.ElementAttributeTemplateId for elementAttributeTemplate in
+			self.ElementTemplate.ElementAttributeTemplates]
+		elementAttributes = ElementAttribute.query.filter(ElementAttribute.ElementId == self.ElementId,
+			ElementAttribute.ElementAttributeTemplateId.in_(elementAttributeTemplateIds))
+		for elementAttribute in elementAttributes:
+			elementAttributeValues[elementAttribute.ElementAttributeTemplate.Name] = TagValue.query.filter(TagValue.TagId == elementAttribute.TagId,
+				TagValue.Timestamp >= startTimestamp, TagValue.Timestamp <= endTimestamp)
+
+		return elementAttributeValues
+
 class ElementAttribute(db.Model):
 	__tablename__ = "ElementAttribute"
 	__table_args__ = \
