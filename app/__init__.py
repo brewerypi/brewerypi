@@ -27,9 +27,9 @@ def createApp(configClass = Config):
 	from app.dashes.elementsSummary.callbacks import registerCallbacks as elementsSummaryCallbacks
 	registerDashApp(app, "elementsSummaryDash", elementsSummaryLayout, elementsSummaryCallbacks, "Elements Summary")
 
-	from app.dashes.elementValuesGraph.layout import layout as elementValuesGraphLayout
-	from app.dashes.elementValuesGraph.callbacks import registerCallbacks as elementValuesGraphCallbacks
-	registerDashApp(app, "elementValuesGraphDash", elementValuesGraphLayout, elementValuesGraphCallbacks, "Element Values Graph")
+	from app.dashes.elementsGraph.layout import layout as elementsGraphLayout
+	from app.dashes.elementsGraph.callbacks import registerCallbacks as elementsGraphCallbacks
+	registerDashApp(app, "elementsGraphDash", elementsGraphLayout, elementsGraphCallbacks, "Elements Graph")
 
 	from app.dashes.eventFrameGroupSummary.layout import layout as eventFrameGroupSummaryLayout
 	from app.dashes.eventFrameGroupSummary.callbacks import registerCallbacks as eventFrameGroupSummaryCallbacks

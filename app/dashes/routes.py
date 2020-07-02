@@ -36,15 +36,15 @@ def elementsSummary(siteId = None, elementTemplateId = None):
 
 	return render_template("dashes/elementsSummary/elementsSummary.html", elementTemplate = elementTemplate, site = site)
 
-@dashes.route("/dashes/elementValuesGraph", methods = ["GET", "POST"])
-@dashes.route("/dashes/elementValuesGraph/<int:elementId>", methods = ["GET", "POST"])
+@dashes.route("/dashes/elementsGraph", methods = ["GET", "POST"])
+@dashes.route("/dashes/elementsGraph/<int:elementId>", methods = ["GET", "POST"])
 @login_required
-def elementValuesGraph(elementId = None):
+def elementsGraph(elementId = None):
 	element = None
 	if elementId is not None:
 		element = Element.query.filter_by(ElementId = elementId).one_or_none()
 
-	return render_template("dashes/elementValuesGraph/elementValuesGraph.html", element = element)
+	return render_template("dashes/elementsGraph/elementsGraph.html", element = element)
 
 @dashes.route("/dashes/eventFrameGroupSummary", methods = ["GET", "POST"])
 @dashes.route("/dashes/eventFrameGroupSummary/<int:eventFrameGroupId>", methods = ["GET", "POST"])

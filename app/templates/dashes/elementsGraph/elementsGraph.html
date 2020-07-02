@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Element Values Graph{% endblock %}
+{% block title %}Elements Graph{% endblock %}
 
 {% block page_content %}
     {% if element is not none %}
@@ -15,18 +15,18 @@
                 <li><a href = "{{ url_for("elements.selectElement", selectedClass = "ElementTemplate",
                     selectedId = element.ElementTemplate.ElementTemplateId) }}">{{ element.ElementTemplate.Name }}</a></li>
                 <li>
-                    <a title = "Previous" href = '{{ url_for("dashes.elementValuesGraph", elementId = element.previous().ElementId) }}'>
+                    <a title = "Previous" href = '{{ url_for("dashes.elementsGraph", elementId = element.previous().ElementId) }}'>
                         <span class = "glyphicon glyphicon-arrow-left"></span></a>
-                    <a title = "Next" href = '{{ url_for("dashes.elementValuesGraph", elementId = element.next().ElementId) }}'>
+                    <a title = "Next" href = '{{ url_for("dashes.elementsGraph", elementId = element.next().ElementId) }}'>
                         <span class = "glyphicon glyphicon-arrow-right"></span></a>    
                     <a href = '{{ url_for("elements.dashboard", elementId = element.ElementId) }}'>{{ element.Name }}</a>
                 </li>
-                <li class = "active">Element Values Graph</li>
+                <li class = "active">Elements Graph</li>
             </ol>
         </div>
     {% endif %}
     <div class = "page-header">
-        <h1>Element Values Graph <small></small></h1>
+        <h1>Elements Graph <small></small></h1>
     </div>
     <div class = "embed-responsive embed-responsive-4by3">
         <iframe id = "iframe" class = "embed-responsive-item"></iframe>
@@ -49,7 +49,7 @@
                     "&elementTemplateId=" + {{ element.ElementTemplateId }} + "&elementId=" + {{ element.ElementId }} + "&collapseExpand=hidden"
             {% endif %}
 
-            $("#iframe").attr("src", '{{ url_for("/elementValuesGraphDash/") }}' + "?localTimezone=" + moment.tz.guess(true) + parameters)
+            $("#iframe").attr("src", '{{ url_for("/elementsGraphDash/") }}' + "?localTimezone=" + moment.tz.guess(true) + parameters)
             setTabIndex()
             $('ol.breadcrumb a[title="Next"]').focus()
         })

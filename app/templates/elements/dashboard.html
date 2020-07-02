@@ -26,7 +26,7 @@
         <h1>{{ element.Name }} <small>Attributes</small></h1>
     </div>
     <div>
-        <a class = "btn btn-default" title = "Dash" href = '{{ url_for("dashes.elementValuesGraph", elementId = element.ElementId) }}'>
+        <a class = "btn btn-default" title = "Dash" href = '{{ url_for("dashes.elementsGraph", elementId = element.ElementId) }}'>
             <span class = "glyphicon glyphicon-stats"></span></a>
         <br><br>
         <table id = "attributesTable" class = "table table-hover" style = "display:none">
