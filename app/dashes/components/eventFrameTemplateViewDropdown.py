@@ -24,6 +24,9 @@ def valueCallback(dashApp):
         [Input(component_id = "eventFrameDropdown", component_property = "value")])
     def eventFrameTemplateViewDropdownValue(eventFrameDropdownValue):
         eventFrame = EventFrame.query.filter_by(EventFrameId = eventFrameDropdownValue).one_or_none()
+        if eventFrame is None:
+            return None
+
         defaultEventFrameTemplateView = EventFrameTemplateView.query.filter(EventFrameTemplateView.Default == True,
             EventFrameTemplateView.EventFrameTemplateId == eventFrame.EventFrameTemplateId).one_or_none()
         if defaultEventFrameTemplateView is None:
