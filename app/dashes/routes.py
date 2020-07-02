@@ -22,11 +22,11 @@ def activeEventFramesSummary(siteId = None, elementTemplateId = None, eventFrame
 	return render_template("dashes/activeEventFramesSummary/activeEventFramesSummary.html", elementTemplate = elementTemplate,
 		eventFrameTemplate = eventFrameTemplate, site = site)
 
-@dashes.route("/dashes/elementSummary", methods = ["GET", "POST"])
-@dashes.route("/dashes/elementSummary/site/<int:siteId>", methods = ["GET", "POST"])
-@dashes.route("/dashes/elementSummary/elementTemplate/<int:elementTemplateId>", methods = ["GET", "POST"])
+@dashes.route("/dashes/elementsSummary", methods = ["GET", "POST"])
+@dashes.route("/dashes/elementsSummary/site/<int:siteId>", methods = ["GET", "POST"])
+@dashes.route("/dashes/elementsSummary/elementTemplate/<int:elementTemplateId>", methods = ["GET", "POST"])
 @login_required
-def elementSummary(siteId = None, elementTemplateId = None):
+def elementsSummary(siteId = None, elementTemplateId = None):
 	site = None
 	elementTemplate = None
 	if siteId is not None:
@@ -34,7 +34,7 @@ def elementSummary(siteId = None, elementTemplateId = None):
 	elif elementTemplateId is not None:
 		elementTemplate = ElementTemplate.query.filter_by(ElementTemplateId = elementTemplateId).one_or_none()
 
-	return render_template("dashes/elementSummary/elementSummary.html", elementTemplate = elementTemplate, site = site)
+	return render_template("dashes/elementsSummary/elementsSummary.html", elementTemplate = elementTemplate, site = site)
 
 @dashes.route("/dashes/elementValuesGraph", methods = ["GET", "POST"])
 @dashes.route("/dashes/elementValuesGraph/<int:elementId>", methods = ["GET", "POST"])
