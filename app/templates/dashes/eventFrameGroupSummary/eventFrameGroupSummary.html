@@ -39,11 +39,10 @@
         {
             var parameters = ""
             {% if eventFrameGroup is not none %}
-                parameters = "&eventFrameGroupId=" + {{ eventFrameGroup.EventFrameGroupId }}
+                parameters = "&eventFrameGroupId=" + {{ eventFrameGroup.EventFrameGroupId }} + "&collapseExpand=collapsed"
             {% endif %}
 
-            $("#iframe").attr("src", '{{ url_for("/eventFrameGroupSummaryDash/") }}' + "?localTimezone=" + moment.tz.guess(true) + parameters +
-                "&collapseExpand=collapsed")
+            $("#iframe").attr("src", '{{ url_for("/eventFrameGroupSummaryDash/") }}' + "?localTimezone=" + moment.tz.guess(true) + parameters)
             setTabIndex()
             $('ol.breadcrumb a[title="Next"]').focus()
         })
