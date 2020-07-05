@@ -59,20 +59,20 @@ def registerCallbacks(dashApp):
             seriesName = eventFrameAttributeTemplateName
             for tagValue in tagValues:
                 # Search for tag dict in list of dicts.
-                listOfDictionaries = list(filter(lambda dictionary: dictionary["name"] == eventFrameAttributeTemplateName, data))
+                listOfDictionaries = list(filter(lambda dictionary: dictionary["name"] == seriesName, data))
                 if len(listOfDictionaries) == 0:
                     # Tag dict doesn't exist so append it to the list of dicts.
                     if tagValue.Tag.LookupId is None:
                         data.append(dict(x = [pytz.utc.localize(tagValue.Timestamp).astimezone(localTimezone)],
                             y = [tagValue.Value],
                             text = [tagValue.Tag.UnitOfMeasurement.Abbreviation],
-                            name = eventFrameAttributeTemplateName,
+                            name = seriesName,
                             mode = "lines+markers"))
                     else:
                         data.append(dict(x = [pytz.utc.localize(tagValue.Timestamp).astimezone(localTimezone)],
                             y = [tagValue.Value],
                             text = [LookupValue.query.filter_by(LookupId = tagValue.Tag.LookupId, Value = tagValue.Value).one().Name],
-                            name = eventFrameAttributeTemplateName,
+                            name = seriesName,
                             mode = "lines+markers"))
                 else:
                     # Tag dict already exists so append to x, y and text.
@@ -94,13 +94,13 @@ def registerCallbacks(dashApp):
                         tagValueNotes = tagValueNotes + note
 
                     # Search for tag notes dict in list of dicts.
-                    listOfDictionaries = list(filter(lambda dictionary: dictionary["name"] == "{} Notes".format(eventFrameAttributeTemplateName), data))
+                    listOfDictionaries = list(filter(lambda dictionary: dictionary["name"] == "{} Notes".format(seriesName), data))
                     if len(listOfDictionaries) == 0:
                         # Tag notes dict doesn't exist so append it to the list of dicts.
                         data.append(dict(x = [pytz.utc.localize(tagValue.Timestamp).astimezone(localTimezone)],
                             y = [tagValue.Value],
                             text = [tagValueNotes],
-                            name = "{} Notes".format(eventFrameAttributeTemplateName),
+                            name = "{} Notes".format(seriesName),
                             mode = "markers"))
                     else:
                         # Tag notes dict already exists so append to x, y and text.
