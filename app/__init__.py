@@ -97,6 +97,9 @@ def createApp(configClass = Config):
 	from . eventFrames import eventFrames as eventFramesBlueprint
 	app.register_blueprint(eventFramesBlueprint)
 
+	from . eventFramesOverlay import eventFramesOverlay as eventFramesOverlayBlueprint
+	app.register_blueprint(eventFramesOverlayBlueprint)
+
 	from . eventFrameTemplates import eventFrameTemplates as eventFrameTemplatesBlueprint
 	app.register_blueprint(eventFrameTemplatesBlueprint)
 

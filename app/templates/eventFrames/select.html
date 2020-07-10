@@ -165,7 +165,6 @@
                         <th></th>
                         <th></th>
                         <th></th>
-                        <th></th>
                     {% elif childrenClass == "EventFrame" %}
                         <th>Element</th>
                         <th>User</th>
@@ -231,8 +230,6 @@
                                     <td></td>
                                     <td></td>
                                 {% endif %}
-                                <td><a class = "btn btn-default" title = "Overlay Builder" href = '{{ url_for("eventFrames.overlayBuilder",
-                                    eventFrameTemplateId = child.id()) }}'><span class = "glyphicon glyphicon-stats"></span></a></td>
                                 {% if current_user.isAdministrator() %}
                                     <td><a class = "btn btn-default" title = "Edit" href = '{{ url_for("eventFrameTemplates.editEventFrameTemplate",
                                         eventFrameTemplateId = child.id()) }}'><span class = "glyphicon glyphicon-edit"></span></a></td>
@@ -478,7 +475,6 @@
                         null,
                         { "orderable": false }, // Associate button.
                         { "orderable": false }, // Copy button.
-                        { "orderable": false }, // Overlay button.
                         { "orderable": false }, // Edit button.
                         { "orderable": false }  // Delete button.
                     {% elif childrenClass == "EventFrame" %}

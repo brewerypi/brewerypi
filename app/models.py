@@ -327,15 +327,18 @@ class EventFrame(db.Model):
 
 		db.session.delete(self)
 
-	def attributeValues(self, eventFrameTemplateViewId = None):
+	def attributeValues(self, eventFrameTemplateViewId = None, eventFrameAttributeTemplateIds = None):
 		eventFrameAttributeValues = {}
-		if eventFrameTemplateViewId is None or eventFrameTemplateViewId == -1:
+		if eventFrameTemplateViewId == -1 or eventFrameAttributeTemplateIds == -1:
 			eventFrameAttributeTemplateIds = [eventFrameAttributeTemplate.EventFrameAttributeTemplateId
 				for eventFrameAttributeTemplate in self.EventFrameTemplate.EventFrameAttributeTemplates]
-		else:
+		elif eventFrameTemplateViewId is not None:
 			eventFrameTemplateView = EventFrameTemplateView.query.get(eventFrameTemplateViewId)
 			eventFrameAttributeTemplateIds = [eventFrameAttributeTemplateEventFrameTemplateView.EventFrameAttributeTemplateId
 				for eventFrameAttributeTemplateEventFrameTemplateView in eventFrameTemplateView.EventFrameAttributeTemplateEventFrameTemplateViews]
+		elif eventFrameAttributeTemplateIds is not None:
+			eventFrameAttributeTemplateIds = EventFrameAttributeTemplate.query.with_entities(EventFrameAttributeTemplate.EventFrameAttributeTemplateId). \
+				filter(EventFrameAttributeTemplate.EventFrameAttributeTemplateId.in_(eventFrameAttributeTemplateIds)).all()
 
 		eventFrameAttributes = EventFrameAttribute.query.filter(EventFrameAttribute.ElementId == self.ElementId,
 			EventFrameAttribute.EventFrameAttributeTemplateId.in_(eventFrameAttributeTemplateIds))

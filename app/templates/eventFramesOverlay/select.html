@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+{% block title %}Event Frames{% endblock %}
+{% block page_content %}
+    <div>
+        <ol class = "breadcrumb">
+            {% if childrenClass == "Enterprise" %}
+                <li class = "active"><span class = "glyphicon glyphicon-home"></span></li>
+                {% set pageHeaderSubText = "Enterprises" %}
+            {% elif childrenClass == "Site" %}
+                <li><a href = '{{ url_for("eventFramesOverlay.selectEventFrameTemplate", selectedClass = "Root") }}'>
+                    <span class = "glyphicon glyphicon-home"></span></a></li>
+                <li class = "active">
+                    <a title = "Previous" href = '{{ url_for("eventFramesOverlay.selectEventFrameTemplate", selectedClass = "Enterprise",
+                        selectedId = parent.previous().EnterpriseId) }}'><span class = "glyphicon glyphicon-arrow-left"></span></a>
+                    <a title = "Next" href = '{{ url_for("eventFramesOverlay.selectEventFrameTemplate", selectedClass = "Enterprise",
+                        selectedId = parent.next().EnterpriseId) }}'><span class = "glyphicon glyphicon-arrow-right"></span></a>    
+                    {{ parent.Name }}
+                </li>
+                {% set pageHeaderSubText = "Sites" %}
+            <!-- "and parent" checks for systems that have not been configured with a site yet. -->
+            {% elif childrenClass == "ElementTemplate" and parent %}
+                <li><a href = '{{ url_for("eventFramesOverlay.selectEventFrameTemplate", selectedClass = "Root") }}'><span class = "glyphicon glyphicon-home">
+                    </span></a></li>
+                <li><a href = '{{ url_for("eventFramesOverlay.selectEventFrameTemplate", selectedClass = "Enterprise",
+                    selectedId = parent.Enterprise.EnterpriseId) }}'>{{ parent.Enterprise.Name }}</a></li>
+                <li class = "active">
+                    <a title = "Previous" href = '{{ url_for("eventFramesOverlay.selectEventFrameTemplate", selectedClass = "Site",
+                        selectedId = parent.previous().SiteId) }}'><span class = "glyphicon glyphicon-arrow-left"></span></a>
+                    <a title = "Next" href = '{{ url_for("eventFramesOverlay.selectEventFrameTemplate", selectedClass = "Site",
+                        selectedId = parent.next().SiteId) }}'><span class = "glyphicon glyphicon-arrow-right"></span></a>    
+                    {{ parent.Name }}
+                </li>
+                {% set pageHeaderSubText = "Element Templates" %}
+            {% elif childrenClass == "EventFrameTemplate" %}
+                <li><a href = '{{ url_for("eventFramesOverlay.selectEventFrameTemplate", selectedClass = "Root") }}'><span class = "glyphicon glyphicon-home">
+                    </span></a></li>
+                <li><a href = '{{ url_for("eventFramesOverlay.selectEventFrameTemplate", selectedClass = "Enterprise",
+                    selectedId = parent.Site.Enterprise.EnterpriseId) }}'>{{ parent.Site.Enterprise.Name }}</a></li>
+                <li><a href = '{{ url_for("eventFramesOverlay.selectEventFrameTemplate", selectedClass = "Site",
+                    selectedId = parent.Site.SiteId) }}'>{{ parent.Site.Name }}</a></li>
+                <li class = "active">
+                    <a title = "Previous" href = '{{ url_for("eventFramesOverlay.selectEventFrameTemplate", selectedClass = "ElementTemplate",
+                        selectedId = parent.previous().ElementTemplateId) }}'><span class = "glyphicon glyphicon-arrow-left"></span></a>
+                    <a title = "Next" href = '{{ url_for("eventFramesOverlay.selectEventFrameTemplate", selectedClass = "ElementTemplate",
+                        selectedId = parent.next().ElementTemplateId) }}'><span class = "glyphicon glyphicon-arrow-right"></span></a>    
+                    {{ parent.Name }}
+                </li>
+                {% set pageHeaderSubText = "Event Frame Templates" %}
+            {% endif %}
+        </ol>
+    </div>
+    <div class = "page-header">
+        <h1>Event Frames Overlay <small>{{ pageHeaderSubText }}</small></h1>
+        <p>Navigate to and select an event frame template to use for overlaying.<p>
+    </div>
+    <div>
+        <table id = "table" class = "table table-hover" style = "display:none">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>Name</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if children %}
+                    {% for child in children %}
+                        <tr>
+                            {% if childrenClass == "EventFrameTemplate" %}
+                                <td><a class = "btn btn-default" title = "Select" href = '{{ url_for("eventFramesOverlay.builder",
+                                    eventFrameTemplateId = child.EventFrameTemplateId) }}'><span class = "glyphicon glyphicon-list"></span>
+                                    </a></td>
+                            {% else %}
+                                <td><a class = "btn btn-default" title = "Select" href = '{{ url_for("eventFramesOverlay.selectEventFrameTemplate",
+                                    selectedClass = child.__class__.__name__, selectedId = child.id()) }}'><span class = "glyphicon glyphicon-list"></span>
+                                    </a></td>
+                            {% endif %}
+                            <td>{{ child.Name }}</td>
+                            <td>{{ child.Description }}</td>
+                        </tr>
+                    {% endfor %}
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <link rel = "stylesheet" type = "text/css" href = {{ url_for("static", filename = "css/datatables.min.css") }}/> 
+    <script type = "text/javascript" src = {{ url_for("static", filename = "js/datatables.min.js") }}></script>
+    {% block setTabIndex %}
+        {{ super() }}
+    {% endblock %}
+    <script>  
+        $(document).ready(function()
+        {
+            var table = $("#table").DataTable
+            ({
+                "order":
+                [
+                    [1, "asc"]              // Name.
+                ],
+                "columns":
+                [
+                    { "orderable": false }, // Select button.
+                    null,
+                    null
+                ],
+                "stateSave": true,
+                "stateDuration": 0,
+                "pageLength": 25,
+                "orderCellsTop": true,
+                "fixedHeader": true
+            })
+
+            $("#table").attr("style", "width:100%")
+            $("#divLoading").attr("style", "display:none")
+
+            // Clear any left over filtering from state saving.
+            table.search("").columns().search("").draw()
+            table.on("draw.dt", function()
+            {
+                setTabIndex()
+            })
+            setTabIndex()
+            $('ol.breadcrumb a[title="Next"]').focus()
+        })
+    </script>
+{% endblock %}

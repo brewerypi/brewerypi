@@ -1,4 +1,5 @@
-from flask import render_template
+from datetime import datetime
+from flask import render_template, request
 from flask_login import login_required
 from app.models import Element, ElementAttribute, ElementTemplate, EventFrame, EventFrameGroup, EventFrameTemplate, Site, Tag
 from . import dashes
@@ -69,7 +70,13 @@ def eventFrameGraph(eventFrameId = None):
 @dashes.route("/dashes/eventFramesOverlay", methods = ["GET", "POST"])
 @login_required
 def eventFramesOverlay():
-	return render_template("dashes/eventFramesOverlay/eventFramesOverlay.html")
+	eventFrameTemplateId = request.args.getlist("eventFrameTemplateId")
+	eventFrameTemplate = EventFrameTemplate.query.filter_by(EventFrameTemplateId = eventFrameTemplateId).one_or_none()
+	eventFrameIds = request.args.getlist("eventFrameId")
+	startTimestamp = datetime.strptime(request.args.getlist("startTimestamp")[0], "%Y-%m-%d %H:%M:%S")
+	endTimestamp = datetime.strptime(request.args.getlist("endTimestamp")[0], "%Y-%m-%d %H:%M:%S")
+	return render_template("dashes/eventFramesOverlay/eventFramesOverlay.html", eventFrameTemplate = eventFrameTemplate, eventFrameIds = eventFrameIds,
+		startTimestamp = startTimestamp, endTimestamp = endTimestamp)
 
 @dashes.route("/dashes/tagValuesGraph", methods = ["GET", "POST"])
 @dashes.route("/dashes/tagValuesGraph/elementAttribute/<int:elementAttributeId>", methods = ["GET", "POST"])

@@ -55,7 +55,7 @@ def registerCallbacks(dashApp):
         fromTimestampUtc = fromTimestampLocal.astimezone(pytz.utc)
         toTimestampUtc = toTimestampLocal.astimezone(pytz.utc)
 
-        for eventFrameAttributeTemplateName, tagValues in eventFrame.attributeValues(eventFrameTemplateViewDropdownValue).items():
+        for eventFrameAttributeTemplateName, tagValues in eventFrame.attributeValues(eventFrameTemplateViewId = eventFrameTemplateViewDropdownValue).items():
             seriesName = eventFrameAttributeTemplateName
             for tagValue in tagValues:
                 # Search for tag dict in list of dicts.

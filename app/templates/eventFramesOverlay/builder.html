@@ -1,27 +1,35 @@
 {% extends "base.html" %}
-
+{% set namespace = namespace(numberOfDefaultColumnsForEventFrames = 5) %}
 {% import "bootstrap/wtf.html" as wtf %}
-
 {% block title %}Event Frames{% endblock %}
-
 {% block page_content %}
     <div>
         <ol class = "breadcrumb">
-            <li><a href = '{{ url_for("eventFrames.selectEventFrame", selectedClass = "Root") }}'><span class = "glyphicon glyphicon-home"></a></li>
-            <li><a href = '{{ url_for("eventFrames.selectEventFrame", selectedClass = "Enterprise",
-                selectedId = eventFrameTemplate.ElementTemplate.Site.Enterprise.id()) }}'>{{ eventFrameTemplate.ElementTemplate.Site.Enterprise.Name }}</a></li>
-            <li><a href = '{{ url_for("eventFrames.selectEventFrame", selectedClass = "Site",
-                selectedId = eventFrameTemplate.ElementTemplate.Site.id()) }}'>{{ eventFrameTemplate.ElementTemplate.Site.Name }}</a></li>
-            <li><a href = '{{ url_for("eventFrames.selectEventFrame", selectedClass = "ElementTemplate",
-                selectedId = eventFrameTemplate.ElementTemplate.id()) }}'>{{ eventFrameTemplate.ElementTemplate.Name }}</a></li>
-            <li class = "active">{{ eventFrameTemplate.Name }}</li>
-            {% if startTimestamp and endTimestamp %}
+            <li><a href = '{{ url_for("eventFramesOverlay.selectEventFrameTemplate", selectedClass = "Root") }}'>
+                <span class = "glyphicon glyphicon-home"></a></li>
+            <li><a href = '{{ url_for("eventFramesOverlay.selectEventFrameTemplate", selectedClass = "Enterprise",
+                selectedId = eventFrameTemplate.ElementTemplate.Site.Enterprise.EnterpriseId) }}'>{{ eventFrameTemplate.ElementTemplate.Site.Enterprise.Name }}
+                </a></li>
+            <li><a href = '{{ url_for("eventFramesOverlay.selectEventFrameTemplate", selectedClass = "Site",
+                selectedId = eventFrameTemplate.ElementTemplate.Site.SiteId) }}'>{{ eventFrameTemplate.ElementTemplate.Site.Name }}</a></li>
+            <li><a href = '{{ url_for("eventFramesOverlay.selectEventFrameTemplate", selectedClass = "ElementTemplate",
+                selectedId = eventFrameTemplate.ElementTemplate.ElementTemplateId) }}'>{{ eventFrameTemplate.ElementTemplate.Name }}</a></li>
+            {% if form %}
+                <li class = "active">{{ eventFrameTemplate.Name }}</li>
+            {% else %}
+                <li><a href = '{{ url_for("eventFramesOverlay.builder", eventFrameTemplateId = eventFrameTemplate.EventFrameTemplateId) }}'>
+                {{ eventFrameTemplate.Name }}</a></li>
                 <li class = "active">{{ moment(startTimestamp).format("YYYY-MM-DD HH:mm:ss") }} - {{ moment(endTimestamp).format("YYYY-MM-DD HH:mm:ss") }}</li>
             {% endif %}
         </ol>
     </div>
     <div class = "page-header">
-            <h1>Event Frames<small> Overlay</small></h1>
+        <h1>Event Frames Overlay <small>Date Range</small></h1>
+        {% if form %}
+            <p>Select a time range for overlaying. The "End" timestamp is optional.<p>
+        {% else %}
+            <p>Filter the list of event frames to overlay then press the Dash button.<p>
+        {% endif %}
     </div>
     {% if form %}
         <div>
@@ -31,20 +39,22 @@
             <button class = "btn btn-primary" id = "buttonMonthPicker6" data-months = "6" title = "6 Months">6 Mo</button>
             <button class = "btn btn-primary" id = "buttonMonthPicker9" data-months = "9" title = "9 Months">9 Mo</button>
             <button class = "btn btn-primary" id = "buttonMonthPicker12" data-months = "12" title = "1 Year">1 Yr</button>
+            <button class = "btn btn-primary" id = "buttonMonthPicker24" data-months = "24" title = "2 Years">2 Yr</button>
+            <button class = "btn btn-primary" id = "buttonMonthPicker60" data-months = "60" title = "5 Years">5 Yr</button>
         </div>
         <div>
             {{ wtf.quick_form(form) }}
         </div>
     {% else %}
-        <a class = "btn btn-default" id = "buttonEventFrameOverlay" title = "Grafana"><span class = "glyphicon glyphicon-stats"></span></a>
+        <a class = "btn btn-default" id = "buttonEventFrameOverlay" title = "Dash"><span class = "glyphicon glyphicon-stats"></span></a>
         <br><br>
         <div>
             Toggle Column:
             <button type = "button" class = "btn btn-primary btn-xs" id = "buttonHideAllColumns">Hide All</button>
             {% for eventFrameAttributeTemplate in eventFrameAttributeTemplates %}
                 {% set dataColumnIndex = loop.index + 4 %}
-                <button type = "button" class = "btn btn-primary btn-xs" data-columnIndex = "{{ dataColumnIndex }}"
-                    id = "buttonToggleColumn{{ eventFrameAttributeTemplate.Name }}">{{ eventFrameAttributeTemplate.Name }}</button>
+                <label><button type = "button" class = "btn btn-primary btn-xs" data-columnIndex = "{{ dataColumnIndex }}"
+                    id = "buttonToggleColumn{{ eventFrameAttributeTemplate.Name }}">{{ eventFrameAttributeTemplate.Name }}</button></label>
             {% endfor %}
             <button type = "button" class = "btn btn-primary btn-xs" id = "buttonShowAllColumns">Show All</button>
             <br><br>
@@ -67,22 +77,24 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for eventFrame in eventFrames %}
-                        <tr class = "trEventFrame" eventFrameId = "{{ eventFrame.EventFrameId }}">
-                            <td>{{ eventFrame.EventFrameId }}</td>
-                            <td>{{ eventFrame.Name }}</td>
-                            <td>{{ eventFrame.ElementName }}</td>
-                            <td>{{ moment(eventFrame.StartTimestamp).format("YYYY-MM-DD HH:mm:ss") }}</td>
-                            {% if eventFrame.EndTimestamp %}
-                                <td>{{ moment(eventFrame.EndTimestamp).format("YYYY-MM-DD HH:mm:ss") }}</td>
-                            {% else %}
-                                <td></td>
-                            {% endif %}
-                            {% for eventFrameAttributeTemplate in eventFrameAttributeTemplates %}
-                                <td>{{ eventFrame[eventFrameAttributeTemplate.Name] }}</td>
-                            {% endfor %}
-                        </tr>
-                    {% endfor %}
+                    {% if eventFrames %}
+                        {% for eventFrame in eventFrames %}
+                            <tr class = "trEventFrame" eventFrameId = "{{ eventFrame.EventFrameId }}">
+                                <td>{{ eventFrame.EventFrameId }}</td>
+                                <td>{{ eventFrame.Name }}</td>
+                                <td>{{ eventFrame.ElementName }}</td>
+                                <td>{{ moment(eventFrame.StartTimestamp).format("YYYY-MM-DD HH:mm:ss") }}</td>
+                                {% if eventFrame.EndTimestamp %}
+                                    <td>{{ moment(eventFrame.EndTimestamp).format("YYYY-MM-DD HH:mm:ss") }}</td>
+                                {% else %}
+                                    <td></td>
+                                {% endif %}
+                                {% for eventFrameAttributeTemplate in eventFrameAttributeTemplates %}
+                                    <td>{{ eventFrame[eventFrameAttributeTemplate.Name] }}</td>
+                                {% endfor %}
+                            </tr>
+                        {% endfor %}
+                    {% endif %}
                 </tbody>
             </table>
         </div>
@@ -94,26 +106,27 @@
     <link rel = "stylesheet" type = "text/css" href = {{ url_for("static", filename = "css/datatables.min.css") }}/> 
     <link rel = "stylesheet" type = "text/css" href = {{ url_for("static", filename = "css/styles.css") }}/>
     <script type = "text/javascript" src = {{ url_for("static", filename = "js/datatables.min.js") }}></script>
+    <script type = "text/javascript" src = {{ url_for("static", filename = "js/moment.min.js") }}></script>
     {% block setTabIndex %}
-            {% if not form %}
-                <script>
-                    function setTabIndex()
+        {% if not form %}
+            <script>
+                function setTabIndex()
+                {
+                    tabIndex = 1
+                    $('#table input').each(function()
                     {
-                        tabIndex = 1
-                        $('#table input').each(function()
-                        {
-                            $(this).attr("tabindex", tabIndex)
-                            tabIndex = tabIndex + 1
-                        })
+                        $(this).attr("tabindex", tabIndex)
+                        tabIndex = tabIndex + 1
+                    })
 
-                        $($("ol.breadcrumb > li:not(.active) > a").get().reverse()).each(function()       
-                        {
-                            $(this).attr("tabindex", tabIndex)
-                            tabIndex = tabIndex + 1
-                        })
-                    }
-                </script>
-            {% endif %}
+                    $($("ol.breadcrumb > li:not(.active) > a").get().reverse()).each(function()
+                    {
+                        $(this).attr("tabindex", tabIndex)
+                        tabIndex = tabIndex + 1
+                    })
+                }
+            </script>
+        {% endif %}
     {% endblock %}
     <script>
         function setUtcTimestamps()
@@ -194,14 +207,15 @@
                     {                        
                         "targets": [0],
                         "visible": false    // Hide the EventFrameId.
-                    }
+                    },
+                    {% for eventFrameAttributeTemplate in eventFrameAttributeTemplates %}
+                        {"visible": false, "targets": {{ loop.index0 + namespace.numberOfDefaultColumnsForEventFrames }}},
+                    {% endfor %}
                 ],
                 "order":
                 [
-                    [3, "desc"],             // Start timestamp.
+                    [3, "desc"]             // Start timestamp.
                 ],
-                "stateSave": true,
-                "stateDuration": 0,
                 "pageLength": 10,
                 "orderCellsTop": true,
                 "fixedHeader": true
@@ -212,58 +226,19 @@
 
             $("#buttonEventFrameOverlay").on("click", function()
             {
-                var rows = []
-                var numberOfRows = 0
+                var eventFrameIds = ""
 
                 // Get every row in the filter and store the EventFrameId.
                 table.rows({filter: "applied"}).every(function()
                 {
-                    var row = {}
-                    row["EventFrameId"] = this.data()[0]
-                    rows.push(row)
-                    numberOfRows = numberOfRows + 1
+                    eventFrameIds = eventFrameIds + "&eventFrameId=" + this.data()[0]
                 })
 
-                {% if startTimestamp != None and endTimestamp != None %}
-                    var startTimestamp = moment("{{ startTimestamp }}").unix()
-                    var endTimestamp = moment("{{ endTimestamp }}").unix()
-                {% endif %}
-
-                if (numberOfRows > 0)
+                if (eventFrameIds != "")
                 {
-                    $.ajax(
-                    {
-                        type : "POST",
-                        url : "/eventFrames/overlay/days",
-                        data : JSON.stringify(rows)
-                    }).done(function(response)
-                    {
-                        var days = response["days"]
-                        var from = moment()
-                        from = from.subtract(days, "days")
-                        from = from.format("x")
-                        {% if eventFrameTemplate %}
-                            var link = "{{ grafanaBaseUri }}/d/EventFramesOverlay/event-frames-overlay?orgId=1" +
-                                "&from=" + from + 
-                                "&to=now" +
-                                "&var-enterprise={{ eventFrameTemplate.ElementTemplate.Site.Enterprise.EnterpriseId }}" +
-                                "&var-site={{ eventFrameTemplate.ElementTemplate.Site.SiteId }}" +
-                                "&var-elementTemplate={{ eventFrameTemplate.ElementTemplate.ElementTemplateId }}" + 
-                                "&var-eventFrameTemplate={{ eventFrameTemplate.EventFrameTemplateId }}" +
-                                "&var-startTimestamp=" + startTimestamp +
-                                "&var-endTimestamp=" + endTimestamp
-                            table.rows({filter: "applied"}).every(function()
-                            {
-                                link = link + "&var-eventFrames=" + this.data()[0]
-                            })
-                            window.open(link, "_blank")
-                        {% endif %}
-                    }).fail(function()
-                    {
-                        $(".alert").remove()
-                        $("#divFlashedMessages").append("<div class = \"alert alert-danger\"><button type = \"button\" class = \"close\" " +
-                            "data-dismiss = \"alert\">&times;</button>The attempt to load the event frame overlay has failed.</div>")                        
-                    })
+                    link = '{{ url_for("dashes.eventFramesOverlay") }}?eventFrameTemplateId={{ eventFrameTemplate.EventFrameTemplateId }}' + eventFrameIds +
+                        "&startTimestamp={{ startTimestamp }}&endTimestamp={{ endTimestamp }}"
+                    window.open(link, "_blank")
                 }
             })
 
@@ -274,7 +249,7 @@
                     if (this.index() == 0 || this.index() > 4)
                     {
                         this.visible(false)
-                        $(".btn.btn-primary.btn-xs[datacolumn = " + this.index() + "]").removeClass("active")
+                        $(".btn.btn-primary.btn-xs[data-columnIndex = " + this.index() + "]").removeClass("active")
                     }
                 })
             })
@@ -291,7 +266,7 @@
                     if (this.index() != 0 || this.index() > 4)
                     {
                         this.visible(true)
-                        $(".btn.btn-primary.btn-xs[datacolumn = " + this.index() + "]").addClass("active")
+                        $(".btn.btn-primary.btn-xs[data-columnIndex = " + this.index() + "]").addClass("active")
                     }
                 })
             })
