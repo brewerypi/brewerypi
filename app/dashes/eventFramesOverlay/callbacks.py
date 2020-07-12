@@ -17,6 +17,7 @@ def registerCallbacks(dashApp):
     eventFramesDropdown.optionsCallback(dashApp)
     eventFramesDropdown.valuesCallback(dashApp)
     eventFrameAttributeTemplatesDropdown.optionsCallback(dashApp)
+    eventFrameAttributeTemplatesDropdown.valuesCallback(dashApp)
 
     @dashApp.callback([Output(component_id = "loadingDiv", component_property = "style"),
         Output(component_id = "dashDiv", component_property = "style"),
