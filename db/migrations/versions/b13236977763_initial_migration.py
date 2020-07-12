@@ -1,164 +1,19 @@
 """Initial migration.
 
-Revision ID: 1d0e685b68e0
+Revision ID: b13236977763
 Revises: 
-Create Date: 2019-08-14 22:11:21.915415
+Create Date: 2020-07-12 12:00:08.014674
 
 """
 from alembic import op
 import sqlalchemy as sa
 from sqlalchemy.dialects import mysql
-from db.migrations.replaceableObjects import ReplaceableObject
 
 # revision identifiers, used by Alembic.
-revision = '1d0e685b68e0'
+revision = 'b13236977763'
 down_revision = None
 branch_labels = None
 depends_on = None
-
-
-spActiveEventFrameSummary = ReplaceableObject(
-    "spActiveEventFrameSummary",
-    "IN eventFrameTemplateIds TEXT, IN eventFrameAttributeTemplateNames TEXT",
-    None,
-    """
-BEGIN
-	SET @@group_concat_max_len = 5000;
-	SET @sql = NULL;
-	SET @dynamicColumns = NULL;
-
-	-- Build the column list of event frame attribute values.
-	SELECT GROUP_CONCAT(DISTINCT CONCAT('MAX(IF(EventFrameAttributeTemplate.Name = ''', EventFrameAttributeTemplate.Name, ''', IF(Tag.LookupId IS NULL, TagValue.Value, LookupValue.Name), '''')) AS ''', EventFrameAttributeTemplate.Name, '''')) INTO @dynamicColumns
-	FROM EventFrameAttributeTemplate
-    WHERE FIND_IN_SET(EventFrameAttributeTemplate.Name, eventFrameAttributeTemplateNames) > 0;
-
-	SET @sql = CONCAT('
-		SELECT EventFrameTemplate.Name AS Template,
-			EventFrame.Name,
-			Element.Name AS Element,
-			EventFrame.StartTimestamp AS Start,
-            ', @dynamicColumns, '
-		FROM EventFrame
-			INNER JOIN Element ON EventFrame.ElementId = Element.ElementId
-			INNER JOIN EventFrameTemplate ON EventFrame.EventFrameTemplateId = EventFrameTemplate.EventFrameTemplateId
-			LEFT JOIN EventFrameAttributeTemplate ON EventFrameTemplate.EventFrameTemplateId = EventFrameAttributeTemplate.EventFrameTemplateId
-			LEFT JOIN EventFrameAttribute ON EventFrameAttributeTemplate.EventFrameAttributeTemplateId = EventFrameAttribute.EventFrameAttributeTemplateId AND
-				Element.ElementId = EventFrameAttribute.ElementId
-			LEFT JOIN
-			(
-				SELECT EventFrame.EventFrameId AS EventFrameId,
-					EventFrameAttributeTemplate.Name AS EventFrameAttributeTemplateName,
-					MAX(TagValue.Timestamp) AS Timestamp
-				FROM EventFrame
-					INNER JOIN Element ON EventFrame.ElementId = Element.ElementId
-					INNER JOIN EventFrameTemplate ON EventFrame.EventFrameTemplateId = EventFrameTemplate.EventFrameTemplateId
-					INNER JOIN EventFrameAttributeTemplate ON EventFrameTemplate.EventFrameTemplateId = EventFrameAttributeTemplate.EventFrameTemplateId
-					LEFT JOIN EventFrameAttribute ON EventFrameAttributeTemplate.EventFrameAttributeTemplateId = EventFrameAttribute.EventFrameAttributeTemplateId AND
-						Element.ElementId = EventFrameAttribute.ElementId
-					LEFT JOIN Tag ON EventFrameAttribute.TagId = Tag.TagId
-					LEFT JOIN TagValue ON Tag.TagId = TagValue.TagId AND
-						CASE
-							WHEN EventFrame.EndTimestamp IS NULL THEN
-								(TagValue.Timestamp >= EventFrame.StartTimestamp)
-							ELSE
-								(TagValue.Timestamp >= EventFrame.StartTimestamp AND TagValue.Timestamp <= EventFrame.EndTimestamp)
-						END
-				WHERE EventFrameTemplate.EventFrameTemplateId IN (', eventFrameTemplateIds, ') AND
-					EventFrame.EndTimestamp IS NULL
-				GROUP BY EventFrameId,
-					EventFrameAttributeTemplateName
-			) CurrentEventFrameAttributeValue ON EventFrame.EventFrameId = CurrentEventFrameAttributeValue.EventFrameId AND
-				EventFrameAttributeTemplate.Name = CurrentEventFrameAttributeValue.EventFrameAttributeTemplateName
-			LEFT JOIN Tag ON EventFrameAttribute.TagId = Tag.TagId
-			LEFT JOIN TagValue ON Tag.TagId = TagValue.TagId AND
-				TagValue.Timestamp = CurrentEventFrameAttributeValue.Timestamp
-			LEFT JOIN Lookup ON Tag.LookupId = Lookup.LookupId
-			LEFT JOIN LookupValue ON Lookup.LookupId = LookupValue.LookupId AND
-				TagValue.Value = LookupValue.Value
-		WHERE EventFrameTemplate.EventFrameTemplateId IN (', eventFrameTemplateIds, ') AND
-			EventFrame.EndTimestamp IS NULL
-		GROUP BY EventFrame.EventFrameId
-        ORDER BY Template, Element');
-
-	PREPARE stmt FROM @sql;
-	EXECUTE stmt;
-	DEALLOCATE PREPARE stmt;
-END""")
-
-
-spElementSummary = ReplaceableObject(
-    "spElementSummary",
-    "IN elementAttributeTemplateNames TEXT, IN elementIds TEXT",
-    None,
-    """
-BEGIN
-	SET @@group_concat_max_len = 5000;
-	SET @sql = NULL;
-	SET @dynamicColumns = NULL;
-
-	SELECT GROUP_CONCAT(DISTINCT CONCAT('MAX(IF(ElementAttributeTemplate.Name = ''', ElementAttributeTemplate.Name, ''', IF(Tag.LookupId IS NULL, TagValue.Value, LookupValue.Name), '''')) AS ''', ElementAttributeTemplate.Name, '''')) INTO @dynamicColumns
-	FROM ElementAttributeTemplate
-    WHERE FIND_IN_SET(ElementAttributeTemplate.Name, elementAttributeTemplateNames) > 0;
-
-	SET @sql = CONCAT('
-		SELECT Element.Name AS Element,
-			ElementTemplate.Name AS Template,
-            ', @dynamicColumns, '
-		FROM Element
-			INNER JOIN ElementTemplate ON Element.ElementTemplateId = ElementTemplate.ElementTemplateId
-			INNER JOIN ElementAttributeTemplate ON ElementTemplate.ElementTemplateId = ElementAttributeTemplate.ElementTemplateId
-			LEFT JOIN ElementAttribute ON ElementAttributeTemplate.ElementAttributeTemplateId = ElementAttribute.ElementAttributeTemplateId AND
-				Element.ElementId = ElementAttribute.ElementId
-			INNER JOIN
-			(
-				SELECT Element.ElementId AS ElementId,
-					ElementAttributeTemplate.Name AS ElementAttributeTemplateName,
-					MAX(TagValue.Timestamp) AS Timestamp
-				FROM Element
-					INNER JOIN ElementTemplate ON Element.ElementTemplateId = ElementTemplate.ElementTemplateId
-					INNER JOIN ElementAttributeTemplate ON ElementTemplate.ElementTemplateId = ElementAttributeTemplate.ElementTemplateId
-					LEFT JOIN ElementAttribute ON ElementAttributeTemplate.ElementAttributeTemplateId = ElementAttribute.ElementAttributeTemplateId AND
-						Element.ElementId = ElementAttribute.ElementId
-					LEFT JOIN Tag ON ElementAttribute.TagId = Tag.TagId
-					LEFT JOIN TagValue TagValue ON Tag.TagId = TagValue.TagId
-				WHERE Element.ElementId IN (', elementIds ,')
-				GROUP BY ElementId,
-					ElementAttributeTemplateName
-			) CurrentElementAttributeValues ON Element.ElementId = CurrentElementAttributeValues.ElementId AND
-				ElementAttributeTemplate.Name = CurrentElementAttributeValues.ElementAttributeTemplateName
-			LEFT JOIN Tag ON ElementAttribute.TagId = Tag.TagId
-			LEFT JOIN TagValue ON Tag.TagId = TagValue.TagId AND
-				TagValue.Timestamp = CurrentElementAttributeValues.Timestamp
-			LEFT JOIN Lookup ON Tag.LookupId = Lookup.LookupId
-			LEFT JOIN LookupValue ON Lookup.LookupId = LookupValue.LookupId AND
-				TagValue.Value = LookupValue.Value
-		WHERE Element.ElementId IN (', elementIds ,')
-		GROUP BY Element.ElementId
-        ORDER BY Template,
-			Element');
-	
-	PREPARE stmt FROM @sql;
-	EXECUTE stmt;
-	DEALLOCATE PREPARE stmt;
-END""")
-
-
-spDayTimestampsSince = ReplaceableObject(
-    "spDayTimestampsSince",
-    "IN since DATETIME",
-    None,
-    """
-BEGIN
-	SET @numberOfDaysBetween = NULL;
-	SET @sql = NULL;
-
-	SELECT DATEDIFF(NOW(), since) INTO @numberOfDaysBetween;
-	SET @sql = CONCAT('SELECT UNIX_TIMESTAMP(''', since, ''' + INTERVAL (seq) DAY) AS time_sec, CONCAT(''Day '', (seq)) AS text, CONCAT(''Day '', (seq)) as tags FROM seq_1_to_', @numberOfDaysBetween);
-
-	PREPARE stmt FROM @sql;
-	EXECUTE stmt;
-	DEALLOCATE PREPARE stmt;
-END""")
 
 
 def upgrade():
@@ -172,6 +27,13 @@ def upgrade():
     sa.UniqueConstraint('Abbreviation', name='AK__Abbreviation'),
     sa.UniqueConstraint('Name', name='AK__Name')
     )
+    op.create_table('EventFrameGroup',
+    sa.Column('EventFrameGroupId', sa.Integer(), nullable=False),
+    sa.Column('Name', sa.String(length=45), nullable=False),
+    sa.PrimaryKeyConstraint('EventFrameGroupId'),
+    sa.UniqueConstraint('Name', name='AK__Name')
+    )
+    op.create_index('IX__Name', 'EventFrameGroup', ['Name'], unique=False)
     op.create_table('Role',
     sa.Column('RoleId', sa.Integer(), nullable=False),
     sa.Column('Name', sa.String(length=45), nullable=False),
@@ -209,7 +71,7 @@ def upgrade():
     op.create_table('User',
     sa.Column('UserId', sa.Integer(), nullable=False),
     sa.Column('Enabled', sa.Boolean(), nullable=False),
-    sa.Column('LastMessageReadTimestamp', sa.DateTime(), nullable=True),
+    sa.Column('LastMessageReadTimestamp', mysql.DATETIME(fsp=6), nullable=True),
     sa.Column('Name', sa.String(length=45), nullable=False),
     sa.Column('PasswordHash', sa.String(length=128), nullable=True),
     sa.Column('RoleId', sa.Integer(), nullable=False),
@@ -254,7 +116,7 @@ def upgrade():
     sa.Column('Body', sa.Text(), nullable=False),
     sa.Column('RecipientId', sa.Integer(), nullable=False),
     sa.Column('SenderId', sa.Integer(), nullable=False),
-    sa.Column('Timestamp', sa.DateTime(), nullable=False),
+    sa.Column('Timestamp', mysql.DATETIME(fsp=6), nullable=False),
     sa.ForeignKeyConstraint(['RecipientId'], ['User.UserId'], name='FK__User$Receive$Message'),
     sa.ForeignKeyConstraint(['SenderId'], ['User.UserId'], name='FK__User$Send$Message'),
     sa.PrimaryKeyConstraint('MessageId')
@@ -263,7 +125,7 @@ def upgrade():
     op.create_table('Note',
     sa.Column('NoteId', sa.Integer(), nullable=False),
     sa.Column('Note', sa.Text(), nullable=False),
-    sa.Column('Timestamp', sa.DateTime(), nullable=False),
+    sa.Column('Timestamp', mysql.DATETIME(fsp=6), nullable=False),
     sa.Column('UserId', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['UserId'], ['User.UserId'], name='FK__User$AddOrEdit$Note'),
     sa.PrimaryKeyConstraint('NoteId')
@@ -344,11 +206,11 @@ def upgrade():
     op.create_table('EventFrame',
     sa.Column('EventFrameId', sa.Integer(), nullable=False),
     sa.Column('ElementId', sa.Integer(), nullable=True),
-    sa.Column('EndTimestamp', sa.DateTime(), nullable=True),
+    sa.Column('EndTimestamp', mysql.DATETIME(fsp=6), nullable=True),
     sa.Column('EventFrameTemplateId', sa.Integer(), nullable=False),
     sa.Column('Name', sa.String(length=45), nullable=False),
     sa.Column('ParentEventFrameId', sa.Integer(), nullable=True),
-    sa.Column('StartTimestamp', sa.DateTime(), nullable=False),
+    sa.Column('StartTimestamp', mysql.DATETIME(fsp=6), nullable=False),
     sa.Column('UserId', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['ElementId'], ['Element.ElementId'], name='FK__Element$Have$EventFrame'),
     sa.ForeignKeyConstraint(['EventFrameTemplateId'], ['EventFrameTemplate.EventFrameTemplateId'], name='FK__EventFrameTemplate$Have$EventFrame'),
@@ -373,10 +235,21 @@ def upgrade():
     sa.PrimaryKeyConstraint('EventFrameAttributeTemplateId'),
     sa.UniqueConstraint('EventFrameTemplateId', 'Name', name='AK__EventFrameTemplateId__Name')
     )
+    op.create_table('EventFrameTemplateView',
+    sa.Column('EventFrameTemplateViewId', sa.Integer(), nullable=False),
+    sa.Column('Dictionary', mysql.LONGTEXT(), nullable=True),
+    sa.Column('Default', sa.Boolean(), nullable=False),
+    sa.Column('Description', sa.String(length=255), nullable=True),
+    sa.Column('EventFrameTemplateId', sa.Integer(), nullable=False),
+    sa.Column('Name', sa.String(length=45), nullable=False),
+    sa.ForeignKeyConstraint(['EventFrameTemplateId'], ['EventFrameTemplate.EventFrameTemplateId'], name='FK__EventFrameTemplate$Have$EventFrameTemplateView'),
+    sa.PrimaryKeyConstraint('EventFrameTemplateViewId'),
+    sa.UniqueConstraint('EventFrameTemplateId', 'Name', name='AK__EventFrameTemplateId_Name')
+    )
     op.create_table('TagValue',
     sa.Column('TagValueId', sa.Integer(), nullable=False),
     sa.Column('TagId', sa.Integer(), nullable=False),
-    sa.Column('Timestamp', sa.DateTime(), nullable=False),
+    sa.Column('Timestamp', mysql.DATETIME(fsp=6), nullable=False),
     sa.Column('UserId', sa.Integer(), nullable=False),
     sa.Column('Value', sa.Float(), nullable=False),
     sa.ForeignKeyConstraint(['TagId'], ['Tag.TagId'], name='FK__Tag$Have$TagValue'),
@@ -396,6 +269,26 @@ def upgrade():
     sa.PrimaryKeyConstraint('EventFrameAttributeId'),
     sa.UniqueConstraint('EventFrameAttributeTemplateId', 'ElementId', name='AK__EventFrameAttributeTemplateId__ElementId')
     )
+    op.create_table('EventFrameAttributeTemplateEventFrameTemplateView',
+    sa.Column('EventFrameAttributeTemplateEventFrameTemplateViewId', sa.Integer(), nullable=False),
+    sa.Column('EventFrameAttributeTemplateId', sa.Integer(), nullable=False),
+    sa.Column('EventFrameTemplateViewId', sa.Integer(), nullable=False),
+    sa.Column('Order', sa.Integer(), nullable=False),
+    sa.ForeignKeyConstraint(['EventFrameAttributeTemplateId'], ['EventFrameAttributeTemplate.EventFrameAttributeTemplateId'], name='FK__EFAT$Have$EventFrameAttributeTemplateEventFrameTemplateView'),
+    sa.ForeignKeyConstraint(['EventFrameTemplateViewId'], ['EventFrameTemplateView.EventFrameTemplateViewId'], name='FK__EFTV$Have$EventFrameAttributeTemplateEventFrameTemplateView'),
+    sa.PrimaryKeyConstraint('EventFrameAttributeTemplateEventFrameTemplateViewId'),
+    sa.UniqueConstraint('EventFrameAttributeTemplateId', 'EventFrameTemplateViewId', name='AK__EventFrameAttributeTemplateId__EventFrameTemplateViewId'),
+    sa.UniqueConstraint('EventFrameTemplateViewId', 'Order', name='AK__EventFrameTemplateViewId__Order')
+    )
+    op.create_table('EventFrameEventFrameGroup',
+    sa.Column('EventFrameEventFrameGroupId', sa.Integer(), nullable=False),
+    sa.Column('EventFrameGroupId', sa.Integer(), nullable=False),
+    sa.Column('EventFrameId', sa.Integer(), nullable=False),
+    sa.ForeignKeyConstraint(['EventFrameGroupId'], ['EventFrameGroup.EventFrameGroupId'], name='FK__EventFrameGroup$Have$EventFrameEventFrameGroup'),
+    sa.ForeignKeyConstraint(['EventFrameId'], ['EventFrame.EventFrameId'], name='FK__EventFrame$Have$EventFrameEventFrameGroup'),
+    sa.PrimaryKeyConstraint('EventFrameEventFrameGroupId'),
+    sa.UniqueConstraint('EventFrameGroupId', 'EventFrameId', name='AK__EventFrameGroupId__EventFrameId')
+    )
     op.create_table('EventFrameNote',
     sa.Column('EventFrameId', sa.Integer(), nullable=False),
     sa.Column('NoteId', sa.Integer(), nullable=False),
@@ -410,45 +303,44 @@ def upgrade():
     sa.ForeignKeyConstraint(['TagValueId'], ['TagValue.TagValueId'], name='FK__TagValue$CanHave$TagValueNote'),
     sa.PrimaryKeyConstraint('NoteId', 'TagValueId')
     )
-    op.createStoredProcedure(spActiveEventFrameSummary)
-    op.createStoredProcedure(spElementSummary)
-    op.createStoredProcedure(spDayTimestampsSince)
     # ### end Alembic commands ###
 
 
 def downgrade():
-    op.dropStoredProcedure(spDayTimestampsSince)
-    op.dropStoredProcedure(spElementSummary)
-    op.dropStoredProcedure(spActiveEventFrameSummary)
     # ### commands auto generated by Alembic - please adjust! ###
     op.drop_table('TagValueNote')
     op.drop_table('EventFrameNote')
+    op.drop_table('EventFrameEventFrameGroup')
+    op.drop_table('EventFrameAttributeTemplateEventFrameTemplateView')
     op.drop_table('EventFrameAttribute')
-    # op.drop_index('IX__Timestamp', table_name='TagValue')
+    op.drop_index('IX__Timestamp', table_name='TagValue')
     op.drop_table('TagValue')
+    op.drop_table('EventFrameTemplateView')
     op.drop_table('EventFrameAttributeTemplate')
-    # op.drop_index('IX__StartTimestamp__EndTimestamp', table_name='EventFrame')
+    op.drop_index('IX__StartTimestamp__EndTimestamp', table_name='EventFrame')
     op.drop_table('EventFrame')
     op.drop_table('ElementAttribute')
     op.drop_table('Tag')
     op.drop_table('EventFrameTemplate')
     op.drop_table('ElementAttributeTemplate')
     op.drop_table('Element')
-    # op.drop_index('IX__UserId__Name__UnixTimestamp', table_name='Notification')
+    op.drop_index('IX__UserId__Name__UnixTimestamp', table_name='Notification')
     op.drop_table('Notification')
-    # op.drop_index('IX__Timestamp', table_name='Note')
+    op.drop_index('IX__Timestamp', table_name='Note')
     op.drop_table('Note')
-    # op.drop_index('IX__RecipientId__Timestamp', table_name='Message')
+    op.drop_index('IX__RecipientId__Timestamp', table_name='Message')
     op.drop_table('Message')
     op.drop_table('LookupValue')
     op.drop_table('ElementTemplate')
     op.drop_table('Area')
-    # op.drop_index('IX__Name', table_name='User')
+    op.drop_index('IX__Name', table_name='User')
     op.drop_table('User')
     op.drop_table('Site')
     op.drop_table('Lookup')
     op.drop_table('UnitOfMeasurement')
-    # op.drop_index('IX__Name', table_name='Role')
+    op.drop_index('IX__Name', table_name='Role')
     op.drop_table('Role')
+    op.drop_index('IX__Name', table_name='EventFrameGroup')
+    op.drop_table('EventFrameGroup')
     op.drop_table('Enterprise')
     # ### end Alembic commands ###
