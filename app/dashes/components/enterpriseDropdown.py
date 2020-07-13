@@ -1,5 +1,7 @@
+import dash
 import dash_core_components as dcc
 from dash.dependencies import Input, Output, State
+from dash.exceptions import PreventUpdate
 from urllib.parse import parse_qs, urlparse
 from app.models import Enterprise
 
@@ -10,6 +12,9 @@ def optionsCallback(dashApp):
     @dashApp.callback(Output(component_id = "enterpriseDropdown", component_property = "options"),
         [Input(component_id = "url", component_property = "href")])
     def enterpriseDropdownOptions(urlHref):
+        if dash.callback_context.triggered[0]["prop_id"] == ".":
+            raise PreventUpdate
+
         return [{"label": enterprise.Name, "value": enterprise.EnterpriseId} for enterprise in Enterprise.query.order_by(Enterprise.Name).all()]
 
 def valueCallback(dashApp):

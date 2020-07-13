@@ -27,7 +27,7 @@ def registerCallbacks(dashApp):
         Input(component_id = "interval", component_property = "n_intervals"),
         Input(component_id = "refreshButton", component_property = "n_clicks")],
         [State(component_id = "url", component_property = "href")])
-    def table(eventFrameTemplatesDropdownValues, intervalNIntervals, refreshButtonNClicks, urlHref):
+    def tableColumnsAndData(eventFrameTemplatesDropdownValues, intervalNIntervals, refreshButtonNClicks, urlHref):
         if len(eventFrameTemplatesDropdownValues) == 0:
             eventFrameTemplateIds = [-1]
         else:

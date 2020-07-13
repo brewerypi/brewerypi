@@ -22,7 +22,7 @@ def registerCallbacks(dashApp):
         Input(component_id = "interval", component_property = "n_intervals"),
         Input(component_id = "refreshButton", component_property = "n_clicks")],
         [State(component_id = "url", component_property = "href")])
-    def table(eventFrameGroupDropdownValue, intervalNIntervals, refreshButtonNClicks, urlHref):
+    def tableColumnsAndData(eventFrameGroupDropdownValue, intervalNIntervals, refreshButtonNClicks, urlHref):
         eventFrameGroup = EventFrameGroup.query.filter_by(EventFrameGroupId = eventFrameGroupDropdownValue).one_or_none()
         if eventFrameGroup is None or eventFrameGroup.EventFrameEventFrameGroups.count() == 0:
             return {"display": "none"}, {"display": "block"}, None, None           

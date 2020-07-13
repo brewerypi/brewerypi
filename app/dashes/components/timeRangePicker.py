@@ -13,7 +13,8 @@ def callback(dashApp):
     refreshInterval.callback(dashApp)
     @dashApp.callback(quickTimeRangePickerCallbackOutputs(),
         quickTimeRangePickerCallbackInputs(),
-        [State(component_id = "fromTimestampInput", component_property = "value")])
+        [State(component_id = "url", component_property = "href"),
+        State(component_id = "fromTimestampInput", component_property = "value")])
     def callback(*args, **kwargs):
         return fromToTimestamps(*args, **kwargs)
 
@@ -21,15 +22,16 @@ def eventFrameCallback(dashApp):
     refreshInterval.callback(dashApp)
     @dashApp.callback(quickTimeRangePickerCallbackOutputs(),
         quickTimeRangePickerCallbackInputs(),
-        [State(component_id = "fromTimestampInput", component_property = "value"),
+        [State(component_id = "url", component_property = "href"),
+        State(component_id = "fromTimestampInput", component_property = "value"),
         State(component_id = "eventFrameDropdown", component_property = "value")])
-    def eventFrameCallback(urlHref, *args, **kwargs):
-        timestamps = fromToTimestamps(urlHref, *args[:-1], **kwargs)
+    def eventFrameCallback(*args, **kwargs):
+        timestamps = fromToTimestamps(*args[:-1], **kwargs)
         fromTimestamp = timestamps[0]
         toTimestamp = timestamps[1]
-        queryString = parse_qs(urlparse(urlHref).query)
         if len(list(filter(lambda property: property["prop_id"] == "url.href", dash.callback_context.triggered))) > 0:
             # url href input fired.
+            queryString = parse_qs(urlparse(urlHref).query)
             if "eventFrameId" in queryString:
                 eventFrameId = int(queryString["eventFrameId"][0])
                 eventFrame = EventFrame.query.get(eventFrameId)
@@ -54,12 +56,12 @@ def eventFrameCallback(dashApp):
 
         return fromTimestamp, toTimestamp
 
-def fromToTimestamps(urlHref, lastFiveMinutesLiNClicks, lastFifthteenMinutesLiNClicks, lastThirtyMinutesLiNClicks, lastOneHourLiNClicks,
+def fromToTimestamps(lastFiveMinutesLiNClicks, lastFifthteenMinutesLiNClicks, lastThirtyMinutesLiNClicks, lastOneHourLiNClicks,
     lastThreeHoursLiNClicks, lastSixHoursLiNClicks, lastTwelveHoursLiNClicks, lastTwentyFourHoursLiNClicks, lastTwoDaysLiNClicks, lastThirtyDaysLiNClicks,
     lastNinetyDaysLiNClicks, lastSixMonthsLiNClicks, lastOneYearLiNClicks, lastTwoYearsLiNClicks, lastFiveYearsLiNClicks, yesterdayLiNClicks,
     lastSevenDaysLiNClicks, dayBeforeYesterdayLiNClicks, thisDayLastWeekLiNClicks, previousWeekLiNClicks, previousMonthLiNClicks, previousYearLiNClicks,
     todayLiNClicks, todaySoFarLiNClicks, thisWeekLiNClicks, thisWeekSoFarLiNClicks, thisMonthLiNClicks, thisMonthSoFarLiNClicks, thisYearLiNClicks,
-    thisYearSoFarLiNClicks, intervalNIntervals, fromTimestampInputValue):
+    thisYearSoFarLiNClicks, intervalNIntervals, urlHref, fromTimestampInputValue):
     queryString = parse_qs(urlparse(urlHref).query)
     if "localTimezone" in queryString:
         localTimezone = pytz.timezone(queryString["localTimezone"][0])
@@ -175,8 +177,7 @@ def layout():
     ])
 
 def quickTimeRangePickerCallbackInputs():
-    return [Input(component_id = "url", component_property = "href"),
-        Input(component_id = "lastFiveMinutesLi", component_property = "n_clicks"),
+    return [Input(component_id = "lastFiveMinutesLi", component_property = "n_clicks"),
         Input(component_id = "lastFifthteenMinutesLi", component_property = "n_clicks"),
         Input(component_id = "lastThirtyMinutesLi", component_property = "n_clicks"),
         Input(component_id = "lastOneHourLi", component_property = "n_clicks"),

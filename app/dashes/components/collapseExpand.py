@@ -1,3 +1,4 @@
+import dash
 import dash_html_components as html
 from dash.dependencies import Input, Output, State
 from dash.exceptions import PreventUpdate
@@ -23,6 +24,9 @@ def callback(dashApp):
         [State(component_id = "collapseExpandButton", component_property = "children"),
         State(component_id = "dropdownDiv", component_property = "className")])
     def callback(urlHref, collapseExpandButtonNClicks, collapseExpandButtonChildren, dropdownDivClassName):
+        if dash.callback_context.triggered[0]["prop_id"] == ".":
+            raise PreventUpdate
+
         if collapseExpandButtonNClicks == 0:
             queryString = parse_qs(urlparse(urlHref).query)
             if "collapseExpand" in queryString:

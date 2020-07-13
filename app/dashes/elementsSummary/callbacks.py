@@ -24,7 +24,7 @@ def registerCallbacks(dashApp):
         [Input(component_id = "elementsDropdown", component_property = "value"),
         Input(component_id = "interval", component_property = "n_intervals"),
         Input(component_id = "refreshButton", component_property = "n_clicks")])
-    def elementsDropdownValue(elementsDropdownValues, intervalNIntervals, refreshButtonNClicks):
+    def tableColumnsAndData(elementsDropdownValues, intervalNIntervals, refreshButtonNClicks):
         if len(elementsDropdownValues) == 0:
             elementIds = [-1]
         else:

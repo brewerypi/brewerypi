@@ -27,8 +27,8 @@ def valuesCallback(dashApp):
         [Input(component_id = "eventFrameAttributeTemplatesDropdownSelectAllButton", component_property = "n_clicks"),
         Input(component_id = "eventFrameAttributeTemplatesDropdownClearAllButton", component_property = "n_clicks")],
         [State(component_id = "eventFrameAttributeTemplatesDropdown", component_property = "options")])
-    def eventFramesDropdownValues(eventFrameAttributeTemplatesDropdownSelectAllButtonNClicks, eventFrameAttributeTemplatesDropdownClearAllButtonNClicks,
-        eventFrameAttributeTemplatesDropdownOptions):
+    def eventFrameAttributeTemplatesDropdownValues(eventFrameAttributeTemplatesDropdownSelectAllButtonNClicks,
+        eventFrameAttributeTemplatesDropdownClearAllButtonNClicks, eventFrameAttributeTemplatesDropdownOptions):
         eventFrameAttributeTemplateIds = []
         componentId = dash.callback_context.triggered[0]["prop_id"].split(".")[0]
         if componentId == "eventFrameAttributeTemplatesDropdownSelectAllButton":
