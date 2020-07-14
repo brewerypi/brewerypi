@@ -45,8 +45,7 @@ def registerCallbacks(dashApp):
         toTimestampUtc = toTimestampLocal.astimezone(pytz.utc)
 
         for element in elements:
-            elementAttributeValues = element.elementAttributeValues(fromTimestampUtc, toTimestampUtc)
-            for elementAttributeTemplateName, tagValues in elementAttributeValues.items():
+            for elementAttributeTemplateName, tagValues in element.attributeValues(fromTimestampUtc, toTimestampUtc).items():
                 seriesName = "{}_{}".format(element.Name, elementAttributeTemplateName)
                 for tagValue in tagValues:
                     # Search for tag dict in list of dicts.
