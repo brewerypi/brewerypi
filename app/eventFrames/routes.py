@@ -423,23 +423,30 @@ def selectEventFrame(selectedClass = None, selectedId = None, months = None, sel
 	return render_template("eventFrames/select.html", children = children, childrenClass = childrenClass,
 		eventFrameAttributeTemplates = eventFrameAttributeTemplates, months = months, parent = parent)
 
-@eventFrames.route("/eventFrames/getSourceEventFrames/<int:eventFrameTemplateId>", methods = ["GET", "POST"])
+@eventFrames.route("/eventFrames/getSourceEventFrames/<int:eventFrameTemplateId>/<string:activeSourceEventFramesOnly>", methods = ["GET", "POST"])
 @login_required
 @permissionRequired(Permission.DATA_ENTRY)
-def getSourceEventFrames(eventFrameTemplateId):
+def getSourceEventFrames(eventFrameTemplateId, activeSourceEventFramesOnly):
 	sourceEventFrames = []
 
+	#Build base query in order to add optional filters
+	query = db.session.query(EventFrame)
+	#Optional filters
+	if activeSourceEventFramesOnly == "true":
+		query = query.filter_by(EndTimestamp = None)
+
+	#If no event frame template filter is selected, use qualified names for event frame choices
 	if eventFrameTemplateId == 0:
-		for eventFrame in EventFrame.query.order_by(EventFrame.Name).all():
+		for eventFrame in query.all():
 			sourceEventFrames.append({"value": eventFrame.EventFrameId, "name": eventFrame.qualifiedName()})
 	else:
 		eventFrameTemplate = EventFrameTemplate.query.get_or_404(eventFrameTemplateId)
-		for eventFrame in EventFrame.query.filter_by(EventFrameTemplateId = eventFrameTemplate.EventFrameTemplateId).all():
+		for eventFrame in query.filter_by(EventFrameTemplateId = eventFrameTemplate.EventFrameTemplateId).all():
 			sourceEventFrames.append({"value": eventFrame.EventFrameId, "name": eventFrame.Name})
 
+	#Sort the list of choices
 	def eventFrameName(eventFrame):
 		return eventFrame["name"]
-
 	sourceEventFrames = sorted(sourceEventFrames, key = eventFrameName)
 	
 	return jsonify(sourceEventFrames)

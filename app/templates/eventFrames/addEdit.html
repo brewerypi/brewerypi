@@ -6,10 +6,11 @@
         function populateSourceEventFrameList()
         {
             var sourceEventFrameTemplateId = $("#sourceEventFrameTemplate").val()
+            var activeSourceEventFramesOnly = $("#activeSourceEventFramesOnly").is(":checked")
             $.ajax(
             {
                 type : "POST",
-                url : "/eventFrames/getSourceEventFrames/" + sourceEventFrameTemplateId
+                url : "/eventFrames/getSourceEventFrames/" + sourceEventFrameTemplateId + "/" + activeSourceEventFramesOnly
             }).done(function(sourceEventFrames)
             {
                 var selectSourceEventFrame = $("#sourceEventFrame")
@@ -76,6 +77,11 @@
             })
 
             $("#sourceEventFrameTemplate").on("change", function()
+            {
+                populateSourceEventFrameList()
+            })
+
+            $("#activeSourceEventFramesOnly").on("change", function()
             {
                 populateSourceEventFrameList()
             })
