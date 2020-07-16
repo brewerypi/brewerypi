@@ -1,7 +1,6 @@
 import pandas as pd
 import pytz
 from dash.dependencies import Input, Output, State
-from dash.exceptions import PreventUpdate
 import dash_core_components as dcc
 from urllib.parse import parse_qs, urlparse
 from app import db
@@ -53,6 +52,8 @@ def registerCallbacks(dashApp):
         Input(component_id = "refreshButton", component_property = "n_clicks")],
         [State(component_id = "url", component_property = "href")])
     def tableColumnsAndData(tabsValue, eventFrameTemplateViewDropdownValue, intervalNIntervals, refreshButtonNClicks, urlHref):
+        if  tabsValue is None:
+            return {"display": "none"}, {"display": "block"}, None, None
 
         queryString = parse_qs(urlparse(urlHref).query)
         if "localTimezone" in queryString:
