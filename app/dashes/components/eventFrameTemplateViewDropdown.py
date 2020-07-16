@@ -6,7 +6,7 @@ from app.models import EventFrame, EventFrameTemplateView
 def layout():
     return dcc.Dropdown(id = "eventFrameTemplateViewDropdown", placeholder = "Select View", multi = False)
 
-def optionsCallback(dashApp, inputComponentId = None):
+def optionsCallback(dashApp, inputComponentId):
     @dashApp.callback(Output(component_id = "eventFrameTemplateViewDropdown", component_property = "options"),
         [Input(component_id = inputComponentId, component_property = "value")])
     def eventFrameTemplateViewDropdownOptions(eventFrameTemplateDropdownValue):
@@ -19,7 +19,7 @@ def optionsCallback(dashApp, inputComponentId = None):
         eventFrameTemplateViews.insert(0, {"label": "All", "value": -1})
         return eventFrameTemplateViews
 
-def valueCallback(dashApp, inputComponentId = None):
+def valueCallback(dashApp, inputComponentId):
     @dashApp.callback(Output(component_id = "eventFrameTemplateViewDropdown", component_property = "value"),
         [Input(component_id = inputComponentId, component_property = "value")])
     def eventFrameTemplateViewDropdownValue(eventFrameTemplateDropdownValue):
