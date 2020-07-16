@@ -1,8 +1,8 @@
 import dash_core_components as dcc
 import dash_html_components as html
 import dash_table
-from app.dashes.components import collapseExpand, elementTemplatesDropdown, enterpriseDropdown, eventFrameTemplatesDropdown, refreshButton, refreshInterval, \
-    siteDropdown
+from app.dashes.components import collapseExpand, elementTemplatesDropdown, enterpriseDropdown, eventFrameTemplatesDropdown, eventFrameTemplateViewDropdown, \
+    refreshButton, refreshInterval, siteDropdown
 
 layout = html.Div(children =
 [
@@ -24,6 +24,9 @@ layout = html.Div(children =
             elementTemplatesDropdown.layout(),
             eventFrameTemplatesDropdown.layout()
         ]),
+        dcc.Tabs(id = "tabs"),
+        dcc.Store(id = "eventFrameTemplateDropdown"),
+        eventFrameTemplateViewDropdown.layout(),
         html.Div(className = "well", children =
         [
             dash_table.DataTable(id = "table", cell_selectable = False, filter_action = "native", sort_action = "native", sort_mode = "multi",

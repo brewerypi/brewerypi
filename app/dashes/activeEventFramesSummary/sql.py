@@ -1,17 +1,23 @@
-from app.models import EventFrameAttributeTemplate, EventFrameTemplate
+from app.models import EventFrameAttributeTemplate, EventFrameAttributeTemplateEventFrameTemplateView
 
-def activeEventFrameAttributeValues(eventFrameTemplateIds):
-    dynamicColumns = ""
-    eventFrameAttributeTemplate = EventFrameTemplate.query.join(EventFrameAttributeTemplate).with_entities(EventFrameAttributeTemplate.Name). \
-        filter(EventFrameTemplate.EventFrameTemplateId.in_(eventFrameTemplateIds)).order_by(EventFrameAttributeTemplate.Name).distinct()
-    for eventFrameAttributeTemplate in eventFrameAttributeTemplate:
-        dynamicColumns = dynamicColumns + \
-            ", MAX(IF(EventFrameAttributeTemplate.Name = '{}', IF(Tag.LookupId IS NULL, TagValue.Value, LookupValue.Name), '')) AS '{}'". \
-            format(eventFrameAttributeTemplate.Name, eventFrameAttributeTemplate.Name)
+def activeEventFrameAttributeValues(eventFrameTemplateId, eventFrameTemplateViewId):
+	dynamicColumns = ""
+	if eventFrameTemplateViewId == -1:
+		eventFrameAttributeTemplates = EventFrameAttributeTemplate.query.with_entities(EventFrameAttributeTemplate.Name). \
+			filter_by(EventFrameTemplateId = eventFrameTemplateId).order_by(EventFrameAttributeTemplate.Name)
+	else:
+		eventFrameAttributeTemplates = EventFrameAttributeTemplate.query.join(EventFrameAttributeTemplateEventFrameTemplateView). \
+			with_entities(EventFrameAttributeTemplate.Name). \
+			filter(EventFrameAttributeTemplateEventFrameTemplateView.EventFrameTemplateViewId == eventFrameTemplateViewId). \
+			order_by(EventFrameAttributeTemplate.Name)
 
-    query = """
-		SELECT EventFrameTemplate.Name AS Template,
-			EventFrame.Name,
+	for eventFrameAttributeTemplate in eventFrameAttributeTemplates:
+		dynamicColumns = dynamicColumns + \
+			", MAX(IF(EventFrameAttributeTemplate.Name = '{}', IF(Tag.LookupId IS NULL, TagValue.Value, LookupValue.Name), '')) AS '{}'". \
+			format(eventFrameAttributeTemplate.Name, eventFrameAttributeTemplate.Name)
+
+	query = """
+		SELECT EventFrame.Name,
 			Element.Name AS Element,
 			EventFrame.StartTimestamp AS Start {}
 		FROM EventFrame
@@ -39,7 +45,7 @@ def activeEventFrameAttributeValues(eventFrameTemplateIds):
 							ELSE
 								(TagValue.Timestamp >= EventFrame.StartTimestamp AND TagValue.Timestamp <= EventFrame.EndTimestamp)
 						END
-				WHERE EventFrameTemplate.EventFrameTemplateId IN ({}) AND
+				WHERE EventFrameTemplate.EventFrameTemplateId = {} AND
 					EventFrame.EndTimestamp IS NULL
 				GROUP BY EventFrameId,
 					EventFrameAttributeTemplateName
@@ -51,11 +57,9 @@ def activeEventFrameAttributeValues(eventFrameTemplateIds):
 			LEFT JOIN Lookup ON Tag.LookupId = Lookup.LookupId
 			LEFT JOIN LookupValue ON Lookup.LookupId = LookupValue.LookupId AND
 				TagValue.Value = LookupValue.Value
-		WHERE EventFrameTemplate.EventFrameTemplateId IN ({}) AND
+		WHERE EventFrameTemplate.EventFrameTemplateId = {} AND
 			EventFrame.EndTimestamp IS NULL
 		GROUP BY EventFrame.EventFrameId
-        ORDER BY Template,
-            Element
-    """.format(dynamicColumns, ",".join(str(eventFrameTemplateId) for eventFrameTemplateId in eventFrameTemplateIds), ",".join(str(eventFrameTemplateId)
-		for eventFrameTemplateId in eventFrameTemplateIds))
-    return query
+		ORDER BY Element
+	""".format(dynamicColumns, eventFrameTemplateId, eventFrameTemplateId)
+	return query

@@ -6,9 +6,9 @@ from app.models import EventFrame, EventFrameTemplateView
 def layout():
     return dcc.Dropdown(id = "eventFrameTemplateViewDropdown", placeholder = "Select View", multi = False)
 
-def optionsCallback(dashApp):
+def optionsCallback(dashApp, inputComponentId = None):
     @dashApp.callback(Output(component_id = "eventFrameTemplateViewDropdown", component_property = "options"),
-        [Input(component_id = "eventFrameTemplateDropdown", component_property = "value")])
+        [Input(component_id = inputComponentId, component_property = "value")])
     def eventFrameTemplateViewDropdownOptions(eventFrameTemplateDropdownValue):
         if eventFrameTemplateDropdownValue is None:
             return []
@@ -19,16 +19,12 @@ def optionsCallback(dashApp):
         eventFrameTemplateViews.insert(0, {"label": "All", "value": -1})
         return eventFrameTemplateViews
 
-def valueCallback(dashApp):
+def valueCallback(dashApp, inputComponentId = None):
     @dashApp.callback(Output(component_id = "eventFrameTemplateViewDropdown", component_property = "value"),
-        [Input(component_id = "eventFrameDropdown", component_property = "value")])
-    def eventFrameTemplateViewDropdownValue(eventFrameDropdownValue):
-        eventFrame = EventFrame.query.filter_by(EventFrameId = eventFrameDropdownValue).one_or_none()
-        if eventFrame is None:
-            return None
-
+        [Input(component_id = inputComponentId, component_property = "value")])
+    def eventFrameTemplateViewDropdownValue(eventFrameTemplateDropdownValue):
         defaultEventFrameTemplateView = EventFrameTemplateView.query.filter(EventFrameTemplateView.Default == True,
-            EventFrameTemplateView.EventFrameTemplateId == eventFrame.EventFrameTemplateId).one_or_none()
+            EventFrameTemplateView.EventFrameTemplateId == eventFrameTemplateDropdownValue).one_or_none()
         if defaultEventFrameTemplateView is None:
             return -1
         else:
