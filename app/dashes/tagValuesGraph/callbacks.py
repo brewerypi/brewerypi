@@ -86,5 +86,4 @@ def registerCallbacks(dashApp):
                                 tagNotesDictionary["y"].append(tagValue.Value)
                                 tagNotesDictionary["text"].append(tagValueNotes)
 
-            return {"display": "none"}, {"display": "block"}, {"data": data, "layout": {"uirevision": "{}{}".format(fromTimestampInputValue,
-                toTimestampInputValue)}}
+            return {"display": "none"}, {"display": "block"}, {"data": data, "layout": {"uirevision": "no reset"}}

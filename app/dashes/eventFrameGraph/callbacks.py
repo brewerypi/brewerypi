@@ -122,5 +122,4 @@ def registerCallbacks(dashApp):
                 eventFrameNotes.append({"Timestamp": pytz.utc.localize(eventFrameNote.Timestamp).astimezone(localTimezone).strftime("%Y-%m-%d %H:%M:%S"),
                     "Note": eventFrameNote.Note})
 
-        return {"display": "none"}, {"display": "block"}, {"data": data, "layout": {"shapes": shapes, "uirevision": "{}{}".format(fromTimestampInputValue,
-            toTimestampInputValue)}}, eventFrameNotes
+        return {"display": "none"}, {"display": "block"}, {"data": data, "layout": {"shapes": shapes, "uirevision": "no reset"}}, eventFrameNotes
