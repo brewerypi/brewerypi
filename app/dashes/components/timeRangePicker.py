@@ -166,7 +166,7 @@ def fromToTimestamps(urlHref, lastFiveMinutesLiNClicks, lastFifthteenMinutesLiNC
     return fromTimestamp.strftime("%Y-%m-%dT%H:%M:%S"), toTimestamp.strftime("%Y-%m-%dT%H:%M:%S")
 
 def fromToTimestampsLayout():
-    return html.Div(className = "btn-group", role = "group", children =
+    return html.Div(id = "fromToTimestampsDiv", className = "btn-group", role = "group", children =
     [
         "From: ", 
         dcc.Input(id = "fromTimestampInput", type = "datetime-local", step = "1"),
@@ -222,7 +222,7 @@ def quickTimeRangePickerCallbackOutputs():
         Output(component_id = "toTimestampInput", component_property = "value")]
 
 def quickTimeRangePickerLayout():
-    return html.Div(className = "btn-group", role = "group", children =
+    return html.Div(id = "quickTimeRangePickerDiv", className = "btn-group", role = "group", children =
     [
         html.Button(id = "timestampRangePickerButton", className = "btn btn-default dropdown-toggle btn-sm", **{"data-toggle": "dropdown",
             "aria-haspopup": "true", "aria-expanded": "false"}, children = ["Quick time range"]),

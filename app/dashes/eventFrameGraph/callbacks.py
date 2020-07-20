@@ -1,5 +1,5 @@
 import pytz
-from dash.dependencies import Input, Output
+from dash.dependencies import Input, Output, State
 from dash.exceptions import PreventUpdate
 from datetime import datetime
 from urllib.parse import parse_qs, urlparse
@@ -25,6 +25,8 @@ def registerCallbacks(dashApp):
 
     @dashApp.callback([Output(component_id = "loadingDiv", component_property = "style"),
         Output(component_id = "dashDiv", component_property = "style"),
+        Output(component_id = "fromToTimestampsDiv", component_property = "style"),
+        Output(component_id = "quickTimeRangePickerDiv", component_property = "style"),
         Output(component_id = "graph", component_property = "figure"),
         Output(component_id = "table", component_property = "data")],
         [Input(component_id = "fromTimestampInput", component_property = "value"),
@@ -33,11 +35,13 @@ def registerCallbacks(dashApp):
         Input(component_id = "eventFrameTemplateViewDropdown", component_property = "value"),
         Input(component_id = "url", component_property = "href"),
         Input(component_id = "interval", component_property = "n_intervals"),
-        Input(component_id = "refreshButton", component_property = "n_clicks")])
+        Input(component_id = "refreshButton", component_property = "n_clicks")],
+        [State(component_id = "fromToTimestampsDiv", component_property = "style"),
+        State(component_id = "quickTimeRangePickerDiv", component_property = "style")])
     def graphFigure(fromTimestampInputValue, toTimestampInputValue, eventFrameDropdownValue, eventFrameTemplateViewDropdownValue, urlHref, intervalNIntervals,
-        refreshButtonNClicks):
+        refreshButtonNClicks, fromToTimestampsDivStyle, quickTimeRangePickerDivStyle):
         if eventFrameDropdownValue is None:
-            return {"display": "none"}, {"display": "block"}, {"data": []}, []
+            return {"display": "none"}, {"display": "block"}, fromToTimestampsDivStyle, quickTimeRangePickerDivStyle, {"data": []}, []
 
         if fromTimestampInputValue == "" or toTimestampInputValue == "":
             raise PreventUpdate
@@ -122,4 +126,6 @@ def registerCallbacks(dashApp):
                 eventFrameNotes.append({"Timestamp": pytz.utc.localize(eventFrameNote.Timestamp).astimezone(localTimezone).strftime("%Y-%m-%d %H:%M:%S"),
                     "Note": eventFrameNote.Note})
 
-        return {"display": "none"}, {"display": "block"}, {"data": data, "layout": {"shapes": shapes, "uirevision": "no reset"}}, eventFrameNotes
+        return {"display": "none"}, {"display": "block"}, {"display": "none"} if "eventFrameId" in queryString else fromToTimestampsDivStyle, \
+            {"display": "none"} if "eventFrameId" in queryString else quickTimeRangePickerDivStyle, \
+                {"data": data, "layout": {"shapes": shapes, "uirevision": "no reset"}}, eventFrameNotes
