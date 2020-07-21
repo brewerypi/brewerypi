@@ -140,7 +140,7 @@
 
 {% block scripts %}
     {{ super() }}
-    {{ moment.include_moment() }}
+    {{ moment.include_moment(local_js = url_for("static", filename = "js/moment.min.js")) }}
     <script>
         {% if current_user.is_authenticated %}
             $(function()
