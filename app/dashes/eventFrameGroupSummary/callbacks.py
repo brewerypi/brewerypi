@@ -29,11 +29,8 @@ def registerCallbacks(dashApp):
             if i == 0:
                 value = eventFrameTemplate.EventFrameTemplateId
 
-            if len(eventFrameTemplates) > 1:
-                label = f"{eventFrameTemplate.ElementTemplate.Name}_{eventFrameTemplate.Name}"
-            else:
-                label = eventFrameTemplate.Name
-
+            label = f"{eventFrameTemplate.ElementTemplate.Site.Enterprise.Abbreviation}_{eventFrameTemplate.ElementTemplate.Site.Abbreviation}_" + \
+                f"{eventFrameTemplate.ElementTemplate.Name}_{eventFrameTemplate.Name}"
             children.append(dcc.Tab(label = label, value = eventFrameTemplate.EventFrameTemplateId))
         return children, value
 
