@@ -1,13 +1,19 @@
-from app.models import EventFrame, EventFrameAttributeTemplate, EventFrameGroup, EventFrameTemplate
+from app.models import EventFrame, EventFrameAttributeTemplate, EventFrameAttributeTemplateEventFrameTemplateView, EventFrameEventFrameGroup, EventFrameTemplate
 
-def eventFrameAttributeValues(eventFrameGroupId):
+def eventFrameAttributeValues(eventFrameGroupId, eventFrameTemplateId, eventFrameTemplateViewId):
 	dynamicColumns = ""
-	eventFrameGroup = EventFrameGroup.query.filter_by(EventFrameGroupId = eventFrameGroupId).one_or_none()
-	eventFrameIds = [eventFrameEventFrameGroup.EventFrameId for eventFrameEventFrameGroup in eventFrameGroup.EventFrameEventFrameGroups]
-	eventFrameTemplateIds = EventFrame.query.with_entities(EventFrame.EventFrameTemplateId).filter(EventFrame.EventFrameId.in_(eventFrameIds)).distinct()
-	eventFrameAttributeTemplate = EventFrameTemplate.query.join(EventFrameAttributeTemplate).with_entities(EventFrameAttributeTemplate.Name). \
-		filter(EventFrameTemplate.EventFrameTemplateId.in_(eventFrameTemplateIds)).order_by(EventFrameAttributeTemplate.Name).distinct()
-	for eventFrameAttributeTemplate in eventFrameAttributeTemplate:
+	eventFrameIds = [eventFrame.EventFrameId for eventFrame in EventFrame.query.join(EventFrameEventFrameGroup). \
+		filter(EventFrame.EventFrameTemplateId == eventFrameTemplateId, EventFrameEventFrameGroup.EventFrameGroupId == eventFrameGroupId)]
+	if eventFrameTemplateViewId == -1:
+		eventFrameAttributeTemplates = EventFrameAttributeTemplate.query.with_entities(EventFrameAttributeTemplate.Name). \
+			filter_by(EventFrameTemplateId = eventFrameTemplateId).order_by(EventFrameAttributeTemplate.Name)
+	else:
+		eventFrameAttributeTemplates = EventFrameAttributeTemplate.query.join(EventFrameAttributeTemplateEventFrameTemplateView). \
+			with_entities(EventFrameAttributeTemplate.Name). \
+			filter(EventFrameAttributeTemplateEventFrameTemplateView.EventFrameTemplateViewId == eventFrameTemplateViewId). \
+			order_by(EventFrameAttributeTemplate.Name)
+
+	for eventFrameAttributeTemplate in eventFrameAttributeTemplates:
 		dynamicColumns = dynamicColumns + \
 			", MAX(IF(EventFrameAttributeTemplate.Name = '{}', IF(Tag.LookupId IS NULL, TagValue.Value, LookupValue.Name), '')) AS '{}'". \
 			format(eventFrameAttributeTemplate.Name, eventFrameAttributeTemplate.Name)
