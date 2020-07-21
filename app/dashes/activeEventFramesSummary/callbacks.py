@@ -29,8 +29,8 @@ def registerCallbacks(dashApp):
     def tabsChildren(eventFrameTemplatesDropdownValues):
         children = []
         value = None
-        for i, eventFrameTemplate in enumerate(EventFrameTemplate.query.filter(EventFrameTemplate.EventFrameTemplateId.in_(eventFrameTemplatesDropdownValues)) \
-            .order_by(EventFrameTemplate.Name)):
+        for i, eventFrameTemplate in enumerate(EventFrameTemplate.query. \
+            filter(EventFrameTemplate.EventFrameTemplateId.in_(eventFrameTemplatesDropdownValues)).order_by(EventFrameTemplate.Name)):
             if i == 0:
                 value = eventFrameTemplate.EventFrameTemplateId
 
