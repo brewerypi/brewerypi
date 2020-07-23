@@ -1101,7 +1101,7 @@ class TagValue(db.Model):
 	TagValueNotes = db.relationship("TagValueNote", backref = "TagValue", lazy = "dynamic")
 
 	def __repr__(self):
-		return "<TagValue: {}>".format(self.TagId)
+		return "<TagValue: {}>".format(self.TagValueId)
 
 	def delete(self):
 		tagValuesNotes = self.TagValueNotes
