@@ -241,8 +241,8 @@
                                     <td></td>
                                 {% endif %}
                             {% elif childrenClass == "EventFrame" %}
-                                <td>{{ child.Name }} <a href = '{{ url_for("messages.listMessages") }}'>
-                                    <span id = "spanEventFrameMessages{{ child.EventFrameId }}" class = "badge" style = "visibility: hidden"></span></td></a>
+                                <td>{{ child.Name }}<a href = '{{ url_for("messages.listMessages") }}'>
+                                    <span id = "spanEventFrameMessages{{ child.EventFrameId }}" class = "badge" style = "visibility: hidden"></span></a></td>
                                 <td>{{ child.ElementName }}</td>
                                 <td>{{ child.UserName }}</td>
                                 <td>{{ moment(child.StartTimestamp).format("YYYY-MM-DD HH:mm:ss") }}</td>
