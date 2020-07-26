@@ -19,14 +19,15 @@ def addEventFrameAttributeTemplate(eventFrameTemplateId, lookup = False):
 		del form.defaultEndValue
 		del form.defaultStartValue
 		del form.unitOfMeasurement
+		choices = []
+		choices.append((-1, ""))
 		lookupQuery = Lookup.query.filter_by(EnterpriseId = eventFrameTemplate.origin().ElementTemplate.Site.Enterprise.EnterpriseId).order_by(Lookup.Name)
 		form.lookup.query = lookupQuery
 		firstLookup = lookupQuery.first()
-		choices = []
-		choices.append((-1, ""))
-		for lookupValue in LookupValue.query.filter_by(LookupId = firstLookup.LookupId if form.lookup.raw_data is None else form.lookup.raw_data[0]). \
-			order_by(LookupValue.Name):
-			choices.append((lookupValue.Value, lookupValue.Name))
+		if firstLookup is not None:
+			for lookupValue in LookupValue.query.filter_by(LookupId = firstLookup.LookupId if form.lookup.raw_data is None else form.lookup.raw_data[0]). \
+				order_by(LookupValue.Name):
+				choices.append((lookupValue.Value, lookupValue.Name))
 
 		form.defaultEndLookupValue.choices = choices
 		form.defaultStartLookupValue.choices = choices
