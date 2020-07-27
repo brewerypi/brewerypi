@@ -33,8 +33,8 @@
                 <tr>
                     <td><a class = "btn btn-default" title = "Select" href = '{{ url_for("eventFrameGroups.dashboard",
                         eventFrameGroupId = eventFrameGroup.EventFrameGroupId) }}'><span class = "glyphicon glyphicon-list"></span></a></td>
-                    <td><a class = "btn btn-default" title = "Grafana"
-                        href = '{{ "EventFrameGroupSummary" | grafanaUrl({"eventFrameGroupId": eventFrameGroup.EventFrameGroupId}) }}' target = "_blank">
+                    <td><a class = "btn btn-default" title = "Dash"
+                        href = '{{ url_for("dashes.eventFrameGroupSummary", eventFrameGroupId = eventFrameGroup.EventFrameGroupId) }}'>
                         <span class = "glyphicon glyphicon-stats"></span></a></td>
                     <td>{{ eventFrameGroup.Name }}</td>
                     <td><a class = "btn btn-default" title = "End All Event Frames in Group"
@@ -80,7 +80,7 @@
                 "columns":
                 [
                     { "orderable": false }, // Select button.
-                    { "orderable": false }, // Grafana button.
+                    { "orderable": false }, // Dash button.
                     null,
                     { "orderable": false }, // End button.
                     { "orderable": false }, // Restart button.

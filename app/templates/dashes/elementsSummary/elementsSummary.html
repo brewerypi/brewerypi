@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block title %}Elements Summary{% endblock %}
+
+{% block page_content %}
+    {% if site is not none or elementTemplate is not none %}
+        <div>
+            <ol class = "breadcrumb">
+                {% if site is not none %}
+                    <li><a href = '{{ url_for("elements.selectElement", selectedClass = "Root") }}'><span class = "glyphicon glyphicon-home"></span></a></li>
+                    <li><a href = '{{ url_for("elements.selectElement", selectedClass = "Enterprise",
+                        selectedId = site.Enterprise.id()) }}'>{{ site.Enterprise.Name }}</a></li>
+                    <li>
+                        <a title = "Previous" href = '{{ url_for("dashes.elementsSummary", siteId = site.previous().id()) }}'>
+                            <span class = "glyphicon glyphicon-arrow-left"></span></a>
+                        <a title = "Next" href = '{{ url_for("dashes.elementsSummary", siteId = site.next().id()) }}'>
+                            <span class = "glyphicon glyphicon-arrow-right"></span></a>
+                        <a href = '{{ url_for("elements.selectElement", selectedClass = "Site", selectedId = site.id()) }}'>{{ site.Name }}</a>
+                    </li>
+                    <li class = "active">Elements Summary</li>
+                {% elif elementTemplate is not none %}
+                    <li><a href = '{{ url_for("elements.selectElement", selectedClass = "Root") }}'><span class = "glyphicon glyphicon-home"></span></a></li>
+                    <li><a href = '{{ url_for("elements.selectElement", selectedClass = "Enterprise",
+                        selectedId = elementTemplate.Site.Enterprise.id()) }}'>{{ elementTemplate.Site.Enterprise.Name }}</a></li>
+                    <li><a href = '{{ url_for("elements.selectElement", selectedClass = "Site",
+                        selectedId = elementTemplate.Site.id()) }}'>{{ elementTemplate.Site.Name }}</a></li>
+                    <li>
+                        <a title = "Previous" href = '{{ url_for("dashes.elementsSummary", elementTemplateId = elementTemplate.previous().id()) }}'>
+                            <span class = "glyphicon glyphicon-arrow-left"></span></a>
+                        <a title = "Next" href = '{{ url_for("dashes.elementsSummary", elementTemplateId = elementTemplate.next().id()) }}'>
+                            <span class = "glyphicon glyphicon-arrow-right"></span></a>
+                        <a href = '{{ url_for("elements.selectElement", selectedClass = "ElementTemplate",
+                            selectedId = elementTemplate.id()) }}'>{{ elementTemplate.Name }}</a>
+                    </li>
+                    <li class = "active">Elements Summary</li>
+                {% endif %}
+            </ol>
+        </div>
+    {% endif %}
+    <div class = "page-header">
+        <h1>Elements Summary <small></small></h1>
+    </div>
+    <div class = "embed-responsive embed-responsive-4by3">
+        <iframe id = "iframe" class = "embed-responsive-item"></iframe>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <script type = "text/javascript" src = {{ url_for("static", filename = "js/moment.min.js") }}></script>
+    <script type = "text/javascript" src = {{ url_for("static", filename = "js/moment-timezone-with-data.min.js") }}></script>
+    {% block setTabIndex %}
+        {{ super() }}
+    {% endblock %}
+    <script>
+        $(document).ready(function()
+        {
+            var parameters = ""
+            {% if site is not none %}
+                elementTemplateParameters = ""
+                elementParameters = ""
+                {% for elementTemplate in site.ElementTemplates | sort(attribute = "Name") %}
+                    elementTemplateParameters = elementTemplateParameters + "&elementTemplateId=" + {{ elementTemplate.ElementTemplateId }}
+                    {% for element in elementTemplate.Elements | sort(attribute = "Name") %}
+                        elementParameters = elementParameters + "&elementId=" + {{ element.ElementId }}
+                    {% endfor %}
+                {% endfor %}
+
+                parameters = "&enterpriseId=" + {{ site.EnterpriseId }} + "&siteId=" + {{ site.SiteId }} + elementTemplateParameters +
+                    elementParameters + "&collapseExpand=collapsed"
+            {% elif elementTemplate is not none %}
+                elementParameters = ""
+                {% for element in elementTemplate.Elements | sort(attribute = "Name") %}
+                    elementParameters = elementParameters + "&elementId=" + {{ element.ElementId }}
+                {% endfor %}
+
+                parameters = "&enterpriseId=" + {{ elementTemplate.Site.EnterpriseId }} + "&siteId=" + {{ elementTemplate.SiteId }} + "&elementTemplateId="
+                    + {{ elementTemplate.ElementTemplateId }} + elementParameters + "&collapseExpand=collapsed"
+            {% endif %}
+
+            $("#iframe").attr("src", '{{ url_for("/elementsSummaryDash/") }}' + "?localTimezone=" + moment.tz.guess(true) + parameters)
+            setTabIndex()
+            $('ol.breadcrumb a[title="Next"]').focus()
+        })
+    </script>
+{% endblock %}

@@ -108,22 +108,22 @@
     </div>
     <div>
         {% if childrenClass == "ElementTemplate" %}
-            <a class = "btn btn-default" title = "Grafana" href = '{{ "ActiveEventFrameSummary" | grafanaUrl({"siteId": parent.id()}) }}'
-                target = "_blank"><span class = "glyphicon glyphicon-stats"></span></a>
+            <a class = "btn btn-default" title = "Dash" href = '{{ url_for("dashes.activeEventFramesSummary", siteId = parent.SiteId) }}'>
+                <span class = "glyphicon glyphicon-stats"></span></a>
             <br><br>
         {% elif childrenClass == "EventFrameTemplate" %}
             {% if current_user.isAdministrator() %}
                 <a class = "btn btn-default" title = "Add" href = '{{ url_for("eventFrameTemplates.addEventFrameTemplate", elementTemplateId = parent.id()) }}'
                     role = "button"><span class = "glyphicon glyphicon-plus"></span></a>
             {% endif %}
-            <a class = "btn btn-default" title = "Grafana" href = '{{ "ActiveEventFrameSummary" | grafanaUrl({"elementTemplateId": parent.id()}) }}'
-                target = "_blank"><span class = "glyphicon glyphicon-stats"></span></a>
+            <a class = "btn btn-default" title = "Dash" href = '{{ url_for("dashes.activeEventFramesSummary", elementTemplateId = parent.ElementTemplateId) }}'>
+                <span class = "glyphicon glyphicon-stats"></span></a>
             <br><br>
         {% elif childrenClass == "EventFrame" %}
             <a class = "btn btn-default" title = "Add" href = '{{ url_for("eventFrames.addEventFrame", eventFrameTemplateId = parent.id()) }}' role = "button">
                 <span class = "glyphicon glyphicon-plus"></span></a>
-            <a class = "btn btn-default" title = "Grafana" href = '{{ "ActiveEventFrameSummary" | grafanaUrl({"eventFrameTemplateId": parent.id()}) }}'
-                target = "_blank"><span class = "glyphicon glyphicon-stats"></span></a>
+            <a class = "btn btn-default" title = "Dash" href = '{{ url_for("dashes.activeEventFramesSummary",
+                eventFrameTemplateId = parent.EventFrameTemplateId) }}'><span class = "glyphicon glyphicon-stats"></span></a>
             <br><br>
         {% elif childrenClass == "DescendantEventFrameTemplate" %}
             <a class = "btn btn-default" title = "Add" href = '{{ url_for("eventFrameTemplates.addEventFrameTemplate",
@@ -165,7 +165,6 @@
                         <th></th>
                         <th></th>
                         <th></th>
-                        <th></th>
                     {% elif childrenClass == "EventFrame" %}
                         <th>Element</th>
                         <th>User</th>
@@ -198,9 +197,9 @@
                             {% if childrenClass == "EventFrame" %}
                                 <td><a class = "btn btn-default" title = "Select" href = '{{ url_for("eventFrames.dashboard",
                                     eventFrameId = child.EventFrameId) }}'><span class = "glyphicon glyphicon-list"></span></a></td>
-                                <td><a class = "btn btn-default" title = "Grafana"
-                                    href = '{{ "EventFramesGraph" | grafanaUrl({"eventFrameId": child.EventFrameId}) }}'
-                                    target = "_blank"><span class = "glyphicon glyphicon-stats"></span></a></td>
+                                <td><a class = "btn btn-default" title = "Dash"
+                                    href = '{{ url_for("dashes.eventFrameGraph", eventFrameId = child.EventFrameId) }}'>
+                                    <span class = "glyphicon glyphicon-stats"></span></a></td>
                                 <td><a class = "btn btn-default" title = "Send Message"
                                     href = '{{ url_for("messages.addMessage", eventFrameId = child.EventFrameId) }}'>
                                     <span class = "glyphicon glyphicon-envelope"></span></a></td>
@@ -231,8 +230,6 @@
                                     <td></td>
                                     <td></td>
                                 {% endif %}
-                                <td><a class = "btn btn-default" title = "Overlay Builder" href = '{{ url_for("eventFrames.overlayBuilder",
-                                    eventFrameTemplateId = child.id()) }}'><span class = "glyphicon glyphicon-stats"></span></a></td>
                                 {% if current_user.isAdministrator() %}
                                     <td><a class = "btn btn-default" title = "Edit" href = '{{ url_for("eventFrameTemplates.editEventFrameTemplate",
                                         eventFrameTemplateId = child.id()) }}'><span class = "glyphicon glyphicon-edit"></span></a></td>
@@ -244,8 +241,8 @@
                                     <td></td>
                                 {% endif %}
                             {% elif childrenClass == "EventFrame" %}
-                                <td>{{ child.Name }} <a href = '{{ url_for("messages.listMessages") }}'>
-                                    <span id = "spanEventFrameMessages{{ child.EventFrameId }}" class = "badge" style = "visibility: hidden"></span></td></a>
+                                <td>{{ child.Name }}<a href = '{{ url_for("messages.listMessages") }}'>
+                                    <span id = "spanEventFrameMessages{{ child.EventFrameId }}" class = "badge" style = "visibility: hidden"></span></a></td>
                                 <td>{{ child.ElementName }}</td>
                                 <td>{{ child.UserName }}</td>
                                 <td>{{ moment(child.StartTimestamp).format("YYYY-MM-DD HH:mm:ss") }}</td>
@@ -302,7 +299,7 @@
                 eventFrameTemplateId = parent.EventFrameTemplateId) }}' role = "button"><span class = "glyphicon glyphicon-plus"></span></a>
             <a class = "btn btn-default" title = "Add Event Frame Attribute Lookup Template"
                 href = '{{ url_for("eventFrameAttributeTemplates.addEventFrameAttributeTemplate",
-                eventFrameTemplateId = parent.EventFrameTemplateId, lookup = True) }}' role = "button"><span class = "glyphicon glyphicon-plus">                    
+                eventFrameTemplateId = parent.EventFrameTemplateId, lookup = True) }}' role = "button"><span class = "glyphicon glyphicon-plus">
                 </span> Lookup</a>
             <br><br>
             <table id = "eventFrameAttributeTemplatesTable" class = "table table-hover" style = "display:none">
@@ -324,7 +321,7 @@
                         <td>{{ eventFrameAttributeTemplate.Name }}</td>
                         <td>{{ eventFrameAttributeTemplate.Description }}</td>
                         <td>{{ "" if eventFrameAttributeTemplate.LookupId is none else eventFrameAttributeTemplate.Lookup.Name }}</td>
-                        <td>{{ "" if eventFrameAttributeTemplate.UnitOfMeasurementId is none else eventFrameAttributeTemplate.UnitOfMeasurement.Abbreviation }}                            
+                        <td>{{ "" if eventFrameAttributeTemplate.UnitOfMeasurementId is none else eventFrameAttributeTemplate.UnitOfMeasurement.Abbreviation }}
                             </td>
                         {% if eventFrameAttributeTemplate.Lookup is none %}
                             <td>{{ "" if eventFrameAttributeTemplate.DefaultStartValue is none else eventFrameAttributeTemplate.DefaultStartValue }}</td>
@@ -466,7 +463,7 @@
                 "columns":
                 [
                     { "orderable": false },     // Select button.
-                    { "orderable": false },     // Grafana button.
+                    { "orderable": false },     // Dash button.
                     {% if childrenClass == "EventFrame" %}
                         { "orderable": false }, // Message button.
                     {% endif %}
@@ -478,7 +475,6 @@
                         null,
                         { "orderable": false }, // Associate button.
                         { "orderable": false }, // Copy button.
-                        { "orderable": false }, // Overlay button.
                         { "orderable": false }, // Edit button.
                         { "orderable": false }  // Delete button.
                     {% elif childrenClass == "EventFrame" %}

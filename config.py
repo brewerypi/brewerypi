@@ -11,7 +11,6 @@ class Config:
 	EXPORT_EVENT_FRAME_ATTRIBUTES_FILENAME = "eventFrameAttributes.csv"
 	EXPORT_FOLDER = "exports"
 	EXPORT_TAGS_FILENAME = "tags.csv"
-	GRAFANA_BASE_URI = os.environ.get("GRAFANA_BASE_URI") or "/grafana"
 	IMPORT_DATABASE_FILENAME = "BreweryPi.sql"
 	IMPORT_ELEMENT_ATTRIBUTES_FILENAME = "elementAttributes.csv"
 	IMPORT_EVENT_FRAME_ATTRIBUTES_FILENAME = "eventFrameAttributes.csv"

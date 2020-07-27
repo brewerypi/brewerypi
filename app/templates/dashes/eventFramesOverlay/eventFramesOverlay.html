@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Event Frames Overlay{% endblock %}
+{% block page_content %}
+    <div>
+        <ol class = "breadcrumb">
+            <li><a href = '{{ url_for("eventFramesOverlay.selectEventFrameTemplate", selectedClass = "Root") }}'>
+                <span class = "glyphicon glyphicon-home"></a></li>
+            <li><a href = '{{ url_for("eventFramesOverlay.selectEventFrameTemplate", selectedClass = "Enterprise",
+                selectedId = eventFrameTemplate.ElementTemplate.Site.Enterprise.id()) }}'>{{ eventFrameTemplate.ElementTemplate.Site.Enterprise.Name }}</a></li>
+            <li><a href = '{{ url_for("eventFramesOverlay.selectEventFrameTemplate", selectedClass = "Site",
+                selectedId = eventFrameTemplate.ElementTemplate.Site.id()) }}'>{{ eventFrameTemplate.ElementTemplate.Site.Name }}</a></li>
+            <li><a href = '{{ url_for("eventFramesOverlay.selectEventFrameTemplate", selectedClass = "ElementTemplate",
+                selectedId = eventFrameTemplate.ElementTemplate.id()) }}'>{{ eventFrameTemplate.ElementTemplate.Name | safe }}</a></li>
+            <li><a href = '{{ url_for("eventFramesOverlay.builder", eventFrameTemplateId = eventFrameTemplate.EventFrameTemplateId) }}'>
+                {{ eventFrameTemplate.Name }}</a></li>
+            <li class = "active">{{ moment(startTimestamp).format("YYYY-MM-DD HH:mm:ss") }} - {{ moment(endTimestamp).format("YYYY-MM-DD HH:mm:ss") }}</li>
+        </ol>
+    </div>
+    <div class = "page-header">
+        <h1>Event Frames Overlay <small></small></h1>
+    </div>
+    <div class = "embed-responsive embed-responsive-4by3">
+        <iframe id = "iframe" class = "embed-responsive-item"></iframe>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <script type = "text/javascript" src = {{ url_for("static", filename = "js/moment.min.js") }}></script>
+    <script type = "text/javascript" src = {{ url_for("static", filename = "js/moment-timezone-with-data.min.js") }}></script>
+    {% block setTabIndex %}
+        {{ super() }}
+    {% endblock %}
+    <script>
+        $(document).ready(function()
+        {
+            var parameters = ""
+            {% if eventFrameTemplate is not none %}
+                parameters = "&enterpriseId=" + {{ eventFrameTemplate.ElementTemplate.Site.EnterpriseId }} +
+                    "&siteId=" + {{ eventFrameTemplate.ElementTemplate.SiteId }} +
+                    "&elementTemplateId=" + {{ eventFrameTemplate.ElementTemplateId }} +
+                    "&eventFrameTemplateId=" + {{ eventFrameTemplate.EventFrameTemplateId }}
+
+                {% if eventFrameIds is not none %}
+                    {% for eventFrameId in eventFrameIds %}
+                        parameters = parameters + "&eventFrameId={{ eventFrameId }}"
+                    {% endfor %}
+                {% endif %}
+
+                parameters = parameters + "&collapseExpand=hidden"
+            {% endif %}
+
+            $("#iframe").attr("src", '{{ url_for("/eventFramesOverlayDash/") }}' + "?localTimezone=" + moment.tz.guess(true) + parameters)
+            {# setTabIndex()
+            $('ol.breadcrumb a[title="Next"]').focus() #}
+        })
+    </script>
+{% endblock %}

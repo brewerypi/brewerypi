@@ -1,10 +1,10 @@
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
-from flask import current_app, flash, jsonify, redirect, render_template, request, session, url_for
+from flask import flash, jsonify, redirect, render_template, request, session, url_for
 from flask_login import current_user, login_required
 from . import eventFrames
-from . forms import EventFrameForm, EventFrameOverlayForm
-from . helpers import currentEventFrameAttributeValues
+from . forms import EventFrameForm
+from . sql import currentEventFrameAttributeValues
 from .. import db
 from .. decorators import permissionRequired
 from .. models import Element, ElementTemplate, Enterprise, EventFrame, EventFrameAttribute, EventFrameAttributeTemplate, \
@@ -193,64 +193,6 @@ def dashboard(eventFrameId, eventFrameGroupId = None, eventFrameTemplateView = N
 	return render_template("eventFrames/dashboard.html", eventFrame = eventFrame, eventFrameEventFrameGroup = eventFrameEventFrameGroup,
 		eventFrameAttributes = eventFrameAttributes, eventFrameTemplateView = eventFrameTemplateView, tagValues = tagValues)
 
-@eventFrames.route("/eventFrames/overlay/days", methods = ["GET", "POST"])
-@login_required
-@permissionRequired(Permission.DATA_ENTRY)
-def days():
-	data = request.get_json(force = True)
-	eventFrameIds = ""
-	for item in data:
-		if eventFrameIds != "":
-			eventFrameIds = eventFrameIds + ", "
-		eventFrameIds = eventFrameIds +  item["EventFrameId"]
-
-	query = """
-	SELECT CEILING(IF(EventFrame.EndTimestamp IS NULL,
-		(UNIX_TIMESTAMP(TagValue.Timestamp) - UNIX_TIMESTAMP(EventFrame.StartTimestamp)) / 86400,
-		(UNIX_TIMESTAMP(EventFrame.EndTimestamp) - UNIX_TIMESTAMP(EventFrame.StartTimestamp)) / 86400)) AS Days
-	FROM EventFrame
-		INNER JOIN Element ON EventFrame.ElementId = Element.ElementId
-		INNER JOIN EventFrameTemplate ON EventFrame.EventFrameTemplateId = EventFrameTemplate.EventFrameTemplateId
-		INNER JOIN EventFrameAttributeTemplate ON EventFrameTemplate.EventFrameTemplateId = EventFrameAttributeTemplate.EventFrameTemplateId
-		LEFT JOIN EventFrameAttribute ON EventFrameAttributeTemplate.EventFrameAttributeTemplateId = EventFrameAttribute.EventFrameAttributeTemplateId AND
-			Element.ElementId = EventFrameAttribute.ElementId
-		INNER JOIN
-		(
-			SELECT EventFrame.EventFrameId AS EventFrameId,
-				EventFrameAttributeTemplate.Name AS EventFrameAttributeTemplateName,
-				MAX(TagValue.Timestamp) AS Timestamp
-			FROM EventFrame
-				INNER JOIN Element ON EventFrame.ElementId = Element.ElementId
-				INNER JOIN EventFrameTemplate ON EventFrame.EventFrameTemplateId = EventFrameTemplate.EventFrameTemplateId
-				INNER JOIN EventFrameAttributeTemplate ON EventFrameTemplate.EventFrameTemplateId = EventFrameAttributeTemplate.EventFrameTemplateId
-				LEFT JOIN EventFrameAttribute ON EventFrameAttributeTemplate.EventFrameAttributeTemplateId = EventFrameAttribute.EventFrameAttributeTemplateId AND
-					Element.ElementId = EventFrameAttribute.ElementId
-				LEFT JOIN Tag ON EventFrameAttribute.TagId = Tag.TagId
-				LEFT JOIN TagValue ON Tag.TagId = TagValue.TagId AND
-					CASE
-						WHEN EventFrame.EndTimestamp IS NULL THEN
-							(TagValue.Timestamp >= EventFrame.StartTimestamp)
-						ELSE
-							(TagValue.Timestamp >= EventFrame.StartTimestamp AND TagValue.Timestamp <= EventFrame.EndTimestamp)
-					END
-			WHERE EventFrame.EventFrameId IN ({})
-			GROUP BY EventFrameId,
-				EventFrameAttributeTemplateName
-		) CurrentEventFrameAttributeValue ON EventFrame.EventFrameId = CurrentEventFrameAttributeValue.EventFrameId AND
-			EventFrameAttributeTemplate.Name = CurrentEventFrameAttributeValue.EventFrameAttributeTemplateName
-		LEFT JOIN Tag ON EventFrameAttribute.TagId = Tag.TagId
-		LEFT JOIN TagValue ON Tag.TagId = TagValue.TagId AND
-			TagValue.Timestamp = CurrentEventFrameAttributeValue.Timestamp
-		LEFT JOIN Lookup ON Tag.LookupId = Lookup.LookupId
-		LEFT JOIN LookupValue ON Lookup.LookupId = LookupValue.LookupId AND
-			TagValue.Value = LookupValue.Value
-	WHERE EventFrame.EventFrameId IN ({})
-	ORDER BY Days DESC
-	LIMIT 1
-	""".format(eventFrameIds, eventFrameIds)
-	days = db.session.execute(query).fetchone()["Days"]
-	return jsonify({"days": days})
-
 @eventFrames.route("/eventFrames/delete/<int:eventFrameId>", methods = ["GET", "POST"])
 @login_required
 @permissionRequired(Permission.DATA_ENTRY)
@@ -387,31 +329,6 @@ def endEventFrame(eventFrameId):
 	db.session.commit()
 	flash('You have successfully ended "{}" for event frame "{}".'.format(eventFrame.EventFrameTemplate.Name, eventFrame.Name), "alert alert-success")
 	return redirect(request.referrer)
-
-@eventFrames.route("/eventFrames/overlayBuilder/<int:eventFrameTemplateId>", methods = ["GET", "POST"])
-@login_required
-@permissionRequired(Permission.DATA_ENTRY)
-def overlayBuilder(eventFrameTemplateId):
-	eventFrameTemplate = EventFrameTemplate.query.get_or_404(eventFrameTemplateId)
-	eventFrameAttributeTemplates = EventFrameAttributeTemplate.query.filter_by(EventFrameTemplateId = eventFrameTemplateId)
-	form = EventFrameOverlayForm()
-
-	if form.validate_on_submit():
-		startTimestamp = datetime.strptime(request.form.get("startUtcTimestamp"), "%Y-%m-%d %H:%M:%S")
-		if request.form.get("endUtcTimestamp") == "":
-			endTimestamp = datetime.utcnow()
-		else:
-			endTimestamp = datetime.strptime(endUtcTimestamp, "%Y-%m-%d %H:%M:%S")
-
-		eventFrames = EventFrame.query.filter(EventFrame.EventFrameTemplateId == eventFrameTemplateId, EventFrame.StartTimestamp >= startTimestamp,
-			EventFrame.StartTimestamp <= endTimestamp)
-		eventFrames = currentEventFrameAttributeValues(eventFrames, eventFrameTemplateId)
-		return render_template("eventFrames/overlayBuilder.html", endTimestamp = endTimestamp, eventFrames = eventFrames,
-			eventFrameAttributeTemplates = eventFrameAttributeTemplates, eventFrameTemplate = eventFrameTemplate,
-			grafanaBaseUri = current_app.config["GRAFANA_BASE_URI"], startTimestamp = startTimestamp)
-
-	return render_template("eventFrames/overlayBuilder.html", eventFrameAttributeTemplates = eventFrameAttributeTemplates,
-		eventFrameTemplate = eventFrameTemplate, form = form)
 
 @eventFrames.route("/eventFrames/restartEventFrame/<int:eventFrameId>", methods = ["GET", "POST"])
 @login_required

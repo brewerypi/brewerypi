@@ -70,7 +70,7 @@
                 <a class = "btn btn-default" title = "Add" href = '{{ url_for("elements.addElement", elementTemplateId = parent.id()) }}' role = "button">
                     <span class = "glyphicon glyphicon-plus"></span></a>
             {% endif %}
-            <a class = "btn btn-default" title = "Grafana" href = '{{ "ElementSummary" | grafanaUrl({"elementTemplateId": parent.id()}) }}' target = "_blank">
+            <a class = "btn btn-default" title = "Dash" href = '{{ url_for("dashes.elementsSummary", elementTemplateId = parent.id()) }}'>
                 <span class = "glyphicon glyphicon-stats"></span></a>
             <br><br>
             Toggle Column:
@@ -95,7 +95,7 @@
                 <a class = "btn btn-default" title = "Add" href = '{{ url_for("elementTemplates.addElementTemplate", siteId = parent.id()) }}'
                     role = "button"><span class = "glyphicon glyphicon-plus"></span></a>
             {% endif %}
-            <a class = "btn btn-default" title = "Grafana" href = '{{ "ElementSummary" | grafanaUrl({"siteId": parent.id()}) }}' target = "_blank">
+            <a class = "btn btn-default" title = "Dash" href = '{{ url_for("dashes.elementsSummary", siteId = parent.id()) }}'>
                 <span class = "glyphicon glyphicon-stats"></span></a>
             <br><br>
         {% endif %}
@@ -133,8 +133,8 @@
                             {% if childrenClass == "Element" %}
                                 <td><a class = "btn btn-default" title = "Select" href = '{{ url_for("elements.dashboard",
                                     elementId = child.ElementId) }}'><span class = "glyphicon glyphicon-list"></span></a></td>
-                                <td><a class = "btn btn-default" title = "Grafana"
-                                    href = '{{ "ElementValuesGraph" | grafanaUrl({"elementId": child.ElementId}) }}' target = "_blank">
+                                <td><a class = "btn btn-default" title = "Dash"
+                                    href = '{{ url_for("dashes.elementsGraph", elementId = child.ElementId) }}'>
                                     <span class = "glyphicon glyphicon-stats"></span></a></td>
                             {% elif childrenClass == "ElementAttributeTemplate" %}
                                 <td></td>
@@ -151,7 +151,7 @@
                                 <td></td>
                                 {% if current_user.isAdministrator() %}
                                     <td><a class = "btn btn-default" title = "Configure" href = '{{ url_for("elements.selectElement",
-                                        selectedClass = "ElementAttributeTemplate", selectedId = child.id()) }}'><span class = "glyphicon glyphicon-wrench">                                            
+                                        selectedClass = "ElementAttributeTemplate", selectedId = child.id()) }}'><span class = "glyphicon glyphicon-wrench">
                                         </span></a></td>
                                     <td><a class = "btn btn-default" title = "Edit" href = '{{ url_for("elementTemplates.editElementTemplate",
                                         elementTemplateId = child.id()) }}'><span class = "glyphicon glyphicon-edit"></span></a></td>
@@ -263,7 +263,7 @@
                 "columns":
                 [
                     { "orderable": false }, // Details button.
-                    { "orderable": false }, // Grafana button.
+                    { "orderable": false }, // Dash button.
                     null,
                     null,
                     {% if childrenClass == "Element" %}

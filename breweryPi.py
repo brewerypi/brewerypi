@@ -2,12 +2,12 @@ import click
 from flask import current_app
 from flask_migrate import Migrate, upgrade
 from sqlalchemy import create_engine
-from app import create_app, db
+from app import createApp, db
 from app.models import Area, Element, ElementAttribute, ElementAttributeTemplate, ElementTemplate, Enterprise, EventFrame, EventFrameAttribute, \
 	EventFrameAttributeTemplate, EventFrameAttributeTemplateEventFrameTemplateView, EventFrameEventFrameGroup, EventFrameGroup, EventFrameNote, \
 	EventFrameTemplate, EventFrameTemplateView, Lookup, LookupValue, Message, Note, Role, Site, Tag, TagValue, TagValueNote, UnitOfMeasurement, User
 
-app = create_app()
+app = createApp()
 migrate = Migrate(app, db, directory = "db/migrations")
 
 @app.shell_context_processor

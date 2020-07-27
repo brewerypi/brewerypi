@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+
+{% block title %}Active Event Frame Summary{% endblock %}
+
+{% block page_content %}
+    {% if site is not none or elementTemplate is not none or eventFrameTemplate is not none %}
+        <div>
+            <ol class = "breadcrumb">
+                {% if site is not none %}
+                    <li><a href = '{{ url_for("eventFrames.selectEventFrame", selectedClass = "Root") }}'><span class = "glyphicon glyphicon-home"></span></a></li>
+                    <li><a href = '{{ url_for("eventFrames.selectEventFrame", selectedClass = "Enterprise", selectedId = site.Enterprise.EnterpriseId) }}'>
+                        {{ site.Enterprise.Name }}</a></li>
+                    <li>
+                        <a title = "Previous" href = '{{ url_for("dashes.activeEventFramesSummary", siteId = site.previous().SiteId) }}'>
+                            <span class = "glyphicon glyphicon-arrow-left"></span></a>
+                        <a title = "Next" href = '{{ url_for("dashes.activeEventFramesSummary", siteId = site.next().SiteId) }}'>
+                            <span class = "glyphicon glyphicon-arrow-right"></span></a>    
+                        <a href = '{{ url_for("eventFrames.selectEventFrame", selectedClass = "Site", selectedId = site.next().SiteId) }}'>{{ site.Name }}</a>
+                    </li>
+                    <li class = "active">Active Event Frames Summary</li>
+                {% elif elementTemplate is not none %}
+                    <li><a href = '{{ url_for("eventFrames.selectEventFrame", selectedClass = "Root") }}'><span class = "glyphicon glyphicon-home"></span></a></li>
+                    <li><a href = '{{ url_for("eventFrames.selectEventFrame", selectedClass = "Enterprise",
+                        selectedId = elementTemplate.Site.Enterprise.EnterpriseId) }}'>{{ elementTemplate.Site.Enterprise.Name }}</a></li>
+                    <li><a href = '{{ url_for("eventFrames.selectEventFrame", selectedClass = "Site",
+                        selectedId = elementTemplate.Site.SiteId) }}'>{{ elementTemplate.Site.Name }}</a></li>
+                    <li>
+                        <a title = "Previous" href = '{{ url_for("dashes.activeEventFramesSummary",
+                            elementTemplateId = elementTemplate.previous().ElementTemplateId) }}'><span class = "glyphicon glyphicon-arrow-left"></span></a>
+                        <a title = "Next" href = '{{ url_for("dashes.activeEventFramesSummary",
+                            elementTemplateId = elementTemplate.next().ElementTemplateId) }}'><span class = "glyphicon glyphicon-arrow-right"></span></a>    
+                        <a href = '{{ url_for("eventFrames.selectEventFrame", selectedClass = "ElementTemplate",
+                            selectedId = elementTemplate.ElementTemplateId) }}'>{{ elementTemplate.Name }}</a>
+                    <li class = "active">Active Event Frames Summary</li>
+                {% elif eventFrameTemplate is not none %}
+                    <li><a href = '{{ url_for("eventFrames.selectEventFrame", selectedClass = "Root") }}'><span class = "glyphicon glyphicon-home"></span></a></li>
+                    <li><a href = '{{ url_for("eventFrames.selectEventFrame", selectedClass = "Enterprise",
+                        selectedId = eventFrameTemplate.ElementTemplate.Site.Enterprise.EnterpriseId) }}'>
+                        {{ eventFrameTemplate.ElementTemplate.Site.Enterprise.Name }}</a></li>
+                    <li><a href = '{{ url_for("eventFrames.selectEventFrame", selectedClass = "Site",
+                        selectedId = eventFrameTemplate.ElementTemplate.Site.SiteId) }}'>{{ eventFrameTemplate.ElementTemplate.Site.Name }}</a></li>
+                    <li><a href = '{{ url_for("eventFrames.selectEventFrame", selectedClass = "ElementTemplate",
+                        selectedId = eventFrameTemplate.ElementTemplate.ElementTemplateId) }}'>{{ eventFrameTemplate.ElementTemplate.Name }}</a></li>
+                    <li>
+                        <a title = "Previous" href = '{{ url_for("dashes.activeEventFramesSummary",
+                            eventFrameTemplateId = eventFrameTemplate.previous().EventFrameTemplateId) }}'>
+                            <span class = "glyphicon glyphicon-arrow-left"></span></a>
+                        <a title = "Next" href = '{{ url_for("dashes.activeEventFramesSummary",
+                            eventFrameTemplateId = eventFrameTemplate.next().EventFrameTemplateId) }}'>
+                            <span class = "glyphicon glyphicon-arrow-right"></span></a>    
+                        <a href = '{{ url_for("eventFrames.selectEventFrame", selectedClass = "EventFrameTemplate",
+                            selectedId = eventFrameTemplate.EventFrameTemplateId) }}'>{{ eventFrameTemplate.Name }}</a>
+                    <li class = "active">Active Event Frames Summary</li>
+                {% endif %}
+            </ol>
+        </div>
+    {% endif %}
+    <div class = "page-header">
+        <h1>Active Event Frames Summary <small></small></h1>
+    </div>
+    <div class = "embed-responsive embed-responsive-4by3">
+        <iframe id = "iframe" class = "embed-responsive-item"></iframe>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <script type = "text/javascript" src = {{ url_for("static", filename = "js/moment.min.js") }}></script>
+    <script type = "text/javascript" src = {{ url_for("static", filename = "js/moment-timezone-with-data.min.js") }}></script>
+    {% block setTabIndex %}
+        {{ super() }}
+    {% endblock %}
+    <script>
+        $(document).ready(function()
+        {
+            var parameters = ""
+            {% if site is not none %}
+                elementTemplateParameters = ""
+                eventFrameTemplateParameters = ""
+                {% for elementTemplate in site.ElementTemplates | sort(attribute = "Name") %}
+                    elementTemplateParameters = elementTemplateParameters + "&elementTemplateId=" + {{ elementTemplate.ElementTemplateId }}
+                    {% for eventFrameTemplate in elementTemplate.EventFrameTemplates | sort(attribute = "Name") %}
+                        eventFrameTemplateParameters = eventFrameTemplateParameters + "&eventFrameTemplateId=" + {{ eventFrameTemplate.EventFrameTemplateId }}
+                    {% endfor %}
+                {% endfor %}
+
+                parameters = "&enterpriseId=" + {{ site.EnterpriseId }} + "&siteId=" + {{ site.SiteId }} + elementTemplateParameters +
+                    eventFrameTemplateParameters + "&collapseExpand=collapsed"
+            {% elif elementTemplate is not none %}
+                eventFrameTemplateParameters = ""
+                {% for eventFrameTemplate in elementTemplate.EventFrameTemplates | sort(attribute = "Name") %}
+                    eventFrameTemplateParameters = eventFrameTemplateParameters + "&eventFrameTemplateId=" + {{ eventFrameTemplate.EventFrameTemplateId }}
+                {% endfor %}
+
+                parameters = "&enterpriseId=" + {{ elementTemplate.Site.EnterpriseId }} + "&siteId=" + {{ elementTemplate.SiteId }} +
+                    "&elementTemplateId=" + {{ elementTemplate.ElementTemplateId }} + eventFrameTemplateParameters + "&collapseExpand=collapsed"
+            {% elif eventFrameTemplate is not none %}
+                parameters = "&enterpriseId=" + {{ eventFrameTemplate.ElementTemplate.Site.EnterpriseId }} +
+                    "&siteId=" + {{ eventFrameTemplate.ElementTemplate.SiteId }} +
+                    "&elementTemplateId=" + {{ eventFrameTemplate.ElementTemplateId }} +
+                    "&eventFrameTemplateId=" + {{ eventFrameTemplate.EventFrameTemplateId }} + "&collapseExpand=collapsed"
+            {% endif %}
+
+            $("#iframe").attr("src", '{{ url_for("/activeEventFramesSummaryDash/") }}' + "?localTimezone=" + moment.tz.guess(true) + parameters)
+            setTabIndex()
+            $('ol.breadcrumb a[title="Next"]').focus()
+        })
+    </script>
+{% endblock %}
