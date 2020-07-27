@@ -83,8 +83,8 @@
                             {% if childrenClass == "Tag" %}
                                 <td><a class = "btn btn-default" title = "Select" href = '{{ url_for("tagValues.listTagValues",
                                     tagId = child.TagId) }}'><span class = "glyphicon glyphicon-list"></span></a></td>
-                                <td><a class = "btn btn-default" title = "Grafana" href = '{{ "TagValuesGraph" | grafanaUrl({"tagId": child.TagId}) }}'
-                                    target = "_blank"><span class = "glyphicon glyphicon-stats"></span></a></td>
+                                <td><a class = "btn btn-default" title = "Dash" href = '{{ url_for("dashes.tagValuesGraph", tagId = child.TagId) }}'>
+                                    <span class = "glyphicon glyphicon-stats"></span></a></td>
                             {% else %}
                                 <td><a class = "btn btn-default" title = "Select" href = '{{ url_for("tags.selectTag", selectedClass = child.__class__.__name__,
                                     selectedId = child.id()) }}'><span class = "glyphicon glyphicon-list"></span></a></td>
@@ -160,7 +160,7 @@
                 "columns":
                 [
                     { "orderable": false }, // Tag values button.
-                    { "orderable": false }, // Grafana button.
+                    { "orderable": false }, // Dash button.
                     null,
                     null,
                     {% if childrenClass == "Tag" %}

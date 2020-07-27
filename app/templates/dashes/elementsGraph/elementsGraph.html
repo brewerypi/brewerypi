@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}Elements Graph{% endblock %}
+
+{% block page_content %}
+    {% if element is not none %}
+        <div>
+            <ol class = "breadcrumb">
+                <li><a href = "{{ url_for("elements.selectElement", selectedClass = "Root", selectedId = None) }}"><span class = "glyphicon glyphicon-home"></span>
+                    </a></li>
+                <li><a href = "{{ url_for("elements.selectElement", selectedClass = "Enterprise",
+                    selectedId = element.ElementTemplate.Site.Enterprise.EnterpriseId) }}">{{ element.ElementTemplate.Site.Enterprise.Name }}</a></li>
+                <li><a href = "{{ url_for("elements.selectElement", selectedClass = "Site",
+                    selectedId = element.ElementTemplate.Site.SiteId) }}">{{ element.ElementTemplate.Site.Name }}</a></li>
+                <li><a href = "{{ url_for("elements.selectElement", selectedClass = "ElementTemplate",
+                    selectedId = element.ElementTemplate.ElementTemplateId) }}">{{ element.ElementTemplate.Name }}</a></li>
+                <li>
+                    <a title = "Previous" href = '{{ url_for("dashes.elementsGraph", elementId = element.previous().ElementId) }}'>
+                        <span class = "glyphicon glyphicon-arrow-left"></span></a>
+                    <a title = "Next" href = '{{ url_for("dashes.elementsGraph", elementId = element.next().ElementId) }}'>
+                        <span class = "glyphicon glyphicon-arrow-right"></span></a>    
+                    <a href = '{{ url_for("elements.dashboard", elementId = element.ElementId) }}'>{{ element.Name }}</a>
+                </li>
+                <li class = "active">Elements Graph</li>
+            </ol>
+        </div>
+    {% endif %}
+    <div class = "page-header">
+        <h1>Elements Graph <small></small></h1>
+    </div>
+    <div class = "embed-responsive embed-responsive-4by3">
+        <iframe id = "iframe" class = "embed-responsive-item"></iframe>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <script type = "text/javascript" src = {{ url_for("static", filename = "js/moment.min.js") }}></script>
+    <script type = "text/javascript" src = {{ url_for("static", filename = "js/moment-timezone-with-data.min.js") }}></script>
+    {% block setTabIndex %}
+        {{ super() }}
+    {% endblock %}
+    <script>
+        $(document).ready(function()
+        {
+            var parameters = ""
+            {% if element is not none %}
+                parameters = "&enterpriseId=" + {{ element.ElementTemplate.Site.EnterpriseId }} + "&siteId=" + {{ element.ElementTemplate.SiteId }} +
+                    "&elementTemplateId=" + {{ element.ElementTemplateId }} + "&elementId=" + {{ element.ElementId }} + "&collapseExpand=hidden"
+            {% endif %}
+
+            $("#iframe").attr("src", '{{ url_for("/elementsGraphDash/") }}' + "?localTimezone=" + moment.tz.guess(true) + parameters)
+            setTabIndex()
+            $('ol.breadcrumb a[title="Next"]').focus()
+        })
+    </script>
+{% endblock %}

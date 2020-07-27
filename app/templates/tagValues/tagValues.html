@@ -78,7 +78,7 @@
                         eventFrameAttributeId = eventFrameAttribute.next().id()) }}'><span class = "glyphicon glyphicon-arrow-right"></span></a>
                     {{ eventFrameAttribute.EventFrameAttributeTemplate.Name }}
                 </li>
-            {% else %}
+            {% elif tag %}
                 <li><a href = '{{ url_for("tags.selectTag", selectedClass = "Root") }}'><span class = "glyphicon glyphicon-home"></span></a></li>
                 <li><a href = '{{ url_for("tags.selectTag", selectedClass = "Enterprise", selectedId = tag.Area.Site.Enterprise.EnterpriseId) }}'>
                     {{ tag.Area.Site.Enterprise.Name }}</a></li>
@@ -121,7 +121,7 @@
                     All</a>
             {% elif eventFrame %}
                 <!-- Show all values tag values for the event frame. -->
-            {% else %}
+            {% elif tag %}
                 <a class = 'btn btn-primary btn-xs {{ "active" if months == 1 }}' title = "1 Mo"
                     href = '{{ url_for("tagValues.listTagValues", tagId = tag.TagId, months = 1) }}' role = "button">1 Mo</a>
                 <a class = 'btn btn-primary btn-xs {{ "active" if months == 2 }}' title = "2 Mo"
@@ -143,6 +143,8 @@
         {% if elementAttribute %}
             <a class = "btn btn-default" title = "Add" href = '{{ url_for("tagValues.addTagValue", elementAttributeId = elementAttribute.ElementAttributeId) }}'
                 role = "button"><span class = "glyphicon glyphicon-plus"></span></a>
+            <a class = "btn btn-default" title = "Dash" href = '{{ url_for("dashes.tagValuesGraph",
+                elementAttributeId = elementAttribute.ElementAttributeId) }}'><span class = "glyphicon glyphicon-stats"></span></a>
         {% elif eventFrameGroup %}
             <a class = "btn btn-default" title = "Add" href = '{{ url_for("tagValues.addTagValue", eventFrameId = eventFrame.EventFrameId,
                 eventFrameAttributeId = eventFrameAttribute.EventFrameAttributeId, eventFrameGroupId = eventFrameGroup.EventFrameGroupId) }}' role = "button">
@@ -150,12 +152,12 @@
         {% elif eventFrame %}
             <a class = "btn btn-default" title = "Add" href = '{{ url_for("tagValues.addTagValue", eventFrameId = eventFrame.EventFrameId,
                 eventFrameAttributeId = eventFrameAttribute.EventFrameAttributeId) }}' role = "button"><span class = "glyphicon glyphicon-plus"></span></a>
-        {% else %}
+        {% elif tag %}
             <a class = "btn btn-default" title = "Add" href = '{{ url_for("tagValues.addTagValue", tagId = tag.TagId) }}' role = "button">
                 <span class = "glyphicon glyphicon-plus"></span></a>
+            <a class = "btn btn-default" title = "Dash" href = '{{ url_for("dashes.tagValuesGraph", tagId = tag.TagId) }}'>
+                <span class = "glyphicon glyphicon-stats"></span></a>
         {% endif %}
-        <a class = "btn btn-default" title = "Grafana" href = '{{ "TagValuesGraph" | grafanaUrl({"tagId": tag.TagId}) }}' target = "_blank">
-            <span class = "glyphicon glyphicon-stats"></span></a>        <br><br>
         <br><br>
         <div id = "divLoading" class = "text-center">
             <img src = '{{ url_for("static", filename = "images/loading.gif") }}'>

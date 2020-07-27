@@ -163,9 +163,8 @@
     </div>
     <div>
         {% if eventFrame.ParentEventFrameId == None %}
-            <a class = "btn btn-default" title = "Grafana" 
-                href = '{{ "EventFramesGraph" | grafanaUrl({"eventFrameId": eventFrame.EventFrameId}) }}' target = "_blank">
-                <span class = "glyphicon glyphicon-stats"></span></a>
+            <a class = "btn btn-default" title = "Dash" 
+                href = '{{ url_for("dashes.eventFrameGraph", eventFrameId = eventFrame.EventFrameId) }}'><span class = "glyphicon glyphicon-stats"></span></a>
         {% endif %}
         <br><br>
         <div>

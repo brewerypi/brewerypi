@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from datetime import datetime
-from wtforms import DateTimeField, HiddenField, SelectField, StringField, SubmitField, ValidationError
+from wtforms import DateTimeField, HiddenField, StringField, SubmitField, ValidationError
 from wtforms.ext.sqlalchemy.fields import QuerySelectField
 from wtforms.validators import Required, Optional
 from .. models import Element, EventFrame
@@ -61,14 +61,3 @@ class EventFrameForm(FlaskForm):
 
 				if validationError:
 					raise ValidationError('The start timestamp "{}" already exists.'.format(field.data))
-
-class EventFrameOverlayForm(FlaskForm):
-	startTimestamp = DateTimeField("Start", validators = [Required()])
-	startUtcTimestamp = HiddenField()
-	endTimestamp = DateTimeField("End", validators = [Optional()])
-	endUtcTimestamp = HiddenField()
-	submit = SubmitField("Search")
-
-	def validate_endTimestamp(self, field):
-		if self.endTimestamp.data < self.startTimestamp.data:
-			raise ValidationError("The End Timestamp must occur after the Start Timestamp.")

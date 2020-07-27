@@ -110,6 +110,18 @@ class Element(db.Model):
 	def previous(self, isManaged = False):
 		return previous(self.nextAndPreviousList(isManaged), self)
 
+	def attributeValues(self, startTimestamp, endTimestamp):
+		attributeValues = {}
+		elementAttributeTemplateIds = [elementAttributeTemplate.ElementAttributeTemplateId for elementAttributeTemplate in
+			self.ElementTemplate.ElementAttributeTemplates]
+		elementAttributes = ElementAttribute.query.filter(ElementAttribute.ElementId == self.ElementId,
+			ElementAttribute.ElementAttributeTemplateId.in_(elementAttributeTemplateIds))
+		for elementAttribute in elementAttributes:
+			attributeValues[elementAttribute.ElementAttributeTemplate.Name] = TagValue.query.filter(TagValue.TagId == elementAttribute.TagId,
+				TagValue.Timestamp >= startTimestamp, TagValue.Timestamp <= endTimestamp)
+
+		return attributeValues
+
 class ElementAttribute(db.Model):
 	__tablename__ = "ElementAttribute"
 	__table_args__ = \
@@ -314,6 +326,31 @@ class EventFrame(db.Model):
 			childEventFrame.delete()
 
 		db.session.delete(self)
+
+	def attributeValues(self, eventFrameTemplateViewId = None, eventFrameAttributeTemplateIds = None):
+		eventFrameAttributeValues = {}
+		if eventFrameTemplateViewId == -1 or eventFrameAttributeTemplateIds == -1:
+			eventFrameAttributeTemplateIds = [eventFrameAttributeTemplate.EventFrameAttributeTemplateId
+				for eventFrameAttributeTemplate in self.EventFrameTemplate.EventFrameAttributeTemplates]
+		elif eventFrameTemplateViewId is not None:
+			eventFrameTemplateView = EventFrameTemplateView.query.get(eventFrameTemplateViewId)
+			eventFrameAttributeTemplateIds = [eventFrameAttributeTemplateEventFrameTemplateView.EventFrameAttributeTemplateId
+				for eventFrameAttributeTemplateEventFrameTemplateView in eventFrameTemplateView.EventFrameAttributeTemplateEventFrameTemplateViews]
+		elif eventFrameAttributeTemplateIds is not None:
+			eventFrameAttributeTemplateIds = EventFrameAttributeTemplate.query.with_entities(EventFrameAttributeTemplate.EventFrameAttributeTemplateId). \
+				filter(EventFrameAttributeTemplate.EventFrameAttributeTemplateId.in_(eventFrameAttributeTemplateIds)).all()
+
+		eventFrameAttributes = EventFrameAttribute.query.filter(EventFrameAttribute.ElementId == self.ElementId,
+			EventFrameAttribute.EventFrameAttributeTemplateId.in_(eventFrameAttributeTemplateIds))
+		for eventFrameAttribute in eventFrameAttributes:
+			if self.EndTimestamp is None:
+				eventFrameAttributeValues[eventFrameAttribute.EventFrameAttributeTemplate.Name] = TagValue.query. \
+					filter(TagValue.TagId == eventFrameAttribute.TagId, TagValue.Timestamp >= self.StartTimestamp)
+			else:
+				eventFrameAttributeValues[eventFrameAttribute.EventFrameAttributeTemplate.Name] = TagValue.query. \
+					filter(TagValue.TagId == eventFrameAttribute.TagId, TagValue.Timestamp >= self.StartTimestamp, TagValue.Timestamp <= self.EndTimestamp)
+
+		return eventFrameAttributeValues
 
 	def end(self):
 		endTimestamp = datetime.utcnow()
@@ -1064,7 +1101,7 @@ class TagValue(db.Model):
 	TagValueNotes = db.relationship("TagValueNote", backref = "TagValue", lazy = "dynamic")
 
 	def __repr__(self):
-		return "<TagValue: {}>".format(self.TagId)
+		return "<TagValue: {}>".format(self.TagValueId)
 
 	def delete(self):
 		tagValuesNotes = self.TagValueNotes
