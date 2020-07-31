@@ -3,6 +3,30 @@
 {% block scripts %}
     {{ super() }}
     <script>
+        function populateSourceEventFrameList()
+        {
+            var sourceEventFrameTemplateId = $("#sourceEventFrameTemplate").val()
+            var activeSourceEventFramesOnly = $("#activeSourceEventFramesOnly").is(":checked")
+            $.ajax(
+            {
+                type : "POST",
+                url : "/eventFrames/getSourceEventFrames/" + sourceEventFrameTemplateId + "/" + activeSourceEventFramesOnly
+            }).done(function(sourceEventFrames)
+            {
+                var selectSourceEventFrame = $("#sourceEventFrame")
+                selectSourceEventFrame.empty().append($("<option />").val(-1).text(""))
+                $.each(sourceEventFrames, function(i)
+                {
+                    selectSourceEventFrame.append($("<option />").val(sourceEventFrames[i].value).text(sourceEventFrames[i].name))
+                })
+            }).fail(function()
+            {
+                $(".alert").remove()
+                $("#divFlashedMessages").append('<div class = "alert alert-danger"><button type = "button" class = "close" ' +
+                    'data-dismiss = "alert">&times;</button>The attempt to update the Source Event Frame list has failed.</div>')
+            })
+        }
+
         function setUtcTimestamps()
         {
             var startTimestamp = $("#startTimestamp").val()
@@ -38,6 +62,16 @@
                     $("#endTimestamp").val(endTimestamp.local().format("YYYY-MM-DD HH:mm:ss"))
                 }
             {% endif %}
+
+            $("#sourceEventFrameTemplate").on("change", function()
+            {
+                populateSourceEventFrameList()
+            })
+
+            $("#activeSourceEventFramesOnly").on("change", function()
+            {
+                populateSourceEventFrameList()
+            })
 
             $("#buttonSave").on("click", function()
             {
