@@ -5,7 +5,7 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 load_dotenv(os.path.join(basedir, ".env"))
 
 class Config:
-	BOOTSTRAP_SERVE_LOCAL = True
+	BOOTSTRAP_SERVE_LOCAL = False if os.environ.get("BOOTSTRAP_SERVE_LOCAL") == "0" else True
 	EXPORT_DATABASE_FILENAME = "BreweryPi.sql"
 	EXPORT_ELEMENT_ATTRIBUTES_FILENAME = "elementsAttributes.csv"
 	EXPORT_EVENT_FRAME_ATTRIBUTES_FILENAME = "eventFrameAttributes.csv"
