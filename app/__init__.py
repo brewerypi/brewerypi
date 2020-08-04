@@ -1,7 +1,7 @@
 import dash
 from flask import Flask
 from flask.helpers import get_root_path
-from flask_bootstrap import Bootstrap
+from flask_bootstrap import Bootstrap, bootstrap_find_resource
 from flask_login import LoginManager, login_required
 from flask_moment import Moment
 from flask_sqlalchemy import SQLAlchemy
@@ -17,6 +17,7 @@ moment = Moment()
 def createApp(configClass = Config):
 	app = Flask(__name__)
 	app.config.from_object(configClass)
+	boostrap.init_app(app)
 
 	from app.dashes.activeEventFramesSummary.layout import layout as activeEventFramesSummaryLayout
 	from app.dashes.activeEventFramesSummary.callbacks import registerCallbacks as activeEventFramesSummaryCallbacks
@@ -47,7 +48,6 @@ def createApp(configClass = Config):
 	from app.dashes.tagValuesGraph.callbacks import registerCallbacks as tagValuesGraphCallbacks
 	registerDashApp(app, "tagValuesGraphDash", tagValuesGraphLayout, tagValuesGraphCallbacks, "Tag Values Graph")
 
-	boostrap.init_app(app)
 	db.init_app(app)
 	loginManager.init_app(app)
 	moment.init_app(app)
@@ -148,12 +148,20 @@ def createApp(configClass = Config):
 	return app
 
 def registerDashApp(app, urlBasePathname, layout, registerCallbacks, title):
+	if app.config["BOOTSTRAP_SERVE_LOCAL"]:
+		externalStylesheets = ["/static/bootstrap/css/bootstrap.min.css"]
+		externalScripts = ["/static/bootstrap/jquery.min.js", "/static/bootstrap/js/bootstrap.min.js"]
+	else:
+		with app.app_context():
+			externalStylesheets = [bootstrap_find_resource("css/bootstrap.css", cdn = "bootstrap")]
+			externalScripts = [bootstrap_find_resource("jquery.js", cdn = "jquery"), bootstrap_find_resource("js/bootstrap.js", cdn = "bootstrap")]
+
 	dashApp = dash.Dash \
 	(
 		__name__,
 		assets_folder = "{}/{}/assets/".format(get_root_path(__name__), urlBasePathname),
-		external_stylesheets = ["/static/bootstrap/css/bootstrap.min.css"],
-		external_scripts = ["/static/bootstrap/jquery.min.js", "/static/bootstrap/js/bootstrap.min.js"],
+		external_stylesheets = externalStylesheets,
+		external_scripts = externalScripts,
 		server = app,
 		url_base_pathname = "/{}/".format(urlBasePathname)
 	)
