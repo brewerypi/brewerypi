@@ -16,6 +16,7 @@ class Config:
 	IMPORT_EVENT_FRAME_ATTRIBUTES_FILENAME = "eventFrameAttributes.csv"
 	IMPORT_FOLDER = "imports"
 	IMPORT_TAGS_FILENAME = "tags.csv"
+	IS_AWS = True if os.environ.get("IS_AWS") == "1" else False
 	IS_RASPBERRY_PI = True if os.environ.get("IS_RASPBERRY_PI") == "1" else False
 	LOCAL_TIMEZONE = os.environ.get("LOCAL_TIMEZONE")
 	MYSQL_DATABASE = os.environ.get("MYSQL_DATABASE") or "BreweryPi"
