@@ -7,6 +7,7 @@ from flask_moment import Moment
 from flask_sqlalchemy import SQLAlchemy
 from config import Config
 
+__version__ = "v3.1.0"
 boostrap = Bootstrap()
 db = SQLAlchemy()
 loginManager = LoginManager()
