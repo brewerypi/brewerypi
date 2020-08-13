@@ -54,8 +54,8 @@
 
 {% block scripts %}
     {{ super() }}
-    <script type = "text/javascript" src = {{ url_for("static", filename = "js/moment.min.js") }}></script>
-    <script type = "text/javascript" src = {{ url_for("static", filename = "js/moment-timezone-with-data.min.js") }}></script>
+    <script type = "text/javascript" src = '{{ url_for("static", filename = "js/moment.min.js") }}'></script>
+    <script type = "text/javascript" src = '{{ url_for("static", filename = "js/moment-timezone-with-data.min.js") }}'></script>
     {% block setTabIndex %}
         {{ super() }}
     {% endblock %}

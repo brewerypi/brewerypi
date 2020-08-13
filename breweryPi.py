@@ -7,7 +7,7 @@ from app.models import Area, Element, ElementAttribute, ElementAttributeTemplate
 	EventFrameAttributeTemplate, EventFrameAttributeTemplateEventFrameTemplateView, EventFrameEventFrameGroup, EventFrameGroup, EventFrameNote, \
 	EventFrameTemplate, EventFrameTemplateView, Lookup, LookupValue, Message, Note, Role, Site, Tag, TagValue, TagValueNote, UnitOfMeasurement, User
 
-app = createApp()
+application = app = createApp()
 migrate = Migrate(app, db, directory = "db/migrations")
 
 @app.shell_context_processor

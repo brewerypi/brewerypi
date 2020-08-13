@@ -13,7 +13,8 @@ from .. decorators import adminRequired
 @adminRequired
 def backupDatabase():
 	attachmentFilename = datetime.utcnow().strftime("%Y%m%d%H%M") + "-BreweryPi.sql" 
-	command = "sudo mysqldump --complete-insert=TRUE {} > /home/pi/brewerypi/exports/BreweryPi.sql".format(current_app.config["MYSQL_DATABASE"])
+	command = "sudo mysqldump --complete-insert=TRUE {} > {}/{}/BreweryPi.sql".format(current_app.config["MYSQL_DATABASE"],
+		os.path.dirname(current_app.instance_path), current_app.config["EXPORT_FOLDER"])
 	process = subprocess.Popen(command, shell = True)
 	process.wait()
 	return send_file(os.path.join("..", current_app.config["EXPORT_FOLDER"], current_app.config["EXPORT_DATABASE_FILENAME"]), as_attachment = True,
@@ -53,9 +54,8 @@ def restoreDatabase():
 		databaseBackupFile = form.databaseBackupFile.data
 		databaseBackupFile.save(os.path.join(current_app.config["IMPORT_FOLDER"], current_app.config["IMPORT_DATABASE_FILENAME"]))
 		databaseBackupFile.close()
-
 		db.session.close()
-		command = "sudo mysql BreweryPi < /home/pi/brewerypi/imports/BreweryPi.sql"
+		command = "sudo mysql BreweryPi < {}/{}/BreweryPi.sql".format(os.path.dirname(current_app.instance_path), current_app.config["IMPORT_FOLDER"])
 		try:
 			subprocess.check_output(command, shell = True, stderr = subprocess.STDOUT)
 			successes.append("Database successfully restored.")
