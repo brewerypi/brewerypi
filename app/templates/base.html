@@ -70,9 +70,7 @@
                     {% if config["IS_AWS"] and current_user.isAdministrator() %}
                         <li class = "dropdown"><a href = "#" class = "dropdown-toggle" data-toggle = "dropdown">AWS <span class = "caret"></span></a>
                             <ul class = "dropdown-menu">
-                                <li><a href = '{{ url_for("raspberryPiUtilities.backupDatabase") }}'>Backup Database</a></li>
                                 <li><a href = '{{ url_for("raspberryPiUtilities.info") }}'>Info</a></li>
-                                <li><a href = '{{ url_for("raspberryPiUtilities.restoreDatabase") }}'>Restore Database</a></li>
                             </ul>
                         </li>
                     {% elif config["IS_RASPBERRY_PI"] and current_user.isAdministrator() %}
