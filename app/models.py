@@ -961,17 +961,6 @@ class Role(db.Model):
 
 	Users = db.relationship("User", backref = "Role", lazy = "dynamic")
 
-	@staticmethod
-	def insertDefaultRoles():
-		defaultRoles = {"User" : Permission.DATA_ENTRY, "Administrator" : 0xff}
-		for defaultRole in defaultRoles:
-			role = Role.query.filter_by(Name = defaultRole).first()
-			if role is None:
-				role = Role(Name = defaultRole)
-			role.Permissions = defaultRoles[defaultRole]
-			db.session.add(role)
-		db.session.commit()
-
 	def __repr__(self):
 		return "<Role: {}>".format(self.Name)
 
@@ -1211,21 +1200,6 @@ class User(UserMixin, db.Model):
 	@Password.setter
 	def Password(self, password):
 		self.PasswordHash = generate_password_hash(password)
-
-	@staticmethod
-	def insertDefaultAdministrator():
-		user = User.query.filter_by(Name = "pi").first()
-		administratorRole = Role.query.filter_by(Name = "Administrator").one_or_none()
-		if administratorRole is None:
-			print('Administrator role does not exist. Cannot create default admin/"pi" user without it.')
-		else:
-			if user is None:
-				user = User(Enabled = True, Name = "pi", Password = "brewery", Role = administratorRole)
-				db.session.add(user)
-			else:
-				user.Role = administratorRole
-
-			db.session.commit()
 
 	def __repr__(self):
 		return "<User: {}>".format(self.Name)
