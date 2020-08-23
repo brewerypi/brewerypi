@@ -17,8 +17,13 @@ class Config:
 	IMPORT_FOLDER = "imports"
 	IMPORT_TAGS_FILENAME = "tags.csv"
 	IS_AWS = True if os.environ.get("IS_AWS") == "1" else False
+	IS_MULTI_TENANT = True if os.environ.get("IS_MULTI_TENANT") == "1" else False
 	IS_RASPBERRY_PI = True if os.environ.get("IS_RASPBERRY_PI") == "1" else False
 	LOCAL_TIMEZONE = os.environ.get("LOCAL_TIMEZONE")
+	MULTI_TENANT_DATABASE = os.environ.get("MULTI_TENANT_DATABASE") or "BreweryPiMultiTenant"
+	MULTI_TENANT_HOST = os.environ.get("MULTI_TENANT_HOST") or "localhost"
+	MULTI_TENANT_PASSWORD = os.environ.get("MULTI_TENANT_PASSWORD") or "brewery"
+	MULTI_TENANT_USERNAME = os.environ.get("MULTI_TENANT_USERNAME") or "pi"
 	MYSQL_DATABASE = os.environ.get("MYSQL_DATABASE") or "BreweryPi"
 	MYSQL_HOST = os.environ.get("MYSQL_HOST") or "localhost"
 	MYSQL_PASSWORD = os.environ.get("MYSQL_PASSWORD") or "brewery"

@@ -1,10 +1,13 @@
 import dash
-from flask import Flask
+import MySQLdb
+from flask import Flask, request
 from flask.helpers import get_root_path
 from flask_bootstrap import Bootstrap, bootstrap_find_resource
 from flask_login import LoginManager, login_required
 from flask_moment import Moment
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import event
+from urllib.parse import urlparse
 from config import Config
 
 __version__ = "v3.1.0"
@@ -50,6 +53,23 @@ def createApp(configClass = Config):
 	registerDashApp(app, "tagValuesGraphDash", tagValuesGraphLayout, tagValuesGraphCallbacks, "Tag Values Graph")
 
 	db.init_app(app)
+	if app.config["IS_MULTI_TENANT"]:
+		with app.app_context():
+			@db.event.listens_for(db.engine, "do_connect")
+			def receiveDoConnect(dialect, conn_rec, cargs, cparams):
+				url = request.url_root
+				subdomain = urlparse(url).hostname.split(".")[0]
+				connection = MySQLdb.connect(host = app.config["MULTI_TENANT_HOST"], db = app.config["MULTI_TENANT_DATABASE"],
+					user = app.config["MULTI_TENANT_USERNAME"], passwd = app.config["MULTI_TENANT_PASSWORD"])
+				cursor = connection.cursor()
+				cursor.execute(f"SELECT HostName, DatabaseName, UserName, Password FROM DbInfo WHERE Subdomain='{subdomain}'")
+				results = cursor.fetchall()
+				cparams["host"] = results[0][0]
+				cparams["db"] = results[0][1]
+				cparams["user"] = results[0][2]
+				cparams["passwd"] = results[0][3]
+				return None
+
 	loginManager.init_app(app)
 	moment.init_app(app)
 
