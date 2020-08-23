@@ -62,7 +62,7 @@ def createApp(configClass = Config):
 				connection = MySQLdb.connect(host = app.config["MULTI_TENANT_HOST"], db = app.config["MULTI_TENANT_DATABASE"],
 					user = app.config["MULTI_TENANT_USERNAME"], passwd = app.config["MULTI_TENANT_PASSWORD"])
 				cursor = connection.cursor()
-				cursor.execute(f"SELECT HostName, DatabaseName, UserName, Password FROM DbInfo WHERE Subdomain='{subdomain}'")
+				cursor.execute(f"SELECT HostName, DatabaseName, UserName, Password FROM Tenant WHERE Subdomain='{subdomain}'")
 				results = cursor.fetchall()
 				cparams["host"] = results[0][0]
 				cparams["db"] = results[0][1]
