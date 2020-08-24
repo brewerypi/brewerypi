@@ -1,5 +1,6 @@
 import os
 from dotenv import load_dotenv
+from sqlalchemy.pool import SingletonThreadPool
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 load_dotenv(os.path.join(basedir, ".env"))
@@ -33,3 +34,5 @@ class Config:
 	SQLALCHEMY_DATABASE_URI = f"mysql://{MYSQL_USERNAME}:{MYSQL_PASSWORD}@{MYSQL_HOST}/{MYSQL_DATABASE}"
 	SQLALCHEMY_SERVER_URI = f"mysql://{MYSQL_USERNAME}:{MYSQL_PASSWORD}@{MYSQL_HOST}"
 	SQLALCHEMY_TRACK_MODIFICATIONS = False
+	if IS_MULTI_TENANT:
+		SQLALCHEMY_ENGINE_OPTIONS={'poolclass': SingletonThreadPool}
