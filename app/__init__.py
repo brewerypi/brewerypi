@@ -1,6 +1,6 @@
 import dash
 import MySQLdb
-from flask import Flask, request
+from flask import Flask, request, session
 from flask.helpers import get_root_path
 from flask_bootstrap import Bootstrap, bootstrap_find_resource
 from flask_login import LoginManager, login_required
@@ -59,15 +59,22 @@ def createApp(configClass = Config):
 			def receiveDoConnect(dialect, conn_rec, cargs, cparams):
 				url = request.url_root
 				subdomain = urlparse(url).hostname.split(".")[0]
-				connection = MySQLdb.connect(host = app.config["MULTI_TENANT_HOST"], db = app.config["MULTI_TENANT_DATABASE"],
-					user = app.config["MULTI_TENANT_USERNAME"], passwd = app.config["MULTI_TENANT_PASSWORD"])
-				cursor = connection.cursor()
-				cursor.execute(f"SELECT HostName, DatabaseName, UserName, Password FROM Tenant WHERE Subdomain='{subdomain}'")
-				results = cursor.fetchall()
-				cparams["host"] = results[0][0]
-				cparams["db"] = results[0][1]
-				cparams["user"] = results[0][2]
-				cparams["passwd"] = results[0][3]
+				if subdomain != session.get("subdomain"):
+					session["subdomain"] = subdomain
+					connection = MySQLdb.connect(host = app.config["MULTI_TENANT_HOST"], db = app.config["MULTI_TENANT_DATABASE"],
+						user = app.config["MULTI_TENANT_USERNAME"], passwd = app.config["MULTI_TENANT_PASSWORD"])
+					cursor = connection.cursor()
+					cursor.execute(f"SELECT HostName, DatabaseName, UserName, Password FROM Tenant WHERE Subdomain='{subdomain}'")
+					results = cursor.fetchall()
+					session["breweryPiHostName"] = results[0][0]
+					session["breweryPiDatabaseName"] = results[0][1]
+					session["breweryPiUserName"] = results[0][2]
+					session["breweryPiPassword"] = results[0][3]
+
+				cparams["host"] = session.get("breweryPiHostName")
+				cparams["db"] = session.get("breweryPiDatabaseName")
+				cparams["user"] = session.get("breweryPiUserName")
+				cparams["passwd"] = session.get("breweryPiPassword")
 				return None
 
 	loginManager.init_app(app)
