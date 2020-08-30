@@ -25,8 +25,15 @@ def add(eventFrameTemplateId):
 			
 			db.session.commit()
 
+		eventFrameTemplateViewMaximumOrder = EventFrameTemplateView.query.filter_by(EventFrameTemplateId =  eventFrameTemplateId). \
+			order_by(EventFrameTemplateView.Order.desc()).first()
+		if eventFrameTemplateViewMaximumOrder is None:
+			order = 1
+		else:
+			order = eventFrameTemplateViewMaximumOrder.Order + 1
+
 		eventFrameTemplateView = EventFrameTemplateView(Default = default, Description = form.description.data, EventFrameTemplateId = eventFrameTemplateId,
-			Name = form.name.data)
+			Name = form.name.data, Order = order)
 		db.session.add(eventFrameTemplateView)
 		db.session.commit()
 		flash('You have successfully added the new event frame template view "{}".'.format(eventFrameTemplateView.Name), "alert alert-success")
@@ -191,3 +198,16 @@ def eventFrameAttributeTemplates(eventFrameTemplateViewId):
 		filter(EventFrameAttributeTemplate.EventFrameAttributeTemplateId.in_(excludedEventFrameAttributeTemplateIds))
 	return render_template("eventFrameTemplateViews/eventFrameAttributeTemplates.html", dictionary = eventFrameTemplateView.dictionary(),
 		eventFrameTemplateView = eventFrameTemplateView, excludedEventFrameAttributeTemplates = excludedEventFrameAttributeTemplates)
+
+@eventFrameTemplateViews.route("/eventFrameTemplateViews/reorder/<int:eventFrameTemplateId>", methods = ["GET", "POST"])
+@login_required
+@adminRequired
+def reorder(eventFrameTemplateId):
+	incomingEventFrameTemplateViews = request.get_json(force = True)
+	for eventFrameTemplateViewName in incomingEventFrameTemplateViews:
+		eventFrameTemplateView = EventFrameTemplateView.query. \
+			filter_by(EventFrameTemplateId = eventFrameTemplateId, Name = eventFrameTemplateViewName).one_or_none()
+		eventFrameTemplateView.Order = incomingEventFrameTemplateViews[eventFrameTemplateViewName]
+
+	db.session.commit()
+	return jsonify()

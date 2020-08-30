@@ -753,6 +753,7 @@ class EventFrameTemplateView(db.Model):
 	__table_args__ = \
 	(
 		UniqueConstraint("EventFrameTemplateId", "Name", name = "AK__EventFrameTemplateId_Name"),
+		UniqueConstraint("EventFrameTemplateViewId", "Order", name = "AK__EventFrameTemplateViewId__Order"),
 	)
 
 	EventFrameTemplateViewId = db.Column(db.Integer, primary_key = True)
@@ -762,6 +763,7 @@ class EventFrameTemplateView(db.Model):
 	EventFrameTemplateId = db.Column(db.Integer, db.ForeignKey("EventFrameTemplate.EventFrameTemplateId",
 		name = "FK__EventFrameTemplate$Have$EventFrameTemplateView"), nullable = False)
 	Name = db.Column(db.String(45), nullable = False)
+	Order = db.Column(db.Integer, nullable = False)
 
 	EventFrameAttributeTemplateEventFrameTemplateViews = db.relationship("EventFrameAttributeTemplateEventFrameTemplateView",
 		backref = "EventFrameTemplateView", lazy = "dynamic")
