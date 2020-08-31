@@ -185,7 +185,7 @@
             {% endif %}
             <a type = "button" class = "{{ class }}" title = "All" 
                 href = '{{ href }}' role = "button">All</a>
-            {% for eventFrameTemplateView in eventFrame.EventFrameTemplate.EventFrameTemplateViews.filter_by(Selectable = True) | sort(attribute = "Name") %}
+            {% for eventFrameTemplateView in eventFrame.EventFrameTemplate.EventFrameTemplateViews.filter_by(Selectable = True) | sort(attribute = "Order") %}
                 {% if eventFrameTemplateView.EventFrameTemplateViewId ==  activeEventFrameTemplateViewId %}
                     {% set class = "btn btn-primary btn-xs active" %}
                 {% else %}
