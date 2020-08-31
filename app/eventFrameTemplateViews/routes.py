@@ -26,7 +26,7 @@ def add(eventFrameTemplateId):
 			db.session.commit()
 
 		eventFrameTemplateView = EventFrameTemplateView(Default = default, Description = form.description.data, EventFrameTemplateId = eventFrameTemplateId,
-			Name = form.name.data)
+			Name = form.name.data, Selectable = form.selectable.data)
 		db.session.add(eventFrameTemplateView)
 		db.session.commit()
 		flash('You have successfully added the new event frame template view "{}".'.format(eventFrameTemplateView.Name), "alert alert-success")
@@ -102,6 +102,7 @@ def edit(eventFrameTemplateViewId):
 		eventFrameTemplateView.Default = default
 		eventFrameTemplateView.EventFrameTemplateId = form.eventFrameTemplateId.data
 		eventFrameTemplateView.Name = form.name.data
+		eventFrameTemplateView.Selectable = form.selectable.data
 		db.session.commit()
 		flash('You have successfully edited the event frame template view "{}".'.format(eventFrameTemplateView.Name), "alert alert-success")
 		return redirect(form.requestReferrer.data)
@@ -112,6 +113,7 @@ def edit(eventFrameTemplateViewId):
 	form.eventFrameTemplateId.data = eventFrameTemplateView.EventFrameTemplateId
 	form.eventFrameTemplateViewId.data = eventFrameTemplateView.EventFrameTemplateViewId
 	form.name.data = eventFrameTemplateView.Name
+	form.selectable.data = eventFrameTemplateView.Selectable
 	if form.requestReferrer.data is None:
 		form.requestReferrer.data = request.referrer
 

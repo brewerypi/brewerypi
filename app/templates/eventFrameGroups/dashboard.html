@@ -46,7 +46,7 @@
                 <a type = "button" class = "{{ class }}" title = "All" 
                     href = '{{ url_for("eventFrameGroups.dashboard", eventFrameGroupId = eventFrameGroup.EventFrameGroupId,
                     displayEventFrameTemplateId = displayEventFrameTemplate.EventFrameTemplateId, eventFrameTemplateViewId = 0) }}' role = "button">All</a>
-                {% for eventFrameTemplateView in displayEventFrameTemplate.EventFrameTemplateViews | sort(attribute = "Name") %}
+                {% for eventFrameTemplateView in displayEventFrameTemplate.EventFrameTemplateViews.filter_by(Selectable = true) | sort(attribute = "Name") %}
                     {% if eventFrameTemplateView.EventFrameTemplateViewId ==  activeEventFrameTemplateViewId %}
                         {% set class = "btn btn-primary btn-xs active" %}
                     {% else %}

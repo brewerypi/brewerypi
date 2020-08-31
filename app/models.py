@@ -762,6 +762,7 @@ class EventFrameTemplateView(db.Model):
 	EventFrameTemplateId = db.Column(db.Integer, db.ForeignKey("EventFrameTemplate.EventFrameTemplateId",
 		name = "FK__EventFrameTemplate$Have$EventFrameTemplateView"), nullable = False)
 	Name = db.Column(db.String(45), nullable = False)
+	Selectable = db.Column(db.Boolean, nullable = False)
 
 	EventFrameAttributeTemplateEventFrameTemplateViews = db.relationship("EventFrameAttributeTemplateEventFrameTemplateView",
 		backref = "EventFrameTemplateView", lazy = "dynamic")

@@ -359,6 +359,7 @@
                         <th>Name</th>
                         <th>Description</th>
                         <th>Default</th>
+                        <th>Selectable</th>
                         <th></th>
                         <th></th>
                     </tr>
@@ -376,6 +377,7 @@
                         <td>{{ eventFrameTemplateView.Name }}</td>
                         <td>{{ eventFrameTemplateView.Description }}</td>
                         <td>{{ eventFrameTemplateView.Default | yesNo }}</td>
+                        <td>{{ eventFrameTemplateView.Selectable | yesNo }}</td>
                         {% if current_user.isAdministrator() %}
                             <td><a class = "btn btn-default" title = "Edit" href = '{{ url_for("eventFrameTemplateViews.edit",
                                 eventFrameTemplateViewId = eventFrameTemplateView.EventFrameTemplateViewId) }}'>
@@ -544,6 +546,7 @@
                 "columns":
                 [
                     { "orderable": false }, // Select button.
+                    null,
                     null,
                     null,
                     null,
