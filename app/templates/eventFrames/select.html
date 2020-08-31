@@ -363,6 +363,7 @@
                         <th></th>
                         <th></th>
                         <th></th>
+                        <th></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -377,6 +378,9 @@
                             <td><a class = "btn btn-default" title = "Configure" href = '{{ url_for("eventFrameTemplateViews.eventFrameAttributeTemplates",
                                 eventFrameTemplateViewId = eventFrameTemplateView.EventFrameTemplateViewId) }}'><span class = "glyphicon glyphicon-wrench">
                                 </span></a></td>
+                            <td><a class = "btn btn-default" title = "Copy" href = '{{ url_for("eventFrameTemplateViews.copy",
+                                fromEventFrameTemplateViewId = eventFrameTemplateView.EventFrameTemplateViewId) }}'>
+                                <span class = "glyphicon glyphicon-copy"></span></a></td>
                             <td><a class = "btn btn-default" title = "Edit" href = '{{ url_for("eventFrameTemplateViews.edit",
                                 eventFrameTemplateViewId = eventFrameTemplateView.EventFrameTemplateViewId) }}'>
                                 <span class = "glyphicon glyphicon-edit"></span></a></td>
@@ -385,6 +389,7 @@
                                 data-type = "event frame template view", data-name = "{{ eventFrameTemplateView.Name }}">
                                 <span class = "glyphicon glyphicon-trash"></span></a></td>
                         {% else %}
+                            <td></td>
                             <td></td>
                             <td></td>
                             <td></td>
