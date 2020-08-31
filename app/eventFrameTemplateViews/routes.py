@@ -102,7 +102,7 @@ def copy(fromEventFrameTemplateViewId):
 
 		eventFrameTemplateView = EventFrameTemplateView(Default = default, Description = form.description.data,
 			Dictionary = fromEventFrameTemplateView.Dictionary, EventFrameTemplateId = fromEventFrameTemplateView.EventFrameTemplateId,
-			Name = form.name.data, Order = order)
+			Name = form.name.data, Order = order, Selectable = fromEventFrameTemplateView.Selectable)
 		db.session.add(eventFrameTemplateView)
 		db.session.commit()
 		for fromEventFrameAttributeTemplateEventFrameTemplateView in fromEventFrameTemplateView.EventFrameAttributeTemplateEventFrameTemplateViews:
