@@ -289,10 +289,9 @@ def eventFrameAttributeTemplates(eventFrameTemplateViewId):
 @adminRequired
 def reorder(eventFrameTemplateId):
 	incomingEventFrameTemplateViews = request.get_json(force = True)
-	for eventFrameTemplateViewName in incomingEventFrameTemplateViews:
-		eventFrameTemplateView = EventFrameTemplateView.query. \
-			filter_by(EventFrameTemplateId = eventFrameTemplateId, Name = eventFrameTemplateViewName).one_or_none()
-		eventFrameTemplateView.Order = incomingEventFrameTemplateViews[eventFrameTemplateViewName]
+	for eventFrameTemplateViewId in incomingEventFrameTemplateViews:
+		eventFrameTemplateView = EventFrameTemplateView.query.get_or_404(eventFrameTemplateViewId)
+		eventFrameTemplateView.Order = incomingEventFrameTemplateViews[eventFrameTemplateViewId]
 
 	db.session.commit()
 	return jsonify()
