@@ -791,7 +791,7 @@ class EventFrameTemplateView(db.Model):
 		return next(self.nextAndPreviousList(), self)
 
 	def nextAndPreviousList(self):
-		return EventFrameTemplateView.query.filter_by(EventFrameTemplateId = self.EventFrameTemplateId).order_by(EventFrameTemplateView.Name).all()
+		return EventFrameTemplateView.query.filter_by(EventFrameTemplateId = self.EventFrameTemplateId).order_by(EventFrameTemplateView.Order).all()
 
 	def previous(self):
 		return previous(self.nextAndPreviousList(), self)
