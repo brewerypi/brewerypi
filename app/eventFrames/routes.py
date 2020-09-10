@@ -381,7 +381,7 @@ def getSourceEventFrames(eventFrameTemplateId, activeSourceEventFramesOnly):
 		for eventFrame in query.filter_by(EventFrameTemplateId = eventFrameTemplate.EventFrameTemplateId).all():
 			sourceEventFrames.append({"value": eventFrame.EventFrameId, "name": eventFrame.Name})
 
-	# Sort the list of choices.
+	# Key function used to sort the list of choices.
 	def eventFrameName(eventFrame):
 		return eventFrame["name"]
 

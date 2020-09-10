@@ -14,11 +14,13 @@
             }).done(function(sourceEventFrames)
             {
                 var selectSourceEventFrame = $("#sourceEventFrame")
+                var selectedSourceEventFrame = $("#sourceEventFrame").val()
                 selectSourceEventFrame.empty().append($("<option />").val(-1).text(""))
                 $.each(sourceEventFrames, function(i)
                 {
                     selectSourceEventFrame.append($("<option />").val(sourceEventFrames[i].value).text(sourceEventFrames[i].name))
                 })
+                $("#sourceEventFrame").val(selectedSourceEventFrame)
             }).fail(function()
             {
                 $(".alert").remove()
