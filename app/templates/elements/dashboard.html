@@ -66,7 +66,11 @@
                         {% else %}
                             <td id = "tdLastTimestamp{{ elementAttribute.Tag.TagId }}"></td>
                             <td id = "tdLastValue{{ elementAttribute.Tag.TagId }}"></td>
-                            <td></td>
+                            {% if elementAttribute.ElementAttributeTemplate.LookupId %}
+                                <td>{{ elementAttribute.ElementAttributeTemplate.Lookup.Name }}</td>
+                            {% else %}
+                                <td>{{ elementAttribute.ElementAttributeTemplate.UnitOfMeasurement.Abbreviation }}</td>
+                            {% endif %}
                         {% endif %}
                         <td>
                             <div class = "form-group" id = "divNewValue{{ elementAttribute.Tag.TagId }}">

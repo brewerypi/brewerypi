@@ -250,7 +250,11 @@
                         {% else %}
                             <td id = "tdLastTimestamp{{ eventFrameAttribute.Tag.TagId }}"></td>
                             <td id = "tdLastValue{{ eventFrameAttribute.Tag.TagId }}"></td>
-                            <td></td>
+                            {% if eventFrameAttribute.EventFrameAttributeTemplate.LookupId %}
+                                <td>{{ eventFrameAttribute.EventFrameAttributeTemplate.Lookup.Name }}</td>
+                            {% else %}
+                                <td>{{ eventFrameAttribute.EventFrameAttributeTemplate.UnitOfMeasurement.Abbreviation }}</td>
+                            {% endif %}
                         {% endif %}
                         <td>
                             <div class = "form-group" id = "divNewValue{{ eventFrameAttribute.Tag.TagId }}">
