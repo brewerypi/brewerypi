@@ -108,7 +108,7 @@
     </div>
     <div>
         {% if childrenClass == "ElementTemplate" %}
-            <a class = "btn btn-default" title = "Dash" href = '{{ url_for("dashes.activeEventFramesSummary", siteId = parent.SiteId) }}'>
+            <a class = "btn btn-default" title = "Dash" href = '{{ url_for("dashes.eventFramesSummary", siteId = parent.SiteId) }}'>
                 <span class = "glyphicon glyphicon-stats"></span></a>
             <br><br>
         {% elif childrenClass == "EventFrameTemplate" %}
@@ -116,13 +116,13 @@
                 <a class = "btn btn-default" title = "Add" href = '{{ url_for("eventFrameTemplates.addEventFrameTemplate", elementTemplateId = parent.id()) }}'
                     role = "button"><span class = "glyphicon glyphicon-plus"></span></a>
             {% endif %}
-            <a class = "btn btn-default" title = "Dash" href = '{{ url_for("dashes.activeEventFramesSummary", elementTemplateId = parent.ElementTemplateId) }}'>
+            <a class = "btn btn-default" title = "Dash" href = '{{ url_for("dashes.eventFramesSummary", elementTemplateId = parent.ElementTemplateId) }}'>
                 <span class = "glyphicon glyphicon-stats"></span></a>
             <br><br>
         {% elif childrenClass == "EventFrame" %}
             <a class = "btn btn-default" title = "Add" href = '{{ url_for("eventFrames.addEventFrame", eventFrameTemplateId = parent.id()) }}' role = "button">
                 <span class = "glyphicon glyphicon-plus"></span></a>
-            <a class = "btn btn-default" title = "Dash" href = '{{ url_for("dashes.activeEventFramesSummary",
+            <a class = "btn btn-default" title = "Dash" href = '{{ url_for("dashes.eventFramesSummary",
                 eventFrameTemplateId = parent.EventFrameTemplateId, months = months) }}'><span class = "glyphicon glyphicon-stats"></span></a>
             <br><br>
         {% elif childrenClass == "DescendantEventFrameTemplate" %}

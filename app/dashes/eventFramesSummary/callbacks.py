@@ -11,7 +11,7 @@ from app import db
 from app.dashes.components import collapseExpand, elementTemplatesDropdown, enterpriseDropdown, eventFrameTemplatesDropdown, eventFrameTemplateViewDropdown, \
     siteDropdown, timeRangePicker
 from app.models import EventFrameTemplate
-from .sql import activeEventFrameAttributeValues
+from .sql import eventFramesAttributeValues
 
 def registerCallbacks(dashApp):
     timeRangePicker.callback(dashApp)
@@ -107,7 +107,7 @@ def registerCallbacks(dashApp):
         toTimestampLocal = localTimezone.localize(datetime.strptime(toTimestampInputValue, "%Y-%m-%dT%H:%M:%S"))
         toTimestampUtc = toTimestampLocal.astimezone(pytz.utc)
 
-        df = pd.read_sql(activeEventFrameAttributeValues(tabsValue, eventFrameTemplateViewDropdownValue, fromTimestampUtc, toTimestampUtc, activeOnly),
+        df = pd.read_sql(eventFramesAttributeValues(tabsValue, eventFrameTemplateViewDropdownValue, fromTimestampUtc, toTimestampUtc, activeOnly),
             db.session.bind)
         df["Start"] = df["Start"].apply(lambda  timestamp: pytz.utc.localize(timestamp).astimezone(localTimezone).strftime("%Y-%m-%d %H:%M:%S"))
         df["End"] = df["End"].apply(lambda  timestamp: pytz.utc.localize(timestamp).astimezone(localTimezone).strftime("%Y-%m-%d %H:%M:%S")

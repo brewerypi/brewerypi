@@ -1,6 +1,6 @@
 from app.models import EventFrameAttributeTemplate, EventFrameAttributeTemplateEventFrameTemplateView
 
-def activeEventFrameAttributeValues(eventFrameTemplateId, eventFrameTemplateViewId, fromTimestampUtc, toTimestampUtc, activeOnly):
+def eventFramesAttributeValues(eventFrameTemplateId, eventFrameTemplateViewId, fromTimestampUtc, toTimestampUtc, activeOnly):
 	dynamicColumns = ""
 	if eventFrameTemplateViewId == -1:
 		eventFrameAttributeTemplates = EventFrameAttributeTemplate.query.with_entities(EventFrameAttributeTemplate.Name). \

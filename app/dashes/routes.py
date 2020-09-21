@@ -4,13 +4,13 @@ from flask_login import login_required
 from app.models import Element, ElementAttribute, ElementTemplate, EventFrame, EventFrameGroup, EventFrameTemplate, Site, Tag
 from . import dashes
 
-@dashes.route("/dashes/activeEventFramesSummary", methods = ["GET", "POST"])
-@dashes.route("/dashes/activeEventFramesSummary/site/<int:siteId>", methods = ["GET", "POST"])
-@dashes.route("/dashes/activeEventFramesSummary/elementTemplate/<int:elementTemplateId>", methods = ["GET", "POST"])
-@dashes.route("/dashes/activeEventFramesSummary/eventFrameTemplate/<int:eventFrameTemplateId>", methods = ["GET", "POST"])
-@dashes.route("/dashes/activeEventFramesSummary/eventFrameTemplate/<int:eventFrameTemplateId>/<int:months>", methods = ["GET", "POST"])
+@dashes.route("/dashes/eventFramesSummary", methods = ["GET", "POST"])
+@dashes.route("/dashes/eventFramesSummary/site/<int:siteId>", methods = ["GET", "POST"])
+@dashes.route("/dashes/eventFramesSummary/elementTemplate/<int:elementTemplateId>", methods = ["GET", "POST"])
+@dashes.route("/dashes/eventFramesSummary/eventFrameTemplate/<int:eventFrameTemplateId>", methods = ["GET", "POST"])
+@dashes.route("/dashes/eventFramesSummary/eventFrameTemplate/<int:eventFrameTemplateId>/<int:months>", methods = ["GET", "POST"])
 @login_required
-def activeEventFramesSummary(siteId = None, elementTemplateId = None, eventFrameTemplateId = None, months = None):
+def eventFramesSummary(siteId = None, elementTemplateId = None, eventFrameTemplateId = None, months = None):
 	site = None
 	elementTemplate = None
 	eventFrameTemplate = None
@@ -22,7 +22,7 @@ def activeEventFramesSummary(siteId = None, elementTemplateId = None, eventFrame
 	elif eventFrameTemplateId is not None:
 		eventFrameTemplate = EventFrameTemplate.query.filter_by(EventFrameTemplateId = eventFrameTemplateId).one_or_none()
 
-	return render_template("dashes/activeEventFramesSummary/activeEventFramesSummary.html", activeOnly = activeOnly, elementTemplate = elementTemplate,
+	return render_template("dashes/eventFramesSummary/eventFramesSummary.html", activeOnly = activeOnly, elementTemplate = elementTemplate,
 		eventFrameTemplate = eventFrameTemplate, months = months, site = site)
 
 @dashes.route("/dashes/elementsSummary", methods = ["GET", "POST"])

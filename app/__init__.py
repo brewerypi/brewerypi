@@ -20,10 +20,9 @@ def createApp(configClass = Config):
 	app.config.from_object(configClass)
 	boostrap.init_app(app)
 
-	from app.dashes.activeEventFramesSummary.layout import layout as activeEventFramesSummaryLayout
-	from app.dashes.activeEventFramesSummary.callbacks import registerCallbacks as activeEventFramesSummaryCallbacks
-	registerDashApp(app, "activeEventFramesSummaryDash", activeEventFramesSummaryLayout, activeEventFramesSummaryCallbacks,
-		"Active Event Frames Summary Dash")
+	from app.dashes.eventFramesSummary.layout import layout as eventFramesSummaryLayout
+	from app.dashes.eventFramesSummary.callbacks import registerCallbacks as eventFramesSummaryCallbacks
+	registerDashApp(app, "eventFramesSummaryDash", eventFramesSummaryLayout, eventFramesSummaryCallbacks, "Event Frames Summary Dash")
 
 	from app.dashes.elementsSummary.layout import layout as elementsSummaryLayout
 	from app.dashes.elementsSummary.callbacks import registerCallbacks as elementsSummaryCallbacks
