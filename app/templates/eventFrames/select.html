@@ -123,7 +123,7 @@
             <a class = "btn btn-default" title = "Add" href = '{{ url_for("eventFrames.addEventFrame", eventFrameTemplateId = parent.id()) }}' role = "button">
                 <span class = "glyphicon glyphicon-plus"></span></a>
             <a class = "btn btn-default" title = "Dash" href = '{{ url_for("dashes.activeEventFramesSummary",
-                eventFrameTemplateId = parent.EventFrameTemplateId) }}'><span class = "glyphicon glyphicon-stats"></span></a>
+                eventFrameTemplateId = parent.EventFrameTemplateId, months = months) }}'><span class = "glyphicon glyphicon-stats"></span></a>
             <br><br>
         {% elif childrenClass == "DescendantEventFrameTemplate" %}
             <a class = "btn btn-default" title = "Add" href = '{{ url_for("eventFrameTemplates.addEventFrameTemplate",

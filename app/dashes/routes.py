@@ -1,5 +1,5 @@
 from datetime import datetime
-from flask import render_template, request
+from flask import render_template, request, session
 from flask_login import login_required
 from app.models import Element, ElementAttribute, ElementTemplate, EventFrame, EventFrameGroup, EventFrameTemplate, Site, Tag
 from . import dashes
@@ -8,11 +8,13 @@ from . import dashes
 @dashes.route("/dashes/activeEventFramesSummary/site/<int:siteId>", methods = ["GET", "POST"])
 @dashes.route("/dashes/activeEventFramesSummary/elementTemplate/<int:elementTemplateId>", methods = ["GET", "POST"])
 @dashes.route("/dashes/activeEventFramesSummary/eventFrameTemplate/<int:eventFrameTemplateId>", methods = ["GET", "POST"])
+@dashes.route("/dashes/activeEventFramesSummary/eventFrameTemplate/<int:eventFrameTemplateId>/<int:months>", methods = ["GET", "POST"])
 @login_required
-def activeEventFramesSummary(siteId = None, elementTemplateId = None, eventFrameTemplateId = None):
+def activeEventFramesSummary(siteId = None, elementTemplateId = None, eventFrameTemplateId = None, months = None):
 	site = None
 	elementTemplate = None
 	eventFrameTemplate = None
+	activeOnly = 1 if months is None else 0
 	if siteId is not None:
 		site = Site.query.filter_by(SiteId = siteId).one_or_none()
 	elif elementTemplateId is not None:
@@ -20,8 +22,8 @@ def activeEventFramesSummary(siteId = None, elementTemplateId = None, eventFrame
 	elif eventFrameTemplateId is not None:
 		eventFrameTemplate = EventFrameTemplate.query.filter_by(EventFrameTemplateId = eventFrameTemplateId).one_or_none()
 
-	return render_template("dashes/activeEventFramesSummary/activeEventFramesSummary.html", elementTemplate = elementTemplate,
-		eventFrameTemplate = eventFrameTemplate, site = site)
+	return render_template("dashes/activeEventFramesSummary/activeEventFramesSummary.html", activeOnly = activeOnly, elementTemplate = elementTemplate,
+		eventFrameTemplate = eventFrameTemplate, months = months, site = site)
 
 @dashes.route("/dashes/elementsSummary", methods = ["GET", "POST"])
 @dashes.route("/dashes/elementsSummary/site/<int:siteId>", methods = ["GET", "POST"])
