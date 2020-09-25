@@ -1,3 +1,4 @@
+import dash
 import pytz
 from dash.dependencies import Input, Output, State
 from dash.exceptions import PreventUpdate
@@ -7,8 +8,45 @@ from app.models import EventFrame, EventFrameNote, LookupValue, Note
 from app.dashes.components import collapseExpand, elementTemplateDropdown, enterpriseDropdown, eventFrameDropdown, eventFrameTemplateDropdown, \
     eventFrameTemplateViewDropdown, siteDropdown, timeRangePicker
 
+def fromToTimestamp(fromTimestamp, toTimestamp, *args):
+    if dash.callback_context.triggered[0]["prop_id"] == ".":
+        raise PreventUpdate
+
+    updatedFromTimestamp = None
+    updatedToTimestamp = None
+    print(dash.callback_context.triggered)
+    if len(list(filter(lambda property: property["prop_id"] == "url.href", dash.callback_context.triggered))) > 0:
+        # url href input fired.
+        urlHref = args[0]
+        queryString = parse_qs(urlparse(urlHref).query)
+        if "eventFrameId" in queryString:
+            eventFrameId = int(queryString["eventFrameId"][0])
+            eventFrame = EventFrame.query.get(eventFrameId)
+            if eventFrame is not None:
+                queryString = parse_qs(urlparse(urlHref).query)
+                if "localTimezone" in queryString:
+                    localTimezone = pytz.timezone(queryString["localTimezone"][0])
+                else:
+                    localTimezone = pytz.utc
+
+                updatedFromTimestamp = eventFrame.StartTimestamp.astimezone(localTimezone)
+                if eventFrame.EndTimestamp is not None:
+                    # A closed event frame exists so use the end timestamp.
+                    updatedToTimestamp = (eventFrame.EndTimestamp + relativedelta(minutes = 1)).astimezone(localTimezone)
+    elif len(list(filter(lambda property: property["prop_id"] == "interval.n_intervals", dash.callback_context.triggered))) > 0:
+        # interval n_intervals input fired.
+        eventFrameDropdownValue = args[1]
+        if eventFrameDropdownValue is not None:
+            eventFrame = EventFrame.query.get(eventFrameDropdownValue)
+            if eventFrame is not None:
+                if eventFrame.EndTimestamp is not None:
+                    raise PreventUpdate
+
+        return fromTimestamp if updatedFromTimestamp is None else updatedFromTimestamp, toTimestamp if updatedToTimestamp is None else updatedToTimestamp
+
 def registerCallbacks(dashApp):
-    timeRangePicker.eventFrameCallback(dashApp)
+    timeRangePicker.callback(dashApp, fromToTimestamp, [State(component_id = "url", component_property = "href"),
+        State(component_id = "eventFrameDropdown", component_property = "value")])
     collapseExpand.callback(dashApp)
     enterpriseDropdown.optionsCallback(dashApp)
     enterpriseDropdown.valueCallback(dashApp)

@@ -13,8 +13,25 @@ from app.dashes.components import collapseExpand, elementTemplatesDropdown, ente
 from app.models import EventFrameTemplate
 from .sql import eventFramesAttributeValues
 
+def fromToTimestamp(fromTimestamp, toTimestamp, *args):
+    updatedFromTimestamp = None
+    urlHref = args[0]
+    queryString = parse_qs(urlparse(urlHref).query)
+    if "localTimezone" in queryString:
+        localTimezone = pytz.timezone(queryString["localTimezone"][0])
+    else:
+        localTimezone = pytz.utc
+
+    if "months" in queryString:
+        months = int(queryString["months"][0])
+        utcNow = pytz.utc.localize(datetime.utcnow())
+        localNow = utcNow.astimezone(localTimezone)
+        updatedFromTimestamp = (localNow - relativedelta(months = months))
+
+    return fromTimestamp if updatedFromTimestamp is None else updatedFromTimestamp, toTimestamp
+
 def registerCallbacks(dashApp):
-    timeRangePicker.callback(dashApp)
+    timeRangePicker.callback(dashApp, fromToTimestamp, [State(component_id = "url", component_property = "href")])
     collapseExpand.callback(dashApp)
     enterpriseDropdown.optionsCallback(dashApp)
     enterpriseDropdown.valueCallback(dashApp)
@@ -97,14 +114,9 @@ def registerCallbacks(dashApp):
         else:
             localTimezone = pytz.utc
 
-        if "months" in queryString:
-            months = int(queryString["months"][0])
-            fromTimestampUtc = datetime.utcnow() - relativedelta(months = months)
-        else:
-            fromTimestampLocal = localTimezone.localize(datetime.strptime(fromTimestampInputValue, "%Y-%m-%dT%H:%M:%S"))
-            fromTimestampUtc = fromTimestampLocal.astimezone(pytz.utc)
-
+        fromTimestampLocal = localTimezone.localize(datetime.strptime(fromTimestampInputValue, "%Y-%m-%dT%H:%M:%S"))
         toTimestampLocal = localTimezone.localize(datetime.strptime(toTimestampInputValue, "%Y-%m-%dT%H:%M:%S"))
+        fromTimestampUtc = fromTimestampLocal.astimezone(pytz.utc)
         toTimestampUtc = toTimestampLocal.astimezone(pytz.utc)
 
         df = pd.read_sql(eventFramesAttributeValues(tabsValue, eventFrameTemplateViewDropdownValue, fromTimestampUtc, toTimestampUtc, activeOnly),
