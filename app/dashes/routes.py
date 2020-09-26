@@ -71,12 +71,11 @@ def eventFramesSummary(siteId = None, elementTemplateId = None, eventFrameTempla
 	elementTemplate = None
 	eventFrameTemplate = None
 	activeOnly = 1 if months is None else 0
+	earliestEventFrameId = None
 	if months == 0:
 		earliestEventFrame = EventFrame.query.filter_by(EventFrameTemplateId = eventFrameTemplateId).order_by(EventFrame.StartTimestamp).first()
 		if earliestEventFrame is not None:
 			earliestEventFrameId = earliestEventFrame.EventFrameId
-		else:
-			earliestEventFrameId = None
 
 	if siteId is not None:
 		site = Site.query.filter_by(SiteId = siteId).one_or_none()
