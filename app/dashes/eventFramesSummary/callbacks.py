@@ -10,7 +10,7 @@ from urllib.parse import parse_qs, urlparse
 from app import db
 from app.dashes.components import collapseExpand, elementTemplatesDropdown, enterpriseDropdown, eventFrameTemplatesDropdown, eventFrameTemplateViewDropdown, \
     siteDropdown, timeRangePicker
-from app.models import EventFrameTemplate
+from app.models import EventFrame, EventFrameTemplate
 from .sql import eventFramesAttributeValues
 
 def fromToTimestamp(fromTimestamp, toTimestamp, *args):
@@ -24,9 +24,16 @@ def fromToTimestamp(fromTimestamp, toTimestamp, *args):
 
     if "months" in queryString:
         months = int(queryString["months"][0])
-        utcNow = pytz.utc.localize(datetime.utcnow())
-        localNow = utcNow.astimezone(localTimezone)
-        updatedFromTimestamp = (localNow - relativedelta(months = months))
+        if months == 0:
+            if "earliestEventFrameId" in queryString:
+                earliestEventFrameId = queryString["earliestEventFrameId"][0]
+                earliestEventFrame = EventFrame.query.get(earliestEventFrameId)
+                earliestEventFrameTimestampUtc = pytz.utc.localize(earliestEventFrame.StartTimestamp)
+                updatedFromTimestamp = earliestEventFrameTimestampUtc.astimezone(localTimezone)
+        else:
+            utcNow = pytz.utc.localize(datetime.utcnow())
+            localNow = utcNow.astimezone(localTimezone)
+            updatedFromTimestamp = (localNow - relativedelta(months = months))
 
     return fromTimestamp if updatedFromTimestamp is None else updatedFromTimestamp, toTimestamp
 

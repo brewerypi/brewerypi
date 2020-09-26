@@ -104,6 +104,9 @@
             parameters = parameters + "&activeOnly=" + {{ activeOnly }}
             {% if months is not none %}
                 parameters = parameters + "&months=" + {{ months }}
+                {% if earliestEventFrameId is not none %}
+                    parameters = parameters + "&earliestEventFrameId=" + {{ earliestEventFrameId }}
+                {% endif %}
             {% endif %}
 
             $("#iframe").attr("src", '{{ url_for("/eventFramesSummaryDash/") }}' + "?localTimezone=" + moment.tz.guess(true) + parameters)
