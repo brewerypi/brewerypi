@@ -9,7 +9,7 @@ def eventFramesAttributeValues(eventFrameTemplateId, eventFrameTemplateViewId, f
 		eventFrameAttributeTemplates = EventFrameAttributeTemplate.query.join(EventFrameAttributeTemplateEventFrameTemplateView). \
 			with_entities(EventFrameAttributeTemplate.Name). \
 			filter(EventFrameAttributeTemplateEventFrameTemplateView.EventFrameTemplateViewId == eventFrameTemplateViewId). \
-			order_by(EventFrameAttributeTemplate.Name)
+			order_by(EventFrameAttributeTemplateEventFrameTemplateView.Order)
 
 	for eventFrameAttributeTemplate in eventFrameAttributeTemplates:
 		dynamicColumns = dynamicColumns + \
