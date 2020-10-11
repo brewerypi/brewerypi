@@ -1,7 +1,5 @@
 {% extends "base.html" %}
-
 {% block title %}Event Frame Dashboard{% endblock %}
-
 {% block page_content %}
     <div>
         <ol class = "breadcrumb">
@@ -108,6 +106,7 @@
                         <th></th>
                         <th>Template</th>
                         <th>Name</th>
+                        <th>Source Event Frame</th>
                         <th>User</th>
                         <th>Start</th>
                         <th>End</th>
@@ -117,7 +116,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for eventFrame in eventFrame.EventFrames %}
+                    {% for eventFrame in eventFrame.ChildEventFrames %}
                         <tr>
                             {% if eventFrameEventFrameGroup is none %}
                                 <td><a class = "btn btn-default" title = "Select" href = '{{ url_for("eventFrames.dashboard",
@@ -129,6 +128,7 @@
                             {% endif %}
                             <td>{{ eventFrame.EventFrameTemplate.Name }}</td>
                             <td>{{ eventFrame.Name }}</td>
+                            <td>{{ eventFrame.SourceEventFrame.Name }}</td>
                             <td>{{ eventFrame.User.Name }}</td>
                             <td>{{ moment(eventFrame.StartTimestamp).format("YYYY-MM-DD HH:mm:ss") }}</td>
                             {% if eventFrame.EndTimestamp %}
@@ -374,7 +374,7 @@
                 tabIndex = tabIndex + 1
                 $("#aAddEventFrameNote").attr("tabindex", tabIndex)
                 tabIndex = tabIndex + 1
-                $($("ol.breadcrumb > li:not(.active) > a").get().reverse()).each(function()       
+                $($("ol.breadcrumb > li:not(.active) > a").get().reverse()).each(function()
                 {
                     $(this).attr("tabindex", tabIndex)
                     tabIndex = tabIndex + 1
@@ -394,6 +394,7 @@
                 "columns":
                 [
                     { "orderable": false }, // Select button.
+                    null,
                     null,
                     null,
                     null,

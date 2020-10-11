@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% set namespace = namespace(numberOfDefaultColumnsForEventFrames = 12) %}
+{% set namespace = namespace(numberOfDefaultColumnsForEventFrames = 13) %}
 {% block title %}Event Frames{% endblock %}
 {% block page_content %}
     <div>
@@ -167,6 +167,7 @@
                         <th></th>
                     {% elif childrenClass == "EventFrame" %}
                         <th>Element</th>
+                        <th>Source Event Frame</th>
                         <th>User</th>
                         <th id = "thStartTimestamp">Start Timestamp</th>
                         <th id = "thEndTimestamp">End Timestamp</th>
@@ -244,6 +245,11 @@
                                 <td>{{ child.Name }}<a href = '{{ url_for("messages.listMessages") }}'>
                                     <span id = "spanEventFrameMessages{{ child.EventFrameId }}" class = "badge" style = "visibility: hidden"></span></a></td>
                                 <td>{{ child.ElementName }}</td>
+                                {% if child.SourceEventFrameName == None %}
+                                    <td></td>
+                                {% else %}
+                                    <td>{{ child.SourceEventFrameName }}</td>
+                                {% endif %}
                                 <td>{{ child.UserName }}</td>
                                 <td>{{ moment(child.StartTimestamp).format("YYYY-MM-DD HH:mm:ss") }}</td>
                                 {% if child.EndTimestamp %}
@@ -486,6 +492,7 @@
                         { "orderable": false }, // Edit button.
                         { "orderable": false }  // Delete button.
                     {% elif childrenClass == "EventFrame" %}
+                        null,
                         null,
                         null,
                         null,
