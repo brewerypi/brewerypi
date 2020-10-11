@@ -184,14 +184,8 @@ def dashboard(eventFrameId, eventFrameGroupId = None, eventFrameTemplateView = N
 	for eventFrameAttribute in eventFrameAttributes:
 		eventFrameAttributeIds.append(eventFrameAttribute.EventFrameAttributeId)
 
-	if eventFrame.EndTimestamp:
-		tagValues = TagValue.query.join(Tag, EventFrameAttribute).filter(EventFrameAttribute.EventFrameAttributeId.in_(eventFrameAttributeIds),
-			TagValue.Timestamp >= eventFrame.StartTimestamp, TagValue.Timestamp <= eventFrame.EndTimestamp)
-	else:
-		tagValues = TagValue.query.join(Tag, EventFrameAttribute).filter(EventFrameAttribute.EventFrameAttributeId.in_(eventFrameAttributeIds),
-			TagValue.Timestamp >= eventFrame.StartTimestamp)
 	return render_template("eventFrames/dashboard.html", eventFrame = eventFrame, eventFrameEventFrameGroup = eventFrameEventFrameGroup,
-		eventFrameAttributes = eventFrameAttributes, eventFrameTemplateView = eventFrameTemplateView, tagValues = tagValues)
+		eventFrameAttributes = eventFrameAttributes, eventFrameTemplateView = eventFrameTemplateView)
 
 @eventFrames.route("/eventFrames/delete/<int:eventFrameId>", methods = ["GET", "POST"])
 @login_required
