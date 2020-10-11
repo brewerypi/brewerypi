@@ -57,7 +57,7 @@
                             <a title = "Previous" href = '{{ url_for("eventFrames.dashboard", eventFrameId = previousEventFrameId,
                                 eventFrameGroupId = eventFrameEventFrameGroup.EventFrameGroupId) }}'><span class = "glyphicon glyphicon-arrow-left"></span></a>
                             <a title = "Next" href = '{{ url_for("eventFrames.dashboard", eventFrameId = nextEventFrameId,
-                                eventFrameGroupId = eventFrameEventFrameGroup.EventFrameGroupId) }}'><span class = "glyphicon glyphicon-arrow-right"></span></a>                    
+                                eventFrameGroupId = eventFrameEventFrameGroup.EventFrameGroupId) }}'><span class = "glyphicon glyphicon-arrow-right"></span></a>
                         {% endif %}                        
                         {% if eventFrame.ParentEventFrameId is none %}
                             {{ eventFrame.Name }}
@@ -209,11 +209,8 @@
                 <tr>
                     <th></th>
                     <th>Name</th>
-                    <th>Last Timestamp</th>
-                    <th>Last Value</th>
-                    <th>Unit</th>
-                    <th>New Value</th>
-                    <th>New Timestamp</th>
+                    <th>Value</th>
+                    <th>Timestamp</th>
                     <th><button class = "btn btn-default" id = "buttonSave" title = "Save All"><span class = "glyphicon glyphicon-floppy-disk"></span>
                         </button></th>
                     <th></th>
@@ -234,82 +231,67 @@
                                 eventFrameGroupId = eventFrameEventFrameGroup.EventFrameGroupId) }}'><span class = "glyphicon glyphicon-list"></span></a></td>
                         {% endif %}
                         <td>{{ eventFrameAttribute.EventFrameAttributeTemplate.Name }}</td>
-                        {% if tagValues.filter_by(TagId = eventFrameAttribute.TagId).count() > 0 %}
-                            {% set firstTagValue = tagValues.filter_by(TagId = eventFrameAttribute.TagId ) | sort(attribute = "Timestamp", reverse = True) |
-                                first %}
-                            <td id = "tdLastTimestamp{{ eventFrameAttribute.Tag.TagId }}">{{ moment(firstTagValue.Timestamp).format("YYYY-MM-DD HH:mm:ss") }}
-                                </td>
-                            {% if eventFrameAttribute.Tag.LookupId %}
-                                <td id = "tdLastValue{{ eventFrameAttribute.Tag.TagId }}">{{ eventFrameAttribute.Tag.Lookup.LookupValues | 
-                                        selectattr("Value", "equalto", firstTagValue.Value) | map(attribute = "Name") | list | first }}          
-                                <td>{{ eventFrameAttribute.Tag.Lookup.Name }}</td>
-                            {% else %}
-                                <td id = "tdLastValue{{ eventFrameAttribute.Tag.TagId }}">{{ firstTagValue.Value }}</td>                    
-                                <td>{{ firstTagValue.Tag.UnitOfMeasurement.Abbreviation }}</td>
-                            {% endif %}
-                        {% else %}
-                            <td id = "tdLastTimestamp{{ eventFrameAttribute.Tag.TagId }}"></td>
-                            <td id = "tdLastValue{{ eventFrameAttribute.Tag.TagId }}"></td>
-                            {% if eventFrameAttribute.EventFrameAttributeTemplate.LookupId %}
-                                <td>{{ eventFrameAttribute.EventFrameAttributeTemplate.Lookup.Name }}</td>
-                            {% else %}
-                                <td>{{ eventFrameAttribute.EventFrameAttributeTemplate.UnitOfMeasurement.Abbreviation }}</td>
-                            {% endif %}
-                        {% endif %}
+                        {% set lastAttributeValue =
+                            eventFrame.lastAttributeValue(eventFrameAttribute.EventFrameAttributeTemplate.EventFrameAttributeTemplateId) %}
                         <td>
                             <div class = "form-group" id = "divNewValue{{ eventFrameAttribute.Tag.TagId }}">
                             {% if eventFrameAttribute.Tag.LookupId %}
-                                <select class = "form-control" id = "inputOrSelectNewValue{{ eventFrameAttribute.Tag.TagId }}">
-                                    <option value = "-1"></option>
+                                <select class = "form-control" id = "inputOrSelectNewValue{{ eventFrameAttribute.Tag.TagId }}" style = "color: #999999">
+                                    <option value = "-1" style = "color: #999999">{{ lastAttributeValue.lookupValueName() if lastAttributeValue else "" }}
+                                        </option>
                                     {% for lookupValue in eventFrameAttribute.Tag.Lookup.LookupValues %}
                                         {% if lookupValue.Selectable %}
-                                            <option value = "{{ lookupValue.Value }}">{{ lookupValue.Name}}</option>
+                                            <option value = "{{ lookupValue.Value }}" style = "color: #000000">{{ lookupValue.Name}}</option>
                                         {% endif %}
                                     {% endfor %}
                                 </select>
                                 <p class = "help-block" id = "pNewValue{{ eventFrameAttribute.Tag.TagId }}"></p>
                             {% else %}
-                                <input class = "form-control" id = "inputOrSelectNewValue{{ eventFrameAttribute.Tag.TagId }}" value = "">
+                                <input class = "form-control" id = "inputOrSelectNewValue{{ eventFrameAttribute.Tag.TagId }}"
+                                    placeholder = '{{ lastAttributeValue.Value | string + " " +
+                                    lastAttributeValue.Tag.UnitOfMeasurement.Abbreviation if lastAttributeValue else
+                                    eventFrameAttribute.EventFrameAttributeTemplate.UnitOfMeasurement.Abbreviation }}' value = "">
                                 <p class = "help-block" id = "pNewValue{{ eventFrameAttribute.Tag.TagId }}"></p>
                             {% endif %}
                             </div>
                         </td>
                         <td>
                             <div class = "form-group" id = "divNewTimestamp{{ eventFrameAttribute.Tag.TagId }}">
-                                <input class = "form-control" id = "inputNewTimestamp{{ eventFrameAttribute.Tag.TagId }}" value = "">
+                                <input class = "form-control" id = "inputNewTimestamp{{ eventFrameAttribute.Tag.TagId }}"
+                                    placeholder = '{{ lastAttributeValue.Timestamp if lastAttributeValue else "" }}' value = "">
                                 <p class = "help-block" id = "pNewTimestamp{{ eventFrameAttribute.Tag.TagId }}"></p>
                             </div>
                         </td>
                         <td></td>
-                        {% if tagValues.filter_by(TagId = eventFrameAttribute.TagId).count() > 0 %}
-                            {% if firstTagValue.TagValueNotes[0] %}
+                        {% if lastAttributeValue %}
+                            {% if lastAttributeValue.TagValueNotes[0] %}
                                 {% set noteButtonClass = "btn btn-default has-note" %}
                             {% else %}
                                 {% set noteButtonClass = "btn btn-default" %}
                             {% endif %}
                             {% if eventFrameEventFrameGroup is none %}
                                 <td><a class = "{{ noteButtonClass }}" title = "Last Value Notes" href = '{{ url_for("tagValueNotes.listTagValueNotes", 
-                                    tagValueId = firstTagValue.TagValueId, eventFrameId = eventFrame.EventFrameId,
+                                    tagValueId = lastAttributeValue.TagValueId, eventFrameId = eventFrame.EventFrameId,
                                     eventFrameAttributeId = eventFrameAttribute.EventFrameAttributeId) }}'><span class = "glyphicon glyphicon-comment"></span>
                                     </a></td>
                                 <td><a class = "btn btn-default" title = "Edit Last Value" href = '{{ url_for("tagValues.editTagValue",
-                                    tagValueId = firstTagValue.TagValueId, eventFrameId = eventFrame.EventFrameId,
+                                    tagValueId = lastAttributeValue.TagValueId, eventFrameId = eventFrame.EventFrameId,
                                     eventFrameAttributeId = eventFrameAttribute.EventFrameAttributeId) }}'><span class = "glyphicon glyphicon-edit"></span>
                                     </a></td>
                             {% else %}
                                 <td><a class = "{{ noteButtonClass }}" title = "Last Value Notes" href = '{{ url_for("tagValueNotes.listTagValueNotes", 
-                                    tagValueId = firstTagValue.TagValueId, eventFrameId = eventFrame.EventFrameId,
+                                    tagValueId = lastAttributeValue.TagValueId, eventFrameId = eventFrame.EventFrameId,
                                     eventFrameAttributeId = eventFrameAttribute.EventFrameAttributeId,
                                     eventFrameGroupId = eventFrameEventFrameGroup.EventFrameGroupId) }}'><span class = "glyphicon glyphicon-comment"></span></a>
                                     </td>
                                 <td><a class = "btn btn-default" title = "Edit Last Value" href = '{{ url_for("tagValues.editTagValue",
-                                    tagValueId = firstTagValue.TagValueId, eventFrameId = eventFrame.EventFrameId,
+                                    tagValueId = lastAttributeValue.TagValueId, eventFrameId = eventFrame.EventFrameId,
                                     eventFrameAttributeId = eventFrameAttribute.EventFrameAttributeId,
                                     eventFrameGroupId = eventFrameEventFrameGroup.EventFrameGroupId) }}'><span class = "glyphicon glyphicon-edit"></span>
                                     </a></td>
                             {% endif %}
                             <td><a class = "btn btn-default" title = "Delete Last Value"
-                                href = '{{ url_for("tagValues.deleteTagValue", tagValueId = firstTagValue.TagValueId) }}'>
+                                href = '{{ url_for("tagValues.deleteTagValue", tagValueId = lastAttributeValue.TagValueId) }}'>
                                 <span class = "glyphicon glyphicon-trash"></span></a></td>
                         {% else %}
                             <td></td>
@@ -440,11 +422,8 @@
                 [
                     { "orderable": false }, // Attribute values button.
                     null,                   // Attribute value name.
-                    null,                   // Last timestamp.
-                    null,                   // Last value.
-                    { "orderable": false }, // Unit.
-                    { "orderable": false }, // New value.
-                    { "orderable": false }, // New timestamp.
+                    { "orderable": false }, // Value.
+                    { "orderable": false }, // Timestamp.
                     { "orderable": false }, // Save all button.
                     { "orderable": false }, // Notes button.
                     { "orderable": false }, // Edit attribute value button.
@@ -457,32 +436,30 @@
                             {"visible": false, "targets": 0},
                         {% endif %}
 
-                        {% if eventFrameTemplateView.dictionary()["showLastTimestamp"] == "False" %}
-                            {"visible": false, "targets": 2},
-                        {% endif %}
-
-                        {% if eventFrameTemplateView.dictionary()["showLastValue"] == "False" %}
-                            {"visible": false, "targets": 3},
-                        {% endif %}
-
-                        {% if eventFrameTemplateView.dictionary()["showUnit"] == "False" %}
-                            {"visible": false, "targets": 4},
-                        {% endif %}
-
                         {% if eventFrameTemplateView.dictionary()["showNoteButton"] == "False" %}
-                            {"visible": false, "targets": 8},
+                            {"visible": false, "targets": 5},
                         {% endif %}
 
                         {% if eventFrameTemplateView.dictionary()["showEditButton"] == "False" %}
-                            {"visible": false, "targets": 9},
+                            {"visible": false, "targets": 6},
                         {% endif %}
 
                         {% if eventFrameTemplateView.dictionary()["showDeleteButton"] == "False" %}
-                            {"visible": false, "targets": 10},
+                            {"visible": false, "targets": 7},
                         {% endif %}
                     ],
                 {% endif %}
                 "pageLength": 25
+            })
+
+            attributesTable.$("[id^=inputNewTimestamp]").each(function()
+            {
+                placeholder = $(this).attr("placeholder")
+                if (placeholder != "")
+                {
+                    placeholderTimestampLocal = moment.utc(placeholder, "YYYY-MM-DD HH:mm:ss").local().format("YYYY-MM-DD HH:mm:ss")
+                    $(this).attr("placeholder", placeholderTimestampLocal)
+                }
             })
 
             $("#eventFrameNotesTable").DataTable
@@ -616,7 +593,7 @@
                     {
                         $(".alert").remove()
                         $("#divFlashedMessages").append("<div class = \"alert alert-danger\"><button type = \"button\" class = \"close\" " +
-                            "data-dismiss = \"alert\">&times;</button>The attempt to save one or more new element attribute values failed.</div>")                        
+                            "data-dismiss = \"alert\">&times;</button>The attempt to save one or more new element attribute values failed.</div>")
                     })
                 }
             })
@@ -644,6 +621,21 @@
                 {
                     var timestamp = new moment()
                     $("#inputNewTimestamp" + id).val(timestamp.format("YYYY-MM-DD HH:mm:ss"))
+                }
+            })
+
+            $("[id^=inputOrSelectNewValue]").on("change", function()
+            {
+                if ($(this).is("select"))
+                {
+                    if ($(this).val() == -1)
+                    {
+                        $(this).attr("style", "color: #999999")
+                    }
+                    else
+                    {
+                        $(this).attr("style", "color: #000000")
+                    }
                 }
             })
 

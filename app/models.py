@@ -377,6 +377,16 @@ class EventFrame(db.Model):
 	def id(self):
 		return self.EventFrameId
 
+	def lastAttributeValue(self, eventFrameAttributeTemplateId):
+		if self.EndTimestamp is None:
+			tagValue = TagValue.query.join(Tag, EventFrameAttribute).filter(EventFrameAttribute.ElementId == self.ElementId, EventFrameAttribute.EventFrameAttributeTemplateId == eventFrameAttributeTemplateId,
+				TagValue.Timestamp >= self.StartTimestamp).order_by(TagValue.Timestamp.desc()).first()
+		else:
+			tagValue = TagValue.query.join(Tag, EventFrameAttribute).filter(EventFrameAttribute.ElementId == self.ElementId, EventFrameAttribute.EventFrameAttributeTemplateId == eventFrameAttributeTemplateId,
+				TagValue.Timestamp >= self.StartTimestamp, TagValue.Timestamp <= self.EndTimestamp).order_by(TagValue.Timestamp.desc()).first()
+
+		return tagValue
+
 	def lineage(self, linealDescent, level):
 		linealDescent.append({"eventFrame" : self, "level" : level})
 		if self.hasDescendants():
@@ -1115,6 +1125,12 @@ class TagValue(db.Model):
 
 	def id(self):
 		return self.TagValueId
+
+	def lookupValueName(self):
+		if self.Tag.LookupId:
+			return LookupValue.query.filter_by(LookupId = self.Tag.LookupId, Value = self.Value).one().Name
+		else:
+			return None
 
 	def next(self, eventFrameId = None):
 		return next(self.nextAndPreviousList(eventFrameId), self)
