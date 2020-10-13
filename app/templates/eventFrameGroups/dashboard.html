@@ -46,7 +46,7 @@
                 <a type = "button" class = "{{ class }}" title = "All" 
                     href = '{{ url_for("eventFrameGroups.dashboard", eventFrameGroupId = eventFrameGroup.EventFrameGroupId,
                     displayEventFrameTemplateId = displayEventFrameTemplate.EventFrameTemplateId, eventFrameTemplateViewId = 0) }}' role = "button">All</a>
-                {% for eventFrameTemplateView in displayEventFrameTemplate.EventFrameTemplateViews | sort(attribute = "Name") %}
+                {% for eventFrameTemplateView in displayEventFrameTemplate.EventFrameTemplateViews.filter_by(Selectable = true) | sort(attribute = "Order") %}
                     {% if eventFrameTemplateView.EventFrameTemplateViewId ==  activeEventFrameTemplateViewId %}
                         {% set class = "btn btn-primary btn-xs active" %}
                     {% else %}
@@ -112,18 +112,23 @@
                                 {% for eventFrameAttributeTemplate in eventFrameAttributeTemplates %}
                                     {% set tagId = eventFrameAttributeTemplate.EventFrameAttributes.filter_by(ElementId = eventFrame.ElementId) |
                                         map(attribute = "TagId") | first%}
+                                    {% set lastAttributeValue = eventFrame.lastAttributeValue(eventFrameAttributeTemplate.EventFrameAttributeTemplateId) %}
                                     {% set disabled = "" if eventFrame.EndTimestamp is none and tagId is defined else "disabled" %}
                                     <td>
                                         <div class = "form-group" id = "divNewValue{{ tagId }}">
                                             {% if eventFrameAttributeTemplate.LookupId is none %}
-                                                <input class = "form-control" id = "inputOrSelectNewValue{{ tagId }}" value = "" {{ disabled }}>
+                                                <input class = "form-control" id = "inputOrSelectNewValue{{ tagId }}"
+                                                    placeholder = '{{ lastAttributeValue.Value | string + " "  +
+                                                    lastAttributeValue.Tag.UnitOfMeasurement.Abbreviation if lastAttributeValue else
+                                                    eventFrameAttributeTemplate.UnitOfMeasurement.Abbreviation }}', value = "" {{ disabled }}>
                                                 <p class = "help-block" id = "pNewValue{{ tagId }}"></p>
                                             {% else %}
-                                                <select class = "form-control" id = "inputOrSelectNewValue{{ tagId }}" {{ disabled }}>
-                                                    <option value = "-1"></option>
+                                                <select class = "form-control" id = "inputOrSelectNewValue{{ tagId }}" {{ disabled }} style = "color: #999999">
+                                                    <option value = "-1" style = "color: #999999">
+                                                        {{ lastAttributeValue.lookupValueName() if lastAttributeValue else "" }}</option>
                                                     {% for lookupValue in eventFrameAttributeTemplate.Lookup.LookupValues %}
                                                         {% if lookupValue.Selectable %}
-                                                            <option value = "{{ lookupValue.Value }}">{{ lookupValue.Name}}</option>
+                                                            <option value = "{{ lookupValue.Value }}" style = "color: #000000">{{ lookupValue.Name}}</option>
                                                         {% endif %}
                                                     {% endfor %}
                                                 </select>
@@ -353,6 +358,21 @@
                 if (event.which == 13)
                 {
                     $("#buttonSave").focus()
+                }
+            })
+
+            $("[id^=inputOrSelectNewValue]").on("change", function()
+            {
+                if ($(this).is("select"))
+                {
+                    if ($(this).val() == -1)
+                    {
+                        $(this).attr("style", "color: #999999")
+                    }
+                    else
+                    {
+                        $(this).attr("style", "color: #000000")
+                    }
                 }
             })
 

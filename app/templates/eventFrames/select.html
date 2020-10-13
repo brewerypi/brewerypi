@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% set namespace = namespace(numberOfDefaultColumnsForEventFrames = 12) %}
+{% set namespace = namespace(numberOfDefaultColumnsForEventFrames = 13) %}
 {% block title %}Event Frames{% endblock %}
 {% block page_content %}
     <div>
@@ -108,7 +108,7 @@
     </div>
     <div>
         {% if childrenClass == "ElementTemplate" %}
-            <a class = "btn btn-default" title = "Dash" href = '{{ url_for("dashes.activeEventFramesSummary", siteId = parent.SiteId) }}'>
+            <a class = "btn btn-default" title = "Dash" href = '{{ url_for("dashes.eventFramesSummary", siteId = parent.SiteId) }}'>
                 <span class = "glyphicon glyphicon-stats"></span></a>
             <br><br>
         {% elif childrenClass == "EventFrameTemplate" %}
@@ -116,14 +116,14 @@
                 <a class = "btn btn-default" title = "Add" href = '{{ url_for("eventFrameTemplates.addEventFrameTemplate", elementTemplateId = parent.id()) }}'
                     role = "button"><span class = "glyphicon glyphicon-plus"></span></a>
             {% endif %}
-            <a class = "btn btn-default" title = "Dash" href = '{{ url_for("dashes.activeEventFramesSummary", elementTemplateId = parent.ElementTemplateId) }}'>
+            <a class = "btn btn-default" title = "Dash" href = '{{ url_for("dashes.eventFramesSummary", elementTemplateId = parent.ElementTemplateId) }}'>
                 <span class = "glyphicon glyphicon-stats"></span></a>
             <br><br>
         {% elif childrenClass == "EventFrame" %}
             <a class = "btn btn-default" title = "Add" href = '{{ url_for("eventFrames.addEventFrame", eventFrameTemplateId = parent.id()) }}' role = "button">
                 <span class = "glyphicon glyphicon-plus"></span></a>
-            <a class = "btn btn-default" title = "Dash" href = '{{ url_for("dashes.activeEventFramesSummary",
-                eventFrameTemplateId = parent.EventFrameTemplateId) }}'><span class = "glyphicon glyphicon-stats"></span></a>
+            <a class = "btn btn-default" title = "Dash" href = '{{ url_for("dashes.eventFramesSummary",
+                eventFrameTemplateId = parent.EventFrameTemplateId, months = months) }}'><span class = "glyphicon glyphicon-stats"></span></a>
             <br><br>
         {% elif childrenClass == "DescendantEventFrameTemplate" %}
             <a class = "btn btn-default" title = "Add" href = '{{ url_for("eventFrameTemplates.addEventFrameTemplate",
@@ -167,6 +167,7 @@
                         <th></th>
                     {% elif childrenClass == "EventFrame" %}
                         <th>Element</th>
+                        <th>Source Event Frame</th>
                         <th>User</th>
                         <th id = "thStartTimestamp">Start Timestamp</th>
                         <th id = "thEndTimestamp">End Timestamp</th>
@@ -244,6 +245,11 @@
                                 <td>{{ child.Name }}<a href = '{{ url_for("messages.listMessages") }}'>
                                     <span id = "spanEventFrameMessages{{ child.EventFrameId }}" class = "badge" style = "visibility: hidden"></span></a></td>
                                 <td>{{ child.ElementName }}</td>
+                                {% if child.SourceEventFrameName == None %}
+                                    <td></td>
+                                {% else %}
+                                    <td>{{ child.SourceEventFrameName }}</td>
+                                {% endif %}
                                 <td>{{ child.UserName }}</td>
                                 <td>{{ moment(child.StartTimestamp).format("YYYY-MM-DD HH:mm:ss") }}</td>
                                 {% if child.EndTimestamp %}
@@ -346,37 +352,43 @@
         </div>
         <div class = "page-header">
             <h1>Event Frames <small>Event Frame Template Views</small></h1>
-        </div>
-        <div>
             <a class = "btn btn-default" title = "Add Event Frame Template View"
                 href = '{{ url_for("eventFrameTemplateViews.add", eventFrameTemplateId = parent.EventFrameTemplateId) }}' role = "button">
                 <span class = "glyphicon glyphicon-plus"></span></a>
             <br><br>
+            <div id = "divEventFrameTemplateViewsReorderedFlashedMessages">
+            </div>
             <table id = "eventFrameTemplateViewsTable" class = "table table-hover" style = "display:none">
                 <thead>
                     <tr>
-                        <th></th>
+                        <th>Order</th>
+                        <th>EventFrameTemplateViewId</th>
                         <th>Name</th>
                         <th>Description</th>
                         <th>Default</th>
+                        <th>Selectable</th>
+                        <th></th>
+                        <th></th>
                         <th></th>
                         <th></th>
                     </tr>
                 </thead>
                 <tbody>
-                    {% for eventFrameTemplateView in parent.EventFrameTemplateViews %}
-                    <tr>
-                        {% if current_user.isAdministrator() %}
-                            <td><a class = "btn btn-default" title = "Select" href = '{{ url_for("eventFrameTemplateViews.eventFrameAttributeTemplates",
-                                eventFrameTemplateViewId = eventFrameTemplateView.EventFrameTemplateViewId) }}'><span class = "glyphicon glyphicon-list">
-                                </span></a></td>
-                        {% else %}
-                            <td></td>
-                        {% endif %}
+                    {% for eventFrameTemplateView in parent.EventFrameTemplateViews | sort(attribute = "Order")%}
+                    <tr data-eventFrameTemplateViewId = "{{ eventFrameTemplateView.EventFrameTemplateViewId }}">
+                        <td >{{ loop.index }}</td>
+                        <td>{{ eventFrameTemplateView.EventFrameTemplateViewId }}</td>
                         <td>{{ eventFrameTemplateView.Name }}</td>
                         <td>{{ eventFrameTemplateView.Description }}</td>
                         <td>{{ eventFrameTemplateView.Default | yesNo }}</td>
+                        <td>{{ eventFrameTemplateView.Selectable | yesNo }}</td>
                         {% if current_user.isAdministrator() %}
+                            <td><a class = "btn btn-default" title = "Configure" href = '{{ url_for("eventFrameTemplateViews.eventFrameAttributeTemplates",
+                                eventFrameTemplateViewId = eventFrameTemplateView.EventFrameTemplateViewId) }}'><span class = "glyphicon glyphicon-wrench">
+                                </span></a></td>
+                            <td><a class = "btn btn-default" title = "Copy" href = '{{ url_for("eventFrameTemplateViews.copy",
+                                fromEventFrameTemplateViewId = eventFrameTemplateView.EventFrameTemplateViewId) }}'>
+                                <span class = "glyphicon glyphicon-copy"></span></a></td>
                             <td><a class = "btn btn-default" title = "Edit" href = '{{ url_for("eventFrameTemplateViews.edit",
                                 eventFrameTemplateViewId = eventFrameTemplateView.EventFrameTemplateViewId) }}'>
                                 <span class = "glyphicon glyphicon-edit"></span></a></td>
@@ -385,6 +397,8 @@
                                 data-type = "event frame template view", data-name = "{{ eventFrameTemplateView.Name }}">
                                 <span class = "glyphicon glyphicon-trash"></span></a></td>
                         {% else %}
+                            <td></td>
+                            <td></td>
                             <td></td>
                             <td></td>
                         {% endif %}
@@ -483,6 +497,7 @@
                         null,
                         null,
                         null,
+                        null,
                         { "orderable": false }, // Associate button.
                         { "orderable": false }, // Stop button.
                         { "orderable": false }, // Edit button.
@@ -537,22 +552,16 @@
 
             var eventFrameTemplateViewsTable = $('#eventFrameTemplateViewsTable').DataTable
             ({
-                "order":
+
+                "pageLength": 25,
+                "rowReorder": true,
+                "searching": false,
+                columnDefs:
                 [
-                    [1, 'asc']              // Name.
-                ],
-                "columns":
-                [
-                    { "orderable": false }, // Select button.
-                    null,
-                    null,
-                    null,
-                    { "orderable": false }, // Edit button.
-                    { "orderable": false }  // Delete button.
-                ],
-                "stateSave": true,
-                "stateDuration": 0,
-                "pageLength": 25
+                    {orderable: true, className: "reorder", targets: 0},
+                    {orderable: false, targets: "_all"},
+                    {visible: false, targets: 1}
+                ]
             })
 
             $("#table").attr("style", "width:100%")
@@ -612,6 +621,35 @@
                 {
                     $(this).addClass("active")
                 }
+            })
+
+            eventFrameTemplateViewsTable.on("row-reorder", function(e, details, edit)
+            {
+                var incomingEventFrameTemplateViews = {}
+                for(var i = 0, ien = details.length; i < ien; i++)
+                {
+                    var rowData = eventFrameTemplateViewsTable.row(details[i].node).data();
+                    var newOrder = details[i].newData
+                    incomingEventFrameTemplateViews[rowData[1]] = newOrder
+                }
+
+                $.ajax(
+                {
+                    type : "POST",
+                    url : "/eventFrameTemplateViews/reorder/{{ parent.EventFrameTemplateId }}",
+                    data : JSON.stringify(incomingEventFrameTemplateViews)
+                }).done(function()
+                {
+                    $(".alert").remove()
+                    $("#divEventFrameTemplateViewsReorderedFlashedMessages").append("<div class = \"alert alert-success\"><button type = \"button\" " +
+                        "class = \"close\" data-dismiss = \"alert\">&times;</button>" +
+                        "The attempt to reorder one or more event frame template views was successful.</div>")
+                }).fail(function()
+                {
+                    $("#divEventFrameTemplateViewsReorderedFlashedMessages").append("<div class = \"alert alert-danger\"><button type = \"button\" " +
+                        "class = \"close\" data-dismiss = \"alert\">&times;</button>" +
+                        "The attempt to reorder one or more event frame template views failed.</div>")
+                })
             })
 
             table.columns().every(function ()

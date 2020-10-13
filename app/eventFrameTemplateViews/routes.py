@@ -2,7 +2,7 @@ import json
 from flask import flash, jsonify, redirect, render_template, request, url_for
 from flask_login import login_required
 from . import eventFrameTemplateViews
-from . forms import EventFrameTemplateViewForm
+from . forms import CopyEventFrameTemplateViewForm, EventFrameTemplateViewForm
 from .. import db
 from .. decorators import adminRequired
 from .. models import EventFrameAttributeTemplate, EventFrameTemplate, EventFrameTemplateView, EventFrameAttributeTemplateEventFrameTemplateView
@@ -25,8 +25,15 @@ def add(eventFrameTemplateId):
 			
 			db.session.commit()
 
+		eventFrameTemplateViewMaximumOrder = EventFrameTemplateView.query.filter_by(EventFrameTemplateId = eventFrameTemplateId). \
+			order_by(EventFrameTemplateView.Order.desc()).first()
+		if eventFrameTemplateViewMaximumOrder is None:
+			order = 1
+		else:
+			order = eventFrameTemplateViewMaximumOrder.Order + 1
+
 		eventFrameTemplateView = EventFrameTemplateView(Default = default, Description = form.description.data, EventFrameTemplateId = eventFrameTemplateId,
-			Name = form.name.data)
+			Name = form.name.data, Selectable = True if default else form.selectable.data, Order = order)
 		db.session.add(eventFrameTemplateView)
 		db.session.commit()
 		flash('You have successfully added the new event frame template view "{}".'.format(eventFrameTemplateView.Name), "alert alert-success")
@@ -70,6 +77,89 @@ def add(eventFrameTemplateId):
 
 	return render_template("addEdit.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
 
+@eventFrameTemplateViews.route("/eventFrameTemplateViews/copy/<int:fromEventFrameTemplateViewId>", methods = ["GET", "POST"])
+@login_required
+@adminRequired
+def copy(fromEventFrameTemplateViewId):
+	operation = "Copy"
+	form = CopyEventFrameTemplateViewForm()
+	fromEventFrameTemplateView = EventFrameTemplateView.query.get_or_404(fromEventFrameTemplateViewId)
+	if form.validate_on_submit():
+		default = form.default.data
+		if default is True:
+			for defaultEventFrameTemplateView in EventFrameTemplateView.query.filter_by(Default = True,
+				EventFrameTemplateId = fromEventFrameTemplateView.EventFrameTemplateId):
+				defaultEventFrameTemplateView.Default = False
+			
+			db.session.commit()
+
+		eventFrameTemplateViewMaximumOrder = EventFrameTemplateView.query.filter_by(EventFrameTemplateId = fromEventFrameTemplateView.EventFrameTemplateId). \
+			order_by(EventFrameTemplateView.Order.desc()).first()
+		if eventFrameTemplateViewMaximumOrder is None:
+			order = 1
+		else:
+			order = eventFrameTemplateViewMaximumOrder.Order + 1
+
+		eventFrameTemplateView = EventFrameTemplateView(Default = default, Description = form.description.data,
+			Dictionary = fromEventFrameTemplateView.Dictionary, EventFrameTemplateId = fromEventFrameTemplateView.EventFrameTemplateId,
+			Name = form.name.data, Order = order, Selectable = True if default else fromEventFrameTemplateView.Selectable)
+		db.session.add(eventFrameTemplateView)
+		db.session.commit()
+		for fromEventFrameAttributeTemplateEventFrameTemplateView in fromEventFrameTemplateView.EventFrameAttributeTemplateEventFrameTemplateViews:
+			eventFrameAttributeTemplateEventFrameTemplateView = EventFrameAttributeTemplateEventFrameTemplateView( \
+				EventFrameAttributeTemplateId = fromEventFrameAttributeTemplateEventFrameTemplateView.EventFrameAttributeTemplateId,
+				EventFrameTemplateViewId = eventFrameTemplateView.EventFrameTemplateViewId,
+				Order = fromEventFrameAttributeTemplateEventFrameTemplateView.Order)
+			db.session.add(eventFrameAttributeTemplateEventFrameTemplateView)
+
+		db.session.commit()
+		flash(f'You have successfully copied the event frame template view "{fromEventFrameTemplateView.Name}" to "{eventFrameTemplateView.Name}".',
+			"alert alert-success")
+		return redirect(url_for("eventFrameTemplateViews.eventFrameAttributeTemplates",
+			eventFrameTemplateViewId = eventFrameTemplateView.EventFrameTemplateViewId))
+
+	# Present a form to copy an event frame template view.
+	form.eventFrameTemplateId.data = fromEventFrameTemplateView.EventFrameTemplateId
+	breadcrumbs = []
+	if fromEventFrameTemplateView.EventFrameTemplate.hasParent():
+		breadcrumbs = [{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Root"), "text" : "<span class = \"glyphicon glyphicon-home\"></span>"},
+			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Enterprise",
+				selectedId = fromEventFrameTemplateView.EventFrameTemplate.origin().ElementTemplate.Site.Enterprise.EnterpriseId),
+				"text" : fromEventFrameTemplateView.EventFrameTemplate.origin().ElementTemplate.Site.Enterprise.Name},
+			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Site",
+				selectedId = fromEventFrameTemplateView.EventFrameTemplate.origin().ElementTemplate.Site.SiteId),
+				"text" : fromEventFrameTemplateView.EventFrameTemplate.origin().ElementTemplate.Site.Name},
+			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "ElementTemplate",
+				selectedId = fromEventFrameTemplateView.EventFrameTemplate.origin().ElementTemplate.ElementTemplateId),
+				"text" : fromEventFrameTemplateView.EventFrameTemplate.origin().ElementTemplate.Name}]
+		for eventFrameTemplateAcestor in fromEventFrameTemplateView.EventFrameTemplate.ancestors([]):
+			breadcrumbs.append({"url" : url_for("eventFrames.selectEventFrame", selectedClass = "EventFrameTemplate",
+				selectedId = eventFrameTemplateAcestor.EventFrameTemplateId, selectedOperation = "configure"), "text" : eventFrameTemplateAcestor.Name})
+
+		breadcrumbs.extend([{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "EventFrameTemplate",
+			selectedId = fromEventFrameTemplateView.EventFrameTemplate.EventFrameTemplateId, selectedOperation = "configure"),
+			"text" : fromEventFrameTemplateView.EventFrameTemplate.Name}, {"url" : None, "text" : fromEventFrameTemplateView.Name}])
+	else:
+		breadcrumbs = [{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Root"), "text" : "<span class = \"glyphicon glyphicon-home\"></span>"},
+			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Enterprise",
+				selectedId = fromEventFrameTemplateView.EventFrameTemplate.ElementTemplate.Site.Enterprise.EnterpriseId),
+				"text" : fromEventFrameTemplateView.EventFrameTemplate.ElementTemplate.Site.Enterprise.Name},
+			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "Site",
+				selectedId = fromEventFrameTemplateView.EventFrameTemplate.ElementTemplate.Site.SiteId),
+				"text" : fromEventFrameTemplateView.EventFrameTemplate.ElementTemplate.Site.Name},
+			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "ElementTemplate",
+				selectedId = fromEventFrameTemplateView.EventFrameTemplate.ElementTemplate.ElementTemplateId),
+				"text" : fromEventFrameTemplateView.EventFrameTemplate.ElementTemplate.Name},
+			{"url" : url_for("eventFrames.selectEventFrame", selectedClass = "EventFrameTemplate",
+				selectedId = fromEventFrameTemplateView.EventFrameTemplate.EventFrameTemplateId, selectedOperation = "configure"),
+				"text" : fromEventFrameTemplateView.EventFrameTemplate.Name},
+			{"url" : None, "text" : fromEventFrameTemplateView.Name}]
+
+	if form.requestReferrer.data is None:
+		form.requestReferrer.data = request.referrer
+
+	return render_template("addEdit.html", breadcrumbs = breadcrumbs, form = form, modelName = modelName, operation = operation)
+
 @eventFrameTemplateViews.route("/eventFrameTemplateViews/delete/<int:eventFrameTemplateViewId>", methods = ["GET", "POST"])
 @login_required
 @adminRequired
@@ -102,6 +192,7 @@ def edit(eventFrameTemplateViewId):
 		eventFrameTemplateView.Default = default
 		eventFrameTemplateView.EventFrameTemplateId = form.eventFrameTemplateId.data
 		eventFrameTemplateView.Name = form.name.data
+		eventFrameTemplateView.Selectable = True if default else form.selectable.data
 		db.session.commit()
 		flash('You have successfully edited the event frame template view "{}".'.format(eventFrameTemplateView.Name), "alert alert-success")
 		return redirect(form.requestReferrer.data)
@@ -112,6 +203,7 @@ def edit(eventFrameTemplateViewId):
 	form.eventFrameTemplateId.data = eventFrameTemplateView.EventFrameTemplateId
 	form.eventFrameTemplateViewId.data = eventFrameTemplateView.EventFrameTemplateViewId
 	form.name.data = eventFrameTemplateView.Name
+	form.selectable.data = eventFrameTemplateView.Selectable
 	if form.requestReferrer.data is None:
 		form.requestReferrer.data = request.referrer
 
@@ -191,3 +283,15 @@ def eventFrameAttributeTemplates(eventFrameTemplateViewId):
 		filter(EventFrameAttributeTemplate.EventFrameAttributeTemplateId.in_(excludedEventFrameAttributeTemplateIds))
 	return render_template("eventFrameTemplateViews/eventFrameAttributeTemplates.html", dictionary = eventFrameTemplateView.dictionary(),
 		eventFrameTemplateView = eventFrameTemplateView, excludedEventFrameAttributeTemplates = excludedEventFrameAttributeTemplates)
+
+@eventFrameTemplateViews.route("/eventFrameTemplateViews/reorder/<int:eventFrameTemplateId>", methods = ["GET", "POST"])
+@login_required
+@adminRequired
+def reorder(eventFrameTemplateId):
+	incomingEventFrameTemplateViews = request.get_json(force = True)
+	for eventFrameTemplateViewId in incomingEventFrameTemplateViews:
+		eventFrameTemplateView = EventFrameTemplateView.query.get_or_404(eventFrameTemplateViewId)
+		eventFrameTemplateView.Order = incomingEventFrameTemplateViews[eventFrameTemplateViewId]
+
+	db.session.commit()
+	return jsonify()

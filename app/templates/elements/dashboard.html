@@ -34,11 +34,8 @@
                 <tr>
                     <th></th>
                     <th>Name</th>
-                    <th>Last Timestamp</th>
-                    <th>Last Value</th>
-                    <th>Unit</th>
-                    <th>New Value</th>
-                    <th>New Timestamp</th>
+                    <th>Value</th>
+                    <th>Timestamp</th>
                     <th><button class = "btn btn-default" id = "buttonSave" title = "Save All"><span class = "glyphicon glyphicon-floppy-disk"></span>
                         </button></th>
                     <th></th>
@@ -52,61 +49,51 @@
                         <td><a class = "btn btn-default" title = "Select" href = "{{ url_for("tagValues.listTagValues", 
                             elementAttributeId = elementAttribute.ElementAttributeId) }}"><span class = "glyphicon glyphicon-list"></span></a></td>
                         <td>{{ elementAttribute.ElementAttributeTemplate.Name }}</td>
-                        {% if elementAttribute.Tag.TagValues[0] %}
-                            {% set firstTagValue = elementAttribute.Tag.TagValues | sort(attribute = "Timestamp", reverse = True) | first %}
-                            <td id = "tdLastTimestamp{{ elementAttribute.Tag.TagId }}">{{ moment(firstTagValue.Timestamp).format("YYYY-MM-DD HH:mm:ss") }}</td>
-                            {% if elementAttribute.Tag.LookupId %}
-                                <td id = "tdLastValue{{ elementAttribute.Tag.TagId }}">{{ elementAttribute.Tag.Lookup.LookupValues | 
-                                        selectattr("Value", "equalto", firstTagValue.Value) | map(attribute = "Name") | list | first }}          
-                                <td>{{ elementAttribute.Tag.Lookup.Name }}</td>
-                            {% else %}
-                                <td id = "tdLastValue{{ elementAttribute.Tag.TagId }}">{{ firstTagValue.Value }}</td>                    
-                                <td>{{ firstTagValue.Tag.UnitOfMeasurement.Abbreviation }}</td>
-                            {% endif %}
-                        {% else %}
-                            <td id = "tdLastTimestamp{{ elementAttribute.Tag.TagId }}"></td>
-                            <td id = "tdLastValue{{ elementAttribute.Tag.TagId }}"></td>
-                            <td></td>
-                        {% endif %}
+                        {% set lastAttributeValue = elementAttribute.Tag.TagValues | sort(attribute = "Timestamp", reverse = True) | first %}
                         <td>
                             <div class = "form-group" id = "divNewValue{{ elementAttribute.Tag.TagId }}">
                                 {% if elementAttribute.Tag.LookupId %}
-                                    <select class = "form-control" id = "inputOrSelectNewValue{{ elementAttribute.Tag.TagId }}">
-                                        <option value = "-1"></option>
+                                    <select class = "form-control" id = "inputOrSelectNewValue{{ elementAttribute.Tag.TagId }}" style = "color: #999999">
+                                        <option value = "-1" style = "color: #999999">{{ lastAttributeValue.lookupValueName() if lastAttributeValue else "" }}
+                                            </option>
                                         {% for lookupValue in elementAttribute.Tag.Lookup.LookupValues %}
                                             {% if lookupValue.Selectable %}
-                                                <option value = "{{ lookupValue.Value }}">{{ lookupValue.Name}}</option>
+                                                <option value = "{{ lookupValue.Value }}" style = "color: #000000">{{ lookupValue.Name}}</option>
                                             {% endif %}
                                         {% endfor %}
                                     </select>
                                     <p class = "help-block" id = "pNewValue{{ elementAttribute.Tag.TagId }}"></p>
                                 {% else %}
-                                    <input class = "form-control" id = "inputOrSelectNewValue{{ elementAttribute.Tag.TagId }}" value = "">
+                                    <input class = "form-control" id = "inputOrSelectNewValue{{ elementAttribute.Tag.TagId }}"
+                                        placeholder = '{{ lastAttributeValue.Value | string + " " +
+                                        lastAttributeValue.Tag.UnitOfMeasurement.Abbreviation if lastAttributeValue else
+                                        elementAttribute.ElementAttributeTemplate.UnitOfMeasurement.Abbreviation }}' value = "">
                                     <p class = "help-block" id = "pNewValue{{ elementAttribute.Tag.TagId }}"></p>
                                 {% endif %}
                             </div>
                         </td>
                         <td>
                             <div class = "form-group" id = "divNewTimestamp{{ elementAttribute.Tag.TagId }}">
-                                <input class = "form-control" id = "inputNewTimestamp{{ elementAttribute.Tag.TagId }}" value = "">
+                                <input class = "form-control" id = "inputNewTimestamp{{ elementAttribute.Tag.TagId }}"
+                                    placeholder = '{{ lastAttributeValue.Timestamp if lastAttributeValue else "" }}'value = "">
                                 <p class = "help-block" id = "pNewTimestamp{{ elementAttribute.Tag.TagId }}"></p>
                             </div>
                         </td>
                         <td></td>
                         {% if elementAttribute.Tag.TagValues[0] %}
-                            {% if firstTagValue.TagValueNotes[0] %}
+                            {% if lastAttributeValue.TagValueNotes[0] %}
                                 {% set noteButtonClass = "btn btn-default has-note" %}
                             {% else %}
                                 {% set noteButtonClass = "btn btn-default" %}
                             {% endif %}
-                            <td><a class = "{{ noteButtonClass }}" title = "Last Value Notes" href = "{{ url_for("tagValueNotes.listTagValueNotes", 
-                                    tagValueId = firstTagValue.TagValueId, elementAttributeId = elementAttribute.ElementAttributeId) }}">
+                            <td><a class = "{{ noteButtonClass }}" title = "Last Value Notes" href = '{{ url_for("tagValueNotes.listTagValueNotes", 
+                                    tagValueId = lastAttributeValue.TagValueId, elementAttributeId = elementAttribute.ElementAttributeId) }}'>
                                     <span class = "glyphicon glyphicon-comment"></span></a></td>
                             <td><a class = "btn btn-default" title = "Edit Last Value"
-                                href = "{{ url_for("tagValues.editTagValue", tagValueId = firstTagValue.TagValueId,
-                                elementAttributeId = elementAttribute.ElementAttributeId) }}"><span class = "glyphicon glyphicon-edit"></span></a></td>
+                                href = '{{ url_for("tagValues.editTagValue", tagValueId = lastAttributeValue.TagValueId,
+                                elementAttributeId = elementAttribute.ElementAttributeId) }}'><span class = "glyphicon glyphicon-edit"></span></a></td>
                             <td><a class = "btn btn-default" title = "Delete Last Value"
-                                href = "{{ url_for("tagValues.deleteTagValue", tagValueId = firstTagValue.TagValueId) }}">
+                                href = '{{ url_for("tagValues.deleteTagValue", tagValueId = lastAttributeValue.TagValueId) }}'>
                                 <span class = "glyphicon glyphicon-trash"></span></a></td>
                         {% else %}
                             <td></td>
@@ -166,11 +153,8 @@
                 [
                     { "orderable": false }, // Attribute values button.
                     null,
-                    null,
-                    null,
-                    { "orderable": false }, // Unit.
-                    { "orderable": false }, // New value.
-                    { "orderable": false }, // New timestamp.
+                    { "orderable": false }, // Value.
+                    { "orderable": false }, // Timestamp.
                     { "orderable": false }, // Save all button.
                     { "orderable": false }, // List attribute value notes button.
                     { "orderable": false }, // Edit attribute value button.
@@ -179,6 +163,16 @@
                 "stateSave": true,
                 "stateDuration": 0,
                 "pageLength": 25
+            })
+
+            attributesTable.$("[id^=inputNewTimestamp]").each(function()
+            {
+                placeholder = $(this).attr("placeholder")
+                if (placeholder != "")
+                {
+                    placeholderTimestampLocal = moment.utc(placeholder, "YYYY-MM-DD HH:mm:ss").local().format("YYYY-MM-DD HH:mm:ss")
+                    $(this).attr("placeholder", placeholderTimestampLocal)
+                }
             })
 
             $("#attributesTable").attr("style", "width:100%")
@@ -295,6 +289,21 @@
                 {
                     var timestamp = new moment()
                     $("#inputNewTimestamp" + id).val(timestamp.local().format("YYYY-MM-DD HH:mm:ss"))
+                }
+            })
+
+            $("[id^=inputOrSelectNewValue]").on("change", function()
+            {
+                if ($(this).is("select"))
+                {
+                    if ($(this).val() == -1)
+                    {
+                        $(this).attr("style", "color: #999999")
+                    }
+                    else
+                    {
+                        $(this).attr("style", "color: #000000")
+                    }
                 }
             })
 
