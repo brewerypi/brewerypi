@@ -88,6 +88,10 @@ def selectLookup(selectedClass = None, selectedId = None):
 			children = Lookup.query.filter_by(EnterpriseId = parent.id())
 		else:
 			parent = Enterprise.query.order_by(Enterprise.Name).first()
+			if parent is None:
+				flash("You must create an Enterprise first.", "alert alert-danger")
+				return redirect(request.referrer)
+
 			children = None
 		childrenClass = "Lookup"
 	elif selectedClass == "Root":

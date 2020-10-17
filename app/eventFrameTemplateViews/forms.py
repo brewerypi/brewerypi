@@ -3,10 +3,29 @@ from wtforms import BooleanField, HiddenField, StringField, SubmitField, Validat
 from wtforms.validators import Length, Required
 from .. models import EventFrameTemplateView
 
+class CopyEventFrameTemplateViewForm(FlaskForm):
+	name = StringField("Name", validators = [Required(), Length(1, 45)])
+	description = StringField("Description", validators = [Length(0, 255)])
+	default = BooleanField("Default")
+	eventFrameTemplateId = HiddenField()
+	requestReferrer = HiddenField()
+	submit = SubmitField("Save")
+
+	def validate_name(self, field):
+		validationError = False
+		eventFrameTemplateView = EventFrameTemplateView.query.filter_by(EventFrameTemplateId = self.eventFrameTemplateId.data, Name = field.data).first()
+		if eventFrameTemplateView is not None:
+			# Trying to copy an eventFrameTemplateView using a name that already exists.
+			validationError = True
+
+		if validationError:
+			raise ValidationError(f'The name "{field.data}" already exists.')
+
 class EventFrameTemplateViewForm(FlaskForm):
 	name = StringField("Name", validators = [Required(), Length(1, 45)])
 	description = StringField("Description", validators = [Length(0, 255)])
 	default = BooleanField("Default")
+	selectable = BooleanField("Selectable", default = "checked")
 	eventFrameTemplateId = HiddenField()
 	eventFrameTemplateViewId = HiddenField()
 	requestReferrer = HiddenField()

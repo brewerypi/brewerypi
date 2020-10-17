@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import HiddenField, SelectField, StringField, IntegerField, SubmitField, ValidationError
+from wtforms import HiddenField, IntegerField, SelectField, StringField, SubmitField, ValidationError
 from wtforms.validators import Length, Required
 from .. models import EventFrameTemplate
 
