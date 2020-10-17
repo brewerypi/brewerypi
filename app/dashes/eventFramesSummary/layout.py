@@ -2,7 +2,7 @@ import dash_core_components as dcc
 import dash_html_components as html
 import dash_table
 from app.dashes.components import collapseExpand, elementTemplatesDropdown, enterpriseDropdown, eventFrameTemplatesDropdown, eventFrameTemplateViewDropdown, \
-    refreshButton, refreshInterval, siteDropdown
+    siteDropdown, timeRangePicker
 
 layout = html.Div(children =
 [
@@ -11,12 +11,8 @@ layout = html.Div(children =
     dcc.Interval(id = "interval", n_intervals = 0, disabled = True),
     html.Div(id = "dashDiv", style = {"display": "none"}, children =
     [
-        html.Div(children =
-        [
-            refreshButton.layout(),
-            refreshInterval.layout()
-        ]),
-        html.Br(),
+        timeRangePicker.layout(),
+        dcc.Checklist(id = "activeOnlyChecklist", options = [{"label": " Active Only?", "value": 1}]),
         collapseExpand.layout(
         [
             enterpriseDropdown.layout(),

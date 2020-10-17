@@ -2,6 +2,7 @@ from datetime import datetime
 from dateutil.relativedelta import relativedelta
 from flask import flash, jsonify, redirect, render_template, request, session, url_for
 from flask_login import current_user, login_required
+from operator import itemgetter
 from . import eventFrames
 from . forms import EventFrameForm
 from . sql import currentEventFrameAttributeValues
@@ -25,12 +26,23 @@ def addEventFrame(eventFrameTemplateId = None, parentEventFrameId = None, eventF
 		parentEventFrame = EventFrame.query.get_or_404(parentEventFrameId)
 		form.element.query = Element.query.join(EventFrame).filter(EventFrame.ElementId == parentEventFrame.origin().ElementId)
 		form.eventFrameTemplate.query = EventFrameTemplate.query. \
-			filter(EventFrameTemplate.ParentEventFrameTemplateId == parentEventFrame.EventFrameTemplateId).order_by(EventFrameTemplate.Name)
+			filter(EventFrameTemplate.ParentEventFrameTemplateId == parentEventFrame.EventFrameTemplateId).order_by(EventFrameTemplate.Order)
 	else:
 		eventFrameTemplate = EventFrameTemplate.query.get_or_404(eventFrameTemplateId)
 		form.element.query = Element.query.join(ElementTemplate).filter(ElementTemplate.ElementTemplateId == eventFrameTemplate.ElementTemplateId). \
 			order_by(Element.Name)
 		form.eventFrameTemplate.query = EventFrameTemplate.query.filter_by(EventFrameTemplateId = eventFrameTemplateId)
+
+	sourceEventFrameTemplateChoices = [(0, "")]
+	for sourceEventFrameTemplate in EventFrameTemplate.query.order_by(EventFrameTemplate.Name).all():
+		sourceEventFrameTemplateChoices.append((sourceEventFrameTemplate.EventFrameTemplateId, sourceEventFrameTemplate.fullyQualifiedName()))
+
+	form.sourceEventFrameTemplate.choices = sorted(sourceEventFrameTemplateChoices, key = itemgetter(1))
+	sourceEventFrameChoices = [(-1, "")]
+	for sourceEventFrame in EventFrame.query.order_by(EventFrame.Name).all():
+		sourceEventFrameChoices.append((sourceEventFrame.EventFrameId, sourceEventFrame.fullyQualifiedName()))
+
+	form.sourceEventFrame.choices = sorted(sourceEventFrameChoices, key = itemgetter(1))
 
 	# Add a new event frame.
 	if form.validate_on_submit():
@@ -39,12 +51,13 @@ def addEventFrame(eventFrameTemplateId = None, parentEventFrameId = None, eventF
 		else:
 			endUtcTimestamp = form.endUtcTimestamp.data
 
+		sourceEventFrameId = None if form.sourceEventFrame.data == -1 else form.sourceEventFrame.data
 		if parentEventFrameId:
-			eventFrame = EventFrame(EndTimestamp = endUtcTimestamp, EventFrameTemplate = form.eventFrameTemplate.data,
+			eventFrame = EventFrame(EndTimestamp = endUtcTimestamp, EventFrameTemplate = form.eventFrameTemplate.data, SourceEventFrameId = sourceEventFrameId,
 				Name = form.name.data, ParentEventFrameId = parentEventFrameId, StartTimestamp = form.startUtcTimestamp.data, UserId = current_user.get_id())
 		else:
 			eventFrame = EventFrame(Element = form.element.data, EndTimestamp = endUtcTimestamp, EventFrameTemplateId = eventFrameTemplateId,
-				Name = form.name.data, StartTimestamp = form.startUtcTimestamp.data, UserId = current_user.get_id())
+				SourceEventFrameId = sourceEventFrameId, Name = form.name.data, StartTimestamp = form.startUtcTimestamp.data, UserId = current_user.get_id())
 
 		db.session.add(eventFrame)
 		db.session.commit()
@@ -184,14 +197,8 @@ def dashboard(eventFrameId, eventFrameGroupId = None, eventFrameTemplateView = N
 	for eventFrameAttribute in eventFrameAttributes:
 		eventFrameAttributeIds.append(eventFrameAttribute.EventFrameAttributeId)
 
-	if eventFrame.EndTimestamp:
-		tagValues = TagValue.query.join(Tag, EventFrameAttribute).filter(EventFrameAttribute.EventFrameAttributeId.in_(eventFrameAttributeIds),
-			TagValue.Timestamp >= eventFrame.StartTimestamp, TagValue.Timestamp <= eventFrame.EndTimestamp)
-	else:
-		tagValues = TagValue.query.join(Tag, EventFrameAttribute).filter(EventFrameAttribute.EventFrameAttributeId.in_(eventFrameAttributeIds),
-			TagValue.Timestamp >= eventFrame.StartTimestamp)
 	return render_template("eventFrames/dashboard.html", eventFrame = eventFrame, eventFrameEventFrameGroup = eventFrameEventFrameGroup,
-		eventFrameAttributes = eventFrameAttributes, eventFrameTemplateView = eventFrameTemplateView, tagValues = tagValues)
+		eventFrameAttributes = eventFrameAttributes, eventFrameTemplateView = eventFrameTemplateView)
 
 @eventFrames.route("/eventFrames/delete/<int:eventFrameId>", methods = ["GET", "POST"])
 @login_required
@@ -218,6 +225,17 @@ def editEventFrame(eventFrameId, eventFrameGroupId = None):
 	else:
 		del form.element
 
+	sourceEventFrameTemplateChoices = [(0, "")]
+	for sourceEventFrameTemplate in EventFrameTemplate.query.order_by(EventFrameTemplate.Name).all():
+		sourceEventFrameTemplateChoices.append((sourceEventFrameTemplate.EventFrameTemplateId, sourceEventFrameTemplate.fullyQualifiedName()))
+
+	form.sourceEventFrameTemplate.choices = sorted(sourceEventFrameTemplateChoices, key = itemgetter(1))
+	sourceEventFrameChoices = [(-1, "")]
+	for sourceEventFrame in EventFrame.query.order_by(EventFrame.Name).all():
+		sourceEventFrameChoices.append((sourceEventFrame.EventFrameId, sourceEventFrame.fullyQualifiedName()))
+
+	form.sourceEventFrame.choices = sorted(sourceEventFrameChoices, key = itemgetter(1))
+
 	# Edit an existing event frame.
 	if form.validate_on_submit():
 		if eventFrame.ParentEventFrameId:
@@ -229,6 +247,11 @@ def editEventFrame(eventFrameId, eventFrameGroupId = None):
 			eventFrame.EndTimestamp = None
 		else:
 			eventFrame.EndTimestamp = form.endUtcTimestamp.data
+
+		if form.sourceEventFrame.data == -1:
+			eventFrame.SourceEventFrameId = None
+		else:
+			eventFrame.SourceEventFrameId = form.sourceEventFrame.data
 
 		eventFrame.Name = form.name.data
 		eventFrame.StartTimestamp = form.startUtcTimestamp.data
@@ -311,6 +334,7 @@ def editEventFrame(eventFrameId, eventFrameGroupId = None):
 
 			breadcrumbs.append({"url": None, "text": text})
 
+	form.sourceEventFrame.data = eventFrame.SourceEventFrameId
 	form.eventFrameId.data = eventFrame.EventFrameId
 	form.endTimestamp.data = eventFrame.EndTimestamp
 	form.name.data = eventFrame.Name
@@ -329,6 +353,34 @@ def endEventFrame(eventFrameId):
 	db.session.commit()
 	flash('You have successfully ended "{}" for event frame "{}".'.format(eventFrame.EventFrameTemplate.Name, eventFrame.Name), "alert alert-success")
 	return redirect(request.referrer)
+
+@eventFrames.route("/eventFrames/getSourceEventFrames/<int:eventFrameTemplateId>/<string:activeSourceEventFramesOnly>", methods = ["GET", "POST"])
+@login_required
+@permissionRequired(Permission.DATA_ENTRY)
+def getSourceEventFrames(eventFrameTemplateId, activeSourceEventFramesOnly):
+	sourceEventFrames = []
+
+	# Build base query in order to add optional filters.
+	query = db.session.query(EventFrame)
+	# Optional filters.
+	if activeSourceEventFramesOnly == "true":
+		query = query.filter_by(EndTimestamp = None)
+
+	# If no event frame template filter is selected, use qualified names for event frame choices.
+	if eventFrameTemplateId == 0:
+		for eventFrame in query.all():
+			sourceEventFrames.append({"value": eventFrame.EventFrameId, "name": eventFrame.fullyQualifiedName()})
+	else:
+		eventFrameTemplate = EventFrameTemplate.query.get_or_404(eventFrameTemplateId)
+		for eventFrame in query.filter_by(EventFrameTemplateId = eventFrameTemplate.EventFrameTemplateId).all():
+			sourceEventFrames.append({"value": eventFrame.EventFrameId, "name": eventFrame.Name})
+
+	# Key function used to sort the list of choices.
+	def eventFrameName(eventFrame):
+		return eventFrame["name"]
+
+	sourceEventFrames = sorted(sourceEventFrames, key = eventFrameName)	
+	return jsonify(sourceEventFrames)
 
 @eventFrames.route("/eventFrames/restartEventFrame/<int:eventFrameId>", methods = ["GET", "POST"])
 @login_required

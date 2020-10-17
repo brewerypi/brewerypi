@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Active Event Frame Summary{% endblock %}
+{% block title %}Event Frame Summary{% endblock %}
 
 {% block page_content %}
     {% if site is not none or elementTemplate is not none or eventFrameTemplate is not none %}
@@ -11,13 +11,13 @@
                     <li><a href = '{{ url_for("eventFrames.selectEventFrame", selectedClass = "Enterprise", selectedId = site.Enterprise.EnterpriseId) }}'>
                         {{ site.Enterprise.Name }}</a></li>
                     <li>
-                        <a title = "Previous" href = '{{ url_for("dashes.activeEventFramesSummary", siteId = site.previous().SiteId) }}'>
+                        <a title = "Previous" href = '{{ url_for("dashes.eventFramesSummary", siteId = site.previous().SiteId) }}'>
                             <span class = "glyphicon glyphicon-arrow-left"></span></a>
-                        <a title = "Next" href = '{{ url_for("dashes.activeEventFramesSummary", siteId = site.next().SiteId) }}'>
+                        <a title = "Next" href = '{{ url_for("dashes.eventFramesSummary", siteId = site.next().SiteId) }}'>
                             <span class = "glyphicon glyphicon-arrow-right"></span></a>    
                         <a href = '{{ url_for("eventFrames.selectEventFrame", selectedClass = "Site", selectedId = site.next().SiteId) }}'>{{ site.Name }}</a>
                     </li>
-                    <li class = "active">Active Event Frames Summary</li>
+                    <li class = "active">Event Frames Summary</li>
                 {% elif elementTemplate is not none %}
                     <li><a href = '{{ url_for("eventFrames.selectEventFrame", selectedClass = "Root") }}'><span class = "glyphicon glyphicon-home"></span></a></li>
                     <li><a href = '{{ url_for("eventFrames.selectEventFrame", selectedClass = "Enterprise",
@@ -25,13 +25,13 @@
                     <li><a href = '{{ url_for("eventFrames.selectEventFrame", selectedClass = "Site",
                         selectedId = elementTemplate.Site.SiteId) }}'>{{ elementTemplate.Site.Name }}</a></li>
                     <li>
-                        <a title = "Previous" href = '{{ url_for("dashes.activeEventFramesSummary",
+                        <a title = "Previous" href = '{{ url_for("dashes.eventFramesSummary",
                             elementTemplateId = elementTemplate.previous().ElementTemplateId) }}'><span class = "glyphicon glyphicon-arrow-left"></span></a>
-                        <a title = "Next" href = '{{ url_for("dashes.activeEventFramesSummary",
+                        <a title = "Next" href = '{{ url_for("dashes.eventFramesSummary",
                             elementTemplateId = elementTemplate.next().ElementTemplateId) }}'><span class = "glyphicon glyphicon-arrow-right"></span></a>    
                         <a href = '{{ url_for("eventFrames.selectEventFrame", selectedClass = "ElementTemplate",
                             selectedId = elementTemplate.ElementTemplateId) }}'>{{ elementTemplate.Name }}</a>
-                    <li class = "active">Active Event Frames Summary</li>
+                    <li class = "active">Event Frames Summary</li>
                 {% elif eventFrameTemplate is not none %}
                     <li><a href = '{{ url_for("eventFrames.selectEventFrame", selectedClass = "Root") }}'><span class = "glyphicon glyphicon-home"></span></a></li>
                     <li><a href = '{{ url_for("eventFrames.selectEventFrame", selectedClass = "Enterprise",
@@ -42,21 +42,21 @@
                     <li><a href = '{{ url_for("eventFrames.selectEventFrame", selectedClass = "ElementTemplate",
                         selectedId = eventFrameTemplate.ElementTemplate.ElementTemplateId) }}'>{{ eventFrameTemplate.ElementTemplate.Name }}</a></li>
                     <li>
-                        <a title = "Previous" href = '{{ url_for("dashes.activeEventFramesSummary",
+                        <a title = "Previous" href = '{{ url_for("dashes.eventFramesSummary",
                             eventFrameTemplateId = eventFrameTemplate.previous().EventFrameTemplateId) }}'>
                             <span class = "glyphicon glyphicon-arrow-left"></span></a>
-                        <a title = "Next" href = '{{ url_for("dashes.activeEventFramesSummary",
+                        <a title = "Next" href = '{{ url_for("dashes.eventFramesSummary",
                             eventFrameTemplateId = eventFrameTemplate.next().EventFrameTemplateId) }}'>
                             <span class = "glyphicon glyphicon-arrow-right"></span></a>    
                         <a href = '{{ url_for("eventFrames.selectEventFrame", selectedClass = "EventFrameTemplate",
                             selectedId = eventFrameTemplate.EventFrameTemplateId) }}'>{{ eventFrameTemplate.Name }}</a>
-                    <li class = "active">Active Event Frames Summary</li>
+                    <li class = "active">Event Frames Summary</li>
                 {% endif %}
             </ol>
         </div>
     {% endif %}
     <div class = "page-header">
-        <h1>Active Event Frames Summary <small></small></h1>
+        <h1>Event Frames Summary <small></small></h1>
     </div>
     <div class = "embed-responsive embed-responsive-4by3">
         <iframe id = "iframe" class = "embed-responsive-item"></iframe>
@@ -101,7 +101,15 @@
                     "&eventFrameTemplateId=" + {{ eventFrameTemplate.EventFrameTemplateId }} + "&collapseExpand=collapsed"
             {% endif %}
 
-            $("#iframe").attr("src", '{{ url_for("/activeEventFramesSummaryDash/") }}' + "?localTimezone=" + moment.tz.guess(true) + parameters)
+            parameters = parameters + "&activeOnly=" + {{ activeOnly }}
+            {% if months is not none %}
+                parameters = parameters + "&months=" + {{ months }}
+                {% if earliestEventFrameId is not none %}
+                    parameters = parameters + "&earliestEventFrameId=" + {{ earliestEventFrameId }}
+                {% endif %}
+            {% endif %}
+
+            $("#iframe").attr("src", '{{ url_for("/eventFramesSummaryDash/") }}' + "?localTimezone=" + moment.tz.guess(true) + parameters)
             setTabIndex()
             $('ol.breadcrumb a[title="Next"]').focus()
         })

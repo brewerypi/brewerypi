@@ -33,7 +33,7 @@ def add(eventFrameTemplateId):
 			order = eventFrameTemplateViewMaximumOrder.Order + 1
 
 		eventFrameTemplateView = EventFrameTemplateView(Default = default, Description = form.description.data, EventFrameTemplateId = eventFrameTemplateId,
-			Name = form.name.data, Selectable = form.selectable.data, Order = order)
+			Name = form.name.data, Selectable = True if default else form.selectable.data, Order = order)
 		db.session.add(eventFrameTemplateView)
 		db.session.commit()
 		flash('You have successfully added the new event frame template view "{}".'.format(eventFrameTemplateView.Name), "alert alert-success")
@@ -102,7 +102,7 @@ def copy(fromEventFrameTemplateViewId):
 
 		eventFrameTemplateView = EventFrameTemplateView(Default = default, Description = form.description.data,
 			Dictionary = fromEventFrameTemplateView.Dictionary, EventFrameTemplateId = fromEventFrameTemplateView.EventFrameTemplateId,
-			Name = form.name.data, Order = order, Selectable = fromEventFrameTemplateView.Selectable)
+			Name = form.name.data, Order = order, Selectable = True if default else fromEventFrameTemplateView.Selectable)
 		db.session.add(eventFrameTemplateView)
 		db.session.commit()
 		for fromEventFrameAttributeTemplateEventFrameTemplateView in fromEventFrameTemplateView.EventFrameAttributeTemplateEventFrameTemplateViews:
@@ -192,7 +192,7 @@ def edit(eventFrameTemplateViewId):
 		eventFrameTemplateView.Default = default
 		eventFrameTemplateView.EventFrameTemplateId = form.eventFrameTemplateId.data
 		eventFrameTemplateView.Name = form.name.data
-		eventFrameTemplateView.Selectable = form.selectable.data
+		eventFrameTemplateView.Selectable = True if default else form.selectable.data
 		db.session.commit()
 		flash('You have successfully edited the event frame template view "{}".'.format(eventFrameTemplateView.Name), "alert alert-success")
 		return redirect(form.requestReferrer.data)
@@ -289,10 +289,9 @@ def eventFrameAttributeTemplates(eventFrameTemplateViewId):
 @adminRequired
 def reorder(eventFrameTemplateId):
 	incomingEventFrameTemplateViews = request.get_json(force = True)
-	for eventFrameTemplateViewName in incomingEventFrameTemplateViews:
-		eventFrameTemplateView = EventFrameTemplateView.query. \
-			filter_by(EventFrameTemplateId = eventFrameTemplateId, Name = eventFrameTemplateViewName).one_or_none()
-		eventFrameTemplateView.Order = incomingEventFrameTemplateViews[eventFrameTemplateViewName]
+	for eventFrameTemplateViewId in incomingEventFrameTemplateViews:
+		eventFrameTemplateView = EventFrameTemplateView.query.get_or_404(eventFrameTemplateViewId)
+		eventFrameTemplateView.Order = incomingEventFrameTemplateViews[eventFrameTemplateViewId]
 
 	db.session.commit()
 	return jsonify()

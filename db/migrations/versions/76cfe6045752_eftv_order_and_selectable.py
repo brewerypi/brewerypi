@@ -1,8 +1,8 @@
-"""Event Frame Template View Order & Selectable.
+"""EFTV Order and Selectable.
 
-Revision ID: 8053ac58ade1
+Revision ID: 76cfe6045752
 Revises: b13236977763
-Create Date: 2020-08-30 21:34:45.041862
+Create Date: 2020-08-30 22:12:40.468380
 
 """
 from alembic import op
@@ -31,7 +31,7 @@ class EventFrameTemplateView(Base):
 
 
 # revision identifiers, used by Alembic.
-revision = '8053ac58ade1'
+revision = '76cfe6045752'
 down_revision = 'b13236977763'
 branch_labels = None
 depends_on = None

@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% set namespace = namespace(numberOfDefaultColumnsForEventFrames = 12) %}
+{% set namespace = namespace(numberOfDefaultColumnsForEventFrames = 13) %}
 {% block title %}Event Frames{% endblock %}
 {% block page_content %}
     <div>
@@ -108,7 +108,7 @@
     </div>
     <div>
         {% if childrenClass == "ElementTemplate" %}
-            <a class = "btn btn-default" title = "Dash" href = '{{ url_for("dashes.activeEventFramesSummary", siteId = parent.SiteId) }}'>
+            <a class = "btn btn-default" title = "Dash" href = '{{ url_for("dashes.eventFramesSummary", siteId = parent.SiteId) }}'>
                 <span class = "glyphicon glyphicon-stats"></span></a>
             <br><br>
         {% elif childrenClass == "EventFrameTemplate" %}
@@ -116,14 +116,14 @@
                 <a class = "btn btn-default" title = "Add" href = '{{ url_for("eventFrameTemplates.addEventFrameTemplate", elementTemplateId = parent.id()) }}'
                     role = "button"><span class = "glyphicon glyphicon-plus"></span></a>
             {% endif %}
-            <a class = "btn btn-default" title = "Dash" href = '{{ url_for("dashes.activeEventFramesSummary", elementTemplateId = parent.ElementTemplateId) }}'>
+            <a class = "btn btn-default" title = "Dash" href = '{{ url_for("dashes.eventFramesSummary", elementTemplateId = parent.ElementTemplateId) }}'>
                 <span class = "glyphicon glyphicon-stats"></span></a>
             <br><br>
         {% elif childrenClass == "EventFrame" %}
             <a class = "btn btn-default" title = "Add" href = '{{ url_for("eventFrames.addEventFrame", eventFrameTemplateId = parent.id()) }}' role = "button">
                 <span class = "glyphicon glyphicon-plus"></span></a>
-            <a class = "btn btn-default" title = "Dash" href = '{{ url_for("dashes.activeEventFramesSummary",
-                eventFrameTemplateId = parent.EventFrameTemplateId) }}'><span class = "glyphicon glyphicon-stats"></span></a>
+            <a class = "btn btn-default" title = "Dash" href = '{{ url_for("dashes.eventFramesSummary",
+                eventFrameTemplateId = parent.EventFrameTemplateId, months = months) }}'><span class = "glyphicon glyphicon-stats"></span></a>
             <br><br>
         {% elif childrenClass == "DescendantEventFrameTemplate" %}
             <a class = "btn btn-default" title = "Add" href = '{{ url_for("eventFrameTemplates.addEventFrameTemplate",
@@ -167,6 +167,7 @@
                         <th></th>
                     {% elif childrenClass == "EventFrame" %}
                         <th>Element</th>
+                        <th>Source Event Frame</th>
                         <th>User</th>
                         <th id = "thStartTimestamp">Start Timestamp</th>
                         <th id = "thEndTimestamp">End Timestamp</th>
@@ -244,6 +245,11 @@
                                 <td>{{ child.Name }}<a href = '{{ url_for("messages.listMessages") }}'>
                                     <span id = "spanEventFrameMessages{{ child.EventFrameId }}" class = "badge" style = "visibility: hidden"></span></a></td>
                                 <td>{{ child.ElementName }}</td>
+                                {% if child.SourceEventFrameName == None %}
+                                    <td></td>
+                                {% else %}
+                                    <td>{{ child.SourceEventFrameName }}</td>
+                                {% endif %}
                                 <td>{{ child.UserName }}</td>
                                 <td>{{ moment(child.StartTimestamp).format("YYYY-MM-DD HH:mm:ss") }}</td>
                                 {% if child.EndTimestamp %}
@@ -356,6 +362,7 @@
                 <thead>
                     <tr>
                         <th>Order</th>
+                        <th>EventFrameTemplateViewId</th>
                         <th>Name</th>
                         <th>Description</th>
                         <th>Default</th>
@@ -370,6 +377,7 @@
                     {% for eventFrameTemplateView in parent.EventFrameTemplateViews | sort(attribute = "Order")%}
                     <tr data-eventFrameTemplateViewId = "{{ eventFrameTemplateView.EventFrameTemplateViewId }}">
                         <td >{{ loop.index }}</td>
+                        <td>{{ eventFrameTemplateView.EventFrameTemplateViewId }}</td>
                         <td>{{ eventFrameTemplateView.Name }}</td>
                         <td>{{ eventFrameTemplateView.Description }}</td>
                         <td>{{ eventFrameTemplateView.Default | yesNo }}</td>
@@ -489,6 +497,7 @@
                         null,
                         null,
                         null,
+                        null,
                         { "orderable": false }, // Associate button.
                         { "orderable": false }, // Stop button.
                         { "orderable": false }, // Edit button.
@@ -550,7 +559,8 @@
                 columnDefs:
                 [
                     {orderable: true, className: "reorder", targets: 0},
-                    {orderable: false, targets: "_all"}
+                    {orderable: false, targets: "_all"},
+                    {visible: false, targets: 1}
                 ]
             })
 

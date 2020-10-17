@@ -18,16 +18,6 @@ If all goes well, you should now be able to point a web browser to the IP addres
 
 Checkout the [Getting Started Quickly](https://github.com/DeschutesBrewery/brewerypi/wiki/Getting-Started-Quickly) tutorial.
 
-## Credits
-
-### Contributors
-
-This project exists thanks to all the companies and people who contribute:
-
-[Deschutes Brewery](https://www.deschutesbrewery.com/), [GoodLife Brewing](https://www.goodlifebrewing.com/), [Wild Ride Brewing](https://www.wildridebrew.com/) and [Worthy Brewing](https://worthybrewing.com/).
-
-[Brian Faivre](https://github.com/bfaivre), [Curtis Nelson](https://github.com/c49nelson), [Huck Bales](https://github.com/huckpdx), [Jeremiah Beisner](https://github.com/jmbeisner), [Kyle Kotaich](https://github.com/kkotaich), Nancy-Taylor Mitchell, Paul Bergeman, [Shaelyn Maloney](https://github.com/smaloney2) and [Tim Alexander](https://github.com/tralexander).
-
 ## License
 
 See the [LICENSE](https://github.com/DeschutesBrewery/brewerypi/blob/master/LICENSE) file.

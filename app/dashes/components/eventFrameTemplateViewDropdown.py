@@ -14,8 +14,8 @@ def optionsCallback(dashApp, inputComponentId):
             return []
 
         eventFrameTemplateViews = [{"label": eventFrameTemplateView.Name, "value": eventFrameTemplateView.EventFrameTemplateViewId}
-            for eventFrameTemplateView in EventFrameTemplateView.query.filter_by(EventFrameTemplateId = eventFrameTemplateDropdownValue). \
-                order_by(EventFrameTemplateView.Name).all()]
+            for eventFrameTemplateView in EventFrameTemplateView.query. \
+                filter_by(EventFrameTemplateId = eventFrameTemplateDropdownValue, Selectable = True).order_by(EventFrameTemplateView.Order).all()]
         eventFrameTemplateViews.insert(0, {"label": "All", "value": -1})
         return eventFrameTemplateViews
 

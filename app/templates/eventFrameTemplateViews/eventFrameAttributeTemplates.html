@@ -56,12 +56,6 @@
             {{ "checked" if dictionary["showStartTimestamp"] == "True" or "showStartTimestamp" not in dictionary }}>Start Timestamp</label>
         <label class = "checkbox-inline"><input id = "inputEndTimestamp" type = "checkbox"
             {{ "checked" if dictionary["showEndTimestamp"] == "True" or "showEndTimestamp" not in dictionary }}>End Timestamp</label>
-        <label class = "checkbox-inline"><input id = "inputLastTimestamp" type = "checkbox"
-            {{ "checked" if dictionary["showLastTimestamp"] == "True" or "showLastTimestamp" not in dictionary }}>Last Timestamp</label>
-        <label class = "checkbox-inline"><input id = "inputLastValue" type = "checkbox"
-            {{ "checked" if dictionary["showLastValue"] == "True" or "showLastValue" not in dictionary }}>Last Value</label>
-        <label class = "checkbox-inline"><input id = "inputUnit" type = "checkbox"
-            {{ "checked" if dictionary["showUnit"] == "True" or "showUnit" not in dictionary }}>Unit</label>
         <label class = "checkbox-inline"><input id = "inputNoteButton" type = "checkbox"
             {{ "checked" if dictionary["showNoteButton"] == "True" or "showNoteButton" not in dictionary }}>Note Button</label>
         <label class = "checkbox-inline"><input id = "inputRemoveButton" type = "checkbox"
@@ -162,9 +156,6 @@
                 var showSelectButton = $("#inputSelectButton").is(":checked")
                 var showStartTimestamp = $("#inputStartTimestamp").is(":checked")
                 var showEndTimestamp = $("#inputEndTimestamp").is(":checked")
-                var showLastTimestamp = $("#inputLastTimestamp").is(":checked")
-                var showLastValue = $("#inputLastValue").is(":checked")
-                var showUnit = $("#inputUnit").is(":checked")
                 var showNoteButton = $("#inputNoteButton").is(":checked")
                 var showRemoveButton = $("#inputRemoveButton").is(":checked")
                 var showStopButton = $("#inputStopButton").is(":checked")
@@ -195,21 +186,6 @@
                 if (showEndTimestamp == false)
                 {
                     dictionary["showEndTimestamp"] = false
-                }
-
-                if (showLastTimestamp == false)
-                {
-                    dictionary["showLastTimestamp"] = false
-                }
-
-                if (showLastValue == false)
-                {
-                    dictionary["showLastValue"] = false
-                }
-
-                if (showUnit == false)
-                {
-                    dictionary["showUnit"] = false
                 }
 
                 if (showNoteButton == false)
