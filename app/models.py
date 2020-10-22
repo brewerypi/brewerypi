@@ -393,10 +393,12 @@ class EventFrame(db.Model):
 
 	def lastAttributeValue(self, eventFrameAttributeTemplateId):
 		if self.EndTimestamp is None:
-			tagValue = TagValue.query.join(Tag, EventFrameAttribute).filter(EventFrameAttribute.ElementId == self.ElementId, EventFrameAttribute.EventFrameAttributeTemplateId == eventFrameAttributeTemplateId,
+			tagValue = TagValue.query.join(Tag, EventFrameAttribute).filter(EventFrameAttribute.ElementId == self.origin().ElementId,
+				EventFrameAttribute.EventFrameAttributeTemplateId == eventFrameAttributeTemplateId,
 				TagValue.Timestamp >= self.StartTimestamp).order_by(TagValue.Timestamp.desc()).first()
 		else:
-			tagValue = TagValue.query.join(Tag, EventFrameAttribute).filter(EventFrameAttribute.ElementId == self.ElementId, EventFrameAttribute.EventFrameAttributeTemplateId == eventFrameAttributeTemplateId,
+			tagValue = TagValue.query.join(Tag, EventFrameAttribute).filter(EventFrameAttribute.ElementId == self.origin().ElementId,
+				EventFrameAttribute.EventFrameAttributeTemplateId == eventFrameAttributeTemplateId,
 				TagValue.Timestamp >= self.StartTimestamp, TagValue.Timestamp <= self.EndTimestamp).order_by(TagValue.Timestamp.desc()).first()
 
 		return tagValue
