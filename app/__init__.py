@@ -10,7 +10,7 @@ from sqlalchemy import event
 from urllib.parse import urlparse
 from config import Config
 
-__version__ = "v3.2.1"
+__version__ = "v3.2.2"
 boostrap = Bootstrap()
 db = SQLAlchemy()
 loginManager = LoginManager()

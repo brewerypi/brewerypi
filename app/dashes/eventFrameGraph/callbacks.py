@@ -3,6 +3,7 @@ import pytz
 from dash.dependencies import Input, Output, State
 from dash.exceptions import PreventUpdate
 from datetime import datetime
+from dateutil.relativedelta import relativedelta
 from urllib.parse import parse_qs, urlparse
 from app.models import EventFrame, EventFrameNote, LookupValue, Note
 from app.dashes.components import collapseExpand, elementTemplateDropdown, enterpriseDropdown, eventFrameDropdown, eventFrameTemplateDropdown, \
@@ -14,7 +15,6 @@ def fromToTimestamp(fromTimestamp, toTimestamp, *args):
 
     updatedFromTimestamp = None
     updatedToTimestamp = None
-    print(dash.callback_context.triggered)
     if len(list(filter(lambda property: property["prop_id"] == "url.href", dash.callback_context.triggered))) > 0:
         # url href input fired.
         urlHref = args[0]
@@ -42,7 +42,7 @@ def fromToTimestamp(fromTimestamp, toTimestamp, *args):
                 if eventFrame.EndTimestamp is not None:
                     raise PreventUpdate
 
-        return fromTimestamp if updatedFromTimestamp is None else updatedFromTimestamp, toTimestamp if updatedToTimestamp is None else updatedToTimestamp
+    return fromTimestamp if updatedFromTimestamp is None else updatedFromTimestamp, toTimestamp if updatedToTimestamp is None else updatedToTimestamp
 
 def registerCallbacks(dashApp):
     timeRangePicker.callback(dashApp, fromToTimestamp, [State(component_id = "url", component_property = "href"),
@@ -79,11 +79,14 @@ def registerCallbacks(dashApp):
     def graphFigure(fromTimestampInputValue, toTimestampInputValue, eventFrameDropdownValue, eventFrameTemplateViewDropdownValue, urlHref, intervalNIntervals,
         refreshButtonNClicks, fromToTimestampsDivStyle, quickTimeRangePickerDivStyle):
         if eventFrameDropdownValue is None:
+            print("a")
             return {"display": "none"}, {"display": "block"}, fromToTimestampsDivStyle, quickTimeRangePickerDivStyle, {"data": []}, []
 
         if fromTimestampInputValue == "" or toTimestampInputValue == "":
+            print("b")
             raise PreventUpdate
 
+        print("c")
         eventFrame = EventFrame.query.get(eventFrameDropdownValue)
         data = []
         queryString = parse_qs(urlparse(urlHref).query)
