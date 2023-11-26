@@ -25,9 +25,9 @@ layout = html.Div(children =
         eventFrameTemplateViewDropdown.layout(),
         html.Div(className = "well", children =
         [
-            dash_table.DataTable(id = "table", cell_selectable = False, filter_action = "native", sort_action = "native", sort_mode = "multi",
+            dash_table.DataTable(id = "table", cell_selectable = False, filter_action = "native", sort_action = "custom", sort_mode = "multi", sort_by = [],
                 style_cell = {"whiteSpace": "normal", "height": "auto", "textAlign": "left"},
-                style_cell_conditional = [{"if": {"column_id": "Start"}, "width": "175px"}])
+                style_cell_conditional = [{"if": {"column_id": "Start"}, "width": "175px"}], hidden_columns = ["DurationInSeconds"])
         ])
     ])
 ])

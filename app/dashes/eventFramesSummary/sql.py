@@ -20,7 +20,8 @@ def eventFramesAttributeValues(eventFrameTemplateId, eventFrameTemplateViewId, f
 		SELECT EventFrame.Name,
 			Element.Name AS Element,
 			EventFrame.StartTimestamp AS Start,
-			EventFrame.EndTimestamp AS End {dynamicColumns}
+			EventFrame.EndTimestamp AS End,
+			IF(EventFrame.EndTimestamp IS NULL, TIMESTAMPDIFF(SECOND, EventFrame.StartTimestamp, NOW()), TIMESTAMPDIFF(SECOND, EventFrame.StartTimestamp, EventFrame.EndTimestamp)) AS DurationInSeconds {dynamicColumns}
 		FROM EventFrame
 			INNER JOIN Element ON EventFrame.ElementId = Element.ElementId
 			INNER JOIN EventFrameTemplate ON EventFrame.EventFrameTemplateId = EventFrameTemplate.EventFrameTemplateId

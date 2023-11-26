@@ -353,6 +353,14 @@ class EventFrame(db.Model):
 
 		db.session.delete(self)
 
+	def durationSeconds(self):
+		if self.EndTimestamp is None:
+			seconds = (datetime.utcnow() - self.StartTimestamp).total_seconds()
+		else:
+			seconds = (self.EndTimestamp - self.StartTimestamp).total_seconds()
+
+		return seconds
+
 	def end(self):
 		endTimestamp = datetime.utcnow()
 		for dictionary in self.lineage([], 0):
