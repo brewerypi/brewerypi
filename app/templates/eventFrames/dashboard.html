@@ -27,20 +27,25 @@
                 {% if loop.last %}
                     <li class = "active">
                         {% if eventFrameEventFrameGroup is none %}
+                            {% if "eventFrameMonths" not in session %}
+                                {% set eventFrameMonths = none %}
+                            {% else %}
+                                {% set eventFrameMonths = session["eventFrameMonths"] %}
+                            {% endif %}
                             {% if eventFrameTemplateView is none %}
                                 <a title = "Previous" href = '{{ url_for("eventFrames.dashboard",
-                                    eventFrameId = eventFrame.previous(session["eventFrameMonths"]).EventFrameId) }}'>
+                                    eventFrameId = eventFrame.previous(eventFrameMonths).EventFrameId) }}'>
                                     <span class = "glyphicon glyphicon-arrow-left"></span></a>
                                 <a title = "Next" href = '{{ url_for("eventFrames.dashboard",
-                                    eventFrameId = eventFrame.next(session["eventFrameMonths"]).EventFrameId) }}'>
+                                    eventFrameId = eventFrame.next(eventFrameMonths).EventFrameId) }}'>
                                     <span class = "glyphicon glyphicon-arrow-right"></span></a>
                             {% else %}
                                 <a title = "Previous" href = '{{ url_for("eventFrames.dashboard",
-                                    eventFrameId = eventFrame.previous(session["eventFrameMonths"]).EventFrameId, eventFrameTemplateView = true,
+                                    eventFrameId = eventFrame.previous(eventFrameMonths).EventFrameId, eventFrameTemplateView = true,
                                     eventFrameTemplateViewId = eventFrameTemplateView.EventFrameTemplateViewId) }}'>
                                     <span class = "glyphicon glyphicon-arrow-left"></span></a>
                                 <a title = "Next" href = '{{ url_for("eventFrames.dashboard",
-                                    eventFrameId = eventFrame.next(session["eventFrameMonths"]).EventFrameId, eventFrameTemplateView = true,
+                                    eventFrameId = eventFrame.next(eventFrameMonths).EventFrameId, eventFrameTemplateView = true,
                                     eventFrameTemplateViewId = eventFrameTemplateView.EventFrameTemplateViewId) }}'>
                                     <span class = "glyphicon glyphicon-arrow-right"></span></a>
                             {% endif %}

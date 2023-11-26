@@ -19,10 +19,15 @@
                     selectedId = eventFrame.EventFrameTemplate.EventFrameTemplateId) }}'>{{ eventFrame.EventFrameTemplate.Name }}</a>
                 </li>
                 <li>
+                    {% if "eventFrameMonths" not in session %}
+                        {% set eventFrameMonths = none %}
+                    {% else %}
+                        {% set eventFrameMonths = session["eventFrameMonths"] %}
+                    {% endif %}
                     <a title = "Previous" href = '{{ url_for("dashes.eventFrameGraph",
-                        eventFrameId = eventFrame.previous(session["eventFrameMonths"]).id()) }}'><span class = "glyphicon glyphicon-arrow-left"></span></a>
+                        eventFrameId = eventFrame.previous(eventFrameMonths).id()) }}'><span class = "glyphicon glyphicon-arrow-left"></span></a>
                     <a title = "Next" href = '{{ url_for("dashes.eventFrameGraph",
-                        eventFrameId = eventFrame.next(session["eventFrameMonths"]).id()) }}'><span class = "glyphicon glyphicon-arrow-right"></span></a>    
+                        eventFrameId = eventFrame.next(eventFrameMonths).id()) }}'><span class = "glyphicon glyphicon-arrow-right"></span></a>    
                     <a href = '{{ url_for("eventFrames.dashboard", eventFrameId = eventFrame.EventFrameId) }}'>{{ eventFrame.Name }}</a>
                 </li>
                 <li class = "active">Event Frame Graph</li>
