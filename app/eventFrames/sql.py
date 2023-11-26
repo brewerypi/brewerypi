@@ -27,6 +27,7 @@ def currentEventFrameAttributeValues(eventFrames, eventFrameTemplateId):
         User.Name AS UserName,
         EventFrame.StartTimestamp,
         EventFrame.EndTimestamp,
+        IF(EventFrame.EndTimestamp IS NULL, TIMESTAMPDIFF(SECOND, EventFrame.StartTimestamp, NOW()), TIMESTAMPDIFF(SECOND, EventFrame.StartTimestamp, EventFrame.EndTimestamp)) AS DurationSeconds,
         SourceEventFrame.Name AS SourceEventFrameName {}
     FROM EventFrame
         INNER JOIN Element ON EventFrame.ElementId = Element.ElementId
