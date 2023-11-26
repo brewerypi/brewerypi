@@ -1,10 +1,13 @@
 import dash
-from flask import Flask
+import MySQLdb
+from flask import Flask, request, session
 from flask.helpers import get_root_path
 from flask_bootstrap import Bootstrap, bootstrap_find_resource
 from flask_login import LoginManager, login_required
 from flask_moment import Moment
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import event
+from urllib.parse import urlparse
 from config import Config
 
 __version__ = "v3.2.2"
@@ -49,6 +52,30 @@ def createApp(configClass = Config):
 	registerDashApp(app, "tagValuesGraphDash", tagValuesGraphLayout, tagValuesGraphCallbacks, "Tag Values Graph")
 
 	db.init_app(app)
+	if app.config["IS_MULTI_TENANT"]:
+		with app.app_context():
+			@db.event.listens_for(db.engine, "do_connect")
+			def receiveDoConnect(dialect, conn_rec, cargs, cparams):
+				url = request.url_root
+				subdomain = urlparse(url).hostname.split(".")[0]
+				if subdomain != session.get("subdomain"):
+					session["subdomain"] = subdomain
+					connection = MySQLdb.connect(host = app.config["MULTI_TENANT_HOST"], db = app.config["MULTI_TENANT_DATABASE"],
+						user = app.config["MULTI_TENANT_USERNAME"], passwd = app.config["MULTI_TENANT_PASSWORD"])
+					cursor = connection.cursor()
+					cursor.execute(f"SELECT HostName, DatabaseName, UserName, Password FROM Tenant WHERE Subdomain='{subdomain}'")
+					results = cursor.fetchall()
+					session["breweryPiHostName"] = results[0][0]
+					session["breweryPiDatabaseName"] = results[0][1]
+					session["breweryPiUserName"] = results[0][2]
+					session["breweryPiPassword"] = results[0][3]
+
+				cparams["host"] = session.get("breweryPiHostName")
+				cparams["db"] = session.get("breweryPiDatabaseName")
+				cparams["user"] = session.get("breweryPiUserName")
+				cparams["passwd"] = session.get("breweryPiPassword")
+				return None
+
 	loginManager.init_app(app)
 	moment.init_app(app)
 

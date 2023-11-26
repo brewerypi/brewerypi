@@ -1,5 +1,6 @@
 import os
 from dotenv import load_dotenv
+from sqlalchemy.pool import NullPool
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 load_dotenv(os.path.join(basedir, ".env"))
@@ -17,8 +18,13 @@ class Config:
 	IMPORT_FOLDER = "imports"
 	IMPORT_TAGS_FILENAME = "tags.csv"
 	IS_AWS = True if os.environ.get("IS_AWS") == "1" else False
+	IS_MULTI_TENANT = True if os.environ.get("IS_MULTI_TENANT") == "1" else False
 	IS_RASPBERRY_PI = True if os.environ.get("IS_RASPBERRY_PI") == "1" else False
 	LOCAL_TIMEZONE = os.environ.get("LOCAL_TIMEZONE")
+	MULTI_TENANT_DATABASE = os.environ.get("MULTI_TENANT_DATABASE") or "BreweryPiMultiTenant"
+	MULTI_TENANT_HOST = os.environ.get("MULTI_TENANT_HOST") or "localhost"
+	MULTI_TENANT_PASSWORD = os.environ.get("MULTI_TENANT_PASSWORD") or "brewery"
+	MULTI_TENANT_USERNAME = os.environ.get("MULTI_TENANT_USERNAME") or "pi"
 	MYSQL_DATABASE = os.environ.get("MYSQL_DATABASE") or "BreweryPi"
 	MYSQL_HOST = os.environ.get("MYSQL_HOST") or "localhost"
 	MYSQL_PASSWORD = os.environ.get("MYSQL_PASSWORD") or "brewery"
@@ -28,3 +34,5 @@ class Config:
 	SQLALCHEMY_DATABASE_URI = f"mysql://{MYSQL_USERNAME}:{MYSQL_PASSWORD}@{MYSQL_HOST}/{MYSQL_DATABASE}"
 	SQLALCHEMY_SERVER_URI = f"mysql://{MYSQL_USERNAME}:{MYSQL_PASSWORD}@{MYSQL_HOST}"
 	SQLALCHEMY_TRACK_MODIFICATIONS = False
+	if IS_MULTI_TENANT:
+		SQLALCHEMY_ENGINE_OPTIONS={'poolclass': NullPool}
