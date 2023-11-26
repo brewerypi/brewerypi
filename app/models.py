@@ -716,6 +716,9 @@ class EventFrameTemplate(db.Model):
 	def __repr__(self):
 		return "<EventFrameTemplate: {}>".format(self.Name)
 
+	def activeEventFrames(self):
+		return self.EventFrames.filter_by(EndTimestamp = None)
+
 	def ancestors(self, ancestors):
 		if self.ParentEventFrameTemplateId == None:
 			return ancestors
