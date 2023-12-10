@@ -1,6 +1,6 @@
 import dash
 import sys
-import dash_html_components as html
+from dash import html
 from dash.dependencies import Input, Output
 
 def layout():

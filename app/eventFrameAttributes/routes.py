@@ -13,11 +13,11 @@ from .. models import Area, Element, ElementTemplate, Enterprise, EventFrame, Ev
 @login_required
 @adminRequired
 def exportEventFrameAttributes():
-	eventFrameAttributes = EventFrameAttribute.query.join(Element, EventFrameAttributeTemplate, Tag, ElementTemplate, Site, Enterprise). \
-	join(EventFrameTemplate, and_(ElementTemplate.ElementTemplateId == EventFrameTemplate.ElementTemplateId,
+	eventFrameAttributes = EventFrameAttribute.query.join(Element).join(EventFrameAttributeTemplate).join(Tag).join(ElementTemplate).join(Site). \
+		join(Enterprise).join(EventFrameTemplate, and_(ElementTemplate.ElementTemplateId == EventFrameTemplate.ElementTemplateId,
 		EventFrameAttributeTemplate.EventFrameTemplateId == EventFrameTemplate.EventFrameTemplateId)). \
-	join(Area, and_(Site.SiteId == Area.SiteId, Tag.AreaId == Area.AreaId)). \
-	order_by(Enterprise.Name, Site.Name, ElementTemplate.Name, EventFrameTemplate.Name, Element.Name, EventFrameAttributeTemplate.Name, Area.Abbreviation,
+		join(Area, and_(Site.SiteId == Area.SiteId, Tag.AreaId == Area.AreaId)). \
+		order_by(Enterprise.Name, Site.Name, ElementTemplate.Name, EventFrameTemplate.Name, Element.Name, EventFrameAttributeTemplate.Name, Area.Abbreviation,
 		Tag.Name)
 	with open(os.path.join(current_app.config["EXPORT_FOLDER"], current_app.config["EXPORT_EVENT_FRAME_ATTRIBUTES_FILENAME"]), "w", encoding = "latin-1") \
 		as eventFramesFile:
@@ -157,7 +157,7 @@ def importEventFrameAttributes():
 						# The element and/or event frame attribute template have changed. Check for existing event frame attribute.
 						if eventFrameAttribute.ElementId != element.ElementId or \
 							eventFrameAttribute.EventFrameAttributeTemplateId != eventFrameAttributeTemplate.EventFrameAttributeTemplateId:
-							eventFrameAttributeCheck = EventFrameAttribute.query.join(Element, EventFrameAttributeTemplate). \
+							eventFrameAttributeCheck = EventFrameAttribute.query.join(Element).join(EventFrameAttributeTemplate). \
 								filter(EventFrameAttribute.ElementId == element.ElementId,
 									EventFrameAttribute.EventFrameAttributeTemplateId == eventFrameAttributeTemplate.EventFrameAttributeTemplateId).first()
 							if eventFrameAttributeCheck is not None:
@@ -184,7 +184,7 @@ def listEventFrameAttributes(eventFrameId):
 	for descendantEventFrameTemplate in eventFrameTemplate.lineage([], 0):
 		eventFrameTemplateIds.append(descendantEventFrameTemplate["eventFrameTemplate"].EventFrameTemplateId)
 	eventFrameAttributeTemplates = EventFrameAttributeTemplate.query.filter(EventFrameAttributeTemplate.EventFrameTemplateId.in_(eventFrameTemplateIds))
-	tags = Tag.query.join(Area, Site, Enterprise).order_by(Enterprise.Abbreviation, Site.Abbreviation, Area.Abbreviation, Tag.Name)
+	tags = Tag.query.join(Area).join(Site).join(Enterprise).order_by(Enterprise.Abbreviation, Site.Abbreviation, Area.Abbreviation, Tag.Name)
 	return render_template("eventFrameAttributes/eventFrameAttributes.html", eventFrame = eventFrame,
 		eventFrameAttributeTemplates = eventFrameAttributeTemplates, tags = tags)
 

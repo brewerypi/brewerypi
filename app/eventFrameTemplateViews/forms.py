@@ -1,10 +1,10 @@
 from flask_wtf import FlaskForm
 from wtforms import BooleanField, HiddenField, StringField, SubmitField, ValidationError
-from wtforms.validators import Length, Required
+from wtforms.validators import DataRequired, Length
 from .. models import EventFrameTemplateView
 
 class CopyEventFrameTemplateViewForm(FlaskForm):
-	name = StringField("Name", validators = [Required(), Length(1, 45)])
+	name = StringField("Name", validators = [DataRequired(), Length(1, 45)])
 	description = StringField("Description", validators = [Length(0, 255)])
 	default = BooleanField("Default")
 	eventFrameTemplateId = HiddenField()
@@ -22,7 +22,7 @@ class CopyEventFrameTemplateViewForm(FlaskForm):
 			raise ValidationError(f'The name "{field.data}" already exists.')
 
 class EventFrameTemplateViewForm(FlaskForm):
-	name = StringField("Name", validators = [Required(), Length(1, 45)])
+	name = StringField("Name", validators = [DataRequired(), Length(1, 45)])
 	description = StringField("Description", validators = [Length(0, 255)])
 	default = BooleanField("Default")
 	selectable = BooleanField("Selectable", default = "checked")

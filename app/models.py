@@ -289,11 +289,12 @@ class EventFrame(db.Model):
 	SourceEventFrameId = db.Column(db.Integer, db.ForeignKey("EventFrame.EventFrameId", name = "FK__EventFrame$CanHave$SourceEventFrame"), nullable = True)
 	UserId = db.Column(db.Integer, db.ForeignKey("User.UserId", name = "FK__User$AddOrEdit$EventFrame"), nullable = False)
 
-	ChildEventFrames = db.relationship("EventFrame", foreign_keys = [ParentEventFrameId], remote_side = [ParentEventFrameId])
-	DestinationEventFrames = db.relationship("EventFrame", foreign_keys = [SourceEventFrameId], remote_side = [SourceEventFrameId])
+	ChildEventFrames = db.relationship("EventFrame", foreign_keys = [ParentEventFrameId], remote_side = [ParentEventFrameId],
+		back_populates = "ParentEventFrame")
+	# DestinationEventFrames = db.relationship("EventFrame", foreign_keys = [SourceEventFrameId], remote_side = [SourceEventFrameId])
 	EventFrameEventFrameGroups = db.relationship("EventFrameEventFrameGroup", backref = "EventFrame", lazy = "dynamic")
 	EventFrameNotes = db.relationship("EventFrameNote", backref = "EventFrame", lazy = "dynamic")
-	ParentEventFrame = db.relationship("EventFrame", foreign_keys = [ParentEventFrameId], remote_side = [EventFrameId])
+	ParentEventFrame = db.relationship("EventFrame", foreign_keys = [ParentEventFrameId], remote_side = [EventFrameId], back_populates = "ChildEventFrames")
 	SourceEventFrame = db.relationship("EventFrame", foreign_keys = [SourceEventFrameId], remote_side = [EventFrameId])
 
 	def __repr__(self):
@@ -401,11 +402,11 @@ class EventFrame(db.Model):
 
 	def lastAttributeValue(self, eventFrameAttributeTemplateId):
 		if self.EndTimestamp is None:
-			tagValue = TagValue.query.join(Tag, EventFrameAttribute).filter(EventFrameAttribute.ElementId == self.origin().ElementId,
+			tagValue = TagValue.query.join(Tag).join(EventFrameAttribute).filter(EventFrameAttribute.ElementId == self.origin().ElementId,
 				EventFrameAttribute.EventFrameAttributeTemplateId == eventFrameAttributeTemplateId,
 				TagValue.Timestamp >= self.StartTimestamp).order_by(TagValue.Timestamp.desc()).first()
 		else:
-			tagValue = TagValue.query.join(Tag, EventFrameAttribute).filter(EventFrameAttribute.ElementId == self.origin().ElementId,
+			tagValue = TagValue.query.join(Tag).join(EventFrameAttribute).filter(EventFrameAttribute.ElementId == self.origin().ElementId,
 				EventFrameAttribute.EventFrameAttributeTemplateId == eventFrameAttributeTemplateId,
 				TagValue.Timestamp >= self.StartTimestamp, TagValue.Timestamp <= self.EndTimestamp).order_by(TagValue.Timestamp.desc()).first()
 
@@ -707,11 +708,13 @@ class EventFrameTemplate(db.Model):
 	ParentEventFrameTemplateId = db.Column(db.Integer, db.ForeignKey("EventFrameTemplate.EventFrameTemplateId",
 		name = "FK__EventFrameTemplate$CanHave$ParentEventFrameTemplate"), nullable = True)
 
-	ChildEventFrameTemplates = db.relationship("EventFrameTemplate", foreign_keys = [ParentEventFrameTemplateId], remote_side = [ParentEventFrameTemplateId])
+	ChildEventFrameTemplates = db.relationship("EventFrameTemplate", foreign_keys = [ParentEventFrameTemplateId], remote_side = [ParentEventFrameTemplateId],
+		back_populates = "ParentEventFrameTemplate")
 	EventFrameAttributeTemplates = db.relationship("EventFrameAttributeTemplate", backref = "EventFrameTemplate", lazy = "dynamic")
 	EventFrames = db.relationship("EventFrame", backref = "EventFrameTemplate", lazy = "dynamic")
 	EventFrameTemplateViews = db.relationship("EventFrameTemplateView", backref = "EventFrameTemplate", lazy = "dynamic")
-	ParentEventFrameTemplate = db.relationship("EventFrameTemplate", foreign_keys = [ParentEventFrameTemplateId], remote_side = [EventFrameTemplateId])
+	ParentEventFrameTemplate = db.relationship("EventFrameTemplate", foreign_keys = [ParentEventFrameTemplateId], remote_side = [EventFrameTemplateId],
+		back_populates = "ChildEventFrameTemplates")
 
 	def __repr__(self):
 		return "<EventFrameTemplate: {}>".format(self.Name)
@@ -921,12 +924,12 @@ class LookupValue(db.Model):
 	def isReferenced(self):
 		# Event frame attribute template default start value.
 		if db.session.query(func.count(EventFrameAttributeTemplate.EventFrameAttributeTemplateId)). \
-			join(TagValue, EventFrameAttributeTemplate.DefaultStartValue == self.Value).filter(EventFrameAttributeTemplate.LookupId == self.LookupId). \
+			join(TagValue).join(EventFrameAttributeTemplate.DefaultStartValue == self.Value).filter(EventFrameAttributeTemplate.LookupId == self.LookupId). \
 			scalar() > 0:
 			return True
 		# Event frame attribute template default end value.
 		elif db.session.query(func.count(EventFrameAttributeTemplate.EventFrameAttributeTemplateId)). \
-			join(TagValue, EventFrameAttributeTemplate.DefaultEndValue == self.Value).filter(EventFrameAttributeTemplate.LookupId == self.LookupId). \
+			join(TagValue).join(EventFrameAttributeTemplate.DefaultEndValue == self.Value).filter(EventFrameAttributeTemplate.LookupId == self.LookupId). \
 			scalar() > 0:
 			return True
 		# Tag value.

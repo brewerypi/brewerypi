@@ -58,7 +58,7 @@ def dashboard(eventFrameGroupId, displayEventFrameTemplateId = None, eventFrameT
 	eventFrameGroup = EventFrameGroup.query.get_or_404(eventFrameGroupId)
 	eventFrames = EventFrame.query.filter(EventFrame.EventFrameId. \
 		in_([eventFrameEventFrameGroup.EventFrameId for eventFrameEventFrameGroup in eventFrameGroup.EventFrameEventFrameGroups]))
-	eventFrameTemplates = EventFrameTemplate.query.join(ElementTemplate, Site, Enterprise).filter(EventFrameTemplate.EventFrameTemplateId. \
+	eventFrameTemplates = EventFrameTemplate.query.join(ElementTemplate).join(Site).join(Enterprise).filter(EventFrameTemplate.EventFrameTemplateId. \
 		in_([eventFrame.EventFrameTemplateId for eventFrame in eventFrames])).order_by(Enterprise.Name, Site.Name, ElementTemplate.Name,
 		EventFrameTemplate.Name)
 	if displayEventFrameTemplateId is None:

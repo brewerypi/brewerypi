@@ -117,7 +117,7 @@ def editTag(tagId):
 @login_required
 @adminRequired
 def exportTags():
-	tags = Tag.query.outerjoin(Lookup).join(Area, Site, Enterprise).order_by(Enterprise.Abbreviation, Site.Abbreviation, Area.Abbreviation, Tag.Name)
+	tags = Tag.query.outerjoin(Lookup).join(Area).join(Site).join(Enterprise).order_by(Enterprise.Abbreviation, Site.Abbreviation, Area.Abbreviation, Tag.Name)
 	with open(os.path.join(current_app.config["EXPORT_FOLDER"], current_app.config["EXPORT_TAGS_FILENAME"]), "w", encoding = "latin-1") as tagsFile:
 		fieldnames = ["Selected", "Tag Id", "Enterprise", "Site", "Area", "Tag Name", "Tag Description", "Lookup", "Unit"]
 		tagsWriter = csv.DictWriter(tagsFile, fieldnames = fieldnames, lineterminator = "\n")

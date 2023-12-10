@@ -1,3 +1,4 @@
+from sqlalchemy import text
 from .. import db
 from .. models import ElementAttributeTemplate
 
@@ -47,5 +48,5 @@ def elementAttributeValues(elementTemplateId):
     WHERE ElementTemplate.ElementTemplateId = {}
     GROUP BY Element.ElementId
     """.format(dynamicColumns, elementTemplateId, elementTemplateId)
-    elements = db.session.execute(query).fetchall()
+    elements = db.session.execute(text(query)).fetchall()
     return elements

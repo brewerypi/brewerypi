@@ -1,5 +1,5 @@
 import dash
-import dash_html_components as html
+from dash import html
 from dash.dependencies import Input, Output, State
 from dash.exceptions import PreventUpdate
 from urllib.parse import parse_qs, urlparse

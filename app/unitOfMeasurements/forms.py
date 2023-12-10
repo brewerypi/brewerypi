@@ -1,11 +1,11 @@
 from flask_wtf import FlaskForm
 from wtforms import HiddenField, StringField, SubmitField, ValidationError 
-from wtforms.validators import Length, Required
+from wtforms.validators import DataRequired, Length 
 from .. models import UnitOfMeasurement
 
 class UnitOfMeasurementForm(FlaskForm):
-	name = StringField("Name", validators = [Required(), Length(1, 45)])
-	abbreviation = StringField("Abbreviation", validators = [Required(), Length(1, 15)])
+	name = StringField("Name", validators = [DataRequired(), Length(1, 45)])
+	abbreviation = StringField("Abbreviation", validators = [DataRequired(), Length(1, 15)])
 	unitOfMeasurementId = HiddenField()
 	submit = SubmitField("Save")
 

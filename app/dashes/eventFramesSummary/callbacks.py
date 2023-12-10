@@ -1,5 +1,5 @@
 import dash
-import dash_core_components as dcc
+from dash import dcc
 import pandas as pd
 import pytz
 from dash.dependencies import Input, Output, State
@@ -129,7 +129,7 @@ def registerCallbacks(dashApp):
         toTimestampUtc = toTimestampLocal.astimezone(pytz.utc)
 
         df = pd.read_sql(eventFramesAttributeValues(tabsValue, eventFrameTemplateViewDropdownValue, fromTimestampUtc, toTimestampUtc, activeOnly),
-            db.session.bind)
+            db.session.connection())
         df["Start"] = df["Start"].apply(lambda  timestamp: pytz.utc.localize(timestamp).astimezone(localTimezone).strftime("%Y-%m-%d %H:%M:%S"))
         df["End"] = df["End"].apply(lambda  timestamp: pytz.utc.localize(timestamp).astimezone(localTimezone).strftime("%Y-%m-%d %H:%M:%S")
             if pd.notnull(timestamp) else "")

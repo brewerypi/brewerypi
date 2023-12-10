@@ -1,11 +1,11 @@
 from flask_wtf import FlaskForm
 from datetime import datetime
 from wtforms import DateTimeField, HiddenField, SubmitField, TextAreaField
-from wtforms.validators import Required
+from wtforms.validators import DataRequired
 
 class EventFrameNoteForm(FlaskForm):
-	note = TextAreaField("Note", validators = [Required()])
-	timestamp = DateTimeField("Timestamp", default = datetime.utcnow, validators = [Required()])
+	note = TextAreaField("Note", validators = [DataRequired()])
+	timestamp = DateTimeField("Timestamp", default = datetime.utcnow, validators = [DataRequired()])
 	utcTimestamp = HiddenField()
 	requestReferrer = HiddenField()
 	submit = SubmitField("Save")

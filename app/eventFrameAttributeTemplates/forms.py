@@ -1,13 +1,13 @@
 from flask_wtf import FlaskForm
 from wtforms import HiddenField, FloatField, SelectField, StringField, SubmitField, ValidationError
-from wtforms.ext.sqlalchemy.fields import QuerySelectField
-from wtforms.validators import Length, Optional, Required
+from wtforms.validators import DataRequired, Length, Optional
+from wtforms_sqlalchemy.fields import QuerySelectField
 from .. models import EventFrameAttributeTemplate, Lookup, LookupValue, UnitOfMeasurement
 
 class EventFrameAttributeTemplateForm(FlaskForm):
-	name = StringField("Name", validators = [Required(), Length(1, 45)])
+	name = StringField("Name", validators = [DataRequired(), Length(1, 45)])
 	description = StringField("Description", validators = [Length(0, 255)])
-	lookup = QuerySelectField("Lookup", validators = [Required()], get_label = "Name")
+	lookup = QuerySelectField("Lookup", validators = [DataRequired()], get_label = "Name")
 	defaultStartLookupValue = SelectField("Default Start Value", validators = [Optional()], coerce = float)
 	defaultEndLookupValue = SelectField("Default End Value", validators = [Optional()], coerce = float)
 	unitOfMeasurement = QuerySelectField("Unit", query_factory = lambda: UnitOfMeasurement.query. \

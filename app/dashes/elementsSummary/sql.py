@@ -2,7 +2,7 @@ from app.models import Element, ElementAttributeTemplate, ElementTemplate
 
 def elementAttributeValues(elementIds):
     dynamicColumns = ""
-    elementAttributeTemplates = Element.query.join(ElementTemplate, ElementAttributeTemplate).with_entities(ElementAttributeTemplate.Name). \
+    elementAttributeTemplates = Element.query.join(ElementTemplate).join(ElementAttributeTemplate).with_entities(ElementAttributeTemplate.Name). \
         filter(Element.ElementId.in_(elementIds)).order_by(ElementAttributeTemplate.Name).distinct()
     for elementAttributeTemplate in elementAttributeTemplates:
         dynamicColumns = dynamicColumns + \
