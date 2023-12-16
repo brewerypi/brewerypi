@@ -1,5 +1,5 @@
 from dash.dependencies import Input, Output
-from app.models import EventFrame, LookupValue
+from app.models import EventFrame, EventFrameAttribute, LookupValue, TagValue
 from app.dashes.components import collapseExpand, elementTemplateDropdown, enterpriseDropdown, eventFrameAttributeTemplatesDropdown, eventFramesDropdown, \
     eventFrameTemplateDropdown, refreshInterval, siteDropdown
 
@@ -34,8 +34,19 @@ def registerCallbacks(dashApp):
         eventFrames = EventFrame.query.filter(EventFrame.EventFrameId.in_(eventFramesDropdownValues)).order_by(EventFrame.StartTimestamp).all()
         SECONDS_IN_A_DAY = 86400
         for eventFrame in eventFrames:
-            for eventFrameAttributeTemplateName, tagValues in \
-                eventFrame.attributeValues(eventFrameAttributeTemplateIds = eventFrameAttributeTemplatesDropdownValues).items():
+            eventFrameAttributes = EventFrameAttribute.query.filter(EventFrameAttribute.ElementId == eventFrame.ElementId,
+                EventFrameAttribute.EventFrameAttributeTemplateId.in_(eventFrameAttributeTemplatesDropdownValues))
+            eventFrameAttributeValues = {}
+            for eventFrameAttribute in eventFrameAttributes:
+                if eventFrame.EndTimestamp is None:
+                    eventFrameAttributeValues[eventFrameAttribute.EventFrameAttributeTemplate.Name] = TagValue.query. \
+                        filter(TagValue.TagId == eventFrameAttribute.TagId, TagValue.Timestamp >= eventFrame.StartTimestamp)
+                else:
+                    eventFrameAttributeValues[eventFrameAttribute.EventFrameAttributeTemplate.Name] = TagValue.query. \
+                        filter(TagValue.TagId == eventFrameAttribute.TagId, TagValue.Timestamp >= eventFrame.StartTimestamp,
+                            TagValue.Timestamp <= eventFrame.EndTimestamp)
+
+            for eventFrameAttributeTemplateName, tagValues in eventFrameAttributeValues.items():
                 seriesName = f"{eventFrame.Name}_{eventFrameAttributeTemplateName}"
                 for tagValue in tagValues:
                     # Search for tag dict in list of dicts.
