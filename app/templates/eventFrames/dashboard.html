@@ -256,7 +256,7 @@
                                 <select class = "form-control" id = "inputOrSelectNewValue{{ eventFrameAttribute.Tag.TagId }}" style = "color: #999999">
                                     <option value = "-1" style = "color: #999999">{{ lastAttributeValue.lookupValueName() if lastAttributeValue else "" }}
                                         </option>
-                                    {% for lookupValue in eventFrameAttribute.Tag.Lookup.LookupValues %}
+                                    {% for lookupValue in eventFrameAttribute.Tag.Lookup.LookupValues  | sort(attribute = "Name") %}
                                         {% if lookupValue.Selectable %}
                                             <option value = "{{ lookupValue.Value }}" style = "color: #000000">{{ lookupValue.Name}}</option>
                                         {% endif %}
