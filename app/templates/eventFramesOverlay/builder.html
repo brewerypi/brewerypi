@@ -51,7 +51,7 @@
         <div>
             Toggle Column:
             <button type = "button" class = "btn btn-primary btn-xs" id = "buttonHideAllColumns">Hide All</button>
-            {% for eventFrameAttributeTemplate in eventFrameAttributeTemplates %}
+            {% for eventFrameAttributeTemplate in eventFrameAttributeTemplates | sort(attribute = "Name") %}
                 {% set dataColumnIndex = loop.index + 4 %}
                 <label><button type = "button" class = "btn btn-primary btn-xs" data-columnIndex = "{{ dataColumnIndex }}"
                     id = "buttonToggleColumn{{ eventFrameAttributeTemplate.Name }}">{{ eventFrameAttributeTemplate.Name }}</button></label>
@@ -71,7 +71,7 @@
                         <th>Element</th>
                         <th id = "thStartTimestamp">Start</th>
                         <th id = "thEndTimestamp">End</th>
-                        {% for eventFrameAttributeTemplate in eventFrameAttributeTemplates %}
+                        {% for eventFrameAttributeTemplate in eventFrameAttributeTemplates | sort(attribute = "Name") %}
                             <th>{{ eventFrameAttributeTemplate.Name }}</th>
                         {% endfor %}
                     </tr>
@@ -89,7 +89,7 @@
                                 {% else %}
                                     <td></td>
                                 {% endif %}
-                                {% for eventFrameAttributeTemplate in eventFrameAttributeTemplates %}
+                                {% for eventFrameAttributeTemplate in eventFrameAttributeTemplates | sort(attribute = "Name") %}
                                     <td>{{ eventFrame[eventFrameAttributeTemplate.Name] }}</td>
                                 {% endfor %}
                             </tr>
@@ -208,7 +208,7 @@
                         "targets": [0],
                         "visible": false    // Hide the EventFrameId.
                     },
-                    {% for eventFrameAttributeTemplate in eventFrameAttributeTemplates %}
+                    {% for eventFrameAttributeTemplate in eventFrameAttributeTemplates | sort(attribute = "Name") %}
                         {"visible": false, "targets": {{ loop.index0 + namespace.numberOfDefaultColumnsForEventFrames }}},
                     {% endfor %}
                 ],
