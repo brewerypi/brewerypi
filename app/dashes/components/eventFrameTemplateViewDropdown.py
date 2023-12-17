@@ -1,4 +1,4 @@
-import dash_core_components as dcc
+from dash import dcc
 from dash.dependencies import Input, Output
 from urllib.parse import parse_qs, urlparse
 from app.models import EventFrame, EventFrameTemplateView

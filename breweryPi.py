@@ -1,7 +1,7 @@
 import click
 from flask import current_app
 from flask_migrate import Migrate, upgrade
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 from werkzeug.security import generate_password_hash
 from app import createApp, db
 from app.models import Area, Element, ElementAttribute, ElementAttributeTemplate, ElementTemplate, Enterprise, EventFrame, EventFrameAttribute, \
@@ -27,26 +27,28 @@ def make_shell_context():
 def deploy(admin, roles):
 	print ("Creating database {} if it does not exist...".format(current_app.config["MYSQL_DATABASE"]))
 	engine = create_engine(current_app.config["SQLALCHEMY_SERVER_URI"])
-	connection = engine.connect()
-	connection.execute("CREATE DATABASE IF NOT EXISTS {}".format(current_app.config["MYSQL_DATABASE"]))
-	print ("Running database upgrade...")
-	upgrade()
-	if roles == True or admin == True:
-		engine = create_engine(current_app.config["SQLALCHEMY_DATABASE_URI"])
-		connection = engine.connect()
-		if roles == True:
-			print ("Inserting default roles if needed...")
-			connection.execute(f"INSERT INTO `Role` (`Name`, `Permissions`) VALUES ('User', {Permission.DATA_ENTRY})")
-			connection.execute(f"INSERT INTO `Role` (`Name`, `Permissions`) VALUES ('Administrator', 0xff)")
+	with engine.connect() as connection:
+		connection.execute(text("CREATE DATABASE IF NOT EXISTS {}".format(current_app.config["MYSQL_DATABASE"])))
+		print ("Running database upgrade...")
+		upgrade()
+		if roles == True or admin == True:
+			engine = create_engine(current_app.config["SQLALCHEMY_DATABASE_URI"])
+			connection = engine.connect()
+			if roles == True:
+				print ("Inserting default roles if needed...")
+				connection.execute(text(f"INSERT INTO `Role` (`Name`, `Permissions`) VALUES ('User', {Permission.DATA_ENTRY})"))
+				connection.execute(text(f"INSERT INTO `Role` (`Name`, `Permissions`) VALUES ('Administrator', 0xff)"))
 
-		if admin == True:
-			print ("Inserting default administrator if needed...")
-			administratorRoleId = connection.execute("SELECT RoleId FROM Role WHERE Name = 'Administrator'").scalar()
-			if administratorRoleId is None:
-				print('Administrator role does not exist. Cannot create default admin/"pi" user without it.')
-			else:
-				password = generate_password_hash("brewery")
-				connection.execute(f"INSERT INTO `User` (`Enabled`, `Name`, `PasswordHash`, `RoleId`) VALUES (1, 'pi', '{password}', {administratorRoleId})")
+			if admin == True:
+				print ("Inserting default administrator if needed...")
+				administratorRoleId = connection.execute(text("SELECT RoleId FROM Role WHERE Name = 'Administrator'")).scalar()
+				if administratorRoleId is None:
+					print('Administrator role does not exist. Cannot create default admin/"pi" user without it.')
+				else:
+					password = generate_password_hash("brewery", method = "pbkdf2")
+					connection.execute(text(f"INSERT INTO `User` (`Enabled`, `Name`, `PasswordHash`, `RoleId`) VALUES (1, 'pi', '{password}', {administratorRoleId})"))
+
+		connection.commit()
 
 @app.cli.command(help = "Diplsay Brewery Pi element tree.")
 @click.option("--tag-areas", is_flag = True, help = "Show which area(s) element tags belong to.")

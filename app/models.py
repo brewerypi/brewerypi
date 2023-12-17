@@ -110,18 +110,6 @@ class Element(db.Model):
 	def previous(self, isManaged = False):
 		return previous(self.nextAndPreviousList(isManaged), self)
 
-	def attributeValues(self, startTimestamp, endTimestamp):
-		attributeValues = {}
-		elementAttributeTemplateIds = [elementAttributeTemplate.ElementAttributeTemplateId for elementAttributeTemplate in
-			self.ElementTemplate.ElementAttributeTemplates]
-		elementAttributes = ElementAttribute.query.filter(ElementAttribute.ElementId == self.ElementId,
-			ElementAttribute.ElementAttributeTemplateId.in_(elementAttributeTemplateIds))
-		for elementAttribute in elementAttributes:
-			attributeValues[elementAttribute.ElementAttributeTemplate.Name] = TagValue.query.filter(TagValue.TagId == elementAttribute.TagId,
-				TagValue.Timestamp >= startTimestamp, TagValue.Timestamp <= endTimestamp)
-
-		return attributeValues
-
 class ElementAttribute(db.Model):
 	__tablename__ = "ElementAttribute"
 	__table_args__ = \
@@ -289,11 +277,12 @@ class EventFrame(db.Model):
 	SourceEventFrameId = db.Column(db.Integer, db.ForeignKey("EventFrame.EventFrameId", name = "FK__EventFrame$CanHave$SourceEventFrame"), nullable = True)
 	UserId = db.Column(db.Integer, db.ForeignKey("User.UserId", name = "FK__User$AddOrEdit$EventFrame"), nullable = False)
 
-	ChildEventFrames = db.relationship("EventFrame", foreign_keys = [ParentEventFrameId], remote_side = [ParentEventFrameId])
-	DestinationEventFrames = db.relationship("EventFrame", foreign_keys = [SourceEventFrameId], remote_side = [SourceEventFrameId])
+	ChildEventFrames = db.relationship("EventFrame", foreign_keys = [ParentEventFrameId], remote_side = [ParentEventFrameId],
+		back_populates = "ParentEventFrame")
+	# DestinationEventFrames = db.relationship("EventFrame", foreign_keys = [SourceEventFrameId], remote_side = [SourceEventFrameId])
 	EventFrameEventFrameGroups = db.relationship("EventFrameEventFrameGroup", backref = "EventFrame", lazy = "dynamic")
 	EventFrameNotes = db.relationship("EventFrameNote", backref = "EventFrame", lazy = "dynamic")
-	ParentEventFrame = db.relationship("EventFrame", foreign_keys = [ParentEventFrameId], remote_side = [EventFrameId])
+	ParentEventFrame = db.relationship("EventFrame", foreign_keys = [ParentEventFrameId], remote_side = [EventFrameId], back_populates = "ChildEventFrames")
 	SourceEventFrame = db.relationship("EventFrame", foreign_keys = [SourceEventFrameId], remote_side = [EventFrameId])
 
 	def __repr__(self):
@@ -315,31 +304,6 @@ class EventFrame(db.Model):
 		else:
 			ancestors.insert(0, self.ParentEventFrame)
 			return self.ParentEventFrame.ancestors(ancestors)
-
-	def attributeValues(self, eventFrameTemplateViewId = None, eventFrameAttributeTemplateIds = None):
-		eventFrameAttributeValues = {}
-		if eventFrameTemplateViewId == -1 or eventFrameAttributeTemplateIds == -1:
-			eventFrameAttributeTemplateIds = [eventFrameAttributeTemplate.EventFrameAttributeTemplateId
-				for eventFrameAttributeTemplate in self.EventFrameTemplate.EventFrameAttributeTemplates]
-		elif eventFrameTemplateViewId is not None:
-			eventFrameTemplateView = EventFrameTemplateView.query.get(eventFrameTemplateViewId)
-			eventFrameAttributeTemplateIds = [eventFrameAttributeTemplateEventFrameTemplateView.EventFrameAttributeTemplateId
-				for eventFrameAttributeTemplateEventFrameTemplateView in eventFrameTemplateView.EventFrameAttributeTemplateEventFrameTemplateViews]
-		elif eventFrameAttributeTemplateIds is not None:
-			eventFrameAttributeTemplateIds = EventFrameAttributeTemplate.query.with_entities(EventFrameAttributeTemplate.EventFrameAttributeTemplateId). \
-				filter(EventFrameAttributeTemplate.EventFrameAttributeTemplateId.in_(eventFrameAttributeTemplateIds)).all()
-
-		eventFrameAttributes = EventFrameAttribute.query.filter(EventFrameAttribute.ElementId == self.ElementId,
-			EventFrameAttribute.EventFrameAttributeTemplateId.in_(eventFrameAttributeTemplateIds))
-		for eventFrameAttribute in eventFrameAttributes:
-			if self.EndTimestamp is None:
-				eventFrameAttributeValues[eventFrameAttribute.EventFrameAttributeTemplate.Name] = TagValue.query. \
-					filter(TagValue.TagId == eventFrameAttribute.TagId, TagValue.Timestamp >= self.StartTimestamp)
-			else:
-				eventFrameAttributeValues[eventFrameAttribute.EventFrameAttributeTemplate.Name] = TagValue.query. \
-					filter(TagValue.TagId == eventFrameAttribute.TagId, TagValue.Timestamp >= self.StartTimestamp, TagValue.Timestamp <= self.EndTimestamp)
-
-		return eventFrameAttributeValues
 
 	def delete(self):
 		for eventFrameEventFrameGroup in self.EventFrameEventFrameGroups:
@@ -401,11 +365,11 @@ class EventFrame(db.Model):
 
 	def lastAttributeValue(self, eventFrameAttributeTemplateId):
 		if self.EndTimestamp is None:
-			tagValue = TagValue.query.join(Tag, EventFrameAttribute).filter(EventFrameAttribute.ElementId == self.origin().ElementId,
+			tagValue = TagValue.query.join(Tag).join(EventFrameAttribute).filter(EventFrameAttribute.ElementId == self.origin().ElementId,
 				EventFrameAttribute.EventFrameAttributeTemplateId == eventFrameAttributeTemplateId,
 				TagValue.Timestamp >= self.StartTimestamp).order_by(TagValue.Timestamp.desc()).first()
 		else:
-			tagValue = TagValue.query.join(Tag, EventFrameAttribute).filter(EventFrameAttribute.ElementId == self.origin().ElementId,
+			tagValue = TagValue.query.join(Tag).join(EventFrameAttribute).filter(EventFrameAttribute.ElementId == self.origin().ElementId,
 				EventFrameAttribute.EventFrameAttributeTemplateId == eventFrameAttributeTemplateId,
 				TagValue.Timestamp >= self.StartTimestamp, TagValue.Timestamp <= self.EndTimestamp).order_by(TagValue.Timestamp.desc()).first()
 
@@ -707,11 +671,13 @@ class EventFrameTemplate(db.Model):
 	ParentEventFrameTemplateId = db.Column(db.Integer, db.ForeignKey("EventFrameTemplate.EventFrameTemplateId",
 		name = "FK__EventFrameTemplate$CanHave$ParentEventFrameTemplate"), nullable = True)
 
-	ChildEventFrameTemplates = db.relationship("EventFrameTemplate", foreign_keys = [ParentEventFrameTemplateId], remote_side = [ParentEventFrameTemplateId])
+	ChildEventFrameTemplates = db.relationship("EventFrameTemplate", foreign_keys = [ParentEventFrameTemplateId], remote_side = [ParentEventFrameTemplateId],
+		back_populates = "ParentEventFrameTemplate")
 	EventFrameAttributeTemplates = db.relationship("EventFrameAttributeTemplate", backref = "EventFrameTemplate", lazy = "dynamic")
 	EventFrames = db.relationship("EventFrame", backref = "EventFrameTemplate", lazy = "dynamic")
 	EventFrameTemplateViews = db.relationship("EventFrameTemplateView", backref = "EventFrameTemplate", lazy = "dynamic")
-	ParentEventFrameTemplate = db.relationship("EventFrameTemplate", foreign_keys = [ParentEventFrameTemplateId], remote_side = [EventFrameTemplateId])
+	ParentEventFrameTemplate = db.relationship("EventFrameTemplate", foreign_keys = [ParentEventFrameTemplateId], remote_side = [EventFrameTemplateId],
+		back_populates = "ChildEventFrameTemplates")
 
 	def __repr__(self):
 		return "<EventFrameTemplate: {}>".format(self.Name)
@@ -921,12 +887,12 @@ class LookupValue(db.Model):
 	def isReferenced(self):
 		# Event frame attribute template default start value.
 		if db.session.query(func.count(EventFrameAttributeTemplate.EventFrameAttributeTemplateId)). \
-			join(TagValue, EventFrameAttributeTemplate.DefaultStartValue == self.Value).filter(EventFrameAttributeTemplate.LookupId == self.LookupId). \
+			join(TagValue).join(EventFrameAttributeTemplate.DefaultStartValue == self.Value).filter(EventFrameAttributeTemplate.LookupId == self.LookupId). \
 			scalar() > 0:
 			return True
 		# Event frame attribute template default end value.
 		elif db.session.query(func.count(EventFrameAttributeTemplate.EventFrameAttributeTemplateId)). \
-			join(TagValue, EventFrameAttributeTemplate.DefaultEndValue == self.Value).filter(EventFrameAttributeTemplate.LookupId == self.LookupId). \
+			join(TagValue).join(EventFrameAttributeTemplate.DefaultEndValue == self.Value).filter(EventFrameAttributeTemplate.LookupId == self.LookupId). \
 			scalar() > 0:
 			return True
 		# Tag value.

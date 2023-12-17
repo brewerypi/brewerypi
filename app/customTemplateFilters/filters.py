@@ -1,6 +1,6 @@
 import re
 from flask import current_app, url_for
-from jinja2 import Markup
+from markupsafe import Markup
 from sqlalchemy import func
 from . import customTemplateFilters
 from .. models import Element, ElementTemplate, EventFrame, EventFrameTemplate, Site

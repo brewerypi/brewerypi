@@ -1,13 +1,13 @@
 from flask_wtf import FlaskForm
 from wtforms import BooleanField, HiddenField, SelectField, StringField, SubmitField, ValidationError
-from wtforms.validators import Length, Required
+from wtforms.validators import DataRequired, Length
 from .. models import Element
 
 class ElementForm(FlaskForm):
-	name = StringField("Name", validators = [Required(), Length(1, 45)])
+	name = StringField("Name", validators = [DataRequired(), Length(1, 45)])
 	description = StringField("Description", validators = [Length(0, 255)])
 	isManaged = BooleanField("Manage Tags", default = "checked")
-	area = SelectField("Area", validators = [Required()], coerce = int)
+	area = SelectField("Area", validators = [DataRequired()], coerce = int)
 	elementId = HiddenField()
 	elementIdToCopy = HiddenField()
 	elementTemplateId = HiddenField()

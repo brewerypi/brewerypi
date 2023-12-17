@@ -1,3 +1,4 @@
+from sqlalchemy import text
 from .. import db
 from .. models import EventFrameAttributeTemplate
 
@@ -70,6 +71,6 @@ def currentEventFrameAttributeValues(eventFrames, eventFrameTemplateId):
     WHERE EventFrame.EventFrameId IN ({})
     GROUP BY EventFrame.EventFrameId
     """.format(dynamicColumns, eventFrameIds, eventFrameIds)
-    eventFrames = db.session.execute(query).fetchall()
+    eventFrames = db.session.execute(text(query)).fetchall()
     return eventFrames
     

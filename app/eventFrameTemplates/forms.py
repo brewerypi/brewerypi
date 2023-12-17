@@ -1,12 +1,12 @@
 from flask_wtf import FlaskForm
 from wtforms import HiddenField, IntegerField, SelectField, StringField, SubmitField, ValidationError
-from wtforms.validators import Length, Required
+from wtforms.validators import DataRequired, Length
 from .. models import EventFrameTemplate
 
 class CopyEventFrameTemplateForm(FlaskForm):
-	name = StringField("Name", validators = [Required(), Length(1, 45)])
+	name = StringField("Name", validators = [DataRequired(), Length(1, 45)])
 	description = StringField("Description", validators = [Length(0, 255)])
-	toElementTemplate = SelectField("To Element Template", validators = [Required()], coerce = int)
+	toElementTemplate = SelectField("To Element Template", validators = [DataRequired()], coerce = int)
 	requestReferrer = HiddenField()
 	submit = SubmitField("Save")
 
@@ -22,8 +22,8 @@ class CopyEventFrameTemplateForm(FlaskForm):
 
 class EventFrameTemplateForm(FlaskForm):
 	parentEventFrameTemplateId = HiddenField()
-	name = StringField("Name", validators = [Required(), Length(1, 45)])
-	order = IntegerField("Order", validators = [Required()])
+	name = StringField("Name", validators = [DataRequired(), Length(1, 45)])
+	order = IntegerField("Order", validators = [DataRequired()])
 	description = StringField("Description", validators = [Length(0, 255)])
 	eventFrameTemplateId = HiddenField()
 	elementTemplateId = HiddenField()

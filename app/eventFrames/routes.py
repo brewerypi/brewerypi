@@ -169,26 +169,26 @@ def dashboard(eventFrameId, eventFrameGroupId = None, eventFrameTemplateView = N
 			Default = True).one_or_none()
 		if defaultEventFrameTemplateView is None:
 			eventFrameTemplateView = None
-			eventFrameAttributes = EventFrameAttribute.query.join(EventFrameAttributeTemplate, EventFrameTemplate). \
+			eventFrameAttributes = EventFrameAttribute.query.join(EventFrameAttributeTemplate).join(EventFrameTemplate). \
 				filter(EventFrameAttribute.ElementId == elementId,
 				EventFrameTemplate.EventFrameTemplateId == eventFrame.EventFrameTemplate.EventFrameTemplateId). \
 				order_by(EventFrameAttributeTemplate.Name)
 		else:
 			eventFrameTemplateView = defaultEventFrameTemplateView
-			eventFrameAttributes = EventFrameAttribute.query.join(EventFrameAttributeTemplate, EventFrameTemplate,
-				EventFrameAttributeTemplateEventFrameTemplateView).filter(EventFrameAttribute.ElementId == elementId,
+			eventFrameAttributes = EventFrameAttribute.query.join(EventFrameAttributeTemplate).join(EventFrameTemplate). \
+				join(EventFrameAttributeTemplateEventFrameTemplateView).filter(EventFrameAttribute.ElementId == elementId,
 				EventFrameTemplate.EventFrameTemplateId == eventFrame.EventFrameTemplate.EventFrameTemplateId,
 				EventFrameAttributeTemplateEventFrameTemplateView.EventFrameTemplateViewId == defaultEventFrameTemplateView.EventFrameTemplateViewId). \
 				order_by(EventFrameAttributeTemplateEventFrameTemplateView.Order)
 	elif  eventFrameTemplateViewId == 0:
 		eventFrameTemplateView = EventFrameTemplateView(EventFrameTemplateViewId = 0, Name = "All")
-		eventFrameAttributes = EventFrameAttribute.query.join(EventFrameAttributeTemplate, EventFrameTemplate). \
+		eventFrameAttributes = EventFrameAttribute.query.join(EventFrameAttributeTemplate).join(EventFrameTemplate). \
 			filter(EventFrameAttribute.ElementId == elementId, EventFrameTemplate.EventFrameTemplateId == eventFrame.EventFrameTemplate.EventFrameTemplateId). \
 			order_by(EventFrameAttributeTemplate.Name)
 	else:
 		eventFrameTemplateView = EventFrameTemplateView.query.get_or_404(eventFrameTemplateViewId)
-		eventFrameAttributes = EventFrameAttribute.query.join(EventFrameAttributeTemplate, EventFrameTemplate,
-			EventFrameAttributeTemplateEventFrameTemplateView).filter(EventFrameAttribute.ElementId == elementId,
+		eventFrameAttributes = EventFrameAttribute.query.join(EventFrameAttributeTemplate).join(EventFrameTemplate). \
+			join(EventFrameAttributeTemplateEventFrameTemplateView).filter(EventFrameAttribute.ElementId == elementId,
 			EventFrameTemplate.EventFrameTemplateId == eventFrame.EventFrameTemplate.EventFrameTemplateId,
 			EventFrameAttributeTemplateEventFrameTemplateView.EventFrameTemplateViewId == eventFrameTemplateViewId). \
 			order_by(EventFrameAttributeTemplateEventFrameTemplateView.Order)

@@ -1,4 +1,4 @@
-import dash_core_components as dcc
+from dash import dcc
 from dash.dependencies import Input, Output, State
 from urllib.parse import parse_qs, urlparse
 from app.models import Area, Enterprise, Site
@@ -11,7 +11,7 @@ def optionsCallback(dashApp):
         [Input(component_id = "sitesDropdown", component_property = "value")])
     def areasDropdownOptions(sitesDropdownValues):
         return [{"label": "{}_{}_{}".format(area.Site.Enterprise.Abbreviation, area.Site.Abbreviation, area.Name), "value": area.AreaId} for area in 
-            Area.query.join(Site, Enterprise).filter(Area.SiteId.in_(sitesDropdownValues)).order_by(Enterprise.Abbreviation, Site.Abbreviation, Area.Name).all()]
+            Area.query.join(Site).join(Enterprise).filter(Area.SiteId.in_(sitesDropdownValues)).order_by(Enterprise.Abbreviation, Site.Abbreviation, Area.Name).all()]
 
 def valuesCallback(dashApp):
     @dashApp.callback(Output(component_id = "areasDropdown", component_property = "value"),

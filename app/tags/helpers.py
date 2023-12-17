@@ -1,3 +1,4 @@
+from sqlalchemy import text
 from app import db
 
 def areaTags(areaId):
@@ -24,5 +25,5 @@ def areaTags(areaId):
         LEFT JOIN Element EventFrameAttributeElement ON EventFrameAttribute.ElementId = EventFrameAttributeElement.ElementId
     WHERE Tag.AreaId = {}
     """.format(areaId)
-    areaTags = db.session.execute(query).fetchall()
+    areaTags = db.session.execute(text(query)).fetchall()
     return areaTags
