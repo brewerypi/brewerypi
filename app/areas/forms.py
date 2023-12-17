@@ -1,11 +1,11 @@
 from flask_wtf import FlaskForm
 from wtforms import HiddenField, StringField, SubmitField, ValidationError
-from wtforms.validators import Length, Required
+from wtforms.validators import DataRequired, Length 
 from .. models import Area
 
 class AreaForm(FlaskForm):
-	name = StringField("Name", validators = [Required(), Length(1, 45)])
-	abbreviation = StringField("Abbreviation", validators = [Required(), Length(1, 10)])
+	name = StringField("Name", validators = [DataRequired(), Length(1, 45)])
+	abbreviation = StringField("Abbreviation", validators = [DataRequired(), Length(1, 10)])
 	description = StringField("Description", validators = [Length(0, 255)])
 	areaId = HiddenField()
 	siteId = HiddenField()

@@ -3,7 +3,7 @@ from dash.dependencies import Input, Output
 from dash.exceptions import PreventUpdate
 from datetime import datetime
 from urllib.parse import parse_qs, urlparse
-from app.models import Element, LookupValue, Note
+from app.models import Element, ElementAttribute, LookupValue, TagValue
 from app.dashes.components import collapseExpand, elementsDropdown, elementTemplatesDropdown, enterpriseDropdown, siteDropdown, timeRangePicker
 
 def registerCallbacks(dashApp):
@@ -45,7 +45,16 @@ def registerCallbacks(dashApp):
         toTimestampUtc = toTimestampLocal.astimezone(pytz.utc)
 
         for element in elements:
-            for elementAttributeTemplateName, tagValues in element.attributeValues(fromTimestampUtc, toTimestampUtc).items():
+            attributeValues = {}
+            elementAttributeTemplateIds = [elementAttributeTemplate.ElementAttributeTemplateId for elementAttributeTemplate in
+                element.ElementTemplate.ElementAttributeTemplates]
+            elementAttributes = ElementAttribute.query.filter(ElementAttribute.ElementId == element.ElementId,
+                ElementAttribute.ElementAttributeTemplateId.in_(elementAttributeTemplateIds))
+            for elementAttribute in elementAttributes:
+                attributeValues[elementAttribute.ElementAttributeTemplate.Name] = TagValue.query.filter(TagValue.TagId == elementAttribute.TagId,
+                    TagValue.Timestamp >= fromTimestampUtc, TagValue.Timestamp <= toTimestampUtc)
+
+            for elementAttributeTemplateName, tagValues in attributeValues.items():
                 seriesName = "{}_{}".format(element.Name, elementAttributeTemplateName)
                 for tagValue in tagValues:
                     # Search for tag dict in list of dicts.

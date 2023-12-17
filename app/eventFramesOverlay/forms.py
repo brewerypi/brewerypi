@@ -1,9 +1,9 @@
 from flask_wtf import FlaskForm
 from wtforms import DateTimeField, HiddenField, SubmitField, ValidationError
-from wtforms.validators import Required, Optional
+from wtforms.validators import DataRequired, Optional
 
 class EventFramesOverlayForm(FlaskForm):
-	startTimestamp = DateTimeField("Start", validators = [Required()])
+	startTimestamp = DateTimeField("Start", validators = [DataRequired()])
 	startUtcTimestamp = HiddenField()
 	endTimestamp = DateTimeField("End", validators = [Optional()])
 	endUtcTimestamp = HiddenField()

@@ -1,11 +1,11 @@
 from datetime import datetime
 from flask_wtf import FlaskForm
 from wtforms import HiddenField, StringField, SubmitField, ValidationError
-from wtforms.validators import Length, Required
+from wtforms.validators import DataRequired, Length
 from .. models import EventFrameGroup
 
 class EventFrameGroupForm(FlaskForm):
-	name = StringField("Name", default = lambda : str(int(datetime.utcnow().timestamp())) + " - ", validators = [Required(), Length(1, 45)])
+	name = StringField("Name", default = lambda : str(int(datetime.utcnow().timestamp())) + " - ", validators = [DataRequired(), Length(1, 45)])
 	eventFrameGroupId = HiddenField()
 	requestReferrer = HiddenField()
 	submit = SubmitField("Save")

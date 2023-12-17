@@ -1,7 +1,7 @@
 import pandas as pd
 import pytz
 from dash.dependencies import Input, Output, State
-import dash_core_components as dcc
+from dash import dcc
 from urllib.parse import parse_qs, urlparse
 from app import db
 from app.dashes.components import collapseExpand, eventFrameGroupDropdown, eventFrameTemplateViewDropdown, refreshInterval
@@ -23,7 +23,7 @@ def registerCallbacks(dashApp):
     def tabsChildren(eventFrameGroupDropdownValue):
         children = []
         value = None
-        eventFrameTemplates = EventFrameTemplate.query.join(EventFrame, EventFrameEventFrameGroup). \
+        eventFrameTemplates = EventFrameTemplate.query.join(EventFrame).join(EventFrameEventFrameGroup). \
             filter(EventFrameEventFrameGroup.EventFrameGroupId == eventFrameGroupDropdownValue).order_by(EventFrameTemplate.Name).all()
         for i, eventFrameTemplate in enumerate(eventFrameTemplates):
             if i == 0:
@@ -55,7 +55,7 @@ def registerCallbacks(dashApp):
         else:
             localTimezone = pytz.utc
 
-        df = pd.read_sql(eventFrameAttributeValues(eventFrameGroup.EventFrameGroupId, tabsValue, eventFrameTemplateViewDropdownValue), db.session.bind)
+        df = pd.read_sql(eventFrameAttributeValues(eventFrameGroup.EventFrameGroupId, tabsValue, eventFrameTemplateViewDropdownValue), db.session.connection())
         df["Start"] = df["Start"].apply(lambda  timestamp: pytz.utc.localize(timestamp).astimezone(localTimezone).strftime("%Y-%m-%d %H:%M:%S"))
         df["End"] = df["End"].apply(lambda timestamp: pytz.utc.localize(timestamp).astimezone(localTimezone).strftime("%Y-%m-%d %H:%M:%S")
             if timestamp is not pd.NaT and timestamp is not None else None)

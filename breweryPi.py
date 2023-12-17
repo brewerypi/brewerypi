@@ -1,11 +1,12 @@
 import click
 from flask import current_app
 from flask_migrate import Migrate, upgrade
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
+from werkzeug.security import generate_password_hash
 from app import createApp, db
 from app.models import Area, Element, ElementAttribute, ElementAttributeTemplate, ElementTemplate, Enterprise, EventFrame, EventFrameAttribute, \
 	EventFrameAttributeTemplate, EventFrameAttributeTemplateEventFrameTemplateView, EventFrameEventFrameGroup, EventFrameGroup, EventFrameNote, \
-	EventFrameTemplate, EventFrameTemplateView, Lookup, LookupValue, Message, Note, Role, Site, Tag, TagValue, TagValueNote, UnitOfMeasurement, User
+	EventFrameTemplate, EventFrameTemplateView, Lookup, LookupValue, Message, Permission, Note, Role, Site, Tag, TagValue, TagValueNote, UnitOfMeasurement, User
 
 application = app = createApp()
 migrate = Migrate(app, db, directory = "db/migrations")
@@ -20,26 +21,37 @@ def make_shell_context():
 		EventFrameTemplate = EventFrameTemplate, EventFrameTemplateView = EventFrameTemplateView, Lookup = Lookup, LookupValue = LookupValue, Message = Message,
 		Note = Note, Role = Role, Site = Site, Tag = Tag, TagValue = TagValue, TagValueNote = TagValueNote, UnitOfMeasurement = UnitOfMeasurement, User = User)
 
-@app.cli.command()
-@click.option("--admin", is_flag = True)
-@click.option("--roles", is_flag = True)
+@app.cli.command(help = "Deploy Brewery Pi database.")
+@click.option("--admin", is_flag = True, help = 'Add the default admin ("pi") user. Requires defaults roles.')
+@click.option("--roles", is_flag = True, help = "Add the default roles.")
 def deploy(admin, roles):
 	print ("Creating database {} if it does not exist...".format(current_app.config["MYSQL_DATABASE"]))
 	engine = create_engine(current_app.config["SQLALCHEMY_SERVER_URI"])
-	connection = engine.connect()
-	result = connection.execute("CREATE DATABASE IF NOT EXISTS {}".format(current_app.config["MYSQL_DATABASE"]))
-	print ("Running database upgrade...")
-	upgrade()
-	if roles == True:
-		print ("Inserting default roles if needed...")
-		Role.insertDefaultRoles()
+	with engine.connect() as connection:
+		connection.execute(text("CREATE DATABASE IF NOT EXISTS {}".format(current_app.config["MYSQL_DATABASE"])))
+		print ("Running database upgrade...")
+		upgrade()
+		if roles == True or admin == True:
+			engine = create_engine(current_app.config["SQLALCHEMY_DATABASE_URI"])
+			connection = engine.connect()
+			if roles == True:
+				print ("Inserting default roles if needed...")
+				connection.execute(text(f"INSERT INTO `Role` (`Name`, `Permissions`) VALUES ('User', {Permission.DATA_ENTRY})"))
+				connection.execute(text(f"INSERT INTO `Role` (`Name`, `Permissions`) VALUES ('Administrator', 0xff)"))
 
-	if admin == True:
-		print ("Inserting default administrator if needed...")
-		User.insertDefaultAdministrator()
+			if admin == True:
+				print ("Inserting default administrator if needed...")
+				administratorRoleId = connection.execute(text("SELECT RoleId FROM Role WHERE Name = 'Administrator'")).scalar()
+				if administratorRoleId is None:
+					print('Administrator role does not exist. Cannot create default admin/"pi" user without it.')
+				else:
+					password = generate_password_hash("brewery", method = "pbkdf2")
+					connection.execute(text(f"INSERT INTO `User` (`Enabled`, `Name`, `PasswordHash`, `RoleId`) VALUES (1, 'pi', '{password}', {administratorRoleId})"))
 
-@app.cli.command()
-@click.option("--tag-areas", is_flag = True)
+		connection.commit()
+
+@app.cli.command(help = "Diplsay Brewery Pi element tree.")
+@click.option("--tag-areas", is_flag = True, help = "Show which area(s) element tags belong to.")
 def elements(tag_areas):
 	print('"*" represents a managed element.')
 	enterprises = Enterprise.query.order_by(Enterprise.Name)

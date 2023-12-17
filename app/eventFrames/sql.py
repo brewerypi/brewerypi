@@ -1,3 +1,4 @@
+from sqlalchemy import text
 from .. import db
 from .. models import EventFrameAttributeTemplate
 
@@ -27,6 +28,7 @@ def currentEventFrameAttributeValues(eventFrames, eventFrameTemplateId):
         User.Name AS UserName,
         EventFrame.StartTimestamp,
         EventFrame.EndTimestamp,
+        IF(EventFrame.EndTimestamp IS NULL, TIMESTAMPDIFF(SECOND, EventFrame.StartTimestamp, NOW()), TIMESTAMPDIFF(SECOND, EventFrame.StartTimestamp, EventFrame.EndTimestamp)) AS DurationSeconds,
         SourceEventFrame.Name AS SourceEventFrameName {}
     FROM EventFrame
         INNER JOIN Element ON EventFrame.ElementId = Element.ElementId
@@ -69,6 +71,6 @@ def currentEventFrameAttributeValues(eventFrames, eventFrameTemplateId):
     WHERE EventFrame.EventFrameId IN ({})
     GROUP BY EventFrame.EventFrameId
     """.format(dynamicColumns, eventFrameIds, eventFrameIds)
-    eventFrames = db.session.execute(query).fetchall()
+    eventFrames = db.session.execute(text(query)).fetchall()
     return eventFrames
     

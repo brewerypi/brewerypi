@@ -2,10 +2,9 @@ import dash
 import pytz
 from dash.dependencies import Input, Output, State
 from dash.exceptions import PreventUpdate
-from datetime import datetime
 from dateutil.relativedelta import relativedelta
 from urllib.parse import parse_qs, urlparse
-from app.models import EventFrame, EventFrameNote, LookupValue, Note
+from app.models import EventFrame, EventFrameAttribute, EventFrameNote, EventFrameTemplateView, LookupValue, Note, TagValue
 from app.dashes.components import collapseExpand, elementTemplateDropdown, enterpriseDropdown, eventFrameDropdown, eventFrameTemplateDropdown, \
     eventFrameTemplateViewDropdown, siteDropdown, timeRangePicker
 
@@ -79,14 +78,11 @@ def registerCallbacks(dashApp):
     def graphFigure(fromTimestampInputValue, toTimestampInputValue, eventFrameDropdownValue, eventFrameTemplateViewDropdownValue, urlHref, intervalNIntervals,
         refreshButtonNClicks, fromToTimestampsDivStyle, quickTimeRangePickerDivStyle):
         if eventFrameDropdownValue is None:
-            print("a")
             return {"display": "none"}, {"display": "block"}, fromToTimestampsDivStyle, quickTimeRangePickerDivStyle, {"data": []}, []
 
         if fromTimestampInputValue == "" or toTimestampInputValue == "":
-            print("b")
             raise PreventUpdate
 
-        print("c")
         eventFrame = EventFrame.query.get(eventFrameDropdownValue)
         data = []
         queryString = parse_qs(urlparse(urlHref).query)
@@ -95,12 +91,27 @@ def registerCallbacks(dashApp):
         else:
             localTimezone = pytz.utc
 
-        fromTimestampLocal = localTimezone.localize(datetime.strptime(fromTimestampInputValue, "%Y-%m-%dT%H:%M:%S"))
-        toTimestampLocal = localTimezone.localize(datetime.strptime(toTimestampInputValue, "%Y-%m-%dT%H:%M:%S"))
-        fromTimestampUtc = fromTimestampLocal.astimezone(pytz.utc)
-        toTimestampUtc = toTimestampLocal.astimezone(pytz.utc)
+        if eventFrameTemplateViewDropdownValue == -1:
+            eventFrameAttributeTemplateIds = [eventFrameAttributeTemplate.EventFrameAttributeTemplateId
+                for eventFrameAttributeTemplate in eventFrame.EventFrameTemplate.EventFrameAttributeTemplates]
+        else:
+            eventFrameTemplateView = EventFrameTemplateView.query.get(eventFrameTemplateViewDropdownValue)
+            eventFrameAttributeTemplateIds = [eventFrameAttributeTemplateEventFrameTemplateView.EventFrameAttributeTemplateId
+                for eventFrameAttributeTemplateEventFrameTemplateView in eventFrameTemplateView.EventFrameAttributeTemplateEventFrameTemplateViews]
 
-        for eventFrameAttributeTemplateName, tagValues in eventFrame.attributeValues(eventFrameTemplateViewId = eventFrameTemplateViewDropdownValue).items():
+        eventFrameAttributes = EventFrameAttribute.query.filter(EventFrameAttribute.ElementId == eventFrame.ElementId,
+            EventFrameAttribute.EventFrameAttributeTemplateId.in_(eventFrameAttributeTemplateIds))
+        eventFrameAttributeValues = {}
+        for eventFrameAttribute in eventFrameAttributes:
+            if eventFrame.EndTimestamp is None:
+                eventFrameAttributeValues[eventFrameAttribute.EventFrameAttributeTemplate.Name] = TagValue.query. \
+                    filter(TagValue.TagId == eventFrameAttribute.TagId, TagValue.Timestamp >= eventFrame.StartTimestamp)
+            else:
+                eventFrameAttributeValues[eventFrameAttribute.EventFrameAttributeTemplate.Name] = TagValue.query. \
+                    filter(TagValue.TagId == eventFrameAttribute.TagId, TagValue.Timestamp >= eventFrame.StartTimestamp,
+                        TagValue.Timestamp <= eventFrame.EndTimestamp)
+
+        for eventFrameAttributeTemplateName, tagValues in eventFrameAttributeValues.items():
             seriesName = eventFrameAttributeTemplateName
             for tagValue in tagValues:
                 # Search for tag dict in list of dicts.

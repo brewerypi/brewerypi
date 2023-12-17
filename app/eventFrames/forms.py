@@ -1,21 +1,21 @@
 from flask_wtf import FlaskForm
 from datetime import datetime
 from wtforms import BooleanField, DateTimeField, HiddenField, SelectField, StringField, SubmitField, ValidationError
-from wtforms.ext.sqlalchemy.fields import QuerySelectField
-from wtforms.validators import Required, Optional
+from wtforms.validators import DataRequired, Optional
+from wtforms_sqlalchemy.fields import QuerySelectField
 from .. models import Element, EventFrame
 
 class EventFrameForm(FlaskForm):
-	element = QuerySelectField("Element", validators = [Required()], get_label = "Name")
-	eventFrameTemplate = QuerySelectField("Event Frame Template", validators = [Required()], get_label = "Name")
+	element = QuerySelectField("Element", validators = [DataRequired()], get_label = "Name")
+	eventFrameTemplate = QuerySelectField("Event Frame Template", validators = [DataRequired()], get_label = "Name")
 	sourceEventFrameTemplate = SelectField("Source Event Frame Template Filter", validators = [Optional()], coerce = int)
 	activeSourceEventFramesOnly = BooleanField("Active Event Frames Sources Only")
 	sourceEventFrame = SelectField("Source Event Frame", validators = [Optional()], coerce = int)
-	startTimestamp = DateTimeField("Start Timestamp", default = datetime.utcnow, validators = [Required()])
+	startTimestamp = DateTimeField("Start Timestamp", default = datetime.utcnow, validators = [DataRequired()])
 	startUtcTimestamp = HiddenField()
 	endTimestamp = DateTimeField("End Timestamp", validators = [Optional()])
 	endUtcTimestamp = HiddenField()
-	name = StringField("Name", default = lambda : int(datetime.utcnow().timestamp()), validators = [Required()])
+	name = StringField("Name", default = lambda : int(datetime.utcnow().timestamp()), validators = [DataRequired()])
 	eventFrameId = HiddenField()
 	eventFrameTemplateId = HiddenField()
 	parentEventFrameId = HiddenField()

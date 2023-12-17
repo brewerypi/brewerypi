@@ -95,7 +95,7 @@ def copy(fromEventFrameTemplateId):
 	fromEventFrameTemplate = EventFrameTemplate.query.get_or_404(fromEventFrameTemplateId)
 	form.toElementTemplate.choices = [(elementTemplate.ElementTemplateId,
 		"{}_{}_{}".format(elementTemplate.Site.Enterprise.Abbreviation, elementTemplate.Site.Abbreviation, elementTemplate.Name)) for elementTemplate in
-		ElementTemplate.query.join(Site, Enterprise). \
+		ElementTemplate.query.join(Site).join(Enterprise). \
 		order_by(Enterprise.Abbreviation, Site.Abbreviation, ElementTemplate.Name)]
 
 	if form.validate_on_submit():

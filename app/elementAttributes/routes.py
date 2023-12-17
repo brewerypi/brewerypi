@@ -14,17 +14,17 @@ from .. models import Area, ElementAttributeTemplate, Element, ElementAttribute,
 @adminRequired
 def listElementAttributes(elementId):
 	element = Element.query.get_or_404(elementId)
-	elementAttributeTemplates = ElementAttributeTemplate.query.join(ElementTemplate, Element). \
+	elementAttributeTemplates = ElementAttributeTemplate.query.join(ElementTemplate).join(Element). \
 		outerjoin(ElementAttribute, and_(Element.ElementId == ElementAttribute.ElementId, \
 		ElementAttributeTemplate.ElementAttributeTemplateId == ElementAttribute.ElementAttributeTemplateId)).filter(Element.ElementId == elementId)
-	tags = Tag.query.join(Area, Site, Enterprise).order_by(Enterprise.Abbreviation, Site.Abbreviation, Area.Abbreviation, Tag.Name)
+	tags = Tag.query.join(Area).join(Site).join(Enterprise).order_by(Enterprise.Abbreviation, Site.Abbreviation, Area.Abbreviation, Tag.Name)
 	return render_template("elementAttributes/elementAttributes.html", element = element, elementAttributeTemplates = elementAttributeTemplates, tags = tags)
 
 @elementAttributes.route("/elementAttributes/export")
 @login_required
 @adminRequired
 def exportElementAttributes():
-	elementAttributes = ElementAttribute.query.join(Element, Tag, ElementTemplate, Site, Enterprise). \
+	elementAttributes = ElementAttribute.query.join(Element).join(Tag).join(ElementTemplate).join(Site).join(Enterprise). \
 		join(ElementAttributeTemplate, ElementAttribute.ElementAttributeTemplateId == ElementAttributeTemplate.ElementAttributeTemplateId). \
 		order_by(Enterprise.Abbreviation, Site.Abbreviation, ElementTemplate.Name, Element.Name, ElementAttributeTemplate.Name)
 	with open(os.path.join(current_app.config["EXPORT_FOLDER"], current_app.config["EXPORT_ELEMENT_ATTRIBUTES_FILENAME"]), "w", encoding = "latin-1") \
@@ -153,7 +153,7 @@ def importElementAttributes():
 						# The element attribute template and/or element have changed. Check for existing element attribute.
 						if elementAttribute.ElementAttributeTemplateId != elementAttributeTemplate.ElementAttributeTemplateId or \
 							elementAttribute.ElementId != element.ElementId:
-							elementAttributeCheck = ElementAttribute.query.join(ElementAttributeTemplate, Element). \
+							elementAttributeCheck = ElementAttribute.query.join(ElementAttributeTemplate).join(Element). \
 								filter(ElementAttribute.ElementAttributeTemplateId == elementAttributeTemplate.ElementAttributeTemplateId, \
 									ElementAttribute.ElementId == element.ElementId).first()
 							if elementAttributeCheck is not None:

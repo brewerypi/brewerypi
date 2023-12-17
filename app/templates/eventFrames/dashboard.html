@@ -27,20 +27,25 @@
                 {% if loop.last %}
                     <li class = "active">
                         {% if eventFrameEventFrameGroup is none %}
+                            {% if "eventFrameMonths" not in session %}
+                                {% set eventFrameMonths = none %}
+                            {% else %}
+                                {% set eventFrameMonths = session["eventFrameMonths"] %}
+                            {% endif %}
                             {% if eventFrameTemplateView is none %}
                                 <a title = "Previous" href = '{{ url_for("eventFrames.dashboard",
-                                    eventFrameId = eventFrame.previous(session["eventFrameMonths"]).EventFrameId) }}'>
+                                    eventFrameId = eventFrame.previous(eventFrameMonths).EventFrameId) }}'>
                                     <span class = "glyphicon glyphicon-arrow-left"></span></a>
                                 <a title = "Next" href = '{{ url_for("eventFrames.dashboard",
-                                    eventFrameId = eventFrame.next(session["eventFrameMonths"]).EventFrameId) }}'>
+                                    eventFrameId = eventFrame.next(eventFrameMonths).EventFrameId) }}'>
                                     <span class = "glyphicon glyphicon-arrow-right"></span></a>
                             {% else %}
                                 <a title = "Previous" href = '{{ url_for("eventFrames.dashboard",
-                                    eventFrameId = eventFrame.previous(session["eventFrameMonths"]).EventFrameId, eventFrameTemplateView = true,
+                                    eventFrameId = eventFrame.previous(eventFrameMonths).EventFrameId, eventFrameTemplateView = true,
                                     eventFrameTemplateViewId = eventFrameTemplateView.EventFrameTemplateViewId) }}'>
                                     <span class = "glyphicon glyphicon-arrow-left"></span></a>
                                 <a title = "Next" href = '{{ url_for("eventFrames.dashboard",
-                                    eventFrameId = eventFrame.next(session["eventFrameMonths"]).EventFrameId, eventFrameTemplateView = true,
+                                    eventFrameId = eventFrame.next(eventFrameMonths).EventFrameId, eventFrameTemplateView = true,
                                     eventFrameTemplateViewId = eventFrameTemplateView.EventFrameTemplateViewId) }}'>
                                     <span class = "glyphicon glyphicon-arrow-right"></span></a>
                             {% endif %}
@@ -110,6 +115,8 @@
                         <th>User</th>
                         <th>Start</th>
                         <th>End</th>
+                        <th>Duration Seconds</th>
+                        <th>Duration</th>
                         <th></th>
                         <th></th>
                         <th></th>
@@ -135,6 +142,16 @@
                                 <td>{{ moment(eventFrame.EndTimestamp).format("YYYY-MM-DD HH:mm:ss") }}</td>
                             {% else %}
                                 <td></td>
+                            {% endif %}
+                            <td>{{ eventFrame.durationSeconds() }}</td>
+                            {% if eventFrame.durationSeconds() < 60 %}
+                                <td>{{ eventFrame.durationSeconds() | round(1) }} sec</td>
+                            {% elif eventFrame.durationSeconds() < 3600 %}
+                                <td>{{ (eventFrame.durationSeconds() / 60) | round(1) }} mins</td>
+                            {% elif eventFrame.durationSeconds() < 86400 %}
+                                <td>{{ (eventFrame.durationSeconds() / 3600) | round(1) }} hrs</td>
+                            {% else %}
+                                <td>{{ (eventFrame.durationSeconds() / 86400) | round(1) }} days</td>
                             {% endif %}
                             {% if eventFrame.EndTimestamp is none %}
                                 <td><a class = "btn btn-default" title = "End" href = '{{ url_for("eventFrames.endEventFrame",
@@ -239,7 +256,7 @@
                                 <select class = "form-control" id = "inputOrSelectNewValue{{ eventFrameAttribute.Tag.TagId }}" style = "color: #999999">
                                     <option value = "-1" style = "color: #999999">{{ lastAttributeValue.lookupValueName() if lastAttributeValue else "" }}
                                         </option>
-                                    {% for lookupValue in eventFrameAttribute.Tag.Lookup.LookupValues %}
+                                    {% for lookupValue in eventFrameAttribute.Tag.Lookup.LookupValues  | sort(attribute = "Name") %}
                                         {% if lookupValue.Selectable %}
                                             <option value = "{{ lookupValue.Value }}" style = "color: #000000">{{ lookupValue.Name}}</option>
                                         {% endif %}
@@ -400,9 +417,16 @@
                     null,
                     null,
                     null,
+                    null,
+                    null,
                     { "orderable": false }, // Stop button.
                     { "orderable": false }, // Edit button.
                     { "orderable": false }  // Delete button.
+                ],
+                "columnDefs":
+                [
+                    {"orderData": 7, "targets": 8},
+                    {"visible": false, "targets": 7},
                 ],
                 "stateSave": true,
                 "stateDuration": 0,

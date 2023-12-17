@@ -7,7 +7,47 @@ Brewery Pi
 {% block page_content %}
 <div class = "page-header">
     <h1>Brewery Pi <small>{{ version }}</small></h1>
-    <h2>Data for the Craft Brewer</h2>
+    {% if current_user.is_authenticated %}
+        <h2>Event Frame Groups</h2>
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                <h3 class="panel-title">Event Frame Groups</h3>
+            </div>
+            <div class="panel-body">
+                <a class="btn btn-default btn-xs" title="Add" href='{{ url_for("eventFrameGroups.add") }}' role="button">
+                    <span class="glyphicon glyphicon-plus" aria-hidden="true"></span></a><br>
+                {% for eventFrameGroup in eventFrameGroups | sort(attribute = "Name") %}
+                    <a href='{{ url_for("eventFrameGroups.dashboard", eventFrameGroupId = eventFrameGroup.EventFrameGroupId) }}'>{{ eventFrameGroup.Name }}</a>
+                        <br>
+                {% endfor %}
+            </div>
+        </div>
+        <h2>Active Event Frames</h2>
+        {% for enterprise in enterprises | sort(attribute = "Name") %}
+            {% for site in enterprise.Sites | sort(attribute = "Name") %}
+                {% for elementTemplate in site.ElementTemplates | sort(attribute = "Name") %}
+                    {% for eventFrameTemplate in elementTemplate.EventFrameTemplates | sort(attribute = "Name") %}
+                        <div class="panel panel-primary">
+                            <div class="panel-heading">
+                                <h3 class="panel-title">{{ eventFrameTemplate.ElementTemplate.Site.Enterprise.Name ~ " / " ~
+                                    eventFrameTemplate.ElementTemplate.Site.Name ~ " / " ~ eventFrameTemplate.ElementTemplate.Name ~ " / " ~
+                                    eventFrameTemplate.Name }}</h3>
+                            </div>
+                            <div class="panel-body">
+                                <a class="btn btn-default btn-xs" title="Add" href='{{ url_for("eventFrames.addEventFrame",
+                                    eventFrameTemplateId = eventFrameTemplate.EventFrameTemplateId) }}' role="button">
+                                    <span class="glyphicon glyphicon-plus" aria-hidden="true"></span></a><br>
+                                {% for eventFrame in eventFrameTemplate.activeEventFrames() | sort(attribute = "StartTimestamp") %}
+                                    <a href='{{ url_for("eventFrames.dashboard", eventFrameId = eventFrame.EventFrameId) }}'>
+                                    {{ eventFrame.Element.Name ~ " - " ~ eventFrame.Name }}</a><br>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% endfor %}
+            {% endfor %}
+        {% endfor %}
+    {% endif %}
 </div>
 {% if current_user.is_authenticated %}
     <a class = "btn btn-default" title = "Log Out" href = "{{ url_for("authentications.logout") }}"><span class = "glyphicon glyphicon-log-out"></span></a>

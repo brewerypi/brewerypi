@@ -1,6 +1,6 @@
-import dash_core_components as dcc
-import dash_html_components as html
-import dash_table
+from dash import dcc
+from dash import html
+from dash import dash_table
 from app.dashes.components import collapseExpand, elementTemplatesDropdown, enterpriseDropdown, eventFrameTemplatesDropdown, eventFrameTemplateViewDropdown, \
     siteDropdown, timeRangePicker
 
@@ -25,9 +25,9 @@ layout = html.Div(children =
         eventFrameTemplateViewDropdown.layout(),
         html.Div(className = "well", children =
         [
-            dash_table.DataTable(id = "table", cell_selectable = False, filter_action = "native", sort_action = "native", sort_mode = "multi",
+            dash_table.DataTable(id = "table", cell_selectable = False, filter_action = "native", sort_action = "custom", sort_mode = "multi", sort_by = [],
                 style_cell = {"whiteSpace": "normal", "height": "auto", "textAlign": "left"},
-                style_cell_conditional = [{"if": {"column_id": "Start"}, "width": "175px"}])
+                style_cell_conditional = [{"if": {"column_id": "Start"}, "width": "175px"}], hidden_columns = ["DurationInSeconds"])
         ])
     ])
 ])

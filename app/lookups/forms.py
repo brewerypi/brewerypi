@@ -1,10 +1,10 @@
 from flask_wtf import FlaskForm
 from wtforms import HiddenField, StringField, SubmitField, ValidationError
-from wtforms.validators import Length, Required
+from wtforms.validators import DataRequired, Length
 from .. models import Lookup
 
 class LookupForm(FlaskForm):
-	name = StringField("Name", validators = [Required(), Length(1, 45)])
+	name = StringField("Name", validators = [DataRequired(), Length(1, 45)])
 	lookupId = HiddenField()
 	enterpriseId = HiddenField()
 	requestReferrer = HiddenField()

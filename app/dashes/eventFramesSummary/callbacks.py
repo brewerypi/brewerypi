@@ -1,5 +1,5 @@
 import dash
-import dash_core_components as dcc
+from dash import dcc
 import pandas as pd
 import pytz
 from dash.dependencies import Input, Output, State
@@ -10,8 +10,8 @@ from urllib.parse import parse_qs, urlparse
 from app import db
 from app.dashes.components import collapseExpand, elementTemplatesDropdown, enterpriseDropdown, eventFrameTemplatesDropdown, eventFrameTemplateViewDropdown, \
     siteDropdown, timeRangePicker
+from app.dashes.eventFramesSummary.sql import eventFramesAttributeValues
 from app.models import EventFrame, EventFrameTemplate
-from .sql import eventFramesAttributeValues
 
 def fromToTimestamp(fromTimestamp, toTimestamp, *args):
     updatedFromTimestamp = None
@@ -97,13 +97,15 @@ def registerCallbacks(dashApp):
         Input(component_id = "activeOnlyChecklist", component_property = "value"),
         Input(component_id = "eventFrameTemplateViewDropdown", component_property = "value"),
         Input(component_id = "interval", component_property = "n_intervals"),
-        Input(component_id = "refreshButton", component_property = "n_clicks")],
+        Input(component_id = "refreshButton", component_property = "n_clicks"),
+        Input(component_id = "table", component_property = "sort_by")],
         [State(component_id = "url", component_property = "href"),
         State(component_id = "fromTimestampInput", component_property = "disabled"),
         State(component_id = "toTimestampInput", component_property = "disabled"),
         State(component_id = "timestampRangePickerButton", component_property = "disabled")])
     def tableColumnsAndData(tabsValue, fromTimestampInputValue, toTimestampInputValue, activeOnlyChecklistValue, eventFrameTemplateViewDropdownValue,
-        intervalNIntervals, refreshButtonNClicks, urlHref, fromTimestampInputDisabled, toTimestampInputDisabled, timestampRangePickerButtonDisabled):
+        intervalNIntervals, refreshButtonNClicks, tableSortBy, urlHref, fromTimestampInputDisabled, toTimestampInputDisabled,
+        timestampRangePickerButtonDisabled):
         if  tabsValue is None:
             return {"display": "none"}, {"display": "block"}, fromTimestampInputDisabled, toTimestampInputDisabled, timestampRangePickerButtonDisabled, None, \
                 None
@@ -127,9 +129,34 @@ def registerCallbacks(dashApp):
         toTimestampUtc = toTimestampLocal.astimezone(pytz.utc)
 
         df = pd.read_sql(eventFramesAttributeValues(tabsValue, eventFrameTemplateViewDropdownValue, fromTimestampUtc, toTimestampUtc, activeOnly),
-            db.session.bind)
+            db.session.connection())
         df["Start"] = df["Start"].apply(lambda  timestamp: pytz.utc.localize(timestamp).astimezone(localTimezone).strftime("%Y-%m-%d %H:%M:%S"))
         df["End"] = df["End"].apply(lambda  timestamp: pytz.utc.localize(timestamp).astimezone(localTimezone).strftime("%Y-%m-%d %H:%M:%S")
             if pd.notnull(timestamp) else "")
+        durations = []
+        for durationInSeconds in df["DurationInSeconds"].tolist():
+            if durationInSeconds < 60:
+                durations.append(f"{durationInSeconds} sec")
+            elif durationInSeconds < 3600:
+                durations.append(f"{round((durationInSeconds / 60), 1)} min")
+            elif durationInSeconds < 86400:
+                durations.append(f"{round((durationInSeconds / 3600), 1)} hrs")
+            else:
+                durations.append(f"{round((durationInSeconds / 86400), 1)} days")
+
+        df.insert(df.columns.get_loc("DurationInSeconds") + 1, "Duration", durations)
+        if len(tableSortBy):
+            sortColumns = []
+            sortDirections = []
+            for sortBy in tableSortBy:
+                if sortBy["column_id"] == "Duration":
+                    sortColumns.append("DurationInSeconds")
+                else:
+                    sortColumns.append(sortBy["column_id"])
+
+                sortDirections.append(sortBy["direction"] == "asc")
+
+            df = df.sort_values(sortColumns, ascending = sortDirections)
+
         return {"display": "none"}, {"display": "block"}, disabletimeRangePickerControls, disabletimeRangePickerControls, disabletimeRangePickerControls, \
              [{"name": column, "id": column, "hideable": True} for column in df.columns], df.to_dict("records")

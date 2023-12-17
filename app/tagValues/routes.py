@@ -44,16 +44,16 @@ def listTagValues(tagId = None, months = None, elementAttributeId = None, eventF
 	if tag.LookupId:
 		if eventFrame:
 			if eventFrame.EndTimestamp:
-				tagValues = TagValue.query.join(Tag, Lookup, LookupValue).filter(Tag.TagId == tag.TagId, TagValue.Value == LookupValue.Value,
+				tagValues = TagValue.query.join(Tag).join(Lookup).join(LookupValue).filter(Tag.TagId == tag.TagId, TagValue.Value == LookupValue.Value,
 					TagValue.Timestamp >= eventFrame.StartTimestamp, TagValue.Timestamp <= eventFrame.EndTimestamp)
 			else:
-				tagValues = TagValue.query.join(Tag, Lookup, LookupValue).filter(Tag.TagId == tag.TagId, TagValue.Value == LookupValue.Value,
+				tagValues = TagValue.query.join(Tag).join(Lookup).join(LookupValue).filter(Tag.TagId == tag.TagId, TagValue.Value == LookupValue.Value,
 					TagValue.Timestamp >= eventFrame.StartTimestamp)
 		else:
 			if months == 0:
-				tagValues = TagValue.query.join(Tag, Lookup, LookupValue).filter(Tag.TagId == tag.TagId, TagValue.Value == LookupValue.Value)
+				tagValues = TagValue.query.join(Tag).join(Lookup).join(LookupValue).filter(Tag.TagId == tag.TagId, TagValue.Value == LookupValue.Value)
 			else:
-				tagValues = TagValue.query.join(Tag, Lookup, LookupValue).filter(Tag.TagId == tag.TagId, TagValue.Timestamp >= fromTimestamp,
+				tagValues = TagValue.query.join(Tag).join(Lookup).join(LookupValue).filter(Tag.TagId == tag.TagId, TagValue.Timestamp >= fromTimestamp,
 					TagValue.Timestamp <= toTimestamp, TagValue.Value == LookupValue.Value)
 	else:
 		if eventFrame:

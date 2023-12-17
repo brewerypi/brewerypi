@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% set namespace = namespace(numberOfDefaultColumnsForEventFrames = 13) %}
+{% set namespace = namespace(numberOfDefaultColumnsForEventFrames = 15) %}
 {% block title %}Event Frames{% endblock %}
 {% block page_content %}
     <div>
@@ -171,6 +171,8 @@
                         <th>User</th>
                         <th id = "thStartTimestamp">Start Timestamp</th>
                         <th id = "thEndTimestamp">End Timestamp</th>
+                        <th id = "thDurationSeconds"></th>
+                        <th id = "thDuration">Duration</th>
                         <th></th>
                         <th></th>
                         <th></th>
@@ -256,6 +258,16 @@
                                     <td>{{ moment(child.EndTimestamp).format("YYYY-MM-DD HH:mm:ss") }}</td>
                                 {% else %}
                                     <td></td>
+                                {% endif %}
+                                <td>{{ child.DurationSeconds }}</td>
+                                {% if child.DurationSeconds < 60 %}
+                                    <td>{{ child.DurationSeconds }} sec</td>
+                                {% elif child.DurationSeconds < 3600 %}
+                                    <td>{{ (child.DurationSeconds / 60) | round(1) }} mins</td>
+                                {% elif child.DurationSeconds < 86400 %}
+                                    <td>{{ (child.DurationSeconds / 3600) | round(1) }} hrs</td>
+                                {% else %}
+                                    <td>{{ (child.DurationSeconds / 86400) | round(1) }} days</td>
                                 {% endif %}
                                 {% if current_user.isAdministrator() and child.ElementTagAreaId is none %}
                                     <td><a class = "btn btn-default" title = "Associate Attributes with Tags"
@@ -444,7 +456,7 @@
                 {
                     var id = $(this).attr("id")
                     var title = $(this).text()
-                    if (title != "" && id != "thStartTimestamp" && id != "thEndTimestamp")
+                    if (title != "" && id != "thStartTimestamp" && id != "thEndTimestamp" && id != "thDuration")
                     {
                         $(this).html('<input type = "text" placeholder = "Filter ' + title + '" />')
                         $("input", this).on("keyup change", function ()
@@ -498,6 +510,8 @@
                         null,
                         null,
                         null,
+                        null,
+                        null,
                         { "orderable": false }, // Associate button.
                         { "orderable": false }, // Stop button.
                         { "orderable": false }, // Edit button.
@@ -516,6 +530,8 @@
                 "columnDefs":
                 [
                     {% if childrenClass == "EventFrame" %}
+                        {"orderData": 9, "targets": 10},
+                        {"visible": false, "targets": 9},
                         {% for eventFrameAttributeTemplate in eventFrameAttributeTemplates %}
                             {"visible": false, "targets": {{ loop.index0 + namespace.numberOfDefaultColumnsForEventFrames }}},
                         {% endfor %}

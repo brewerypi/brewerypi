@@ -30,5 +30,5 @@ def registerCallbacks(dashApp):
         else:
             elementIds = elementsDropdownValues
 
-        df = pd.read_sql(elementAttributeValues(elementIds), db.session.bind)
+        df = pd.read_sql(elementAttributeValues(elementIds), db.session.connection())
         return {"display": "none"}, {"display": "block"}, [{"name": column, "id": column, "hideable": True} for column in df.columns], df.to_dict("records")
