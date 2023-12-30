@@ -1225,7 +1225,7 @@ class User(UserMixin, db.Model):
 	
 	@Password.setter
 	def Password(self, password):
-		self.PasswordHash = generate_password_hash(password)
+		self.PasswordHash = generate_password_hash(password, method = "pbkdf2")
 
 	def __repr__(self):
 		return "<User: {}>".format(self.Name)
