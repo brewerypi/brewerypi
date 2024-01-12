@@ -1,9 +1,8 @@
 from datetime import datetime
 from flask import render_template, request, session
 from flask_login import login_required
+from app.dashes import dashes
 from app.models import Element, ElementAttribute, ElementTemplate, EventFrame, EventFrameGroup, EventFrameTemplate, Site, Tag
-from . import dashes
-
 
 @dashes.route("/dashes/elementsSummary", methods = ["GET", "POST"])
 @dashes.route("/dashes/elementsSummary/site/<int:siteId>", methods = ["GET", "POST"])
@@ -48,6 +47,11 @@ def eventFrameGroupSummary(eventFrameGroupId = None):
 		eventFrameGroup = EventFrameGroup.query.filter_by(EventFrameGroupId = eventFrameGroupId).one_or_none()
 
 	return render_template("dashes/eventFrameGroupSummary/eventFrameGroupSummary.html", eventFrameGroup = eventFrameGroup)
+
+@dashes.route("/dashes/eventFramesControlChart", methods = ["GET", "POST"])
+@login_required
+def eventFramesControlChart():
+	return render_template("dashes/eventFramesControlChart/eventFramesControlChart.html")
 
 @dashes.route("/dashes/eventFramesOverlay", methods = ["GET", "POST"])
 @login_required

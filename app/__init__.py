@@ -10,7 +10,7 @@ from sqlalchemy import event
 from urllib.parse import urlparse
 from config import Config
 
-__version__ = "v4.0.1"
+__version__ = "v4.1.0"
 boostrap = Bootstrap()
 db = SQLAlchemy()
 loginManager = LoginManager()
@@ -42,6 +42,10 @@ def createApp(configClass = Config):
 	from app.dashes.eventFrameGraph.layout import layout as eventFrameGraphLayout
 	from app.dashes.eventFrameGraph.callbacks import registerCallbacks as eventFrameGraphCallbacks
 	registerDashApp(app, "eventFrameGraphDash", eventFrameGraphLayout, eventFrameGraphCallbacks, "Event Frame Graph")
+
+	from app.dashes.eventFramesControlChart.layout import layout as eventFramesControlChartLayout
+	from app.dashes.eventFramesControlChart.callbacks import registerCallbacks as eventFramesControlChartCallbacks
+	registerDashApp(app, "eventFramesControlChartDash", eventFramesControlChartLayout, eventFramesControlChartCallbacks, "Event Frames Control Chart")
 
 	from app.dashes.eventFramesOverlay.layout import layout as eventFramesOverlayLayout
 	from app.dashes.eventFramesOverlay.callbacks import registerCallbacks as eventFramesOverlayCallbacks
