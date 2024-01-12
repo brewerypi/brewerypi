@@ -49,6 +49,7 @@
                         <ul class = "dropdown-menu">
                             <li><a href = '{{ url_for("eventFrames.selectEventFrame") }}'>Event Frames</a></li>
                             <li><a href = '{{ url_for("eventFrameGroups.listEventFrameGroups") }}'>Groups</a></li>
+                            <li><a href = '{{ url_for("dashes.eventFramesControlChart") }}'>Control Chart</a></li>
                             <li><a href = '{{ url_for("eventFramesOverlay.selectEventFrameTemplate") }}'>Overlay</a></li>
                             {% if current_user.isAdministrator() %}
                             <li><a href = '{{ url_for("eventFrameAttributes.exportEventFrameAttributes") }}'>Export</a></li>
@@ -62,6 +63,7 @@
                             <li><a href = '{{ url_for("dashes.elementsSummary") }}'>Elements Summary</a></li>
                             <li><a href = '{{ url_for("dashes.eventFrameGraph") }}'>Event Frame Graph</a></li>
                             <li><a href = '{{ url_for("dashes.eventFrameGroupSummary") }}'>Event Frame Group Summary</a></li>
+                            <li><a href = '{{ url_for("dashes.eventFramesControlChart") }}'>Event Frames Control Chart</a></li>
                             <li><a href = '{{ url_for("eventFramesOverlay.selectEventFrameTemplate") }}'>Event Frames Overlay</a></li>
                             <li><a href = '{{ url_for("dashes.eventFramesSummary") }}'>Event Frames Summary</a></li>
                             <li><a href = '{{ url_for("dashes.tagValuesGraph") }}'>Tag Values Graph</a></li>

@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}Event Frames Control Chart{% endblock %}
+
+{% block page_content %}
+    <div class = "page-header">
+        <h1>Event Frames Control Chart <small></small></h1>
+    </div>
+    <div class = "embed-responsive embed-responsive-4by3">
+        <iframe id = "iframe" class = "embed-responsive-item"></iframe>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <script type = "text/javascript" src = '{{ url_for("static", filename = "js/moment.min.js") }}'></script>
+    <script type = "text/javascript" src = '{{ url_for("static", filename = "js/moment-timezone-with-data.min.js") }}'></script>
+    {% block setTabIndex %}
+        {{ super() }}
+    {% endblock %}
+    <script>
+        $(document).ready(function()
+        {
+            $("#iframe").attr("src", '{{ url_for("/eventFramesControlChartDash/") }}' + "?localTimezone=" + moment.tz.guess(true))
+            setTabIndex()
+            $('ol.breadcrumb a[title="Next"]').focus()
+        })
+    </script>
+{% endblock %}
